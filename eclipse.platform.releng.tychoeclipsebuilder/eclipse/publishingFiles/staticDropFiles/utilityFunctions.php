@@ -283,8 +283,10 @@ be split as
 function computeDisplayConfig($config) {
    $lastUnderscore = strrpos ($config, "_");
    $firstUnderscore = strpos ($config, "_"); 
+   $platformLength=$lastUnderscore - $firstUnderscore - 1;
+   //echo "<br/>DEBUG: config: $config firstUnderscore: $firstUnderscore  lastUnderscore: $lastUnderscore  lastMinusFirst: $platformLength"
    $jobname = substr($config,0,$firstUnderscore);
-   $platformconfig = substr($config,$firstUnderscore+1,$lastUnderscore);
+   $platformconfig = substr($config,$firstUnderscore + 1,$platformLength);
    $vmused = substr($config,$lastUnderscore+1);
    //echo "DEBUG: jobname: ".$jobname."<br/>";
    //echo "DEBUG: platformconfig: ".$platformconfig."<br/>";
