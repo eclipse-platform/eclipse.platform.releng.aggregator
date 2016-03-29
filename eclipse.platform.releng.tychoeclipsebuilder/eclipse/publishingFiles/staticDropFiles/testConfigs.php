@@ -6,11 +6,14 @@
 // to be the same order as displayed on test results summary page. (And,
 // while not sure how that can be controlled, eventually, in either case
 // we'd probably want a consistent ordering.
+// AND, I have learned, must be in alphabetical order! 
+// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=490624
 
 include("buildproperties.php");
 
 $expectedTestConfigs = array();
+$expectedTestConfigs[]="ep46$BUILD_TYPE-unit-cen64_linux.gtk.x86_64_8.0";
 $expectedTestConfigs[]="ep46$BUILD_TYPE-unit-lin64_linux.gtk.x86_64_8.0";
 $expectedTestConfigs[]="ep46$BUILD_TYPE-unit-mac64_macosx.cocoa.x86_64_8.0";
 $expectedTestConfigs[]="ep46$BUILD_TYPE-unit-win32_win32.win32.x86_8.0";
-$expectedTestConfigs[]="ep46$BUILD_TYPE-unit-cen64_linux.gtk.x86_64_8.0";
+

@@ -188,20 +188,27 @@ if (file_exists("testNotes.html")) {
 }
 ?>
 
+<?php 
+$width=80; 
+$half= $width / 2;
+$ncolumns=count($expectedTestConfigs);
+/* 
+   unsure if 'percent' can be "real" number, or if must be integer?
+   if needs to be integer, use ($a - ($a % $b)) / $b;
+*/
+$colWidth=$width / $ncolumns;
+echo "<table width='".$width."%' border='1' bgcolor='#EEEEEE' rules='groups' align='center'>\n";
+echo "<tr bgcolor='#9999CC'>\n";
+echo "<th rowspan='2' width='".$half."%' align='center'> org.eclipse <br> Component </th>\n";
+echo "<th colspan='".($ncolumns + 1)."' align='center'> Test Configurations </th></tr>\n";
+echo "<tr bgcolor='#9999CC'>\n";
 
-
-<table width="90%" border="1" bgcolor="#EEEEEE" rules="groups" align="center">
-<tr bgcolor="#9999CC">
-<th rowspan="2" width="40%" align="center"> org.eclipse <br> Component </th>
-<th colspan="5" align="center"> Test Configurations </th></tr>
-<tr bgcolor="#9999CC">
-<!-- TODO: should make a loop?  -->
-<th width="20%"><?= computeDisplayConfig($expectedTestConfigs[0]); ?></th>
-<th width="20%"><?= computeDisplayConfig($expectedTestConfigs[1]); ?></th>
-<th width="20%"><?= computeDisplayConfig($expectedTestConfigs[2]); ?></th>
-<th width="20%"><?= computeDisplayConfig($expectedTestConfigs[3]); ?></th>
-<th><th width="10%"></th>
-</tr>
+foreach ($expectedTestConfigs as $column)
+{ 
+echo "<th width='".$colWidth."%'>". computeDisplayConfig($column) . "</th>\n";
+}
+echo "</tr>\n";
+?>
 
 %testresults%
 
