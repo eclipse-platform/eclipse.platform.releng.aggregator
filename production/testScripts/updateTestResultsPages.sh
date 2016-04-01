@@ -261,9 +261,16 @@ then
 #      echo "Could not mkdir -p $dataDir. Return code was $RC. Exiting."
 #      exit $RC
 #  fi
+  
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
+  # if 
   XVFB_RUN="xvfb-run"
-  XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfb-log.txt"
+  if [[ ! -w "${TMP_DIR}" ]]
+  then
+    TMP_DIR="${$buildRoot}/tmp/"
+    mkdir -p "${TMP_DIR}"
+  fi
+  XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfbErrorFile.txt"
   # --server-args -screen 0 1024x768x24"
   #
   if [[ ${buildType} =~ [INM] ]]
