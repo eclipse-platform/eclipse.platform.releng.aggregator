@@ -70,7 +70,7 @@ done
 echo -e "\n\tANT_OPTS: $ANT_OPTS"
 echo -e "\n\thttp_proxy: $http_proxy"
 echo -e "\n\tftp_proxy: $ftp_proxy"
-export ANT_OPTS="-Dhttp.proxyHost=proxy.eclipse.org  -Dhttp.proxyPort=9898  -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\172.30.206.*\ -Dhttps.nonProxyHosts=\172.30.206.*\ -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\172.30.206.*"
+export ANT_OPTS="-Dhttp.proxyHost=proxy.eclipse.org  -Dhttp.proxyPort=9898  -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
 export http_proxy=http://proxy.eclipse.org:9898
 export ftp_proxy=http://proxy.eclipse.org:9898
 echo -e "\n\tANT_OPTS: $ANT_OPTS"
