@@ -267,7 +267,8 @@ then
   XVFB_RUN="xvfb-run"
   if [[ ! -w "${TMP_DIR}" ]]
   then
-    TMP_DIR="${$buildRoot}/tmp/"
+    echo -e "\n\tTMP_DIR not defined, so will create at ${buildRoot}/tmp"
+    TMP_DIR="${buildRoot}/tmp"
     mkdir -p "${TMP_DIR}"
   fi
   XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfbErrorFile.txt"
