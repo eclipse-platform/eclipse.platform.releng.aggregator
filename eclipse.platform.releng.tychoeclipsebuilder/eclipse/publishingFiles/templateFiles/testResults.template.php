@@ -83,11 +83,11 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
 <?php }
 
-echo "<div id=\"midcolumn\">".PHP.EOL;
+echo "<div id=\"midcolumn\">".PHP_EOL;
 
-echo "<h2>Test Results for <a href=\"../$BUILD_ID\">$BUILD_ID</a></h2>".PHP_EOL;
+echo "<h2>Test Results for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h2>".PHP_EOL;
 echo "<div class=\"homeitem3col\">".PHP_EOL;
-echo "<h3 id=\"Logs\"> Logs for <a href="../$BUILD_ID">$BUILD_ID</a></h3>".PHP_EOL;
+echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h2>".PHP_EOL;
 echo "<ul>";
 
 
