@@ -227,35 +227,36 @@
   </pluginRepositories>
   <build>
     <plugins>
-    <plugin>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>properties-maven-plugin</artifactId>
-      <version>1.0.0</version>
-      <executions>
-        <execution>
-          <phase>validate</phase>
-          <goals>
-            <goal>read-project-properties</goal>
-          </goals>
-          <configuration>
-            <quiet>true</quiet>
-            <urls>
-              <!-- 
-              This build-individual-repository.properties file is used to specify an alternative p2 repository from
-              where to get the most recent prereqs of artifacts that are required by, but not built by, the "build-individual-repository"
-              profile. On Eclipse.org Platform HIPP we change this to N-builds when doing infrequent I-builds, but use I-builds repository 
-              when doing frequent I-builds. To give another example of use, those doing "local builds" may want to point it to their own local build 
-              repository if they are working with a complex change that spans multiple repositories.
-              But the property file is not required and for most uses the default of the latest I-build will suffice.
-              Example contents of the file:
-                eclipse-p2-repo.url=http://download.eclipse.org/eclipse/updates/4.6-N-builds
-              -->
-              <url>file:///${env.HOME}/.m2/build-individual-repository.properties</url>
-            </urls>
-          </configuration>
-        </execution>
-      </executions>
-     </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <quiet>true</quiet>
+              <urls>
+                <!--
+                  This build-individual-repository.properties file is used to specify an alternative p2 repository from
+                  where to get the most recent prereqs of artifacts that are required by, but not built by, the "build-individual-repository"
+                  profile. On Eclipse.org Platform HIPP we change this to N-builds when doing infrequent I-builds, but use I-builds repository
+                  when doing frequent I-builds. To give another example of use, those doing "local builds" may want to point it to their 
+                  own local build
+                  repository if they are working with a complex change that spans multiple repositories.
+                  But the property file is not required and for most uses the default of the latest I-build will suffice.
+                  Example contents of the file:
+                  eclipse-p2-repo.url=http://download.eclipse.org/eclipse/updates/4.6-N-builds
+                -->
+                <url>file:///${env.HOME}/.m2/build-individual-repository.properties</url>
+              </urls>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
@@ -472,6 +473,39 @@
               Required for 4.2 and earlier. Not for 4.3 and later.
               <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
             -->
+
+            <!-- See https://wiki.eclipse.org/Tycho/Additional_Tools#tycho-eclipserun-plugin_behind_a_proxy  -->
+            <target>
+              <touch
+                file="${project.build.directory}/work/configuration/.settings/org.eclipse.core.net.prefs"
+                mkdirs="true" />
+                <!-- we are getting properites directly from maven's setting.xml
+                    file but could come from other sources -->
+                     but will have separate for now -->
+              <propertyfile file="${project.build.directory}/work/configuration/.settings/org.eclipse.core.net.prefs">
+                <entry
+                  key="eclipse.preferences.version"
+                  value="1" />
+                <entry
+                  key="nonProxiedHosts"
+                  value="${http.nonProxyHosts}" />
+                <entry
+                  key="org.eclipse.core.net.hasMigrated"
+                  value="true" />
+                <entry
+                  key="proxyData/HTTP/hasAuth"
+                  value="false" />
+                <entry
+                  key="proxyData/HTTP/host"
+                  value="${http.proxyHost}" />
+                <entry
+                  key="proxyData/HTTP/port"
+                  value="${http.proxyPort}" />
+                <entry
+                  key="systemProxiesEnabled"
+                  value="false" />
+              </propertyfile>
+            </target>
           </configuration>
         </plugin>
         <plugin>
@@ -1006,7 +1040,7 @@
       <properties>
         <!-- Since we append output of various tests, write to a common folder besides tests -->
         <!-- it's recommended to override that to an absolute valuein specific Hudson configurations
-         and Sonar integration -->
+          and Sonar integration -->
         <jacoco.destFile>${project.basedir}/../target/jacoco.exec</jacoco.destFile>
         <sonar.jacoco.reportPath>${jacoco.destFile}</sonar.jacoco.reportPath>
       </properties>
