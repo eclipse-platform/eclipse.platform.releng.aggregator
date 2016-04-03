@@ -36,7 +36,11 @@ assertNotEmpty aggDir
 assertNotEmpty BUILD_ID
 assertNotEmpty buildDirectory
 
-export MAVEN_SETTINGS="--settings /shared/eclipse/mavenSettings/settings.xml"
+CUSTOM_SETTINGS_FILE=/shared/eclipse/mavenSettings/settings.xml
+if [[ -r "${CUSTOM_SETTINGS_FILE}" ]]
+then 
+  export MAVEN_SETTINGS="--settings ${CUSTOM_SETTINGS_FILE}"
+fi
 
 # remember, local "test builds" that use this script must change
 # or override 'GIT_PUSH' to simply echo, not actually push. Only
