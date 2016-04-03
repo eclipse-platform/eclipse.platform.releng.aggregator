@@ -3,14 +3,15 @@
 # Assuming this is ran before "promote", so data is read and written to build machine, 
 # and then will be promoted with rest of build.
 
+source localBuildProperties.shsource 2>/dev/null
 
 JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
 export JAVA_HOME=${JAVA_8_HOME}
 buildIdToTest=${BUILD_ID:-"I20160314-2000"}
 buildIdToCompare="4.5/R-4.5.2-201602121500"
 build_type=${buildIdToTest:0:1}
-build_dir_root="/shared/eclipse/builds/4${build_type}/siteDir/eclipse/downloads/drops4"
-build_update_root="/shared/eclipse/builds/4${build_type}/siteDir/updates"
+build_dir_root="${BUILD_HOME}/4${build_type}/siteDir/eclipse/downloads/drops4"
+build_update_root="${BUILD_HOME}/4${build_type}/siteDir/updates"
 dl_dir_root="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
 if [[ ${build_type} == "M" ]]
 then
