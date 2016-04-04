@@ -85,7 +85,7 @@ then
   eqFromDir=${equinoxPostingDirectory}/${BUILD_ID}
   eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
 
-  # Note: for proper mirroring at Eclipse, we probably do not want/need to
+  # Note: for proper mirroring at Eclipse, we probably do not want or need to
   # maintain "times" on build machine, but let them take times at time of copying.
   # If it turns out to be important to maintain times (such as ran more than once,
   # to pick up a "more" output, such as test results, then add -t to rsync

@@ -32,7 +32,7 @@ fi
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 
-printf "/n/tINFO: %s/n" "calling getEBuilderForDropDir.sh from publish-eclipse.sh"
+printf "\n\tINFO: %s\n" "calling getEBuilderForDropDir.sh from publish-eclipse.sh"
 $SCRIPT_PATH/getEBuilderForDropDir.sh $buildDirectory $EBUILDER_HASH
 
 fn-checkout-basebuilder "$basebuilderDir"

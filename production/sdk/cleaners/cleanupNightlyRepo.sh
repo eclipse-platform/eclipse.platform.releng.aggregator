@@ -52,7 +52,7 @@ function generateCleanupXML ()
   mainRepoDir=$1
   if [[ -z "${mainRepoDir}" ]]
   then 
-    echo -e "/n/tERROR: main repo to work with was not defined"
+    echo -e "\n\tERROR: main repo to work with was not defined"
   else
     writeHeader $mainRepoDir
     writeReposToRemove 
