@@ -175,7 +175,7 @@ GATHER_PARTS_BUILD_LOG="${logsDirectory}/mb070_gather-parts_output.txt"
 # after promotion to milestone or release. (see bug 435671)
 export BUILD_DIR_SEG=$BUILD_ID
 export EQ_BUILD_DIR_SEG=$BUILD_ID
-
+export TESTED_BUILD_TYPE=$BUILD_TYPE
 # These variables, from original env file, are re-written to BUILD_ENV_FILE,
 # with values for this build (some of them computed) partially for documentation, and
 # partially so this build can be re-ran or re-started using it, instead of
@@ -195,6 +195,7 @@ fn-write-property STREAMService
 fn-write-property aggDir
 fn-write-property BUILD_ID
 fn-write-property BUILD_TYPE
+fn-write-property TESTED_BUILD_TYPE
 fn-write-property TIMESTAMP
 fn-write-property TMP_DIR
 fn-write-property JAVA_HOME
