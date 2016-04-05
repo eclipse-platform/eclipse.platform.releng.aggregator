@@ -19,7 +19,7 @@ fi
 
 source "$1"
 
-SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
+export SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
 source $SCRIPT_PATH/build-functions.shsource
 
@@ -160,7 +160,7 @@ fn-publish-equinox ()
     -DpostingDirectory=$BUILD_DIR \
     -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
     -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
-    -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
+    -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.template.php${PATCH_BUILD}" \
     -DbuildDir="$EQ_BUILD_DIR_SEG" \
     -DEBuilderDir="$EBuilderDir" \
     -DeclipseStream=$BUILD_STREAM \

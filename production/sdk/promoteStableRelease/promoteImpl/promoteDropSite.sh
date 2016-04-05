@@ -52,7 +52,7 @@ then
     RC=$?
     if [[ $RC != 0 ]]
     then
-      echo -e "/n/tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
+      echo -e "\n\tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
       exit 1
     fi
   fi

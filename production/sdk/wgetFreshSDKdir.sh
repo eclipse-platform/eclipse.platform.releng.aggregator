@@ -27,7 +27,7 @@ function errorExit ()
   # so is technically a programming error.
   if [[ -z "{MSG}" ]]
   then
-    printf "/n/tWARNING: /t%s" "Call to errorExit provided no message"
+    printf "\n\tWARNING: /t%s" "Call to errorExit provided no message"
     MSG="No message provided."
   fi
   # May be legitimate not to provide "exit status", in which case we just use '1'.

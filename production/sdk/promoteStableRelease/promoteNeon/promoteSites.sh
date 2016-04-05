@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+#*******************************************************************************
+# Copyright (c) 2013-2016 IBM Corporation and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#     David Williams - initial API and implementation
+#*******************************************************************************
 
 # Utility to rename build and "promote" it to DL Server.
 
@@ -7,11 +17,11 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160128-2000
+export DROP_ID=I20160317-0200
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=M5
+export CHECKPOINT=M6
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Neon
 
@@ -27,7 +37,7 @@ export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 
-export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promoteMars}
+export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promote${TRAIN_NAME}}
 
 # Ordinarily, BUILD_LABEL (for Eclipse) and Equinox are the same. 
 # But if we are promoting an "RC" site, then may be different, since 

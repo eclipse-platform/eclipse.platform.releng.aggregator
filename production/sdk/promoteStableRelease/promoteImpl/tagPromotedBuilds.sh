@@ -12,7 +12,7 @@ echo "git tag -a -m \"${NEW_ANNOTATION}\" ${NEW_TAG} ${DROP_ID}" >> deferredTag.
 echo "RC=\$?" >> deferredTag.sh
 echo "if [[ \$RC != 0 ]]" >> deferredTag.sh
 echo "then" >> deferredTag.sh
-echo "   printf \"/n/t%s/n\" \"ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${NEW_TAG} and annotation of ${NEW_ANNOTATION}.\"" >> deferredTag.sh
+echo "   printf \"\n\t%s\n\" \"ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${NEW_TAG} and annotation of ${NEW_ANNOTATION}.\"" >> deferredTag.sh
 echo "   popd" >> deferredTag.sh
 echo "   exit \$RC" >> deferredTag.sh
 echo "fi" >> deferredTag.sh
@@ -20,7 +20,7 @@ echo "git push origin tag ${NEW_TAG}" >> deferredTag.sh
 echo "RC=\$?" >> deferredTag.sh
 echo "if [[ \$RC != 0 ]]" >> deferredTag.sh
 echo "then" >> deferredTag.sh
-echo "   printf \"/n/t%s/n\" \"ERROR: Failed to push new tag, ${NEW_TAG}.\"" >> deferredTag.sh
+echo "   printf \"\n\t%s\n\" \"ERROR: Failed to push new tag, ${NEW_TAG}.\"" >> deferredTag.sh
 echo "   popd" >> deferredTag.sh
 echo "   exit \$RC" >> deferredTag.sh
 echo "fi" >> deferredTag.sh

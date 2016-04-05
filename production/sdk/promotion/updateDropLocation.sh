@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-SCRIPTDIR=$( dirname $0 )
-echo "SCRIPTDIR: ${SCRIPTDIR}"
-source ${SCRIPTDIR}/syncUpdateUtils.shsource
+export PROMOTION_SCRIPT_PATH=${PROMOTION_SCRIPT_PATH:-$( dirname $0 )}
+echo "PROMOTION_SCRIPT_PATH: ${PROMOTION_SCRIPT_PATH}"
+source ${PROMOTION_SCRIPT_PATH}/syncUpdateUtils.shsource
 
 # Utility to convert raw millisecond string of digits to "hours, minutes" type
 # of display string.
@@ -392,8 +392,8 @@ then
     echo "       drop directory: ${dropFromBuildDir}"
     exit 1
   fi
-  SCRIPTDIR=$( dirname $0 )
-  ${SCRIPTDIR}/getEBuilder.sh "${EBUILDER_HASH}" "${dropFromBuildDir}"
+  export PROMOTION_SCRIPT_PATH=${PROMOTION_SCRIPT_PATH:-$( dirname $0 )}
+  ${PROMOTION_SCRIPT_PATH}/getEBuilder.sh "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
   updatePages $eclipseStream $buildId "${EBUILDER_HASH}" $JOB_NAME $JOB_NUMBER
   rccode=$?

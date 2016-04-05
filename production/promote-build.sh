@@ -24,14 +24,15 @@ source $SCRIPT_PATH/build-functions.shsource
 # promote script, and log results. ASSUMING this works for all
 # types of builds, etc (which is the goal for the sdk promotions).
 workLocation=/shared/eclipse/sdk/promotion
+# the cron job must know about and use the queueLocation
+# to look for its promotions scripts. (i.e. implicit tight coupling)
+queueLocation=/shared/eclipse/promotion/queue
 
-# the cron job must know about and use this same
-# location to look for its promotions scripts. (i.e. implicit tight coupling)
-promoteScriptLocationEclipse=$workLocation/queue
+
 
 # directory should normally exist -- best to create first, with committer's ID --
 # but in case not
-mkdir -p "${promoteScriptLocationEclipse}"
+mkdir -p "${queueLocation}"
 #env > env.txt
 
 if [[ -z ${STREAM} || -z ${BUILD_ID} ]]
@@ -55,13 +56,13 @@ fi
 
 # Here is content of promotion script:
 ptimestamp=$( date +%Y%m%d%H%M )
-echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
-echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
+echo "#!/usr/bin/env bash" >  ${queueLocation}/${scriptName}
+echo "# promotion script created at $ptimestamp" >>  ${queueLocation}/${scriptName}
 
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${promoteScriptLocationEclipse}/${scriptName}
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${queueLocation}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
-chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
+chmod -v ug=rwx,o-rwx ${queueLocation}/${scriptName}
 
 # we do not promote equinox, if BUILD_FAILED since no need.
 if [[ -z "${BUILD_FAILED}" ]]
@@ -84,7 +85,7 @@ then
   eqFromDir=${equinoxPostingDirectory}/${BUILD_ID}
   eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
 
-  # Note: for proper mirroring at Eclipse, we probably do not want/need to
+  # Note: for proper mirroring at Eclipse, we probably do not want or need to
   # maintain "times" on build machine, but let them take times at time of copying.
   # If it turns out to be important to maintain times (such as ran more than once,
   # to pick up a "more" output, such as test results, then add -t to rsync

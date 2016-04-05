@@ -21,7 +21,7 @@ echo "ulimit (file handles): $( ulimit -n ) "
 
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
-
+export PROMOTION_SCRIPT_PATH="$SCRIPT_PATH/sdk/promotion"
 
 source "${SCRIPT_PATH}/build-functions.shsource"
 
@@ -36,7 +36,11 @@ assertNotEmpty aggDir
 assertNotEmpty BUILD_ID
 assertNotEmpty buildDirectory
 
-
+CUSTOM_SETTINGS_FILE=/shared/eclipse/mavenSettings/settings.xml
+if [[ -r "${CUSTOM_SETTINGS_FILE}" ]]
+then 
+  export MAVEN_SETTINGS="--settings ${CUSTOM_SETTINGS_FILE}"
+fi
 
 # remember, local "test builds" that use this script must change
 # or override 'GIT_PUSH' to simply echo, not actually push. Only
@@ -171,7 +175,7 @@ GATHER_PARTS_BUILD_LOG="${logsDirectory}/mb070_gather-parts_output.txt"
 # after promotion to milestone or release. (see bug 435671)
 export BUILD_DIR_SEG=$BUILD_ID
 export EQ_BUILD_DIR_SEG=$BUILD_ID
-
+export TESTED_BUILD_TYPE=$BUILD_TYPE
 # These variables, from original env file, are re-written to BUILD_ENV_FILE,
 # with values for this build (some of them computed) partially for documentation, and
 # partially so this build can be re-ran or re-started using it, instead of
@@ -191,6 +195,7 @@ fn-write-property STREAMService
 fn-write-property aggDir
 fn-write-property BUILD_ID
 fn-write-property BUILD_TYPE
+fn-write-property TESTED_BUILD_TYPE
 fn-write-property TIMESTAMP
 fn-write-property TMP_DIR
 fn-write-property JAVA_HOME
@@ -218,6 +223,7 @@ fn-write-property PATCH_BUILD
 fn-write-property ALT_POM_FILE
 fn-write-property JAVA_DOC_TOOL
 fn-write-property loadLog
+fn-write-property MAVEN_SETTINGS
 
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
@@ -423,8 +429,14 @@ then
   fi
 fi
 
+# create repo reports. Depends on exported 'BUILD_ID'. 
+$SCRIPT_PATH/createReports.sh
+#For now, do not fail if create reports fails, since 
+# Since it did once while moving to triggering builds from Hudson (bug 487044).
+#checkForErrorExit $? "Error occurred during createReports.sh"
+
 # if all ended well, put "promotion scripts" in known locations
-$SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
+$SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt#
 checkForErrorExit $? "Error occurred during promote-build"
 
 # check for dirt in working tree. Note. we want near very end, since even things

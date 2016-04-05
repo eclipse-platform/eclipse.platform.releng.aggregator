@@ -36,9 +36,14 @@ umask 0002
 
 
 
-# masterBuilder.sh must know about and use this same
+# cron jobs and hudson jobs must know about and use this same
 # location to put its collections scripts. (i.e. implicit tight coupling)
-testdataLocation=/shared/eclipse/sdk/testjobdata
+testdataLocation=/shared/eclipse/testjobqueue
+# endure exists
+if [[ ! -e "${testdataLocation}" ]]
+then
+  mkdir -p "${testdataLocation}"
+fi  
 
 # Note: if we ever need to handle spaces, or newlines in names (seems unlikely) this
 # for loop won't quiet work, and will be more complicated (or, at least unintuitive).

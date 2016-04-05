@@ -15,9 +15,9 @@ DISABLED="M"
 function removeOldPromotionScripts ()
 {
     echo -e "\n\tRemove old promotion scripts."
-    find /shared/eclipse/sdk/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
-    find /shared/eclipse/sdk/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
-    find /shared/eclipse/sdk/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
+    find /shared/eclipse/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
+    find /shared/eclipse/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
+    find /shared/eclipse/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;

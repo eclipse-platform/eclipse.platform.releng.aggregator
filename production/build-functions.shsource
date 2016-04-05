@@ -344,7 +344,7 @@ fn-maven-build-aggregator ()
     MARGS="$MARGS -Peclipse-sign"
   fi
   if [[ -n "${PATCH_BUILD}" ]]; then
-    MARGS="$MARGS -P${PATCH_BUILD} -Dcomparator.repo=http://download.eclipse.org/eclipse/updates/4.6-P-builds/"
+    MARGS="$MARGS -P${PATCH_BUILD}"
   fi
 
   MARGS="$MARGS ${MAVEN_BREE}"
@@ -380,7 +380,7 @@ fn-maven-build-aggregator ()
   echo "DEBUG: MARGS: $MARGS"
   echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
   echo "DEBUG: CODE_WARNINGS: ${CODE_WARNINGS}"
-
+ 
   # --fail-at-end gives chance for bundles to compile, even after
   # a compile error. Might have to specify --fail-never to see them all? See
   # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
@@ -394,7 +394,9 @@ fn-maven-build-aggregator ()
   # mvn versions:display-property-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-property-updates.txt
   # Note: we pass in bogus eclipse-p2-repo.url value (XXXXX), to help ensure no regressions of 
   # bug 471835 (See bug 478483)  
-  mvn $MARGS ${FAIL_OPTION} -V  ${ALT_POM_FILE} \
+  # Note: reactorBuildTimestampProperty was added as a work around for bug 486698.
+  # It should be removed once bug 486783 is fixed. I created bug 489510 as a reminder to remove the workaround.
+  mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
     clean verify \
     -DskipTests=true \
     -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
@@ -575,7 +577,7 @@ fn-pom-version-updater ()
 
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
   pushd "$REPO_DIR"
-  mvn $MARGS  ${ALT_POM_FILE} \
+  mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
     org.eclipse.tycho:tycho-versions-plugin:0.23.1:update-pom \
     -Dmaven.repo.local=$LOCAL_REPO \
     -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
@@ -1038,7 +1040,7 @@ fn-gather-main-index ()
   pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
   # Simplified by creating PHP variables in buildproperties.php
-  cp "index.php.template${PATCH_BUILD}" "$BUILD_DIR"/index.php
+  cp "index.template.php${PATCH_BUILD}" "$BUILD_DIR"/index.php
 
   popd
 }
@@ -1118,19 +1120,19 @@ fn-summarize-apitooling ()
   EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
   pushd "$BUILD_DIR"
   # Make sure FREEZE_PARAMS is defined, but empty space, if not using freeze reports.
-  FREEZE_PARAMS=" "
+  #FREEZE_PARAMS=" "
   # When no "freeze" in effect for a release comment these out. Uncomment after M6, changing to appropriate versions.
-  #FREEZE_PARAMS="-DfreezeBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/S-4.5M6-201503200800/eclipse-SDK-4.5M6-win32.zip \
-    #   -DfreezeName=Eclipse-SDK-4.5M6 \
-    #   -DfreezeFilename=eclipse-SDK-4.5M6-win32.zip "
+  FREEZE_PARAMS="-DfreezeBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/S-4.6M6-201603170200/eclipse-SDK-4.6M6-win32.zip \
+       -DfreezeName=Eclipse-SDK-4.6M6 \
+       -DfreezeFilename=eclipse-SDK-4.6M6-win32.zip "
   # this API_PREV_REF_LABEL variable should be changed any time the version used
   # by previousBaseURL changes. Its purpose is just to localize changes to this one
-  # place, and not have to make further, hard-coded changes to testResults.php.template.
+  # place, and not have to make further, hard-coded changes to testResults.template.php.
   # Similar for freeze label.
   # NOTE: the *reference* for API changes should be the "previous release", even if it is a "service release".
   API_PREV_REF_LABEL=4.5.2
   fn-write-property API_PREV_REF_LABEL
-  #API_FREEZE_REF_LABEL=4.5M6
+  API_FREEZE_REF_LABEL=4.6M6
   API_FREEZE_REF_LABEL=" "
   fn-write-property API_FREEZE_REF_LABEL
   java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
@@ -1181,7 +1183,7 @@ fn-publish-eclipse ()
     -DpostingDirectory="$BUILD_ROOT/siteDir/eclipse/downloads/drops4" \
     -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
     -DpublishingContent="$EBuilderDir"/eclipse/publishingFiles \
-    -DdropTemplateFileName="${EBuilderDir}/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
+    -DdropTemplateFileName="${EBuilderDir}/eclipse/publishingFiles/templateFiles/index.template.php${PATCH_BUILD}" \
     -DbuildLabel="$BUILD_DIR_SEG" \
     -DEBuilderDir="$EBuilderDir" \
     -DAGGR_DIR="$AGGR_DIR" \

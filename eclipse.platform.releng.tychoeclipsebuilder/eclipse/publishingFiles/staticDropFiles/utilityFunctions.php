@@ -95,37 +95,33 @@ function calcTestConfigsRan($testResultsDirName) {
     // TEMP? appears "old style" builds had directories named "results", but now "testresults"
     // and we want to look in $testResultsDirName/consolelogs
     if (file_exists("$testResultsDirName/consolelogs")) {
-      $buildDir = dir("$testResultsDirName/consolelogs");
-      while ($file = $buildDir->read()) {
+      $consolelogDir = dir("$testResultsDirName/consolelogs");
+      //echo "<br />DEBUG: count of expectedTestConfigs: ".count($expectedTestConfigs)." <br />";
+      //echo "<br />DEBUG: and var_dump of expectedTestConfigs was: <br />";
+      //var_dump($expectedTestConfigs);
+      //echo "<br />";
+      while ($file = $consolelogDir->read()) {
         for ($i = 0 ; $i < count($expectedTestConfigs) ; $i++) {
-          if (strncmp($file, $expectedTestConfigs[$i], count($expectedTestConfigs[$i])) == 0) {
+          //echo "file: ".$file."<br />";
+          //echo "expectTestConfigs[$i] ". $expectedTestConfigs[$i]. "<br />";
+          if ((strpos($file, $expectedTestConfigs[$i])) !== FALSE) {
             $boxes++;
-            // our way of matching job names, with test configs, is very limited,
-            // at the moment ... just looking for three letter match between the two.
-            $keyMatchStrings = array("lin","win","mac");
-            foreach ($keyMatchStrings as $keyMatch) {
 
-            // First make sure we get "fresh" list of test summary files, each time.
+            // First make sure we get "fresh" list of ALL test summary files, each time.
             $testResultsSummaryFiles = glob($testResultsDirName."/ep*-unit-*.xml");
-            //echo "DEBUG: found ".count($testResultsSummaryFiles). "summary files<br />";
-            //echo "DEBUG: while expected config was $expectedTestConfigs[$i]<br />";
-            // Then match the "test config" we found, with the test summary file.
-            if (strpos($expectedTestConfigs[$i], $keyMatch) !== FALSE) {
-              // echo "DEBUG: found matching config: $expectedTestConfigs[$i]<br />";
-              foreach ($testResultsSummaryFiles as $summFileName) {
-                 // echo "DEBUG: processing $summFileName<br />";
-                 if (strpos($summFileName, $keyMatch) !== FALSE) {
-                   //echo "DEBUG: found matching summary file: $summFileName<br />";
-                   $xmlResults = simplexml_load_file($summFileName);
-                   $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
-                   $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
-                   $testResults[$expectedTestConfigs[$i]]["passCount"]=$xmlResults->passCount;
-                   $testResults[$expectedTestConfigs[$i]]["skipCount"]=$xmlResults->skipCount;
-                 }
+            foreach ($testResultsSummaryFiles as $summFileName) {
+              // echo "DEBUG: processing $summFileName<br />";
+              $jobname=jobname($expectedTestConfigs[$i]);
+              //echo "DEBUG: jobname: " . $jobname;
+              if (substr_startswith($summFileName, $testResultsDirName."/".$jobname)) {
+                //echo "DEBUG: found matching summary file: $summFileName<br />";
+                $xmlResults = simplexml_load_file($summFileName);
+                $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
+                $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
+                $testResults[$expectedTestConfigs[$i]]["passCount"]=$xmlResults->passCount;
+                $testResults[$expectedTestConfigs[$i]]["skipCount"]=$xmlResults->skipCount;
               }
             }
-            }
-            break;
           }
         }
       }
@@ -266,4 +262,42 @@ function fileSizeForDisplay($filename) {
   }
   $result =  "(" . $zipfilesize . $scaleChar . ")";
   return $result;
+}
+
+/*
+This function "breaks" the full config string at meaningful 
+underscores, for improved display in tables and similar.
+Remember, some config values can have more than two underscores, 
+such as ep46N-unit-lin64_linux.gtk.x86_64_8.0, which should 
+be split as 
+         ep46N-unit-lin64
+         lin64_linux.gtk.x86_64
+         8.0
+ */
+function computeDisplayConfig($config) {
+  $lastUnderscore = strrpos ($config, "_");
+  $firstUnderscore = strpos ($config, "_"); 
+  $platformLength=$lastUnderscore - $firstUnderscore - 1;
+  //echo "<br/>DEBUG: config: $config firstUnderscore: $firstUnderscore  lastUnderscore: $lastUnderscore  lastMinusFirst: $platformLength"
+  $jobname = substr($config,0,$firstUnderscore);
+  $platformconfig = substr($config,$firstUnderscore + 1,$platformLength);
+  $vmused = substr($config,$lastUnderscore+1);
+  //echo "DEBUG: jobname: ".$jobname."<br/>";
+  //echo "DEBUG: platformconfig: ".$platformconfig."<br/>";
+  //echo "DEBUG: vmused: ".$vmused."<br/>";
+  return $jobname."<br/>".$platformconfig."<br/>".$vmused;
+
+}
+
+/* This function gets the first segment of the config
+   which is 'jobname' on Hudson.
+ */
+function jobname($config) {
+  $firstUnderscore = strpos ($config, "_");
+  $jobname = substr($config,0,$firstUnderscore);
+  return $jobname;
+}
+
+function substr_startswith($haystack, $needle) {
+  return substr($haystack, 0, strlen($needle)) === $needle;
 }
