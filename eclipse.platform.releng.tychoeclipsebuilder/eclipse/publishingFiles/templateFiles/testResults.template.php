@@ -190,14 +190,14 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 ?>
 
 <?php
-  $width=100;
+  $width=90;
   $half= $width / 2;
   $ncolumns=count($expectedTestConfigs);
           /*
           unsure if 'percent' can be "real" number, or if must be integer?
           if needs to be integer, use ($a - ($a % $b)) / $b;
            */
-  $colWidth=$width / $ncolumns;
+  $colWidth=$half / $ncolumns;
   echo "<table width='".$width."%' border='1' bgcolor='#EEEEEE' rules='groups' align='center'>\n";
   echo "<tr bgcolor='#9999CC'>\n";
   echo "<th rowspan='2' width='".$half."%' align='center'> org.eclipse <br /> Test Bundles </th>\n";
@@ -209,12 +209,15 @@ if (file_exists("buildlogs/reporeports/index.html")) {
     echo "<th width='".$colWidth."%'>". computeDisplayConfig($column) . "</th>\n";
   }
   echo "</tr>\n";
+  
+  if (file_exists("testResultRows.html")) {
+    include "testResultsRows.html";
+} else {
+    include "testResultsRowsPending.html";
+}
+  
 ?>
-
-            %testresults%
-
-       
-        </div>
+</div>
 <?php
 if (file_exists("compilerSummary.html")) {
     include "compilerSummary.html";
