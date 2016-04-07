@@ -87,7 +87,7 @@ echo "<div id=\"midcolumn\">".PHP_EOL;
 
 echo "<h2>Test Results for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h2>".PHP_EOL;
 echo "<div class=\"homeitem3col\">".PHP_EOL;
-echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h2>".PHP_EOL;
+echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h3>".PHP_EOL;
 echo "<ul>";
 
 
@@ -117,7 +117,6 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   echo "  This tool verifies the versions of the plugins against Eclipse ${API_PREV_REF_LABEL}.&nbsp;&nbsp;
   Exclusions are listed in <a href=\"http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/tree/eclipse.platform.releng.tychoeclipsebuilder/eclipse/apiexclude/exclude_list_external.txt?h=$BRANCH\">.../apiexclude/exclude_list_external.txt</a>.</li> ";
 ?>
-        <ul>
 
 <?php
   $deprecationFilename="apitools/deprecation/apideprecation.html";
@@ -164,6 +163,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
     echo "Performance tests are pending.\n";
   }
   echo "</li>\n";
+  echo "</ul>\n";
 ?>
         </div>
 
@@ -190,18 +190,18 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 ?>
 
 <?php
-  $width=80;
+  $width=90;
   $half= $width / 2;
   $ncolumns=count($expectedTestConfigs);
           /*
           unsure if 'percent' can be "real" number, or if must be integer?
           if needs to be integer, use ($a - ($a % $b)) / $b;
            */
-  $colWidth=$width / $ncolumns;
+  $colWidth=$half / $ncolumns;
   echo "<table width='".$width."%' border='1' bgcolor='#EEEEEE' rules='groups' align='center'>\n";
   echo "<tr bgcolor='#9999CC'>\n";
-  echo "<th rowspan='2' width='".$half."%' align='center'> org.eclipse <br> Component </th>\n";
-  echo "<th colspan='".($ncolumns + 1)."' align='center'> Test Configurations </th></tr>\n";
+  echo "<th rowspan='2' width='".$half."%' align='center'> org.eclipse <br /> Test Bundles </th>\n";
+  echo "<th colspan='".($ncolumns + 1)."' align='center'> Test Configurations (Hudson Job/os.ws.arch/VM) </th></tr>\n";
   echo "<tr bgcolor='#9999CC'>\n";
 
   foreach ($expectedTestConfigs as $column)
@@ -209,43 +209,23 @@ if (file_exists("buildlogs/reporeports/index.html")) {
     echo "<th width='".$colWidth."%'>". computeDisplayConfig($column) . "</th>\n";
   }
   echo "</tr>\n";
+  
+  if (file_exists("testResultRows.html")) {
+    include "testResultsRows.html";
+} else {
+    include "testResultsRowsPending.html";
+}
+  
+?>
+</div>
+<?php
+if (file_exists("compilerSummary.html")) {
+    include "compilerSummary.html";
+} else {
+    include "compilerSummaryPending.html";
+}
 ?>
 
-            %testresults%
-
-          </table>
-          </br>
-        </div>
-
-        <div class="homeitem3col">
-          <h3 id="PluginsErrors"> Plugins containing compile errors or warnings</h3>
-          </br>
-          &nbsp;&nbsp;The table below shows the plugins in which errors or warnings were encountered. Click on the jar file link to view its
-          detailed report.
-          </br></br>
-          <table width="77%" border="1">
-            <tr>
-              <td><b>Compile Logs (Jar Files)</b></td>
-              <td><b>Errors</b></td>
-              <td><b>Warnings</b></td>
-            </tr>
-
-            %compilelogs%
-
-          </table>
-
-          <table width="77%" border="1">
-            <tr>
-              <td><b>Compile Logs (Jar Files)</b></td>
-              <td><b>Forbidden Access Warnings</b></td>
-              <td><b>Discouraged Access Warnings</b></td>
-            </tr>
-
-            %accesseslogs%
-
-          </table>
-          </br>
-        </div>
       </div>
     </body>
   </html>
