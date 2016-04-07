@@ -41,6 +41,7 @@ echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
     <style type="text/css">
       <!--
       P {text-indent: 30pt; margin: inherit}
+      tr:hover td { background-color: #CCCCFF; }
       -->
     </style>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
@@ -50,7 +51,7 @@ echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
     <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/layout.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/print.css" media="print" />
 <script type="text/javascript">
-<![CDATA[
+//<![CDATA[
   sfHover = function() {
     var sfEls = document.getElementById("leftnav").getElementsByTagName("li");
     for (var i=0; i<sfEls.length; i++) {
@@ -63,7 +64,7 @@ echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
     }
   }
 if (window.attachEvent) window.attachEvent("onload", sfHover);
-]]>
+//]]>
   </script>
 </head>
 <body>
@@ -198,7 +199,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
           if needs to be integer, use ($a - ($a % $b)) / $b;
            */
   $colWidth=$half / $ncolumns;
-  echo "<table width='".$width."%' border='1' bgcolor='#EEEEEE' rules='groups' align='center'>\n";
+  echo "<table width='".$width."%' border='1' bgcolor='#EEEEEE' rules='rows' align='center'>\n";
   echo "<tr bgcolor='#9999CC'>\n";
   echo "<th rowspan='2' width='".$half."%' align='center'> org.eclipse <br /> Test Bundles </th>\n";
   echo "<th colspan='".($ncolumns + 1)."' align='center'> Test Configurations (Hudson Job/os.ws.arch/VM) </th></tr>\n";
@@ -212,9 +213,10 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   
   if (file_exists("testResultRows.html")) {
     include "testResultsRows.html";
-} else {
+  } else {
     include "testResultsRowsPending.html";
-}
+  }
+
   
 ?>
 </div>
