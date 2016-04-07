@@ -210,7 +210,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   }
   echo "</tr>\n";
   
-  $rowResultsFile="testResultRows.html";
+  $rowResultsFile="testResultsRows.html";
   if (file_exists($rowResultsFile)) {
     include $rowResultsFile;
 } else {
