@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html >
 <?php
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
@@ -41,10 +40,13 @@ echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
     <style type="text/css">
       <!--
       P {text-indent: 30pt; margin: inherit}
-      tr:hover td { background-color: #CCCCFF; }
+      table {border-collapse: collapse;}
+      tr {border-bottom: 1px solid #000; }
+      tr:hover td { background-color: #b3b3ff; }
+      tr:nth-child(even){background-color: #ffffff}
       -->
     </style>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="author" content="Eclipse Foundation, Inc." />
     <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
     <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/visual.css" media="screen" />
