@@ -175,22 +175,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   echo "<h3 id=\"UnitTest\"> Unit Test Results for <a href=\"../$BUILD_ID\">$BUILD_ID</a></h3>".PHP_EOL;
 ?>
 
-          <p>The unit tests are run on the <a href="https://hudson.eclipse.org/shared/view/Eclipse%20and%20Equinox/">shared Hudson instance</a>.</p>
 
-          <p>The table shows the unit test results for this build on the platforms
-          tested. You may access the test results page specific to each
-          component on a specific platform by clicking the cell link.
-          Normally, the number of errors is indicated in the cell.
-          A "-1" or "DNF" means the test "Did Not Finish" for unknown reasons
-          and hence no results page is available. In that case,
-          more information can sometimes be found in
-          the <a href="logs.php#console">console logs</a>.</p>
-<?php
-  if (file_exists("testNotes.html")) {
-    $my_file = file_get_contents("testNotes.html");
-    echo $my_file;
-  }
-?>
 
 <?php
 
