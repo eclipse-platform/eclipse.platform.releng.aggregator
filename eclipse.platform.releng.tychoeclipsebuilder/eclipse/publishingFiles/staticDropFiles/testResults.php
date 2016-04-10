@@ -1,43 +1,40 @@
-<!DOCTYPE html >
 <?php
+
+include_once("buildproperties.php");
+include_once("utilityFunctions.php");
+
+# Begin: page-specific settings.
+$pageTitle    = "Test Results for $BUILD_ID";
+$pageKeywords = "eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide";
+$pageAuthor   = "David Williams and Christopher Guindon";
+
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
-include_once("utilityFunctions.php");
-include ('buildproperties.php');
-include ('testConfigs.php');
 
-if (array_key_exists("SERVER_NAME", $_SERVER)) {
-  $servername = $_SERVER["SERVER_NAME"];
-  if ($servername === "build.eclipse.org") {
-    $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
-    $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
-    $appsource="/home/data/httpd/download.eclipse.org/eclipse.org-common/system";
-    $clickthroughstr="";
-  }
-  else {
-    $imagesource="../../../eclipse.org-common/stylesheets";
-    $csssource="../../../eclipse.org-common/stylesheets";
-    $appsource="../../../eclipse.org-common/system";
-    $clickthroughstr="download.php?dropFile=";
 
-  }
-}
-else {
-  $servername = "localhost";
-  $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
-  $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
-  $appsource="NONE";
-  $clickthroughstr="";
-}
+ob_start();
 
-echo "<head>".PHP_EOL;
+/*
+DL.thin.header.php.html was original obtained from
 
-echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
+wget https://eclipse.org/eclipse.org-common/themes/solstice/html_template/thin/header.php
+
+and then that file modified to suit our needs.
+Occasionally, our version should be compared to the "standard" to see if anything has
+changed, in the interest of staying consistent.
+
+See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
+
+ */
+$endingBreadCrumbs="<li><a href=\"../$BUILD_ID/\">$BUILD_ID</a></li><li class=\"active\">Test Results</li>";
+
+require("DL.thin.header.php.html");
+
 ?>
 
 
 
-    <style type="text/css">
+    <style type="text/css" scoped>
       <!--
       P {text-indent: 30pt; margin: inherit}
       table {border-collapse: collapse;}
@@ -46,12 +43,6 @@ echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
       tr:nth-child(even){background-color: #ffffff}
       -->
     </style>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="author" content="Eclipse Foundation, Inc." />
-    <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/visual.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/layout.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/print.css" media="print" />
 <script type="text/javascript">
 //<![CDATA[
   sfHover = function() {
@@ -68,20 +59,19 @@ echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
 if (window.attachEvent) window.attachEvent("onload", sfHover);
 //]]>
   </script>
-</head>
-<body>
+
+
 
   <?php if (! isset ($BUILD_FAILED) ) { ?>
 
-  <div id="leftcol">
-    <ul id="leftnav">
+<aside class="col-md-6" id="leftcol" style="margin-top=20px;" >
+<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px">
       <li><a href="#Logs">Logs</a></li>
       <li><a href="#UnitTest">Unit Test Results</a></li>
       <li><a href="#PluginsErrors">Plugins Containing Compile Errors</a></li>
 
-    </ul>
-
-  </div>
+</ul>
+</aside>
   <!-- end 'not build failed' -->
 
 <?php }
@@ -89,7 +79,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 echo "<div id=\"midcolumn\">".PHP_EOL;
 
 echo "<h2>Test Results for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h2>".PHP_EOL;
-echo "<div class=\"homeitem3col\">".PHP_EOL;
+
 echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h3>".PHP_EOL;
 echo "<ul>";
 
@@ -168,9 +158,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   echo "</li>\n";
   echo "</ul>\n";
 ?>
-        </div>
-
-        <div class="homeitem3col">
+</div> <!-- end mid column -->
 <?php
   echo "<h3 id=\"UnitTest\"> Unit Test Results for <a href=\"../$BUILD_ID\">$BUILD_ID</a></h3>".PHP_EOL;
 ?>
@@ -190,7 +178,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 }
   
 ?>
-</div>
+
 <?php
 if (file_exists("compilerSummary.html")) {
     include "compilerSummary.html";
@@ -199,6 +187,13 @@ if (file_exists("compilerSummary.html")) {
 }
 ?>
 
-      </div>
+</div> <!-- close container -->
+</main> <!-- close main element -->
     </body>
   </html>
+<?php
+  $html = ob_get_clean();
+
+  #echo the computed content
+  echo $html;
+?>

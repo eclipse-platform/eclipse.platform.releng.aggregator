@@ -55,7 +55,7 @@ changed, in the interest of staying consistent.
 See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 
  */
-
+$endingBreadCrumbs="<li class=\"active\">$BUILD_ID></li>";
 require("DL.thin.header.php.html");
 
 ?>
