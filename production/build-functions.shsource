@@ -599,57 +599,6 @@ fn-pom-version-updater ()
   return $RC
 }
 
-# USAGE: fn-pom-version-update-with-commit BUILD_ID REPO_DIR LOCAL_REPO
-#   BUILD_ID: I20121116-0700
-#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
-#   VERBOSE: true
-#   SIGNING: true
-fn-pom-version-update-with-commit ()
-{
-
-  checkNArgs $# 3
-  if [[ $? != 0 ]]; then return 1; fi
-  BUILD_ID="$1"; shift
-  REPO_DIR="$1"; shift
-  LOCAL_REPO="$1"; shift
-
-  # fail fast if not set up correctly
-  rc=$(fn-check-dir-exists TMP_DIR)
-  checkForErrorExit "$rc" "$rc"
-
-  report=${TMP_DIR}/pom_${BUILD_ID}.txt
-  MARGS="-DbuildId=$BUILD_ID  --update-snapshots"
-  if [[ -n "${PATCH_BUILD}" ]]; then
-    MARGS="$MARGS -P${PATCH_BUILD}"
-  fi
-  pushd "$REPO_DIR"
-  mvn $MARGS  ${ALT_POM_FILE} \
-    org.eclipse.tycho:tycho-versions-plugin:0.23.1:update-pom \
-    -Dmaven.repo.local=$LOCAL_REPO \
-    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
-  changes=$( git status --short -uno | cut -c4- )
-  if [ -z "$changes" ]; then
-    echo No changes in pom versions
-    return
-  fi
-  repos=$( git status --short -uno | cut -c4- | grep -v pom.xml )
-  for CURRENT_REPO in $repos; do
-    pushd "$CURRENT_REPO"
-    pom_only=$( git status --short -uno | grep -v pom.xml | wc -l )
-    if [[ pom_only == 0 ]]; then
-      git add $( git status --short -uno | cut -c4- )
-      git commit -m "Update pom versions for build $BUILD_ID"
-      echo $GIT_PUSH origin HEAD
-    else
-      echo Unable to update poms for $CURRENT_REPO
-    fi
-    popd
-  done
-  echo git add $changes
-  git add $changes
-  popd
-}
 
 # USAGE: fn-gather-repo BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
