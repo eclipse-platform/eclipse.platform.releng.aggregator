@@ -88,7 +88,7 @@ require("DL.thin.header.php.html");
 <!-- end 'not build failed' -->
 <?php } ?>
 
-<div>
+<div id="midcolumn">
 <h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?> </h1>
 <p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform build along with
 is logs and tests.</p>
@@ -137,10 +137,6 @@ if (isset ($BUILD_FAILED) ) {
 }
 else {
 ?>
-
-</div>
-
-<div id="midcolumn">
 
 <h3>Logs and Test Links</h3>
 
