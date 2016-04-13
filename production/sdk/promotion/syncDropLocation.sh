@@ -125,12 +125,12 @@ function sendPromoteMail ()
     BUILD_ROOT=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
     eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
     dlFromPath=$( dlFromPath $eclipseStream $buildId )
-    echo "DEBUG CBI dlFromPath: $dlFromPath"
-    buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
-    echo "DEBGUG CBI buildDropDir: $buildDropDir"
-    builderDropLogsDir=${buildDropDir}/${comparatorLogRelPath}
+    echo "DEBUG CBI dlFromPath: ${dlFromPath}"
+    buildDropDir="${BUILD_ROOT}/siteDir/${dlFromPath}/${buildId}"
+    echo "DEBGUG CBI buildDropDir: ${buildDropDir}"
+    builderDropLogsDir="${buildDropDir}/${comparatorLogRelPath}"
     echo "DEBUG: CBI builderDropLogsDir: ${builderDropLogsDir}"
-    aggr=${BUILD_ROOT}/gitcache/eclipse.platform.releng.aggregator
+    aggr="${BUILD_ROOT}/gitcache/eclipse.platform.releng.aggregator"
 
 # another thing we need to capture from "build area", besides the artifactcomparison directories below, 
 # is the buildnotes_*.html files. 
