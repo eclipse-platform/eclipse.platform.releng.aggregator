@@ -122,8 +122,6 @@ function sendPromoteMail ()
   link=$(linkURL ${downloadURL}testResults.php)
   message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
 
-  if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
-  then
     BUILD_ROOT=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
     eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
     dlFromPath=$( dlFromPath $eclipseStream $buildId )
@@ -131,13 +129,24 @@ function sendPromoteMail ()
     buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
     echo "DEBGUG CBI buildDropDir: $buildDropDir"
     builderDropLogsDir=${buildDropDir}/${comparatorLogRelPath}
-    echo "DEBUG: CBI builderDropLogsDir: ${builderDropLogsDir
+    echo "DEBUG: CBI builderDropLogsDir: ${builderDropLogsDir}"
     aggr=${BUILD_ROOT}/gitcache/eclipse.platform.releng.aggregator
+
+# another thing we need to capture from "build area", besides the artifactcomparison directories below, 
+# is the buildnotes_*.html files. 
+# TODO: all this "gathering" of stuff needs to move to the "gather" function, instead of 
+# here in "syncDropLocation"!
+  mkdir -p "${buildDropDir}/holdBuildNotes"
+  find $aggr -name "buildnotes_*.html" -exec rsync '{}' "${buildDropDir}/holdBuildNotes" \;
+
+  if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
+  then
     link=$(linkURL ${downloadURL}${comparatorLogRelPath})
     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}<p>\n"
     # Plus, also zip up any artifactcomparison directories that exist in the target
     # directories. 
     find $aggr -regex ".*target/artifactcomparison" -type d -exec zip -r  ${builderDropLogsDir}/artifactcomparisons.zip '{}' \;
+    
   else
     echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
