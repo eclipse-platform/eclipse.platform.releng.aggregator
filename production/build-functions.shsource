@@ -967,8 +967,55 @@ fn-gather-23-compile-logs ()
     echo "[ERROR] $REPO_DIR did not exist in fn-gather-23-compile-logs"
   fi
 }
+#   fn-gather-buildnotes 
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+function fn-gather-buildnotes 
+{
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  echo "collecting buildnotes"
+  if [[ -d "$REPO_DIR" ]]
+  then
+    pushd "$REPO_DIR"
+    mkdir -p "${BUILD_DIR}/holdBuildNotes"
+    find . -name "buildnotes_*.html" -exec rsync '{}' "${BUILD_DIR}/holdBuildNotes/" \;
+    popd
+  else
+    echo "   ERROR: $REPO_DIR did not exist in fn-gather-buildnotes"
+    return 1
+  fi
+}
+#   fn-gather-artifactcomparisons 
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+function fn-gather-artifactcomparisons 
+{
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  echo "collecting artifactcomparisons"
+  if [[ -d "$REPO_DIR" ]]
+  then
+    pushd "$REPO_DIR"
+    mkdir -p "${BUILD_DIR}/buildlogs/comparatorlogs"
+    find . -regex ".*target/artifactcomparison" -type d -exec zip -r  "${BUILD_DIR}/buildlogs/comparatorlogs/artifactcomparisons.zip" '{}' \;
+    popd
+  else
+    echo "   ERROR: $REPO_DIR did not exist in fn-gather-artifactcomparisons"
+    return 1
+  fi
+}
 
-
+    
+}
 # USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_PRETTY_DATE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
