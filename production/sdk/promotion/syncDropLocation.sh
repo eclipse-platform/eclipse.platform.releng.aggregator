@@ -124,8 +124,20 @@ function sendPromoteMail ()
 
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
+    BUILD_ROOT=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+    eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
+    dlFromPath=$( dlFromPath $eclipseStream $buildId )
+    echo "DEBUG CBI dlFromPath: $dlFromPath"
+    buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
+    echo "DEBGUG CBI buildDropDir: $buildDropDir"
+    builderDropLogsDir=${buildDropDir}/${comparatorLogRelPath}
+    echo "DEBUG: CBI builderDropLogsDir: ${builderDropLogsDir
+    aggr=${BUILD_ROOT}/gitcache/eclipse.platform.releng.aggregator
     link=$(linkURL ${downloadURL}${comparatorLogRelPath})
     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}<p>\n"
+    # Plus, also zip up any artifactcomparison directories that exist in the target
+    # directories. 
+    find $aggr -regex ".*target/artifactcomparison" -type d -exec zip -r  ${builderDropLogsDir}/artifactcomparisons.zip '{}' \;
   else
     echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
