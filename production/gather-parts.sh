@@ -50,11 +50,13 @@ then
   fn-gather-swt-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
   fn-gather-test-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 fi
-# but we do (always) need these two, at least for JDT patch build
+# but we do (always) need these, at least for JDT patch build
 fn-gather-repo "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-ecj-jars "$BUILD_ID" "$aggDir" "$buildDirectory"
+
 fn-gather-buildnotes "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-artifactcomparisons "$BUILD_ID" "$aggDir" "$buildDirectory"
+
 # if doing PATCH_BUILD we do not need to slice repos
 if [[ -z "${PATCH_BUILD}" ]]
 then
