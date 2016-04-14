@@ -122,10 +122,16 @@ function sendPromoteMail ()
   link=$(linkURL ${downloadURL}testResults.php)
   message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
 
+    eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
+
+    echo "DEBGUG CBI buildDropDir: ${buildDropDir}"
+    echo "DEBUG: CBI builderDropLogsDir: ${builderDropLogsDir}"
+
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
-    link=$(linkURL ${downloadURL}${comparatorLogRelPath})
-    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}<p>\n"
+   link=$(linkURL ${downloadURL}${comparatorLogRelPath})
+   echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
+   message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}<p>\n"
   else
     echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi

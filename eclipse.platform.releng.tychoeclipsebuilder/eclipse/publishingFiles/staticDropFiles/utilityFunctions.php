@@ -264,7 +264,7 @@ function fileSizeForDisplay($filename) {
   return $result;
 }
 
-/*
+/* Deprecated. This function moved to "generate test results table" ant task.
 This function "breaks" the full config string at meaningful 
 underscores, for improved display in tables and similar.
 Remember, some config values can have more than two underscores, 

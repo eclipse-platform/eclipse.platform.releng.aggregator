@@ -599,57 +599,6 @@ fn-pom-version-updater ()
   return $RC
 }
 
-# USAGE: fn-pom-version-update-with-commit BUILD_ID REPO_DIR LOCAL_REPO
-#   BUILD_ID: I20121116-0700
-#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
-#   VERBOSE: true
-#   SIGNING: true
-fn-pom-version-update-with-commit ()
-{
-
-  checkNArgs $# 3
-  if [[ $? != 0 ]]; then return 1; fi
-  BUILD_ID="$1"; shift
-  REPO_DIR="$1"; shift
-  LOCAL_REPO="$1"; shift
-
-  # fail fast if not set up correctly
-  rc=$(fn-check-dir-exists TMP_DIR)
-  checkForErrorExit "$rc" "$rc"
-
-  report=${TMP_DIR}/pom_${BUILD_ID}.txt
-  MARGS="-DbuildId=$BUILD_ID  --update-snapshots"
-  if [[ -n "${PATCH_BUILD}" ]]; then
-    MARGS="$MARGS -P${PATCH_BUILD}"
-  fi
-  pushd "$REPO_DIR"
-  mvn $MARGS  ${ALT_POM_FILE} \
-    org.eclipse.tycho:tycho-versions-plugin:0.23.1:update-pom \
-    -Dmaven.repo.local=$LOCAL_REPO \
-    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
-  changes=$( git status --short -uno | cut -c4- )
-  if [ -z "$changes" ]; then
-    echo No changes in pom versions
-    return
-  fi
-  repos=$( git status --short -uno | cut -c4- | grep -v pom.xml )
-  for CURRENT_REPO in $repos; do
-    pushd "$CURRENT_REPO"
-    pom_only=$( git status --short -uno | grep -v pom.xml | wc -l )
-    if [[ pom_only == 0 ]]; then
-      git add $( git status --short -uno | cut -c4- )
-      git commit -m "Update pom versions for build $BUILD_ID"
-      echo $GIT_PUSH origin HEAD
-    else
-      echo Unable to update poms for $CURRENT_REPO
-    fi
-    popd
-  done
-  echo git add $changes
-  git add $changes
-  popd
-}
 
 # USAGE: fn-gather-repo BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
@@ -722,7 +671,7 @@ fn-gather-sdk ()
     # cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
     #tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
     cp org.eclipse.sdk.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk.zip
-    cp org.eclipse.sdk.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip
+    cp org.eclipse.sdk.ide-solaris.gtk.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86_64.zip
     cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
     cp org.eclipse.sdk.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32.zip
     popd
@@ -761,7 +710,7 @@ fn-gather-platform ()
     # cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
     #tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
     cp org.eclipse.platform.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
-    cp org.eclipse.platform.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
+    cp org.eclipse.platform.ide-solaris.gtk.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86_64.zip
     cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
     cp org.eclipse.platform.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32.zip
     popd
@@ -826,7 +775,7 @@ fn-gather-test-zips ()
 }
 
 
-# USAGE: fn-gather-test-zips BUILD_ID REPO_DIR BUILD_DIR
+# USAGE: fn-gather-ecj-jars BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
@@ -1018,7 +967,58 @@ fn-gather-23-compile-logs ()
     echo "[ERROR] $REPO_DIR did not exist in fn-gather-23-compile-logs"
   fi
 }
+#   fn-gather-buildnotes 
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+function fn-gather-buildnotes 
+{
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  echo "collecting buildnotes"
+  if [[ -d "$REPO_DIR" ]]
+  then
+    pushd "$REPO_DIR"
+    tempBuildnotesDir="${BUILD_DIR}/buildlogs/holdBuildNotes"
+    mkdir -p ${tempBuildnotesDir}
+    find . -name "buildnotes_*.html" -exec rsync '{}' ${tempBuildnotesDir}  \;
+    popd
+  else
+    echo "   ERROR: $REPO_DIR did not exist in fn-gather-buildnotes"
+    return 1
+  fi
+}
+#   fn-gather-artifactcomparisons 
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+# TODO: this may take a while, for something that usually won't be found. 
+# could skip for N-builds. Plus, could check if size of log was greater than minimum. 
+# see syncDropLocation for current home of that "check". 
+function fn-gather-artifactcomparisons 
+{
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  echo "collecting artifactcomparisons"
+  if [[ -d "$REPO_DIR" ]]
+  then
+    pushd "$REPO_DIR"
+    mkdir -p "${BUILD_DIR}/buildlogs/comparatorlogs"
+    find . -regex ".*target/artifactcomparison" -type d -exec zip -r  "${BUILD_DIR}/buildlogs/comparatorlogs/artifactcomparisons.zip" '{}' \;
+    popd
+  else
+    echo "   ERROR: $REPO_DIR did not exist in fn-gather-artifactcomparisons"
+    return 1
+  fi
+}
 
+ 
 
 # USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_PRETTY_DATE
 #   BUILD_ID: I20121116-0700
@@ -1040,7 +1040,7 @@ fn-gather-main-index ()
   pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
   # Simplified by creating PHP variables in buildproperties.php
-  cp "index.template.php${PATCH_BUILD}" "$BUILD_DIR"/index.php
+  cp "index.template.${PATCH_BUILD}.php" "$BUILD_DIR"/index.php
 
   popd
 }
@@ -1127,7 +1127,7 @@ fn-summarize-apitooling ()
        -DfreezeFilename=eclipse-SDK-4.6M6-win32.zip "
   # this API_PREV_REF_LABEL variable should be changed any time the version used
   # by previousBaseURL changes. Its purpose is just to localize changes to this one
-  # place, and not have to make further, hard-coded changes to testResults.template.php.
+  # place, and not have to make further, hard-coded changes to php files.
   # Similar for freeze label.
   # NOTE: the *reference* for API changes should be the "previous release", even if it is a "service release".
   API_PREV_REF_LABEL=4.5.2
@@ -1136,7 +1136,7 @@ fn-summarize-apitooling ()
   API_FREEZE_REF_LABEL=" "
   fn-write-property API_FREEZE_REF_LABEL
   java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-    -data ${BUILD_DIR}/workspace-comparatorLogs \
+    -data ${BUILD_DIR}/workspace-apitoolingsLogs \
     -application org.eclipse.ant.core.antRunner \
     -buildfile "$ANT_SCRIPT" \
     -DbuildDirectory=$(dirname "$BUILD_DIR" ) \

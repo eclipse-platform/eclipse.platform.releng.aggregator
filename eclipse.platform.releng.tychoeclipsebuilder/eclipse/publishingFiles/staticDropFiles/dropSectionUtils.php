@@ -19,6 +19,8 @@
   function getDropSize($zipfile) {
 
     $filesize = "N/A";
+  if (file_exists($zipfile)) 
+  {
     $filesizebytes  = filesize($zipfile);
     if($filesizebytes > 0) {
       if($filesizebytes < 1048576) {
@@ -29,6 +31,7 @@
         $filesize = round($filesizebytes / 1048576, 0) . " MB";
       }
     }
+  }
     return($filesize);
   }
 

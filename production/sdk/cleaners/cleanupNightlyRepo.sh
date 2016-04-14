@@ -14,6 +14,7 @@
 function writeHeader ()
 {
   compositeRepoDir="$1"
+  antBuildFile=$2
   if [[ -z "${compositeRepoDir}" ]]
   then
     echo -e "\n\tWARNING: compositeRepoDir not passed to writeHeader function as expected. But will continue with variablei for later use?"
@@ -31,7 +32,7 @@ function writeHeader ()
 
 function writeReposToRemove ()
 {
-
+  antBuildFile=$1
   for repo in "${reposToRemove[@]}" 
   do
     echo "        <repository location=\"$repo\" />" >> $antBuildFile
@@ -41,6 +42,7 @@ function writeReposToRemove ()
 
 function writeClosing ()
 {
+  antBuildFile=$1
   echo -e "      </remove>" >> $antBuildFile
   echo -e "    </p2.composite.repository>" >> $antBuildFile
   echo -e "  </target>" >> $antBuildFile
@@ -50,54 +52,55 @@ function writeClosing ()
 function generateCleanupXML ()
 {
   mainRepoDir=$1
-  if [[ -z "${mainRepoDir}" ]]
+  antBuildFile=$2
+  if [[ -z "${mainRepoDir}" || ! -e "${mainRepoDir}" ]]
   then 
-    echo -e "\n\tERROR: main repo to work with was not defined"
+    echo -e "\n\tERROR: main repo to work with was not defined or did not exist"
   else
-    writeHeader $mainRepoDir
-    writeReposToRemove 
-    writeClosing
+    writeHeader $mainRepoDir $antBuildFile
+    writeReposToRemove $antBuildFile
+    writeClosing $antBuildFile
   fi
 }
 
 function getReposToRemove ()
 {
   cDir="$1"
-  buildType="N*"
+  buildType=$2
+  nRetain=$3
+
   if [[ ! -e "${cDir}" ]]
   then
-    echo -e "\n\tiERROR: expected directory did not exist" >&2
+    echo -e "\n\tERROR: expected directory did not exist" >&2
     echo -e "\t\t${cDir}" >&2
     reposToRemove=()
+    return 1
   else
+    echo -e "\n\tDEBUG: working with directory ${cDir}"
     # for "repo names" we want only the last segment of the directory, so use -printf %f. The %C@ is seconds since the beginning of time, for sorting.
     # Some caution is needed here. Seems on eclipse.org "atime" is the one that reflects "when created", 
     # whereas ctime and mtime are all identical, in every directory?! Turns out, mine is that 
     # say too. Apparently p2 "touches" every directory, for some reason. Perhaps only in the "atomic" case? 
     # But, atime can vary from system to system, depending .. some systems do update, when accessed?
-    sortedallOldRepos=( $(find ${cDir} -maxdepth 1 -type d -atime +3 -name "${buildType}" -printf "%C@ %f\n" | sort -n | cut -d\  -f2 ) )
-    nOldRepos=${#sortedallOldRepos[@]}
+    sortedallOldRepos=( $(find ${cDir} -maxdepth 1 -type d  -name "${buildType}*" -printf "%C@ %f\n" | sort -n | cut -d\  -f2 ) )
+    #nOldRepos=${#sortedallOldRepos[@]}
     # all builds "find" command should match above, except for age related (and printf) arguments
-    nbuilds=$( find ${cDir} -maxdepth 1 -type d -name "${buildType}" | wc -l )
+    nbuilds=$( find ${cDir} -maxdepth 1 -type d -name "${buildType}*" | wc -l )
     echo -e "\tNumber of repos before cleaning: $nbuilds"
-    echo -e "\tNumber of old repos ${nOldRepos}"
+    #echo -e "\tNumber of old repos ${nOldRepos}"
     echo -e "\tDEBUG contents of sortedallOldRepos array"
     for item in "${sortedallOldRepos[@]}"
     do
       echo -e "\t${item}"
     done
-    totalMinusOld=$(( nbuilds - nOldRepos ))
-    echo -e "\tDEBUG: total minus old: $totalMinusOld"
-    if [[ $totalMinusOld -gt 4 ]]
+    #totalMinusOld=$(( nbuilds - nOldRepos ))
+    #echo -e "\tDEBUG: total minus old: $totalMinusOld"
+    if [[ $nbuilds -gt $nRetain ]]
     then
-      echo -e "\tDEBUG: number of repos remaining, if all were removed, is greater than 4, so can remove all of the old ones"
-      #can remove all old ones
-      reposToRemove=("${sortedallOldRepos[@]}")
-    else
-      # removee all old ones, except for 4
-      nToRemove=$(( nbuilds - 4 ))
+      # remove all old ones, except for nRetain
+      nToRemove=$(( nbuilds - nRetain ))
       echo -e "\tDEBUG: nToRemove: $nToRemove"
-      #remove all except newest 4 (if more than 4)
+      #remove all except newest nRetain (if more than nRetain)
       if [[ ${nToRemove} -gt 0 ]]
       then
         echo -e "\tDEBUG: number of old repos to remove found to be ${nToRemove}"
@@ -110,9 +113,12 @@ function getReposToRemove ()
   fi
 }
 
-function cleanNightlyRepo ()
+function cleanRepo ()
 {
-  dryRun=$1
+  eclipseRepo=$1
+  buildType=$2
+  nRetain=$3
+  dryRun=$4
   # Will use the convenient eclipse known to be installed in /shared/simrel
   baseBuilder=/shared/simrel/tools/eclipse45/eclipse
   eclipseexe=${baseBuilder}/eclipse
@@ -123,7 +129,7 @@ function cleanNightlyRepo ()
     exit 1
   fi
   JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-  export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}} 
+  export JAVA_HOME=${JAVA_8_HOME} 
   javaexe=${JAVA_HOME}/jre/bin/java
   if [[ ! -x ${javaexe} ]]
   then 
@@ -132,43 +138,73 @@ function cleanNightlyRepo ()
     exit 1
   fi
 
+  antBuildFile=cleanupRepoScript${buildType}.xml
   antRunner=org.eclipse.ant.core.antRunner
   devWorkspace=/shared/eclipse/sdk/cleaners/workspace-cleanup
   echo -e "\tDEBUG: Cleaning repository ${eclipseRepo} on $HOSTNAME on $(date ) " >&2
-  getReposToRemove "${eclipseRepo}"
-  generateCleanupXML "${eclipseRepo}" 
-  if [[ -z "${dryRun}" ]]
+  getReposToRemove "${eclipseRepo}" $buildType $nRetain
+  RC=$?
+  if [[ $RC == 0 ]]
   then
-    $eclipseexe -nosplash --launcher.suppressErrors -data "${devWorkspace}" -application  ${antRunner} -f $antBuildFile -vm ${javaexe}
-    RC=$?
-  fi
-  if [[ $RC == 0 ]] 
-  then
-    for file in "${reposToRemove[@]}"
-    do
-      echo -e "\tDEBUG: directories to remove: ${eclipseRepo}/${file}"
+    # be sure there are some to remove
+    nToRemove=${#reposToRemove[@]}
+    if [[ $nToRemove == 0 ]]
+    then 
+      echo -e "\tfound no files to remove for current repo"
+    else
+      echo -e "\n\tfound $nToRemove so generating ant file"
+      generateCleanupXML "${eclipseRepo}" $antBuildFile
       if [[ -z "${dryRun}" ]]
       then
-        rm -rf ${eclipseRepo}/${file}
+        $eclipseexe -nosplash --launcher.suppressErrors -data "${devWorkspace}" -application  ${antRunner} -f $antBuildFile -vm ${javaexe}
+        RC=$?
       fi
-    done
-  fi 
-  if [[ -n "${dryRun}" ]]
-  then
-    cat $antBuildFile
+      if [[ $RC == 0 ]] 
+      then
+        # we only clean N-build directories, others need to be manually cleaned
+        # after every milestone, or after every release
+        if [[ $buildType == "N" ]] 
+        then
+          for file in "${reposToRemove[@]}"
+          do
+            echo -e "\tDEBUG: directories to remove: ${eclipseRepo}/${file}"
+            if [[ -z "${dryRun}" ]]
+            then
+              rm -rf ${eclipseRepo}/${file}
+            fi
+          done
+          else 
+            echo -e "\n\tReminder: only composite cleaned. For $buildType builds must cleanup simple repos ever milestone or release".
+        fi
+      fi 
+      if [[ -n "${dryRun}" ]]
+      then
+        echo "Since dryrun printing $antBuildFile"
+        cat $antBuildFile
+      fi
+    fi
   fi
 }
 
-antBuildFile=cleanupRepoScript.xml
+
 
 remoteBase="/home/data/httpd/download.eclipse.org"
 
-eclipseRepo="${remoteBase}/eclipse/updates/4.6-N-builds"
+eclipseNRepo="${remoteBase}/eclipse/updates/4.6-N-builds"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.6-I-builds"
+eclipseMRepo="${remoteBase}/eclipse/updates/4.6-M-builds"
+eclipseSRepo="${remoteBase}/eclipse/updates/4.6milestones"
 
+#doDryrun=dryrun
+doDryrun=
 # global
 declare -a reposToRemove=()
-
-#cleanNightlyRepo dryrun 
-cleanNightlyRepo 
+cleanRepo $eclipseNRepo N 4 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipseIRepo I 4 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipseMRepo M 4 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipseSRepo S 2 $doDryrun
 
 unset reposToRemove

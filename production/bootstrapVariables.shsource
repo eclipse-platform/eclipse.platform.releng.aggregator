@@ -108,18 +108,27 @@ fn-build-dir ()
     echo "aggDir was already defined as $aggDir"
   fi
 
-# NOTE: for now, we must always set BUILD_ID here, 
+# NOTE: if BUILD_ID is already set, we need to make sure it 
+# is one of "our" BUILD_IDs,  
 # since if we try to run on Hudson, it gets's Hudson's 
 # version of BUILD_D which is like "2016-03-13_17-12-03"
-#  if [[ -z "${BUILD_ID}" ]]
-#  then
+# Therefore, we not only check "if set", we also check 
+# it's format to be sure it matches the pattern we use.
+# We do not expect S or R in this context
+# if we ever do, it is a 3 part id, not 2 part.
+# Either of the two "digits" forms should work.
+#buildIdPattern="^[MNIPY][0-9]{8}-[0-9]{4}$"
+buildIdPattern="^[MNIPY][[:digit:]]{8}-[[:digit:]]{4}$"
+
+  if [[ -z "${BUILD_ID}" || ! "${BUILD_ID}" =~ $buildIdPattern ]]
+  then
     BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
     assertNotEmpty BUILD_ID
     export BUILD_ID
     echo "BUILD_ID was defined as $BUILD_ID"
-#  else
-#    echo "BUILD_ID was already defined as $BUILD_ID"
-#  fi
+  else
+   echo "BUILD_ID was already defined as $BUILD_ID"
+  fi
 
   if [[ -z "${buildDirectory}" ]]
   then

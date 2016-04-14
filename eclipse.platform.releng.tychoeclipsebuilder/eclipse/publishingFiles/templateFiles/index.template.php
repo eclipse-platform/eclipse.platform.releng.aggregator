@@ -55,7 +55,7 @@ changed, in the interest of staying consistent.
 See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 
  */
-
+$endingBreadCrumbs="<li class=\"active\">$BUILD_ID</li>";
 require("DL.thin.header.php.html");
 
 ?>
@@ -63,7 +63,7 @@ require("DL.thin.header.php.html");
 
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
-<aside class="col-md-6" id="leftcol" style="margin-top=20px;" >
+<aside class="col-md-6" id="leftcol" style="margin-top:20px;" >
 <ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px">
     <li><a href="#Repository">Eclipse p2 Repository</a></li>
     <li><a href="#EclipseSDK">Eclipse SDK</a></li>
@@ -88,7 +88,7 @@ require("DL.thin.header.php.html");
 <!-- end 'not build failed' -->
 <?php } ?>
 
-<div>
+<div id="midcolumn">
 <h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?> </h1>
 <p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform build along with
 is logs and tests.</p>
@@ -137,10 +137,6 @@ if (isset ($BUILD_FAILED) ) {
 }
 else {
 ?>
-
-</div>
-
-<div id="midcolumn">
 
 <h3>Logs and Test Links</h3>
 
@@ -497,8 +493,7 @@ else {
 
 <?php } ?>
 </div> <!-- end dropsection -->
-</div> <!-- close div classs=container -->
-</main> <!-- close main role="main" element -->
+</main> <!-- close main element -->
 </body>
 </html>
 <?php

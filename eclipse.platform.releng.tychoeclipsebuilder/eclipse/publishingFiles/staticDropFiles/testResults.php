@@ -1,92 +1,57 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
 <?php
+
+include_once("buildproperties.php");
+include_once("utilityFunctions.php");
+
+# Begin: page-specific settings.
+$pageTitle    = "Test Results for $BUILD_ID";
+$pageKeywords = "eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide";
+$pageAuthor   = "David Williams and Christopher Guindon";
+
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
-include_once("utilityFunctions.php");
-include ('buildproperties.php');
-include ('testConfigs.php');
 
-if (array_key_exists("SERVER_NAME", $_SERVER)) {
-  $servername = $_SERVER["SERVER_NAME"];
-  if ($servername === "build.eclipse.org") {
-    $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
-    $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
-    $appsource="/home/data/httpd/download.eclipse.org/eclipse.org-common/system";
-    $clickthroughstr="";
-  }
-  else {
-    $imagesource="../../../eclipse.org-common/stylesheets";
-    $csssource="../../../eclipse.org-common/stylesheets";
-    $appsource="../../../eclipse.org-common/system";
-    $clickthroughstr="download.php?dropFile=";
 
-  }
-}
-else {
-  $servername = "localhost";
-  $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
-  $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
-  $appsource="NONE";
-  $clickthroughstr="";
-}
+ob_start();
 
-echo "<head>".PHP_EOL;
+/*
+DL.thin.header.php.html was original obtained from
 
-echo "<title>Test Results for $BUILD_ID</title>".PHP_EOL;
+wget https://eclipse.org/eclipse.org-common/themes/solstice/html_template/thin/header.php
+
+and then that file modified to suit our needs.
+Occasionally, our version should be compared to the "standard" to see if anything has
+changed, in the interest of staying consistent.
+
+See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
+
+ */
+$endingBreadCrumbs="<li><a href=\"../$BUILD_ID/\">$BUILD_ID</a></li><li class=\"active\">Test Results</li>";
+
+require("DL.thin.header.php.html");
+
 ?>
 
 
 
-    <style type="text/css">
-      <!--
-      P {text-indent: 30pt; margin: inherit}
-      -->
-    </style>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <meta name="author" content="Eclipse Foundation, Inc." />
-    <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/visual.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/layout.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/print.css" media="print" />
-<script type="text/javascript">
-<![CDATA[
-  sfHover = function() {
-    var sfEls = document.getElementById("leftnav").getElementsByTagName("li");
-    for (var i=0; i<sfEls.length; i++) {
-      sfEls[i].onmouseover=function() {
-        this.className+=" sfhover";
-      }
-      sfEls[i].onmouseout=function() {
-        this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
-      }
-    }
-  }
-if (window.attachEvent) window.attachEvent("onload", sfHover);
-]]>
-  </script>
-</head>
-<body>
-
   <?php if (! isset ($BUILD_FAILED) ) { ?>
 
-  <div id="leftcol">
-    <ul id="leftnav">
+<aside class="col-md-6" id="leftcol" style="margin-top:20px;" >
+<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px">
       <li><a href="#Logs">Logs</a></li>
       <li><a href="#UnitTest">Unit Test Results</a></li>
       <li><a href="#PluginsErrors">Plugins Containing Compile Errors</a></li>
 
-    </ul>
-
-  </div>
+</ul>
+</aside>
   <!-- end 'not build failed' -->
 
 <?php }
 
 echo "<div id=\"midcolumn\">".PHP_EOL;
 
-echo "<h2>Test Results for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h2>".PHP_EOL;
-echo "<div class=\"homeitem3col\">".PHP_EOL;
+echo "<h1>Test Results for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h1>".PHP_EOL;
+
 echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h3>".PHP_EOL;
 echo "<ul>";
 
@@ -165,61 +130,28 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   echo "</li>\n";
   echo "</ul>\n";
 ?>
-        </div>
-
-        <div class="homeitem3col">
+</div> <!-- end mid column (logs) section -->
+<div class="resultsSection">
 <?php
-  echo "<h3 id=\"UnitTest\"> Unit Test Results for <a href=\"../$BUILD_ID\">$BUILD_ID</a></h3>".PHP_EOL;
-?>
 
-          <p>The unit tests are run on the <a href="https://hudson.eclipse.org/shared/view/Eclipse%20and%20Equinox/">shared Hudson instance</a>.</p>
+// all the following tables are styled based on being in the "resultsSection".
+// See resultsSection.css.
 
-          <p>The table shows the unit test results for this build on the platforms
-          tested. You may access the test results page specific to each
-          component on a specific platform by clicking the cell link.
-          Normally, the number of errors is indicated in the cell.
-          A "-1" or "DNF" means the test "Did Not Finish" for unknown reasons
-          and hence no results page is available. In that case,
-          more information can sometimes be found in
-          the <a href="logs.php#console">console logs</a>.</p>
-<?php
-  if (file_exists("testNotes.html")) {
-    $my_file = file_get_contents("testNotes.html");
-    echo $my_file;
-  }
-?>
-
-<?php
-  $width=90;
-  $half= $width / 2;
-  $ncolumns=count($expectedTestConfigs);
-          /*
-          unsure if 'percent' can be "real" number, or if must be integer?
-          if needs to be integer, use ($a - ($a % $b)) / $b;
-           */
-  $colWidth=$half / $ncolumns;
-  echo "<table width='".$width."%' border='1' bgcolor='#EEEEEE' rules='groups' align='center'>\n";
-  echo "<tr bgcolor='#9999CC'>\n";
-  echo "<th rowspan='2' width='".$half."%' align='center'> org.eclipse <br /> Test Bundles </th>\n";
-  echo "<th colspan='".($ncolumns + 1)."' align='center'> Test Configurations (Hudson Job/os.ws.arch/VM) </th></tr>\n";
-  echo "<tr bgcolor='#9999CC'>\n";
-
-  foreach ($expectedTestConfigs as $column)
-  {
-    echo "<th width='".$colWidth."%'>". computeDisplayConfig($column) . "</th>\n";
-  }
-  echo "</tr>\n";
-  
-  $rowResultsFile="testResultsRows.html";
+  // testResultsTables.html is generated by a custom ant task in
+  // build tools (see TestResultsGenerator.java). It consist of
+  // one to three tables: test results, missing files, files missing from
+  // testManifest.xml. The later two are are rarely produced, since usually nothing
+  // is missing.
+  $rowResultsFile="testResultsTables.html";
   if (file_exists($rowResultsFile)) {
     include $rowResultsFile;
 } else {
-    include "testResultsRowsPending.html";
+    include "testResultsTablesPending.html";
 }
-  
-?>
-</div>
-<?php
+
+// compilerSummary.html is generated by the same custom ant task.
+// (Though, if it already exists, from previous run, it is not re-generated, normally.
+// It consists of two tables, 1. errors and warnings from compiler. 2) access errors and warnings.
 if (file_exists("compilerSummary.html")) {
     include "compilerSummary.html";
 } else {
@@ -227,6 +159,13 @@ if (file_exists("compilerSummary.html")) {
 }
 ?>
 
-      </div>
+</div> <!-- close resultSection -->
+</main>
     </body>
   </html>
+<?php
+  $html = ob_get_clean();
+
+  #echo the computed content
+  echo $html;
+?>
