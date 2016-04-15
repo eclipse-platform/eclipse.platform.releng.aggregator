@@ -231,6 +231,10 @@ else {
     echo "<li>Performance tests are pending.</li>\n";
   }
 
+  if (file_exists("buildnotes/")) {
+    echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
+  }
+
   echo "</ul>\n";
 
 
@@ -302,11 +306,7 @@ else {
   }
 ?>
 
-<?php
-  if (file_exists("buildnotes/")) {
-    echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
-  }
-?>
+
 </ul>
 </div> <!-- end midcolumn -->
 
