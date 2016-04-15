@@ -162,6 +162,15 @@ else {
 
   //  echo "<ul class='midlist'>";
   echo "<ul>";
+  
+  // build notes are put at the top of the list under the assumption if there is something
+  // there, then it it pretty important for everyone to read. Such as "this build does not export" or 
+  // something like that. 
+  if (file_exists("buildnotes/")) {
+    echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
+  }
+  
+  
   //  We will always display link to logs (as normal link, not using color:inherit;)
   echo "<li>View the <a  style=\"text-decoration:none\" title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
 
@@ -229,10 +238,6 @@ else {
     echo "<li>View the <a href=\"performance/performance.php\">performance test results</a> for the current build.</li>\n";
   } else {
     echo "<li>Performance tests are pending.</li>\n";
-  }
-
-  if (file_exists("buildnotes/")) {
-    echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
   }
 
   echo "</ul>\n";
