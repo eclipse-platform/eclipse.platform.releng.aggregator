@@ -1300,23 +1300,21 @@
 
   <target
     name="configureDeltaPack"
+    depends="init"
     if="pdebuild">
-    <property
-      name="deltapackArchive"
-      value="eclipse-${buildId}-delta-pack.zip" />
+
     <property
       name="installDeltapack"
       value="${install}/deltapack" />
-    <mkdir dir="${installDeltapack}" />
-    <exec
-      dir="."
-      executable="unzip">
-      <arg value="-o" />
-      <arg value="-qq" />
-      <arg value="${deltapackArchive}" />
-      <arg value="-d" />
-      <arg value="${installDeltapack}" />
-    </exec>
+    <available
+      file="${installDeltapack}"
+      property="deltaPackInstalled" />
+    <!--
+        createDeltaPack requires buildId, buildType, and DOWNLOAD_HOST, which is why they
+        are explicitly part of the "depends" list.
+    -->
+    <ant antfile="createDeltaPack.xml" taskname="createDeltaPack" />
+
   </target>
 
   <macrodef name="runTests">
@@ -1918,7 +1916,7 @@
     depends="init">
     <runTests testPlugin="org.eclipse.equinox.http.servlet.tests" />
   </target>
-  
+
   <target
     name="equinoxp2"
     depends="init">
