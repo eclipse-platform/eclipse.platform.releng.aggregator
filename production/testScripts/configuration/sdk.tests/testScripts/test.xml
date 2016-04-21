@@ -57,7 +57,7 @@
 
     <antcall target="setupRepo" />
     <antcall target="${setupTarget}" />
-    <antcall target="configureDeltaPack" />
+
     <antcall target="installPreferences">
       <param
         name="eclipse-home"
@@ -544,7 +544,14 @@
     </script>
     <fail unless="buildType" />
   </target>
-
+  <target
+    name="initCurrentUpdateSite"
+    depends="initDownloadHosts, initStreamVariables, initBuildId, initBuildType"
+    unless="currentUpdateSite">
+    <property
+      name="currentUpdateSite"
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
+  </target>
   <target
     name="initStreamSpecificProperties"
     depends="initConfigurationDir"
@@ -790,7 +797,7 @@
 
   <target
     name="init"
-    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive"
+    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive"
     unless="testingIsInitialized">
 
     <property environment="env" />
@@ -1100,6 +1107,21 @@
     </condition>
     <condition
       property="runtimeArchive"
+      value="eclipse-SDK-${buildIdToUse}-solaris-gtk-x86_64.zip">
+      <and>
+        <equals
+          arg1="${os}"
+          arg2="solaris" />
+        <equals
+          arg1="${ws}"
+          arg2="gtk" />
+        <equals
+          arg1="${arch}"
+          arg2="x86_64" />
+      </and>
+    </condition>    
+    <condition
+      property="runtimeArchive"
       value="eclipse-SDK-${buildIdToUse}-aix-gtk-ppc.zip">
       <and>
         <equals
@@ -1298,24 +1320,6 @@
       value="${cvs_root}" />
   </target>
 
-  <target
-    name="configureDeltaPack"
-    depends="init"
-    if="pdebuild">
-
-    <property
-      name="installDeltapack"
-      value="${install}/deltapack" />
-    <available
-      file="${installDeltapack}"
-      property="deltaPackInstalled" />
-    <!--
-        createDeltaPack requires buildId, buildType, and DOWNLOAD_HOST, which is why they
-        are explicitly part of the "depends" list.
-    -->
-    <ant antfile="createDeltaPack.xml" taskname="createDeltaPack" />
-
-  </target>
 
   <macrodef name="runTests">
     <attribute name="testPlugin" />
