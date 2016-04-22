@@ -58,23 +58,54 @@
       (and, pass in?)
       (and make "version" variable)
     -->
+    <!-- example of typical value, when "directory" and "label" are different
+    <property name="eclipseBaseDir" value="S-4.6M3-201510291100"/>
+    <property name="eclispeBaseLabel" value="4.6M3"/>
+    -->
+    <!-- for I or M build (which is the unusual case) the build directory and label are the same -->
+    <property name="eclipseBaseDir" value="I20160419-0800"/>
+    <property name="eclispeBaseLabel" value="I20160419-0800"/>
+    
     <property
       name="platformURL"
-      value="http://${downloadHost}/eclipse/downloads/drops4/S-4.6M3-201510291100" />
+      value="http://${downloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
     <!--
       We used to use binary platform, since smaller, but moved to SDK, to be able to use API Tools.
       But then moved back to Platform, after having some cases where we need to pick up new fixes from
-      API tools.
+      API tools while continuting to use older "base" for stability.
     -->
     <property
       name="platformFile"
-      value="eclipse-platform-4.6M3-linux-gtk-x86_64.tar.gz" />
+      value="eclipse-platform-${eclispeBaseLabel}-linux-gtk-x86_64.tar.gz" />
 
-    <!-- TODO: we should read 'eclipserun-repo' from buildproperties.propterties? -->
+    <!-- 
+    mavenproperties.properties is produced during the build and contains
+    significant variables (and values) that control the build. In this context, 
+    'eclipserun-repo' is the one we want, so we only have to set it one place.
+    In "post-build" work, WORKSPACE is passed in as the "drop directory" on 
+    the build machine, which is where the properties are written.
+    -->
+    <property file="${WORKSPACE}/mavenproperties.properties"/>
+
     <echo message="eclipserun-repo: ${eclipserun-repo}" />
+    <!-- 
+      just in case mavenproperties.properties did not exist, we also
+      set a default value here. And, for now, at least, we have some 
+      special logic to provide clear message "it was not set". We can 
+      remove that, or change to a "fail" if we find it is always set 
+      as expected in the ways we use it. (such as, may not exist yet, 
+      if this is called too early?) 
+    -->
+    
+    <condition property="eclipserun-repo-is-set" value="${eclipserun-repo}" else="not set">
+        <isset property="eclipserun-repo" />
+    </condition>
+    <echo message="DEBUG: Before setting default, eclisperun-repo was found to be ${eclipserun-repo-is-set}" />
+    <!-- the following setting is just to make sure "its right" on the next run. Eventually, we'll change this 
+         to a "<fail" element, once confident all paths lead to a correct value -->
     <property
       name="eclipserun-repo"
-      value="http://download.eclipse.org/eclipse/updates/4.6milestones/S-4.6M3-201510291100/" />
+      value="http://download.eclipse.org/eclipse/updates/4.6-I-builds/I20160419-0800/" />
     <echo message="eclipserun-repo: ${eclipserun-repo}" />
 
     <property
