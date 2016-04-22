@@ -74,10 +74,10 @@ require("DL.thin.header.php.html");
 <div>
 <h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?> </h1>
 <p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform Project.</p>
-<p>This page has a patch feature that provides an implementation of JDT that supports Java 9. This is an implementation
+<p>This page has a patch feature that provides an implementation of JDT that supports Java 9. This is an implementation 
 of an early-draft specification developed under the Java
 Community Process (JCP) and is made available for testing and evaluation purposes
-only. The code is not compatible with any specification of the JCP. For more information on our early Java 9 work,
+only. The code is not compatible with any specification of the JCP. For more information on our early Java 9 work, 
 see the <a href="https://wiki.eclipse.org/Java9">Eclipse wiki page on that topic</a>.</p>
 <p>This patch is for the Neon (4.6) stream of Eclipse.</p>
 <?php
@@ -129,17 +129,6 @@ else {
 <h3>Logs and Test Links</h3>
 
 <?php
-
-  // build notes are put at the top of the list under the assumption if there is something
-  // there, then it it pretty important for everyone to read. Such as "this build does not export" or
-  // something like that.
-  if (file_exists("buildnotes/")) {
-      $fileArray=glob("buildnotes/buildnotes_*.html");
-      if (count($fileArray) > 0) {
-          echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
-      }
-  }
-
   // for current (modern) builds, test results are always in
   // 'testresults'. That directory only exists after first results
   // have finished and been "published".
@@ -301,6 +290,11 @@ if (! isset($PATCH_BUILD)) {
   }
 ?>
 
+<?php
+  if (file_exists("buildnotes/")) {
+    echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
+  }
+?>
 </ul>
 </div> <!-- end midcolumn -->
 
@@ -339,7 +333,7 @@ if (! isset($PATCH_BUILD)) {
     <?php startTable(); ?>
     <tr>
        <?php columnHeads(); ?>
-    </tr>
+    </tr>  
     <td><img src = "repo.gif" alt="Zipped Repo" />Patch, in zipped repo</td>
     <?php genLinks("${PATCH_BUILD}-${BUILD_ID}-repository.zip"); ?>
     </tr>
@@ -362,7 +356,7 @@ if (! isset($PATCH_BUILD)) {
 
 <h3 id="JUnitPlugin">Tests and Testing Framework&nbsp;<a href="details.html#JUnitPlugin"><i class="fa fa-info-circle">&nbsp;</i></a>
 </h3>
-<?php startTable(); ?>
+<?php startTable(); ?> 
 <tr>
   <?php columnHeads(); ?>
 </tr>

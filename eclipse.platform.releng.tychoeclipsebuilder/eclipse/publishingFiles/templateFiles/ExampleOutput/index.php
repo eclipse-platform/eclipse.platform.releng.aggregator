@@ -373,8 +373,8 @@ is logs and tests.</p>
 <?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk.zip"); ?>
 </tr>
 <tr>
-<td>Solaris 10 (x86_64/GTK+)</td>
-<?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk-x86_64.zip"); ?>
+<td>Solaris 10 (x86/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip"); ?>
 </tr>
 <tr>
 <td>HP-UX (ia64/GTK+)</td>

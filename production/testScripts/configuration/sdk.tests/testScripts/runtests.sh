@@ -194,7 +194,6 @@ echo
 echo "extdirprop in runtest.sh: ${extdirprop}"
 echo "extdirproperty in runtest.sh: ${extdirproperty}"
 echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
-echo "DOWNLOAD_HOST: $DOWNLOAD_HOST"
 
 
 # -Dtimeout=300000 "${ANT_OPTS}"

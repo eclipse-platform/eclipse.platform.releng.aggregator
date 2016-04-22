@@ -105,11 +105,11 @@ if (file_exists("../baseline.php")) {
 </tr>
 
 <?php
-$rowResultsFile="performanceTables.html";
+$rowResultsFile="performanceRows.html";
   if (file_exists($rowResultsFile)) {
     include $rowResultsFile;
 } else {
-    include "testResultsTablesPending.html";
+    include "testResultsRowsPending.html";
 }
 ?>
 </table>

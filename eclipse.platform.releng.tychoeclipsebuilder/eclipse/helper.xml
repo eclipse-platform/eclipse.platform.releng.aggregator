@@ -33,7 +33,7 @@
             message="The UNIX versions of your build output will be invalid.  Windows will not preserve symbolic links and permissions on executable files." />
     </target>
 
-    <!-- TODO: I think this is no longer called -->
+
     <target name="buildStandAloneSWT">
         <parallel failonany="true">
             <sequential>
@@ -87,7 +87,6 @@
         </parallel>
         <parallel failonany="true">
             <sequential>
-          <!--
                 <antcall target="packageSwtStandalone">
                     <param
                         name="os"
@@ -99,7 +98,6 @@
                         name="arch"
                         value="sparc" />
                 </antcall>
-                -->
                 <antcall target="packageSwtStandalone">
                     <param
                         name="os"
@@ -109,7 +107,7 @@
                         value="gtk" />
                     <param
                         name="arch"
-                        value="x86_64" />
+                        value="x86" />
                 </antcall>
                 <antcall target="packageSwtStandalone">
                     <param
@@ -240,6 +238,16 @@
         <copy todir="${postingDirectory}/${buildLabel}">
             <fileset dir="${publishingContent}/staticDropFiles" />
         </copy>
+
+        <!--copy buildnotes from plugin directories-->
+        <mkdir dir="${postingDirectory}/${buildLabel}/buildnotes" />
+        <!--copy
+            todir="${postingDirectory}/${buildLabel}/buildnotes"
+            flatten="true">
+            <fileset
+                dir="${buildDirectory}/plugins"
+                includes="**/buildnotes_*.html,**/buildnotes_*.htm,**/jdt_core_style.css" />
+        </copy-->
 
         <!--copy javadoc logs-->
         <copy
