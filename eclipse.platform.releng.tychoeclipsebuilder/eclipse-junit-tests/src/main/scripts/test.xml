@@ -57,20 +57,25 @@
 
     <antcall target="setupRepo" />
     <antcall target="${setupTarget}" />
-    <antcall target="configureDeltaPack" />
-    <antcall target="installPreferences" />
+
+    <antcall target="installPreferences">
+      <param
+        name="eclipse-home"
+        value="${eclipse-home}/eclipse" />
+    </antcall>
     <antcall target="installExtraPlugins" />
     <antcall target="installTestPlugins" />
 
-
   </target>
 
-  <target name="installPreferences">
+  <target
+    name="installPreferences"
+    depends="initStreamSpecificProperties">
     <property
       name="preferenceDirectory"
       value="${eclipse-home}/configuration/.settings/" />
     <mkdir dir="${preferenceDirectory}" />
-
+    <echo message="[PREFS] made preferenceDirectory at ${preferenceDirectory}" />
     <antcall target="installNetworkPreferences" />
 
   </target>
@@ -81,9 +86,9 @@
     if="org.eclipse.core.net.prefs">
     <echo
       message="${org.eclipse.core.net.prefs}"
-      file="${preferenceDirectory}" />
+      file="${preferenceDirectory}/org.eclipse.core.net.prefs" />
     <!-- TODO: be sure to check if quoted properly -->
-    <echo message="wrote ${org.eclipse.core.net.prefs} to ${preferenceDirectory}" />
+    <echo message="[PREFS] wrote ${org.eclipse.core.net.prefs} to ${preferenceDirectory}" />
   </target>
 
   <!--Extract test bundles repo -->
@@ -273,6 +278,11 @@
       development ... you never know)
     -->
     <antcall target="${platformTarget}" />
+    <antcall target="installPreferences">
+      <param
+        name="eclipse-home"
+        value="${platformLocation}/eclipse" />
+    </antcall>
   </target>
 
 
@@ -357,7 +367,7 @@
       resultproperty="directorcode">
       <arg value="-vm" />
       <arg path="${java.home}/bin/java" />
-      <arg value="-application" /> 
+      <arg value="-application" />
       <arg value="org.eclipse.equinox.p2.director" />
       <arg value="-consoleLog" />
       <arg value="-debug" />
@@ -382,6 +392,11 @@
       name="launcherPath"
       refid="launcher.paths" />
     <antcall target="setupPlatform" />
+    <antcall target="installPreferences">
+      <param
+        name="eclipse-home"
+        value="${eclipse-home}" />
+    </antcall>
     <echo>-installTestIU ${testPlugin} +</echo>
     <echo> from ${repoLocation} </echo>
     <echo> into ${eclipse-home} </echo>
@@ -404,11 +419,13 @@
       <arg value="-flavor" />
       <arg value="tooling" />
       <arg value="-installIUs" />
-      <arg value="${testPlugin},org.eclipse.test,org.eclipse.ant.optional.junit,org.eclipse.test.performance,org.eclipse.test.performance.win32,org.easymock" />
+      <arg
+        value="${testPlugin},org.eclipse.test,org.eclipse.ant.optional.junit,org.eclipse.test.performance,org.eclipse.test.performance.win32,org.easymock" />
       <arg value="-repository" />
       <arg value="file:${repoLocation}" />
     </java>
     <antcall target="configureTeamTest" />
+
     <antcall target="installderby" />
   </target>
 
@@ -420,7 +437,11 @@
     <property
       name="perfrepoLocation"
       value="http://build.eclipse.org/eclipse/buildtools" />
-
+    <!-- use 'file://' if problems with proxies
+    <property
+      name="perfrepoLocation"
+      value="file:///shared/eclipse/buildtools/" />
+    -->
     <java
       jar="${launcherPath}"
       failonerror="true"
@@ -523,7 +544,14 @@
     </script>
     <fail unless="buildType" />
   </target>
-
+  <target
+    name="initCurrentUpdateSite"
+    depends="initDownloadHosts, initStreamVariables, initBuildId, initBuildType"
+    unless="currentUpdateSite">
+    <property
+      name="currentUpdateSite"
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
+  </target>
   <target
     name="initStreamSpecificProperties"
     depends="initConfigurationDir"
@@ -769,7 +797,7 @@
 
   <target
     name="init"
-    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive"
+    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive"
     unless="testingIsInitialized">
 
     <property environment="env" />
@@ -1079,6 +1107,21 @@
     </condition>
     <condition
       property="runtimeArchive"
+      value="eclipse-SDK-${buildIdToUse}-solaris-gtk-x86_64.zip">
+      <and>
+        <equals
+          arg1="${os}"
+          arg2="solaris" />
+        <equals
+          arg1="${ws}"
+          arg2="gtk" />
+        <equals
+          arg1="${arch}"
+          arg2="x86_64" />
+      </and>
+    </condition>    
+    <condition
+      property="runtimeArchive"
       value="eclipse-SDK-${buildIdToUse}-aix-gtk-ppc.zip">
       <and>
         <equals
@@ -1277,26 +1320,6 @@
       value="${cvs_root}" />
   </target>
 
-  <target
-    name="configureDeltaPack"
-    if="pdebuild">
-    <property
-      name="deltapackArchive"
-      value="eclipse-${buildId}-delta-pack.zip" />
-    <property
-      name="installDeltapack"
-      value="${install}/deltapack" />
-    <mkdir dir="${installDeltapack}" />
-    <exec
-      dir="."
-      executable="unzip">
-      <arg value="-o" />
-      <arg value="-qq" />
-      <arg value="${deltapackArchive}" />
-      <arg value="-d" />
-      <arg value="${installDeltapack}" />
-    </exec>
-  </target>
 
   <macrodef name="runTests">
     <attribute name="testPlugin" />
@@ -1897,7 +1920,7 @@
     depends="init">
     <runTests testPlugin="org.eclipse.equinox.http.servlet.tests" />
   </target>
-  
+
   <target
     name="equinoxp2"
     depends="init">
@@ -2232,6 +2255,7 @@
   <target
     name="pdeLR"
     depends="init">
+
     <antcall target="pdebuild" />
   </target>
 

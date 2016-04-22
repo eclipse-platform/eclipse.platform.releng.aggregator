@@ -107,7 +107,7 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 if (isset ($NEWS_ID)) {
   echo "<h2><a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a></h2>\n";
 }
-// Similar for $ACK_ID and $README_ID, but they are added only for 'R builds', 
+// Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
 // And, are added by the promotion scripts, as long as we keep same conventions.
 if (isset ($ACK_ID)) {
   echo "<h2><a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${ACK_ID}.php\">Acknowledgments</a></h2>\n";
@@ -162,6 +162,18 @@ else {
 
   //  echo "<ul class='midlist'>";
   echo "<ul>";
+
+  // build notes are put at the top of the list under the assumption if there is something
+  // there, then it it pretty important for everyone to read. Such as "this build does not export" or
+  // something like that.
+  if (file_exists("buildnotes/")) {
+      $fileArray=glob("buildnotes/buildnotes_*.html");
+      if (count($fileArray) > 0) {
+          echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
+      }
+  }
+
+
   //  We will always display link to logs (as normal link, not using color:inherit;)
   echo "<li>View the <a  style=\"text-decoration:none\" title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
 
@@ -302,11 +314,7 @@ else {
   }
 ?>
 
-<?php
-  if (file_exists("buildnotes/")) {
-    echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
-  }
-?>
+
 </ul>
 </div> <!-- end midcolumn -->
 
@@ -356,7 +364,7 @@ else {
 
 <h3 id="JUnitPlugin">Tests and Testing Framework&nbsp;<a href="details.html#JUnitPlugin"><i class="fa fa-info-circle">&nbsp;</i></a>
 </h3>
-<?php startTable(); ?> 
+<?php startTable(); ?>
 <tr>
   <?php columnHeads(); ?>
 </tr>

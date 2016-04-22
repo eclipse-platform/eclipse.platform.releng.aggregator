@@ -5,7 +5,7 @@
 
   <target
     name="init"
-    depends="initWorkspace, initDownloadHosts, initBuildId, initBuildType, initBasicDirectories, initStreamSpecificVariables, initTargetPlatform, initPlatformSpecificProperties, initconfigure.team.cvs.test,setJavaMajorVersion"
+    depends="initWorkspace, initDownloadHosts, initBuildId, initBuildType, initBasicDirectories, initStreamSpecificVariables, initTargetPlatform, initPlatformSpecificProperties, initCurrentUpdateSite, initconfigure.team.cvs.test,setJavaMajorVersion"
     unless="runTest2Initialized">
 
     <property
@@ -144,11 +144,7 @@
       verbose="${selectiveVerbose}"
       src="${buildURL}/eclipse-Automated-Tests-${buildId}.zip"
       dest="${testDir}/eclipse-Automated-Tests-${buildId}.zip" />
-    <get
-      retries="5"
-      verbose="${selectiveVerbose}"
-      src="${archiveLocation}/eclipse-${buildIdToUse}-delta-pack.zip"
-      dest="${executionDir}/eclipse-${buildIdToUse}-delta-pack.zip" />
+
   </target>
 
   <target
@@ -582,6 +578,7 @@
     <printProperty property="eclipse.perf.dbloc" />
     <printProperty property="eclipse.perf.config" />
     <printProperty property="eclipse.perf.assertAgainst" />
+    <printProperty property="currentUpdateSite" />
 
     <!-- The following will leave pw in file, which is not a lot different
       that leave them printed in log, as we also do. But, could be improved by
@@ -599,7 +596,14 @@
       name="streamSpecificPropertiesSet"
       value="true" />
   </target>
-
+  <target
+    name="initCurrentUpdateSite"
+    depends="initDownloadHosts, initStreamVariables, initBuildId, initBuildType"
+    unless="currentUpdateSite">
+    <property
+      name="currentUpdateSite"
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
+  </target>
   <target
     name="checkInstallDir"
     if="install">
