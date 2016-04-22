@@ -47,6 +47,7 @@ export propertyFile=${propertyFile:-platformSpecific.properties}
 export testedPlatform=${testedPlatform:-linux.gtk.x86_64_x.0}
 
 echo "=== properties in testAll.sh"
+echo "    DOWNLOAD_HOST: ${DOWNLOAD_HOST}"
 echo "    jvm in testAll: ${jvm}"
 echo "    extdir in testAll (if any): ${extdir}"
 echo "    propertyFile in testAll: ${propertyFile}"

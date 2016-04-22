@@ -429,11 +429,14 @@ then
   fi
 fi
 
-# create repo reports. Depends on exported 'BUILD_ID'. 
-$SCRIPT_PATH/createReports.sh
-#For now, do not fail if create reports fails, since 
-# Since it did once while moving to triggering builds from Hudson (bug 487044).
-#checkForErrorExit $? "Error occurred during createReports.sh"
+if [[ -z "${BUILD_FAILED}" ]]
+then
+   # create repo reports. Depends on exported 'BUILD_ID'. 
+   $SCRIPT_PATH/createReports.sh
+   #For now, do not fail if create reports fails, since 
+   # Since it did once while moving to triggering builds from Hudson (bug 487044).
+   #checkForErrorExit $? "Error occurred during createReports.sh"
+fi 
 
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt#

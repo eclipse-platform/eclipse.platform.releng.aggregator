@@ -125,11 +125,11 @@ if (file_exists("testNotes.html")) {
 <th><th width="20%"></th>
 </tr>
 <?php
-$rowResultsFile="perfBaselineResultsRows.html";
+$rowResultsFile="perfBaselineResultsTables.html";
   if (file_exists($rowResultsFile)) {
     include $rowResultsFile;
 } else {
-    include "testResultsRowsPending.html";
+    include "testResultsTablesPending.html";
 }
 ?>
 </table>
