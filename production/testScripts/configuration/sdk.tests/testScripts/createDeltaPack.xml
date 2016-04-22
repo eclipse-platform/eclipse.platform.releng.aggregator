@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  name="equinox feature build"
+  default="build"
+  basedir=".">
+
+  <target name="init">
+
+    <fail unless="buildId" message="buildId must be passed into this script."/>
+    <fail unless="buildType" message="buildType must be passed into this script."/>
+    <fail unless="DOWNLOAD_HOST" message="DOWNLOAD_HOST must be passed into this script." />
+    <property name="buildRepo" value="http://${DOWNLOAD_HOST}/eclipse/updates/4.6-${buildType}-builds/${buildId}" />
+
+    <!-- Normally installDeltapack passed in by caller, but handey for local testing -->
+    <property name="installDeltapack" value="${basedir}/test-eclipse/deltapack"/>
+
+    <property
+      name="featureTemp"
+      value="${basedir}/featureTemp" />
+  </target>
+
+  <target
+    name="build"
+    depends="init"
+    unless="deltaPackInstalled">
+
+
+    <echo message="DEBUG: echoproperties at beginning of deltapack (after init)" />
+    <echoproperties />
+    <delete
+      verbose="true"
+      dir="${featureTemp}" />
+    <mkdir dir="${featureTemp}" />
+    <delete
+      verbose="true"
+      dir="${installDeltapack}" />
+    <mkdir dir="${installDeltapack}" />
+    
+    <p2.mirror
+      source="${buildRepo}"
+      log="${installDeltapack}/deltapackmirrorlog.txt"
+      verbose="true"
+      ignoreerrors="true">
+      <destination
+        kind="metadata"
+        location="file://${featureTemp}"
+        name="RCP Delta Pack Repo"
+        format="${buildRepo}" />
+      <destination
+        kind="artifact"
+        location="file://${featureTemp}"
+        name="RCP Delta Pack Repo"
+        format="${buildRepo}" />
+      <iu
+        id="org.eclipse.platform.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.platform.source.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.rcp.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.rcp.source.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.jdt.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.jdt.source.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.rcp.configuration.feature.group"
+        version="" />
+
+      <iu
+        id="org.eclipse.equinox.executable"
+        version="" />
+      <iu
+        id="org.eclipse.e4.rcp.feature.group"
+        version="" />
+      <iu
+        id="org.eclipse.e4.rcp.source.feature.group"
+        version="" />
+      <slicingOptions
+        includeOptional="false"
+        includeNonGreedy="false"
+        followStrict="true"
+        followOnlyFilteredRequirements="true"
+        latestVersionOnly="true"/>
+    </p2.mirror>
+    <p2.remove.iu>
+      <repository location="file://${featureTemp}" />
+      <iu id="org.eclipse.jdt.feature.jar" />
+      <iu id="org.eclipse.jdt.source.feature.jar" />
+      <iu id="org.eclipse.platform.feature.jar" />
+      <iu id="org.eclipse.platform.source.feature.jar" />
+      <iu id="org.eclipse.rcp.feature.jar" />
+      <iu id="org.eclipse.rcp.source.feature.jar" />
+      <iu id="org.eclipse.e4.rcp.feature.jar" />
+      <iu id="org.eclipse.e4.rcp.source.feature.jar" />
+    </p2.remove.iu>
+    <p2.repo2runnable
+      destination="file://${installDeltapack}/eclipse"
+      failonerror="true">
+        <source>
+           <repository location="file://${featureTemp}" />
+        </source>
+    </p2.repo2runnable>
+    <delete verbose="true">
+      <fileset
+        dir="${installDeltapack}/eclipse"
+        includes="*.jar" />
+      <fileset
+        dir="${installDeltapack}/eclipse"
+        includes="*.xml" />
+    </delete>
+
+  </target>
+
+
+</project>
