@@ -21,6 +21,10 @@ function removeOldPromotionScripts ()
     find /shared/eclipse/equinox/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
+    # The job on Hudson that creates these files also cleans them up when over 2 days old. 
+    # find /shared/eclipse/testjobqueue -name "RAN*" -ctime +3 -ls -exec rm '{}' \;
+    # find /shared/eclipse/testjobqueue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
+    # find /shared/eclipse/testjobqueue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
 }
 
 function removeOldDirectories ()
