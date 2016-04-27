@@ -126,7 +126,7 @@ export LOCAL_REPO="${BUILD_ROOT}/localMavenRepo"
 # and remove any existing LOCAL_REPO, and re-fetch.
 # But CLEAN_LOCAL can be overridden for remote builds, quick test builds,
 # etc.
-export CLEAN_LOCAL=${CLEAN_LOCAL:-false}
+export CLEAN_LOCAL=${CLEAN_LOCAL:-true}
 # We "remove" by moving to backup, in case there's ever any reason to
 # compare "what's changed".
 if [[ -d ${LOCAL_REPO} && "${CLEAN_LOCAL}" == "true" ]]
