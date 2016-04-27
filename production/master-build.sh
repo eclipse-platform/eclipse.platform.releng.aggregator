@@ -36,7 +36,7 @@ assertNotEmpty aggDir
 assertNotEmpty BUILD_ID
 assertNotEmpty buildDirectory
 
-CUSTOM_SETTINGS_FILE=/shared/eclipse/mavenSettings/settings.xml
+CUSTOM_SETTINGS_FILE=/shared/eclipse/settings/settingsBuildMachine.xml
 if [[ -r "${CUSTOM_SETTINGS_FILE}" ]]
 then 
   export MAVEN_SETTINGS="--settings ${CUSTOM_SETTINGS_FILE}"
