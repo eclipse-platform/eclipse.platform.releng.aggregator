@@ -36,10 +36,13 @@ assertNotEmpty aggDir
 assertNotEmpty BUILD_ID
 assertNotEmpty buildDirectory
 
-CUSTOM_SETTINGS_FILE=/shared/eclipse/settings/settingsBuildMachine.xml
+# Temporarily set on production build. See bug 492502. 
+# Remember, only this specific setting (line) is to be removed later. 
+# the construct in general can be used for local builds, and has been, for a while. 
+CUSTOM_SETTINGS_FILE=${CUSTOM_SETTINGS_FILE:-"/shared/eclipse/settings/settingsBuildMachine.xml"}
 if [[ -r "${CUSTOM_SETTINGS_FILE}" ]]
-then 
-  export MAVEN_SETTINGS="--settings ${CUSTOM_SETTINGS_FILE}"
+then
+    export MAVEN_SETTINGS="--settings ${CUSTOM_SETTINGS_FILE}"
 fi
 
 # remember, local "test builds" that use this script must change
