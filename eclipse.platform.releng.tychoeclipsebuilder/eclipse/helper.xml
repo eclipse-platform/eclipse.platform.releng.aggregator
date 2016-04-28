@@ -2,223 +2,28 @@
     name="Helper targets"
     default="noDefault">
 
-    <fail unless="EBuilderDir" message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
-    <fail unless="postingDirectory" message="postingDirectory must be passed to this script." />
-    <fail unless="buildLabel" message="buildLabel must be passed to this script." />
+  <property environment="env" />
+
+  <fail
+    unless="EBuilderDir"
+    message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
+  <fail
+    unless="postingDirectory"
+    message="postingDirectory must be passed to this script." />
+  <fail
+    unless="buildLabel"
+    message="buildLabel must be passed to this script." />
     <property
         name="publishingContent"
         value="${EBuilderDir}/eclipse/publishingFiles" />
-
-    <!-- ===================================================================== -->
-    <!-- Set of helper targets for building the Eclipse SDK -->
-    <!-- ===================================================================== -->
-    <target name="discoverOS">
-        <condition property="onUnix">
-            <and>
-                <os family="unix" />
-            </and>
-        </condition>
-        <condition property="onWindows">
-            <and>
-                <os family="windows" />
-            </and>
-        </condition>
-    </target>
-
-    <target
-        name="printWarnings"
-        if="onWindows"
-        depends="discoverOS">
-        <echo
-            message="The UNIX versions of your build output will be invalid.  Windows will not preserve symbolic links and permissions on executable files." />
-    </target>
-
-    <!-- TODO: I think this is no longer called -->
-    <target name="buildStandAloneSWT">
-        <parallel failonany="true">
-            <sequential>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="ws"
-                        value="win32" />
-                    <param
-                        name="os"
-                        value="win32" />
-                    <param
-                        name="arch"
-                        value="x86" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="ws"
-                        value="win32" />
-                    <param
-                        name="os"
-                        value="win32" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-            </sequential>
-        </parallel>
-        <parallel failonany="true">
-            <antcall target="packageSwtStandalone">
-                <param
-                    name="os"
-                    value="aix" />
-                <param
-                    name="ws"
-                    value="gtk" />
-                <param
-                    name="arch"
-                    value="ppc" />
-            </antcall>
-            <antcall target="packageSwtStandalone">
-                <param
-                    name="os"
-                    value="aix" />
-                <param
-                    name="ws"
-                    value="gtk" />
-                <param
-                    name="arch"
-                    value="ppc64" />
-            </antcall>
-        </parallel>
-        <parallel failonany="true">
-            <sequential>
-          <!--
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="solaris" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="sparc" />
-                </antcall>
-                -->
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="solaris" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="hpux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="ia64" />
-                </antcall>
-            </sequential>
-        </parallel>
-        <parallel failonany="true">
-            <sequential>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="linux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="x86" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="macosx" />
-                    <param
-                        name="ws"
-                        value="cocoa" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="linux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="linux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="ppc64" />
-                </antcall>
-            </sequential>
-        </parallel>
-
-    </target>
-
-
-
-    <target name="packageSwtStandalone">
-        <condition
-            property="downloadFile"
-            value="swt-${buildId}-${ws}-${os}.zip">
-            <equals
-                arg1="${arch}"
-                arg2="" />
-        </condition>
-        <property
-            name="downloadFile"
-            value="swt-${buildId}-${ws}-${os}-${arch}.zip" />
-        <property
-            name="destination"
-            value="${postingDirectory}/${buildLabel}" />
-        <property
-            name="archiveFullPath"
-            value="${destination}/${downloadFile}" />
-
-        <condition
-            property="swtdir"
-            value="${buildDirectory}/plugins/org.eclipse.swt.${ws}.${os}">
-            <equals
-                arg1="${arch}"
-                arg2="" />
-        </condition>
-
-        <property
-            name="swtdir"
-            value="${buildDirectory}/plugins/org.eclipse.swt.${ws}.${os}.${arch}" />
-        <ant
-            antfile="build.xml"
-            target="swtdownload"
-            dir="${swtdir}">
-        </ant>
-    </target>
-
 
     <target
         name="publish"
         description="Preparing to post the build...">
 
-        <fail unless="AGGR_DIR" message="AGGR_DIR must be defined for this this script" />
+    <fail
+      unless="AGGR_DIR"
+      message="AGGR_DIR must be defined for this this script" />
 
         <mkdir dir="${postingDirectory}/${buildLabel}/checksum" />
         <exec
@@ -242,36 +47,49 @@
         </copy>
 
         <!--copy javadoc logs-->
+    <echo message="DEBUG: BUILD_FAILED: env.BUILD_FAILED: ${env.BUILD_FAILED}" />
+    <!--copy javadoc logs: we use failonerror=false and quiet=true since if "build failed"
+      this files likely do not exist, and quiet=false (default) results in warnings being
+      logged to error log. This can be more distracting, than constructive. And, if the
+      files can not be created, for some reason, then that will cause a failure during main part of build.
+    -->
         <copy
             file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/target/doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.javadoc.txt"
-            failonerror="false" />
+      failonerror="false"
+      quiet="true" />
         <copy
             file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/target/doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.javadoc.txt"
-            failonerror="false" />
+      failonerror="false"
+      quiet="true" />
         <copy
             file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/target/doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.javadoc.txt"
-            failonerror="false" />
+      failonerror="false"
+      quiet="true" />
         <copy
             file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/target/platformconvert.txt"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.schema.txt"
-            failonerror="false" />
+      failonerror="false"
+      quiet="true" />
         <copy
             file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/target/jdtconvert.txt"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.schema.txt"
-            failonerror="false" />
+      failonerror="false"
+      quiet="true" />
         <copy
             file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/target/pdeconvert.txt"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.schema.txt"
-            failonerror="false" />
+      failonerror="false"
+      quiet="true" />
 
     </target>
 
     <target name="generateEclipseIndex">
-        <property name="generatorClass"
-            value="org.eclipse.releng.generators.TestResultsGenerator" />
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.TestResultsGenerator" />
 
         <available
             classname="${generatorClass}"
@@ -327,7 +145,7 @@
     <target
         name="verifyCompile"
         if="eclipse.running">
-        <echo message="Checking for compile errors..." />
+    <echo message="DEBUG: in helper.xml: Checking for compile errors..." />
         <!--create html output for compile logs-->
         <eclipse.convert
             input="${postingDirectory}/${buildLabel}/compilelogs"

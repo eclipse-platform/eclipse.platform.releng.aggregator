@@ -1,27 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
   name="equinox feature build"
-  default="build"
+  default="createDeltaPack"
   basedir=".">
+<!-- this particular ant file is not used during our builds or tests. 
+    It is, though, very similar to tasks in the pdebuild tests.xml file, 
+    where the "delta pack" is created for the purposes of pdebuild tests.
+    This file was left here, for now, as a convient "sanity check". 
+-->
+  <target name="initcreateDeltaPack">
 
-  <target name="init">
+    <!--
+      In product tests, currentUpdateSite is provided by the testing infrastructure.
+      It should be similar to somethign like
+      http://download.eclipse.org/eclipse/updates/4.6-I-builds/I20160419-0800/
+    -->
 
-    <fail unless="buildId" message="buildId must be passed into this script."/>
-    <fail unless="buildType" message="buildType must be passed into this script."/>
-    <fail unless="DOWNLOAD_HOST" message="DOWNLOAD_HOST must be passed into this script." />
-    <property name="buildRepo" value="http://${DOWNLOAD_HOST}/eclipse/updates/4.6-${buildType}-builds/${buildId}" />
+    <fail
+      unless="currentUpdateSite"
+      message="currentUpdateSite must be provided to this script." />
 
-    <!-- Normally installDeltapack passed in by caller, but handey for local testing -->
-    <property name="installDeltapack" value="${basedir}/test-eclipse/deltapack"/>
+    <!--
+      'executionDir' is ${testDir}/eclipse-testing"
+      'install' is ${executionDir}/test-eclipse
+      The eclipse to-be-tested is intalled under ${install}
+      So 'deltapack' will be a peer to it.
+      In productin tests, 'install' and 'executionDir' are provided by the testing
+      infrastructure. But, if not assigned, they are given the value of basedir, 
+      to make local testing easier.
+    -->
+    
+    <property name="install" value="${basedir}"/>
+    
+    <property name="executionDir" value="${basedir}"/>
+
+
+    <property
+      name="installDeltapack"
+      value="${install}/deltapack" />
 
     <property
       name="featureTemp"
-      value="${basedir}/featureTemp" />
+      value="${executionDir}/featureTemp" />
   </target>
 
+  <!--
+    This 'createDeltaPack' target is conceptually very similar to the one we refer to in our
+    documentation, in our Git repo, at
+    http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/scripts/createdeltapack.xml
+    Only in this one, there is no need to "zip up" the delta pack.
+    deltaPackInstalled can be set by caller, if they happen to know deltaPack is already installed, 
+    and they simply want to run the pdebuild tests. 
+  -->
   <target
-    name="build"
-    depends="init"
+    name="createDeltaPack"
+    depends="initcreateDeltaPack"
     unless="deltaPackInstalled">
 
 
@@ -35,22 +68,22 @@
       verbose="true"
       dir="${installDeltapack}" />
     <mkdir dir="${installDeltapack}" />
-    
+
     <p2.mirror
-      source="${buildRepo}"
-      log="${installDeltapack}/deltapackmirrorlog.txt"
+      source="${currentUpdateSite}"
+      log="${executionDir}/deltapackmirrorlog.txt"
       verbose="true"
       ignoreerrors="true">
       <destination
         kind="metadata"
         location="file://${featureTemp}"
         name="RCP Delta Pack Repo"
-        format="${buildRepo}" />
+        format="${currentUpdateSite}" />
       <destination
         kind="artifact"
         location="file://${featureTemp}"
         name="RCP Delta Pack Repo"
-        format="${buildRepo}" />
+        format="${currentUpdateSite}" />
       <iu
         id="org.eclipse.platform.feature.group"
         version="" />
@@ -87,7 +120,7 @@
         includeNonGreedy="false"
         followStrict="true"
         followOnlyFilteredRequirements="true"
-        latestVersionOnly="true"/>
+        latestVersionOnly="true" />
     </p2.mirror>
     <p2.remove.iu>
       <repository location="file://${featureTemp}" />
@@ -102,10 +135,10 @@
     </p2.remove.iu>
     <p2.repo2runnable
       destination="file://${installDeltapack}/eclipse"
-      failonerror="true">
-        <source>
-           <repository location="file://${featureTemp}" />
-        </source>
+      failonerror="false">
+      <source>
+        <repository location="file://${featureTemp}" />
+      </source>
     </p2.repo2runnable>
     <delete verbose="true">
       <fileset
