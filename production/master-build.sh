@@ -89,8 +89,12 @@ echo "buildDirectory: >${buildDirectory}<"
 
 export logsDirectory="${buildDirectory}/buildlogs"
 # making in two steps, in to try and get group and permissions inherited
+echo "initial umask in master-build.sh: $(umask)"
+umask 0002
+echo "umask after setting in master-build.sh: $(umask)"
 mkdir -p "${buildDirectory}"
 checkForErrorExit $? "Could not create buildDirectory: ${buildDirectory}"
+chmod -c g+s "${buildDirectory}"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
 
