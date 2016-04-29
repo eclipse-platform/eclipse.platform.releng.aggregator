@@ -94,6 +94,7 @@ umask 0002
 echo "umask after setting in master-build.sh: $(umask)"
 mkdir -p "${buildDirectory}"
 checkForErrorExit $? "Could not create buildDirectory: ${buildDirectory}"
+chgrp -c eclipse.platform.releng "${buildDirectory}"
 chmod -c g+s "${buildDirectory}"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
