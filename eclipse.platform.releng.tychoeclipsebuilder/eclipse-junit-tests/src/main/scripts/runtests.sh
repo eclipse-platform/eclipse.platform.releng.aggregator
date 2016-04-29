@@ -37,21 +37,23 @@ echo "jvm: $jvm"
 # But, if running standalone, we'll assume "up two" from current directoy
 WORKSPACE=${WORKSPACE:-"../../.."};
 
-stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5.2-linux-gtk-x86_64.tar.gz}
-stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
-
+stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/workarea/${buildId}/eclipse-testing/platformLocation/}
 # Note: test.xml will "reinstall" fresh install of what we are testing,
 # but we do need an install for initial launcher, and, later, need one for a
 # stable version of p2 director. For both purposes, we
 # we should use "old and stable" version,
 # which needs to be installed in ${stableEclipseInstallLocation}.
-# Note: for production tests, we use ${WORKSPACE}/org.eclipse.releng.basebuilder,
-# for historical reasons. The "true" (old) basebuilder does not have an 'eclipse' directory;
-# plugins is directly under org.eclipse.releng.basebuilder.
-if [[ ! -r ${stableEclipseInstallLocation} || ! -r "${stableEclipseInstallLocation}/eclipse" ]]
+# A previous step should have already put the tar or zip file for binary platform there.
+if [[ ! -r ${stableEclipseInstallLocation} ]]
 then
-  mkdir -p ${stableEclipseInstallLocation}
-  tar -xf ${stableEclipseSDK} -C ${stableEclipseInstallLocation}
+  echo "stableEclipseInstallLocation was NOT found at ${stableEclipseInstallLocation}"
+  echo "Exiting, since something is not as expected."
+  exit 1
+else
+  echo "stableEclipseInstallation directory found, as expected, at ${stableEclipseInstallLocation}"
+  # should only be one tar file there, with a name similar to eclipse-platform-4.5.2-linux-gtk-x86_64.tar.gz 
+  # so for simplicity, we'll assume all is well and untar what ever we find. 
+  tar -xf ${stableEclipseInstallLocation}/*tar.gz -C ${stableEclipseInstallLocation}
 fi
 
 launcher=$(find ${stableEclipseInstallLocation} -name "org.eclipse.equinox.launcher_*.jar" )
@@ -182,7 +184,6 @@ else
 fi
 
 mkdir -p results/consolelogs
-
 echo "extdirprop in runtest.sh: ${extdirprop}"
 echo "extdirproperty in runtest.sh: ${extdirproperty}"
 echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
