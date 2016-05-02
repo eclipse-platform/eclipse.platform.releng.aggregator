@@ -137,9 +137,12 @@ buildIdPattern="^[MNIPY][[:digit:]]{8}-[[:digit:]]{4}$"
     export buildDirectory
     # this should be when we first create buildDirectory
     echo "Making buildDirectory: ${buildDirectory}"
-    mkdir -p "${buildDirectory}"
-    # it appears GID bit is not always set correctly, so we'll do so explicitly
-    chmod -c g+s "${buildDirectory}"
+    echo "initial umask in bootstrapVariables.shsource: $(umask)"
+    umask 0002
+    echo "umask after setting in bootstrapVariables.shsource: $(umask)"
+    
+    # it appears GID bit is not always set correctly, so we will try to do explicitly
+    mkdir -p --mode u=rwx,g=rwxs,o=rx "${buildDirectory}"
   else
     echo "buildDirectory was already defined as $buildDirectory"
   fi
