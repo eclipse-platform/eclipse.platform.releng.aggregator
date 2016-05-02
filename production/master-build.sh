@@ -94,10 +94,10 @@ umask 0002
 echo "umask after setting in master-build.sh: $(umask)"
 mkdir -p "${buildDirectory}"
 checkForErrorExit $? "Could not create buildDirectory: ${buildDirectory}"
-chgrp -v eclipse.platform.releng "${buildDirectory}"
-chmod -v g+s "${buildDirectory}"
+chmod -v g+S "${buildDirectory}"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
+chmod -v g+S "${buildDirectory}"
 
 export loadLog=${loadLog:-"${logsDirectory}/loadLog.txt"}
 # First step uses '>' to start fresh. Subsequent should use '>>'
