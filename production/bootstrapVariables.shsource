@@ -140,9 +140,12 @@ buildIdPattern="^[MNIPY][[:digit:]]{8}-[[:digit:]]{4}$"
     echo "initial umask in bootstrapVariables.shsource: $(umask)"
     umask 0002
     echo "umask after setting in bootstrapVariables.shsource: $(umask)"
-    
     # it appears GID bit is not always set correctly, so we will try to do explicitly
-    mkdir -p --mode u=rwx,g=rwxs,o=rx "${buildDirectory}"
+    #mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx "${buildDirectory}"
+    mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx $BUILD_ROOT
+    pushd $BUILD_ROOT
+    mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx $BUILD_ID
+    popd
   else
     echo "buildDirectory was already defined as $buildDirectory"
   fi
