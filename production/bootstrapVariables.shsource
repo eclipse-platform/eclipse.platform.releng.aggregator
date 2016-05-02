@@ -137,14 +137,20 @@ buildIdPattern="^[MNIPY][[:digit:]]{8}-[[:digit:]]{4}$"
     export buildDirectory
     # this should be when we first create buildDirectory
     echo "Making buildDirectory: ${buildDirectory}"
-    echo "initial umask in bootstrapVariables.shsource: $(umask)"
-    umask 0002
-    echo "umask after setting in bootstrapVariables.shsource: $(umask)"
-    # it appears GID bit is not always set correctly, so we will try to do explicitly
-    #mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx "${buildDirectory}"
-    mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx $BUILD_ROOT
+    # Testing confirmed that umask was correct initially.
+    #echo "initial umask in bootstrapVariables.shsource: $(umask)"
+    #umask 0002
+    #echo "umask after setting in bootstrapVariables.shsource: $(umask)"
+    # it appears GID bit is not always set correctly. 
+    # Appears related to "depth" of directories made. 
+    # If we "cd" to parent directory, then it works. 
+    # even using --mode u=rwx,g=rwxs,o=rx did not make it correctly.
+    # See https://bugs.eclipse.org/bugs/show_bug.cgi?id=492493
+    #mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx  "${buildDirectory}"
+    # Normally $BUILD_ROOT will already exist, but in case not.
+    mkdir -p --verbose $BUILD_ROOT
     pushd $BUILD_ROOT
-    mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx $BUILD_ID
+    mkdir --verbose $BUILD_ID
     popd
   else
     echo "buildDirectory was already defined as $buildDirectory"
