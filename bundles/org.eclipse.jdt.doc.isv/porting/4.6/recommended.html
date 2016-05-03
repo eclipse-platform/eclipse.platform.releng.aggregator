@@ -17,65 +17,7 @@
 </p>
 
 <ol>
-	<li>The class SubProgressMonitor has been deprecated and replaced by the class SubMonitor.</li>
-	<li>In order to avoid breakage, plugin authors should update their code to 
-	handle new progress reporting conventions that will be introduced in Eclipse 4.7. 
-	See <a href="#progress_convention">below</a> for more details.</li>
+	<li>None</li>
 </ol>
-
-<h2><a name="progress_convention">Progress Reporting</a></h2>
-
-In order to reduce boilerplate, Eclipse 4.7 will introduce a new calling convention for
-methods which receive an IProgressMonitor as a parameter. In Eclipse 4.7 it will be the
-caller's responsibility to invoke <code>done()</code> on IProgressMonitor rather than the
-receiver. Callers can choose to use SubMonitor, which doesn't required the use of
-<code>done()</code>. This means that - in practice - most
-invocations of <code>done()</code> will be deleted along with their surrounding try/catch blocks.
-<p>
-Clients should not remove the boilerplate yet. For now, any method that previously
-received an IProgressMonitor and invoked done() on it should continue to do so.
-<p>
-Methods which obtain their own top-level progress monitors rather than receiving one as a
-parameter are now responsible for invoking done() on those monitors. Technically, they were
-always responsible for doing this, but some of them didn't do so because any method they
-passed it to would have invoked done() on their behalf. Now this will matter and the methods
-will need to be changed. For example:
-
-<pre>
-// Before:
-public void doSaveAs() {
-  IProgressMonitor monitor= getProgressMonitor();
-  performSaveAs(monitor);
-}
-</pre>
-
-<pre>
-// After:
-public void doSaveAs() {
-  IProgressMonitor monitor= getProgressMonitor();
-    try {
-      performSaveAs(monitor);
-    } finally {
-      monitor.done();
-    }
-}
-</pre>
-
-<p>
-Fortunately there are few of these methods and they are easy to find. Migration is as follows:
-<li>Open the call hierarchy view on StatusLineManager#getProgressMonitor().</li>
-<li>Ensure that all callers of these methods contain a finally block that 
-    invokes done (as in the doSaveAs() example, above).</li>
-<li>Open the type hierarchy of IProgressMonitor. Look for progress monitors which invoke done() on
-    another monitor or which do something else in their done() method besides reporting work,
-    setting a task name, or calling done on another monitor. SubMonitor can be ignored. Monitors
-    which set a control's visibility or deallocate a resource in their done() method must not
-    be ignored.</li>
-<li>Use the call hierarchy view to locate every place that instantiates or accesses an instance of
-    one of those classes. Ensure that those access points contain a try/finally block that invokes done().</li>
-<p>
-Full details and discussion can be found 
-<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=487372">here</a>
-
 </body>
 </html>
