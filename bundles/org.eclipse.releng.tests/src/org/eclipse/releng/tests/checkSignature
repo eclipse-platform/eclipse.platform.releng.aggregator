@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# small utility to check signature of app on the mac. Assumes the XCode tools installed.
+
+appPathAndName=$1
+if [[ -z "${appPathAndName}" ]] 
+then 
+    echo -e "\n\t[ERROR] Programming error. The applications path and name must be specified for $(basename $0)"
+    exit 1
+fi
+
+if [[ ! -e "${appPathAndName}" ]]
+then
+    echo -e "\n\t[ERROR] Programning error in $(basename $0). The applications path and name was specified, but did not exist,\n\t\tWas specified as ${appPathAndName}"
+    exit 2
+fi
+SPCTL=$(which spctl)
+if [[ -z "${SPCTL}" ]]
+then
+    echo "\n\t[ERROR} spctl was not found on this system to check signatures"
+    exit 3
+fi
+CODESIGN=$(which codesign)
+if [[ -z "${CODESIGN}" ]]
+then 
+    echo "\n\t[ERROR codesign was not found on this system to check signatures"
+    exit 4
+fi
+
+echo -e "\n\t${SPCTL} -a -t exec -vvvv $appPathAndName\n"
+"${SPCTL}" -a -t exec -vvvv "$appPathAndName"
+RCspctl=$?
+if [[ $RCspctl != 0 ]]
+then
+    echo -e "\n\tspctl returned $RCspctl"
+fi
+# display always returns 0 apparently
+echo -e "\n\t${CODESIGN} --verbose=4 --display --deep -r- $appPathAndName\n"
+"${CODESIGN}" --verbose=4 --display --deep --continue -r- "$appPathAndName"
+# verify for return code
+echo -e "\n\t${CODESIGN} --verbose=4 --verify --deep --continue  -r- $appPathAndName\n"
+"${CODESIGN}" --verbose=4 --verify --deep --continue -r- "$appPathAndName"
+RCcodesign=$?
+if [[ $RCcodesign != 0 ]]
+then
+    echo -e "\n\tcodesign returned $RCcodesign"
+fi
+# according to man pages, return code of 1 means "not correctly signed".
+# other return codes (2, 3) mean things like "arguments not correct"
+if [[ $RCspctl == 1 || $RCcodesign == 1 ]]
+then
+    echo -e "\n\t[ERROR] The application $appPathAndName was not correctly signed"
+    exit $(( $RCspctl & $RCcodesign ))
+fi
+if [[ $RCspctl != 0 || $RCcodesign != 0 ]]
+then
+    echo -e "\n\t[ERROR] The verification arguments while checking $appPathAndName were not correct"
+    exit $(( $RCspctl & $RCcodesign ))
+fi
+exit 0
+
