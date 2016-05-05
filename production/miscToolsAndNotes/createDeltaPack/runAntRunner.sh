@@ -35,6 +35,12 @@ APP_NAME=org.eclipse.ant.core.antRunner
 
 devworkspace="${PWD}/workspace-antRunner"
 
+
+export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
+JAVA_EXEC_DIR=${JAVA_HOME}/bin
+JAVA_CMD=${JAVA_EXEC_DIR}/java
+ECLIPSE_EXE=${PWD}/eclipse/eclipse
+
 echo
 echo "   buildId:           ${buildId}"
 echo "   buildType:         ${buildType}"
@@ -43,11 +49,10 @@ echo "   devworkspace:      $devworkspace"
 echo "   APP_NAME:          $APP_NAME"
 echo "   BUILDFILESTR:      $BUILDFILESTR"
 echo "   extraArgs:         ${extraArgs}"
+echo "   JAVA_HOME:         ${JAVA_HOME}"
+echo "   ECLIPSE_EXE:       ${ECLIPSE_EXE}"
 echo
-export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
-JAVA_EXEC_DIR=${JAVA_HOME}/bin
-JAVA_CMD=${JAVA_EXEC_DIR}/java
-ECLIPSE_EXE=${PWD}/eclipse/eclipse
+
 echo
 $JAVA_CMD -version
 echo
