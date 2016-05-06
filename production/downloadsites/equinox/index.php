@@ -1,14 +1,14 @@
-<?php 
-require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");	
-require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/nav.class.php"); 	
-require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/menu.class.php"); 	
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
+require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/nav.class.php");
+require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/menu.class.php");
 
-$App 	= new App();	
-$Nav	= new Nav();	
-$Menu 	= new Menu();		
-include($App->getProjectCommon());    
+$App 	= new App();
+$Nav	= new Nav();
+$Menu 	= new Menu();
+include($App->getProjectCommon());
 
-# Begin: page-specific settings.  Change these. 
+# Begin: page-specific settings.  Change these.
 $pageTitle = "Equinox Downloads";
 $pageKeywords = "equinox, osgi, framework, runtime, download";
 $pageAuthor = "Equinox committers";
@@ -36,16 +36,16 @@ while ($anEntry = $aDirectory->read()) {
         $day = substr($timePart, 6, 2);
         $hour = substr($timePart,8,2);
         $minute = substr($timePart,10,2);
-        // special logic adds 1 second if build id contains "RC" ... this was 
-        // added for the M build case, where there is an M build and and RC version that 
+        // special logic adds 1 second if build id contains "RC" ... this was
+        // added for the M build case, where there is an M build and and RC version that
         // have same time stamp. One second should not effect displayed values.
         $isRC = strpos($anEntry, "RC");
         if ($isRC === false) {
           $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-        } else { 
+        } else {
           $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
         }
-        $buckets[$parts[0]][$timeStamp] = $anEntry; 
+        $buckets[$parts[0]][$timeStamp] = $anEntry;
         $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
         if (isset($latestTimeStamp) && array_key_exists($parts[0], $latestTimeStamp)) {
           if ($timeStamp > $latestTimeStamp[$parts[0]]) {
@@ -72,10 +72,10 @@ while ($anEntry = $aDirectory->read()) {
         $isRC = strpos($anEntry, "RC");
         if ($isRC === false) {
           $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-        } else { 
+        } else {
           $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
         }
-        $buckets[$buildType[0]][$timeStamp] = $anEntry;   
+        $buckets[$buildType[0]][$timeStamp] = $anEntry;
 
         $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
         if (isset($latestTimeStamp) && array_key_exists($buildType,$latestTimeStamp)) {
@@ -99,7 +99,7 @@ $html = <<<EOHTML
 
         <div class="homeitem3col">
                 <h3>Latest Builds</h3>
-                <table  width="100%" CELLSPACING=0 CELLPADDING=3> 
+                <table  width="100%" CELLSPACING=0 CELLPADDING=3>
 
 EOHTML;
 
@@ -119,7 +119,7 @@ foreach($dropType as $value) {
                                 <td width="30%"><a href="drops/$fileName/index.php">$parts[1]</a></td>
 
 EOHTML;
-    if (count($parts)==2) 
+    if (count($parts)==2)
       $html .= <<<EOHTML
                         <tr>
                                 <td width="30%"><a href="drops/$fileName/index.php">$fileName</a></td>
@@ -144,7 +144,7 @@ foreach($dropType as $value) {
 
   $html .= <<<EOHTML
 
-                <h3>$value Builds</h3>
+                <h3>$value</h3>
                 <table  width="100%" CELLSPACING=0 CELLPADDING=3>
 
 EOHTML;
