@@ -9,6 +9,8 @@ do
   md5sum -b ${zipfile} > checksum/${zipfile}.md5
   echo [sha1] ${zipfile}
   sha1sum -b ${zipfile} > checksum/${zipfile}.sha1
+  echo [sha256] ${zipfile}
+  sha256sum -b ${zipfile} > checksum/${zipfile}.sha256
   echo [sha512] ${zipfile}
   sha512sum -b ${zipfile} > checksum/${zipfile}.sha512
 done
@@ -22,6 +24,8 @@ do
   md5sum -b ${gzipfile} > checksum/${gzipfile}.md5
   echo [sha1] ${gzipfile}
   sha1sum -b ${gzipfile} > checksum/${gzipfile}.sha1
+  echo [sha256] ${gzipfile}
+  sha256sum -b ${gzipfile} > checksum/${gzipfile}.sha256  
   echo [sha512] ${gzipfile}
   sha512sum -b ${gzipfile} > checksum/${gzipfile}.sha512
 done
@@ -36,6 +40,8 @@ do
   md5sum -b ${jarfile} > checksum/${jarfile}.md5
   echo [sha1] ${jarfile}
   sha1sum -b ${jarfile} > checksum/${jarfile}.sha1
+  echo [sha256] ${jarfile}
+  sha256sum -b ${jarfile} > checksum/${jarfile}.sha256
   echo [sha512] ${jarfile}
   sha512sum -b ${jarfile} > checksum/${jarfile}.sha512
 done
