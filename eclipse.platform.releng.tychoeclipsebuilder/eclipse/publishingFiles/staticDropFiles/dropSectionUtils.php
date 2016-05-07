@@ -12,7 +12,7 @@ function columnHeads() {
   echo "<th class=\"col-md-3\">Platform</th>";
   echo "<th class=\"col-md-5\">Download</th>";
   echo "<th class=\"col-md-2\">Size</th>";
-  echo "<th class=\"col-md-2\">Checksum</th>";
+  //echo "<th class=\"col-md-2\">Checksum</th>";
   return;
 }
 
