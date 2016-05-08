@@ -6,10 +6,10 @@ then
 fi
 source "${SCRIPT_PATH}/bashUtilities.shsource"
 checkSumStart="$(date +%s )"
-allCheckSumsMD5=checksum/MD5SUMS
-allCheckSumsSHA1=checksum/SHA1SUMS
-allCheckSumsSHA256=checksum/SHA256SUMS
-allCheckSumsSHA512=checksum/SHA512SUMS
+allCheckSumsMD5=checksum/SUMSMD5.txt
+allCheckSumsSHA1=checksum/SUMSSHA1.txt
+allCheckSumsSHA256=checksum/SUMSSHA256.txt
+allCheckSumsSHA512=checksum/SUMSSHA512.txt
 
 #  Remove the "all" files, here at beginning if they all ready exist, 
 #  so that subsequent calls can all use append (i.e. ">>") 
