@@ -64,8 +64,11 @@ echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${queueLocation}/${scriptName}
 
+
+
 # we do not promote equinox, if BUILD_FAILED since no need.
-if [[ -z "${BUILD_FAILED}" ]]
+# we also do not promote if Patch build or Y-build or experimental (since, to date, those are not "for" equinox). 
+if [[ -z "${BUILD_FAILED}" &&  ! $BUILD_TYPE =~ [XYP] ]]
 then
 
   # The 'workLocation' provides a handy central place to have the
