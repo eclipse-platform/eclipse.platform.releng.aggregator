@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "${SCRIPT_PATH}/bashUtilities.shsource"
+checkSumStart="$(date +%s )"
 allCheckSumsMD5=checksum/MD5SUMS
 allCheckSumsSHA1=checksum/SHA1SUMS
 allCheckSumsSHA256=checksum/SHA256SUMS
@@ -69,3 +71,6 @@ do
   echo [sha512] ${jarfile}
   sha512sum -b ${jarfile} | tee checksum/${jarfile}.sha512 >>${allCheckSumsSHA512}
 done
+checkSumEnd="$(date +%s )"
+elapsedTime $checkSumStart $checkSumEnd "Elapsed Time Checksums"
+
