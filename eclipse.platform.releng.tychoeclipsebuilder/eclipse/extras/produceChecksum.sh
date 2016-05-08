@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-
+echo "Producing checksums"
+if [[ -z "${SCRIPT_PATH}" ]]
+then
+  echo -e "\n\tWARNING: SCRIPT_PATH not defined in ${0##*/}"
+fi
 source "${SCRIPT_PATH}/bashUtilities.shsource"
 checkSumStart="$(date +%s )"
 allCheckSumsMD5=checksum/MD5SUMS
@@ -7,8 +11,8 @@ allCheckSumsSHA1=checksum/SHA1SUMS
 allCheckSumsSHA256=checksum/SHA256SUMS
 allCheckSumsSHA512=checksum/SHA512SUMS
 
-// Remove the "all" files, here at beginning if they all ready exist, 
-// so that subsequent calls can all use append (i.e. ">>") 
+#  Remove the "all" files, here at beginning if they all ready exist, 
+#  so that subsequent calls can all use append (i.e. ">>") 
 if [[ -e ${allCheckSumsMD5} ]] 
 then
   rm ${allCheckSumsMD5}
