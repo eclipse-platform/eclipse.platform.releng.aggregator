@@ -15,7 +15,8 @@
 
 # can be retrieved, on Hudson, with 
 # wget --no-verbose --no-cache  -O checkComposites.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/checkComposites/checkComposites.sh;
-# and then simply executed in "bash script" build step.
+# and typically set chmod +x checkComposites.sh
+# and then executed in "bash script" build step.
 
 baseEclipseAccessDir=/home/data/httpd/download.eclipse.org
 baseEclipseDirSegment=eclipse/downloads/drops4/R-4.5.2-201602121500
