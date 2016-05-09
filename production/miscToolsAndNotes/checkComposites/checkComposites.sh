@@ -56,6 +56,7 @@ fi
 
 for repo in ${repoList}
 do
+  echo -e "\n\n\tChecking ${repo}\n\n"
   ${WORKSPACE}/eclipse/eclipse -nosplash  -consolelog -debug -application org.eclipse.equinox.p2.director -list -repository ${repoAccess}${repo} -vm /shared/common/jdk1.8.0_x64-latest/bin/java
   RC=$?
   if [[ $RC != 0 ]]
