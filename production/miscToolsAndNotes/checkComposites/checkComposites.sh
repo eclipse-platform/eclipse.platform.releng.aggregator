@@ -62,6 +62,7 @@ do
   if [[ $RC != 0 ]]
   then
     echo -e "\n\t[ERROR]: p2.director list returned a non-zero return code: $RC"
+    exit $RC
   fi
 done
 
