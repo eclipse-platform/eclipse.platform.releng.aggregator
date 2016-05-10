@@ -9,8 +9,17 @@ else
   checkSumStart="$(date +%s )"
 fi
 
-allCheckSumsSHA256=checksum/SUMSSHA256.txt
-allCheckSumsSHA512=checksum/SUMSSHA512.txt
+# unclear if this script has access to build ID or not. 
+# Note: if it does, and becomes part of DL, then "promote script" will
+# need to be modified to change the name.
+if [[ -z "${BUILD_ID}" ]] 
+then
+  allCheckSumsSHA256=checksum/SUMSSHA256
+  allCheckSumsSHA512=checksum/SUMSSHA512
+else
+  allCheckSumsSHA256=checksum/${BUILD_ID}-SUMSSHA256
+  allCheckSumsSHA512=checksum/${BUILD_ID}-SUMSSHA512
+fi
 
 #  Remove the "all" files, here at beginning if they all ready exist, 
 #  so that subsequent calls can all use append (i.e. ">>") 
