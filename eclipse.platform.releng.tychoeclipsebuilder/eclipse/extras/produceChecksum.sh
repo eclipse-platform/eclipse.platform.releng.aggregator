@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-echo "Producing checksums"
+echo "[DEBUG] Producing checksums starting"
+echo "[DEBUG] current directory: ${PWD}"
 if [[ -z "${SCRIPT_PATH}" ]]
 then
   echo -e "\n\tWARNING: SCRIPT_PATH not defined in ${0##*/}"
@@ -76,3 +77,4 @@ then
   checkSumEnd="$(date +%s )"
   elapsedTime $checkSumStart $checkSumEnd "${area} Elapsed Time computing checksums"
 fi
+echo "[DEBUG] Producing checksums ended normally"
