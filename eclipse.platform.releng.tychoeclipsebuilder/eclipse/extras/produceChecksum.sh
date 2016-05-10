@@ -3,9 +3,10 @@ echo "Producing checksums"
 if [[ -z "${SCRIPT_PATH}" ]]
 then
   echo -e "\n\tWARNING: SCRIPT_PATH not defined in ${0##*/}"
+else
+  source "${SCRIPT_PATH}/bashUtilities.shsource"
+  checkSumStart="$(date +%s )"
 fi
-source "${SCRIPT_PATH}/bashUtilities.shsource"
-checkSumStart="$(date +%s )"
 
 allCheckSumsSHA256=checksum/SUMSSHA256.txt
 allCheckSumsSHA512=checksum/SUMSSHA512.txt
@@ -56,6 +57,22 @@ do
   sha512sum -b ${jarfile} | tee checksum/${jarfile}.sha512 >>${allCheckSumsSHA512}
 done
 
-checkSumEnd="$(date +%s )"
-elapsedTime $checkSumStart $checkSumEnd "Elapsed Time Checksums"
-
+if [[ -n "${SCRIPT_PATH}" ]]
+then
+  # This checkSums script is called twice, once while publishing Eclipse DL site, again 
+  # which publishing equinox DL site. We use a simple heuristic to add "Eclipse" or "Equinox" to the output message.
+  currentDirectory="${PWD}"
+  equinoxPattern="^.*equinox.*$"
+  eclipsePattern="^.*eclipse.*$"
+  if [[ "${currentDirectory}" =~ $equinoxPattern ]]
+  then
+    area="Equinox"
+  elif [[ "${currentDirectory}" =~ $eclipsePattern ]]
+  then
+    area="Eclipse"
+  else
+    area="[WARNING]: Unknown area"
+  fi
+  checkSumEnd="$(date +%s )"
+  elapsedTime $checkSumStart $checkSumEnd "${area} Elapsed Time computing checksums"
+fi
