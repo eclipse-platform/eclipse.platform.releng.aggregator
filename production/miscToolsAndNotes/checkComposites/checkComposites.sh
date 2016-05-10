@@ -25,9 +25,9 @@ repoFileAccess=file:///home/data/httpd/download.eclipse.org/
 repoHttpAccess=http://download.eclipse.org
 repoAccess=${repoFileAccess}
 repoList="\
-/eclipse/updates/4.6-P-builds/\
-/eclipse/updates/4.6-N-builds/\
-/eclipse/updates/4.6-I-builds/\
+/eclipse/updates/4.6-P-builds/ \
+/eclipse/updates/4.6-N-builds/ \
+/eclipse/updates/4.6-I-builds/ \
 /eclipse/updates/4.5/ \
 "
 
