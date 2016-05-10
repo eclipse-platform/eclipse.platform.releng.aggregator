@@ -60,7 +60,7 @@ done
 if [[ -n "${SCRIPT_PATH}" ]]
 then
   # This checkSums script is called twice, once while publishing Eclipse DL site, again 
-  # which publishing equinox DL site. We use a simple heuristic to add "Eclipse" or "Equinox" to the output message.
+  # when publishing Equinox DL site. We use a simple heuristic to add "Eclipse" or "Equinox" to the output message.
   currentDirectory="${PWD}"
   equinoxPattern="^.*equinox.*$"
   eclipsePattern="^.*eclipse.*$"
