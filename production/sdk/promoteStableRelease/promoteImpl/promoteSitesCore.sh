@@ -70,8 +70,6 @@ export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/${BUILD_MAJOR}.${BUI
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
 
-
-
 # Eclipse Drop Site (final segment)
 export ECLIPSE_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 # Equinox Drop Site (final segment)
@@ -173,7 +171,17 @@ then
 fi 
 
 # ### Begins the point of making modifications to the build ###
-if [[ "${DL_TYPE}" == "S" ]]
+
+# This testNotes.html file is inserted for display by main index.php file, if it exists.
+# SIGNOFF_BUG should not be defined if there are no JUnit failures to investigate and explain
+if [[ -n "${SIGNOFF_BUG}" ]] 
+then
+ echo -e "<p>Any unit test failures below have been investigated and found to be test-related and do not affect the quality of the build.\nSee the sign-off page <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=${SIGNOFF_BUG}\">(bug ${SIGNOFF_BUG})</a> for details.</p>" > "${BUILDMACHINE_BASE_DL}/${DROP_ID}/testNotes.html"
+fi
+
+# There is no "new and noteworthy" for RC builds, only Milestones.
+# TODO: PLUS, there is one for final release! 
+if [[ "${DL_TYPE}" == "S" && "${CHECKPOINT}" =~ ^M.*$ ]]
 then
   printf "\tINFO: %s\n" "Created NEWS_ID and added to buildproperties.php, since doing Milestone promote."
   echo -e "\$NEWS_ID = \"${NEWS_ID}\";" >> "${BUILDMACHINE_BASE_DL}/${DROP_ID}/buildproperties.php"

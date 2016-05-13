@@ -12,16 +12,27 @@
 
 # Utility to rename build and "promote" it to DL Server.
 
+# default it to do dry run first, to sanity check files and labels created.
 export DRYRUN=dry-run
+
+# These first three variables DROP_ID, CHECKPOINT, and SIGNOFF_BUG 
+# change each time. 
 
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160428-0800
+export DROP_ID=I20160512-1000
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=M7
+export CHECKPOINT=RC1
+
+# This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
+export SIGNOFF_BUG=493482
+
+# These remaining variables change less often, but do change
+# for different development phases and streams.
+
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Neon
 

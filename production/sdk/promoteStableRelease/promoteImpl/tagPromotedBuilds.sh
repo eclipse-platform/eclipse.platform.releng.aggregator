@@ -3,6 +3,9 @@
 # TODO: might want to add if [[ "${HIDE_SITE}" != "true" ]] logic as we do for
 # deferredCompositeAdd script
 
+# TODO: if another build has taken place (such as a PATCH build) we 
+# may need to 'pull' aggegator first before we can push our tag
+
 echo "#!/usr/bin/env bash" > deferredTag.sh
 echo "# navigate to gitcache aggregator" >> deferredTag.sh
 echo "pushd ${BUILD_ROOT}/${AGGR_LOCATION}" >> deferredTag.sh
