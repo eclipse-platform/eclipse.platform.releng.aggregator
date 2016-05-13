@@ -121,20 +121,20 @@ function createXZ
         RC=$?
         if [[ $RC = 0 ]]
         then
-          echo -e "\n\tINFO: Will exit ${0##/*/}, since contents of p2.index file implies already converted this site at "
+          echo -e "\n\tINFO: Will exit ${0##*/}, since contents of p2.index file implies already converted this site at "
           echo -e "  \t${BUILDMACHINE_SITE}"
           return 0
         else
           if [[ $RC > 1 ]]
           then
-            echo -e "\n\tERROR: Will exit ${0##/*/}, since grep returned an error code of $RC"
+            echo -e "\n\tERROR: Will exit ${0##*/}, since grep returned an error code of $RC"
             return $RC
           fi
         fi
       else
         if [[ $RC > 1 ]]
         then
-          echo -e "\n\tERROR: Will exit ${0##/*/}, since grep returned an error code of $RC"
+          echo -e "\n\tERROR: Will exit ${0##*/}, since grep returned an error code of $RC"
           return $RC
         fi
       fi

@@ -17,11 +17,11 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160317-0200
+export DROP_ID=I20160428-0800
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=M6
+export CHECKPOINT=M7
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Neon
 

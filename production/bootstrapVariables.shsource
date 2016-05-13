@@ -7,7 +7,13 @@ then
   RAWDATE=$( date +%s )
   export RAWDATE
 fi
-
+if [[ -z "${SCRIPT_PATH}" ]]
+then
+   echo -e "\n\t[ERROR] SCRIPT_PATH is not defined as expected in ${0##*/}"
+   exit 1
+else 
+   echo -e "\n\t[INFO] SCRIPT_PATH defined as ${SCRIPT_PATH}"
+fi
 source "${SCRIPT_PATH}/bashUtilities.shsource"
 
 # USAGE: fn-git-cache BUILD_ROOT
@@ -137,9 +143,20 @@ buildIdPattern="^[MNIPY][[:digit:]]{8}-[[:digit:]]{4}$"
     export buildDirectory
     # this should be when we first create buildDirectory
     echo "Making buildDirectory: ${buildDirectory}"
-    mkdir -p "${buildDirectory}"
-    # it appears GID bit is not always set correctly, so we'll do so explicitly
-    chmod -c g+s "${buildDirectory}"
+    # Testing confirmed that umask was correct initially.
+    #echo "initial umask in bootstrapVariables.shsource: $(umask)"
+    #umask 0002
+    #echo "umask after setting in bootstrapVariables.shsource: $(umask)"
+    # it appears GID bit is not always set correctly. 
+    # Appears related to "depth" of directories made. 
+    # If we "cd" to parent directory, then it works. 
+    # even using --mode u=rwx,g=rwxs,o=rx did not make it correctly.
+    # See https://bugs.eclipse.org/bugs/show_bug.cgi?id=492493
+    #mkdir -p --verbose --mode u=rwx,g=rwxs,o=rx  "${buildDirectory}"
+    mkdir -p --verbose $BUILD_ROOT/siteDir/eclipse/downloads/drops4
+    pushd $BUILD_ROOT/siteDir/eclipse/downloads/drops4
+    mkdir --verbose $BUILD_ID
+    popd
   else
     echo "buildDirectory was already defined as $buildDirectory"
   fi

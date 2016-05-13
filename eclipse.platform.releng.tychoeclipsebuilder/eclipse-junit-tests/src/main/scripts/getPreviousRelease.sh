@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Utility to copy current and previous rversions of SDK and platform binary to the expected location.
+# Convenience script.
+# Utility to copy current and previous versions of SDK and platform binary to the expected location.
 # some parts expected to be temporary, until 'installDir' and 'testDir' 
 # correctly or redefined.
 

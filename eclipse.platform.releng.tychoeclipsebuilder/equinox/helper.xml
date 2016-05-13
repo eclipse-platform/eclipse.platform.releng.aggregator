@@ -43,7 +43,7 @@
   <target
     name="publish"
     depends="init">
-
+    <echo message="[DEBUG] Equinox helper.xml publish starting" />
         <!-- there are three "buildproperties.* files, each with same variables defined/used
              during the build, such as BUILD_ID, etc. One for PHP, one for Ant, and one for BASH scripts.
              The one for PHP is most likely to be useful on download site.
@@ -87,7 +87,7 @@
     <!-- generate md5s and sha1s for bundles -->
     <mkdir dir="${equinoxPostingDirectory}/${buildDir}/checksum" />
     <exec
-      executable="sh"
+      executable="/bin/bash"
       dir="${equinoxPostingDirectory}/${buildDir}">
       <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
     </exec>
@@ -157,13 +157,14 @@
       compileLogsDirectoryName="${equinoxPostingDirectory}/${buildDir}/compilelogs/plugins"
       testManifestFileName="${eqpublishingContent}/testManifest.xml" />
 
-
+    <echo message="[DEBUG] Equinox helper.xml publish ending normally" />
   </target>
 
 
   <target
     name="updateTestManifests"
     depends="init">
+    <echo message="Starting updateTestManifest" />
     <antcall target="updateTestManifest">
       <param
         name="bundle.id"
@@ -194,30 +195,13 @@
         name="bundle.id"
         value="org.eclipse.equinox.launcher" />
     </antcall>
-    <antcall target="updateTestManifest">
-      <param
-        name="bundle.id"
-        value="org.eclipse.equinox.log" />
-    </antcall>
-        <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=376921
-        <antcall target="updateTestManifest">
-            <param
-                name="bundle.id"
-                value="org.eclipse.equinox.initializer" />
-        </antcall>
-        -->
+
     <antcall target="updateTestManifest">
       <param
         name="bundle.id"
         value="org.eclipse.equinox.region" />
     </antcall>
-        <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=376921
-        <antcall target="updateTestManifest">
-            <param
-                name="bundle.id"
-                value="org.eclipse.equinox.console.supportability" />
-        </antcall>
-        -->
+
     <antcall target="updateTestManifest">
       <param
         name="bundle.id"

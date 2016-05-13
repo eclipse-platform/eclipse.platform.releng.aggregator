@@ -275,8 +275,17 @@
       to target test environment. The intent is to make sure that apart of the tests
       works consistently, and does not "break the tests", simply because of some recent
       but in p2Director. (while unlikely, these days ... since that code is not under active
-      development ... you never know)
+      development ... you never know). We test for both "Eclipse.app" and "eclipse.app"
+      since the case of our app might change, and the file system of MacOSX may or may 
+      not be set to "case sensitive".
     -->
+    <condition property="basePlatformInstalled">
+       <or>
+       <available file="${platformLocation}/eclipse" />
+       <available file="${platformLocation}/Eclipse.app" />
+       <available file="${platformLocation}/eclipse.app" />
+       </or>
+    </condition>
     <antcall target="${platformTarget}" />
     <antcall target="installPreferences">
       <param
@@ -289,8 +298,9 @@
   <!--setup for platform zip archives -->
   <target
     name="platform-zip"
+    unless="basePlatformInstalled"
     depends="init"
-    description="Reinstall the test Eclipse installation if specified by user">
+    description="Install the base binary platform installation">
     <condition property="platformArchiveExists">
       <available file="${platformLocation}/${platformArchive}" />
     </condition>
@@ -314,8 +324,9 @@
   <!--setup for platform tar.gz archives -->
   <target
     name="platform-tar.gz"
+    unless="basePlatformInstalled"
     depends="init"
-    description="Reinstall the test Eclipse installation if specified by user">
+    description="Install the base binary platform installation">
     <condition property="platformArchiveExists">
       <available file="${platformLocation}/${platformArchive}" />
     </condition>
@@ -2146,18 +2157,6 @@
     <antcall target="markCurrentTime">
       <param
         name="message"
-        value="start pdeLR" />
-    </antcall>
-    <antcall target="pdeLR" />
-    <antcall target="markCurrentTime">
-      <param
-        name="message"
-        value="end pdeLR" />
-    </antcall>
-
-    <antcall target="markCurrentTime">
-      <param
-        name="message"
         value="start jdtLR" />
     </antcall>
     <antcall target="jdtLR" />
@@ -2165,6 +2164,18 @@
       <param
         name="message"
         value="end jdtLR" />
+    </antcall>
+
+    <antcall target="markCurrentTime">
+      <param
+        name="message"
+        value="start pdeLR" />
+    </antcall>
+    <antcall target="pdeLR" />
+    <antcall target="markCurrentTime">
+      <param
+        name="message"
+        value="end pdeLR" />
     </antcall>
 
     <antcall target="markCurrentTime">

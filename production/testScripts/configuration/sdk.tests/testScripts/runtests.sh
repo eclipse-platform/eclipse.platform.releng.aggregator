@@ -13,43 +13,48 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/bin
 source localBuildProperties.shsource 2>/dev/null
 
 
-# should already be defined, by now, in production tests
-export jvm=${jvm:-/shared/common/jdk-1.6.x86_64/jre/bin/java}
-echo "jvm: $jvm"
-
-if [ -z "${jvm}" -o ! -e ${jvm} ]
+# jvm should already be defined, by now, in production tests
+# export jvm=${jvm:-/shared/common/jdk1.8.0_x64/jre/bin/java}
+# but if not, we use a simple 'java'.
+if [[ -z "${jvm}" ]]
 then
-  echo "No JVM define, or the defined one was found to not be executable"
-  echo "    jvm: $jvm"
-  exit 1
+  echo "WARNING: jvm was not defined, so using simple 'java'."
+  export jvm=$(which java)
 fi
 
-stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5.2-linux-gtk-x86_64.tar.gz}
-stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
+if [[ -z "${jvm}" || ! -x ${jvm} ]]
+then
+  echo "ERROR: No JVM define, or the defined one was found to not be executable"
+  exit 1
+fi
+echo "jvm: $jvm"
+
+stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/workarea/${buildId}/eclipse-testing/platformLocation/}
 # Note: test.xml will "reinstall" fresh install of what we are testing,
 # but we do need an install for initial launcher, and, later, need one for a
 # stable version of p2 director. For both purposes, we
 # we should use "old and stable" version,
 # which needs to be installed in ${stableEclipseInstallLocation}.
-# Note: for production tests, we use ${WORKSPACE}/org.eclipse.releng.basebuilder,
-# for historical reasons. The "true" (old) basebuilder does not have an 'eclipse' directory;
-# plugins is directly under org.eclipse.releng.basebuilder.
-if [ ! -r ${stableEclipseInstallLocation} ]
+# A previous step should have already put the tar or zip file for binary platform there.
+if [[ ! -r ${stableEclipseInstallLocation} ]]
 then
-  mkdir stableEclipseSDK
-  tar -xf ${stableEclipseSDK} -C ${stableEclipseInstallLocation}
-  # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
-  #We no longer use "dropins" for tests! test.xml will "install" them, from "test repo"
-  #unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+  echo "stableEclipseInstallLocation was NOT found at ${stableEclipseInstallLocation}"
+  echo "Exiting, since something is not as expected."
+  exit 1
+else
+  echo "stableEclipseInstallation directory found, as expected, at ${stableEclipseInstallLocation}"
+  # should only be one tar file there, with a name similar to eclipse-platform-4.5.2-linux-gtk-x86_64.tar.gz 
+  # so for simplicity, we'll assume all is well and untar what ever we find. 
+  tar -xf ${stableEclipseInstallLocation}/*tar.gz -C ${stableEclipseInstallLocation}
 fi
 
 launcher=$(find ${stableEclipseInstallLocation} -name "org.eclipse.equinox.launcher_*.jar" )
-echo "launcher: $launcher"
 if [ -z "${launcher}" ]
 then
-   echo "launcher not found in ${stableEclipseInstallLocation}"
+  echo "ERROR: launcher not found in ${stableEclipseInstallLocation}"
    exit 1
 fi
+echo "launcher: $launcher"
 
 
 # define, but null out variables we expect on the command line
@@ -96,7 +101,7 @@ do
     -vm)
       jvm="${2}"; shift;;
     *)
-      tests=$tests\ ${1};;
+      tests="$tests\ ${1}";;
   esac
   shift
 done
@@ -106,37 +111,43 @@ echo "Specified test targets (if any): ${tests}"
 echo "Specified ext dir (if any): ${extdirproperty}"
 
 # for *nix systems, os, ws and arch values must be specified
-if [ "x$os" = "x" ]
+if [[ -z "${os}" || -z "${ws}" || -z "${arch}" ]]
 then
+  echo >&2 "WARNING: On some systems, os, ws, and arch values must be specified,"
+  echo >&2 "         but can usually be correctly inferred given the running VM, etc."
   echo >&2 "$usage"
-  exit 1
+else
+  platformArgString=""
+  platformParmString=""
+  platformString=""
+  if [[ -n "${os}" ]]
+  then
+    platformArgString="${platformArgString} -Dosgi.os=$os"
+    platformParmString="${platformParmString} -Dos=$os"
+    platformString="${platformString}${os}"
 fi
-
-if [ "x$ws" = "x" ]
+  if [[ -n "${ws}" ]]
 then
-  echo >&2 "$usage"
-  exit 1
+    platformArgString="${platformArgString} -Dosgi.ws=$ws"
+    platformParmString="${platformParmString} -Dws=$ws"
+    platformString="${platformString}_${ws}"
 fi
-
-if [ "x$arch" = "x" ]
+  if [[ -n "${arch}" ]]
 then
-  echo >&2 "$usage"
-  exit 1
+    platformArgString="${platformArgString} -Dosgi.arch=$arch"
+    platformParmString="${platformParmString} -Darch=$arch"
+    platformString="${platformString}_${arch}"
+fi
 fi
 
 
 
 # run tests
 
-#echo " = = = Start list environment variables in effect = = = ="
+#### Uncomment lines below to have complete list of ENV variables. 
+#echo " = = = Start list environment variables in effect in runtests.sh = = = ="
 #env
-#echo " = = = End list environment variables in effect = = = ="
-
-# TODO: consider moving all this to 'testAll.sh'. (If testAll.sh stays around)
-# make sure there is a window manager running. See bug 379026
-# we should not have to, but may be a quirk/bug of hudson setup
-# assuming metacity attaches to "current" display by default (which should have
-# already been set by Hudson). We echo its value here just for extra reference/cross-checks.
+#echo " = = = End list environment variables in effect in runtests.sh = = = ="
 
 # This next section on window mangers is needed if and only if "running in background" or
 # started on another machine, such as Hudson or Cruisecontrol, where it may be running
@@ -177,7 +188,6 @@ else
   fi
 fi
 
-
 echo
 
 # list out metacity processes so overtime we can see if they accumulate, or if killed automatically
@@ -191,16 +201,23 @@ wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|i
 echo "Window Manager processes: $wmpss"
 echo
 
+
+mkdir -p results/consolelogs
 echo "extdirprop in runtest.sh: ${extdirprop}"
 echo "extdirproperty in runtest.sh: ${extdirproperty}"
 echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
 echo "DOWNLOAD_HOST: $DOWNLOAD_HOST"
-
+echo "platformArgString: ${platformArgString}"
+echo "platformParmString: ${platformParmString}"
+echo "platformString: ${platformString}"
+echo "testedPlatform: ${testedPlatform}"
 
 # -Dtimeout=300000 "${ANT_OPTS}"
 if [[ -n "${extdirproperty}" ]]
 then
-  $jvm ${ANT_OPTS} "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
+  echo "running with extdir defined"
+  $jvm ${ANT_OPTS} "${extdirproperty}" ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests 2>&1 | tee $consolelogs
 else
-  $jvm ${ANT_OPTS} -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests
+  echo "running without extdir defined"
+  $jvm ${ANT_OPTS} ${platformArgString}  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests 2>&1 | tee $consolelogs
 fi

@@ -53,11 +53,18 @@ then
   # It is in main scenarios, but not sure about things like "re-running unit tests at a later time".
   # If directory doesn't exist yet, create it first, so we can assign proper access
   # permissions for later "clean up" routines.
-  mkdir -p "${BUILD_DIR}/${EBUILDER}"
-  chmod -c g+ws "${BUILD_DIR}/${EBUILDER}"
+  # Permissions not correct for this 'mkdir' so we will use same trick as in bootstrapVariables
+  # see https://bugs.eclipse.org/bugs/show_bug.cgi?id=492493
+  # mkdir -p "${BUILD_DIR}/${EBUILDER}"
+  # chmod -c g+ws "${BUILD_DIR}/${EBUILDER}"
+  # BUILD_DIR pretty much has to exist at this point, but in case not: 
+  mkdir -p "${BUILD_DIR}"
+  pushd "${BUILD_DIR}"
+  mkdir "${EBUILDER}"
+  popd
+  
   # note the use of "reference" ... we typically only need a little bit of
   # new stuff, that the gitCache version doesn't have already, if any.
-
   echo "Doing git clone using:  --reference  \${aggDir} \${AGGREGATOR_REPO} \${BUILD_DIR}/\${EBUILDER}"
   echo "which evaluates to git clone  --reference  ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}"
   git clone --reference  ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}

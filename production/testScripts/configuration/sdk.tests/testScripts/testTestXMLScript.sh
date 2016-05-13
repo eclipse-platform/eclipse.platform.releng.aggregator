@@ -2,6 +2,9 @@
 
 source localBuildProperties.shsource  2>/dev/null
 
+# No longer works as expected.
+# TODO: fix.
+
 #   Utility to test the test.xml file. It's intended to allow rapid confirmation
 #   that the test.xml file ends up "computing" correct values, for various versions
 #   of java and ant.
@@ -35,8 +38,8 @@ unset JRE_HOME
 #   nothing is specific to any recent version of ant. (Though, some of the machines
 #   have ant 1.6 set as 'default'!)
 #export ANT_HOME=/shared/common/apache-ant-1.7.1
-export ANT_HOME=/shared/common/apache-ant-1.8.4/
-#export ANT_HOME=/shared/common/apache-ant-1.9.6
+#export ANT_HOME=/shared/common/apache-ant-1.8.4/
+export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 #   JAVA_HOME is, at least, what runs the ant instance. If no 'jvm' option is specified,
 #   it also becomes the instance that runs the tests.
@@ -54,5 +57,5 @@ export TESTING_TEST_XML=true
 #    to simply test the test script itself. The test-all target runs all of those tests.
 #ant -f test.xml test-all
 
-ant -f test.xml test-all  -propertyfile vm.properties
+ant -f test.xml test-all  -propertyfile vm.properties -DbuildId=I20160430-0237 -DeclipseStream=4.6.0 -Dosgi.os=linux
 

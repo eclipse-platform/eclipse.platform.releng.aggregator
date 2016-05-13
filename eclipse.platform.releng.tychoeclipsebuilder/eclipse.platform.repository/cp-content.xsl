@@ -5,27 +5,27 @@
   <xsl:output
     omit-xml-declaration="yes"
     indent="yes" />
-  <xsl:strip-space elements="*"/>
+  <xsl:strip-space elements="*" />
   <xsl:template match="/repository/units">
     <xsl:copy>
-      <xsl:apply-templates select="@*|node()"/>
-      <xsl:copy-of select="unit[@id='org.eclipse.equinox.executable.feature.group']"/>
+      <xsl:apply-templates select="@*|node()" />
+      <xsl:copy-of select="unit[@id='org.eclipse.equinox.executable.feature.group']" />
     </xsl:copy>
   </xsl:template>
   <xsl:template match="/repository/units/unit[@id='org.eclipse.equinox.executable.feature.group']/@id">
     <xsl:attribute name="id">
-      <xsl:value-of select="'org.eclipse.equinox.executable'"/>
+      <xsl:value-of select="'org.eclipse.equinox.executable'" />
     </xsl:attribute>
   </xsl:template>
   <xsl:template
     match="/repository/units/unit[@id='org.eclipse.equinox.executable.feature.group']/provides/provided[@name='org.eclipse.equinox.executable.feature.group']/@name">
     <xsl:attribute name="name">
-      <xsl:value-of select="'org.eclipse.equinox.executable'"/>
+      <xsl:value-of select="'org.eclipse.equinox.executable'" />
     </xsl:attribute>
   </xsl:template>
   <xsl:template match="/repository/units/unit[@id='org.eclipse.equinox.executable.feature.group']/update/@id">
     <xsl:attribute name="id">
-      <xsl:value-of select="'org.eclipse.equinox.executable'"/>
+      <xsl:value-of select="'org.eclipse.equinox.executable'" />
     </xsl:attribute>
   </xsl:template>
   <xsl:template
@@ -44,7 +44,7 @@
   <xsl:template match="@*|node()">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()">
-        <!--xsl:sort select="@id|@name"/-->
+        <!--xsl:sort select="@id|@name"/ -->
       </xsl:apply-templates>
     </xsl:copy>
   </xsl:template>

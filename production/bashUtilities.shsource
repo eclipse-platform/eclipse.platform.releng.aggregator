@@ -133,3 +133,97 @@ assertNotEmpty ()
 
 }
 
+
+function show_time () {
+num=$1
+min=0
+hour=0
+day=0
+if((num>59));then
+  ((sec=num%60))
+  ((num=num/60))
+  if((num>59));then
+    ((min=num%60))
+    ((num=num/60))
+    if((num>23));then
+      ((hour=num%24))
+      ((day=num/24))
+    else
+      ((hour=num))
+    fi
+  else
+    ((min=num))
+  fi
+else
+  ((sec=num))
+fi
+
+if [[ $day > 0 ]]
+then
+  echo "$day d  $hour h  $min m  $sec s"
+elif [[ $hour > 0 ]]
+then
+  echo "$hour h  $min m  $sec s"
+elif [[ $min > 0 ]]
+then
+  echo "$min m  $sec s"
+else
+  echo "$sec s"
+fi
+}
+
+# This funtion needs three arguments, in order.
+#   StartTime (in epoch seconds)
+#   EndTime (in epock seconds)
+#   Message. Optional quoted string that is printed with elapsed time. If not provided, "Elapsed Time" is used.
+#
+elapsedTime ()
+{
+  start=$1
+  end=$2
+  message=$3
+  # TODO: could improve error checking, by making sure times are "all digits"
+  if [[ -z "$start" ]]
+  then
+    "[ERROR] Start time must be provided to ${0##*/}"
+    exit 1
+  fi
+  if [[ -z "$end" ]]
+  then
+    "[ERROR] End time must be provided to ${0##*/}"
+    exit 1
+  fi
+  if [[ -z "$message" ]]
+  then
+    message="Elapsed Time"
+  fi
+  elapsedSeconds=$(( ${end} - ${start} ))
+  elapsedTime=$( show_time $elapsedSeconds )
+  echo -e "\n\t${message}: $elapsedTime"
+  if [[ -n "${timeFile}" ]]
+  then
+    # elapsed time is for human readers. elapsedSeconds is recorded too in case we ever do more 
+    # statistics or graphs with the data. 
+    echo -e "\n\t${message}: $elapsedTime\n\t${message}: RawSeconds: ${elapsedSeconds}" >> "${timeFile}"
+  else
+    echo -e "\n\t[WARNING] timeFile variable was not defined in ${0##*/}"
+  fi
+}
+
+testElapsedTime ()
+{
+  #RAW_DATE_START="$(date -u +%s )"
+  RAW_DATE_START="$(date +%s )"
+
+  echo -e "\n\tRAW Date Start: ${RAW_DATE_START} \n"
+  echo -e "\tStart Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_START} )"
+
+  sleep 6
+
+  RAW_DATE_END="$(date +%s )"
+
+  echo -e "\n\tRAW Date End: ${RAW_DATE_END} \n"
+  echo -e "\tEnd Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_END} )"
+
+  elapsedTime $RAW_DATE_START $RAW_DATE_END "Testing Elapsed Time"
+}

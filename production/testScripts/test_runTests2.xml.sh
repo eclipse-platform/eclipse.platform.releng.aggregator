@@ -25,7 +25,7 @@ function clean()
 
   echo -e "\n Cleaning previous results, as requested."
   # remember, do not want to rm "out.txt" since we may be currently piping to it via 'tee'.
-  rm -fr ${WORKSPACE}/eclipse.platform.releng.aggregator/ eclipse.platform.releng.aggregator-master.zip eclipse.platform.releng.basebuilder-R38M6PlusRC3G/ getEBuilder.xml org.eclipse.releng.basebuilder/ runTests2.xml tempEBuilder/
+  rm -fr ${WORKSPACE}/eclipse.platform.releng.aggregator/ eclipse.platform.releng.aggregator-master.zip  getEBuilder.xml  runTests2.xml tempEBuilder/
 
   rm -fr ${WORKSPACE}/production.properties propertiesAllFromRunTest2.properties sdk.tests streamSpecific-build.properties workarea
 

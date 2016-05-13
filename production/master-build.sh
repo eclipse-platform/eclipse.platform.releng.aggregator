@@ -88,9 +88,6 @@ assertNotEmpty buildDirectory
 echo "buildDirectory: >${buildDirectory}<"
 
 export logsDirectory="${buildDirectory}/buildlogs"
-# making in two steps, in to try and get group and permissions inherited
-mkdir -p "${buildDirectory}"
-checkForErrorExit $? "Could not create buildDirectory: ${buildDirectory}"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
 
@@ -113,6 +110,8 @@ export TRACE_OUTPUT=${TRACE_OUTPUT:-$buildDirectory/buildlogs/trace_output.txt}
 echo $BUILD_PRETTY_DATE > ${TRACE_OUTPUT}
 
 assertNotEmpty buildDirectory
+# This file will hold "elapsed times" of various build steps
+export timeFile=${timeFile:-"${buildDirectory}/timesFile.txt"}
 
 # These files have variable/value pairs for this build, suitable for use in
 # shell scripts, PHP files, or as Ant (or Java) properties
