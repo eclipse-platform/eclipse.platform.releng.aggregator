@@ -26,7 +26,12 @@ case ${DL_TYPE} in
     ;;
   "S" )
     export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}milestones
-    export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}/${CHECKPOINT}
+    # NEWS_ID is for milestones only, not RCs. So we check that CHECHPOINT starts 
+    # with 'M' (M1, M2, ... M7) and do not created if CHECKPOINT is an RC (RC1, RC2 ... RC4)
+    if [[ "${CHECKPOINT}" =~ ^M.*$ ]]
+    then
+      export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}/${CHECKPOINT}
+    fi
     ;;
   "R" )
     export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
