@@ -28,11 +28,12 @@ repoList="\
 /eclipse/updates/4.6-P-builds/ \
 /eclipse/updates/4.6-N-builds/ \
 /eclipse/updates/4.6-I-builds/ \
+/eclipse/updates/4.6milestones/ \
 /eclipse/updates/4.5/ \
 "
 
 
-# WORKSPACE will be defined in Hudson. For conventience of local, remote, testing we will make several
+# WORKSPACE will be defined in Hudson. For convenience of local, remote, testing we will make several
 # assumptions if it is not defined.
 if [[ -z "${WORKSPACE}" ]]
 then
