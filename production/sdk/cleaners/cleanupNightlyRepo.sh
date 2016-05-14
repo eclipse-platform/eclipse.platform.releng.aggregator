@@ -25,7 +25,7 @@ function writeHeader ()
   echo -e "  basedir=\".\"" >>$antBuildFile
   echo -e "  default=\"cleanup\">" >>$antBuildFile
   echo -e "  <target name=\"cleanup\">" >>$antBuildFile
-  echo -e "    <p2.composite.repository>" >>$antBuildFile 
+  echo -e "    <p2.composite.repository>" >>$antBuildFile
   echo -e "      <repository location=\"file://${compositeRepoDir}\" />" >>$antBuildFile
   echo -e "      <remove>" >> $antBuildFile
 }
@@ -33,7 +33,7 @@ function writeHeader ()
 function writeReposToRemove ()
 {
   antBuildFile=$1
-  for repo in "${reposToRemove[@]}" 
+  for repo in "${reposToRemove[@]}"
   do
     echo "        <repository location=\"$repo\" />" >> $antBuildFile
   done
@@ -54,7 +54,7 @@ function generateCleanupXML ()
   mainRepoDir=$1
   antBuildFile=$2
   if [[ -z "${mainRepoDir}" || ! -e "${mainRepoDir}" ]]
-  then 
+  then
     echo -e "\n\tERROR: main repo to work with was not defined or did not exist"
   else
     writeHeader $mainRepoDir $antBuildFile
@@ -78,9 +78,9 @@ function getReposToRemove ()
   else
     echo -e "\n\tDEBUG: working with directory ${cDir}"
     # for "repo names" we want only the last segment of the directory, so use -printf %f. The %C@ is seconds since the beginning of time, for sorting.
-    # Some caution is needed here. Seems on eclipse.org "atime" is the one that reflects "when created", 
-    # whereas ctime and mtime are all identical, in every directory?! Turns out, mine is that 
-    # say too. Apparently p2 "touches" every directory, for some reason. Perhaps only in the "atomic" case? 
+    # Some caution is needed here. Seems on eclipse.org "atime" is the one that reflects "when created",
+    # whereas ctime and mtime are all identical, in every directory?! Turns out, mine is that
+    # say too. Apparently p2 "touches" every directory, for some reason. Perhaps only in the "atomic" case?
     # But, atime can vary from system to system, depending .. some systems do update, when accessed?
     sortedallOldRepos=( $(find ${cDir} -maxdepth 1 -type d  -name "${buildType}*" -printf "%C@ %f\n" | sort -n | cut -d\  -f2 ) )
     #nOldRepos=${#sortedallOldRepos[@]}
@@ -123,16 +123,16 @@ function cleanRepo ()
   baseBuilder=/shared/simrel/tools/eclipse45/eclipse
   eclipseexe=${baseBuilder}/eclipse
   if [[ ! -x ${eclipseexe} ]]
-  then 
+  then
     echo -e "\n\tERROR: expected eclipse location not found, or not executable"
     echo -e "\t${eclipseexe}"
     exit 1
   fi
   JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-  export JAVA_HOME=${JAVA_8_HOME} 
+  export JAVA_HOME=${JAVA_8_HOME}
   javaexe=${JAVA_HOME}/jre/bin/java
   if [[ ! -x ${javaexe} ]]
-  then 
+  then
     echo -e "\n\tERROR: expected java location not found, or not executable"
     echo -e "\t${javaexe}"
     exit 1
@@ -149,7 +149,7 @@ function cleanRepo ()
     # be sure there are some to remove
     nToRemove=${#reposToRemove[@]}
     if [[ $nToRemove == 0 ]]
-    then 
+    then
       echo -e "\tfound no files to remove for current repo"
     else
       echo -e "\n\tfound $nToRemove so generating ant file"
@@ -159,11 +159,11 @@ function cleanRepo ()
         $eclipseexe -nosplash --launcher.suppressErrors -data "${devWorkspace}" -application  ${antRunner} -f $antBuildFile -vm ${javaexe}
         RC=$?
       fi
-      if [[ $RC == 0 ]] 
+      if [[ $RC == 0 ]]
       then
         # we only clean N-build directories, others need to be manually cleaned
         # after every milestone, or after every release
-        if [[ $buildType == "N" ]] 
+        if [[ $buildType == "N" ]]
         then
           for file in "${reposToRemove[@]}"
           do
@@ -173,10 +173,10 @@ function cleanRepo ()
               rm -rf ${eclipseRepo}/${file}
             fi
           done
-          else 
+          else
             echo -e "\n\tReminder: only composite cleaned. For $buildType builds must cleanup simple repos ever milestone or release".
         fi
-      fi 
+      fi
       if [[ -n "${dryRun}" ]]
       then
         echo "Since dryrun printing $antBuildFile"

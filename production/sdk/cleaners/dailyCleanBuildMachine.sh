@@ -3,11 +3,11 @@
 # Utility to clean build machine
 
 # DISABLED will prevent builds of that build type to not be cleaned up.
-# This is needed such as during the 2 or 3 weeks that we have a release 
+# This is needed such as during the 2 or 3 weeks that we have a release
 # candidate, but do not publically make visible until the Simultaneious
-# Release. In those cases, we want to keep the originally named build around, 
-# as well as any renamed versions of it. Valid values are the standard one 
-# character "build types" we use (I,M,N,P). Leave blank (or commented out) 
+# Release. In those cases, we want to keep the originally named build around,
+# as well as any renamed versions of it. Valid values are the standard one
+# character "build types" we use (I,M,N,P). Leave blank (or commented out)
 # if nothing should be disabled.
 
 DISABLED="M"
@@ -21,7 +21,7 @@ function removeOldPromotionScripts ()
     find /shared/eclipse/equinox/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
     find /shared/eclipse/equinox/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
-    # The job on Hudson that creates these files also cleans them up when over 2 days old. 
+    # The job on Hudson that creates these files also cleans them up when over 2 days old.
     # find /shared/eclipse/testjobqueue -name "RAN*" -ctime +3 -ls -exec rm '{}' \;
     # find /shared/eclipse/testjobqueue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
     # find /shared/eclipse/testjobqueue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
@@ -33,10 +33,10 @@ function removeOldDirectories ()
     ctimeAge=$2
     pattern=$3
     echo -e "\n\tCleaning rootdir: ${rootdir}"
-    if [[ -e "${rootdir}" ]] 
+    if [[ -e "${rootdir}" ]]
     then
         # leave at least one, on build machine.
-        # TODO: this may work most of the time, since ran daily, but the correct 
+        # TODO: this may work most of the time, since ran daily, but the correct
         # fix is work with the list. This will delete all, on some occasions.
         # Also, for build machine, it is really only I and M builds that we want to leave one in place.
         count=$( find "${rootdir}" -maxdepth 1 -type d -ctime ${ctimeAge} -name "${pattern}"  | wc -l )
@@ -44,7 +44,7 @@ function removeOldDirectories ()
         then
             find "${rootdir}" -maxdepth 1 -type d -ctime ${ctimeAge} -name "${pattern}" -ls -exec rm -fr '{}' \;
         fi
-    else 
+    else
         echo -e "\t\tINFO: rootdir did not exist."
     fi
 }
@@ -63,11 +63,11 @@ function removeBuildFamily ()
     else
         basedir="/shared/eclipse/${buildmachine}/${major}${buildType}/siteDir"
         chkdir="eclipse/downloads/drops4"
-        removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
+        removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*"
         chkdir="equinox/drops"
-        removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
+        removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*"
         chkdir="updates/${major}.${minor}-${buildType}-builds"
-        removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
+        removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*"
     fi
 }
 
@@ -75,14 +75,14 @@ function cleanBuildMachine ()
 {
 
     buildmachine=$1
-    
+
     echo -e "\n\tDaily clean of ${buildmachine} build machine on $(date )\n"
     echo -e "\tRemember to "turn off" when M build or I build needs to be deferred promoted,"
     echo -e "\tsuch as for "quiet week".\n"
 
-    
+
     INUSE_BEFORE=$(nice -12 du /shared/eclipse/${buildmachine} -sh)
-    
+
     major=4
 
     minor=6

@@ -22,10 +22,10 @@ for  ((i=${#files[@]}-1; i>=0; --i)); do
   newest[$count]="${files[$i]}"
   #echo "DEBUG: count = $count"
   count=$(( count + 1 ))
-  if [ $count -gt 3 ] 
-  then 
+  if [ $count -gt 3 ]
+  then
     break
-  fi  
+  fi
 done
 #echo "DEBUG: newest (up to 4)"
 #for nfile in ${newest[*]}; do

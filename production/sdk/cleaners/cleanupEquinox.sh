@@ -9,8 +9,8 @@
 # Contributors:
 #     IBM Corporation - initial API and implementation
 #*******************************************************************************
-# inherited script from John A. in 2016. 
-# Some 'todos': 
+# inherited script from John A. in 2016.
+# Some 'todos':
 #   bullet proof a little?
 #   handle M builds too?
 
