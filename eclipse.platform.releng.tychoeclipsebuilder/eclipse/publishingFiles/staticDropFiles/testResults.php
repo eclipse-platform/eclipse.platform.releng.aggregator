@@ -26,7 +26,7 @@ changed, in the interest of staying consistent.
 See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 
  */
-$endingBreadCrumbs="<li><a href=\"../$BUILD_ID/\">$BUILD_ID</a></li><li class=\"active\">Test Results</li>";
+$endingBreadCrumbs="<li><a href=\"../$BUILD_DIR_SEG/\">$BUILD_ID</a></li><li class=\"active\">Test Results</li>";
 
 require("DL.thin.header.php.html");
 
@@ -50,9 +50,9 @@ require("DL.thin.header.php.html");
 
 echo "<div id=\"midcolumn\">".PHP_EOL;
 
-echo "<h1>Test Results for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h1>".PHP_EOL;
+echo "<h1>Test Results for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID."</a></h1>".PHP_EOL;
 
-echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_ID."\">".$BUILD_ID."</a></h3>".PHP_EOL;
+echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID."</a></h3>".PHP_EOL;
 echo "<ul>";
 
 
