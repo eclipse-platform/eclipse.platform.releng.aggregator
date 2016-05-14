@@ -73,13 +73,16 @@ function removeBuildFamily ()
 
 function cleanBuildMachine ()
 {
-    echo -e "\n\tDaily clean of ${HOSTNAME} build machine on $(date )\n"
+
+    buildmachine=$1
+    
+    echo -e "\n\tDaily clean of ${buildmachine} build machine on $(date )\n"
     echo -e "\tRemember to "turn off" when M build or I build needs to be deferred promoted,"
     echo -e "\tsuch as for "quiet week".\n"
 
-    INUSE_BEFORE=$(nice -12 du /shared/eclipse/builds -sh)
-
-    buildmachine=$1
+    
+    INUSE_BEFORE=$(nice -12 du /shared/eclipse/${buildmachine} -sh)
+    
     major=4
 
     minor=6
@@ -104,7 +107,7 @@ function cleanBuildMachine ()
 
     removeOldPromotionScripts
 
-    INUSE_AFTER=$(nice -12 du /shared/eclipse/builds -sh)
+    INUSE_AFTER=$(nice -12 du /shared/eclipse/${buildmachine} -sh)
 
     echo -e "\n\tDisk used before cleaning: $INUSE_BEFORE"
     echo -e "\tDisk used after cleaning: $INUSE_AFTER"
