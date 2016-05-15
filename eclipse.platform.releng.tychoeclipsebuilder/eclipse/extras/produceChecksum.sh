@@ -73,22 +73,41 @@ do
   sha512sum -b ${jarfile} | tee checksum/${jarfile}.sha512 >>${allCheckSumsSHA512}
 done
 
+
+# This checkSums script is called twice, once while publishing Eclipse DL site, again
+# when publishing Equinox DL site. We use a simple heuristic to add "Eclipse" or "Equinox" to the output message.
+currentDirectory="${PWD}"
+equinoxPattern="^.*equinox.*$"
+eclipsePattern="^.*eclipse.*$"
+if [[ "${currentDirectory}" =~ $equinoxPattern ]]
+then
+  area="equinox"
+elif [[ "${currentDirectory}" =~ $eclipsePattern ]]
+then
+  area="eclipse"
+else
+  area="[ERROR]: Unknown area"
+  exit 1
+fi
+
+echo "[DEBUG] Producing GPG signatures starting."
+# We make double use of the "area". One to simplify signing script. Second to identify times in timefile.
+# remember, this "HOME" is for e4Build
+# TODO: put in error checking for file existence/readable
+key_passphrase=${HOME}/${area}-dev.passphrase
+
+signer=${area}-dev@eclipse.org
+signature_file256=${allCheckSumsSHA256}.gpg
+signature_file512=${allCheckSumsSHA512}.gpg
+fileToSign256=${allCheckSumsSHA256}
+fileToSign512=${allCheckSumsSHA512}
+
+cat ${key_passphrase} | gpg --local-user ${signer} --sign --armor --output ${signature_file256} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign256}
+cat ${key_passphrase} | gpg --local-user ${signer} --sign --armor --output ${signature_file512} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign512}
+
+# if SCRIPT_PATH not defined, we can not call elapsed time
 if [[ -n "${SCRIPT_PATH}" ]]
 then
-  # This checkSums script is called twice, once while publishing Eclipse DL site, again
-  # when publishing Equinox DL site. We use a simple heuristic to add "Eclipse" or "Equinox" to the output message.
-  currentDirectory="${PWD}"
-  equinoxPattern="^.*equinox.*$"
-  eclipsePattern="^.*eclipse.*$"
-  if [[ "${currentDirectory}" =~ $equinoxPattern ]]
-  then
-    area="Equinox"
-  elif [[ "${currentDirectory}" =~ $eclipsePattern ]]
-  then
-    area="Eclipse"
-  else
-    area="[WARNING]: Unknown area"
-  fi
   checkSumEnd="$(date +%s )"
   elapsedTime $checkSumStart $checkSumEnd "${area} Elapsed Time computing checksums"
 fi
