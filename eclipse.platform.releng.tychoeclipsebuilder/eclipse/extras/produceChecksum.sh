@@ -9,17 +9,26 @@ else
   checkSumStart="$(date +%s )"
 fi
 
-# unclear if this script has access to build ID or not.
-# Note: if it does, and becomes part of DL, then "promote script" will
-# need to be modified to change the name.
-if [[ -z "${BUILD_ID}" ]]
+# This checkSums script is called twice, once while publishing Eclipse DL site, again
+# when publishing Equinox DL site. We use a simple heuristic to 
+# make use of "eclipse" or "equinox".
+# TODO: better design to require it to be passed in?
+currentDirectory="${PWD}"
+equinoxPattern="^.*equinox.*$"
+eclipsePattern="^.*eclipse.*$"
+if [[ "${currentDirectory}" =~ $equinoxPattern ]]
 then
-  allCheckSumsSHA256=checksum/SUMSSHA256
-  allCheckSumsSHA512=checksum/SUMSSHA512
+  client="equinox"
+elif [[ "${currentDirectory}" =~ $eclipsePattern ]]
+then
+  client="eclipse"
 else
-  allCheckSumsSHA256=checksum/${BUILD_ID}-SUMSSHA256
-  allCheckSumsSHA512=checksum/${BUILD_ID}-SUMSSHA512
+  echo "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
+  exit 1
 fi
+
+allCheckSumsSHA256=checksum/${client}-${BUILD_ID}-SUMSSHA256
+allCheckSumsSHA512=checksum/${client}-${BUILD_ID}-SUMSSHA512
 
 #  Remove the "all" files, here at beginning if they all ready exist,
 #  so that subsequent calls can all use append (i.e. ">>")
@@ -73,30 +82,13 @@ do
   sha512sum -b ${jarfile} | tee checksum/${jarfile}.sha512 >>${allCheckSumsSHA512}
 done
 
-
-# This checkSums script is called twice, once while publishing Eclipse DL site, again
-# when publishing Equinox DL site. We use a simple heuristic to add "Eclipse" or "Equinox" to the output message.
-currentDirectory="${PWD}"
-equinoxPattern="^.*equinox.*$"
-eclipsePattern="^.*eclipse.*$"
-if [[ "${currentDirectory}" =~ $equinoxPattern ]]
-then
-  area="equinox"
-elif [[ "${currentDirectory}" =~ $eclipsePattern ]]
-then
-  area="eclipse"
-else
-  area="[ERROR]: Unknown area"
-  exit 1
-fi
-
 echo "[DEBUG] Producing GPG signatures starting."
-# We make double use of the "area". One to simplify signing script. Second to identify times in timefile.
+# We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
 # remember, this "HOME" is for e4Build
 # TODO: put in error checking for file existence/readable
-key_passphrase=${HOME}/${area}-dev.passphrase
+key_passphrase=${HOME}/${client}-dev.passphrase
 
-signer=${area}-dev@eclipse.org
+signer=${client}-dev@eclipse.org
 signature_file256=${allCheckSumsSHA256}.gpg
 signature_file512=${allCheckSumsSHA512}.gpg
 fileToSign256=${allCheckSumsSHA256}
@@ -109,6 +101,6 @@ cat ${key_passphrase} | gpg --local-user ${signer} --sign --armor --output ${sig
 if [[ -n "${SCRIPT_PATH}" ]]
 then
   checkSumEnd="$(date +%s )"
-  elapsedTime $checkSumStart $checkSumEnd "${area} Elapsed Time computing checksums"
+  elapsedTime $checkSumStart $checkSumEnd "${client} Elapsed Time computing checksums"
 fi
 echo "[DEBUG] Producing checksums ended normally"
