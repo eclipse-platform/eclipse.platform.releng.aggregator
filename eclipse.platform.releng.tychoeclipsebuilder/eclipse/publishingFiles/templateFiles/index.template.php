@@ -303,8 +303,8 @@ else {
     <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
     <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
 <?php
-  $sums256file="checksum/$BUILD_ID-SUMSSHA256";
-  $sums512file="checksum/$BUILD_ID-SUMSSHA512";
+  $sums256file="checksum/eclipse-$BUILD_ID-SUMSSHA256";
+  $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
   if (file_exists($sums256file)) {
     echo "<p style=\"text-indent: 3em;\"><a href=\"$sums256file\">SHA256 Checksums</a>&nbsp;(<a href=\"$sums256file.gpg\">GPG</a>)</p>";
   }
