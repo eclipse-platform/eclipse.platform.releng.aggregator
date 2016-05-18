@@ -36,7 +36,7 @@ gtk.linux.s390 \
 gtk.linux.s390x \
 gtk.linux.x86 \
 gtk.linux.x86_64 \
-gtk.solaris.sparc \
+gtk.solaris.sparcv9 \
 gtk.solaris.x86 \
 win32.win32.x86 \
 win32.win32.x86_64 \

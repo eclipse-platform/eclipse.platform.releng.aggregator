@@ -388,8 +388,8 @@ is logs and tests.</p>
 <?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64le.tar.gz"); ?>
 </tr>
 <tr>
-<td>Solaris 10 (SPARC/GTK+)</td>
-<?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk.zip"); ?>
+<td>Solaris 11 (SPARCv9/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk-sparcv9.zip"); ?>
 </tr>
 <tr>
 <td>Solaris 10 (x86/GTK+)</td>
@@ -457,8 +457,8 @@ is logs and tests.</p>
 <?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-ppc64le.tar.gz"); ?>
 </tr>
 <tr>
-<td>Solaris 10 (SPARC/GTK+)</td>
-<?php genLinks("eclipse-platform-${BUILD_ID}-solaris-gtk.zip"); ?>
+<td>Solaris 11 (SPARCv9/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-solaris-gtk-sparcv9.zip"); ?>
 </tr>
 <tr>
 <td>Solaris 10 (x86/GTK+)</td>
@@ -573,8 +573,8 @@ is logs and tests.</p>
 <?php genLinks("swt-${BUILD_ID}-gtk-linux-ppc64le.zip"); ?>
 </tr>
 <tr>
-<td>Solaris 10 (SPARC/GTK+)</td>
-<?php genLinks("swt-${BUILD_ID}-gtk-solaris-sparc.zip"); ?>
+<td>Solaris 11 (SPARCv9/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-solaris-sparcv9.zip"); ?>
 </tr>
 <tr>
 <td>Solaris 10 (x86/GTK+)</td>
