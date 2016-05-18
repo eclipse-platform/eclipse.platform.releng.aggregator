@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localBuildProperties.shsource 2>/dev/null
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
