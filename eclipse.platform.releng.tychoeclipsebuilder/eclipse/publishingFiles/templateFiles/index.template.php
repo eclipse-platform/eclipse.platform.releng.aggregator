@@ -306,10 +306,10 @@ else {
   $sums256file="checksum/eclipse-$BUILD_ID-SUMSSHA256";
   $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
   if (file_exists($sums256file)) {
-    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums256file\">SHA256 Checksums</a>&nbsp;(<a href=\"$sums256file.gpg\">GPG</a>)</p>";
+    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums256file\">SHA256 Checksums</a>&nbsp;(<a href=\"$sums256file.asc\">GPG</a>)</p>";
   }
   if (file_exists($sums512file)) {
-    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums</a>&nbsp;(<a href=\"$sums512file.gpg\">GPG</a>)</p>";
+    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
   }
 ?>
 <?php

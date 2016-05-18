@@ -95,8 +95,8 @@ echo "[DEBUG] Producing GPG signatures starting."
 key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
 
 signer=${signer:-${client}-dev@eclipse.org}
-signature_file256=${allCheckSumsSHA256}.gpg
-signature_file512=${allCheckSumsSHA512}.gpg
+signature_file256=${allCheckSumsSHA256}.asc
+signature_file512=${allCheckSumsSHA512}.asc
 fileToSign256=${allCheckSumsSHA256}
 fileToSign512=${allCheckSumsSHA512}
 
