@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+
+# this localBuildProperties.shsource file is to ease local builds to 
+# override some variables.
+# It should not be used for production builds.
+source localBuildProperties.shsource 2>/dev/null
+
 echo "[DEBUG] Producing checksums starting"
 echo "[DEBUG] current directory: ${PWD}"
 if [[ -z "${SCRIPT_PATH}" ]]
@@ -84,18 +90,18 @@ done
 
 echo "[DEBUG] Producing GPG signatures starting."
 # We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
-# remember, this "HOME" is for e4Build
+# remember, this "HOME" is for e4Build for production builds.
 # TODO: put in error checking for file existence/readable
-key_passphrase=${HOME}/${client}-dev.passphrase
+key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
 
-signer=${client}-dev@eclipse.org
+signer=${signer:-${client}-dev@eclipse.org}
 signature_file256=${allCheckSumsSHA256}.gpg
 signature_file512=${allCheckSumsSHA512}.gpg
 fileToSign256=${allCheckSumsSHA256}
 fileToSign512=${allCheckSumsSHA512}
 
-cat ${key_passphrase} | gpg --local-user ${signer} --sign --armor --output ${signature_file256} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign256}
-cat ${key_passphrase} | gpg --local-user ${signer} --sign --armor --output ${signature_file512} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign512}
+cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file256} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign256}
+cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file512} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign512}
 
 # if SCRIPT_PATH not defined, we can not call elapsed time
 if [[ -n "${SCRIPT_PATH}" ]]
