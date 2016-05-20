@@ -21,10 +21,10 @@ else
   oldlabel=$2
   newdirname=$3
   newlabel=$4
-  dirname=$5
+  export dirname=$5
   if [[ -z "${dirname}" ]]
   then
-    dirname=$oldname
+    export dirname=$oldname
   fi
   printf "\n\tInput to renameBuild.sh:\n"
   printf "\t\toldname: ${oldname}\n"
@@ -124,6 +124,9 @@ perl -w -pi -e "${replaceCommand}" ${dirname}/buildproperties.php
 # It appears THIS is the one required ... changing label, inside files, 
 # not "directory name" as above.
 perl -w -pi -e "${replaceCommand}" ${dirname}/checksum/*
+
+# now re-sign the files of checksums, since names inside them changed.
+${PROMOTE_IMPL}/resignFiles.sh 
 
 # ===============================
 
