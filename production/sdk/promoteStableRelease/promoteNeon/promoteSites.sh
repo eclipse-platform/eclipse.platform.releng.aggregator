@@ -21,14 +21,14 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160512-1000
+export DROP_ID=I20160519-1730
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=RC1
+export CHECKPOINT=RC2
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
-export SIGNOFF_BUG=493482
+export SIGNOFF_BUG=493964
 
 # These remaining variables change less often, but do change
 # for different development phases and streams.
