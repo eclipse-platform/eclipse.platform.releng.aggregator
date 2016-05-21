@@ -302,14 +302,15 @@ else {
     <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments</a></li>
     <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
     <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
+  <ul>
 <?php
-  $sums256file="checksum/eclipse-$BUILD_ID-SUMSSHA256";
+  //$sums256file="checksum/eclipse-$BUILD_ID-SUMSSHA256";
+  //if (file_exists($sums256file)) {
+  //  echo "<p style=\"text-indent: 3em;\"><a href=\"$sums256file\">SHA256 Checksums</a>&nbsp;(<a href=\"$sums256file.asc\">GPG</a>)</p>";
+  //}
   $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
-  if (file_exists($sums256file)) {
-    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums256file\">SHA256 Checksums</a>&nbsp;(<a href=\"$sums256file.asc\">GPG</a>)</p>";
-  }
   if (file_exists($sums512file)) {
-    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
+    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
   }
 ?>
 <?php
@@ -323,8 +324,6 @@ else {
   }
 ?>
 
-
-</ul>
 </div> <!-- end midcolumn -->
 
 <?php
