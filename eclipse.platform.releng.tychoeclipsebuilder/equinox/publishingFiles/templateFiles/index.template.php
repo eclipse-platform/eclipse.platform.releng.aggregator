@@ -30,10 +30,6 @@
 <div id="midcolumn">
   <h3>Equinox $BUILD_TYPE_NAME Build: $BUILD_ID</h3>
   <p><b>$BUILD_PRETTY_DATE</b></p>
-  <p>These downloads are provided under the <a href="http://www.eclipse.org/legal/epl/notice.html">
-  Eclipse Foundation Software User Agreement</a>. Click <a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">here</a> for instructions
-  on verifying download integrity.</p>
-
 
   <div class="homeitem3col">
     <h3>All of Equinox</h3>
@@ -115,43 +111,17 @@
   </div>
 
   <div class="homeitem3col">
-    <h3>Legend</h3>
-    <table border="0" cellspacing="0" cellpadding="0" width="100%">
-      <tr></tr>
-      <!-- no longer display these
-      <tr>
-        <td align="center"><img src="/equinox/images/OK.gif"/></td>
-        <td>Build completed OK</td>
-      </tr>
-      <tr>
-        <td align="center"><img src="/equinox/images/FAIL.gif"/></td>
-        <td>Build failed to complete</td>
-      </tr>
-      <tr>
-        <td align="center"><img src="/equinox/images/pending.gif"/></td>
-        <td>Build is still pending</td>
-      </tr>
-      -->
-      <tr>
-        <td align="center"><img src="/equinox/images/repo.gif"/></td>
-        <td>Build artifact is also a p2 repository</td>
-      </tr>
-      <!--
-      <tr>
-        <td align="center"><img src="/equinox/images/md5.png"/></td>
-        <td>Click to get the MD5 hash for the corresponding build artifact</td>
-      </tr>
-      -->
-      <tr>
-        <td align="center"><img src="/equinox/images/sha1.png"/></td>
-        <td>Click to get the SHA512 hash for the corresponding build artifact</td>
-      </tr>
-      <tr>
-        <td align="center"><img src="http://eclipse.org/equinox/images/arrow.png"/></td>
-        <td>Click to expand section.</td>
-      </tr>
-    </table>
+    <h3>Other Information</h3>
+       <p><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></p>
+       <?php
+          $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
+          if (file_exists($sums512file)) {
+             echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
+          }
+       ?>
   </div>
+
+
 </div>
 
 EOHTML;
