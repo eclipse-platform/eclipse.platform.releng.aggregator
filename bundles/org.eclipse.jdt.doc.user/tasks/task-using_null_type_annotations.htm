@@ -179,7 +179,7 @@ denotes a type that is <em>known to be nullable</em>.
         }
     }
 </pre>
-<p>
+<p id="pessimistic_analysis">
 A type variable corresponding to an <strong>unconstrained</strong> type parameter requires <strong>pessimistic
 checking</strong> in order to guarantee safety with all legal substitutions: this type can
 neither be assumed to be nullable nor nonnull.
@@ -205,6 +205,7 @@ following error against the return in <code>provide()</code>:
 <blockquote>
 Null type mismatch (type annotations): 'null' is not compatible to the free type variable 'T'
 </blockquote>
+<p>The severity of problems detected by this pessimistic analysis is controlled by a dedicated <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#pessimistic_analysis">preference option</a>.
 <p>
 By enforcing this defensive strategy regarding unconstrained type parameters we obtain the benefit
 of allowing clients to freely choose the rules for a particular generic instantiation,
@@ -483,20 +484,21 @@ All mismatches detected based on type annotations are prefixed with "<code>Null 
 	The actual type argument <code>X</code>, however, doesn't conform to this constraint.</dd>
 <dt><font color="SaddleBrown">This nullness annotation conflicts with a '@N' annotation which is effective on the same type parameter</font></dt>
 <dd>A null annotation on a bound of a type parameter conflicts with another null annotation on another bound or on the type parameter itself.</dd>
-<dt><font color="SaddleBrown">Null type mismatch (type annotations): ''null'' is not compatible to the free type variable 'T'</font></dt>
-<dd>An attempt is made to assing <code>null</code> to a variable typed to an unconstrained type variable,
-	 see the section on <a href="#typeVariables">type variables</a></dd>
-<dt><font color="SaddleBrown">Null type mismatch (type annotations): required 'T' but this expression has type '@Nullable T', where 'T' is a free type variable</font></dt>
-<dd>An attempt is made to assign a value of a nullable type to a variable typed to an unconstrained type variabled,
-	 see the section on <a href="#typeVariables">type variables</a></dd>
 <dt><font color="SaddleBrown">Contradictory null annotations: method was inferred as 'T foo(X)', but only one of '@NonNull' and '@Nullable' can be effective at any location</font></dt>
 <dd>Type inference for a generic method invocation has produced a signature in which contradictory null annotations clash on the same element.<dd>
+<dt><font color="SaddleBrown">Null type mismatch (type annotations): 'null' is not compatible to the free type variable 'T'</font></dt>
+<dt><font color="SaddleBrown">Null type mismatch (type annotations): required 'T' but this expression has type '@Nullable T', where 'T' is a free type variable</font></dt>
+<dt><font color="SaddleBrown">Null type safety: required '@NonNull' but this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
+<dt><font color="SaddleBrown">The field 'f' may not have been initialized, whereas its type 'T' is a free type variable that may represent a '@NonNull' type</font></dt>
+<dt><font color="SaddleBrown">Potential null pointer access: this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
+<dd>These problems are specifically detected by <a href="#pessimistic_analysis">pessimistic analysis for free type variables</a>.</dd>
 </dl>
+
 
 <h3>Lambda expressions and method references</h3>
 For any mismatches in null annotations affecting lambda expressions or method references the corresponding
 "descriptor" is mentioned (the single abstract method being implemented by the lambda / method reference).
-This is usefull for finding the origin of a null annotation that is not explicit at the current expression.
+This is useful for finding the origin of a null annotation that is not explicit at the current expression.
 
 
 </body>
