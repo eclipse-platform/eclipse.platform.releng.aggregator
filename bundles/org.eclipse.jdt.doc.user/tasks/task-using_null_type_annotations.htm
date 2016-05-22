@@ -240,6 +240,53 @@ freely choose the nullness of his type arguments:
         return result;
     }
 </pre>
+<h3 id="substitution">Substitution</h3>
+<p>
+The intention behind combining null type annotations with generics is to propagate a constraint defined for a type argument
+into all occurrences of the corresponding type variable. For example, if you declare a variable of type <code>List&lt;@NonNull String&gt;</code>
+and invoke any method from <code>List&lt;T&gt;</code> on this variable, all method signatures will see type <code>T</code> substituted by <code>@NonNull String</code>.
+This is how inserting a <code>null</code> value into this list is made impossible, and allows to safely regard elements extracted from this list as nonnull. 
+The previous section gave examples of exactly this idea.
+</p>
+<p>
+Unfortunately, this idea introduces a new risk when applied to generic library classes that are <em>not designed with null annotations in mind.</em>
+A prominent example is method <code>java.util.Map.get(K)</code>, which declares to return <code>V</code>.
+In this particular case, the javadoc of said method explicitly states that <code>null</code> is a possible return value,
+which is in conflict with substituting <code>V</code> by any nonnull type.
+So, if this specific method <code>get()</code> is invoked on a variable of type <code>Map&lt;Y,@NonNull X&gt;</code>, 
+it is <em>unsafe</em> to assume that the return value is nonnull.
+This dilemma is a combination of two factors:
+</p>
+<ol>
+<li>The library lacks null annotations (it should be considered as "legacy" in terms of null annotations)</li>
+<li>The compiler cannot know whether an unannotated type variable is by intention (as to support arbitrary substitution) or an unsafe omission (legacy).
+</ol>
+<p>
+To alert users about this risk, a specific warning is raised by the compiler:
+</p>
+<blockquote>
+Unsafe interpretation of method return type as '@NonNull X' based on the receiver type 'Map&lt;Y,@NonNull X&gt;'. Type 'Map' doesn't seem to be designed with null type annotations in mind
+</blockquote> 
+<p>The severity of this problem is controlled by a dedicated <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#unsafe_interpretation_generic_legacy">preference option</a>.
+<p>In response to this warning, the resolution of the dilemma is to add null annotations to the generic class in question. 
+For the likely case that the current user is not the owner of the legacy library, 
+<a href="task-using_external_null_annotations.htm">external null annotations</a> should be used.
+Then there are two options:</p>
+<ol>
+<li>For the given example, method <code>get(K)</code> should be declared to return <code>@Nullable V</code>.
+	</li>
+<li>For the opposite case as exemplified by <code>List.get()</code>, the return type should be left unannotated.
+	In order to signal to the compiler that types are left <em>unannotated by intention</em>, 
+	a stub external annotation file (.eea) should be created without inserting actual external annotations.
+	This will tell the compiler that this class is no longer to be considered as legacy,
+	and hence all signatures of this class should be interpreted verbatim according to the rules given above
+	(care must be taken that this is safe for all method in that class).
+	</li>
+</ol>
+<p>If an external annotation file is found, the specific warning about unsafe interpretation is not issued.
+Finally, if a project is not yet configured for using external annotations for the given library,
+the problem is softened to "info" severity.
+</p> 
 
 <h2 id="inference">Inference</h2>
 <p>
@@ -492,6 +539,9 @@ All mismatches detected based on type annotations are prefixed with "<code>Null 
 <dt><font color="SaddleBrown">The field 'f' may not have been initialized, whereas its type 'T' is a free type variable that may represent a '@NonNull' type</font></dt>
 <dt><font color="SaddleBrown">Potential null pointer access: this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
 <dd>These problems are specifically detected by <a href="#pessimistic_analysis">pessimistic analysis for free type variables</a>.</dd>
+<dt><font color="SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on the receiver type 'Map&lt;Y,@NonNull X&gt;'. Type 'Map' doesn't seem to be designed with null type annotations in mind</font></dt>
+<dt><font color="SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on substitution 'V=@NonNull X'. Declaring type 'Map&lt;K,V&gt;' doesn't seem to be designed with null type annotations in mind</font></dt>
+<dd>This signals a particular dilemma regarding <a href="#substitution">substitution of type variables from a legacy library</a>.
 </dl>
 
 
