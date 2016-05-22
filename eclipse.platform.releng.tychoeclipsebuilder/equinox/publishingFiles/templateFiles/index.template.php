@@ -114,7 +114,7 @@
     <h3>Other Information</h3>
        <p><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></p>
        <?php
-          $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
+          $sums512file="checksum/equinox-$BUILD_ID-SUMSSHA512";
           if (file_exists($sums512file)) {
              echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
           }
