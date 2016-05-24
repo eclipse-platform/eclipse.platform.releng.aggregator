@@ -16,15 +16,17 @@ eclipsePattern="^.*eclipse.*$"
 if [[ "${renameDir}" =~ $equinoxPattern ]]
 then
   client="equinox"
-  buildLabel="${DL_LABEL_EQ}"
+  buildLabel="${BUILD_LABEL_EQ}"
 elif [[ "${renameDir}" =~ $eclipsePattern ]]
 then
   client="eclipse"
-  buildLabel="${DL_LABEL}"
+  buildLabel="${BUILD_LABEL}"
 else
   echo "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
   exit 1
 fi
+# note, at this point, the file name itself is still the old filename. 
+# will will be renamed in a later stage.
 allCheckSumsSHA256=checksum/${client}-${buildLabel}-SUMSSHA256
 allCheckSumsSHA512=checksum/${client}-${buildLabel}-SUMSSHA512
 
