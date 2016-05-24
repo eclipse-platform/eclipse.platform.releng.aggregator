@@ -2,17 +2,17 @@
   name="Publish Build"
   default="default">
 
-<!-- Properties that must be passed to this script:
-  buildDirectory: Path to perform the build in.  (A working directory)
-  buildType:    Type of build (nightly, integration etc.)
-  buildId:    Build name
-  buildLabel:    <buildType>-<buildName>-<timestamp>
--->
+  <!-- Properties that must be passed to this script:
+    buildDirectory: Path to perform the build in. (A working directory)
+    buildType: Type of build (nightly, integration etc.)
+    buildId: Build name
+    buildLabel: <buildType>-<buildName>-<timestamp>
+  -->
   <property
     name="result"
     value="${buildDirectory}" />
 
-<!--name of generated index page-->
+  <!--name of generated index page -->
   <property
     name="indexFileName"
     value="index.php" />
@@ -31,27 +31,27 @@
       name="indexResults"
       classname="${class}" />
 
-<!--
-  isBuildTested:  true|false  should JUnit plugin test results be used to generate index page
-  dropTokenList:  comma separated list of strings which should be replaced by the fileName attribute settings in the testManifest.xml.
-  xmlDirectoryName:  path to directory containing JUnit plugin test results in xml format (see doc is org.eclipse.test).
-  dropDirectoryName: path to directory containing the result of the build.
-  testResultsHtmlFileName:  name of file which will be generated with links to JUnit test results
-  dropHtmlFileName:  name of generated index page
-  hrefTestResultsTargetPath:  relative path from index page to parent directory containing JUnit html and xml test results
-            for example, 
-                if html is in 
-                .../testResults/html/...  
-                and xml is in 
-                .../testResults/xml/... 
-                then hrefTestResultsTargetPath would be set to testResults
-                if, that is, the "testResults.php" page is a peer of the 'testResults' 
-                directory. If testResults.php page is under testResults directory, 
-                then the value would be ".". 
-  hrefCompileLogsTargetPath:  relative path from index page directory containing compilelogs
-  testManifestFileName:  name of xml file containing descriptions of zip types and log files
+    <!--
+      isBuildTested: true|false should JUnit plugin test results be used to generate index page
+      dropTokenList: comma separated list of strings which should be replaced by the fileName attribute settings in the testManifest.xml.
+      xmlDirectoryName: path to directory containing JUnit plugin test results in xml format (see doc is org.eclipse.test).
+      dropDirectoryName: path to directory containing the result of the build.
+      testResultsHtmlFileName: name of file which will be generated with links to JUnit test results
+      dropHtmlFileName: name of generated index page
+      hrefTestResultsTargetPath: relative path from index page to parent directory containing JUnit html and xml test results
+      for example,
+      if html is in
+      .../testResults/html/...
+      and xml is in
+      .../testResults/xml/...
+      then hrefTestResultsTargetPath would be set to testResults
+      if, that is, the "testResults.php" page is a peer of the 'testResults'
+      directory. If testResults.php page is under testResults directory,
+      then the value would be ".".
+      hrefCompileLogsTargetPath: relative path from index page directory containing compilelogs
+      testManifestFileName: name of xml file containing descriptions of zip types and log files
 
--->
+    -->
 
     <condition
       property="xmlDirectoryName"
@@ -62,12 +62,14 @@
     </condition>
     <condition
       property="xmlDirectoryName"
-      value="${result}/performance/xml"
-      else="${result}/testresults/xml">
+      value="${result}/performance/xml">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
+    <property
+      name="xmlDirectoryName"
+      value="${result}/testresults/xml" />
 
     <condition
       property="manifestFile"
@@ -78,14 +80,19 @@
         substring="-perf-" />
     </condition>
 
-    <property
-      name="xmlDirectoryName"
-      value="${result}/xml" />
+    <condition
+      property="regenerate"
+      value="true"
+      else="false">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
     <property
       name="dropDirectoryName"
       value="${postingDirectory}/${buildLabel}" />
 
-<!-- TODO: should require this, and others to be passed in, and fail, if not -->
+    <!-- TODO: should require this, and others to be passed in, and fail, if not -->
     <property
       name="dropTemplateFileName"
       value="${basedir}/templateFiles/index.html.template" />
@@ -145,11 +152,11 @@
         string="${job}"
         substring="-perf-" />
     </condition>
-    <!-- 
-    <property
+    <!--
+      <property
       name="hrefTestResultsTargetPath"
       value="${result}" />
-        -->
+    -->
     <property
       name="hrefCompileLogsTargetPath"
       value="compilelogs/plugins/" />
@@ -159,36 +166,36 @@
     <property
       name="testManifestFileName"
       value="${manifestFile}" />
-        <condition
-          property="testsConfigExpected"
-          value="ep46${buildType}-perf-lin64_8.0">
-          <contains
-            string="${job}"
-            substring="ep46${buildType}-perf-lin64" />
-        </condition>
-        <condition
-          property="testsConfigExpected"
-          value="ep46${buildType}-perf-lin64-baseline_8.0">
-          <contains
-            string="${job}"
-            equals="ep46${buildType}-perf-lin64-baseline" />
-        </condition>
-        <condition
-          property="testsConfigExpected"
-          value="ep46${buildType}LR-perf-lin64_8.0">
-          <contains
-            string="${job}"
-            substring="ep46${buildType}LR-perf-lin64" />
-        </condition>
-        <condition
-          property="testsConfigExpected"
-          value="ep46${buildType}LR-perf-lin64-baseline_8.0">
-          <contains
-            string="${job}"
-            equals="ep46${buildType}LR-perf-lin64-baseline" />
-        </condition> 
-        <!-- else normal unit tests configs -->          
-   
+    <condition
+      property="testsConfigExpected"
+      value="ep46${buildType}-perf-lin64_8.0">
+      <contains
+        string="${job}"
+        substring="ep46${buildType}-perf-lin64" />
+    </condition>
+    <condition
+      property="testsConfigExpected"
+      value="ep46${buildType}-perf-lin64-baseline_8.0">
+      <contains
+        string="${job}"
+        equals="ep46${buildType}-perf-lin64-baseline" />
+    </condition>
+    <condition
+      property="testsConfigExpected"
+      value="ep46${buildType}LR-perf-lin64_8.0">
+      <contains
+        string="${job}"
+        substring="ep46${buildType}LR-perf-lin64" />
+    </condition>
+    <condition
+      property="testsConfigExpected"
+      value="ep46${buildType}LR-perf-lin64-baseline_8.0">
+      <contains
+        string="${job}"
+        equals="ep46${buildType}LR-perf-lin64-baseline" />
+    </condition>
+    <!-- else normal unit tests configs -->
+
     <property
       name="testsConfigExpected"
       value="ep46${buildType}-unit-lin64_linux.gtk.x86_64_8.0,ep46${buildType}-unit-mac64_macosx.cocoa.x86_64_8.0,ep46${buildType}-unit-win32_win32.win32.x86_8.0,ep46${buildType}-unit-cen64_linux.gtk.x86_64_8.0" />
@@ -211,6 +218,7 @@
     <echo message="     testsConfigExpected: ${testsConfigExpected}" />
     <indexResults
       isBuildTested="${isBuildTested}"
+      regenerate="${regenerate}"
       buildType="${buildType}"
       dropTokenList="${dropTokenList}"
       dropHtmlFileName="${indexFileName}"
@@ -229,9 +237,9 @@
 
 
   <target name="getStaticFiles">
-  <!--get static files required in the buildLabel directory-->
+    <!--get static files required in the buildLabel directory -->
     <copy todir="${result}">
       <fileset dir="staticDropFiles" />
     </copy>
- </target>
+  </target>
 </project>
