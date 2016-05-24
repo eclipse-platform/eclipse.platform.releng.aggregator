@@ -2,23 +2,10 @@
   name="Helper targets"
   default="noDefault">
 
-  <property environment="env" />
-
-  <fail
-    unless="EBuilderDir"
-    message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
-  <fail
-    unless="postingDirectory"
-    message="postingDirectory must be passed to this script." />
-  <fail
-    unless="buildLabel"
-    message="buildLabel must be passed to this script." />
-  <property
-    name="publishingContent"
-    value="${EBuilderDir}/eclipse/publishingFiles" />
 
   <target
     name="publish"
+    depends="init"
     description="Preparing to post the build...">
     <echo message="[DEBUG] Eclipse helper.xml publish starting" />
     <fail
@@ -86,7 +73,9 @@
     <echo message="[DEBUG] Eclipse helper.xml publish ending normally" />
   </target>
 
-  <target name="generateEclipseIndex">
+  <target
+    name="generateEclipseIndex"
+    depends="init">
     <property
       name="generatorClass"
       value="org.eclipse.releng.generators.TestResultsGenerator" />
@@ -173,6 +162,7 @@
 
   <target
     name="verifyCompile"
+    depends="init"
     if="eclipse.running">
     <echo message="DEBUG: in helper.xml: Checking for compile errors..." />
     <!--create html output for compile logs -->
@@ -181,6 +171,35 @@
       validation="true" />
     <!-- Sends email to recipient list in monitor.properties with compile logs attached if errors found -->
     <!-- <verifyCompile install="${postingDirectory}/${buildLabel}/compilelogs" /> -->
+  </target>
+
+  <target name="init">
+    <!-- we make sure 'job' has some value (that would not match conditions),
+      so "conditions" will work, ultimately getting some
+      "no match" default value. But not setting
+      it to something seems to cause them to "bomb out"
+    -->
+    <property
+      name="job"
+      value="jobNOTpassedin" />
+    <echo message="in helper.xml the value of job passed in (or, not) was ${job}" />
+
+
+    <property environment="env" />
+
+    <fail
+      unless="EBuilderDir"
+      message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
+    <fail
+      unless="postingDirectory"
+      message="postingDirectory must be passed to this script." />
+    <fail
+      unless="buildLabel"
+      message="buildLabel must be passed to this script." />
+    <property
+      name="publishingContent"
+      value="${EBuilderDir}/eclipse/publishingFiles" />
+
   </target>
 
   <!-- ===================================================================== -->
