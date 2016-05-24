@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  A utility ant script get the base builder from Git (or CVS).
-  Hudson jobs (or builds) can call this script from generic ant
-  as one of it first build steps to get the eclipse antRunner, for example.
+  A utility ant script which gets the Eclipse Platform binary from 'archive' server then uses it to
+  install additional tools and utilities from several p2 repositories: from 'downloads', the 'build' machine, 
+  and one that is on an 'external' site, to actually test that proxies work. (The external one is a "real" project, 
+  so this script should not be ran so often to "stress" that site, or throw off their download statistics.)
+
+  Hudson jobs (or builds) can call a script like this one from generic ant
+  as one of it first build steps to get the eclipse tools or applications, such as antRunner.
 -->
 <project
   name="getBaseBuilder"
@@ -61,10 +65,10 @@
     <mkdir dir="${TMP}" />
 
     <condition
-      property="downloadHost"
-      value="${env.DOWNLOAD_HOST}"
-      else="archive.eclipse.org">
-      <isset property="env.DOWNLOAD_HOST" />
+      property="basedownloadHost"
+      value="${env.BASE_DOWNLOAD_HOST}"
+      else="download.eclipse.org">
+      <isset property="env.BASE_DOWNLOAD_HOST" />
     </condition>
     <!--
       TODO: need make platform independent, as in test.xml, to compute right one.
@@ -81,7 +85,7 @@
     
     <property
       name="platformURL"
-      value="http://${downloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
+      value="http://${basedownloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
     <!--
       We used to use binary platform, since smaller, but moved to SDK, to be able to use API Tools.
       But then moved back to Platform, after having some cases where we need to pick up new fixes from
@@ -161,6 +165,24 @@
     <property
       name="webtools.feature.version"
       value="1.2.0.v201102200505-21-7w312213311616" />
+
+    <!-- 
+      This repo ONLY used for testing proxies. Not production runs.
+      Have included this "external" site, just to give a true
+      test of the proxies themselves. I got this site from "marketplace"
+      and because this is a "real" project for someone, we should not
+      overuse the "test" aspect, or will throw off their numbers.
+      If it is ever desired to "run this test" ever day, or similar,
+      then a better "test site" should be found or created. -->
+    <property
+      name="external.repository"
+      value=" http://fabrizioiannetti.github.io/p2/" />
+    <property
+      name="external.feature"
+      value="com.github.fabeclipse.textedgrep_feature.feature.group" />
+    <property
+      name="external.feature.version"
+      value="" />
 
     <!-- assign default WORKSPACE if not on Hudson, for local testing if nothing else -->
     <property

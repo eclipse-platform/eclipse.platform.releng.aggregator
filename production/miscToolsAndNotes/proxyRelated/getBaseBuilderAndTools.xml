@@ -66,10 +66,10 @@
     <mkdir dir="${TMP}" />
 
     <condition
-      property="downloadHost"
-      value="${env.DOWNLOAD_HOST}"
-      else="archive.eclipse.org">
-      <isset property="env.DOWNLOAD_HOST" />
+      property="basedownloadHost"
+      value="${env.BASE_DOWNLOAD_HOST}"
+      else="download.eclipse.org">
+      <isset property="env.BASE_DOWNLOAD_HOST" />
     </condition>
     <!--
       TODO: need make platform independent, as in test.xml, to compute right one.
@@ -86,7 +86,7 @@
     
     <property
       name="platformURL"
-      value="http://${downloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
+      value="http://${basedownloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
     <!--
       We used to use binary platform, since smaller, but moved to SDK, to be able to use API Tools.
       But then moved back to Platform, after having some cases where we need to pick up new fixes from
@@ -167,7 +167,9 @@
       name="webtools.feature.version"
       value="1.2.0.v201102200505-21-7w312213311616" />
 
-    <!-- Have included this "external" site, just to give a true
+    <!-- 
+      This repo ONLY used for testing proxies. Not production runs.
+      Have included this "external" site, just to give a true
       test of the proxies themselves. I got this site from "marketplace"
       and because this is a "real" project for someone, we should not
       overuse the "test" aspect, or will throw off their numbers.
@@ -198,6 +200,7 @@
       name="folderName"
       value="org.eclipse.releng.basebuilder" />
 
+    <property name="java8vmbindir" value="/shared/common/jdk1.8.0_x64-latest/bin/" />
     <property
       name="getBaseBuilderInitialized"
       value="true" />
@@ -261,7 +264,7 @@
       <arg
         value="${apiTools.iu}/${apiTools.iu.version},${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version},${buildTools.derby.feature}/${buildTools.derby.feature.version},${external.feature}/${external.feature.version}" />
       <arg value="-vm" />
-      <arg value="${jvm}" />
+      <arg value="${java8vmbindir}" />
       <!-- vmargs must come last -->
       <arg value="-vmargs" />
       <arg value="-Djava.io.tmpdir=${TMP}" />
@@ -275,7 +278,6 @@
 
     <echo
       message="platform and tools installed. platformURL: ${platformURL} platform: ${platformFile}, fetched using proxyRelated/getBaseBuilderAndTools.xml" />
-
     <echo message="The following were the properties in effect:" />
     <echoproperties />
   </target>
