@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
 
-#Since the names of the files in the checksum files changed, 
-#the file-of-checksums must be resigned to be valid. Otherwise, 
-#appears "tampered with" (since it has been tampered with :) 
+#Since the names of the files in the checksum files changed,
+#the file-of-checksums must be resigned to be valid. Otherwise,
+#appears "tampered with" (since it has been tampered with :)
 
 # During promote, this file is called from "renameBuild.sh"
 
 echo "[DEBUG] Re-producing GPG signatures starting."
 
-# in early scripts we cd to the parent of the directory 
-# we are changing. dirname is normally "DROP_ID".
-renameDir=${renameDir:-"${PWD}/${dirname}"}
+# in early scripts we cd to the parent of the directory
+# we are changing. We need "whole name" (at least PWD)
+# to find proper client. Note: "buildLabel" is almost always
+# the same for equinox and eclipse, at this point. But we
+# set to their "global" values, just in case that changes.
+renameDir=${renameDir:-"${PWD}/${newdirname}"}
 equinoxPattern="^.*equinox.*$"
 eclipsePattern="^.*eclipse.*$"
 if [[ "${renameDir}" =~ $equinoxPattern ]]
@@ -25,10 +28,21 @@ else
   echo "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
   exit 1
 fi
-# note, at this point, the file name itself is still the old filename. 
-# will will be renamed in a later stage.
-allCheckSumsSHA256=checksum/${client}-${buildLabel}-SUMSSHA256
-allCheckSumsSHA512=checksum/${client}-${buildLabel}-SUMSSHA512
+
+echo -e "\n\t == properties just before GPG signing ==\n"
+echo -e "\t\t client: $client"
+echo -e "\t\tPWD: $PWD"
+printf "\t\toldname: ${oldname}\n"
+printf "\t\toldlabel: ${oldlabel}\n"
+printf "\t\tnewdirname: ${newdirname}\n"
+printf "\t\tnewlabel: ${newlabel}\n"
+printf "\t\tdirname: ${dirname}\n\n"
+
+# note, at this point, the file name itself is still the old filename.
+# will will be renamed in a later stage. but we should change only
+# the files in "newdirname" (set and exported from rename build).
+allCheckSumsSHA256=${dirname}/checksum/${client}-${buildLabel}-SUMSSHA256
+allCheckSumsSHA512=${dirname}/checksum/${client}-${buildLabel}-SUMSSHA512
 
 key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
 
