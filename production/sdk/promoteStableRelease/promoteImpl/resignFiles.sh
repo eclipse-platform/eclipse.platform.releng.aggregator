@@ -8,14 +8,16 @@
 
 echo "[DEBUG] Re-producing GPG signatures starting."
 
-dirname=${dirname:-"${PWD}"}
+# in early scripts we cd to the parent of the directory 
+# we are changing. dirname is normally "DROP_ID".
+renameDir=${renameDir:-"${PWD}/${dirname}"}
 equinoxPattern="^.*equinox.*$"
 eclipsePattern="^.*eclipse.*$"
-if [[ "${dirname}" =~ $equinoxPattern ]]
+if [[ "${renameDir}" =~ $equinoxPattern ]]
 then
   client="equinox"
   buildLabel="${DL_LABEL_EQ}"
-elif [[ "${dirname}" =~ $eclipsePattern ]]
+elif [[ "${renameDir}" =~ $eclipsePattern ]]
 then
   client="eclipse"
   buildLabel="${DL_LABEL}"

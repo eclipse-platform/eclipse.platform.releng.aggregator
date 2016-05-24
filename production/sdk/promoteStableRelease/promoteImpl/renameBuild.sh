@@ -125,7 +125,7 @@ perl -w -pi -e "${replaceCommand}" ${dirname}/buildproperties.php
 # not "directory name" as above.
 perl -w -pi -e "${replaceCommand}" ${dirname}/checksum/*
 
-# now re-sign the files of checksums, since names inside them changed.
+echo -e "Now GPG resigning the files of checksums, since names inside them changed from $oldlabel to $newlabel."
 ${PROMOTE_IMPL}/resignFiles.sh 
 
 # ===============================
