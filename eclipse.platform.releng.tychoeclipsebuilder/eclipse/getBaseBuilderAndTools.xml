@@ -15,6 +15,17 @@
 
     <property environment="env" />
 
+    <!-- this property file is optional. It's primarily used to set 
+         the "proxy setting preferences" for Eclpse. -->
+    <property file="platformSpecific.properties" />
+
+    <!-- jvm usually set in the platformSpecific.properties file, but if not, we
+      will force one possibly valid value. -->
+    <property
+      name="jvm"
+      value="/shared/common/jdk1.8.0_x64-latest/bin" />
+
+
     <condition
       property="TMP"
       value="${env.TMP_DIR}">
@@ -40,18 +51,20 @@
 
     <property
       name="TMP"
-      value="/shared/eclipse/tmp" />
+      value="${basedir}/tmp" />
 
     <fail
       unless="TMP"
       message="TMP not defined, since TMP_DIR nor BUILD_ROOT was defined" />
     <echo message="TMP: ${TMP}" />
 
+    <mkdir dir="${TMP}" />
+
     <condition
-      property="basedownloadHost"
-      value="${env.BASE_DOWNLOAD_HOST}"
-      else="download.eclipse.org">
-      <isset property="env.BASE_DOWNLOAD_HOST" />
+      property="downloadHost"
+      value="${env.DOWNLOAD_HOST}"
+      else="archive.eclipse.org">
+      <isset property="env.DOWNLOAD_HOST" />
     </condition>
     <!--
       TODO: need make platform independent, as in test.xml, to compute right one.
@@ -68,7 +81,7 @@
     
     <property
       name="platformURL"
-      value="http://${basedownloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
+      value="http://${downloadHost}/eclipse/downloads/drops4/${eclipseBaseDir}" />
     <!--
       We used to use binary platform, since smaller, but moved to SDK, to be able to use API Tools.
       But then moved back to Platform, after having some cases where we need to pick up new fixes from
@@ -133,6 +146,13 @@
       value="" />
 
     <property
+      name="buildTools.derby.feature"
+      value="org.apache.derby.core.feature.feature.group" />
+    <property
+      name="buildTools.derby.feature.version"
+      value="" />
+
+    <property
       name="webtools.repository"
       value="http://download.eclipse.org/webtools/releng/repository/" />
     <property
@@ -182,6 +202,7 @@
       dest="${TMP}/${platformFile}"
       src="${platformURL}/${platformFile}"
       usetimestamp="true" />
+    <!-- untar is broken in Ant 1.9.4. See https://bz.apache.org/bugzilla/show_bug.cgi?id=56641 -->
     <untar
       compression="gzip"
       src="${TMP}/${platformFile}"
@@ -201,6 +222,9 @@
         <include name="*.so*" />
       </fileset>
     </chmod>
+
+    <antcall target="installSettings" />
+
     <exec
       dir="${TMP}/eclipse"
       failonerror="true"
@@ -216,7 +240,7 @@
       <arg value="${eclipserun-repo},${buildTools.repository},${webtools.repository}" />
       <arg value="-installIU" />
       <arg
-        value="${apiTools.iu}/${apiTools.iu.version},${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version}" />
+        value="${apiTools.iu}/${apiTools.iu.version},${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version},${buildTools.derby.feature}/${buildTools.derby.feature.version},${external.feature}/${external.feature.version}" />
       <arg value="-vm" />
       <arg value="${java8vmbindir}" />
       <!-- vmargs must come last -->
@@ -225,15 +249,27 @@
     </exec>
 
     <!-- we "move" so the directory structure so it flat under basebuilder ...
-      for compatibility to older code/scripts -->
+      for compatibility to very old code/scripts -->
     <move todir="${WORKSPACE}/${folderName}">
-      <fileset dir="${TMP}/eclipse/">
-
-      </fileset>
+      <fileset dir="${TMP}/eclipse/" />
     </move>
 
     <echo
-      message="platform and tools installed, platformURL: ${platformURL} platform: ${platformFile}, fetched using tychoeclipsebuilder/getBaseBuilderAndTools.xml" />
+      message="platform and tools installed. platformURL: ${platformURL} platform: ${platformFile}, fetched using tychoeclipsebuilder/getBaseBuilderAndTools.xml" />
+    <echo message="The following were the properties in effect:" />
+    <echoproperties />
+  </target>
+  <target
+    name="installSettings"
+    if="org.eclipse.core.net.prefs">
+    <property
+      name="settingsDir"
+      value="org.eclipse.releng.basebuilder/configuration/.settings" />
+
+    <mkdir dir="${settingsDir}" />
+    <echo
+      message="${org.eclipse.core.net.prefs}"
+      file="${settingsDir}/org.eclipse.core.net.prefs" />
   </target>
 
 </project>
