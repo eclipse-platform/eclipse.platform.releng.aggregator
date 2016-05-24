@@ -21,14 +21,14 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160519-1730
+export DROP_ID=I20160523-2000
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=RC2
+export CHECKPOINT=RCT
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
-export SIGNOFF_BUG=493964
+export SIGNOFF_BUG=
 
 # These remaining variables change less often, but do change
 # for different development phases and streams.
@@ -36,14 +36,12 @@ export SIGNOFF_BUG=493964
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Neon
 
-export BUILD_MAJOR=4
-export BUILD_MINOR=6
-export BUILD_SERVICE=0
+# Three digit release number, such as 4.7.0 or 4.6.1
+STREAM=4.6.0
 
-# These are what precedes main drop directory name -- 
-# that is, for what we are naming the build TO
-# For Maintenance, it's always 'M' (from M-build) until it's 'R'.
-# for main line code, it's 'S' (from I-build) until it's 'R'
+# The build type we are naming the build TO
+# For Maintenance, it is always 'M' (from M-build) until it's 'R'.
+# for main line code, it is alwasy 'S' (from I-build) until it's 'R'
 export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
@@ -67,11 +65,26 @@ export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promote${TRAI
 # equinox, not update site. None of the "deferred" stuff is set.
 #export INDEX_ONLY=true
 # We only ever check for 'true'
+# Note: this function has not been well tested. It usually does
+# no harm, just to redo everything, unless changes made on download
+# server drop site only.
 #export INDEX_ONLY=false
 
 # = = = = = = = Things past here seldom need to be updated
 export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export TRACE_LOG=${CL_SITE}/traceLog.txt
+
+if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
+then
+  export BUILD_MAJOR=${BASH_REMATCH[1]}
+  export BUILD_MINOR=${BASH_REMATCH[2]}
+  export BUILD_SERVICE=${BASH_REMATCH[3]}
+else
+  echo "STREAM must contain major, minor, and service versions, such as 4.3.0"
+  echo "    but found ${STREAM}"
+  exit 1
+fi
+
 
 # remove any of the scripts we create, such as for 'dry-run', since some of them, 
 # such as 'checklist' are normally appended to, not to mention better to start off 
