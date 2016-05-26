@@ -26,7 +26,9 @@
 <p>
 Removed APIs in the Neon (4.6) release:
 </p>
-None.
+<ol>
+ <li><a href="#runtime">Eclipse 2.0 runtime model and boot API</a></li>
+</ol>
 <p>
 Planned API removals after June 2016:
 </p>
@@ -35,21 +37,22 @@ Planned API removals after June 2016:
  <li><a href="#tabletreeviewer">TableTree and TableTreeViewer</a></li>
  <li><a href="#tasklist">org.eclipse.ui.views.tasklist.TaskList</a></li>
  <li><a href="#auth">Platform authorization API</a></li>
- <li><a href="#runtime">Eclipse 2.0 runtime model and boot API</a></li>
 </ol>
 
 <p>
 Planned API removals after June 2017:
 </p>
 <ol>
- <li><a href="#imageandmessagearea">ImageAndMessageArea from JFace</a></li>
+ <li><a href="#icontextcomputer">IContextComputer</a></li>
+ <li><a href="#iplatformrunnable">org.eclipse.core.runtime.IPlatformRunnable</a></li>
 </ol>
 
 <p>
 Planned API removals after June 2018:
 </p>
 <ol>
- <li><a href="#icontextcomputer">IContextComputer</a></li>
+ <li><a href="#imageandmessagearea">ImageAndMessageArea from JFace</a></li>
+ <li><a href="#fullscreen">org.eclipse.ui.cocoa.fullscreenWindow</a></li>
 </ol>
 <hr>
 
@@ -60,7 +63,24 @@ Planned API removals after June 2018:
 
 <h2>API removals in this release</h2>
 
-None
+<h3>1. <a name="runtime">Eclipse 2.0 runtime model and boot API</a></h3>
+<p>
+When the Eclipse runtime transitioned to use OSGi as its implementation, some existing
+APIs for interacting with the old runtime were deprecated and moved to a compatibility fragment
+(<tt>org.eclipse.core.runtime.compatibility</tt>). All API that was still valid was moved
+elsewhere. These APIs have been non-functional since Eclipse 3.0 and will therefore
+be removed in the future. The following packages will be removed:
+</p>
+<ul>
+ <li><tt>org.eclipse.core.boot</tt></li>
+ <li><tt>org.eclipse.core.runtime.model</tt></li>
+ </ul>
+ The compatibility fragment, <tt>org.eclipse.core.runtime.compatibility</tt> will
+ also be removed. As a consequence <code>org.eclipse.ui.startup</code> extensions will no longer work if they do not specify a class that implements <code> org.eclipse.ui.IStartup</code>. 
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
+</p>
+
 
 <!-- ############################################## -->
 
@@ -114,23 +134,6 @@ be removed from <tt>org.eclipse.core.runtime.Platform</tt>:
 <p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=476404" target="_blank">bug 476404</a>.
 </p>
-<h3>5. <a name="runtime">Eclipse 2.0 runtime model and boot API</a></h3>
-<p>
-When the Eclipse runtime transitioned to use OSGi as its implementation, some existing
-APIs for interacting with the old runtime were deprecated and moved to a compatibility fragment
-(<tt>org.eclipse.core.runtime.compatibility</tt>). All API that was still valid was moved
-elsewhere. These APIs have been non-functional since Eclipse 3.0 and will therefore
-be removed in the future. The following packages will be removed:
-</p>
-<ul>
- <li><tt>org.eclipse.core.boot</tt></li>
- <li><tt>org.eclipse.core.runtime.model</tt></li>
- </ul>
- The compatibility fragment, <tt>org.eclipse.core.runtime.compatibility</tt> will
- also be removed. As a consequence <code>org.eclipse.ui.startup</code> extensions will no longer work if they do not specify a class that implements <code> org.eclipse.ui.IStartup</code>. 
-<p>
-For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
-</p>
 
 
 <!-- ############################################## -->
@@ -144,14 +147,15 @@ The <code>org.eclipse.ui.help.IContextComputer</code> class and dependent classe
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=442961" target="_blank">bug 442961</a>.
 </p>
 
-<h3>2. <a name="iplatformrunnable">org.eclipse.core.boot.IPlatformRunnable</a></h3>
+<h3>2. <a name="iplatformrunnable">org.eclipse.core.runtime.IPlatformRunnable</a></h3>
 <p>
-The <code>org.eclipse.core.boot.IPlatformRunnable</code> interface is planned to be removed.
+The <code>org.eclipse.core.runtime.IPlatformRunnable</code> interface is planned to be removed.
 </p>
 <p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
 </p>
 
+<!-- ############################################## -->
 <h2>API removals after June 2018</h2>
 <h3>1. <a name="imageandmessagearea">ImageAndMessageArea from JFace</a></h3>
 <p>
@@ -160,5 +164,24 @@ The <code>org.eclipse.jface.dialogs.ImageAndMessageArea</code> class is planned 
 <p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=475863" target="_blank">bug 475863</a>.
 </p>
+
+<h3>2. <a name="fullscreen">org.eclipse.ui.cocoa.fullscreenWindow</a></h3>
+<p>
+Eclipse Platform 4.2 introduced a OS&nbsp;X-specific command to toggle full-screen
+called <code>org.eclipse.ui.cocoa.fullscreenWindow</code> (<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=376394" target="_blank">bug 376394</a>),
+bound to Command-Ctrl-F.  In 4.6 we introduced a cross-platform command
+to toggle full-screen called <code>org.eclipse.ui.window.fullscreenmode</code>
+(<a href="https://bugs.eclipse.org/489087">bug 489087</a> and
+<a href="https://bugs.eclipse.org/491572">bug 491572</a>).  As a result,
+we have two "Toggle Full Screen" commands on OS&nbsp;X, and both
+appear in the <em>Quick Access</em>.  We will consolidate our code to
+use <code>org.eclipse.ui.window.fullscreenmode</code>, and plan to
+remove <code>org.eclipse.ui.cocoa.fullscreenWindow</code>.
+</p>
+<p>
+For further details or to provide feedback on this change, see
+<a href="https://bugs.eclipse.org/493932" target="_blank">bug 493932</a>.
+</p>
+
 </body>
 </html>
