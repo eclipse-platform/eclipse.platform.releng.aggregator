@@ -4,7 +4,7 @@
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
 include ('buildproperties.php');
-include ('baseline/testConfigs.php');
+include ('baseline/perfTestConfigs.php');
 if (array_key_exists("SERVER_NAME", $_SERVER)) {
     $servername = $_SERVER["SERVER_NAME"];
     if ($servername === "build.eclipse.org") {

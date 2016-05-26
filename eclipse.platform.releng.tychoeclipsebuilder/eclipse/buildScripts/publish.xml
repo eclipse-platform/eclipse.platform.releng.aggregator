@@ -12,10 +12,6 @@
     name="result"
     value="${buildDirectory}" />
 
-  <!--name of generated index page -->
-  <fail
-    unless="indexFileName"
-    message="indexFileName should have been defined by now." />
 
   <target name="default">
     <antcall target="getStaticFiles" />
@@ -99,33 +95,34 @@
       name="indexFileName"
       value="index.php" />
 
-    <!--
-      <condition
-      property="indexFileName"
-      value="baseline.php">
+
+    <condition
+      property="dropTemplateFileName"
+      value="${basedir}/templateFiles/perfBaselineResults.template.php">
       <contains
-      string="${job}"
-      substring="-baseline" />
-      </condition>
-      <condition
-      property="indexFileName"
-      value="performance.php">
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="dropTemplateFileName"
+      value="${basedir}/templateFiles/performance.template.php">
       <contains
-      string="${job}"
-      substring="-perf-" />
-      </condition>
-      <condition
-      property="indexFileName"
-      value="testResults.php">
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="dropTemplateFileName"
+      value="${basedir}/staticDropFiles/testResults.php">
       <contains
-      string="${job}"
-      substring="-unit-" />
-      </condition>
-      <!- - else standard default for download page - ->
-      <property
-      name="indexFileName"
-      value="index.php" />
-    -->
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+    <!-- else standard default for download page -->
+<property
+      name="dropTemplateFileName"
+      value="${basedir}/templateFiles/index.template.php" />
+
+
 
     <condition
       property="manifestFile"
@@ -160,10 +157,6 @@
       name="dropDirectoryName"
       value="${postingDirectory}/${buildLabel}" />
 
-    <!-- TODO: should require this, and others to be passed in, and fail, if not -->
-    <property
-      name="dropTemplateFileName"
-      value="${basedir}/templateFiles/index.html.template" />
 
     <condition
       property="testResultsHtmlFileName"

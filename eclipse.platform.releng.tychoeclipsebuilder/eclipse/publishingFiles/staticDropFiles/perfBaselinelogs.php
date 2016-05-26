@@ -3,7 +3,7 @@
 <?php
 $testresults="baseline";
 include("buildproperties.php");
-include ('testConfigs.php');
+include ('perfTestConfigs.php');
 include ('utilityFunctions.php');
 include ('logPhpUtils.php');
 ?>
