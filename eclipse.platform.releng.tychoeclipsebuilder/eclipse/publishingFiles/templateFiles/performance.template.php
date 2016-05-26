@@ -14,7 +14,7 @@
 <?php
 
 include("../buildproperties.php");
-include ("../testConfigs.php");
+include ("testConfigs.php");
 
     $performanceDir=".";
     $performance = dir($performanceDir);

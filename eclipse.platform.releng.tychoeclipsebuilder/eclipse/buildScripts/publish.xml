@@ -13,9 +13,9 @@
     value="${buildDirectory}" />
 
   <!--name of generated index page -->
-  <property
-    name="indexFileName"
-    value="index.php" />
+  <fail
+    unless="indexFileName"
+    message="indexFileName should have been defined by now." />
 
   <target name="default">
     <antcall target="getStaticFiles" />
@@ -53,6 +53,7 @@
 
     -->
 
+    <!-- xml results directory -->
     <condition
       property="xmlDirectoryName"
       value="${result}/baseline/xml">
@@ -67,10 +68,65 @@
         string="${job}"
         substring="-perf-" />
     </condition>
+    <!-- else standard default for unit tests -->
     <property
       name="xmlDirectoryName"
       value="${result}/testresults/xml" />
 
+    <condition
+      property="indexFileName"
+      value="baseline.php">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="indexFileName"
+      value="performance.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="indexFileName"
+      value="testResults.php">
+      <contains
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+    <!-- else standard default for download page -->
+    <property
+      name="indexFileName"
+      value="index.php" />
+
+    <!--
+    <condition
+      property="indexFileName"
+      value="baseline.php">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="indexFileName"
+      value="performance.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="indexFileName"
+      value="testResults.php">
+      <contains
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+    <!- - else standard default for download page - ->
+    <property
+      name="indexFileName"
+      value="index.php" />
+    -->
+    
     <condition
       property="manifestFile"
       value="${basedir}/performanceTestManifest.xml"
@@ -88,6 +144,7 @@
         string="${job}"
         substring="-perf-" />
     </condition>
+    
     <property
       name="dropDirectoryName"
       value="${postingDirectory}/${buildLabel}" />
@@ -99,13 +156,6 @@
 
     <condition
       property="testResultsHtmlFileName"
-      value="baselineAlt.php">
-      <contains
-        string="${job}"
-        substring="-baselineAlt" />
-    </condition>
-    <condition
-      property="testResultsHtmlFileName"
       value="baseline.php">
       <contains
         string="${job}"
@@ -113,22 +163,27 @@
     </condition>
     <condition
       property="testResultsHtmlFileName"
-      value="performance/performance.php"
-      else="testResultsTables.html">
+      value="performance/performance.php">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
-    <property
-      name="testResultsHtmlFileName"
-      value="testResultsTables.html" />
     <condition
-      property="hrefTestResultsTargetPath"
-      value="baselineAlt">
+      property="testResultsHtmlFileName"
+      value="testResultsTables.html">
       <contains
         string="${job}"
-        substring="-baselineAlt" />
+        substring="-unit-" />
     </condition>
+    <!-- "fake" file that should not hurt anything, but may be published, 
+         when doing ONLY the download page? 
+         TODO: should be a "<fail" or "undefined" here, but may depend on 
+         custom ant task, so we'll take the safe approach first.
+    -->
+    <property
+      name="testResultsHtmlFileName"
+      value="noValidJobInPublishXML.html" />
+
     <condition
       property="hrefTestResultsTargetPath"
       value="baseline">
@@ -138,20 +193,29 @@
     </condition>
     <condition
       property="hrefTestResultsTargetPath"
-      value="."
-      else="testresults">
+      value="performance">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
     <condition
-      property="doMissingListValue"
-      value="false"
-      else="true">
+      property="hrefTestResultsTargetPath"
+      value="testresults">
       <contains
         string="${job}"
-        substring="-perf-" />
+        substring="-unit-" />
     </condition>
+    <!-- "fake" dir that should not hurt anything, but may be published, 
+         when doing ONLY the download page? 
+         TODO: should be a "<fail" or "undefined" here, but may depend on 
+         custom ant task, so we'll take the safe approach first.
+    -->
+    <property
+      name="hrefTestResultsTargetPath"
+      value="nohrefTestResultsTargetPathDefined" />
+    
+    <!-- we should be able to do this now, and refine list in manifest. -->
+    <property name="doMissingListValue" value="true" />
     <!--
       <property
       name="hrefTestResultsTargetPath"
@@ -166,6 +230,8 @@
     <property
       name="testManifestFileName"
       value="${manifestFile}" />
+    
+    <!-- test configs -->
     <condition
       property="testsConfigExpected"
       value="ep46${buildType}-perf-lin64_8.0">
@@ -195,7 +261,6 @@
         substring="ep46${buildType}LR-perf-lin64-baseline" />
     </condition>
     <!-- else normal unit tests configs -->
-
     <property
       name="testsConfigExpected"
       value="ep46${buildType}-unit-lin64_linux.gtk.x86_64_8.0,ep46${buildType}-unit-mac64_macosx.cocoa.x86_64_8.0,ep46${buildType}-unit-win32_win32.win32.x86_8.0,ep46${buildType}-unit-cen64_linux.gtk.x86_64_8.0" />
