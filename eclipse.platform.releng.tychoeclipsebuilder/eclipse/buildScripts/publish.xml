@@ -100,33 +100,33 @@
       value="index.php" />
 
     <!--
-    <condition
+      <condition
       property="indexFileName"
       value="baseline.php">
       <contains
-        string="${job}"
-        substring="-baseline" />
-    </condition>
-    <condition
+      string="${job}"
+      substring="-baseline" />
+      </condition>
+      <condition
       property="indexFileName"
       value="performance.php">
       <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <condition
+      string="${job}"
+      substring="-perf-" />
+      </condition>
+      <condition
       property="indexFileName"
       value="testResults.php">
       <contains
-        string="${job}"
-        substring="-unit-" />
-    </condition>
-    <!- - else standard default for download page - ->
-    <property
+      string="${job}"
+      substring="-unit-" />
+      </condition>
+      <!- - else standard default for download page - ->
+      <property
       name="indexFileName"
       value="index.php" />
     -->
-    
+
     <condition
       property="manifestFile"
       value="${basedir}/performanceTestManifest.xml"
@@ -136,15 +136,26 @@
         substring="-perf-" />
     </condition>
 
+    <!-- regenerate fale will avoid re-analyzing compile logs, index.php page
+      and similar, if it already exists. If it does not exist, it will recreate it. -->
     <condition
       property="regenerate"
-      value="true"
-      else="false">
+      value="false">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
-    
+    <condition
+      property="regenerate"
+      value="false">
+      <contains
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+    <property
+      name="regenerate"
+      value="true" />
+
     <property
       name="dropDirectoryName"
       value="${postingDirectory}/${buildLabel}" />
@@ -175,10 +186,10 @@
         string="${job}"
         substring="-unit-" />
     </condition>
-    <!-- "fake" file that should not hurt anything, but may be published, 
-         when doing ONLY the download page? 
-         TODO: should be a "<fail" or "undefined" here, but may depend on 
-         custom ant task, so we'll take the safe approach first.
+    <!-- "fake" file that should not hurt anything, but may be published,
+      when doing ONLY the download page?
+      TODO: should be a "<fail" or "undefined" here, but may depend on
+      custom ant task, so we'll take the safe approach first.
     -->
     <property
       name="testResultsHtmlFileName"
@@ -205,17 +216,19 @@
         string="${job}"
         substring="-unit-" />
     </condition>
-    <!-- "fake" dir that should not hurt anything, but may be published, 
-         when doing ONLY the download page? 
-         TODO: should be a "<fail" or "undefined" here, but may depend on 
-         custom ant task, so we'll take the safe approach first.
+    <!-- "fake" dir that should not hurt anything, but may be published,
+      when doing ONLY the download page?
+      TODO: should be a "<fail" or "undefined" here, but may depend on
+      custom ant task, so we'll take the safe approach first.
     -->
     <property
       name="hrefTestResultsTargetPath"
       value="nohrefTestResultsTargetPathDefined" />
-    
+
     <!-- we should be able to do this now, and refine list in manifest. -->
-    <property name="doMissingListValue" value="true" />
+    <property
+      name="doMissingListValue"
+      value="true" />
     <!--
       <property
       name="hrefTestResultsTargetPath"
@@ -230,7 +243,7 @@
     <property
       name="testManifestFileName"
       value="${manifestFile}" />
-    
+
     <!-- test configs -->
     <condition
       property="testsConfigExpected"
