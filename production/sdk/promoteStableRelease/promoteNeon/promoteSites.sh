@@ -12,7 +12,9 @@
 
 # Utility to rename build and "promote" it to DL Server.
 
-# default it to do dry run first, to sanity check files and labels created.
+# DRYRUN should default it to do dry run first, 
+# to sanity check files and labels created. And 
+# then comment out to do the real thing.
 export DRYRUN=dry-run
 
 # These first three variables DROP_ID, CHECKPOINT, and SIGNOFF_BUG 
@@ -21,27 +23,31 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160523-2000
+export DROP_ID=I20160525-2000
 
-# checkpoint means either milestone or release candidate
-# should be empty for final release
-export CHECKPOINT=RCT
+# CHECKPOINT is the code for either milestone (M1, M2, ...) 
+# or release candidate (RC1, RC2, ...). 
+# It should be empty for the final release.
+export CHECKPOINT=RC3
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
-export SIGNOFF_BUG=
+export SIGNOFF_BUG=494618
 
 # These remaining variables change less often, but do change
 # for different development phases and streams.
 
-# Used in naming repo and equinox download pages.
+# TRAIN_NAME is used for two things: 
+# naming repo (that is, it's internal property name) and 
+# the equinox download pages.
 export TRAIN_NAME=Neon
 
-# Three digit release number, such as 4.7.0 or 4.6.1
+# STREAM is the three digit release number, such as 4.7.0 or 4.6.1.
 STREAM=4.6.0
 
-# The build type we are naming the build TO
+# DL_TYPE ("download type") is the build type we are naming 
+# the build *TO*
 # For Maintenance, it is always 'M' (from M-build) until it's 'R'.
-# for main line code, it is alwasy 'S' (from I-build) until it's 'R'
+# for main line (master) code, it is always 'S' (from I-build) until it's 'R'
 export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
