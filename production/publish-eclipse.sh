@@ -48,7 +48,9 @@ then
 else
   fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fi
-
+echo -e "\n\n[DEBUG] == critical values in publish-eclipse.sh == "
+echo -e "\n[DEBUG] buildDirectory in publish-eclipse.sh: $buildDirectory"
+echo -e "\n[DEBUG] BUILD_ID in publish-eclipse.sh: $BUILD_ID"
 fn-parse-compile-logs "$BUILD_ID" \
   "${EBuilderDir}/eclipse/helper.xml" \
   "$buildDirectory" "$launcherJar"

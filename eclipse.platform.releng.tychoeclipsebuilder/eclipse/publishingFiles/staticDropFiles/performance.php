@@ -1,14 +1,39 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link rel="stylesheet" href="http://download.eclipse/eclipse/default_style.css"
-  type="text/css">
-<title>Performance Results</title>
-</head>
-<body>
- <div class="homeitem3col">
-<h2 name="PerformanceResults">Performance Results</h2> 
+<?php
+
+include_once("buildproperties.php");
+include_once("utilityFunctions.php");
+include("../buildproperties.php");
+include ("../perfTestConfigs.php");
+include ("perfTestConfigs.php");
+
+# Begin: page-specific settings.
+$pageTitle    = "Performance Test Results for $BUILD_ID";
+$pageKeywords = "eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide";
+$pageAuthor   = "David Williams and Christopher Guindon";
+
+//ini_set("display_errors", "true");
+//error_reporting (E_ALL);
+
+
+ob_start();
+
+/*
+DL.thin.header.php.html was original obtained from
+
+wget https://eclipse.org/eclipse.org-common/themes/solstice/html_template/thin/header.php
+
+and then that file modified to suit our needs.
+Occasionally, our version should be compared to the "standard" to see if anything has
+changed, in the interest of staying consistent.
+
+See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
+
+ */
+$endingBreadCrumbs="<li><a href=\"../$BUILD_DIR_SEG/\">$BUILD_ID</a></li><li class=\"active\">Test Results</li>";
+
+require("DL.thin.header.php.html");
+
+?>
 <h3 name="Performancefingerprint">Performance fingerprint</h3>
 
 <?php
@@ -90,19 +115,6 @@ if (file_exists("../baseline.php")) {
 }
 ?>
 
-
-
-<table width="85%" border="1" bgcolor="#EEEEEE" rules="groups" align="center">
-<tr bgcolor="#9999CC">
-<th rowspan="2" width="40%" align="center"> org.eclipse <br> Component </th>
-<th colspan="5" align="center"> Test Configurations </th></tr>
-<tr bgcolor="#9999CC">
-<!-- The order of the columns is "hard coded". Linux, Mac, Windows -->
-<th width="20%"><?= $expectedTestConfigs[0] ?></th>
-<th width="20%"><?= $expectedTestConfigs[1] ?></th>
-<th width="20%"><?= $expectedTestConfigs[2] ?></th>
-<th><th width="20%"></th>
-</tr>
 
 <?php
 $rowResultsFile="performanceTables.html";

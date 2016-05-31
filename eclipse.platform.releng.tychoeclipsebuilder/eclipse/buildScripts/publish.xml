@@ -8,10 +8,45 @@
     buildId: Build name
     buildLabel: <buildType>-<buildName>-<timestamp>
   -->
-  <property
-    name="result"
-    value="${buildDirectory}" />
+  <fail
+    if="result"
+    message="the value result was passed in as publish.xml started. As if someone was overriding buildDirectory?" />
+  <fail
+    if="dropDirectory"
+    message="the value dropDirectory was passed in as publish.xml started. But we expect to compute it." />
 
+  <fail
+    unless="buildDirectory"
+    message="buildDirectory must be defined for publish.xml " />
+
+  <fail
+    unless="buildLabel"
+    message="buildLabel must be defined for publish.xml" />
+  <!-- this is the "top" of the drop directory
+    It is used internal to this script to define
+    the "real" dropDirecotry. Sometimes equal to this root,
+    but for tests, will be one level lower, such as testResult (for unit tests),
+    performance (for main stream performance tests), or baseline (for baseline
+    performance tests).
+  -->
+  <property
+    name="dropDirectoryName"
+    value="${postingDirectory}/${buildLabel}" />
+
+  <condition property="notRedundantDir">
+    <not>
+      <equals
+        arg1="${buildDirectory}"
+        arg2="${dropDirectoryName}" />
+    </not>
+  </condition>
+
+  <echo message="== buildDirectory: ${line.separator}==${buildDirectory}" />
+  <echo message="== dropDirectoryName: ${line.separator}==${dropDirectoryName}" />
+
+  <fail
+    if="notRedundantDir"
+    message="buildDirectory and dropDirectoryName are surpisingly NOT equal. Caller has passed in wrong value." />
 
   <target name="default">
     <antcall target="getStaticFiles" />
@@ -52,14 +87,14 @@
     <!-- xml results directory -->
     <condition
       property="xmlDirectoryName"
-      value="${result}/baseline/xml">
+      value="${buildDirectory}/baseline/xml">
       <contains
         string="${job}"
         substring="-baseline" />
     </condition>
     <condition
       property="xmlDirectoryName"
-      value="${result}/performance/xml">
+      value="${buildDirectory}/performance/xml">
       <contains
         string="${job}"
         substring="-perf-" />
@@ -67,7 +102,7 @@
     <!-- else standard default for unit tests -->
     <property
       name="xmlDirectoryName"
-      value="${result}/testresults/xml" />
+      value="${buildDirectory}/testresults/xml" />
 
     <condition
       property="indexFileName"
@@ -110,8 +145,8 @@
         string="${job}"
         substring="-unit-" />
     </condition>
-    <!-- else standard default for download page -->
-<property
+    <!-- else standard default for download index.php page -->
+    <property
       name="dropTemplateFileName"
       value="${basedir}/templateFiles/index.template.php" />
 
@@ -124,12 +159,23 @@
         substring="-perf-" />
     </condition>
 
-
-    <property
-      name="dropDirectoryName"
-      value="${postingDirectory}/${buildLabel}" />
-
-
+    <condition
+      property="expectedConfigFilename"
+      value="perfTestConfigs.php"
+      else="testConfigs.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="foundConfigFilename"
+      value="perfTestConfigsFound.php"
+      else="testConfigsFound.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    
     <condition
       property="testResultsHtmlFileName"
       value="baselineResultsTable.php">
@@ -151,14 +197,10 @@
         string="${job}"
         substring="-unit-" />
     </condition>
-    <!-- "fake" file that should not hurt anything, but may be published,
-      when doing ONLY the download page?
-      TODO: should be a "<fail" or "undefined" here, but may depend on
-      custom ant task, so we'll take the safe approach first.
-    -->
+    <!-- is this used by indexer or hard coded? -->
     <property
       name="testResultsHtmlFileName"
-      value="noValidJobInPublishXML.html" />
+      value="testResultsTables.html" />
 
     <condition
       property="hrefTestResultsTargetPath"
@@ -181,30 +223,22 @@
         string="${job}"
         substring="-unit-" />
     </condition>
-    <!-- "fake" dir that should not hurt anything, but may be published,
-      when doing ONLY the download page?
-      TODO: should be a "<fail" or "undefined" here, but may depend on
-      custom ant task, so we'll take the safe approach first.
-    -->
     <property
-      name="hrefTestResultsTargetPath"
-      value="nohrefTestResultsTargetPathDefined" />
+      name="testResultsHtmlFileName"
+      value="testresults" />
 
     <!-- we should be able to do this now, and refine list in manifest. -->
     <property
       name="doMissingListValue"
       value="true" />
-    <!--
-      <property
-      name="hrefTestResultsTargetPath"
-      value="${result}" />
-    -->
+
+    <!-- it is surprising these are defined here? -->
     <property
       name="hrefCompileLogsTargetPath"
       value="compilelogs/plugins/" />
     <property
       name="compileLogsDirectoryName"
-      value="${dropDirectoryName}/compilelogs/plugins" />
+      value="${buildDirectory}/${hrefCompileLogsTargetPath}" />
     <property
       name="testManifestFileName"
       value="${manifestFile}" />
@@ -245,7 +279,7 @@
 
     <echo message=" = = properties in publish.xml == " />
     <echo message="     job: ${job}" />
-    <echo message="     result: ${result}" />
+    <echo message="     buildDirectory: ${buildDirectory}" />
     <echo message="     xmlDirectoryName: ${xmlDirectoryName}" />
     <echo message="     dropDirectoryName ${dropDirectoryName}" />
     <echo message="     dropTemplateFileName: ${dropTemplateFileName}" />
@@ -273,6 +307,8 @@
       compileLogsDirectoryName="${compileLogsDirectoryName}"
       testManifestFileName="${testManifestFileName}"
       testsConfigExpected="${testsConfigExpected}"
+      expectedConfigFilename="${expectedConfigFilename}"
+      foundConfigFilename="${foundConfigFilename}"
       doMissingList="${doMissingListValue}" />
 
   </target>
@@ -280,7 +316,7 @@
 
   <target name="getStaticFiles">
     <!--get static files required in the buildLabel directory -->
-    <copy todir="${result}">
+    <copy todir="${buildDirectory}">
       <fileset dir="staticDropFiles" />
     </copy>
   </target>

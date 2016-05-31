@@ -12,22 +12,15 @@
       unless="AGGR_DIR"
       message="AGGR_DIR must be defined for this this script" />
 
-    <mkdir dir="${postingDirectory}/${buildLabel}/checksum" />
+    <mkdir dir="${buildDirectory}/checksum" />
     <exec
       executable="/bin/bash"
-      dir="${postingDirectory}/${buildLabel}">
+      dir="${buildDirectory}">
       <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
     </exec>
 
-    <!--post clickThroughs -->
-    <copy todir="${postingDirectory}/${buildLabel}">
-      <fileset
-        dir="${EBuilderDir}/eclipse"
-        includes="clickThroughs/" />
-    </copy>
-
     <!--get static files required in the buildLabel directory -->
-    <copy todir="${postingDirectory}/${buildLabel}">
+    <copy todir="${buildDirectory}">
       <fileset dir="${publishingContent}/staticDropFiles" />
     </copy>
 
@@ -42,32 +35,32 @@
     -->
     <copy
       file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/target/doc.bin.log"
-      tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.javadoc.txt"
+      tofile="${buildDirectory}/compilelogs/platform.doc.isv.javadoc.txt"
       failonerror="false"
       quiet="true" />
     <copy
       file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/target/doc.bin.log"
-      tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.javadoc.txt"
+      tofile="${buildDirectory}/compilelogs/jdt.doc.isv.javadoc.txt"
       failonerror="false"
       quiet="true" />
     <copy
       file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/target/doc.bin.log"
-      tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.javadoc.txt"
+      tofile="${buildDirectory}/compilelogs/pde.doc.user.javadoc.txt"
       failonerror="false"
       quiet="true" />
     <copy
       file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/target/platformconvert.txt"
-      tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.schema.txt"
+      tofile="${buildDirectory}/compilelogs/platform.doc.isv.schema.txt"
       failonerror="false"
       quiet="true" />
     <copy
       file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/target/jdtconvert.txt"
-      tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.schema.txt"
+      tofile="${buildDirectory}/compilelogs/jdt.doc.isv.schema.txt"
       failonerror="false"
       quiet="true" />
     <copy
       file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/target/pdeconvert.txt"
-      tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.schema.txt"
+      tofile="${buildDirectory}/compilelogs/pde.doc.user.schema.txt"
       failonerror="false"
       quiet="true" />
     <echo message="[DEBUG] Eclipse helper.xml publish ending normally" />
@@ -93,6 +86,23 @@
         string="${job}"
         substring="-perf-" />
     </condition>
+    <condition
+      property="manifestFile"
+      value="${publishingContent}/testManifest.xml">
+      <contains
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+
+    <property
+      name="manifestFile"
+      value="${publishingContent}/testManifest.xml" />
+    <echo
+      message="[DEBUG] job is undefined which is normal when doing initial publish (before tests run). Set to normal testManifest file (to hold logs, etc.)." />
+
+    <fail
+      unless="buildType"
+      message="buildType must be defined to generateIndex before calling publish.xml" />
 
     <!--regenerate the index page with links to test results -->
     <ant
@@ -102,16 +112,11 @@
       <property
         name="isBuildTested"
         value="true" />
-      <property
-        name="buildType"
-        value="${buildType}" />
 
       <property
         name="dropTokenList"
         value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
-      <property
-        name="result"
-        value="${postingDirectory}/${buildLabel}" />
+
       <property
         name="testManifestFileName"
         value="${manifestFile}" />
@@ -126,10 +131,10 @@
     <echo message="DEBUG: in helper.xml: Checking for compile errors..." />
     <!--create html output for compile logs -->
     <eclipse.convert
-      input="${postingDirectory}/${buildLabel}/compilelogs"
+      input="${buildDirectory}/compilelogs/plugins"
       validation="true" />
     <!-- Sends email to recipient list in monitor.properties with compile logs attached if errors found -->
-    <!-- <verifyCompile install="${postingDirectory}/${buildLabel}/compilelogs" /> -->
+    <!-- <verifyCompile install="${buildDirectory}/compilelogs/pugins" /> -->
   </target>
 
   <target name="init">
@@ -159,42 +164,16 @@
       name="publishingContent"
       value="${EBuilderDir}/eclipse/publishingFiles" />
 
-    <!-- these conditions used to be in "ant" call, but
-      ant does not support "nested conditions" so we simply
-      set the property here in init -->
-    <condition
-      property="testsConfigExpected"
-      value="ep46${buildType}-perf-lin64_8.0">
-      <contains
-        string="${job}"
-        substring="ep46${buildType}-perf-lin64" />
-    </condition>
-    <condition
-      property="testsConfigExpected"
-      value="ep46${buildType}-perf-lin64-baseline_8.0">
-      <contains
-        string="${job}"
-        substring="ep46${buildType}-perf-lin64-baseline" />
-    </condition>
-    <condition
-      property="testsConfigExpected"
-      value="ep46${buildType}LR-perf-lin64_8.0">
-      <contains
-        string="${job}"
-        substring="ep46${buildType}LR-perf-lin64" />
-    </condition>
-    <condition
-      property="testsConfigExpected"
-      value="ep46${buildType}LR-perf-lin64-baseline_8.0">
-      <contains
-        string="${job}"
-        substring="ep46${buildType}LR-perf-lin64-baseline" />
-    </condition>
-    <!-- else normal unit tests configs -->
-    <property
-      name="testsConfigExpected"
-      value="ep46${buildType}-unit-lin64_linux.gtk.x86_64_8.0,ep46${buildType}-unit-mac64_macosx.cocoa.x86_64_8.0,ep46${buildType}-unit-win32_win32.win32.x86_8.0,ep46${buildType}-unit-cen64_linux.gtk.x86_64_8.0" />
+    <fail
+      unless="buildLabel"
+      message="buildLabel must be passed in to helper.xml" />
 
+    <property
+      name="buildDirectory"
+      value="${postingDirectory}/${buildLabel}" />
+
+    <!-- should already exist ... but, just in case not ... -->
+    <mkdir dir="${buildDirectory}" />
 
   </target>
 
