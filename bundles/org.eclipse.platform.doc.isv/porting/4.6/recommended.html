@@ -19,9 +19,10 @@
 
 <ol>
 	<li><a href="#progress_convention">The calling conventions have changed for methods which receive a progress monitor</a></li>
-	<li><a href="#ListenerList">ListenerList has been generified</a></li>
 	<li><a href="#SubProgressMonitor">The class SubProgressMonitor has been deprecated and replaced by the class SubMonitor</a></li>
+	<li><a href="#ListenerList">ListenerList has been generified</a></li>
 	<li><a href="#FullScreen">Toggling Full-Screen</a></li>
+	<li><a href="#HighDPI">High-DPI icons</a></li>
 </ol>
 
 <hr>
@@ -74,6 +75,7 @@ public void doSaveAs() {
 Fortunately there are few of these methods and they are easy to find.
 <p>
 <strong>Action required:</strong>
+<ul>
 <li>Open the call hierarchy view on StatusLineManager#getProgressMonitor().</li>
 <li>Ensure that all callers of these methods contain a finally block that 
     invokes done (as in the doSaveAs() example, above).</li>
@@ -83,7 +85,7 @@ Fortunately there are few of these methods and they are easy to find.
     resource in their done() method must not be ignored.</li>
 <li>Use the call hierarchy view to locate every place that instantiates or accesses an instance of
     one of those classes. Ensure that those access points contain a try/finally block that invokes done().</li>
-<p>
+</ul>
 
 <p><strong>More Information:</strong>
 <p>
@@ -92,25 +94,7 @@ more examples of how to use progress monitors with the new calling convention. B
 about this change <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=487372">can be found here.</a>
 
 <!-- ############################################## -->
-<h2>2. <a name="ListenerList">ListenerList has been generified</a></h2>
-<p><strong>What is affected:</strong> Clients that refer to <code>org.eclipse.core.runtime.ListenerList</code>.
-</p>
-<p><strong>Description:</strong>
-<code>org.eclipse.core.runtime.ListenerList</code> has been generified to offer compile-time type
-safety, to simplify client code, and to avoid giving clients access to an internal array.
-<code>ListenerList&lt;E&gt;</code> now implements <code>Iterable&lt;E&gt;</code>.
-</p>
-<p><strong>Action required:</strong>
-Clients should:
-</p>
-<ul>
-<li>add type arguments to their references to ListenerList</li>
-<li>convert usages of <code>#getListeners()</code> to an enhanced 'for' loop,
-thereby taking advantage of the type-safe <code>#iterator()</code>.</li>
-</ul>
-
-<!-- ############################################## -->
-<h2>3. <a name="SubProgressMonitor">SubProgressMonitor has been deprecated</a></h2>
+<h2>2. <a name="SubProgressMonitor">SubProgressMonitor has been deprecated</a></h2>
 <p><strong>What is affected:</strong> Clients that refer to <code>org.eclipse.core.runtime.SubProgressMonitor</code>.</p>
 <p><strong>Description:</strong>
 <code>org.eclipse.core.runtime.SubProgressMonitor</code> has been deprecated and replaced by
@@ -160,6 +144,24 @@ The above code should be refactored to this:
 </pre>
 
 <!-- ############################################## -->
+<h2>3. <a name="ListenerList">ListenerList has been generified</a></h2>
+<p><strong>What is affected:</strong> Clients that refer to <code>org.eclipse.core.runtime.ListenerList</code>.
+</p>
+<p><strong>Description:</strong>
+<code>org.eclipse.core.runtime.ListenerList</code> has been generified to offer compile-time type
+safety, to simplify client code, and to avoid giving clients access to an internal array.
+<code>ListenerList&lt;E&gt;</code> now implements <code>Iterable&lt;E&gt;</code>.
+</p>
+<p><strong>Action required:</strong>
+Clients should:
+</p>
+<ul>
+<li>add type arguments to their references to ListenerList</li>
+<li>convert usages of <code>#getListeners()</code> to an enhanced 'for' loop,
+thereby taking advantage of the type-safe <code>#iterator()</code>.</li>
+</ul>
+
+<!-- ############################################## -->
 <h2>4. <a name="FullScreen">Toggling Full-Screen command</a></h2>
 <p><strong>What is affected:</strong> Any code using the OS&nbsp;X-specific
 <code>org.eclipse.ui.cocoa.fullscreenWindow</code> command.
@@ -182,6 +184,33 @@ and developers should use the
 <p><strong>Action required:</strong>
 Clients should convert usages to the
 <code>org.eclipse.ui.window.fullscreenmode</code> command.</p>
+
+<!-- ############################################## -->
+<h2>5. <a name="HighDPI">High-DPI icons</a></h2>
+<p><strong>What is affected:</strong> Products that use bitmap images.
+
+<p><strong>Description:</strong> On high-DPI screens, SWT now automatically
+scales images that have been created by one of the traditional constructors
+of <code>org.eclipse.swt.graphics.Image</code>. To avoid blurry images,
+clients can use one of these constructors:
+<ul><li><code>Image(Device, ImageFileNameProvider)</code></li>
+    <li><code>Image(Device, ImageDataProvider)</code></li>
+</ul>
+<p>
+JFace-based applications that use the standard<br>
+<code>org.eclipse.jface.resource.ImageDescriptor#createFromURL(URL)</code><br>
+API to create icon images already support high-DPI icons out of the box:
+<p>
+Just append "@2x" to the file name and place the high-DPI icons
+into the same folder as the original icon. If you use OSGi bundles, you can also put the icons into a fragment
+that contains the same folder structure.
+<p>
+Example:<br>
+100%: newclass_wiz.png<br>
+200%: newclass_wiz@2x.png
+
+<p><strong>Action required:</strong>
+In JFace applications, add "@2x" icons. In SWT applications, use the new Image constructors.</p>
 
 </body>
 </html>
