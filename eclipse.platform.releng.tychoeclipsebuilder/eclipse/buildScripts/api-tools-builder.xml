@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2013-2016 IBM Corporation and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+        mrennie        - initial API and implementation
+        David Williams - modest modifications.
+ -->
+
 <!-- ======================================================================
-     Jun 4, 2013 11:06:50 AM
+  Jun 4, 2013 11:06:50 AM
 
-     API Tools builder integration
-     This buildfile calls all of the post-build Ant tasks
+  API Tools builder integration
+  This buildfile calls all of the post-build Ant tasks
 
-     This buildfile requires the apitooling-ant.jar and the api-tasks.properties file
-     from the org.eclipse.pde.api.tools bundle
+  This buildfile requires the apitooling-ant.jar and the api-tasks.properties file
+  from the org.eclipse.pde.api.tools bundle
 
-     mrennie
-     ====================================================================== -->
+  mrennie
+  ====================================================================== -->
 <project
   name="API Tools builder integration"
   default="apiToolsReports">
@@ -127,7 +139,7 @@
     unless="apitoolinginitialized"
     depends="getfreezereference">
 
-        <!-- The name for the build - i.e. I20130603-2000 -->
+    <!-- The name for the build - i.e. I20130603-2000 -->
     <fail
       unless="buildLabel"
       message="buildLabel must be provided." />
@@ -138,10 +150,10 @@
       unless="previousBaselineFilename"
       message="previousBaselineFilename must be provided" />
 
-        <!--
-          The ?on-disk? location of the previous Eclipse build - for example Eclipse 4.2.2
-          If not defined, assume same as file name ... otherwise, assume can be used for "human readable name"?
-        -->
+    <!--
+      The ?on-disk? location of the previous Eclipse build - for example Eclipse 4.2.2
+      If not defined, assume same as file name ... otherwise, assume can be used for "human readable name"?
+    -->
     <property
       name="previousBaselineName"
       value="${previousBaselineFilename}" />
@@ -165,7 +177,7 @@
       dest="${reference}"
       src="${previousBaseURL}" />
     <!-- no need to unzip?
-    <unzip
+      <unzip
       src="${reference}/${previousBaselineFilename}"
       dest="${reference}" />
     -->
@@ -187,15 +199,15 @@
       name="current_location"
       value="${buildDirectory}/eclipse-SDK-${buildLabel}-win32.zip" />
     <!--
-       If not available, build failed, for other reasons, so we'll prevent 
-       errors from occuring here, which might be confusing in debugging.
+      If not available, build failed, for other reasons, so we'll prevent
+      errors from occuring here, which might be confusing in debugging.
     -->
     <available
       file="${current_location}"
       property="currentZipAvailable" />
   </target>
-  
-    <!-- there will not always be a freeze report, only after M6 -->
+
+  <!-- there will not always be a freeze report, only after M6 -->
   <target
     name="getfreezereference"
     if="freezeFilename">
@@ -203,7 +215,7 @@
       unless="freezeBaseURL"
       message="full URL of freeze build must be provided, if freezeFilename is." />
 
-        <!-- if not provided, assume freezeName is same as freezeFilename -->
+    <!-- if not provided, assume freezeName is same as freezeFilename -->
     <property
       name="freezeName"
       value="freezeFilename" />
@@ -217,18 +229,18 @@
       dest="${freezereference}"
       src="${freezeBaseURL}" />
     <!-- no need to unzip?
-    <unzip
+      <unzip
       src="${freezereference}/${freezeFilename}"
       dest="${freezereference}" />
     -->
 
   </target>
 
-    <!-- there will not always be a freeze report, only after M6 -->
+  <!-- there will not always be a freeze report, only after M6 -->
   <target
     name="dofreezeReport"
     if="freezereference">
-      <!-- run the freeze task -->
+    <!-- run the freeze task -->
     <apitooling.apifreeze
       baseline="${freezereference}/${freezeFilename}"
       profile="${current_location}"

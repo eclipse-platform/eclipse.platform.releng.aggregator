@@ -1,3 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2016 IBM Corporation and others.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+   
+    Contributors:
+        David Williams - initial API and implementation
+ -->
+
 <project
   name="Publish Build"
   default="default">
@@ -175,7 +187,7 @@
         string="${job}"
         substring="-perf-" />
     </condition>
-    
+
     <condition
       property="testResultsHtmlFileName"
       value="baselineResultsTable.php">
@@ -244,11 +256,14 @@
       value="${manifestFile}" />
 
     <!-- test configs: follows pattern of [job]_[OSGiTriplet]_[VM]
-         the underscores are significant. When we "select files" to group,
-         in a column, part of the selection is based on files that end with:
-         '_' + [OSGiTriplet]_[VM] + ".xml"
-         Less sure (right now) how "job" is worked in to that selection, but am 
-         concerned our "LR" may cause those results to be in a differnt column?
+      the underscores are significant. When we "select files" to group,
+      in a column, part of the selection is based on plugin unit test result files that *end with*:
+      '_' + [job]_[OSGiTriplet]_[VM] + ".xml" where what comes before the '_' is the plugin name.
+      Then later, for display, we break [job]_[OSGiTriplet]_[VM] at the first and last underscores.
+      (There can be other underscores besides "first and last", such as in 'x86_64'.
+      In other words, the "expected config" must match exactly what the unit tests produce as
+      the end of the filename. (Not sure of impact of "LR" on our
+      heuristics.)
     -->
     <condition
       property="testsConfigExpected"
