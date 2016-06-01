@@ -13,6 +13,12 @@
 # General purpose utilities related to git and similar,
 # to be sourced where needed
 
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localBuildProperties.shsource 2>/dev/null
+ARCHIVE_HOST=${ARCHIVE_HOST:-archive.eclipse.org}
+DOWNLOAD_HOST=${DOWNLOAD_HOST:-download.eclipse.org}
+
 if [[ -z "${SCRIPT_PATH}" ]]
 then
    echo -e "\n\t[ERROR] SCRIPT_PATH is not defined as expected in ${0##*/}"
@@ -1139,7 +1145,7 @@ fn-summarize-apitooling ()
   # Make sure FREEZE_PARAMS is defined, but empty space, if not using freeze reports.
   #FREEZE_PARAMS=" "
   # When no "freeze" in effect for a release comment these out. Uncomment after M6, changing to appropriate versions.
-  FREEZE_PARAMS="-DfreezeBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/S-4.6M6-201603170200/eclipse-SDK-4.6M6-win32.zip \
+  FREEZE_PARAMS="-DfreezeBaseURL=http://${ARCHIVE_HOST}/eclipse/downloads/drops4/S-4.6M6-201603170200/eclipse-SDK-4.6M6-win32.zip \
        -DfreezeName=Eclipse-SDK-4.6M6 \
        -DfreezeFilename=eclipse-SDK-4.6M6-win32.zip "
   # this API_PREV_REF_LABEL variable should be changed any time the version used
@@ -1161,7 +1167,7 @@ fn-summarize-apitooling ()
     -DbuildId="$BUILD_ID" \
     -DbuildLabel="$BUILD_ID" \
     -DbuildWorkingArea="${BUILD_HOME}/4${BUILD_TYPE}/gitCache/eclipse.platform.releng.aggregator" \
-    -DpreviousBaseURL=http://archive.eclipse.org/eclipse/downloads/drops4/R-4.5.2-201602121500/eclipse-SDK-4.5.2-win32.zip \
+    -DpreviousBaseURL=http://${ARCHIVE_HOST}/eclipse/downloads/drops4/R-4.5.2-201602121500/eclipse-SDK-4.5.2-win32.zip \
     -DpreviousBaselineName=Eclipse-SDK-4.5.2 \
     -DpreviousBaselineFilename=eclipse-SDK-4.5.2-win32.zip \
     -Djava.io.tmpdir=$TMP_DIR \
