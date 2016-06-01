@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2015. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2016. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" type="text/css"/>
@@ -15,14 +15,15 @@ table.news tr {vertical-align: top;}
 table.news tr td.section {font-size: 20px; font-weight: bold;}
 table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
+ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in Mars</title>
+<title>Eclipse Platform What's New in Neon</title>
 </head>
 
 <body>
-<h2>What's New in Mars</h2>
+<h2>What's New in Neon</h2>
 <p>Here are descriptions of some of the more interesting or significant changes 
-made to the Eclipse Platform for the Mars (4.5) release of Eclipse.</p>
+made to the Eclipse Platform for the Neon (4.6) release of Eclipse.</p>
 <p>
 Plug-in developers will also be interested in the corresponding 
 <a href="../../org.eclipse.platform.doc.isv/whatsNew/platform_isv_whatsnew.html">What's new</a>
@@ -37,352 +38,498 @@ document in the plug-in developer's guide.</p>
 </colgroup>
 <tbody>
 
-  <tr><td class="title">Text search speedup</td>
+  <tr id="swt-autoscale">
+    <td class="title">SWT provides resolution-based auto-scaling</td>
     <td class="content">
-        Text search has been sped up by a factor 3x-4x for full workspace searches on multi-core machines.
-        <p>Text search now uses the <code>JobGroup</code> API added with Eclipse 4.5 (<code>org.eclipse.core.runtime.jobs.JobGroup</code>) to parallelize its processing.</p>
-    </td>
-  </tr>
-
-  <tr id="macapp">
-    <td class="title">Mac OS X distribution now an Application Bundle</td>
-    <td class="content">
-      For Mars (4.5), the Eclipse SDK for OS X is now distributed in a more standard "Mac App" format, 
-      instead of the "directory format" we have used in the past.
-      <p id="updatecaution"><strong>CAUTION:</strong> Current Mac users can <strong>not use "update"</strong> to Mars. In fact, 
-      <strong>doing so will break your installation!</strong> You need to start with a fresh download.
-      </p>
-      <p>In the event that 
-      you updated before reading this, and have ended up with a broken installation, see
-      <a href="https://wiki.eclipse.org/Platform-releng/Issues_related_to_Mac_App_installations">Issues related to Mac App installations</a>
-      for the steps to recover your installation, after getting a fresh download.</p>
-    </td>
-  </tr>
-  
-  <tr id="default_heap_size">
-    <td class="title">Default max heap size increased to 1024 MB</td>
-    <td class="content">
-       To improve the "out of the box" user experience on today's modern hardware,
-       the default maximum heap size (-Xmx VM argument) has been increased from 512M to 1024M.
-       And the initial heap size (-Xms) has been increased from 40M to 256M.
-    </td>
-  </tr>
-
-  <tr id="open-with-dialog">
-    <td class="title">Improved "Open With..." dialog</td>
-    <td class="content">
-      The <b>Open With &gt; Other...</b> dialog now has
-      <ul>
-        <li>a filter field</li>
-        <li>options to remember the selected editor as default for the selected file name or type</li>
-      </ul>
+      SWT now automatically scales images on high-DPI monitors on Windows and Linux, similar to the Mac's Retina support on OS X. 
+      In the absence of high-resolution images, SWT will auto-scale the available images to ensure that SWT-based applications like Eclipse
+      are scaled proportionately to the resolution of the monitor.
       <p>
-        <img src="images/open-with-dialog-improved.png" alt=""/>
+      <img width="520" src="images/hidpi-neon.png" alt="Screenshot of Neon at 200%" />
       </p>
+      <p>
+      For comparison, here's how it looked in Mars without high-DPI support:
+      </p>
+      <p>
+      <img width="520" src="images/hidpi-mars.png" alt="Screenshot of Mars at 200%" />
+      </p>
+      <p>
+      To tweak the default settings, see <a href="#swt-autoscale-tweaks">Tweaking SWT's auto-scaling</a>.<br/>
+      SWT programmers, see <a href="../../org.eclipse.platform.doc.isv/whatsNew/platform_isv_whatsnew.html#high-dpi-api">APIs for high-DPI monitor support</a>.<br/>
+      Icon designers and product owners, see <a href="../../org.eclipse.platform.doc.isv/whatsNew/platform_isv_whatsnew.html#high-dpi-icons">High-DPI icons using "@2x" convention</a>.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="word-wrap">
+    <td class="title">Word wrap in text editors</td>
+    <td class="content">
+      A <b>Toggle Word Wrap</b> button has been added to the workbench toolbar. Shortcut: <b>Alt+Shift+Y</b>.
+      <p>
+      <img src="images/word-wrap.png" alt="" />
+      </p>
+      <p>
+        By default, text editors are opened with word wrap disabled.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="text-zoom-commands">
+  	<td class="title">Commands and shortcuts to zoom in text editors</td>
+  	<td class="content">
+    In text editors, you can now use <b>Zoom In</b> (<b>Ctrl++</b> or <b>Ctrl+=</b>) and <b>Zoom Out</b> (<b>Ctrl+-</b>) commands
+    to increase and decrease the font size.
+    <p>
+      Like a change in the <b>General &gt; Appearance &gt; Colors and Fonts</b> preference page, the commands persistently
+      change the font size in all editors of the same type. If the editor type's font is configured to use a default font,
+      then that default font will be zoomed.
+    </p>
+    </td>
+  </tr>
+
+  <tr id="pinch-to-zoom">
+    <td class="title">Pinch to zoom in text editors</td>
+    <td class="content">
+      To temporarily zoom the editor font in text editors, use a "<b>pinch</b>" gesture on a touchpad.
+      Put two fingers on the touchpad and move them apart or together.
+      <p>
+        To reset the original font size, rotate two fingers by at least 45°, or close and reopen the editor (<b>Navigate &gt; Back</b>).
+      </p>
+      <p>
+        Those gestures only affect the current editor. Changes are neither propagated to other editors nor persisted.
+      </p>
+      <p>
+        Note: SWT currently only supports these gestures on OS X and on Windows systems that use the native
+        multi-touch support. Touchpads that emulate mouse move/scroll events don't support gestures.
+        Gesture support on GTK is not implemented yet.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="autosave-dirty-editors">
+    <td class="title">Automatic Save of dirty editors</td>
+    <td class="content">
+      Auto-save of dirty editors is now available in Eclipse. The autosave option is <b>disabled by default</b>.
+      A new autosave preference page (<b>Preferences &gt; General &gt; Editors &gt; Autosave</b>) is available  and allows to enable/disable the autosave and change the interval of autosave.
+      The countdown is reset on keyboard activity, mouse click, or when a popup is displayed (e.g. content assist, preference page, ...).
+      <p><img src="images/autosave-preference-page.png" alt="" /></p>
+    </td>
+  </tr>
+
+  <tr id="search-binary-files">
+    <td class="title">Search in binary files</td>
+    <td class="content">
+      The <b>Search &gt; File...</b> dialog has a new option to search in binary files as well.
+      <p>
+        <img src="images/search-binary-files.png" alt=""/>
+      </p>
+      By default, the option is disabled, and matches are only reported in files that have the <i>Text</i>
+      content type, or in files that have no content type and don't contain the null character (\u0000).
 	</td>
   </tr>
 
-  <tr id="png-icons">
-    <td class="title">New icons</td>
+  <tr id="terminate-relaunch-history">
+    <td class="title">Terminate and Relaunch from history</td>
     <td class="content">
-        Many icons have been updated to PNG format, which provides better alpha blending and
-        a much nicer appearance especially on darker backgrounds.
-        <p>
-            <img src="images/ant-icons.png" alt="Some of the new Ant images"/>
-        </p>
+      A <b>Terminate and Relaunch</b> option is now available while launching from history.
+      The default setting is to launch without terminating previous launches. To enable automatic termination,
+      select the option "Terminate and Relaunch while launching from history" on
+      <b>Preferences &gt; Run/Debug &gt; Launching</b>.
+      
+      <p>
+        The behavior not selected on the preference page can also be activated on-demand by holding
+        the <b>Shift</b> key while launching the configuration from history.
+      </p>
+	  <p><img src="images/launch-preference-history-relaunch.png" alt="" /></p>
+      <p>
+        Hint: You can still open the dialog to <b>edit a launch configuration</b> by holding
+        the <b>Ctrl</b> key while selecting the configuration from history.
+      </p>
     </td>
   </tr>
 
-  <tr id="close-tabs-menus">
-    <td class="title">Close Tabs to the Left/Right</td>
+  <tr id="workspace-launcher-platform">
+    <td class="title">Directly start previously selected workspaces in the launcher</td>
     <td class="content">
-      The context menu of editor and view tabs now offer <b>Close Tabs to the Left</b> and <b>Close Tabs to the Right</b> menu.
+      The workspace selection dialog now allows you to start a previously selected 
+      workspace directly via a link. The path to 
+      the workspace is shortened. The full path is available if you hover over the link.
       <p>
-        <img src="images/close-tabs-menus.png" alt="" />
-      </p>
-     </td>
+      You can remove existing entries via the context menu.
+     </p>
+     <p>
+      <img src="images/recent-workspace-launcher.png" alt="" />
+    </p>
+    </td>
   </tr>
 
-  <tr id="mru-tabs">
-    <td class="title">"Visible tabs shown on overflow" behavior decoupled from appearance theme</td>
+  <tr id="workspace-name-in-window-title">
+    <td class="title">Workspace name shown in window title by default</td>
     <td class="content">
-      In Eclipse 4.2, the non-"Classic" themes introduced a new strategy to select the editor tabs shown
-      when there's not enough screen space to show all tabs. The new strategy shows a sliding
-      window of tabs in their original opening sequence, cutting off tabs at the beginning and/or end of
-      the full sequence.
-      
-      <p>In classic versions of Eclipse (before 4.2, and later with a "Classic" theme), the strategy
-      was to show the most recently used tabs (MRU), i.e. the "working set" of tabs you're currently using.
-      </p>
-      
-      <p>The coupling of behavior with styling (themes) was found to be problematic, and the
-      tab visibility has has been turned into a separate preference. See
-      <b>Preferences &gt; General &gt; Appearance &gt; Show most recently used tabs</b>.
-      </p>
-      
+    The workspace name is now shown at the beginning of the window title by default.
+    The initial name is the name of the workspace directory.
+    <p>
+    The name can be changed or cleared in <b>Preferences &gt; General &gt; Workspace</b>.
+    </p>
+    </td>
+  </tr>
+
+  <tr id="quick-access-improvements">
+    <td class="title">Quick Access improvements</td>
+    <td class="content">
+      <b>Quick Access</b> (<b>Ctrl+3</b>) is a small text field in the toolbar. You can use it to trigger any command in the Eclipse IDE.
+      <p><img src="images/eclipse-quick-access-improved-search.png" alt="" /></p>
+      <p>You can now restrict the search to Views, Commands, etc. by typing the category name followed by a colon. 
+      For example, to filter the list of all the views, start typing <code>"Views: "</code> in the search-box.</p>
       <p>
-        <img src="images/mru-preference.png" alt="" />
+      A few usability bugs have been fixed: The tooltip shows the keyboard shortcut,
+      the number of search results per category is independent of the size of the proposals window,
+      and the list with previous choices already opens when you click the field with the mouse.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="hide-toolbars">
+    <td class="title">Hide the window toolbars</td>
+    <td class="content">
+     	You can use the <b>Toggle visibility the window toolbars</b> command (via Quick Access: <b>Ctrl+3</b>) to hide
+     	all currently visible toolbars of the currently window. Executing the command again reveals these toolbars again. 
+     	This allows you to maximize the space 
+     	available for editors and views. If you minimize a stack after you selected this command, 
+     	the minimized stack will be visible until you trigger the command to hide the toolbars again. This allows
+     	you to decide which minimized stacks are currently useful for you.
+    </td>
+  </tr>
+
+  <tr id="perspective-switcher-default-display">
+    <td class="title">Perspective names hidden by default</td>
+    <td class="content">
+      To save space in the toolbar, the perspective switcher has been changed to show only the icons of perspectives by default.
+      You can show the text again via the context menu.
+      <p>New default:</p>
+      <p>
+        <img src="images/perspective-switcher-notext.png" alt=""/>
+      </p>
+      <p>Old default:</p>
+      <p>
+        <img src="images/perspective-switcher-withtext.png" alt=""/>
       </p>
       
+    </td>
+  </tr>
+
+  <tr id="full-screen">
+    <td class="title">Full Screen</td>
+    <td class="content">
+      The <b>Full Screen</b> feature is now also available on Windows and Linux. You can toggle the mode via shortcut (<b>Alt+F11</b>) or menu (<b>Window &gt; Appearance &gt; Toggle Full Screen</b>).
       <p>
-      By default, the option is <b>disabled</b>. Users of a "Classic" theme need to enable it manually
-      to keep the behavior they're used to.
+      When Full Screen is activated, you'll see a dialog which tells you how to turn it off again.
       </p>
-      
       <p>
-      Plugin developers and Eclipse product owners can change via preferences whether
-      the CSS theme or a user preference should control this option, and
-      whether MRU should be enabled by default. The preferences are for the
-      "org.eclipse.e4.ui.workbench.renderers.swt" plug-in, and the keys are:
+      On the Mac, <b>Window &gt; Toggle Full Screen</b> (<b>Control+Command+F</b>) still works as before.
       </p>
+    </td>
+  </tr>
+
+  <tr id="theming-enablement">
+    <td class="title">Preference setting to disable the Eclipse styling (CSS based theming)</td>
+    <td class="content">
+    	You can disable the CSS-based styling of the Eclipse IDE via
+    	<b>Preferences &gt; General &gt; Appearance &gt; Enable theming</b>.
+    	This will prevent Eclipse from rendering custom colors, shades, and borders, and may result in better performance.
+    	<p>
+      		<img src="images/enable-disable-theming.png" alt=""/>
+      	</p>
+	</td>
+  </tr>
+
+  <tr id="text-editor-selection-strategy">
+    <td class="title">Selecting the text editor for unassociated file types</td>
+    <td class="content">
+      On the <b>Preferences &gt; General &gt; Editors &gt; File Association</b> page, you can now define an editor selection
+      strategy for unassociated file types. Three strategies are proposed out-of-the-box:
       <ul>
-      <li>
-      "MRUControlledByCSS" (default is "false"),
-      </li>
-      <li>
-      "enableMRUDefault" (default is "false"),
-      </li>
-      <li>"enableMRU" (default is "false").
-      </li>
+        <li><b>System Editor; if none: Text Editor</b> (default) will open the system editor associated with the file, if available. If no system editor
+          is associated with the given file, fall back to the Eclipse Text Editor</li>
+        <li><b>Text Editor</b> will always open Eclipse's Text Editor on unassociated file types</li>
+        <li><b>Ask via pop-up</b> will open the same dialog as using <b>Open With &gt; Other...</b> on a file and let you choose which
+          editor to use (inside or outside the IDE)</li> 
       </ul>
+     <p>
+      Keep in mind that in any case, it's possible to assign an editor for an unassociated file type either via this same preference page,
+      or via the <b>Open With &gt; Other...</b> context-menu on the file.
+     </p>
+     <p>
+      The implementation comes with a new extension-point <code>org.eclipse.ui.ide.unknownEditorStrategy</code>
+      that allows external contributions of additional strategies.
+     </p>
+    </td>
+  </tr>
+  
+  <tr id="date-variable-format">
+    <td class="title">'date' template variable with custom format</td>
+    <td class="content">
+     The 'date' variable, supported in editor and code templates, now allows you to specify which format to use when inserting the current date (or time).
+     <p>
+       <img src="images/date-variable-format.png" alt="Example: ${d:date('EEEE dd MM yyyy HH:mm:ss', 'fr_CH')}"/>
+     </p>
     </td>
   </tr>
 
-  <tr id="perspective_customization">
-    <td class="title">Perspective Customization</td>
+  <tr id="word-selection-default-value">
+    <td class="title">'word_selection' and 'line_selection' template variable with default values</td>
     <td class="content">
-      After 3 years of absence, the <b>Customize Perspective Dialog</b> and <b>Reset Perspective</b> are back to Eclipse.
-      The dialog which allows to configure the visible menu, toolbar, action sets
-      and shortcuts was broken starting with Eclipse 4.2, together with the the ability to reset the perspective.
-      <p>
-        <img src="images/cpd_toolbar_compare_M4_M5.png" alt="Configuring toolbars" />
-      </p>
-      <p>
-        <img src="images/cpd_menubar_compare_M4_M5.png" alt="Configuring menus" />
-      </p>
-      <p>
-        <img src="images/cpd_actionsets_compare_M4_M5.png" alt="Configuring action sets" />
-      </p>
-     </td>
-  </tr>
-
-  <tr id="print-button-hidden">
-    <td class="title">Print button hidden by default</td>
-    <td class="content">
-      The <b>Print</b> button on the main toolbar is now hidden by default.
-      <p>The button can be added back to the toolbar via the <b>Customize Perspective</b> dialog.
-      To open this dialog, right-click on the current perspective button and select the <b>Customize...</b> menu item.
-      </p>
-      <p>
-      In the <b>Tool Bar Visibility</b> tab, expand <b>File</b>, select <b>Print</b>, and click <b>OK</b>.
-      </p>
-      <p>
-        <img src="images/show-print-button.png" alt="" />
-      </p>
-     </td>
-  </tr>
-
-  <tr id="perspectivemenu">
-    <td class="title">Perspective menu entries grouped</td>
-    <td class="content">
-      The entries related to perspectives have been grouped into one menu entry to simplify the Window menu.
-          <p>
-            <img src="images/perspectivemenu.png" alt="" />
-          </p>
+     The 'word_selection' and 'line_selection' variables, supported in editor and code templates, now allow you to specify a default value to use if the current text selection is empty.
     </td>
   </tr>
 
-  <tr id="ui-responsiveness-monitoring">
-    <td class="title">UI responsiveness monitoring</td>
+  <tr id="import-projects">
+    <td class="title">Import projects</td>
     <td class="content">
-      You can enable automatic detection of periods when the Eclipse user interface is unresponsive:
-          <p>
-            <img src="images/ui-responsiveness-monitoring.png" alt="" />
-          </p>
-      <p>UI freezes longer than the warning threshold are logged to the Eclipse error log
-      as warnings. The logged messages include one or more stack traces of the display
-      thread. Longer UI freezes are logged as errors and include stack traces of all threads.
-      Please keep in mind that capturing stack traces of all threads involves extra
-      overhead, so setting the error threshold below 1 second is not recommended.</p>
-      <p>A UI freeze is logged at the end of the freeze or after the deadlock threshold has
-      expired, whichever comes first. The latter condition facilitates logging of indefinite
-      UI freezes caused by deadlocks.</p>
-      <p>Please file bugs for the UI freezes you encounter, describe what you were doing
-      at the time, and include the messages from the error log related to the freeze.</p> 
+    A new <b>Import Projects</b> wizard is available via the <b>File &gt; Open Projects...</b> menu and via the general
+    <b>Import...</b> command under <b>General &gt; Projects from Folder or Archive</b>.
+    <p>
+      Compared to other ways to import or create projects, this wizard aims at being a universal wizard that,
+      from a source directory or archive, can detect and configure various kinds of projects.
+    </p>
+    <p>
+       <img src="images/import-projects.png" alt="" />
+    </p>
+    <p>
+      This wizard relies on an extensible set of strategies that look at the content of the import source
+      to detect file types, project layout patterns, or even look into some files in order to deduct which folders should be
+      turned into projects and how those should be configured. Configuration usually involves setting up project natures and
+      preferences.
+    </p>
+    <p>
+      The import strategies are contributed via the new extension point <code>org.eclipse.ui.ide.projectConfigurator</code>, so that other IDE components
+      can contribute detection and configuration specific to the technology they're supporting.
+    </p>
     </td>
   </tr>
 
-  <tr id="apply-git-patch">
-    <td class="title">Apply Patch... wizard more resilient</td>
+  <tr id="new-button-workingset">
+    <td class="title">"New..." button for creating Working Sets</td>
     <td class="content">
-      Patches that have been created via "<code>git format-patch</code>" sometimes couldn't be
-      applied successfully using Eclipse's <b>Team &gt; Apply Patch...</b> wizard.
+        A <b>New...</b> button has been added to the <code>WorkingSetConfigurationBlock</code>:
       <p>
-      Now, the wizard properly skips lines that are not part of an actual file diff section
-      (e.g. the <code>--&crarr;2.1.1</code> that Git appends).
+        <img src="images/new-button-workingsetconfigurationblock.png" alt="" />
+      </p>
+      <p>
+        This saves quite a few clicks when creating new Working Sets.
       </p>
     </td>
   </tr>
 
-  <tr id="nested-projects">
-    <td class="title">Nested/Hierarchical view of projects</td>
+  <tr id="solstice-welcome-theme">
+    <td class="title">New Welcome theme 'Solstice'</td>
     <td class="content">
-      The <b>Project Explorer</b> now provides the ability to view the projects in a hierarchical (a.k.a. nested) form. For modular
-      projects, this allows to have your Project Explorer mapping more closely the organization of your modules as they are on the
-      file system. This hierarchical view of projects often makes easier to navigate modular projects.
-      <p>Hierarchical view of projects can be triggered from the <b>Project Explorer</b> view menu, under the <b>Projects Presentation</b> item.</p>
+        The Welcome/Intro introduces a new <em>Solstice</em> theme
+        providing a new modern appearance.  The Welcome also
+        introduces a new quadrant-based root page, <tt>qroot</tt>,
+        which supports a new command-driven section defined through
+        the <tt>org.eclipse.ui.intro.quicklinks</tt> extension point.
+        These <em>quicklinks</em> are intended to be populated by
+	product owners.
       <p>
-      <img src="images/nested-projects-menu.png" alt="Hierarchical view of projects can be triggered from the Project Explorer view menu, under the Projects Presentation item"/>
-      </p>
-      <p>
-        Then it makes the folders that are at the same location as a project replaced by the project, and the projects that are nested under
-        other projects will not be shown as root elements.</p>
-      <p><img src="images/nested-projects.png" alt=""/></p>
-      <p>This implementation relies on the Common Navigator Framework.</p>
-    </td>
-  </tr>
-
-  <tr id="open-resource-duplicates">
-    <td class="title">"Open Resource" dialog can now filter duplicate resources.</td>
-    <td class="content">
-    	With the new <a href="#nested-projects">Hierarchical view in the Project Explorer</a>, it has
-    	become more frequent to have multiple workspace projects with overlapping resource trees. 
-    	The <b>Open Resource</b> dialog has been enriched with a new option to allow hiding entries that
-    	reference the same underlying resource, and to show only the most relevant.
-    	<p>
-        	<img src="images/openresource-before-filter.png" alt=""/>
-      	</p>
-       	<p>
-        	<img src="images/openresource-after-filter.png" alt=""/>
-      	</p>
-    </td>
-  </tr>
-
-  <tr id="rename-copy-resource-dialog">
-    <td class="title">Improved rename &amp; copy resource dialogs</td>
-    <td class="content">
-      The <b>Rename Resource</b> dialog on resource files now pre-selects the file name without the extension.
-      <p>
-      <img src="images/rename-resource.png" alt=""/>
-      </p>
-      When you copy/paste (<b>Ctrl+C</b> / <b>Ctrl+V</b>) a file onto itself to create a duplicate,
-      the proposed new name is now just the old name followed by the digit 2 (or 3, etc., if that name is already taken).
-      <p>
-      <img src="images/resource-paste-conflict.png" alt=""/>
+        <img src="images/eclipse-welcome-solstice.png" alt="" />
       </p>
     </td>
   </tr>
 
-  <tr id="workspace-location-in-prefs">
-    <td class="title">Workspace location in preferences</td>
+  <tr id="welcome-launchbar">
+    <td class="title">Welcome Launchbar restored</td>
     <td class="content">
-      The <b>Workspace</b> preference page now shows the current workspace path.  In addition the path can be configured to appear in the
-      window title, a feature that previously was only available through the <code>-showLocation</code> command line argument.
-      This argument is still in effect and overrides the preference.
+        In Eclipse 3.x, the <b>Go to Workbench</b> button
+        on the Welcome page would minimize the Welcome page to the window
+        status bar.  This behavior has been restored for Eclipse 4.6.
       <p>
-        <img src="images/workspace-in-prefs.png" alt="Show the workspace in preferences and in window title" />
+        <img src="images/eclipse-welcome-launchbar.png" alt="" />
       </p>
     </td>
   </tr>
 
-  <tr id="darktheme-section-titlebar">
-    <td class="title">Improved look for Forms based editors in the dark theme</td>
+  <tr id="mac-default-theme-enhancement">
+    <td class="title">Improvements in the Mac default theme</td>
     <td class="content">
-		Using the new CSS capabilities in to style the Section, the dark theme has been improved.
-		
-		<p>
-		The following image demonstrates the old look of the Section title bar,
-		where the title bar had a hard coded white gradient.
-	
-        </p>
-       <p>
-        	<img src="images/dark_theme_old_pde.png"  alt="Section in the dark theme before M5"/>
-    	</p>
-    	<p>
-		The following image demonstrates the new default look in the platform dark theme.
-    	</p>
-    	<p>
-        	<img src="images/dark_theme_new_pde.png"  alt="Section in the dark theme with M5"/>
-    	</p>
+      The look of the toolbar in the Mac default theme was adjusted to align with other Mac applications.
+     <p>
+      Old styling:
+     </p> 
+     <p>
+      <img src="images/mac-theme-old-toolbar.png" alt="" />
+    </p>
+     <p>
+      New toolbar styling:
+     </p> 
+      <p>
+      <img src="images/mac-theme-new-toolbar.png" alt="" />
+    </p>
     </td>
   </tr>
 
-  <tr id="default-gtk3">
-    <td class="title">GTK+ 3 used by default on Linux distributions (when installed and available)</td>
+  <tr id="dark-theme-styled-links">
+    <td class="title">Link widget background color can be styled via CSS</td>
     <td class="content">
-      SWT and Eclipse will use the GTK+ 3 libraries by default on all Linux platforms,
-      whenever GTK+ 3 is installed and available (including GTK+ 3.10 and above). 
-      <p>You can force Eclipse to use GTK+ 2 port by setting the environment 
-      variable <code>SWT_GTK3</code> to 0 or using the launcher parameter <code>--launcher.GTK_version</code> flag in .ini file, if needed.
-      (For example: export SWT_GTK3=0) </p> 
-    </td>
-  </tr>
-    
-  <tr id="gtk-supported-versions-update">
-  	<td class="title">Dropped support for GTK+ versions older than 2.18 in Eclipse launcher</td>
-  	<td class="content">
-  		GTK+ 2.18.0 or later (and its dependencies) is now the pre-requisite to
-  		run Eclipse successfully on all Linux/UNIX platforms (in Luna, this was GTK+ 2.10.0).
-  		Support for all versions older than 2.18 has been dropped.
-  		<p>
-  			Eclipse stops with the following error dialog when a GTK+ version older than 2.18.0 is detected:
-  		</p>
-  		<p>
-          <img src="images/gtk-version-error.png" alt="[Error dialog with only an OK button to Exit]" />
-        </p>
-  		
-  	</td>
-  </tr>
-
-  <tr id="terminate-all-action">
-    <td class="title">'Terminate/Disconnect All' in Console view</td>
-    <td class="content">
-      You can invoke the <b>Terminate/Disconnect All</b> action from the Console view's context menu:
-          <p>
-            <img src="images/console-terminate-disconnect-all.png" alt="" />
-          </p>
+    You can now style the background color of the SWT Link widget. This is used in
+    the default dark theme provided by Eclipse.
+    <p>
+    <img src="images/themed-links.png" alt="" />
+    </p>
     </td>
   </tr>
 
-  <tr id="console-word-wrap">
-    <td class="title">Word wrap in the Console</td>
+  <tr id="dark-theme-styled-text-scrollbar">
+    <td class="title">Themed scroll bar enabled for editors in dark theme</td>
     <td class="content">
-        A new formatting option has been contributed to the <b>Console</b> view for all I/O consoles: <b>Word Wrap</b>.
+    It's now possible to replace the native scroll bar of a StyledText by a styled overlay. This is enabled
+    by default in the dark theme on Windows.
+    <p>
+    <img src="images/themed-scroll-bar.png" alt="" />
+    </p>
+    <p>
+    This feature can be disabled in the Windows dark theme by setting the <code>swt.enable.themedScrollBar</code> 
+    VM argument to <code>false</code> (or enabled on the dark theme for other platforms by setting it to true)
+    in eclipse.ini or on the command line after <code>-vmargs</code>:
+    </p>
+    <p>
+    <b>-Dswt.enable.themedScrollBar=false</b>
+    </p>
+    <p>
+    Note that it may be added through css to any theme (see 
+    <a href="http://git.eclipse.org/c/platform/eclipse.platform.ui.git/diff/bundles/org.eclipse.e4.ui.css.swt/plugin.xml?id=742d2e990765d5bbf9be61ff3f047105f8102bd3">
+    properties available for customization</a> and a <a href="http://git.eclipse.org/c/platform/eclipse.platform.ui.git/diff/bundles/org.eclipse.ui.themes/css/e4-dark_win.css?id=742d2e990765d5bbf9be61ff3f047105f8102bd3">css example</a>) 
+    -- the user may always override the theme setting by using the <code>swt.enable.themedScrollBar</code> VM argument.
+    </p>
+    <p>
+    <b>Caveats</b>: We're aware that the themed scroll bar is not currently available for all
+    elements (such as trees and tables), and some places where the scroll bar was
+    invisible (such as compare editors) may now show a scroll bar. These will only
+    be fixed for Eclipse 4.7.
+    </p>
+    </td>
+  </tr>
+
+  <tr id="gtk3-menus">
+    <td class="title">Improved menu support on GTK3</td>
+    <td class="content">
+      The SWT GTK3 port has received an update to its menus as part of the push to update SWT
+      to GTK3. Here are some of the notable changes.
+      <p>Padding: By default, SWT menus now look similar to those in OS X: Text is not strictly aligned.
+         This is due to a new way in which menus are constructed in GTK3 (see <a href="https://wiki.gnome.org/HowDoI/GMenu#Icons">
+         https://wiki.gnome.org/HowDoI/GMenu#Icons</a> for more details). In order to align all text entries in a menu, simply launch
+         the SWT application with the environment variable <b>SWT_PADDED_MENU_ITEMS=1</b>.</p>
+      <p>Checkboxes and images: On GTK2.x, a menu entry was limited to either a checkbox <i>or</i> an image.
+         On GTK3, SWT now supports menu entries that contain both an image and a checkbox.</p>
+      <p>The image below shows a screenshot of the default GTK3 menu on the left,
+         compared to an aligned GTK3 menu on the right.</p>
+          <img src="images/gtk3-menu-comparison.png" alt=""/>
+    </td>
+  </tr>
+
+  <tr id="swt-autoscale-tweaks">
+    <td class="title">Tweaking SWT's auto-scaling</td>
+    <td class="content">
+        If you don't like SWT's default appearance on HiDPI monitors, here are a few hints to
+        tweak the scaling:
         <p>
-            The new option is available on the Console view toolbar and in the content popup menu within the Console view.
+        On <b>GTK</b>, the standard way to configure scaling for a single application is to set the
+        <code>GDK_DPI_SCALE</code> environment variable before launching an application.
+        E.g. to set the scale factor to 150% on the command line when launching Eclipse:
         </p>
-        <img src="images/word-wrap.png" alt="The new word wrap toolbar and popup menu command"/>
-    </td>
-  </tr>
-
-  <tr id="scroll-lock">
-    <td class="title">Automatic scroll lock in Console view</td>
-    <td class="content">
-		Scrolling up in the <b>Console</b> view using keys, mouse wheel, or scroll bar now automatically enables the <b>Scroll Lock</b> mode.
-		<p>
-		When you scroll down to the end of the console, the scroll lock is automatically released again.
-		</p>
-    </td>
-  </tr>
-
-  <tr id="console-output-limit">
-    <td class="title">Console output limit</td>
-    <td class="content">
-		<b>Preferences &gt; Run/Debug &gt; Console &gt; Console buffer size (characters)</b>
-		is now only limited by the amount of characters the Console view can render.
-		<p>
-		The arbitrary limit of 1 million characters has been removed.
-		</p>
-    </td>
-  </tr>
-
-  <tr id="stdin-file">
-    <td class="title">Assigning stdin to a file</td>
-    <td class="content">
-        Stdin can now be assigned to a file in the "Common" tab of launch configuration dialogs.
+        <pre><b>$ GDK_DPI_SCALE=1.5 ./eclipse</b></pre>
         <p>
-          <img src="images/stdin-file.png" alt="" />
+        On <b>Windows</b> and <b>GTK</b>, SWT's auto-scaling can be configured using the <code>swt.autoScale</code>
+        Java property. E.g. to disable auto-scaling and make the application behave like on Mars (4.5),
+        add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
         </p>
+        <pre><b>-Dswt.autoScale=false</b></pre>
+        <p>
+        And here are all the <code>swt.autoScale</code> arguments that are currently implemented:
+        </p>
+        <ul>
+        <li><code>false</code>: scale factor is set to 100% (no scaling)</li>
+        <li><code>integer</code>: scale factor depends on the current display resolution,
+            but only uses integer multiples of 100%. The detected native zoom is
+            generally rounded down (e.g. at 150%, will use 100%), unless close to
+            the next integer multiple (currently at 175%, will use 200%).</li>
+        <li><code>quarter</code>: scale factor depends on the current display resolution,
+            but only uses integer multiples of 25%. The detected native zoom is
+            rounded to the closest permissible value. (This used to be the default in
+            the last two pre-release milestones.)</li>
+        <li><code>exact</code>: scale factor is set to the native zoom (with 1% as minimal
+            step).</li>
+        <li><i>&lt;value&gt;</i>: scale factor uses the given integer value in
+            percent as zoom level.</li>
+        </ul>
+        <p>
+        The current default is "integer". Note that non-integer scale factors
+        exhibit various problems like jagged borders or even completely missing images.
+        </p>
+        <p>
+        The scaling method can be configured by setting the <b><code>swt.autoScale.method</code></b> system property to:
+        </p>
+        <ul>
+        <li><code>nearest</code>: nearest-neighbor interpolation, may look jagged</li>
+        <li><code>smooth</code>: smooth edges, may look blurry</li>
+        </ul>
+        <p>
+        The current default is to use "nearest", except on
+        GTK when the deviceZoom is not an integer multiple of 100%.
+        The smooth strategy currently doesn't work on Windows and Mac OS X.
+        </p>
+        <p>
+        Auto-scaling cannot be disabled on the Mac as it is provided by the OS.
+        </p>
+    </td>
+  </tr>
+
+  <tr id="simplified-capabilities-preference-page">
+    <td class="title">Advanced capabilities preferences are now displayed in place (no extra dialog) </td>
+    <td class="content">
+        Previously, the entries in the <b>Capabilities</b> preference page were displayed in a list. If you wanted to edit them, you had to open an extra dialog.
+        Now you can directly enable or disable the capabilities from the preference page, as depicted in the following screenshot.
+      <p>
+        <img src="images/simplified-capabilities-page.png" alt="" />
+      </p>
+      <p>
+        Since this dialog has API to prevent advanced editing, if the property ALLOW_ADVANCED is set to false, the original list
+        is maintained and will be shown, which allows you to enable/disable only the main categories (not individual capabilities).
+      </p>
+    </td>
+  </tr>
+
+  <tr id="wayland-launching">
+    <td class="title">Eclipse workspace launcher now fully functional on Wayland</td>
+    <td class="content">
+      Eclipse has been updated to include improved support for the Wayland display manager.
+      <p>Previously, launching Eclipse on Wayland was possible only if not using the native launcher due to a bug that would
+         cause the workspace launcher to hang and eventually crash. This has now been fixed, allowing
+         Eclipse to launch on Wayland just as it would on X11.</p>
+    </td>
+  </tr>
+
+  <tr id="solaris-64-bit-builds">
+    <td class="title">Solaris builds are now 64-bit only</td>
+    <td class="content">
+        The 32-bit builds of Solaris (both x86 and SPARC) have been discontinued as there is no 32-bit Java 8 JRE available on Solaris.
+        <p> These builds are instead being replaced by the corresponding 64-bit builds. The 64-bit build for Solaris x86 is already available in M7 and the 64-bit SPARC build will be available soon. </p>
+    </td>
+  </tr>
+
+  <tr id="ant-version-upgrade">
+    <td class="title">Ant 1.9.6</td>
+    <td class="content">
+      Eclipse has adopted Ant version 1.9.6.
+    </td>
+  </tr>
+
+  <tr id="uuid">
+    <td class="title">Eclipse generates and sends a UUID</td>
+    <td class="content">
+        Eclipse creates and uses an automatically generated UUID. The UUID is stored in <code>${user.home}/.eclipse/eclipse.uuid</code>.
+        The UUID is automatically added to the user agent on requests made to eclipse.org servers, including requests made by p2 during Install/Update operations.
+        If you do not want to include the UUID in those requests, you can edit the <code>eclipse.uuid</code> file and set <code>eclipse.uuid=0</code>.
     </td>
   </tr>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" type="text/css"/>
@@ -17,15 +17,16 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Mars (PDE)</title>
+<title>What's New in Neon (PDE)</title>
 </head>
 
 <body>
-<h2>What's New in Mars (PDE)</h2>
+<h2>What's New in Neon (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Plug-in Development Environment (PDE)
-for the Mars (4.5) release of Eclipse. They are grouped into:</p>
+for the Neon (4.6) release of Eclipse. They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
 	<li><a href="#dialogs-editors-views">Dialogs, Editors, and Views</a></li>
+	<li><a href="#declarative-services">OSGi Declarative Services</a></li>
 	<li><a href="#wizards">Wizards</a></li>
 	<li><a href="#APITools">API Tools</a></li>
 </ul>
@@ -44,155 +45,261 @@ documents.</p>
 </colgroup>
 <tbody>
 
-<!-- ******************** Dialogs, Editors, and Views ********************** -->
+  <!-- ******************** Dialogs, Editors, and Views ********************** -->
   <tr>
     <td id="dialogs-editors-views" class="section" colspan="2"><h2>Dialogs, Editors, and Views</h2></td>
   </tr>
-  
-  <tr id="wildcard-support-plugins-features">
-    <td class="title">Added wildcard support for selecting plug-ins</td>
+
+  <tr id="product-editor">
+    <td class="title">Product editor "Dependencies" tab renamed to "Content"</td>
     <td class="content">
-      Wildcard support and implicit prefix completion are now supported in all plug-in selection dialogs,
-      e.g. in the product editor or in the target definition.
-      Due to the implicit "*" at the beginning of the pattern, you can just type "platf" to find "org.eclipse.platform".
-          <p>
-            <img src="images/plugin-selection-without-wildcards.png" alt="" />
-          </p>
-    </td>
-  </tr>
-  
-  <tr id="product-default-preferences">
-    <td class="title">Products can set default preference values</td>
-    <td class="content">
-      In the <b>Product Editor</b> you can now use an Eclipse Preferences File ("*.epf") to
-      generate the default preference settings in the product's customization file. 
+        The "Dependencies" tab in the product editor was renamed to the more descriptive term "Content".
+        This avoids confusion with the "Dependencies" tab in the MANIFEST.MF editor.
       <p>
-      <img src="images/product-preferences.png" alt=""/>
-      </p>
-      A wizard allows you to
-      control which files to use for generating the preference defaults.
-      <p>
-      <img src="images/product-convert-preferences.png" alt=""/>
+       <img src="images/producteditor.png" alt="New label for content in the product"/>
       </p>
     </td>
   </tr>
 
-  <tr id="pde-css-product-editor">
-    <td class="title">Products can specify CSS file</td>
+  <tr id="pde-debug-option-help">
+    <td class="title">Tooltips for options in Tracing dialog </td>
     <td class="content">
-      In the <b>Product Editor</b>, on the <b>Customization</b> tab, you can now
-      specify the name of a CSS file to be used to style the product. 
-       
-      <p>
-        <img src="images/product-css-location.png" alt="Your product must have the Eclipse 4 CSS support installed and you must synchronize the product with its defining plug-in to keep the extension point up to date."/>
-      </p>
+    	In the <b>Tracing </b> tab of Eclipse launch configuration, the options now have tooltips which display
+    	more information about that option.
+		<p>
+			<img src="images/pde-tracing-options-help.png" alt="" />
+    	</p>
+    	The information gets extracted from comments in the declaring bundle's .options file.
     </td>
   </tr>
 
-  <tr id="category-repository-references">
-    <td class="title">Category editor can specify additional update repositories</td>
+  <tr id="pde-project-explorer">
+    <td class="title">PDE perspective uses Project Explorer</td>
     <td class="content">
-      In the <b>Category Manifest Editor</b> you can now specify additional update repositories that should be
-      referenced by the generated update repository. These additional repositories will be searched for
-      content whenever the generated repository receives a request for content.
-      <p>
-      <img src="images/category-repositories.png" alt=""/>
-      </p>
+      The PDE perspective now uses the <b>Project Explorer</b> instead of the <b>Package Explorer</b> view by default.
     </td>
   </tr>
 
-  <tr id="category-download-statistics">
-    <td class="title">Category editor can define download statistics</td>
+  <tr id="pdebuildwarning">
+    <td class="title">Warnings for missing build entries for model fragments and the application model</td>
     <td class="content">
-      In the <b>Category Manifest Editor</b> you can now specify a download statistics server that should
-      be used to collect download statistics about your product. You can also specify which features and/or
-      bundles should be used to collect download information. 
-      <p>
-      <img src="images/category-download-statistics.png" alt=""/>
-      </p>
-    </td>
-  </tr>
-  
-  <tr id="pde-target-editor-reload">
-    <td class="title">"Reload" button in target editor </td>
-    <td class="content">
-       In the <b>Target Editor</b>, on the <b>Locations</b> section, there is now a <b>Reload</b> button that clears the cached 
-       p2 profile and then resolves the target. This button is helpful in scenarios where the target editor is left in inconsistent
-       state due to issues like unstable network connection.
-      <p>
-        <img src="images/pde-target-editor-reload-button.png" alt=""/>
-      </p>
+    	If an Eclipse 4 model fragment or application model file is not included in the build.properties file, 
+    	PDE will issue warnings.  
+		<p>
+      		<img src="images/pdewarnings.png" alt="Build warnings"/>
+      	</p>
     </td>
   </tr>
 
-  <tr id="pde-error-log-size">
-    <td class="title">Option to set maximum log size</td>
+  <tr id="pde-importpackages">
+    <td class="title">Import and export packages in Plug-in Manifest editor supports prefix wildcard matching by default</td>
     <td class="content">
-      In the <b>Error Log</b> view, on the <b>view menu &gt; Filters...</b> dialog, there now is an option to set
-      the maximum log size that can be read by the Error Log view. If the size of the error log exceeds
-      this limit, a warning is logged.
-      <p>
-        <img src="images/pde-logsize-filter-dialog.png" alt="Maximum log size in filter log dialog"/>
-      </p>
+	The import and export package dialog in the <b> Plug-in Manifest editor </b> uses wildcards by default. For example, to add
+	<code>org.eclipse.e4.core.services</code> as package dependency,
+	you can type in <code>services</code> instead of <code>*services</code>.
     </td>
   </tr>
+
+  <tr id="pde-plugin-image-browser-filter">
+    <td class="title">Plug-in Image Browser Filtering</td>
+    <td class="content">
+
+     In <b>Plug-in Image Browser</b> view, it is now possible to filter icons by
+     their full path or name.
+
+     <p>
+     Use the new ImageFilter field to provide the search criteria (? = any character, * = any string) 
+     to find the icons with matching path or name. 
+     </p>
+
+     <p>
+      <img src="images/pde-plugin-image-browser-filter.png" alt="" />
+    </p>
+    </td>
+  </tr>
+
+   <tr id="pde-image-browser-pagination">
+    <td class="title">Pagination control in Plug-in Image Browser</td>
+    <td class="content">
+    	In the <b>Plug-in Image Browser</b>,  at the end of the view, there are pagination controls 
+    	to move to the next page of images.
+		<p>
+			<img src="images/pde-plugin-image-browser-pagination.png" alt="" />
+    	</p>
+    </td>
+  </tr>
+
+  <tr id="prompt-for-unsaved-features">
+    <td class="title">Product launch prompts for unsaved features</td>
+    <td class="content">
+      In case you have an unsaved feature included in your product configuration file, 
+      PDE will prompt you to save it before the launch.
+      
+       <p>
+        <img src="images/prompt-unsaved-feature-pde.png" alt=""/>
+      </p>
+      
+    </td>
+  </tr>
+
+  <!-- ******************** OSGi Declarative Services ********************** -->
+  <tr>
+    <td id="declarative-services" class="section" colspan="2"><h2>OSGi Declarative Services</h2></td>
+  </tr>
+
+  <tr id="ds-annotations">
+    <td class="title">Support for OSGi Declarative Services Annotations</td>
+    <td class="content">
+    	OSGi Declarative Services provide a powerful mechanism for developing complex, service-oriented
+    	applications. With proper tooling, annotations, which were added to Declarative Services
+    	in version 1.2, make it easy to generate and maintain the required component descriptor files.
+    	<p>
+    	When enabled, PDE automatically generates and updates Declarative Services component 
+    	descriptor files from appropriately annotated Java source. This is done without requiring 
+    	any additional builder to be configured in your project.
+    	</p>
+    	<p>
+    	When you annotate your component implementation classes with <code>@Component</code>, and any
+    	reference bind methods with <code>@Reference</code>, PDE will validate your annotations
+    	and generate the corresponding component descriptor files. Any errors discovered during validation
+    	are highlighted and reported.
+    	</p>
+    	<p>
+			<img src="images/ds-annotations.png" alt="" />
+    	</p>
+    	<p>
+    	In addition, PDE will also maintain the project's MANIFEST.MF and build.properties file
+    	-- generated component descriptor files are automatically added to the manifest
+    	and included in the build.
+		</p>
+		<p>
+		To enable this feature, go to <b>Preferences</b> or <b>Project Properties &gt; Plug-in Development &gt; DS Annotations</b>
+		and check <b>Generate descriptors from annotated sources</b>. 
+		</p>
+    </td>
+  </tr>
+
+  <tr id="ds-annotation-bapl">
+    <td class="title">DS Annotations Bundle-ActivationPolicy generation</td>
+    <td class="content">
+		The Declarative Service Annotations support can now be configured to generate the bundle header for lazy activation.
+		The <code>Bundle-ActivationPolicy: lazy</code> header is necessary when starting an Eclipse application that uses the Equinox launcher.
+		Otherwise, the bundle that provides the declarative service will not be started automatically and therefore the service won't be available.
+		In a plain OSGi environment, this header is not necessary and might not have any effect. Therefore, it can be configured via preferences 
+		whether the header should be generated or not.
+        <p>
+          <img src="images/ds-annotations-bapl.png" alt="" />
+        </p>
+    </td>
+  </tr>
+
+  <tr id="ds-annotations-template">
+    <td class="title">Updated OSGi Declarative Services Example</td>
+    <td class="content">
+    	The OSGi Declarative Services Example now uses annotations.
+    	<p>
+    	Instead of creating a Component Definition file for each component class and adding it
+    	to the manifest and build.properties, the wizard creates component classes annotated with
+    	the appropriate DS annotations, which are then used by PDE to automatically generate
+    	the corresponding component descriptor files.  
+		</p>
+    </td>
+  </tr>
+
 
   <!-- ******************** Wizards ********************** -->
   <tr>
     <td id="wizards" class="section" colspan="2"><h2>Wizards</h2></td>
   </tr>
-  
-  <tr id="e4Template">
-    <td class="title">Create an E4 project from "New Plug-in" wizard</td>
+
+  <tr id="plugin-wizard-activator-creation">
+    <td class="title">New Plug-in wizard does not create activator by default</td>
     <td class="content">
-		It is now possible to create an E4 project using the <b>New Plug-in Project</b> wizard.
-		Select <b>This plug-ins will make contributions to the UI</b> and <b>create a rich client application</b>:
-      <p>
-        <img src="images/e4-template-step-1.png" alt="" />
-      </p>
-      <p>
-        The next page will offer a template to create an E4 project:
-      </p>
-       <p>
-        <img src="images/e4-template-step-2.png" alt="" />
-      </p>
-      <p>
-        Then you can select to generate some sample content:
-      </p>
-        <p>
-        <img src="images/e4-template-step-3.png" alt="" />
-      </p>
-       <p>
-        And you get your E4 project in your workspace:
-      </p>
-        <p>
-        <img src="images/e4-template-result.png" alt="" />
-      </p>
-	</td>
+	   By default, the new plug-in wizard does not suggest the creation of an activator class anymore. 
+	   Functionality in activators can in most cases be replaced with other means (e.g. OSGi declarative services), and activators
+	   can slow down the startup of an application.
+    </td>
+  </tr>
+  
+  <tr id="e4wizard">
+    <td class="title">Retirement of the Eclipse 4 project wizard</td>
+    <td class="content">
+        As PDE offers now Eclipse 4 RCP templates, the separate Eclipse 4 project generation wizard has been retired.
+    </td>
   </tr>
 
-<!-- ******************** APITools ********************** -->
+   <tr id="plug-in-with-an-e4-swt-view">
+    <td class="title">Plug-in template with an Eclipse 4 SWT view</td>
+    <td class="content">
+      In the plug-in templates, it is now possible to choose:
+        plug-in with an Eclipse 4 SWT view.
+
+    <p>
+      To get this template, create a new plug-in project and answer 'no' to the question:
+      Would you like to create a Rich Client Application?
+    </p>
+
+    <p>
+      Then, the 'Plug-in with an Eclipse 4 SWT View' template will be proposed in the list:
+    </p>
+
+    <p>
+      <img src="images/plug-in-with-an-e4-swt-view.png" alt="" />
+    </p>
+    <p>
+      The generated plug-in will contain a model fragment with a sample E4 view that:
+    </p>
+      <ul>
+       <li> manages the single and the multiple selection using the injection mechanism</li>
+       <li> is added to any E3 compat or pure E4 application thanks to the 'xpath:/' notation</li>
+       <li> is present in the <b>Window &gt; Show view</b> dialog </li>
+      </ul>
+
+    </td>
+  </tr>
+
+  <tr id="plug-in-with-an-e4-handler">
+    <td class="title">Plug-in template with an Eclipse 4 Handler</td>
+    <td class="content">
+      In the plug-in templates, it is now possible to choose:
+        plug-in with an Eclipse 4 handler.
+
+    <p>
+      To get this template, create a new plug-in project and answer 'no' to the question:
+      Would you like to create a Rich Client Application?
+    </p>
+
+    <p>
+      Then, the 'Plug-in with an Eclipse 4 Handler' template will be proposed in the list:
+    </p>
+
+    <p>
+      <img src="images/plug-in-with-an-e4-handler.png" alt="" />
+    </p>
+    <p>
+      The generated plug-in will contain a model fragment with a sample E4 hello world command that appears:
+    </p>
+      <ul>
+       <li> in the 'E4 Handler' main menu </li>
+       <li> in the 'E4 Handler' submenu in any popup menu </li>
+      </ul>
+
+    </td>
+  </tr>
+
+
+  <!-- ******************** APITools ********************** -->
   <tr>
     <td id="APITools" class="section" colspan="2"><h2>API Tools</h2></td>
   </tr>
 
-  <tr id="apibaselinefromtarget">
-    <td class="title">Create an API baseline from a target definition</td>
+  <tr id="multi-version-baseline-support">
+    <td class="title">Multi-version support for API analysis builder</td>
     <td class="content">
-		In the <b>Plug-in Development &gt; API Baselines</b> preference page,
-		an API baseline can now be created from an existing target definition.
-    </td>
-  </tr>
-
-  <tr id="pde-api-use-scan">
-    <td class="title">API use scan report specifies additional filters used </td>
-    <td class="content">
-      <b> API use scan report</b>  specifies the location of additional filters (.api_filter files)
-      used during the scan. It also reports the number of illegal references filtered out due to 
-      additional filters used.
-      <p>
-        <img src="images/pde-additional-filter-information.png" alt="Additional Filter Information"/>
-      </p>
+	The API Analysis Builder now supports API baselines with multi-version bundles.
+	While doing API analysis for a bundle for which multiple versions exist in the baseline,
+	the comparisons are performed with the bundle in the baseline which best matches
+	the development bundle that is being built.
     </td>
   </tr>
 
