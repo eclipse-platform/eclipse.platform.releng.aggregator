@@ -1,10 +1,9 @@
 <?php
 
-include_once("buildproperties.php");
-include_once("utilityFunctions.php");
+
+include("../utilityFunctions.php");
 include("../buildproperties.php");
 include ("../perfTestConfigs.php");
-include ("perfTestConfigs.php");
 
 # Begin: page-specific settings.
 $pageTitle    = "Performance Test Results for $BUILD_ID";
@@ -31,15 +30,12 @@ See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
  */
 $endingBreadCrumbs="<li><a href=\"../$BUILD_DIR_SEG/\">$BUILD_ID</a></li><li class=\"active\">Test Results</li>";
 
-require("DL.thin.header.php.html");
+require("../DL.thin.header.php.html");
 
 ?>
 <h3 name="Performancefingerprint">Performance fingerprint</h3>
 
 <?php
-
-include("../buildproperties.php");
-include ("../perfTestConfigs.php");
 
     $performanceDir=".";
     $performance = dir($performanceDir);
