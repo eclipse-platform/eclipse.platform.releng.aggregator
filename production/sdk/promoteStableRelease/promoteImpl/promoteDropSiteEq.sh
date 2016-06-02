@@ -1,4 +1,14 @@
 #!/usr/bin/env bash
+#*******************************************************************************
+# Copyright (c) 2016 IBM Corporation and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#     David Williams - initial API and implementation
+#*******************************************************************************
 
 currentDropId=$1
 currentBuildLabelEQ=$2
@@ -66,19 +76,19 @@ MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
 #if [[ "${HIDE_SITE}" == "true" ]]
 #then
 
-  # add buildHidden to "local" (buildMachine) directory
-  touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
-  # make "deferred" script to remove buildHidden later
-  PROMOTE_VARIABLE=${MANUAL_PREFIX}
-  DEF_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
-  echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
-  echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
-           "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" \
-    > ${DEF_PFILE}
+# add buildHidden to "local" (buildMachine) directory
+touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
+# make "deferred" script to remove buildHidden later
+PROMOTE_VARIABLE=${MANUAL_PREFIX}
+DEF_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
+echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
+  "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" \
+  > ${DEF_PFILE}
 #else
-  PROMOTE_VARIABLE=${PROMOTE_PREFIX}
-  IMMED_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
-  echo "# Script for immediate promotion" > ${IMMED_PFILE}
+PROMOTE_VARIABLE=${PROMOTE_PREFIX}
+IMMED_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+echo "# Script for immediate promotion" > ${IMMED_PFILE}
 #fi
 
 printf "\n\t%s\n" "Creating promote script."
