@@ -14,7 +14,7 @@ function findEclipseExe ()
 
   if [[ -z "${BUILD_ID}" ]]
   then
-    echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID" 2>>${TRACE_LOG}
+    echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID" >>${TRACE_LOG}
     return 1
   fi
 
@@ -25,23 +25,23 @@ function findEclipseExe ()
   basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_ID}
   if [[ ! -d "${basebuilderParent}" ]]
   then
-    echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed." 2>>${TRACE_LOG}
-    echo "    basebuilderParent: ${basebuilderParent}" 2>>${TRACE_LOG}
+    echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed." >>${TRACE_LOG}
+    echo "    basebuilderParent: ${basebuilderParent}" >>${TRACE_LOG}
     return 1
   fi
 
   baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
   if [[ ! -d "${baseBuilderDir}" ]]
   then
-    echo -e "\n\tWARNING: The basebuilder directory " 2>>${TRACE_LOG}
-    echo -e "\t${baseBuilderDir}" 2>>${TRACE_LOG}
-    echo -e "\tdid not exist as expected. Will re-create.\n" 2>>${TRACE_LOG}
+    echo -e "\n\tWARNING: The basebuilder directory " >>${TRACE_LOG}
+    echo -e "\t${baseBuilderDir}" >>${TRACE_LOG}
+    echo -e "\tdid not exist as expected. Will re-create.\n" >>${TRACE_LOG}
 
     EBuilder="${BUILD_ROOT}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
     # make sure that build repo still exists
     if [[ ! -d ${EBuilder} ]]
     then
-      echo "ERROR: the EBuilder directory no longer exists. Can no re-create automatically" 2>>${TRACE_LOG}
+      echo "ERROR: the EBuilder directory no longer exists. Can no re-create automatically" >>${TRACE_LOG}
       return 1
     fi
 
@@ -55,26 +55,28 @@ function findEclipseExe ()
     ant -f ${EBuilder}/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=${basebuilderParent}
     if [[ "$?" != 0 ]]
     then
-      echo "ERROR: Ant failed while executing getBaseBuilderAndTools.xml" 2>>${TRACE_LOG}
+      echo "ERROR: Ant failed while executing getBaseBuilderAndTools.xml" >>${TRACE_LOG}
       return 1
     fi
     if [[ ! -d "${baseBuilderDir}" ]]
     then
-      echo -e "\n\tERROR: The basebuilder directory, "   2>>${TRACE_LOG}
-      echo -e "\t${baseBuilderDir}"  2>>${TRACE_LOG}
-      echo -e "\twas not re-created.\n" 2>>${TRACE_LOG}
+      echo -e "\n\tERROR: The basebuilder directory, "   >>${TRACE_LOG}
+      echo -e "\t${baseBuilderDir}"  >>${TRACE_LOG}
+      echo -e "\twas not re-created.\n" >>${TRACE_LOG}
       return 1
     fi
   fi
 
   export ECLIPSE_EXE=$baseBuilderDir/eclipse
-  echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
+  echo -e "\n\tDEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" >>${TRACE_LOG}
 
-  if [[ -n ${ECLIPSE_EXE} && -x ${ECLIPSE_EXE} ]]
+  if [[ -x ${ECLIPSE_EXE} ]]
   then
-    echo "Found Eclipse executable: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
+    echo -e "\n\tFound Eclipse executable: ${ECLIPSE_EXE}" >>${TRACE_LOG}
   else
-    echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse" 2>>${TRACE_LOG}
+    # TODO: This logic is not quite right. We may have gotten here because 
+    # ECLIPSE_ECE did not exist at all.
+    echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse" >>${TRACE_LOG}
     # bit of a hack to make executable, when it should be already!?
     chmod -c +x ${ECLIPSE_EXE}
     # may have in include *.so?
