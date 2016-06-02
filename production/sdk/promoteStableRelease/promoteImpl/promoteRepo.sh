@@ -38,10 +38,12 @@ BUILDMACHINE_SITE=${BUILDMACHINE_BASE_SITE}/${DROP_ID}
 
 export DLMACHINE_BASE_SITE=/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
 # just in case first time
+echo -e "\n\tJust in case first time, we will 'mkdir -p ' for \n\t$DLMACHINE_BASE_SITE\n"
 mkdir -p $DLMACHINE_BASE_SITE
 
 export DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
 # just in case first time
+echo -e "\n\tJust in case first time, we will 'mkdir -p ' for \n\t$DLMACHINE_SITE\n"
 mkdir -p $DLMACHINE_SITE
 
 source ${PROMOTE_IMPL}/promoteUtilities.shsource
@@ -70,6 +72,6 @@ fi
 printf "\n\t%s\n" "rsync build machine repo site, to downloads repo site."
 # remember, need trailing slash since going from existing directories
 # contents to new directories contents
-rsync -r "${BUILDMACHINE_SITE}/"  "${DLMACHINE_SITE}"
+rsync -vr "${BUILDMACHINE_SITE}/"  "${DLMACHINE_SITE}"
 
 
