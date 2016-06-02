@@ -52,16 +52,6 @@ export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 
-# NOTE: Normally these variables are computed automatically later in 
-# the scripts. We provide these commented out "templates" here, since sometimes we may 
-# want to include them at non-standard times, for example, we may want to 
-# include "NEWS_ID" in an RC builds, whereas normally we do not. But for S and R 
-# promotions, NEWS_ID is computed and included automatically. Note: per bug 495252
-# we started including them automatically for S-*RC4 builds as well.
-#export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-#export ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-#export README_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-
 export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promote${TRAIN_NAME}}
 
 # Ordinarily, BUILD_LABEL (for Eclipse) and Equinox are the same. 
