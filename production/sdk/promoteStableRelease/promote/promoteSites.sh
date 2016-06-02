@@ -11,7 +11,16 @@
 #*******************************************************************************
 
 # Utility to rename build and "promote" it to DL Server.
+# This promoteSites.sh script is primarily to collect (and validate) the needed values, 
+# and then calls promoteSitesCore.sh to initiate the main work (which calls 
+# many other scripts). 
 
+# This has been designed to work "on Hudson" or from terminal console -- 
+# but does assume the builds and build repository on on "/shared/eclipse/...". 
+# On Hudson, the job must be defined as a parameterized job, with the parameters 
+# in this file defined with the same names as in this file. 
+# From a command line, the script can be ran, or tested, with something similar to 
+#  DROP_ID=I20160602-0112 CHECKPOINT=RC4 SIGNOFF_BUG="" TRAIN_NAME=Neon STREAM=4.6.0 DL_TYPE=S DRYRUN=false ./promoteSites.sh
 
 
 # These first three variables DROP_ID, CHECKPOINT, and SIGNOFF_BUG 
