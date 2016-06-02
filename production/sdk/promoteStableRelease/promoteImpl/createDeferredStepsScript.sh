@@ -24,7 +24,7 @@ echo "" >> "${CL_SITE}/deferredSteps.sh"
 #echo "# Actually, though, would be best to do in 'first step', to confirm before visible." >> "${CL_SITE}/deferredSteps.sh"
 #echo "touch /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/overrideTestColor" >> "${CL_SITE}/deferredSteps.sh"
 #echo "" >> "${CL_SITE}/deferredSteps.sh"
-echo "/shared/eclipse/sdk/updateIndexes.sh" >> "${CL_SITE}/deferredSteps.sh"
+echo "${WORKSPACE}/sdk/updateIndexes.sh" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 
 echo "${CL_SITE}/deferredCompositeAdd.sh" >> "${CL_SITE}/deferredSteps.sh"

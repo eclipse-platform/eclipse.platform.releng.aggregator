@@ -125,6 +125,28 @@ then
 
   printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/checklist.txt"
   printf "\t%s\n\n" "http://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
+  
+  # mail template
+
+  # start with empty line, and '>' to be sure re-created if exists already.  
+  printf "\n" > "${CL_SITE}/mailtemplate.txt"
+  
+  printf "\n%s\n\n" "${INITIAL_MAIL_LINES}" >> "${CL_SITE}/mailtemplate.txt"
+  
+  printf "\t%s\n" "Eclipse downloads:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "http://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+
+  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+
+  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+
+  printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "http://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+
+  printf "\n\n%s\n" "${CLOSING_MAIL_LINES}" >> "${CL_SITE}/mailtemplate.txt"
+
 else
   printf "\n\tINFO: %s\n" "Doing an INDEX_ONLY run, so deferred script not produced."
 fi

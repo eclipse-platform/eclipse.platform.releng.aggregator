@@ -13,10 +13,10 @@
 # Utility to add "stats" to repos. For documentation, see
 # https://wiki.eclipse.org/WTP/Releng/Tools/addRepoProperties
 
-# I theory, with a few more variables? This script should be the same 
+# In theory, with a few more variables? This script should be the same 
 # as addRepoProperties.sh
 
-export PROMOTE_IMPL=${PROMOTE_IMPL:-/shared/eclipse/sdk/promoteStableRelease/promoteImpl}
+export PROMOTE_IMPL=${PROMOTE_IMPL:-${WORKSPACE}/sdk/promoteStableRelease/promoteImpl}
 
 APP_NAME=org.eclipse.wtp.releng.tools.addRepoProperties
 

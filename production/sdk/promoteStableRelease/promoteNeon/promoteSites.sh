@@ -12,6 +12,7 @@
 
 # Utility to rename build and "promote" it to DL Server.
 
+
 # DRYRUN should default it to do dry run first, 
 # to sanity check files and labels created. And 
 # then comment out to do the real thing.
@@ -23,15 +24,15 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160525-2000
+export DROP_ID=I20160602-0112
 
 # CHECKPOINT is the code for either milestone (M1, M2, ...) 
 # or release candidate (RC1, RC2, ...). 
 # It should be empty for the final release.
-export CHECKPOINT=RC3
+export CHECKPOINT=RC4
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
-export SIGNOFF_BUG=494618
+export SIGNOFF_BUG=495252
 
 # These remaining variables change less often, but do change
 # for different development phases and streams.
@@ -52,8 +53,12 @@ export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 
-export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promote${TRAIN_NAME}}
+# These are generic templates. Normally, in Hudson fields, can customize.
+export INITIAL_MAIL_LINES="We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates."
+export CLOSING_MAIL_LINES="Thank you to everyone who made this checkpoint possible."
 
+
+# = = = = = = = This section/concept requires work
 # Ordinarily, BUILD_LABEL (for Eclipse) and Equinox are the same. 
 # But if we are promoting an "RC" site, then may be different, since 
 # they were already promoted once.
@@ -63,6 +68,7 @@ export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promote${TRAI
 #export DROP_ID_EQ=M-Mars.1RC3-201509040015
 #export BUILD_LABEL_EQ=Mars.1RC3
 
+# = = = = = = = This section/concept requires work
 # INDEX_ONLY means that everything has been promoted once already
 # and we merely want to "rename" and "promote" any new unit tests
 # or performance tests that have completed since the initial promotion.
@@ -76,8 +82,26 @@ export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promote${TRAI
 # server drop site only.
 #export INDEX_ONLY=false
 
+
+# This variable is for preparation to run on Hudson. Instead of from terminal. 
+# If ran on Hudson, it is assumed the aggregator is checked out into a directory named
+# "sdk". And, NOTE, there are some places in the scripts where /shared/eclipse
+# is still required, such as "finding the build" for "finding the aggregator" for tagging.
+export WORKSPACE=${WORKSPACE:-/shared/eclipse}
+
+export PROMOTE_IMPL=${WORKSPACE}/sdk/promoteStableRelease/promoteImpl
+
 # = = = = = = = Things past here seldom need to be updated
-export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
+# and should be moved into promoteSitesCore.sh 
+
+
+# One problem with old cl_site value is it "dirties" the working tree.
+#export CL_SITE=${CL_SITE:-${WORKSPACE}/sdk/promoteStableRelease/promote${TRAIN_NAME}}
+export CL_SITE=${WORKSPACE}/stage2output${TRAIN_NAME}
+mkdir -p "${CL_SITE}"
+
+
+# Currently this isn't used much, but is intended to be for "advanced debugging".
 export TRACE_LOG=${CL_SITE}/traceLog.txt
 
 if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
@@ -92,9 +116,8 @@ else
 fi
 
 
-# remove any of the scripts we create, such as for 'dry-run', since some of them, 
-# such as 'checklist' are normally appended to, not to mention better to start off 
-# clean. Notice the "verbose", but "ignore non-existent files"
+# remove any of the scripts we create, such as for 'dry-run'.
+# Notice the "verbose", but "ignore non-existent files"
 rm -vf ${CL_SITE}/*.txt ${CL_SITE}/deferred*
 
 # regex section
