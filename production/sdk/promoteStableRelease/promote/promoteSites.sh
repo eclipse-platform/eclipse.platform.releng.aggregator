@@ -13,10 +13,6 @@
 # Utility to rename build and "promote" it to DL Server.
 
 
-# DRYRUN should default it to do dry run first, 
-# to sanity check files and labels created. And 
-# then comment out to do the real thing.
-export DRYRUN=dry-run
 
 # These first three variables DROP_ID, CHECKPOINT, and SIGNOFF_BUG 
 # change each time. 
@@ -24,15 +20,38 @@ export DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=I20160602-0112
+if [[ -z "${DROP_ID}" ]]
+then
+  echo "\n\t[ERROR] DROP_ID must be defined for ${0##/*}"
+  exit 1
+else
+  export DROP_ID
+  echo "\n\t[INFO] DROP_ID: $DROP_ID"  
+fi
 
 # CHECKPOINT is the code for either milestone (M1, M2, ...) 
 # or release candidate (RC1, RC2, ...). 
 # It should be empty for the final release.
-export CHECKPOINT=RC4
+if [[ -z "${CHECKPOINT}" ]]
+then
+  echo "\n\t[ERROR] CHECKPOINT must be defined for ${0##/*}"
+  exit 1
+else
+  export CHECKPOINT
+  echo "\n\t[INFO] CHECKPOINT: $CHECKPOINT"  
+fi
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
 export SIGNOFF_BUG=495252
+if [[ -z "${SIGNOFF_BUG}" ]]
+then
+  echo "\n\t[INFO] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
+  echo "\t\tCan be added by hand to buildproperties.php"
+  exit 1
+else
+  export SIGNOFF_BUG
+  echo "[/t/t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
+fi
 
 # These remaining variables change less often, but do change
 # for different development phases and streams.
@@ -40,10 +59,25 @@ export SIGNOFF_BUG=495252
 # TRAIN_NAME is used for two things: 
 # naming repo (that is, it's internal property name) and 
 # the equinox download pages.
-export TRAIN_NAME=Neon
+if [[ -z "${TRAIN_NAME}" ]]
+then
+  echo "\n\t[ERROR] TRAIN_NAME must be defined for ${0##/*}"
+  exit 1
+else
+  export TRAIN_NAME
+  echo "\n\t[INFO] TRAIN_NAME: $TRAIN_NAME"  
+fi
 
 # STREAM is the three digit release number, such as 4.7.0 or 4.6.1.
-STREAM=4.6.0
+# STREAM=4.6.0
+if [[ -z "${STREAM}" ]]
+then
+  echo "\n\t[ERROR] STREAM must be defined for ${0##/*}"
+  exit 1
+else
+  export STREAM
+  echo "\n\t[INFO] STREAM: $STREAM"  
+fi
 
 # DL_TYPE ("download type") is the build type we are naming 
 # the build *TO*
@@ -52,10 +86,52 @@ STREAM=4.6.0
 export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
+if [[ -z "${DL_TYPE}" ]]
+then
+  echo "\n\t[ERROR] DL_TYPE must be defined for ${0##/*}"
+  exit 1
+else
+  # Could probably define default - or validate! - based on first letter of DROP_ID
+  # M --> M
+  # I --> S
+  export DL_TYPE
+  echo "\n\t[INFO] DL_TYPE: $DL_TYPE"  
+fi
 
 # These are generic templates. Normally, in Hudson fields, can customize.
-export INITIAL_MAIL_LINES="We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates."
-export CLOSING_MAIL_LINES="Thank you to everyone who made this checkpoint possible."
+# But if nothing is assigned, will use these generic ones.
+if [[ -z "${INITIAL_MAIL_LINES}" ]]
+then
+  export INITIAL_MAIL_LINES="We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates."
+else
+  export INITIAL_MAIL_LINES
+fi
+
+if [[ -z "${CLOSING_MAIL_LINES}" ]]
+then
+  export CLOSING_MAIL_LINES="Thank you to everyone who made this checkpoint possible."
+else
+  export CLOSING_MAIL_LINES
+fi
+
+echo "\n\t[INFO] INITIAL_MAIL_LINES: $INITIAL_MAIL_LINES"  
+echo "\n\t[INFO] CLOSING_MAIL_LINES: $CLOSING_MAIL_LINES"  
+
+
+# DRYRUN should default it to do dry run first, 
+# to sanity check files and labels created. And 
+# then set to false to do the real thing.
+# Hudson will pass in "true" or "false" depending on if 
+# checkbox if checked, or not, so if we find no value, 
+# assume "true".
+if [[ -z "${DRYRUN}" ]]
+then
+  export DRYRUN=true
+  echo "[INFO] DRYRUN found undefined, so set it to 'true'"
+else
+  export DEBUG
+  echo "[INFO] DRYRUN was $DRYRUN"
+fi
 
 
 # = = = = = = = This section/concept requires work

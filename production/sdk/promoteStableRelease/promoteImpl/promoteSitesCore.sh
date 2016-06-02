@@ -193,7 +193,7 @@ else
   printf "\n\tINFO: %s\n" "Doing an INDEX_ONLY run, so deferred step script not promoted."
 fi
 
-if [[ ${DRYRUN} == "dry-run" ]]
+if [[ "${DRYRUN}" == "true" ]]
 then
   printf "\n\t%s" "Doing dry-run ..."
   printf "\n"
