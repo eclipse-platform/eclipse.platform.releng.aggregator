@@ -143,4 +143,4 @@ else
   exit 1
 fi
 
-"${PROMOTE_IMPL}/promoteSitesCore.sh"
+"${PROMOTE_IMPL}/promoteSitesCore.sh" 2>&1 | tee ${CL_SITE}/stage1PromotionLog.txt
