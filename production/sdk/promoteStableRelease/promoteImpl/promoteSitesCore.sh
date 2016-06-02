@@ -32,12 +32,20 @@ case ${DL_TYPE} in
     then
       export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}/${CHECKPOINT}
     fi
+    # except for RC4. Since it it intended to be "final" we include the variables 
+    # just like they were for an "R" build. (See bug 495252). 
+    if [[ "${CHECKPOINT}" == "RC4" ]]
+    then
+      export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
+      export ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}
+      export README_ID=${BUILD_MAJOR}.${BUILD_MINOR}
+    fi
     ;;
   "R" )
     export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
     export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
     export ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-    export $README_ID=${BUILD_MAJOR}.${BUILD_MINOR}
+    export README_ID=${BUILD_MAJOR}.${BUILD_MINOR}
     ;;
   *)
     echo -e "\n\tERROR: case statement for repo output did not match any pattern."
@@ -181,7 +189,7 @@ fi
 # SIGNOFF_BUG should not be defined if there are no JUnit failures to investigate and explain
 if [[ -n "${SIGNOFF_BUG}" ]] 
 then
- echo -e "<p>Any unit test failures below have been investigated and found to be test-related and do not affect the quality of the build.\nSee the sign-off page <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=${SIGNOFF_BUG}\">(bug ${SIGNOFF_BUG})</a> for details.</p>" > "${BUILDMACHINE_BASE_DL}/${DROP_ID}/testNotes.html"
+  echo -e "<p>Any unit test failures below have been investigated and found to be test-related and do not affect the quality of the build.\nSee the sign-off page <a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=${SIGNOFF_BUG}\">(bug ${SIGNOFF_BUG})</a> for details.</p>" > "${BUILDMACHINE_BASE_DL}/${DROP_ID}/testNotes.html"
 fi
 
 # There is no "new and noteworthy" for RC builds, only Milestones.
