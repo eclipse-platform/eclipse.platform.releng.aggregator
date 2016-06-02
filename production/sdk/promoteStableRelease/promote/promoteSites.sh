@@ -17,12 +17,12 @@
 # These first three variables DROP_ID, CHECKPOINT, and SIGNOFF_BUG 
 # change each time. 
 
-# DROP_ID is the name of the build we are promoting. 
+# DROP_ID is the name (build id) of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
-# and a few other variables, below. 
+# and a few other variables. 
 if [[ -z "${DROP_ID}" ]]
 then
-  echo "\n\t[ERROR] DROP_ID must be defined for ${0##/*}"
+  echo "\n\t[ERROR] DROP_ID must be defined for ${0##*/}"
   exit 1
 else
   export DROP_ID
@@ -34,7 +34,7 @@ fi
 # It should be empty for the final release.
 if [[ -z "${CHECKPOINT}" ]]
 then
-  echo "\n\t[ERROR] CHECKPOINT must be defined for ${0##/*}"
+  echo "\n\t[ERROR] CHECKPOINT must be defined for ${0##*/}"
   exit 1
 else
   export CHECKPOINT
@@ -61,7 +61,7 @@ fi
 # the equinox download pages.
 if [[ -z "${TRAIN_NAME}" ]]
 then
-  echo "\n\t[ERROR] TRAIN_NAME must be defined for ${0##/*}"
+  echo "\n\t[ERROR] TRAIN_NAME must be defined for ${0##*/}"
   exit 1
 else
   export TRAIN_NAME
@@ -72,7 +72,7 @@ fi
 # STREAM=4.6.0
 if [[ -z "${STREAM}" ]]
 then
-  echo "\n\t[ERROR] STREAM must be defined for ${0##/*}"
+  echo "\n\t[ERROR] STREAM must be defined for ${0##*/}"
   exit 1
 else
   export STREAM
@@ -88,7 +88,7 @@ export DL_TYPE=S
 #export DL_TYPE=M
 if [[ -z "${DL_TYPE}" ]]
 then
-  echo "\n\t[ERROR] DL_TYPE must be defined for ${0##/*}"
+  echo "\n\t[ERROR] DL_TYPE must be defined for ${0##*/}"
   exit 1
 else
   # Could probably define default - or validate! - based on first letter of DROP_ID
