@@ -10,11 +10,21 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
-echo "#!/usr/bin/env bash" >> "${CL_SITE}/deferredSteps.sh"
+echo "#!/usr/bin/env bash" > "${CL_SITE}/deferredSteps.sh"
+
 echo "" >> "${CL_SITE}/deferredSteps.sh"
+
+echo "# We set DRYRUN to what ever the value was that produced these scripts as a reminder these won't work if DRYRUN was on." >> "${CL_SITE}/deferredSteps.sh"
+echo "DRYRUN=${DRYRUN}" >> "${CL_SITE}/deferredSteps.sh"
+echo "if [[ -n \"${DRYRUN}\" ]]" >> "${CL_SITE}/deferredSteps.sh"
+echo "then" >> "${CL_SITE}/deferredSteps.sh" 
+echo "   echo \"DRYRUN was set, so exiting. Intended for visual inspection only.\"" >> "${CL_SITE}/deferredSteps.sh"
+echo "   exit 1" >> "${CL_SITE}/deferredSteps.sh"
+echo "fi" >> "${CL_SITE}/deferredSteps.sh"
+
 echo "# Utility to automate second, deferred step of a promotion (making visible, at the right time, etc.)" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
-echo "# equinox is only promoted every 30 minutes ... so should do close to the hour, or half hour, " >> "${CL_SITE}/deferredSteps.sh"
+echo "# equinox is only promoted every 15-30 minutes ... so should do close to the hour, or half hour, " >> "${CL_SITE}/deferredSteps.sh"
 echo "# to avoid looking out of sync." >> "${CL_SITE}/deferredSteps.sh"
 echo "mv /shared/eclipse/equinox/promotion/queue/manual-promote-${DL_LABEL_EQ}.sh /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL_EQ}.sh" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
