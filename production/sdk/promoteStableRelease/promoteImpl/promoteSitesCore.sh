@@ -123,7 +123,11 @@ export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # until tagged.
 export AGGR_LOCATION="gitCache/eclipse.platform.releng.aggregator"
 
+# This "localBuildProperties" file is not for production runs. 
+# It is only for local testing, where some key locations or hosts may be 
+# defined differently.
 source localBuildProperties.shsource 2>/dev/null
+
 # Build machine locations (would very seldom change)
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 export BUILD_ROOT=${BUILD_HOME}/${BUILD_MAJOR}${BUILD_TYPE}
