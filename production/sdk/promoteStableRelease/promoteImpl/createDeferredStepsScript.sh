@@ -14,6 +14,9 @@ echo "#!/usr/bin/env bash" > "${CL_SITE}/deferredSteps.sh"
 
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 
+echo "# As in main scripts, set WORKSPACE to run on Hudson or shared eclipse" >> "${CL_SITE}/deferredSteps.sh"
+echo "export WORKSPACE=\${WORKSPACE:-/shared/eclipse} >> "${CL_SITE}/deferredSteps.sh"
+
 echo "# We set DRYRUN to what ever the value was that produced these scripts as a reminder these won't work if DRYRUN was on." >> "${CL_SITE}/deferredSteps.sh"
 echo "DRYRUN=${DRYRUN}" >> "${CL_SITE}/deferredSteps.sh"
 echo "if [[ -n \"\${DRYRUN}\" ]]" >> "${CL_SITE}/deferredSteps.sh"
@@ -34,17 +37,17 @@ echo "" >> "${CL_SITE}/deferredSteps.sh"
 #echo "# Actually, though, would be best to do in 'first step', to confirm before visible." >> "${CL_SITE}/deferredSteps.sh"
 #echo "touch /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/overrideTestColor" >> "${CL_SITE}/deferredSteps.sh"
 #echo "" >> "${CL_SITE}/deferredSteps.sh"
-echo "${WORKSPACE}/sdk/updateIndexes.sh" >> "${CL_SITE}/deferredSteps.sh"
+echo "\${WORKSPACE}/sdk/updateIndexes.sh" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 
-echo "${CL_SITE}/deferredCompositeAdd.sh" >> "${CL_SITE}/deferredSteps.sh"
+echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredCompositeAdd.sh" >> "${CL_SITE}/deferredSteps.sh"
 
 # We don't tag, during deferred step, when doing a release.
 # It comes a little later.
 if [[ "${DL_TYPE}" != "R" ]] 
 then
-  echo "" >> "${CL_SITE}/deferredSteps.sh"
-  echo "${CL_SITE}/deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
+  echo "" >> "\${WORKSPACE}/${STAGE2DIRSEG}/deferredSteps.sh"
+  echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
 fi 
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "# In theory could automate the 'announce' mail too ... but, " >> "${CL_SITE}/deferredSteps.sh"

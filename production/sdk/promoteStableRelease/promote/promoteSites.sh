@@ -97,7 +97,9 @@ export PROMOTE_IMPL=${WORKSPACE}/sdk/promoteStableRelease/promoteImpl
 
 # One problem with old cl_site value is it "dirties" the working tree.
 #export CL_SITE=${CL_SITE:-${WORKSPACE}/sdk/promoteStableRelease/promote${TRAIN_NAME}}
-export CL_SITE=${WORKSPACE}/stage2output${TRAIN_NAME}
+# stage 2 directory should be "outside" the normal working tree
+export STAGE2DIRSEG=stage2output${TRAIN_NAME}${CHECKPOINT}
+export CL_SITE=${WORKSPACE}/${STAGE2DIRSEG}
 mkdir -p "${CL_SITE}"
 
 
