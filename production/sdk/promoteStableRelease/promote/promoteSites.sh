@@ -22,11 +22,11 @@
 # and a few other variables. 
 if [[ -z "${DROP_ID}" ]]
 then
-  echo "\n\t[ERROR] DROP_ID must be defined for ${0##*/}"
+  echo -e "\n\t[ERROR] DROP_ID must be defined for ${0##*/}"
   exit 1
 else
   export DROP_ID
-  echo "\n\t[INFO] DROP_ID: $DROP_ID"  
+  echo -e "\n\t[INFO] DROP_ID: $DROP_ID"  
 fi
 
 # CHECKPOINT is the code for either milestone (M1, M2, ...) 
@@ -34,23 +34,23 @@ fi
 # It should be empty for the final release.
 if [[ -z "${CHECKPOINT}" ]]
 then
-  echo "\n\t[ERROR] CHECKPOINT must be defined for ${0##*/}"
+  echo -e "\n\t[ERROR] CHECKPOINT must be defined for ${0##*/}"
   exit 1
 else
   export CHECKPOINT
-  echo "\n\t[INFO] CHECKPOINT: $CHECKPOINT"  
+  echo -e "\n\t[INFO] CHECKPOINT: $CHECKPOINT"  
 fi
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
 export SIGNOFF_BUG=495252
 if [[ -z "${SIGNOFF_BUG}" ]]
 then
-  echo "\n\t[INFO] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
-  echo "\t\tCan be added by hand to buildproperties.php"
+  echo -e "\n\t[INFO] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
+  echo -e "\t\tCan be added by hand to buildproperties.php"
   exit 1
 else
   export SIGNOFF_BUG
-  echo "[/t/t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
+  echo -e "[/t/t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
 fi
 
 # These remaining variables change less often, but do change
@@ -61,22 +61,22 @@ fi
 # the equinox download pages.
 if [[ -z "${TRAIN_NAME}" ]]
 then
-  echo "\n\t[ERROR] TRAIN_NAME must be defined for ${0##*/}"
+  echo -e "\n\t[ERROR] TRAIN_NAME must be defined for ${0##*/}"
   exit 1
 else
   export TRAIN_NAME
-  echo "\n\t[INFO] TRAIN_NAME: $TRAIN_NAME"  
+  echo -e "\n\t[INFO] TRAIN_NAME: $TRAIN_NAME"  
 fi
 
 # STREAM is the three digit release number, such as 4.7.0 or 4.6.1.
 # STREAM=4.6.0
 if [[ -z "${STREAM}" ]]
 then
-  echo "\n\t[ERROR] STREAM must be defined for ${0##*/}"
+  echo -e "\n\t[ERROR] STREAM must be defined for ${0##*/}"
   exit 1
 else
   export STREAM
-  echo "\n\t[INFO] STREAM: $STREAM"  
+  echo -e "\n\t[INFO] STREAM: $STREAM"  
 fi
 
 # DL_TYPE ("download type") is the build type we are naming 
@@ -88,14 +88,14 @@ export DL_TYPE=S
 #export DL_TYPE=M
 if [[ -z "${DL_TYPE}" ]]
 then
-  echo "\n\t[ERROR] DL_TYPE must be defined for ${0##*/}"
+  echo -e "\n\t[ERROR] DL_TYPE must be defined for ${0##*/}"
   exit 1
 else
   # Could probably define default - or validate! - based on first letter of DROP_ID
   # M --> M
   # I --> S
   export DL_TYPE
-  echo "\n\t[INFO] DL_TYPE: $DL_TYPE"  
+  echo -e "\n\t[INFO] DL_TYPE: $DL_TYPE"  
 fi
 
 # These are generic templates. Normally, in Hudson fields, can customize.
@@ -127,10 +127,10 @@ echo "\n\t[INFO] CLOSING_MAIL_LINES: $CLOSING_MAIL_LINES"
 if [[ -z "${DRYRUN}" ]]
 then
   export DRYRUN=true
-  echo "[INFO] DRYRUN found undefined, so set it to 'true'"
+  echo -e "\n\t[INFO] DRYRUN found undefined, so set it to 'true'"
 else
   export DEBUG
-  echo "[INFO] DRYRUN was $DRYRUN"
+  echo -e "\n\t[INFO] DRYRUN was $DRYRUN"
 fi
 
 
