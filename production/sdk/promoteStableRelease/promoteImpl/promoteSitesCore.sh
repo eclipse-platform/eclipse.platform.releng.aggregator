@@ -270,5 +270,5 @@ then
 else
   printf "\n\tINFO: %s\n" "Doing an INDEX_ONLY run, so repo not promoted."
 fi
-
+  printf "\n\t\t%s\n" "[INFO] The scripts for \"stage 2\" (deferred) promotion are in ${CL_SITE}"
 exit 0
