@@ -16,7 +16,7 @@ echo "" >> "${CL_SITE}/deferredSteps.sh"
 
 echo "# We set DRYRUN to what ever the value was that produced these scripts as a reminder these won't work if DRYRUN was on." >> "${CL_SITE}/deferredSteps.sh"
 echo "DRYRUN=${DRYRUN}" >> "${CL_SITE}/deferredSteps.sh"
-echo "if [[ -n \"${DRYRUN}\" ]]" >> "${CL_SITE}/deferredSteps.sh"
+echo "if [[ -n \"\${DRYRUN}\" ]]" >> "${CL_SITE}/deferredSteps.sh"
 echo "then" >> "${CL_SITE}/deferredSteps.sh" 
 echo "   echo \"DRYRUN was set, so exiting. Intended for visual inspection only.\"" >> "${CL_SITE}/deferredSteps.sh"
 echo "   exit 1" >> "${CL_SITE}/deferredSteps.sh"
