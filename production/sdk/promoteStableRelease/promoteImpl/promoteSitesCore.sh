@@ -10,9 +10,48 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
-# TODO: Should check that all required variables are defined. 
-# That is, those variables defined in promoteSites.sh are in fact 
-# defined and have reasonable values.
+
+# Currently this isn't used much, but is intended to be for "advanced debugging".
+export TRACE_LOG=${CL_SITE}/traceLog.txt
+
+if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
+then
+  export BUILD_MAJOR=${BASH_REMATCH[1]}
+  export BUILD_MINOR=${BASH_REMATCH[2]}
+  export BUILD_SERVICE=${BASH_REMATCH[3]}
+else
+  echo "STREAM must contain major, minor, and service versions, such as 4.3.0"
+  echo "    but found ${STREAM}"
+  exit 1
+fi
+
+
+# remove any of the scripts we create, such as for 'dry-run'.
+# Notice the "verbose", but "ignore non-existent files"
+rm -vf ${CL_SITE}/*.txt ${CL_SITE}/deferred*
+
+# regex section
+# BUILD_TYPE is the prefix of the build -- 
+# that is, for what we are renaming the build FROM
+RCPATTERN="^([MI])-(${BUILD_MAJOR}\.${BUILD_MINOR}\.${BUILD_SERVICE}RC[12345]{1}[abcd]?)-([[:digit:]]{12})$"
+PATTERN="^([MI])([[:digit:]]{8})-([[:digit:]]{4})$"
+if [[ "${DROP_ID}" =~ $RCPATTERN ]]
+then
+  export BUILD_TYPE=${BASH_REMATCH[1]}
+  export BUILD_LABEL=${BASH_REMATCH[2]}
+  export BUILD_TIMESTAMP=${BASH_REMATCH[3]}
+elif [[ "${DROP_ID}" =~ $PATTERN ]]
+then
+  export BUILD_TYPE=${BASH_REMATCH[1]}
+  export BUILD_TIMESTAMP=${BASH_REMATCH[2]}${BASH_REMATCH[3]}
+  # Label and ID are the same, in this case
+  export BUILD_LABEL=$DROP_ID
+  export BUILD_LABEL_EQ=$DROP_ID
+  export DROP_ID_EQ=$DROP_ID
+else 
+  echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
+  exit 1
+fi
 
 # For initial releases, do not include service in label
 if [[ "${BUILD_SERVICE}" == "0" ]]

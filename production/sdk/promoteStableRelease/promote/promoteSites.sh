@@ -158,6 +158,7 @@ fi
 # server drop site only.
 #export INDEX_ONLY=false
 
+# = = = = = = = Things past here seldom need to be updated
 
 # This variable is for preparation to run on Hudson. Instead of from terminal. 
 # If ran on Hudson, it is assumed the aggregator is checked out into a directory named
@@ -167,58 +168,11 @@ export WORKSPACE=${WORKSPACE:-/shared/eclipse}
 
 export PROMOTE_IMPL=${WORKSPACE}/sdk/promoteStableRelease/promoteImpl
 
-# = = = = = = = Things past here seldom need to be updated
-# and should be moved into promoteSitesCore.sh 
-
-
 # One problem with old cl_site value is it "dirties" the working tree.
 #export CL_SITE=${CL_SITE:-${WORKSPACE}/sdk/promoteStableRelease/promote${TRAIN_NAME}}
 # stage 2 directory should be "outside" the normal working tree
 export STAGE2DIRSEG=stage2output${TRAIN_NAME}${CHECKPOINT}
 export CL_SITE=${WORKSPACE}/${STAGE2DIRSEG}
 mkdir -p "${CL_SITE}"
-
-
-# Currently this isn't used much, but is intended to be for "advanced debugging".
-export TRACE_LOG=${CL_SITE}/traceLog.txt
-
-if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
-then
-  export BUILD_MAJOR=${BASH_REMATCH[1]}
-  export BUILD_MINOR=${BASH_REMATCH[2]}
-  export BUILD_SERVICE=${BASH_REMATCH[3]}
-else
-  echo "STREAM must contain major, minor, and service versions, such as 4.3.0"
-  echo "    but found ${STREAM}"
-  exit 1
-fi
-
-
-# remove any of the scripts we create, such as for 'dry-run'.
-# Notice the "verbose", but "ignore non-existent files"
-rm -vf ${CL_SITE}/*.txt ${CL_SITE}/deferred*
-
-# regex section
-# BUILD_TYPE is the prefix of the build -- 
-# that is, for what we are renaming the build FROM
-RCPATTERN="^([MI])-(${BUILD_MAJOR}\.${BUILD_MINOR}\.${BUILD_SERVICE}RC[12345]{1}[abcd]?)-([[:digit:]]{12})$"
-PATTERN="^([MI])([[:digit:]]{8})-([[:digit:]]{4})$"
-if [[ "${DROP_ID}" =~ $RCPATTERN ]]
-then
-  export BUILD_TYPE=${BASH_REMATCH[1]}
-  export BUILD_LABEL=${BASH_REMATCH[2]}
-  export BUILD_TIMESTAMP=${BASH_REMATCH[3]}
-elif [[ "${DROP_ID}" =~ $PATTERN ]]
-then
-  export BUILD_TYPE=${BASH_REMATCH[1]}
-  export BUILD_TIMESTAMP=${BASH_REMATCH[2]}${BASH_REMATCH[3]}
-  # Label and ID are the same, in this case
-  export BUILD_LABEL=$DROP_ID
-  export BUILD_LABEL_EQ=$DROP_ID
-  export DROP_ID_EQ=$DROP_ID
-else 
-  echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
-  exit 1
-fi
 
 "${PROMOTE_IMPL}/promoteSitesCore.sh" 2>&1 | tee ${CL_SITE}/stage1PromotionLog.txt
