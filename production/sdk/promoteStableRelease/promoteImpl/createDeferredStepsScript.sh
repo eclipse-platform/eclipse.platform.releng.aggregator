@@ -15,7 +15,7 @@ echo "#!/usr/bin/env bash" > "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 
 echo "# As in main scripts, set WORKSPACE to run on Hudson or shared eclipse" >> "${CL_SITE}/deferredSteps.sh"
-echo "export WORKSPACE=\${WORKSPACE:-/shared/eclipse} >> "${CL_SITE}/deferredSteps.sh"
+echo "export WORKSPACE=\${WORKSPACE:-/shared/eclipse}" >> "${CL_SITE}/deferredSteps.sh"
 
 echo "# We set DRYRUN to what ever the value was that produced these scripts as a reminder these won't work if DRYRUN was on." >> "${CL_SITE}/deferredSteps.sh"
 echo "DRYRUN=${DRYRUN}" >> "${CL_SITE}/deferredSteps.sh"
@@ -46,7 +46,7 @@ echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredCompositeAdd.sh" >> "${CL_SITE}/defe
 # It comes a little later.
 if [[ "${DL_TYPE}" != "R" ]] 
 then
-  echo "" >> "\${WORKSPACE}/${STAGE2DIRSEG}/deferredSteps.sh"
+  echo "" >> "${WORKSPACE}/${STAGE2DIRSEG}/deferredSteps.sh"
   echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
 fi 
 echo "" >> "${CL_SITE}/deferredSteps.sh"
