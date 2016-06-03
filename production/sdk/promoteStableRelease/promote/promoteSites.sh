@@ -59,7 +59,7 @@ then
   exit 1
 else
   export SIGNOFF_BUG
-  echo -e "[/t/t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
+  echo -e "\t\t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
 fi
 
 # These remaining variables change less often, but do change
