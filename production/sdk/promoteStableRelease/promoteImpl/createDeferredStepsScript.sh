@@ -40,14 +40,14 @@ echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "\${UTILITIES_HOME}/sdk/updateIndexes.sh" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 
-echo "\${UTILITIES_HOME}/${STAGE2DIRSEG}/deferredCompositeAdd.sh" >> "${CL_SITE}/deferredSteps.sh"
+echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredCompositeAdd.sh" >> "${CL_SITE}/deferredSteps.sh"
 
 # We don't tag, during deferred step, when doing a release.
 # It comes a little later.
 if [[ "${DL_TYPE}" != "R" ]] 
 then
   echo "" >> "${UTILITIES_HOME}/${STAGE2DIRSEG}/deferredSteps.sh"
-  echo "\${UTILITIES_HOME}/${STAGE2DIRSEG}/deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
+  echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
 fi 
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "# In theory could automate the 'announce' mail too ... but, " >> "${CL_SITE}/deferredSteps.sh"
