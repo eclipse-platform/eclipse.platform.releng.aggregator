@@ -174,11 +174,11 @@ fi
 # "sdk". And, NOTE, there are some places in the scripts where /shared/eclipse
 # is still required, such as "finding the build" for "finding the aggregator" for tagging.
 
-if [[ -z "${UTILITIES_HOME}" ]]
+if [[ -z "${WORKSPACE}" ]]
 then
   export UTILITIES_HOME=/shared/eclipse
 else
-  export UTILITIES_HOME=/${UTILITIES_HOME}/utilities/production
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
 fi
 
 export PROMOTE_IMPL=${UTILITIES_HOME}/sdk/promoteStableRelease/promoteImpl
