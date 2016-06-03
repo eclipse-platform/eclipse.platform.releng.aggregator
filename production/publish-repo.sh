@@ -264,25 +264,27 @@ then
   #        #exit $RC
   #    fi
 
+  # == I do not see a need for this? dw 6/3/2016
+  # == BUT, if needed, need to "mkdir" first! 
   # Make composite directly on build machine, for patches only
   # repodir is absolute path to composite repository,
   # complocation is the (relative) child repository (usually direcotry named 'buildId')
   # site parent is "one up" from siteDirOnBuildMachine.
-  siteDirParentOnBuildMachine=$( updateSiteParent "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
-  java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
-    -data ${buildDirectory}/workspace-makeComposite \
-    -application org.eclipse.ant.core.antRunner \
-    -v \
-    -buildfile "${EBuilderDir}/eclipse/buildScripts/addToComposite.xml" \
-    -Drepodir=${siteDirParentOnBuildMachine}  \
-    -Dcomplocation=${BUILD_ID}
+  #siteDirParentOnBuildMachine=$( updateSiteParent "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
+  #java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
+  #  -data ${buildDirectory}/workspace-makeComposite \
+  #  -application org.eclipse.ant.core.antRunner \
+  #  -v \
+  #  -buildfile "${EBuilderDir}/eclipse/buildScripts/addToComposite.xml" \
+  #  -Drepodir=${siteDirParentOnBuildMachine}  \
+  #  -Dcomplocation=${BUILD_ID}
 
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
+  #RC=$?
+  #if [[ $RC != 0 ]]
+  #then
+  #  echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
     #exit $RC
-  fi
+  #fi
 
 fi
 
