@@ -46,7 +46,7 @@ echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredCompositeAdd.sh" >> "${CL_SITE}/defe
 # It comes a little later.
 if [[ "${DL_TYPE}" != "R" ]] 
 then
-  echo "" >> "${UTILITIES_HOME}/${STAGE2DIRSEG}/deferredSteps.sh"
+  echo "" >> "${CL_SITE}/deferredSteps.sh"
   echo "\${WORKSPACE}/${STAGE2DIRSEG}/deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
 fi 
 echo "" >> "${CL_SITE}/deferredSteps.sh"
