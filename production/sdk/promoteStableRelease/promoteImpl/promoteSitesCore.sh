@@ -209,6 +209,14 @@ then
       printf "\n\n\t%s\n\n" "ERROR: tagPromotedBuilds.sh failed."
       exit $rccode
     fi
+    # a special case where for RC4 we publish the news, acks, and readme, even though
+    # the DL_TYPE is S or M.
+    if [[ "${CHECKPOINT}" == "RC4" ]] 
+    then
+       echo -e "\$NEWS_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${DROP_ID}/buildproperties.php"
+       echo -e "\$ACK_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${DROP_ID}/buildproperties.php"
+       echo -e "\$README_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${DROP_ID}/buildproperties.php"
+    fi
   else
     printf "\n\tINFO: %s\n" "No tagging script created, since promoting to an R-Build."
     printf "\tINFO: %s\n" "But, we did create NEWS_ID, ACK_ID and README_ID and added to buildproperties.php, since doing Release promote."
