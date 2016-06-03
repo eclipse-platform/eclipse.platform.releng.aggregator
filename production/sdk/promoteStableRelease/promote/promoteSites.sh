@@ -173,15 +173,21 @@ fi
 # If ran on Hudson, it is assumed the aggregator is checked out into a directory named
 # "sdk". And, NOTE, there are some places in the scripts where /shared/eclipse
 # is still required, such as "finding the build" for "finding the aggregator" for tagging.
-export WORKSPACE=${WORKSPACE:-/shared/eclipse}
 
-export PROMOTE_IMPL=${WORKSPACE}/sdk/promoteStableRelease/promoteImpl
+if [[ -z "${UTILITIES_HOME}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+else
+  export UTILITIES_HOME=/${UTILITIES_HOME}/utilities/production
+fi
+
+export PROMOTE_IMPL=${UTILITIES_HOME}/sdk/promoteStableRelease/promoteImpl
 
 # One problem with old cl_site value is it "dirties" the working tree.
-#export CL_SITE=${CL_SITE:-${WORKSPACE}/sdk/promoteStableRelease/promote${TRAIN_NAME}}
+#export CL_SITE=${CL_SITE:-${UTILITIES_HOME}/sdk/promoteStableRelease/promote${TRAIN_NAME}}
 # stage 2 directory should be "outside" the normal working tree
 export STAGE2DIRSEG=stage2output${TRAIN_NAME}${CHECKPOINT}
-export CL_SITE=${WORKSPACE}/${STAGE2DIRSEG}
+export CL_SITE=${UTILITIES_HOME}/${STAGE2DIRSEG}
 mkdir -p "${CL_SITE}"
 
 "${PROMOTE_IMPL}/promoteSitesCore.sh" 2>&1 | tee ${CL_SITE}/stage1PromotionLog.txt

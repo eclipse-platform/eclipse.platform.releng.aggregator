@@ -171,7 +171,7 @@ then
   if [[ "${HIDE_SITE}" != "true" ]]
   then
     printf "\n\t%s\n" "Update main overall download index page so it shows new build."
-    source ${WORKSPACE}/sdk/updateIndexFilesFunction.shsource
+    source ${UTILITIES_HOME}/sdk/updateIndexFilesFunction.shsource
     updateIndex
   fi
 else

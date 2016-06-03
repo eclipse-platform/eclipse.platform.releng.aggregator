@@ -16,7 +16,7 @@
 # In theory, with a few more variables? This script should be the same 
 # as addRepoProperties.sh
 
-export PROMOTE_IMPL=${PROMOTE_IMPL:-${WORKSPACE}/sdk/promoteStableRelease/promoteImpl}
+export PROMOTE_IMPL=${PROMOTE_IMPL:-${UTILITIES_HOME}/sdk/promoteStableRelease/promoteImpl}
 
 APP_NAME=org.eclipse.wtp.releng.tools.addRepoProperties
 
