@@ -91,33 +91,21 @@ require("../DL.thin.header.php.html");
     }
 ?>
 
-<h3 name="UnitTest">Performance Unit Test Results for <?php echo "$BUILD_ID"; ?> </h3>
-
-<p>The table shows the unit test results for this build on the platforms
-tested. You may access the test results page specific to each
-component on a specific platform by clicking the cell link.
-Normally, the number of errors is indicated in the cell.
-A "-1" or "DNF" means the test "Did Not Finish" for unknown reasons
-and hence no results page is available. In that case,
-more information can sometimes be found in
-the <a href="../perflogs.php#console">console logs</a>.</p>
 <?php
-if (file_exists("$performanceDir/testNotes.html")) {
-    $my_file = file_get_contents("$performanceDir/testNotes.html");
+if (file_exists("../pertestNotes.html")) {
+    $my_file = file_get_contents("../perftestNotes.html");
     echo $my_file;
 }
-if (file_exists("../baseline.php")) {
-   echo "<p>See also the <a href=\"../baseline.php\">baseline unit tests results</a>.</p>";
-}
+
 ?>
 
 
 <?php
-$rowResultsFile="performanceTables.html";
+$rowResultsFile="../performanceResultsTable.html";
   if (file_exists($rowResultsFile)) {
     include $rowResultsFile;
 } else {
-    include "testResultsTablesPending.html";
+    include "../testResultsTablesPending.html";
 }
 ?>
 </table>
