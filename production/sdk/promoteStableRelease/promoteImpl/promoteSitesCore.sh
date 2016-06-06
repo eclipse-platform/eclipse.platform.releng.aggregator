@@ -83,7 +83,10 @@ case ${DL_TYPE} in
     fi
     # except for RC4. Since it it intended to be "final" we include the variables 
     # just like they were for an "R" build. (See bug 495252). 
-    if [[ "${CHECKPOINT}" == "RC4" ]]
+    # to accomidate "respins", we use a regex so that adding an "a" or "b", 
+    # will still match.
+    RC4PAT=^RC4[abcd]?$
+    if [[ "${CHECKPOINT}" =~  $RC4PATH ]]
     then
       export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
       export ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}
@@ -211,7 +214,7 @@ then
     fi
     # a special case where for RC4 we publish the news, acks, and readme, even though
     # the DL_TYPE is S or M.
-    if [[ "${CHECKPOINT}" == "RC4" ]] 
+    if [[ "${CHECKPOINT}" =~ $RC4PATH ]] 
     then
        echo -e "\$NEWS_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${DROP_ID}/buildproperties.php"
        echo -e "\$ACK_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${DROP_ID}/buildproperties.php"
