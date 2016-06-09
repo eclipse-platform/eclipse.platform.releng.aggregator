@@ -78,10 +78,10 @@ echo -e "\n\thttp_proxy: $http_proxy"
 echo -e "\n\tftp_proxy: $ftp_proxy"
 export JVM_OPTS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
 export JAVA_ARGS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-export ANT_ARGS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\"onProxyHosts=\"*.eclipse.org\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"*.eclipse.org\""
+export ANT_ARGS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
 export JAVA_PROXIES="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-export MAVEN_OPTS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*|download.eclipse.org\" -Dhttps.nonProxyHosts=\"172.30.206.*|download.eclipse.org\""
 
+export JAVA_DOC_PROXIES="-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source localBuildProperties.shsource 2>/dev/null
