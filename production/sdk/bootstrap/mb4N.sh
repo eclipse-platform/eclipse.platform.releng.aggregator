@@ -91,6 +91,8 @@ export PRODUCTION_SCRIPTS_DIR=production
 
 source $BUILD_HOME/bootstrap.shsource
 
+echo -e "[DEBUG] ANT_OPTS: ${ANT_OPTS}"
+
 # run rest in "back ground"
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &
 
