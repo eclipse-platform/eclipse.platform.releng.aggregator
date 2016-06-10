@@ -34,7 +34,7 @@ oldumask=$(umask)
 umask $NEWUMASK
 
 echo "ulimit (file handles): $( ulimit -n ) "
-ulimit -n 2048
+ulimit -n 4096
 echo "ulimit (file handles): $( ulimit -n ) "
 
 echo "locale charmap: $(locale charmap)"
@@ -65,6 +65,8 @@ done
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source localBuildProperties.shsource 2>/dev/null
+
+# BUILD_HOME defines the "top" of the build area (for all types of builds)
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 SCRIPT_NAME=$0
@@ -87,11 +89,27 @@ BUILDSTREAMTYPEDIR=${eclipseStreamMajor}$BUILD_TYPE
 
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 
+# These values for proxies come from the configuration files of the Releng HIPP instance. 
+# They are normally defined in "ANT_OPTS" and similar environment variables, but 
+# the JavaDoc program requires them is this special -Jflag form. 
+# export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""}
+
+# We could probably do away with this special directory now, since we 
+# clone a shallow copy of aggregator to "utilities" on Hudson.
+# We could probably redefine it to something like 
+# ${WORKSPACE}/utilities/production 
+# and then in the bootstrap.shsource do away with the "clone and copy"
+# that we do there. And, also, change occurrences of 
+# ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}
+# to simply
+# ${PRODUCTION_SCRIPTS_DIR}
 export PRODUCTION_SCRIPTS_DIR=production
 
 source $BUILD_HOME/bootstrap.shsource
 
-echo -e "[DEBUG] ANT_OPTS: ${ANT_OPTS}"
+# default (later) is set to 'true'. 
+# set to false here for less output.
+# export MVN_DEBUG=false
 
 # run rest in "back ground"
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &

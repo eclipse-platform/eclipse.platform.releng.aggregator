@@ -37,7 +37,7 @@ oldumask=$(umask)
 umask $NEWUMASK
 
 echo "ulimit (file handles): $( ulimit -n ) "
-ulimit -n 2048
+ulimit -n 4096
 echo "ulimit (file handles): $( ulimit -n ) "
 
 echo "locale charmap: $(locale charmap)"
@@ -65,26 +65,11 @@ do
   esac
 done
 
-
-# Copied from Hudson's standard variables
-echo -e "\n\tANT_OPTS: $ANT_OPTS"
-echo -e "\n\thttp_proxy: $http_proxy"
-echo -e "\n\tftp_proxy: $ftp_proxy"
-export ANT_OPTS="-Dhttp.proxyHost=proxy.eclipse.org  -Dhttp.proxyPort=9898  -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-export http_proxy=http://proxy.eclipse.org:9898
-export ftp_proxy=http://proxy.eclipse.org:9898
-echo -e "\n\tANT_OPTS: $ANT_OPTS"
-echo -e "\n\thttp_proxy: $http_proxy"
-echo -e "\n\tftp_proxy: $ftp_proxy"
-export JVM_OPTS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-export JAVA_ARGS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-export ANT_ARGS="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-export JAVA_PROXIES="-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts=\"172.30.206.*\" -Dhttps.nonProxyHosts=\"172.30.206.*\" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts=\"172.30.206.*\""
-
-export JAVA_DOC_PROXIES="-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source localBuildProperties.shsource 2>/dev/null
+
+# BUILD_HOME defines the "top" of the build area (for all types of builds)
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 SCRIPT_NAME=$0
@@ -104,10 +89,27 @@ BUILDSTREAMTYPEDIR=${eclipseStreamMajor}$BUILD_TYPE
 
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 
+# These values for proxies come from the configuration files of the Releng HIPP instance. 
+# They are normally defined in "ANT_OPTS" and similar environment variables, but 
+# the JavaDoc program requires them is this special -Jflag form. 
+export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""}
+
+# We could probably do away with this special directory now, since we 
+# clone a shallow copy of aggregator to "utilities" on Hudson.
+# We could probably redefine it to something like 
+# ${WORKSPACE}/utilities/production 
+# and then in the bootstrap.shsource do away with the "clone and copy"
+# that we do there. And, also, change occurrences of 
+# ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}
+# to simply
+# ${PRODUCTION_SCRIPTS_DIR}
 export PRODUCTION_SCRIPTS_DIR=production
 
 source $BUILD_HOME/bootstrap.shsource
-export MVN_DEBUG=false
+
+# default (later) is set to 'true'. 
+# set to false here for less output.
+# export MVN_DEBUG=false
 
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 
 
