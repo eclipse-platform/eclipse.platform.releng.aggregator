@@ -109,7 +109,8 @@ source $BUILD_HOME/bootstrap.shsource
 
 # default (later) is set to 'true'. 
 # set to false here for less output.
-# export MVN_DEBUG=false
+# setting to false until  bug 495750 is fixed, else too much output.
+export MVN_DEBUG=false
 
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 
 
