@@ -4,6 +4,8 @@
 	<property file="${basedir.properties}"/>
 
 	<target name="init">
+	    <property environment="env" />
+        <echo message="env.JAVA_DOC_PROXIES: ${env.JAVA_DOC_PROXIES}" />
 		<available file="${basedir}/index" property="index.present"/>
 	</target>
 
@@ -195,8 +197,11 @@
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
 
+	  <!-- if not pass in from environment, set this value to empty -->
+	  <property name="env.JAVA_DOC_PROXIES" value=""/>
+
 		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
-			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
+			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M ${env.JAVA_DOC_PROXIES}"  />
 		</exec>
 		
 <!-- Debugging: Add a snapshot of the workspace contents: 

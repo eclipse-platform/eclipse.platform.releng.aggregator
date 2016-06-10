@@ -4,10 +4,8 @@
 	<property file="${basedir.properties}"/>
 
 	<target name="init">
-	  <property environment="env" />
-	  <echo message="== DEBUG ANT_OPTS ==" />
-	  <echo message="env.ANT_OPTS: ${env.ANT_OPTS}" />
-    <echo message="env.JAVA_DOC_PROXIES: ${env.JAVA_DOC_PROXIES}" />
+	    <property environment="env" />
+        <echo message="env.JAVA_DOC_PROXIES: ${env.JAVA_DOC_PROXIES}" />
 		<available file="${basedir}/index" property="index.present"/>
 	</target>
 
@@ -133,6 +131,9 @@
 		<!--scrub isv plugin directories of any preexisting api doc content-->
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
+	  
+	  <!-- if not pass in from environment, set this value to empty -->
+	  <property name="env.JAVA_DOC_PROXIES" value=""/>
 
 		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx500M ${env.JAVA_DOC_PROXIES}"  />
