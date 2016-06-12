@@ -18,6 +18,9 @@
 # 'utilities' to help emphasize we are not using it for the 
 # main build or making use of its submodules.
 
+# This one file can be retrieved with 
+#   wget http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/cloneUtilities/choneUtilities.sh
+# and then executed 
 
 # This "localBuildProperties" file is not for production runs.
 # It is only for local testing, where some key locations or hosts may be
