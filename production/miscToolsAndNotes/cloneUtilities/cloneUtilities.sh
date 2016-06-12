@@ -20,17 +20,29 @@
 
 # This one file can be retrieved with 
 #   wget http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/cloneUtilities/cloneUtilities.sh
-# and then executed 
+# and then chmod +x cloneUtilities.sh 
+# and then executed with ./cloneUtilities.sh
+# It is best to remove 'cloneUtilities.sh' and wget it each 
+# time in case it itself changes. 
+
+
+# If running on Hudson, we access the repo directly with file://
+# protocol. If not (i.e. if WORKSPACE is not defined) then we use 
+# git://git.eclipse.org/
+export REPO_ACCESS="file://"
+if [[ -z "${WORKSPACE}" ]]
+then
+  echo -e "\n\t[WARNING] This script is intend to be ran in Hudson."
+  echo -e "\t\t But since WORKSPACE was not defined, will define it as PWD for local testing.\n\n"
+  export WORKSPACE=${PWD}
+  export REPO_ACCESS="git://git.eclipse.org/"
+fi
 
 # This "localBuildProperties" file is not for production runs.
 # It is only for local testing, where some key locations or hosts may be
 # defined differently.
 source localBuildProperties.shsource 2>/dev/null
 
-# put the aggregator repo in a subdirectory of WORKSPACE, utilities, in case we ever need
-# a special clean-up method where some things are cleaned but not others.
-# Plus, it helps emphasize we are using *this* clone of the aggregator for its utilities, not as an
-# aggregation of submodules.
 
 if [[ -e ${WORKSPACE}/utilities ]]
 then
