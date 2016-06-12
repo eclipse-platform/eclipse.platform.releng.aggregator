@@ -35,7 +35,7 @@ then
   echo -e "\n\t[WARNING] This script is intend to be ran in Hudson."
   echo -e "\t\t But since WORKSPACE was not defined, will define it as PWD for local testing.\n\n"
   export WORKSPACE=${PWD}
-  export REPO_ACCESS="git://git.eclipse.org/"
+  export REPO_ACCESS="git://git.eclipse.org"
 fi
 
 # This "localBuildProperties" file is not for production runs.
