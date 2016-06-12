@@ -237,8 +237,7 @@ fn-write-property ALT_POM_FILE
 fn-write-property JAVA_DOC_TOOL
 fn-write-property loadLog
 fn-write-property MAVEN_SETTINGS
-fn-write-property ANT_OPTS
-fn-write-property HTTPS_PROXY
+fn-write-property ANT_OPT
 fn-write-property JAVA_DOC_PROXIES
 # HTTPS_PROXY appears to be set by the infrastructure, 
 # the NO_PROXY and ALL_PROXY we set in boot strap file.
