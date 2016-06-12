@@ -240,6 +240,9 @@ fn-write-property MAVEN_SETTINGS
 fn-write-property ANT_OPTS
 fn-write-property HTTPS_PROXY
 fn-write-property JAVA_DOC_PROXIES
+# HTTPS_PROXY appears to be set by the infrastructure, 
+# the NO_PROXY and ALL_PROXY we set in boot strap file.
+fn-write-property HTTPS_PROXY
 # These definitions are primarily for Curl. (Wget and other programs use different env variables or parameters
 fn-write-property NO_PROXY
 fn-write-property ALL_PROXY
