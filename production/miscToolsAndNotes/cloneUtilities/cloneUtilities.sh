@@ -87,7 +87,7 @@ else
   # compared to "wget" the few files needed. (first time, just took 1 second, which is
   # hard to argue with!)
   RAW_DATE_START="$(date +%s )"
-  git clone --depth=1 --config="core.autocrlf=input" file:///gitroot/platform/eclipse.platform.releng.aggregator.git ${WORKSPACE}/utilities
+  git clone --depth=1 --config="core.autocrlf=input" ${REPO_ACCESS}/gitroot/platform/eclipse.platform.releng.aggregator.git ${WORKSPACE}/utilities
   RC=$?
   if [[ $RC != 0 ]]
   then
