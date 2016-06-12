@@ -94,6 +94,10 @@ export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 # the JavaDoc program requires them is this special -Jflag form. 
 export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""}
 
+# These definitions are primarily for Curl. (Wget and other programs use different env variables or parameters
+export NO_PROXY=eclipse.org,build.eclipse.org,download.eclipse.org,archive.eclipse.org,dev.eclipes.org,git.eclipse.org
+export ALL_PROXY=proxy.eclipse.org:9898
+
 # We could probably do away with this special directory now, since we 
 # clone a shallow copy of aggregator to "utilities" on Hudson.
 # We could probably redefine it to something like 

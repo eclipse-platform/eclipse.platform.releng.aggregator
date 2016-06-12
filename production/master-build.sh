@@ -242,6 +242,13 @@ fn-write-property ALT_POM_FILE
 fn-write-property JAVA_DOC_TOOL
 fn-write-property loadLog
 fn-write-property MAVEN_SETTINGS
+fn-write-property ANT_OPTS
+fn-write-property HTTPS_PROXY
+fn-write-property JAVA_DOC_PROXIES
+# These definitions are primarily for Curl. (Wget and other programs use different env variables or parameters
+fn-write-property NO_PROXY
+fn-write-property ALL_PROXY
+
 
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
