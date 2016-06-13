@@ -96,7 +96,6 @@ if (file_exists("../pertestNotes.html")) {
     $my_file = file_get_contents("../perftestNotes.html");
     echo $my_file;
 }
-
 ?>
 
 
@@ -106,6 +105,10 @@ $rowResultsFile="../performanceResultsTable.html";
     include $rowResultsFile;
 } else {
     include "../testResultsTablesPending.html";
+}
+$LRrowResultsFile="../performanceLRResultsTables.html";
+  if (file_exists($LRrowResultsFile)) {
+    include $LRrowResultsFile;
 }
 ?>
 </table>

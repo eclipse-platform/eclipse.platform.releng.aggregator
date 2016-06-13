@@ -88,28 +88,6 @@
       property="class"
       value="${generatorClass}" />
 
-    <condition
-      property="manifestFile"
-      value="${publishingContent}/performanceTestManifest.xml"
-      else="${publishingContent}/testManifest.xml">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <condition
-      property="manifestFile"
-      value="${publishingContent}/testManifest.xml">
-      <contains
-        string="${job}"
-        substring="-unit-" />
-    </condition>
-
-    <property
-      name="manifestFile"
-      value="${publishingContent}/testManifest.xml" />
-    <echo
-      message="[DEBUG] job is undefined which is normal when doing initial publish (before tests run). Set to normal testManifest file (to hold logs, etc.)." />
-
     <fail
       unless="buildType"
       message="buildType must be defined to generateIndex before calling publish.xml" />
@@ -123,13 +101,6 @@
         name="isBuildTested"
         value="true" />
 
-      <property
-        name="dropTokenList"
-        value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
-
-      <property
-        name="testManifestFileName"
-        value="${manifestFile}" />
     </ant>
 
   </target>
@@ -152,6 +123,9 @@
       so "conditions" will work, ultimately getting some
       "no match" default value. But not setting
       it to something seems to cause them to "bomb out"
+      TODO: eliminate "job" as a variable. 
+      That only works if doing one job at a time, which 
+      is not always true. 
     -->
     <property
       name="job"
