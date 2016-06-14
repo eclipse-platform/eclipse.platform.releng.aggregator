@@ -25,24 +25,23 @@
 # It is best to remove 'cloneUtilities.sh' and wget it each 
 # time in case it itself changes. 
 
-
-# If running on Hudson, we access the repo directly with file://
-# protocol. If not (i.e. if WORKSPACE is not defined) then we use 
-# git://git.eclipse.org/
-export REPO_ACCESS="file://"
-if [[ -z "${WORKSPACE}" ]]
-then
-  echo -e "\n\t[WARNING] This script is intend to be ran in Hudson."
-  echo -e "\t\t But since WORKSPACE was not defined, will define it as PWD for local testing.\n\n"
-  export WORKSPACE=${PWD}
-  export REPO_ACCESS="git://git.eclipse.org"
-fi
-
 # This "localBuildProperties" file is not for production runs.
 # It is only for local testing, where some key locations or hosts may be
 # defined differently.
 source localBuildProperties.shsource 2>/dev/null
 
+
+# If running on Hudson, we access the repo directly with file://
+# protocol. If not (i.e. if WORKSPACE is not defined) then we use 
+# git://git.eclipse.org/
+export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"file:///gitroot"}
+if [[ -z "${WORKSPACE}" ]]
+then
+  echo -e "\n\t[WARNING] This script is intend to be ran in Hudson."
+  echo -e "\t\t But since WORKSPACE was not defined, will define it as PWD for local testing.\n\n"
+  export WORKSPACE=${PWD}
+  export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"git://git.eclipse.org/gitroot"}
+fi
 
 if [[ -e ${WORKSPACE}/utilities ]]
 then
@@ -87,7 +86,7 @@ else
   # compared to "wget" the few files needed. (first time, just took 1 second, which is
   # hard to argue with!)
   RAW_DATE_START="$(date +%s )"
-  git clone --depth=1 --config="core.autocrlf=input" ${REPO_ACCESS}/gitroot/platform/eclipse.platform.releng.aggregator.git ${WORKSPACE}/utilities
+  git clone --depth=1 --config="core.autocrlf=input" ${REPO_AND_ACCESS}/platform/eclipse.platform.releng.aggregator.git ${WORKSPACE}/utilities
   RC=$?
   if [[ $RC != 0 ]]
   then
@@ -106,5 +105,3 @@ fi
 # checked into Git as executable.
 echo -e "\n\t[INFO] Make sure sh files are executable. If any "changes" are seen in log, they should be gixed in Git\n"
 find utilities -name "*.sh" -exec chmod -c +x '{}' \;
-
-
