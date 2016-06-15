@@ -91,7 +91,7 @@ fi
 # the build *TO*
 # For Maintenance, it is always 'M' (from M-build) until it's 'R'.
 # for main line (master) code, it is always 'S' (from I-build) until it's 'R'
-export DL_TYPE=S
+#export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 if [[ -z "${DL_TYPE}" ]]
