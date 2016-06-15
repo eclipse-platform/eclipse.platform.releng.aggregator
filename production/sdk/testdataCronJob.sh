@@ -33,7 +33,14 @@ umask 0002
 # Remember, don't echo except when testing, or mail will be sent each time it runs.
 # echo "umask explicitly set to 0002, old value was $oldumask"
 
-
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  export WORKSPACE=/shared/eclipse
+else
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+fi
 
 
 # cron jobs and hudson jobs must know about and use this same
@@ -75,7 +82,7 @@ do
       # notice these logs are concatenated on purpose, to give some "history", but
       # that means has to be "manually" removed every now and then.
       # improve as desired.
-      /bin/bash /shared/eclipse/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
+      /bin/bash ${UTILITIES_HOME}/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
       # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
       # then try various types of files file names, etc.
       # echo "DEBUG: normally would execute file here: $datafile" 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/datacollect-err.txt

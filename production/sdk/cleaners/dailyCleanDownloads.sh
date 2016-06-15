@@ -10,6 +10,15 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  export WORKSPACE=/shared/eclipse
+else
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+fi
+
 # Utility to clean build machine
 echo -e "\n\tDaily clean of ${HOSTNAME} download server on $(date )\n"
 
@@ -63,6 +72,6 @@ done
 nbuilds=$( find ${cDir} -maxdepth 1 -type d -name "${buildType}" | wc -l )
 echo -e "\tNumber of N-builds after cleaning: $nbuilds"
 
-source /shared/eclipse/sdk/updateIndexFilesFunction.shsource >/dev/null
+source ${UTILITIES_HOME}/sdk/updateIndexFilesFunction.shsource >/dev/null
 updateIndex >/dev/null
 

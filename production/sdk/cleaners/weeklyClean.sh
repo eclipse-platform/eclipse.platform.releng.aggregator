@@ -10,13 +10,23 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  export WORKSPACE=/shared/eclipse
+else
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+fi
+
+
 # Utility to clean download machine
 echo -e "\n\tWeekly clean of ${HOSTNAME} download server on $(date )\n"
 
 # clean 4.x M builds every 30 days.
 find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -type d -ctime +30 -name "M20*" -ls -execdir rm -fr '{}' \;
 
-source /shared/eclipse/sdk/updateIndexFilesFunction.shsource >/dev/null
+source ${UTILITIES_HOME}/sdk/updateIndexFilesFunction.shsource >/dev/null
 updateIndex > /dev/null
 
 

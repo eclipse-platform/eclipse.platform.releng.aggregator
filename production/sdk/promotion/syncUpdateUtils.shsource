@@ -5,6 +5,16 @@
 source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  export WORKSPACE=/shared/eclipse
+else
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+fi
+
+
 # These variable are not correctly defined centrally, 
 # and are also defined in various Ant scripts.
 # For production, use value for shared instance
@@ -314,7 +324,7 @@ function syncDropLocation ()
     return $rccode
   else
     # Now update main DL page index pages, to show available
-    source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
+    source ${UTILITIES_HOME}/sdk/updateIndexFilesFunction.shsource
     updateIndex
   fi
 

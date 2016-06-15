@@ -60,7 +60,7 @@ echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 ${ANT_HOME}/bin/ant -version
 #       -lib /shared/common/apache-ant-1.9.6/lib/ \
-  ${ANT_HOME}/bin/ant -f /shared/eclipse/sdk/collectTestResults.xml \
+  ${ANT_HOME}/bin/ant -f ${UTILITIES_HOME}/sdk/collectTestResults.xml \
   -Djob=${job} \
   -DbuildNumber=${buildNumber} \
   -DbuildId=${buildId} \

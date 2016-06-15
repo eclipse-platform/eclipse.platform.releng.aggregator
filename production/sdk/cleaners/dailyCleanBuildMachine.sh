@@ -20,7 +20,7 @@
 # character "build types" we use (I,M,N,P). Leave blank (or commented out)
 # if nothing should be disabled.
 
-DISABLED="M"
+DISABLED="MI"
 
 function removeOldPromotionScripts ()
 {

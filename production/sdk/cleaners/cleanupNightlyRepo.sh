@@ -11,6 +11,15 @@
 #     IBM Corporation - initial API and implementation
 #*******************************************************************************
 
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  export WORKSPACE=/shared/eclipse
+else
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+fi
+
 function writeHeader ()
 {
   compositeRepoDir="$1"
