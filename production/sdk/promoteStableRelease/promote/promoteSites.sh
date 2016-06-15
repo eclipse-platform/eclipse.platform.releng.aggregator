@@ -43,8 +43,7 @@ fi
 # It should be empty for the final release.
 if [[ -z "${CHECKPOINT}" ]]
 then
-  echo -e "\n\t[ERROR] CHECKPOINT must be defined for ${0##*/}"
-  exit 1
+  echo -e "\n\t[WARNING] CHECKPOINT was blank in ${0##*/}"
 else
   export CHECKPOINT
   echo -e "\n\t[INFO] CHECKPOINT: $CHECKPOINT"  
