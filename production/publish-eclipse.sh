@@ -52,12 +52,12 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
 
 # Temporary fork/condition
-if [[ "true" == "${USING_TYCHO_SNAPSHOT}" ]]
-then
+# if [[ "true" == "${USING_TYCHO_SNAPSHOT}" ]]
+# then
   fn-gather-23-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
-else
-  fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
-fi
+#else
+#  fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
+# fi
 echo -e "\n\n[DEBUG] == critical values in publish-eclipse.sh == "
 echo -e "\n[DEBUG] buildDirectory in publish-eclipse.sh: $buildDirectory"
 echo -e "\n[DEBUG] BUILD_ID in publish-eclipse.sh: $BUILD_ID"
