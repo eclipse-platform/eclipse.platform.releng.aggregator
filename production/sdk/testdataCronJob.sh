@@ -40,10 +40,10 @@ then
   # TODO: probably should not set WORKSPACE, since
   # doubt if it is used.
   export WORKSPACE=/shared/eclipsei
-  RUNNING_ON_HUDSON=false
+  export RUNNING_ON_HUDSON=false
 else
   export UTILITIES_HOME=/${WORKSPACE}/utilities/production
-  RUNNING_ON_HUDSON=true
+  export RUNNING_ON_HUDSON=true
 fi
 
 
