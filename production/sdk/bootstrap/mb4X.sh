@@ -34,7 +34,7 @@ oldumask=$(umask)
 umask $NEWUMASK
 
 echo "ulimit (file handles): $( ulimit -n ) "
-ulimit -n 2048
+ulimit -n 4096
 echo "ulimit (file handles): $( ulimit -n ) "
 
 echo "locale charmap: $(locale charmap)"
@@ -87,9 +87,23 @@ BUILDSTREAMTYPEDIR=${eclipseStreamMajor}$BUILD_TYPE
 
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 
+# These values for proxies come from the configuration files of the Releng HIPP instance. 
+# They are normally defined in "ANT_OPTS" and similar environment variables, but 
+# the JavaDoc program requires them is this special -Jflag form. 
+# If running locally, all these proxy value should be overridden and set to empty string.
+export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""}
+
+# These definitions are primarily for Curl. (Wget and other programs use different env variables or parameters
+export NO_PROXY=${NO_PROXY:-eclipse.org,build.eclipse.org,download.eclipse.org,archive.eclipse.org,dev.eclipes.org,git.eclipse.org}
+export ALL_PROXY=${ALL_PROXY:-proxy.eclipse.org:9898}
+
 export PRODUCTION_SCRIPTS_DIR=production
 
 source $BUILD_HOME/bootstrap.shsource
+
+# default (later) is set to 'true'. 
+# set to false here for less output.
+# export MVN_DEBUG=false
 
 # run rest in "back ground"
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &

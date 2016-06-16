@@ -92,21 +92,13 @@ export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 # These values for proxies come from the configuration files of the Releng HIPP instance. 
 # They are normally defined in "ANT_OPTS" and similar environment variables, but 
 # the JavaDoc program requires them is this special -Jflag form. 
+# If running locally, all these proxy value should be overridden and set to empty string.
 export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""}
 
 # These definitions are primarily for Curl. (Wget and other programs use different env variables or parameters
-export NO_PROXY=eclipse.org,build.eclipse.org,download.eclipse.org,archive.eclipse.org,dev.eclipes.org,git.eclipse.org
-export ALL_PROXY=proxy.eclipse.org:9898
+export NO_PROXY=${NO_PROXY:-eclipse.org,build.eclipse.org,download.eclipse.org,archive.eclipse.org,dev.eclipes.org,git.eclipse.org}
+export ALL_PROXY=${ALL_PROXY:-proxy.eclipse.org:9898}
 
-# We could probably do away with this special directory now, since we 
-# clone a shallow copy of aggregator to "utilities" on Hudson.
-# We could probably redefine it to something like 
-# ${WORKSPACE}/utilities/production 
-# and then in the bootstrap.shsource do away with the "clone and copy"
-# that we do there. And, also, change occurrences of 
-# ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}
-# to simply
-# ${PRODUCTION_SCRIPTS_DIR}
 export PRODUCTION_SCRIPTS_DIR=production
 
 source $BUILD_HOME/bootstrap.shsource

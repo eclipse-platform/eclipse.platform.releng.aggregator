@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-# Simple utility to run as cronjob to run Eclipse Platform builds
+# This job is just like its cronjob counter part, except it 
+# turns off verbose debugging (else Hudson logs would be 300 MB)
+# and does not pipe output to separate files, but lets it all go 
+# to Hudson't "console". 
 # Normally resides in $BUILD_HOME
 
 function usage()
@@ -65,24 +68,19 @@ done
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source localBuildProperties.shsource 2>/dev/null
+
+# BUILD_HOME defines the "top" of the build area (for all types of builds)
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 SCRIPT_NAME=$0
-LOG_BASE_NAME=${SCRIPT_NAME##*/}
-LOG_OUT_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.out.log
-LOG_ERR_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.err.log
 
-echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_ERR_NAME
+echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) "
 
-echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME
+echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
-# use BETA_JAVA9 to do a "complete build" that includes Java 9 beta code
-# use master to literally build "just the three" bundles that are required.
-#export BRANCH=BETA_JAVA9
 export BRANCH=master
-export BUILD_TYPE=P
+export BUILD_TYPE=I
 export STREAM=4.6.0
-export PATCH_BUILD=java9patch46
 
 eclipseStreamMajor=${STREAM:0:1}
 
@@ -94,20 +92,39 @@ export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 # These values for proxies come from the configuration files of the Releng HIPP instance. 
 # They are normally defined in "ANT_OPTS" and similar environment variables, but 
 # the JavaDoc program requires them is this special -Jflag form. 
-# If running locally, all these proxy value should be overridden and set to empty string.
 export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.org -J-Dhttps.proxyPort=9898 -J-Dhttps.nonProxyHosts=\"172.30.206.*\""}
 
 # These definitions are primarily for Curl. (Wget and other programs use different env variables or parameters
 export NO_PROXY=${NO_PROXY:-eclipse.org,build.eclipse.org,download.eclipse.org,archive.eclipse.org,dev.eclipes.org,git.eclipse.org}
 export ALL_PROXY=${ALL_PROXY:-proxy.eclipse.org:9898}
 
-export PRODUCTION_SCRIPTS_DIR=production
-
-source $BUILD_HOME/bootstrap.shsource
-
 # default (later) is set to 'true'. 
 # set to false here for less output.
-# export MVN_DEBUG=false
+# setting to false until  bug 495750 is fixed, else too much output.
+export MVN_DEBUG=false
 
-# run rest in "back ground"
-${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &
+
+export PRODUCTION_SCRIPTS_DIR=production
+if [[ -z "${WORKSPACE}" ]]
+then
+   export RUNNING_ON_HUDSON=false
+else
+   export RUNNING_ON_HUDSON=true
+fi
+echo -e "\n\t[INFO]RUNNING_ON_HUDSON: $RUNNING_ON_HUDSON"
+
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  source $BUILD_HOME/bootstrap.shsource
+  makeProductionDirectoryOnBuildMachine
+  # build_eclipse_org.shsource should come from branch 
+  # though ideally  the rest of "production" directory would be identical between branches.
+${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 
+else
+  export UTILITIES_HOME=${WORKSPACE}/utilities/production
+  source $UTILITIES_HOME/sdk/bootstrap/bootstrap.shsource
+  $UTILITIES_HOME/master-build.sh $UTILITIES_HOME/build_eclipse_org.shsource
+fi
+
