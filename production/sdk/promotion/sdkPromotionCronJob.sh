@@ -80,10 +80,10 @@ do
       # notice these logs are concatenated on purpose, to give some "history", but
       # that means has to be "manually" removed every now and then.
       # improve as desired.
-      /bin/bash $runningpromotefile 1>>$queueLocation/promotion-out.txt 2>>$queueLocation/promotion-err.txt
+      /bin/bash $runningpromotefile 
       # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
       # then try various types of files file names, etc.
-      # echo "DEBUG: normally would execute file here: $promotefile" 1>>$queueLocation/promotion-out.txt 2>>$queueLocation/promotion-err.txt
+      # echo "DEBUG: normally would execute file here: $promotefile"
       rccode=$?
       if [[ $rccode != 0 ]]
       then

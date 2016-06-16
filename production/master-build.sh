@@ -27,8 +27,12 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
   echo USAGE: $0 env_file
   exit 1
 fi
-
-export SCRIPT_PATH="${BUILD_ROOT}/production"
+if [[ "${RUNNING_ON_HUDSON}" == "true" ]]
+then
+  export SCRIPT_PATH="${UTILITIES_HOME}"
+else
+  export SCRIPT_PATH="${BUILD_ROOT}/production"
+fi
 export PROMOTION_SCRIPT_PATH="$SCRIPT_PATH/sdk/promotion"
 
 source "${SCRIPT_PATH}/build-functions.shsource"

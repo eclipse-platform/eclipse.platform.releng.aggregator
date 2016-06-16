@@ -22,18 +22,22 @@ function usage ()
 }
 
 source "$1" 2>/dev/null
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+else
+  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+fi
 
+TODO: Should we make use of "UTILITIES_HOME" here?
 if [[ -z ${SCRIPT_PATH} ]]
 then
   SCRIPT_PATH=${PWD}
 fi
-
+echo -e "\n\t[DEBUG] SCRIPT_PATH in promote-build.sh: $SCRIPT_PATH"
 source $SCRIPT_PATH/build-functions.shsource
 
-# The 'workLocation' provides a handy central place to have the
-# promote script, and log results. ASSUMING this works for all
-# types of builds, etc (which is the goal for the sdk promotions).
-workLocation=/shared/eclipse/sdk/promotion
 # the cron job must know about and use the queueLocation
 # to look for its promotions scripts. (i.e. implicit tight coupling)
 queueLocation=/shared/eclipse/promotion/queue
@@ -69,7 +73,7 @@ ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${queueLocation}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${queueLocation}/${scriptName}
 
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${queueLocation}/${scriptName}
+echo "${UTILITIES_HOME}/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${queueLocation}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${queueLocation}/${scriptName}
@@ -81,14 +85,9 @@ chmod -v ug=rwx,o-rwx ${queueLocation}/${scriptName}
 if [[ -z "${BUILD_FAILED}" &&  $BUILD_TYPE =~ [IMN] ]]
 then
 
-  # The 'workLocation' provides a handy central place to have the
-  # promote script, and log results. ASSUMING this works for all
-  # types of builds, etc (which is the goal for the sdk promotions).
-  workLocationEquinox=/shared/eclipse/equinox/promotion
-
   # the cron job must know about and use this same
   # location to look for its promotions scripts. (i.e. tight coupling)
-  promoteScriptLocationEquinox=${workLocationEquinox}/queue
+  promoteScriptLocationEquinox=/shared/eclipse/equinox/promotion/queue
 
   # Directory should normally exist -- best to create with committer's ID before hand,
   # but in case not.

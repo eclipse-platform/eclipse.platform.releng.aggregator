@@ -98,23 +98,33 @@ export JAVA_DOC_PROXIES=${JAVA_DOC_PROXIES:-"-J-Dhttps.proxyHost=proxy.eclipse.o
 export NO_PROXY=eclipse.org,build.eclipse.org,download.eclipse.org,archive.eclipse.org,dev.eclipes.org,git.eclipse.org
 export ALL_PROXY=proxy.eclipse.org:9898
 
-# We could probably do away with this special directory now, since we 
-# clone a shallow copy of aggregator to "utilities" on Hudson.
-# We could probably redefine it to something like 
-# ${WORKSPACE}/utilities/production 
-# and then in the bootstrap.shsource do away with the "clone and copy"
-# that we do there. And, also, change occurrences of 
-# ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}
-# to simply
-# ${PRODUCTION_SCRIPTS_DIR}
-export PRODUCTION_SCRIPTS_DIR=production
-
-source $BUILD_HOME/bootstrap.shsource
-
 # default (later) is set to 'true'. 
 # set to false here for less output.
 # setting to false until  bug 495750 is fixed, else too much output.
 export MVN_DEBUG=false
 
+
+export PRODUCTION_SCRIPTS_DIR=production
+if [[ -z "${WORKSPACE}" ]]
+then
+   export RUNNING_ON_HUDSON=false
+else
+   export RUNNING_ON_HUDSON=true
+fi
+echo -e "\n\t[INFO]RUNNING_ON_HUDSON: $RUNNING_ON_HUDSON"
+
+# To allow this cron job to work from hudson, or traditional crontab
+if [[ -z "${WORKSPACE}" ]]
+then
+  export UTILITIES_HOME=/shared/eclipse
+  source $BUILD_HOME/bootstrap.shsource
+  makeProductionDirectoryOnBuildMachine
+  # build_eclipse_org.shsource should come from branch 
+  # though ideally  the rest of "production" directory would be identical between branches.
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh "${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource" 
+else
+  export UTILITIES_HOME=${WORKSPACE}/utilities/production
+  source $UTILITIES_HOME/sdk/bootstrap/bootstrap.shsource
+  $UTILITIES_HOME/master-build.sh $UTILITIES_HOME/build_eclipse_org.shsource
+fi
 

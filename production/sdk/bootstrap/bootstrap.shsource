@@ -60,7 +60,6 @@ echo "  STREAMService: $STREAMService"
 echo "  BUILD_TYPE: $BUILD_TYPE"
 echo "  BUILD_ROOT: $BUILD_ROOT"
 echo "  BUILD_HOME: $BUILD_HOME"
-echo "  PRODUCTION_SCRIPTS_DIR: $PRODUCTION_SCRIPTS_DIR"
 echo "  REPO_AND_ACCESS: $REPO_AND_ACCESS"
 
 # We put these in build_root in case two builds get started at once.
@@ -83,15 +82,17 @@ then
   exit 1
 fi
 
-
-git clone --depth=1 -b ${BRANCH} ${REPO_AND_ACCESS}/platform/${AGGR_REPO_NAME} $BUILD_ROOT/tmp/${AGGR_REPO_NAME}
+function makeProductionDirectoryOnBuildMachine ()
+{
+  # NOTE: master of production scripts used for all branch builds 
+  git clone --depth=1 -b master ${REPO_AND_ACCESS}/platform/${AGGR_REPO_NAME} $BUILD_ROOT/tmp/${AGGR_REPO_NAME}
 RC=$?
 if [[ $RC != 0 ]]
 then
   echo "Could not clone repo as expected"
   exit $RC
 fi
-
+  echo "  PRODUCTION_SCRIPTS_DIR: $PRODUCTION_SCRIPTS_DIR"
 #remove any previous production scripts, to make sure completely fresh
 rm -fr $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR} 2>/dev/null
 
@@ -111,4 +112,5 @@ then
   echo "Could not chmod of production scripts to executable. Running under wrong id?"
   exit 1
 fi
+}
 

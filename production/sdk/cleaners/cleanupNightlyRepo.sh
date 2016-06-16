@@ -15,7 +15,6 @@
 if [[ -z "${WORKSPACE}" ]]
 then
   export UTILITIES_HOME=/shared/eclipse
-  export WORKSPACE=/shared/eclipse
 else
   export UTILITIES_HOME=/${WORKSPACE}/utilities/production
 fi

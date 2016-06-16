@@ -39,7 +39,6 @@ then
   export UTILITIES_HOME=/shared/eclipse
   # TODO: probably should not set WORKSPACE, since
   # doubt if it is used.
-  export WORKSPACE=/shared/eclipsei
   export RUNNING_ON_HUDSON=false
 else
   export UTILITIES_HOME=/${WORKSPACE}/utilities/production
