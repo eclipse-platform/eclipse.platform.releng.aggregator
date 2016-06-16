@@ -41,7 +41,7 @@ then
   # doubt if it is used.
   export RUNNING_ON_HUDSON=false
 else
-  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+  export UTILITIES_HOME=${WORKSPACE}/utilities/production
   export RUNNING_ON_HUDSON=true
 fi
 

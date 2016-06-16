@@ -178,7 +178,7 @@ then
   export UTILITIES_HOME=/shared/eclipse
   export WORKSPACE=/shared/eclipse
 else
-  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+  export UTILITIES_HOME=${WORKSPACE}/utilities/production
 fi
 
 export PROMOTE_IMPL=${UTILITIES_HOME}/sdk/promoteStableRelease/promoteImpl

@@ -21,7 +21,7 @@ echo "then" >> "${CL_SITE}/deferredSteps.sh"
 echo "  export UTILITIES_HOME=/shared/eclipse" >> "${CL_SITE}/deferredSteps.sh"
 echo "  export WORKSPACE=/shared/eclipse" >> "${CL_SITE}/deferredSteps.sh"
 echo "else" >> "${CL_SITE}/deferredSteps.sh"
-echo "  export UTILITIES_HOME=/${WORKSPACE}/utilities/production" >> "${CL_SITE}/deferredSteps.sh"
+echo "  export UTILITIES_HOME=\${WORKSPACE}/utilities/production" >> "${CL_SITE}/deferredSteps.sh"
 echo "fi" >> "${CL_SITE}/deferredSteps.sh"
 
 echo "# We set DRYRUN to what ever the value was that produced these scripts as a reminder these won't work if DRYRUN was on." >> "${CL_SITE}/deferredSteps.sh"

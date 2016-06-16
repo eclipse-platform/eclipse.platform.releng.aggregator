@@ -27,7 +27,7 @@ if [[ -z "${WORKSPACE}" ]]
 then
   export UTILITIES_HOME=/shared/eclipse
 else
-  export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+  export UTILITIES_HOME=${WORKSPACE}/utilities/production
 fi
 
 TODO: Should we make use of "UTILITIES_HOME" here?
@@ -73,7 +73,7 @@ ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${queueLocation}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${queueLocation}/${scriptName}
 
-echo "${UTILITIES_HOME}/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${queueLocation}/${scriptName}
+echo "${UTILITIES_HOME}/sdk/promotion/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${queueLocation}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${queueLocation}/${scriptName}
