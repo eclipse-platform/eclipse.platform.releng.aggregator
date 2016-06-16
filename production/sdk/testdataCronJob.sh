@@ -37,9 +37,13 @@ umask 0002
 if [[ -z "${WORKSPACE}" ]]
 then
   export UTILITIES_HOME=/shared/eclipse
-  export WORKSPACE=/shared/eclipse
+  # TODO: probably should not set WORKSPACE, since
+  # doubt if it is used.
+  export WORKSPACE=/shared/eclipsei
+  RUNNING_ON_HUDSON=false
 else
   export UTILITIES_HOME=/${WORKSPACE}/utilities/production
+  RUNNING_ON_HUDSON=true
 fi
 
 
@@ -50,7 +54,7 @@ testdataLocation=/shared/eclipse/testjobqueue
 if [[ ! -e "${testdataLocation}" ]]
 then
   mkdir -p "${testdataLocation}"
-fi  
+fi
 
 # Note: if we ever need to handle spaces, or newlines in names (seems unlikely) this
 # for loop won't quiet work, and will be more complicated (or, at least unintuitive).
@@ -82,7 +86,14 @@ do
       # notice these logs are concatenated on purpose, to give some "history", but
       # that means has to be "manually" removed every now and then.
       # improve as desired.
-      /bin/bash ${UTILITIES_HOME}/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
+      # NOTE: if running on Hudson, we do not collect the logs, since they
+      # will be part of Hudson's log.
+      if [[ "${RUNNING_ON_HUDSON}" == "false" ]]
+      then
+        /bin/bash ${UTILITIES_HOME}/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
+      else
+        /bin/bash ${UTILITIES_HOME}/sdk/collect.sh < $runningdatafile
+      fi
       # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
       # then try various types of files file names, etc.
       # echo "DEBUG: normally would execute file here: $datafile" 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/datacollect-err.txt

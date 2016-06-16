@@ -9,29 +9,29 @@ source localBuildProperties.shsource 2>/dev/null
 
 
 function show_time () {
-    num=$1
-    min=0
-    hour=0
-    day=0
-    if((num>59));then
-        ((sec=num%60))
-        ((num=num/60))
-        if((num>59));then
-            ((min=num%60))
-            ((num=num/60))
-            if((num>23));then
-                ((hour=num%24))
-                ((day=num/24))
-            else
-                ((hour=num))
-            fi
-        else
-            ((min=num))
-        fi
+num=$1
+min=0
+hour=0
+day=0
+if((num>59));then
+  ((sec=num%60))
+  ((num=num/60))
+  if((num>59));then
+    ((min=num%60))
+    ((num=num/60))
+    if((num>23));then
+      ((hour=num%24))
+      ((day=num/24))
     else
-        ((sec=num))
+      ((hour=num))
     fi
-    echo "$day d  $hour h  $min m  $sec s"
+  else
+    ((min=num))
+  fi
+else
+  ((sec=num))
+fi
+echo "$day d  $hour h  $min m  $sec s"
 }
 
 
@@ -150,44 +150,44 @@ unittestJobPattern="^.*-unit-.*$"
 #if [[ $JOB_NAME =~ ${unittestJobPattern} ]]
 #then
 
-  BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
+BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
 
-  BUILDFILESTR="-f ${BUILDFILE}"
-  echo
-  echo " BUILDFILESTR: $BUILDFILESTR"
+BUILDFILESTR="-f ${BUILDFILE}"
+echo
+echo " BUILDFILESTR: $BUILDFILESTR"
 
-  # provide blank, to get default
-  BUILDTARGET=" "
+# provide blank, to get default
+BUILDTARGET=" "
 
-  devworkspace="${fromDir}/workspace-updateTestResults"
-  devArgs="-Xmx512m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
+devworkspace="${fromDir}/workspace-updateTestResults"
+devArgs="-Xmx512m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
 
-  echo
-  echo " = = Properties in updateTestResultsPages.sh: generate section  = = "
-  echo "   dev script:   $0"
-  echo "   BUILD_HOME:   ${BUILD_HOME}"
-  echo "   devworkspace: $devworkspace"
-  echo "   devArgs:      $devArgs"
-  echo "   devJRE:       $devJRE"
-  echo "   BUILDFILESTR: $BUILDFILESTR"
-  echo "   job:          $JOB_NAME"
-  echo
+echo
+echo " = = Properties in updateTestResultsPages.sh: generate section  = = "
+echo "   dev script:   $0"
+echo "   BUILD_HOME:   ${BUILD_HOME}"
+echo "   devworkspace: $devworkspace"
+echo "   devArgs:      $devArgs"
+echo "   devJRE:       $devJRE"
+echo "   BUILDFILESTR: $BUILDFILESTR"
+echo "   job:          $JOB_NAME"
+echo
 
-  if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
+if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
+then
+
+  ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -consolelog -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
+  RC=$?
+  if [[ $RC != 0 ]]
   then
-
-    ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -consolelog -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
-    RC=$?
-    if [[ $RC != 0 ]]
-    then
-      echo "ERROR: eclipse returned non-zero return code, exiting with RC: $RC."
-      exit $RC
-    fi
-  else
-    echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse."
-    RC=1
+    echo "ERROR: eclipse returned non-zero return code, exiting with RC: $RC."
     exit $RC
   fi
+else
+  echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse."
+  RC=1
+  exit $RC
+fi
 
 #fi
 
@@ -247,44 +247,51 @@ then
   RC=$?
   if [[ $RC != 0 ]]
   then
-      echo "Could not mkdir -p ${ROOT_PERF_DATA}. Return code was $RC. Exiting."
-      exit $RC
+    echo "Could not mkdir -p ${ROOT_PERF_DATA}. Return code was $RC. Exiting."
+    exit $RC
   fi
-  # Will try "just one". Might get some better results, now that bug 481272 has been fixed. 
+  # Will try "just one". Might get some better results, now that bug 481272 has been fixed.
   dataDir=${ROOT_PERF_DATA}
-#  dataDir=${ROOT_PERF_DATA}/${buildId}_${JOB_NAME}_${JOB_NUMBER}
+  #  dataDir=${ROOT_PERF_DATA}/${buildId}_${JOB_NAME}_${JOB_NUMBER}
   # make anew
-#  mkdir -p "${dataDir}"
-#  RC=$?
-#  if [[ $RC != 0 ]]
-#  then
-#      echo "Could not mkdir -p $dataDir. Return code was $RC. Exiting."
-#      exit $RC
-#  fi
-  
+  #  mkdir -p "${dataDir}"
+  #  RC=$?
+  #  if [[ $RC != 0 ]]
+  #  then
+  #      echo "Could not mkdir -p $dataDir. Return code was $RC. Exiting."
+  #      exit $RC
+  #  fi
+
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
-  # if 
-  XVFB_RUN="xvfb-run"
-  if [[ ! -w "${TMP_DIR}" ]]
+  # if running on Hudson, be sure "use xvnc" is checked.
+  # If not running on Hudson, can use this xvfb-run utility,
+  # distributed with xvfb as a "build time only" requirement.
+  if [[ "${RUNNING_ON_HUDSON}" == "false" ]]
   then
-    echo -e "\n\tTMP_DIR not defined, so will create at ${buildRoot}/tmp"
-    TMP_DIR="${buildRoot}/tmp"
-    mkdir -p "${TMP_DIR}"
+    XVFB_RUN="xvfb-run"
+    if [[ ! -w "${TMP_DIR}" ]]
+    then
+      echo -e "\n\tTMP_DIR not defined, so will create at ${buildRoot}/tmp"
+      TMP_DIR="${buildRoot}/tmp"
+      mkdir -p "${TMP_DIR}"
+    fi
+    XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfbErrorFile.txt"
+    # --server-args -screen 0 1024x768x24"
+  else 
+    echo "\n\t[INFO] Running on Hudson, be sure Xvnc is checked."
   fi
-  XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfbErrorFile.txt"
-  # --server-args -screen 0 1024x768x24"
   #
   if [[ ${buildType} =~ [INM] ]]
   then
-     if [[ "${buildType}" == "M" ]]
-     then
+    if [[ "${buildType}" == "M" ]]
+    then
       current_prefix=" -current.prefix M "
-     else
+    else
       current_prefix=" -current.prefix I,N "
-     fi
+    fi
   else
-     echo -e "\n\tPROGRAM ERROR: build type did not equal expected value (M or N or I). Exiting."
-     exit 1
+    echo -e "\n\tPROGRAM ERROR: build type did not equal expected value (M or N or I). Exiting."
+    exit 1
   fi
 
   PERF_OUTFILE="${fromDir}/performance/perfAnalysis_${buildId}_${JOB_NAME}_${JOB_NUMBER}.txt"
