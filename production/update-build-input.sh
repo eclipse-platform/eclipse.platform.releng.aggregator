@@ -40,6 +40,8 @@ then
    echo -e "\t[ERROR] expected file: repositories_${PATCH_OR_BRANCH_LABEL}.txt"
    echo -e "\t[ERROR] to be in directory: $STREAMS_PATH\n"
    exit 1
+else 
+   echo -e "\n\t[INFO] Using repositories file: $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt\n"
 fi
 repositories=$( echo $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt )
 repoScript=$( echo $SCRIPT_PATH/git-submodule-checkout.sh )
