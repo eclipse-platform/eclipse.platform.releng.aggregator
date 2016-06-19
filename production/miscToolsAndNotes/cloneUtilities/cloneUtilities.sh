@@ -10,20 +10,20 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
-# This is a handy utility to use on Hudson that makes a 
-# shallow clone of the master branch of the 
+# This is a handy utility to use on Hudson that makes a
+# shallow clone of the master branch of the
 # eclipse.platform.releng.aggregator
-# project for the purpose of using the utilities in the 
+# project for the purpose of using the utilities in the
 # "production" directory. It clones into a directory named
-# 'utilities' to help emphasize we are not using it for the 
+# 'utilities' to help emphasize we are not using it for the
 # main build or making use of its submodules.
 
-# This one file can be retrieved with 
+# This one file can be retrieved with
 #   wget http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/cloneUtilities/cloneUtilities.sh
-# and then chmod +x cloneUtilities.sh 
+# and then chmod +x cloneUtilities.sh
 # and then executed with ./cloneUtilities.sh
-# It is best to remove 'cloneUtilities.sh' and wget it each 
-# time in case it itself changes. 
+# It is best to remove 'cloneUtilities.sh' and wget it each
+# time in case it itself changes.
 
 # This "localBuildProperties" file is not for production runs.
 # It is only for local testing, where some key locations or hosts may be
@@ -32,7 +32,7 @@ source localBuildProperties.shsource 2>/dev/null
 
 
 # If running on Hudson, we access the repo directly with file://
-# protocol. If not (i.e. if WORKSPACE is not defined) then we use 
+# protocol. If not (i.e. if WORKSPACE is not defined) then we use
 # git://git.eclipse.org/
 export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"file:///gitroot"}
 if [[ -z "${WORKSPACE}" ]]
@@ -53,29 +53,13 @@ then
   # Try initial rebase --abort in case starting from a failed previous run.
   printf "\n\t[INFO] Doing rebase --abort in case starting from a failed previous run.\n"
   git rebase --abort
-    RC=$?
-    if [[ $RC != 0 ]]
-    then
-          printf "\n\t[INFO] initial git rebase --abort returned non zero return code: RC: $RC\n"
-          printf "\n\t       probably due to no initial rebase --abort needed.\n"
-    fi
-  printf "\n\t[INFO] The tree should not be dirty, but stash all changes and reset hard, just in case.\n"
-  git stash save --all
   RC=$?
   if [[ $RC != 0 ]]
   then
-    printf "\n\t[ERROR] git stash returned non zero return code: RC: $RC\n"
-    exit $RC
+    printf "\n\t[INFO] initial git rebase --abort returned non zero return code: RC: $RC\n"
+    printf "\n\t       probably due to not needing to do an initial rebase --abort.\n"
   fi
-  # We do not want to save anything stashed.
-  printf "\n\t[INFO] Doing stash clear since we would never want to save any changes made on utilities files\n"
-  git stash clear
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    printf "\n\t[ERROR] git stash clear after stash --all returned non zero return code: RC: $RC\n"
-    exit $RC
-  fi
+
   printf "\n\t[INFO] Doing fetch origin --depth=1 which we'll force to be our new HEAD\n"
   git fetch origin --depth=1
   RC=$?
@@ -95,20 +79,12 @@ then
     RCa=$?
     if [[ $RCa != 0 ]]
     then
-          printf "\n\t[ERROR] git rebase --abort returned non zero return code: RCa: $RCa\n"
-          exit $RCa
+      printf "\n\t[ERROR] git rebase --abort returned non zero return code: RCa: $RCa\n"
+      exit $RCa
     fi
     exit $RC
   fi
-  # No longer needed, since we do the fetch before reset hard
-  #echo -e "\n\t[INFO] pull utilities to get any recent changes.\n"
-  #git pull
-  #RC=$?
-  #if [[ $RC != 0 ]]
-  #then
-  #  printf "\n\t[ERROR] git pull returned non zero return code: RC: $RC\n"
-  #  exit $RC
-  #fi
+
   RAW_DATE_END="$(date +%s )"
   echo -e "\n\t[INFO] Elapsed seconds to pull: $(($RAW_DATE_END - $RAW_DATE_START))\n"
   popd
