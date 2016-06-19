@@ -45,14 +45,21 @@ fi
 
 if [[ -e ${WORKSPACE}/utilities ]]
 then
-  echo -e "\n\t[INFO] utilities directory found to exist, so will reset and pull\n"
+  echo -e "\n\t[INFO] utilities directory found to exist, so will fetch and reset\n"
   pushd ${WORKSPACE}/utilities
   RAW_DATE_START="$(date +%s )"
   # This "little tree" should not be dirty, but in case it is, we "stash --all" and
-  # then do a hard reset before doing a pull.
-  # IFF we ever wanted to "switch branches" here, then we should also do a fetch before
-  # doing the pull, in case the "branch is new".
-  echo -e "\n\t[INFO] The tree should not be dirty, but stash all changes and reset hard, just in case.\n"
+  # then do a fetch and hard reset.
+  # Try initial rebase --abort in case starting from a failed previous run.
+  printf "\n\t[INFO] Doing rebase --abort in case starting from a failed previous run.\n"
+  git rebase --abort
+    RC=$?
+    if [[ $RC != 0 ]]
+    then
+          printf "\n\t[INFO] initial git rebase --abort returned non zero return code: RC: $RC\n"
+          printf "\n\t       probably due to no initial rebase --abort needed.\n"
+    fi
+  printf "\n\t[INFO] The tree should not be dirty, but stash all changes and reset hard, just in case.\n"
   git stash save --all
   RC=$?
   if [[ $RC != 0 ]]
@@ -60,23 +67,50 @@ then
     printf "\n\t[ERROR] git stash returned non zero return code: RC: $RC\n"
     exit $RC
   fi
-  git reset --hard
+  # We do not want to save anything stashed.
+  printf "\n\t[INFO] Doing stash clear since we would never want to save any changes made on utilities files\n"
+  git stash clear
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    printf "\n\t[ERROR] git stash clear after stash --all returned non zero return code: RC: $RC\n"
+    exit $RC
+  fi
+  printf "\n\t[INFO] Doing fetch origin --depth=1 which we'll force to be our new HEAD\n"
+  git fetch origin --depth=1
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    printf "\n\t[ERROR] git fetch origin returned non zero return code: RC: $RC\n"
+    exit $RC
+  fi
+  printf "\n\t[INFO] Now doing reset --hard origin/master forcing our local pointer to what ever was fetched.\n"
+  git reset --hard origin/master
   RC=$?
   if [[ $RC != 0 ]]
   then
     printf "\n\t[ERROR] git reset --hard returned non zero return code: RC: $RC\n"
+    printf "\n\t[INFO] Doing a rebase --abort to be able to retry to restore clone to pristine.\n"
+    git rebase --abort
+    RCa=$?
+    if [[ $RCa != 0 ]]
+    then
+          printf "\n\t[ERROR] git rebase --abort returned non zero return code: RCa: $RCa\n"
+          exit $RCa
+    fi
     exit $RC
   fi
-  echo -e "\n\t[INFO] pull utilities to get any recent changes.\n"
-  git pull
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    printf "\n\t[ERROR] git reset --hard returned non zero return code: RC: $RC\n"
-    exit $RC
-  fi
+  # No longer needed, since we do the fetch before reset hard
+  #echo -e "\n\t[INFO] pull utilities to get any recent changes.\n"
+  #git pull
+  #RC=$?
+  #if [[ $RC != 0 ]]
+  #then
+  #  printf "\n\t[ERROR] git pull returned non zero return code: RC: $RC\n"
+  #  exit $RC
+  #fi
   RAW_DATE_END="$(date +%s )"
-  echo -e "\n\t[INFO] Elapsed seconds to pull: $(($RAW_DATE_END - $RAW_DATE_START))"
+  echo -e "\n\t[INFO] Elapsed seconds to pull: $(($RAW_DATE_END - $RAW_DATE_START))\n"
   popd
 else
   echo -e "\n\t[INFO] utilities directory found NOT to exist, so will clone a shallow copy.\n"
