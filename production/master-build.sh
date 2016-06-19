@@ -156,7 +156,7 @@ then
     mv ${LOCAL_REPO} ${LOCAL_REPO}.bak
   fi
 fi
-export STREAMS_PATH="${UTILITIES}/streams"
+export STREAMS_PATH="${UTILITIES_HOME}/streams"
 
 BUILD_TYPE_NAME="Integration"
 if [ "$BUILD_TYPE" = M ]; then
@@ -333,6 +333,16 @@ else
     echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
     echo "       http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=${AGGRCOMMIT}"  >> ${buildDirectory}/directory.txt
   fi
+  
+if [[ ! -e "$STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt" ]]
+then 
+   echo -e "\n\t[ERROR] repositories file did not exist."
+   echo -e "\t[ERROR] expected file: repositories_${PATCH_OR_BRANCH_LABEL}.txt"
+   echo -e "\t[ERROR] to be in directory: $STREAMS_PATH\n"
+   exit 1
+else 
+   echo -e "\n\t[INFO] Using repositories file: $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt\n"
+fi
 
   echo "# " >> ${buildDirectory}/directory.txt
   echo "# .../streams/repositories_${PATCH_OR_BRANCH_LABEL}.txt" >> ${buildDirectory}/directory.txt
