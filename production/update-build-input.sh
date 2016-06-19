@@ -33,7 +33,7 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT")
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
-repositories=$( echo $STREAMS_PATH/repositories${PATCH_BUILD}.txt )
+repositories=$( echo $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt )
 repoScript=$( echo $SCRIPT_PATH/git-submodule-checkout.sh )
 
 

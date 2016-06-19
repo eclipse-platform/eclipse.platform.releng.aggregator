@@ -23,11 +23,24 @@ export BUILD_TYPE=${BUILD_TYPE:-N}
 
 # If not set be caller, make sure its an empty string
 # as the variable is sometimes used to "complete" a name,
-# such as "repositories${PATCH_BUILD}.txt"
+# such as "repositories_${PATCH_BUILD}.txt"
 # (not sure this makes a difference in bash?
 # undefined is same as empty string?)
 export PATCH_BUILD=${PATCH_BUILD:-""}
 
+# PATCH_OR_BRANCH_LABEL is a very special purpose variable, used to identify 
+# files in the same branch (usually master) that are to be used, such as 
+# repositories_master.txt or index.template_${PATCH_OR_BRANCH}.php
+# If not set in bootstrap script, infer based on patch_build or branch
+if [[ -z ${PATCH_OR_BRANCH_LABEL} ]] 
+then
+  if [[ -z "${PATCH_BUILD}" ]] 
+  then 
+    export PATCH_OR_BRANCH_LABEL=${BRANCH}
+  else
+    export PATCH_OR_BRANCH_LABEL=${PATCH_BUILD}
+  fi
+fi
 # environment variable to control if jars use Java 8 with pack200 or not 
 # Should be temporary. See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=463510
 # Not sure if this effect Maven/Tycho builds, or not. 

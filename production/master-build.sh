@@ -156,7 +156,7 @@ then
     mv ${LOCAL_REPO} ${LOCAL_REPO}.bak
   fi
 fi
-export STREAMS_PATH="${aggDir}/streams"
+export STREAMS_PATH="${UTILITIES}/streams"
 
 BUILD_TYPE_NAME="Integration"
 if [ "$BUILD_TYPE" = M ]; then
@@ -335,9 +335,9 @@ else
   fi
 
   echo "# " >> ${buildDirectory}/directory.txt
-  echo "# .../streams/repositories${PATCH_BUILD}.txt" >> ${buildDirectory}/directory.txt
+  echo "# .../streams/repositories_${PATCH_OR_BRANCH_LABEL}.txt" >> ${buildDirectory}/directory.txt
   echo "# " >> ${buildDirectory}/directory.txt
-  cat $STREAMS_PATH/repositories${PATCH_BUILD}.txt >> ${buildDirectory}/directory.txt
+  cat $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt >> ${buildDirectory}/directory.txt
   echo "# " >> ${buildDirectory}/directory.txt
 
 

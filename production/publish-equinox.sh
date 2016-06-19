@@ -170,7 +170,7 @@ fn-publish-equinox ()
     -DpostingDirectory=$BUILD_DIR \
     -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
     -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
-    -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.template${PATCH_BUILD}.php" \
+    -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.template_${PATCH_OR_BRANCH_LABEL}.php" \
     -DindexFileName="index.php" \
     -DbuildDir="$EQ_BUILD_DIR_SEG" \
     -DEBuilderDir="$EBuilderDir" \
