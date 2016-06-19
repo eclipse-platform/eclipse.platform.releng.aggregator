@@ -33,6 +33,14 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT")
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
+# Confirm file exists as expected
+if [[ ! -e "$STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt" ]]
+then 
+   echo -e "\n\t[ERROR] repositories file did not exist."
+   echo -e "\t[ERROR] expected file: repositories_${PATCH_OR_BRANCH_LABEL}.txt"
+   echo -e "\t[ERROR] to be in directory: $STREAMS_PATH\n"
+   exit 1
+fi
 repositories=$( echo $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt )
 repoScript=$( echo $SCRIPT_PATH/git-submodule-checkout.sh )
 

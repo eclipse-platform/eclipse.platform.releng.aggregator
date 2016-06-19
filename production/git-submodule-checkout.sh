@@ -34,7 +34,7 @@ fi
 
 
 if [ -z "$VAL" ]; then
-  echo "WARNING: No tag or branch specified for $name in repositories.txt" >> ${TRACE_OUTPUT}
+  echo "WARNING: No tag or branch specified for $name in repositories_${PATCH_OR_BRANCH_LABEL}.txt" >> ${TRACE_OUTPUT}
   echo "   Has a submodule been added? Perhaps just commented out?" >> ${TRACE_OUTPUT}
   echo "   Will use what ever was last added to aggregator"  >> ${TRACE_OUTPUT}
   # is this ever an error?
