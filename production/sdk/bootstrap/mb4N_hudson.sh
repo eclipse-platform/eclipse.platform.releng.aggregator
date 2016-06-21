@@ -112,7 +112,6 @@ else
    export RUNNING_ON_HUDSON=true
 fi
 echo -e "\n\t[INFO] RUNNING_ON_HUDSON: $RUNNING_ON_HUDSON"
-echo -e "\n\t[DEBUG] RAWDATE in mb4N_hudson was: $RAWDATE\n"
 
 # To allow this cron job to work from hudson, or traditional crontab
 if [[ -z "${WORKSPACE}" ]]
