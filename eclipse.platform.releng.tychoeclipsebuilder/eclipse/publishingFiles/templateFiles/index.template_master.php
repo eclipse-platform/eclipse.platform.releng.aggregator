@@ -309,8 +309,12 @@ else {
   //  echo "<p style=\"text-indent: 3em;\"><a href=\"$sums256file\">SHA256 Checksums</a>&nbsp;(<a href=\"$sums256file.asc\">GPG</a>)</p>";
   //}
   $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
-  if (file_exists($sums512file)) {
+  $sums512file_asc=$sums512file.asc;
+  
+  if ((file_exists($sums512file) && (file_exists($sums512file_asc)) {
     echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
+  } else if ((file_exists($sums512file)) {
+    echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>";
   }
 ?>
 <?php
