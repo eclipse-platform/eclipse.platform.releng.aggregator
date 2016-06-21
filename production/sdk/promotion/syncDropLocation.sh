@@ -46,7 +46,7 @@ function sendPromoteMail ()
   # sent to mail list (just other email addresses)
   # especially handy if send from one id (e.g. "david_williams)
   # only good with 'mail', not 'sendmail'
-  #export MAILRC=~/.e4Buildmailrc
+  #export MAILRC=~/.genie.relengmailrc
 
   # common part of URL and file path
   # varies by build stream

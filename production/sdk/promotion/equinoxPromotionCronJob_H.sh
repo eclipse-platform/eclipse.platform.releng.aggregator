@@ -25,7 +25,7 @@
 # Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
 # to false) for a test I-build on a remote machine.
 export PATH=/usr/local/bin:/usr/bin:/bin:${HOME}/bin
-# unset common variables (some defined for e4Build) which we don't want (or, set ourselves)
+# unset common variables (some defined for genie.releng) which we don't want (or, set ourselves)
 unset JAVA_HOME
 unset JAVA_ROOT
 unset JAVA_JRE

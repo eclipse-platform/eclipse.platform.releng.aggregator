@@ -59,7 +59,7 @@ fi
 
 # remember, local "test builds" that use this script must change
 # or override 'GIT_PUSH' to simply echo, not actually push. Only
-# e4Build should 'push' these tags.
+# genie.releng should 'push' these tags.
 #GIT_PUSH='echo git push'
 if [[ "${testbuildonly}" == "true" ]]
 then

@@ -92,7 +92,7 @@ if [[ $SIGNING != "false" ]]
 then
   echo "[DEBUG] Producing GPG signatures starting."
   # We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
-  # remember, this "HOME" is for e4Build for production builds.
+  # remember, this "HOME" is for genie.releng for production builds.
   # TODO: put in error checking for file existence/readable
   key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
 

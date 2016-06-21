@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Utility script to semi-automate creation of a branch using committer shell (or, e4Build id)
+# Utility script to semi-automate creation of a branch using committer shell (or, genie.releng id)
 
 #project=simrel
 project=platform
@@ -52,7 +52,7 @@ git checkout -b $branchName $startTag
 checkForErrorExit $? "Could not create local branch ($branchName) from tag ($startTag)"
 
 # The part above could be done by anyone. The following code is where committer access is required
-# (which is accomplished by using e4Build id for the general case).
+# (which is accomplished by using genie.releng id for the general case).
 
 # note: using cd here is where executing this whole thing from a committer shell on server is handy
 cd $repo
