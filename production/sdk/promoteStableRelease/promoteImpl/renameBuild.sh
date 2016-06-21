@@ -233,7 +233,7 @@ elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
   oldString="BUILD_TYPE_NAME = \"Maintenance\""
 else
-  echo "\n\tERROR: Unexpected OLD_BUILD_TYPE value. ${OLD_BUILD_TYPE}, in $0."
+  echo -e "\n\tERROR: Unexpected OLD_BUILD_TYPE value. ${OLD_BUILD_TYPE}, in $0."
   exit 1
 fi
 
@@ -247,7 +247,7 @@ elif [[ "${DL_TYPE}" == "S" ]]
 then
   newString="BUILD_TYPE_NAME = \"Stable\""
 else
-  echo "\n\tERROR: Unexpected DL_TYPE value, ${DL_TYPE}, in $0."
+  echo -e "\n\tERROR: Unexpected DL_TYPE value, ${DL_TYPE}, in $0."
   exit 1
 fi
 

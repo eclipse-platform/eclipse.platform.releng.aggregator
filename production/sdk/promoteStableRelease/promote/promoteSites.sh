@@ -122,8 +122,8 @@ else
   export CLOSING_MAIL_LINES
 fi
 
-echo "\n\t[INFO] INITIAL_MAIL_LINES: $INITIAL_MAIL_LINES"  
-echo "\n\t[INFO] CLOSING_MAIL_LINES: $CLOSING_MAIL_LINES"  
+echo -e "\n\t[INFO] INITIAL_MAIL_LINES: $INITIAL_MAIL_LINES"  
+echo -e "\n\t[INFO] CLOSING_MAIL_LINES: $CLOSING_MAIL_LINES"  
 
 
 # DRYRUN should default it to do dry run first, 

@@ -35,7 +35,7 @@ then
   client="eclipse"
   buildLabel="${BUILD_LABEL}"
 else
-  echo "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
+  echo -e "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
   exit 1
 fi
 

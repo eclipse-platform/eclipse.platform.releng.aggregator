@@ -266,7 +266,7 @@ then
   # if running on Hudson, be sure "use xvnc" is checked.
   # If not running on Hudson, can use this xvfb-run utility,
   # distributed with xvfb as a "build time only" requirement.
-  echo "\n\t[DEBUG] RUNNING_ON_HUDSON: ${RUNNING_ON_HUDSON}\n"
+  echo -e "\n\t[DEBUG] RUNNING_ON_HUDSON: ${RUNNING_ON_HUDSON}\n"
   if [[ "${RUNNING_ON_HUDSON}" == "false" ]]
   then
     XVFB_RUN="xvfb-run"
@@ -279,7 +279,7 @@ then
     XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfbErrorFile.txt"
     # --server-args -screen 0 1024x768x24"
   else 
-    echo "\n\t[INFO] Running on Hudson, be sure Xvnc is checked."
+    echo -e "\n\t[INFO] Running on Hudson, be sure Xvnc is checked."
   fi
   #
   if [[ ${buildType} =~ [INM] ]]

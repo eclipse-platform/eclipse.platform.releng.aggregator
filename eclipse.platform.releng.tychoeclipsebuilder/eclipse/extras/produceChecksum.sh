@@ -29,7 +29,7 @@ elif [[ "${currentDirectory}" =~ $eclipsePattern ]]
 then
   client="eclipse"
 else
-  echo "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
+  echo -e "\n\t[ERROR]: Unknown client: ${client} in ${0##*/}\n"
   exit 1
 fi
 
