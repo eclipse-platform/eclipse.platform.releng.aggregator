@@ -21,10 +21,10 @@ DOWNLOAD_HOST=${DOWNLOAD_HOST:-download.eclipse.org}
 
 if [[ -z "${SCRIPT_PATH}" ]]
 then
-   echo -e "\n\t[ERROR] SCRIPT_PATH is not defined as expected in ${0##*/}"
-   exit 1
-else 
-   echo -e "\n\t[INFO] SCRIPT_PATH defined as ${SCRIPT_PATH}"
+  echo -e "\n\t[ERROR] SCRIPT_PATH is not defined as expected in ${0##*/}"
+  exit 1
+else
+  echo -e "\n\t[INFO] SCRIPT_PATH defined as ${SCRIPT_PATH}"
 fi
 source ${SCRIPT_PATH}/bashUtilities.shsource
 source ${SCRIPT_PATH}/bootstrapVariables.shsource
@@ -352,8 +352,8 @@ fn-maven-build-aggregator ()
   SIGNING=$1; shift
   MAVEN_BREE=$1; shift
 
-  # For now, we always specify --update-snapshots. We may eventually want 
-  # to fine tune that to use it only when we do not "clean workspace" before 
+  # For now, we always specify --update-snapshots. We may eventually want
+  # to fine tune that to use it only when we do not "clean workspace" before
   # a build. i.e. only specify for nightlies? See bug 480817.
 
   MARGS="-DbuildId=$BUILD_ID --update-snapshots"
@@ -377,7 +377,7 @@ fn-maven-build-aggregator ()
   then
     FORCEQUALIFIERARG="-DforceContextQualifier=${BUILD_ID}"
     # always fail-fast for now. Otherwise too hard to debug.
-    FAIL_OPTION=${FAIL_OPTION:-"--fail-never"}
+    #FAIL_OPTION=${FAIL_OPTION:-"--fail-never"}
     FAIL_OPTION=${FAIL_OPTION:-"--fail-fast"}
     #CODE_WARNINGS="-Dcode.ignoredWarnings=-warn:-deprecation"
     # For now treat N- and I-builds the same for bug 483395 comment 21.
@@ -405,7 +405,7 @@ fn-maven-build-aggregator ()
   echo "DEBUG: MARGS: $MARGS"
   echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
   echo "DEBUG: CODE_WARNINGS: ${CODE_WARNINGS}"
- 
+
   # --fail-at-end gives chance for bundles to compile, even after
   # a compile error. Might have to specify --fail-never to see them all? See
   # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
@@ -417,8 +417,8 @@ fn-maven-build-aggregator ()
   # 'dependency updates' not useful for Tycho, since its "dependencies" are via p2.
   # mvn versions:display-dependency-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-dependency-updates.txt
   # mvn versions:display-property-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-property-updates.txt
-  # Note: we pass in bogus eclipse-p2-repo.url value (XXXXX), to help ensure no regressions of 
-  # bug 471835 (See bug 478483)  
+  # Note: we pass in bogus eclipse-p2-repo.url value (XXXXX), to help ensure no regressions of
+  # bug 471835 (See bug 478483)
   # Note: reactorBuildTimestampProperty was added as a work around for bug 486698.
   # It should be removed once bug 486783 is fixed. I created bug 489510 as a reminder to remove the workaround.
   mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
@@ -497,69 +497,69 @@ fn-tag-build-inputs ()
   REPOSITORIES_TXT="$1"; shift
   pushd "$REPO_DIR"
 
-  # == Step 1 of git logging. 
-  # TODO: This may not work right if "streams/repositories.txt" contains tags. 
+  # == Step 1 of git logging.
+  # TODO: This may not work right if "streams/repositories.txt" contains tags.
   GITLOG_FILENAME=gitLog.txt
   GITLOG_FILE=${buildDirectory}/${GITLOG_FILENAME}
   echo "Creating ${GITLOG_FILENAME}"
   # we set REPORTDATE first thing, to get some idea of "time elapsed" since start of build.
-  # While we still have "tagging" to do, we have by now checked out everything and cleaned up 
-  # the working tree. (So any commits after this time, would definitely not be "included" in build. 
+  # While we still have "tagging" to do, we have by now checked out everything and cleaned up
+  # the working tree. (So any commits after this time, would definitely not be "included" in build.
   REPORTDATE=$( date +%s )
   # we make in same format as "build id" for easy comparison.
   REPORTTIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$REPORTDATE )
-  # before tagging anything with current build id, 
+  # before tagging anything with current build id,
   # get the most recent tag that matches the build type
-  # I am assuming BUILD_TYPE has been exported by some calling method, 
-  # so we have access to it without re-computing, and without passing 
-  # as an argument. 
-  # I am fairly sure this find tags in "local repo", so would work for Nightlies, as well as 
-  # working before we pushed current tag. If found to be empty (no changes) we could skip the build. 
+  # I am assuming BUILD_TYPE has been exported by some calling method,
+  # so we have access to it without re-computing, and without passing
+  # as an argument.
+  # I am fairly sure this find tags in "local repo", so would work for Nightlies, as well as
+  # working before we pushed current tag. If found to be empty (no changes) we could skip the build.
 
-  # I've learned N-builds are "special", since we do not push those tags. 
-  # For I and M builds, though, we do want the "remote" (permanent) tag, to avoid 
-  # picking up tags of cancelled jobs. 
-  if [[ "${BUILD_TYPE}" == "N" ]] 
+  # I've learned N-builds are "special", since we do not push those tags.
+  # For I and M builds, though, we do want the "remote" (permanent) tag, to avoid
+  # picking up tags of cancelled jobs.
+  if [[ "${BUILD_TYPE}" == "N" ]]
   then
     monthInSeconds=$(( 3600 * 24 * 30 ))
     rightnow=$(date +%s)
     oneMonthAgo=$(( rightnow - monthInSeconds))
     commitish=$(git rev-list --tags="${BUILD_TYPE}*" --max-age=${oneMonthAgo} --max-count=1 )
     lastTag=$(git describe --tags --abbrev=0 ${commitish})
-    if [[ ! ${lastTag} =~ ^([${BUILD_TYPE}]).*$ ]] 
+    if [[ ! ${lastTag} =~ ^([${BUILD_TYPE}]).*$ ]]
     then
-      # Unset if was not an 'N' build (even with all the constraints specified, Git 
+      # Unset if was not an 'N' build (even with all the constraints specified, Git
       # will "find" an I-tag, if no N-tag satisfies the constraints.
       lastTag=""
-    else 
+    else
       echo "DEBUG: lastTag matched ^([${BUILD_TYPE}]).*$"
     fi
   else
     lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
-  fi 
+  fi
 
-  # == Here is where we do the actual tagging  
+  # == Here is where we do the actual tagging
   git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi"
   git tag $BUILD_ID
 
   # == Step 2 of Git logging.
-  if [[ -n "${lastTag}" ]] 
+  if [[ -n "${lastTag}" ]]
   then
     # TODO: other log options to consider? --pretty=oneline?
     echo -e "\n\tGit log from ${lastTag} (previous) to ${BUILD_ID} (current)\n" > ${GITLOG_FILE}
-    # We include the "time of report" since this report might be included in a "build has started" 
+    # We include the "time of report" since this report might be included in a "build has started"
     # mail message, so it would be good to know if we are much delayed in getting that message out.
     echo -e "\tThe tagging, and this report, were done at about $REPORTTIMESTAMP\n\n" >> ${GITLOG_FILE}
-    # This first one is for aggregator itself. 
+    # This first one is for aggregator itself.
     git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
-    # And now all submodules. Note we use --quiet specifically not to have the 
-    # "Entering <submodule>" messages printed. 
+    # And now all submodules. Note we use --quiet specifically not to have the
+    # "Entering <submodule>" messages printed.
     git submodule --quiet foreach git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
   else
     echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > ${GITLOG_FILE}
   fi
   # == end of Git logging
-  
+
   # have 'push' at end, since in future we may not build if we find "no changes"
   $GIT_PUSH --verbose origin $BUILD_ID
   popd
@@ -995,11 +995,11 @@ fn-gather-23-compile-logs ()
     echo "[ERROR] $REPO_DIR did not exist in fn-gather-23-compile-logs"
   fi
 }
-#   fn-gather-buildnotes 
+#   fn-gather-buildnotes
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
-function fn-gather-buildnotes 
+function fn-gather-buildnotes
 {
   checkNArgs $# 3
   if [[ $? != 0 ]]; then return 1; fi
@@ -1019,14 +1019,14 @@ function fn-gather-buildnotes
     return 1
   fi
 }
-#   fn-gather-artifactcomparisons 
+#   fn-gather-artifactcomparisons
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
-# TODO: this may take a while, for something that usually won't be found. 
-# could skip for N-builds. Plus, could check if size of log was greater than minimum. 
-# see syncDropLocation for current home of that "check". 
-function fn-gather-artifactcomparisons 
+# TODO: this may take a while, for something that usually won't be found.
+# could skip for N-builds. Plus, could check if size of log was greater than minimum.
+# see syncDropLocation for current home of that "check".
+function fn-gather-artifactcomparisons
 {
   checkNArgs $# 3
   if [[ $? != 0 ]]; then return 1; fi
@@ -1046,7 +1046,7 @@ function fn-gather-artifactcomparisons
   fi
 }
 
- 
+
 
 # USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_PRETTY_DATE
 #   BUILD_ID: I20121116-0700
@@ -1150,8 +1150,8 @@ fn-summarize-apitooling ()
   #FREEZE_PARAMS=" "
   # When no "freeze" in effect for a release comment these out. Uncomment after M6, changing to appropriate versions.
   FREEZE_PARAMS="-DfreezeBaseURL=http://${ARCHIVE_HOST}/eclipse/downloads/drops4/S-4.6M6-201603170200/eclipse-SDK-4.6M6-win32.zip \
-       -DfreezeName=Eclipse-SDK-4.6M6 \
-       -DfreezeFilename=eclipse-SDK-4.6M6-win32.zip "
+    -DfreezeName=Eclipse-SDK-4.6M6 \
+    -DfreezeFilename=eclipse-SDK-4.6M6-win32.zip "
   # this API_PREV_REF_LABEL variable should be changed any time the version used
   # by previousBaseURL changes. Its purpose is just to localize changes to this one
   # place, and not have to make further, hard-coded changes to php files.
