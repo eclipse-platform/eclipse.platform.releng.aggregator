@@ -30,7 +30,7 @@ else
   export UTILITIES_HOME=${WORKSPACE}/utilities/production
 fi
 
-TODO: Should we make use of "UTILITIES_HOME" here?
+#TODO: Should we make use of "UTILITIES_HOME" here?
 if [[ -z ${SCRIPT_PATH} ]]
 then
   SCRIPT_PATH=${PWD}
