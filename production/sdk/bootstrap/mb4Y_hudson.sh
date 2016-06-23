@@ -116,8 +116,6 @@ else
 fi
 echo -e "\n\t[INFO]RUNNING_ON_HUDSON: $RUNNING_ON_HUDSON"
 
-export GIT_PUSH='echo no git push done until Bug 496335 is resolved'
-
 # To allow this cron job to work from hudson, or traditional crontab
 if [[ -z "${WORKSPACE}" ]]
 then
