@@ -7,7 +7,7 @@ while [[ $count -lt $max ]]
 do
   sleep 1m
   count=$(($count + 1))
-  echo "count: $count"
+  echo -e "\tcount: $count of $max" | tee /shared/eclipse/test496698/test496698out.txt
   if [[ $count -ge $max ]]
   then
     echo -e "\n\tExiting ${0##*/} normally\n"
