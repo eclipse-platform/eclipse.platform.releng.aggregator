@@ -7,7 +7,7 @@ while [[ $count -lt $max ]]
 do
   sleep 1m
   count=$(($count + 1))
-  echo -e "\n\tcount: $count of $max\n"
+  echo -e "\n\n\tcount: $count of $max\n"
   echo -e "\n\tps:\n"
   ps -f
   echo -e "\n\tps -ef | grep \"${0##*/}\":\n"
