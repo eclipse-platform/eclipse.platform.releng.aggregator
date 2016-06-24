@@ -488,6 +488,9 @@ fn-add-submodule-updates ()
 #   BUILD_ID: M20121116-1100
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
+# NOTE: the use of || : at the end of git submodules foreach commands. 
+# See git submodules --help for more info ,or 
+# http://stackoverflow.com/questions/19728933/continue-looping-over-submodules-with-the-git-submodule-foreach-command-after
 fn-tag-build-inputs ()
 {
   checkNArgs $# 3
@@ -539,7 +542,7 @@ fn-tag-build-inputs ()
   fi
 
   # == Here is where we do the actual tagging
-  git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi"
+  git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
   git tag $BUILD_ID
 
   # == Step 2 of Git logging.
@@ -560,7 +563,7 @@ fn-tag-build-inputs ()
   fi
   # == end of Git logging
 
-  # have 'push' at end, since in future we may not build if we find "no changes"
+  # have final push of for aggregator at end, since in future we may not build if we find "no changes"
   $GIT_PUSH --verbose origin $BUILD_ID
   popd
 }
