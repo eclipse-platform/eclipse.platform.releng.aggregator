@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # wait 30 seconds, and start other script.
-./runFor11Minutes.sh
+./runFor11Minutes.sh &
 
 max=10
 count=1
