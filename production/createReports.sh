@@ -25,16 +25,16 @@ build_update_root="${BUILD_HOME}/4${build_type}/siteDir/updates"
 dl_dir_root="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
 if [[ ${build_type} == "N" ]]
 then
-  update_dir_segment="4.6-N-builds"
+  update_dir_segment="4.7-N-builds"
 elif [[ ${build_type} == "M" ]]
 then
-  update_dir_segment="4.5-M-builds"
+  update_dir_segment="4.6-M-builds"
 elif [[ ${build_type} == "I" ]]
 then
-  update_dir_segment="4.6-I-builds"
+  update_dir_segment="4.7-I-builds"
 elif [[ ${build_type} == "Y" ]] 
 then
-  update_dir_segment="4.6-Y-builds"
+  update_dir_segment="4.7-Y-builds"
 else
   echo -e "\nERROR: Unhandled build type: ${build_type} so update_dir_segment undefined: $update_dir_segment"
 fi
