@@ -30,6 +30,11 @@ repoList="\
 /eclipse/updates/4.6-I-builds/ \
 /eclipse/updates/4.6milestones/ \
 /eclipse/updates/4.5/ \
+/eclipse/updates/4.7-P-builds/ \
+/eclipse/updates/4.7-N-builds/ \
+/eclipse/updates/4.7-I-builds/ \
+/eclipse/updates/4.7milestones/ \
+/eclipse/updates/4.6/ \
 "
 
 
