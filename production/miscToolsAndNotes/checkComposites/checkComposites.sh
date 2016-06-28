@@ -24,6 +24,7 @@ baseEclipse=eclipse-platform-4.5.2-linux-gtk-x86_64.tar.gz
 repoFileAccess=file:///home/data/httpd/download.eclipse.org/
 repoHttpAccess=http://download.eclipse.org
 repoAccess=${repoFileAccess}
+# TODO: reduce this list soon
 repoList="\
 /eclipse/updates/4.6-P-builds/ \
 /eclipse/updates/4.6-N-builds/ \
