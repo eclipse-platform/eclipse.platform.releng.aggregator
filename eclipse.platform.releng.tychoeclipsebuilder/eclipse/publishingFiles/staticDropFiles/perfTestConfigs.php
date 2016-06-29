@@ -10,5 +10,5 @@
 include("buildproperties.php");
 
 $expectedTestConfigs = array();
-$expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-perf-lin64_linux.gtk.x86_64_8.0";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-perf-lin64_linux.gtk.x86_64_8.0";
 
