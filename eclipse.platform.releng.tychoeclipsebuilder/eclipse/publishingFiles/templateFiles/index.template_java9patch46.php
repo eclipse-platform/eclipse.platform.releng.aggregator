@@ -293,7 +293,7 @@ if (! isset($PATCH_BUILD)) {
 <?php
 
   $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
-  $sums512file_asc=$sums512file."asc";
+  $sums512file_asc=$sums512file.".asc";
 
   if ((file_exists($sums512file)) && (file_exists($sums512file_asc))) {
     echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
