@@ -94,17 +94,11 @@ fn-build-dir ()
 }
 
 
-  # if not defined "externally", we use default for eclipse.org
-  if [[ -z "${REPO_AND_ACCESS}" ]]
-  then
-    # unless we are on 'build' machine
-    if [[ "build" == "$(hostname)" ]]
-    then
-      export REPO_AND_ACCESS=file:///gitroot
-    else
-      export REPO_AND_ACCESS=git://git.eclipse.org/gitroot
-    fi
-  fi
+  # if not defined "externally", then something is wrong 
+  # with our assumptions and we should simply fail here. 
+  # If the definition ever needs to be put back here, then 
+  # see bootstrap.shsource for how REPO_AND_ACESS is defined. 
+  assertNotEmpty REPO_AND_ACCESS
 
   if [[ -z "${AGGREGATOR_REPO}" ]]
   then
