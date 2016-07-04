@@ -245,12 +245,12 @@ function fileSizeForDisplay($filename) {
     $zipfilesize=filesize($filename);
     if ($zipfilesize > $criteria) {
       $zipfilesize=round($zipfilesize/$onemeg, 0);
-      $scaleChar = " MB";
+      $scaleChar = " MiB";
     }
     else {
       if ($zipfilesize > $onekilo) {
         $zipfilesize=round($zipfilesize/$onekilo, 0);
-        $scaleChar = " KB";
+        $scaleChar = " KiB";
       } else {
         // use raw size in bytes if less that one 1K
         $scaleChar = " B";
