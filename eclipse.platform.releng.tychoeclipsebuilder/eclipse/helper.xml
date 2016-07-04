@@ -1,13 +1,13 @@
 <!--
-    Copyright (c) 2016 IBM Corporation and others.
-    All rights reserved. This program and the accompanying materials
-    are made available under the terms of the Eclipse Public License v1.0
-    which accompanies this distribution, and is available at
-    http://www.eclipse.org/legal/epl-v10.html
-   
-    Contributors:
-        David Williams - initial API and implementation
- -->
+  Copyright (c) 2016 IBM Corporation and others.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/legal/epl-v10.html
+
+  Contributors:
+  David Williams - initial API and implementation
+-->
 <project
   name="Helper targets"
   default="noDefault">
@@ -91,6 +91,33 @@
     <fail
       unless="buildType"
       message="buildType must be defined to generateIndex before calling publish.xml" />
+    <!-- this section that checks for 'eclipseStream' and computes major, minor, etc. was
+      copy/pasted from 'genTestIndexes.xml'. In principle, should be
+      abstracted out into a "utility" file -->
+    <fail
+      unless="eclipseStream"
+      message="eclipseStream must be provided by caller" />
+    <condition property="streamOK">
+      <matches
+        pattern="\d\.\d\.\d"
+        string="${eclipseStream}" />
+    </condition>
+    <fail
+      message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
+      unless="streamOK" />
+    <script language="javascript">
+      <![CDATA[
+            var eclipseStream = project.getProperty("eclipseStream");
+            var pattern = new
+            RegExp(/(\d+)\.(\d+)\.(\d+)/);
+
+            var sArray = pattern.exec(eclipseStream);
+            // sArray[0] is "whole match"
+            project.setProperty("eclipseStreamMajor", sArray[1]);
+            project.setProperty("eclipseStreamMinor", sArray[2]);
+            project.setProperty("eclipseStreamService", sArray[3]);
+          ]]>
+    </script>
 
     <!--regenerate the index page with links to test results -->
     <ant
@@ -123,9 +150,9 @@
       so "conditions" will work, ultimately getting some
       "no match" default value. But not setting
       it to something seems to cause them to "bomb out"
-      TODO: eliminate "job" as a variable. 
-      That only works if doing one job at a time, which 
-      is not always true. 
+      TODO: eliminate "job" as a variable.
+      That only works if doing one job at a time, which
+      is not always true.
     -->
     <property
       name="job"
