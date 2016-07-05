@@ -88,14 +88,13 @@ do
   sha512sum -b ${jarfile} | tee checksum/${jarfile}.sha512 >>${allCheckSumsSHA512}
 done
 
-if [[ $SIGNING != "false" ]]
+# We'll always try to sign checksum files, if passphrase file exists
+echo "[DEBUG] Producing GPG signatures starting."
+# We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
+# remember, this "HOME" is for genie.releng for production builds.
+key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
+if [[ -r $key_passphrase_file ]]
 then
-  echo "[DEBUG] Producing GPG signatures starting."
-  # We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
-  # remember, this "HOME" is for genie.releng for production builds.
-  # TODO: put in error checking for file existence/readable
-  key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
-
   signer=${signer:-${client}-dev@eclipse.org}
   signature_file256=${allCheckSumsSHA256}.asc
   signature_file512=${allCheckSumsSHA512}.asc
@@ -104,6 +103,10 @@ then
 
   cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file256} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign256}
   cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file512} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign512}
+else
+  # We don't treat as ERROR since would be normal in a "local build".
+  # But, would be an ERROR in production build so could be improved.
+  echo -e "\n\t[WARNING] The key_passphrase_file did not exist or was not readable.\n"
 fi
 # if SCRIPT_PATH not defined, we can not call elapsed time
 if [[ -n "${SCRIPT_PATH}" ]]
