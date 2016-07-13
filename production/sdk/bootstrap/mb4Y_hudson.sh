@@ -104,7 +104,7 @@ export ALL_PROXY=${ALL_PROXY:-proxy.eclipse.org:9898}
 # default (later) is set to 'true'. 
 # set to false here for less output.
 # setting to false until  bug 495750 is fixed, else too much output.
-export MVN_DEBUG=false
+# export MVN_DEBUG=false
 
 
 export PRODUCTION_SCRIPTS_DIR=production
