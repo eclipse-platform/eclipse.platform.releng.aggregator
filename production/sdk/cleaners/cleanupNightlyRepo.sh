@@ -148,7 +148,16 @@ function cleanRepo ()
 
   antBuildFile=cleanupRepoScript${buildType}.xml
   antRunner=org.eclipse.ant.core.antRunner
-  devWorkspace=/shared/eclipse/sdk/cleaners/workspace-cleanup
+
+  # To allow this cron job to work from hudson, or traditional crontab
+  if [[ -z "${WORKSPACE}" ]]
+  then
+    export devWorkspace=/shared/eclipse/sdk/cleaners/workspace-cleanup
+  else
+    # we don't put under "utilities" or "sdk" to keep the git tree clean when on Hudson
+    export devWorkspace=${WORKSPACE}/workspace-cleanup
+  fi
+
   echo -e "\tDEBUG: Cleaning repository ${eclipseRepo} on $HOSTNAME on $(date ) " >&2
   getReposToRemove "${eclipseRepo}" $buildType $nRetain
   RC=$?
