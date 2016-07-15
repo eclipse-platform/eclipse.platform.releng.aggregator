@@ -113,5 +113,5 @@ fi
 # tree dirty. In that case, a "reset --hard" will have to
 # be done before pull, or better, make sure executable files are
 # checked into Git as executable.
-echo -e "\n\t[INFO] Make sure sh files are executable. If any "changes" are seen in log, they should be gixed in Git\n"
+echo -e "\n\t[INFO] Make sure sh files are executable. If any "changes" are seen in log, they should be fixed in Git\n"
 find utilities -name "*.sh" -exec chmod -c +x '{}' \;
