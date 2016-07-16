@@ -54,8 +54,13 @@ public class DB {
                 return name;
             }
         }
+        // dw 7/16/2016: assuming this pattern is supposed to be JUST the date part of build id
+        // yyyymmdd
+        // There are probably much better patterns than even my "quick and dirty" method?
+        final Pattern pattern = Pattern.compile("20[0-9][0-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
+// This poorly hardcoded pattern could have one of the big limitations in finding the "right" version to use in plots?
+//      final Pattern pattern = Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
 
-        final Pattern pattern = Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
         final Matcher matcher = pattern.matcher(name);
 
         if (!matcher.find()) {
