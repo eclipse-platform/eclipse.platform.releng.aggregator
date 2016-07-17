@@ -25,7 +25,8 @@ fi
 
 
 # remember, the eclipse install must match the VM used (e.g. both 64 bit, both 32 bit, etc).
-ECLIPSE_EXE=${ECLIPSE_EXE:-/shared/simrel/tools/eclipse45/eclipse/eclipse}
+# The default value is "hard coded" for running on Hudson case. Could be improved to a non-dirty tree location.
+ECLIPSE_EXE=${ECLIPSE_EXE:-utilities/eclipse.platform.releng.tychoeclipsebuilder/eclipse/org.eclipse.releng.basebuilder/eclipse }
 
 if [ ! -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
