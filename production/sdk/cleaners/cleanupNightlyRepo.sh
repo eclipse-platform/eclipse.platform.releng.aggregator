@@ -127,8 +127,8 @@ function cleanRepo ()
   buildType=$2
   nRetain=$3
   dryRun=$4
-  # Will use the convenient eclipse known to be installed in /shared/simrel
-  baseBuilder=/shared/simrel/tools/eclipse45/eclipse
+  # Changed to "hard coded" location of where to expect on Hudson.
+  baseBuilder=utilities/eclipse.platform.releng.tychoeclipsebuilder/eclipse/org.eclipse.releng.basebuilder
   eclipseexe=${baseBuilder}/eclipse
   if [[ ! -x ${eclipseexe} ]]
   then
