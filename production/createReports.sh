@@ -18,7 +18,7 @@ source localBuildProperties.shsource 2>/dev/null
 JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
 export JAVA_HOME=${JAVA_8_HOME}
 buildIdToTest=${BUILD_ID:-"I20160314-2000"}
-buildIdToCompare="4.5/R-4.5.2-201602121500"
+buildIdToCompare="4.6/R-4.6-201606061100"
 build_type=${buildIdToTest:0:1}
 build_dir_root="${BUILD_HOME}/4${build_type}/siteDir/eclipse/downloads/drops4"
 build_update_root="${BUILD_HOME}/4${build_type}/siteDir/updates"
