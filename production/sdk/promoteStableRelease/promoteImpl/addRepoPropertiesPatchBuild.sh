@@ -65,8 +65,8 @@ fi
 # TODO: control with variable!
 #ART_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
 #CON_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
-ART_REPO_NAME="Eclipse Project Java 9 Patch Repository for Eclipse 4.5 (Mars Release)"
-CON_REPO_NAME="Eclipse Project Java 9 Patch Repository for Eclipse 4.5 (Mars Release)"
+ART_REPO_NAME="Eclipse Project Java 9 Patch Repository for Eclipse 4.6 (Neon Release)"
+CON_REPO_NAME="Eclipse Project Java 9 Patch Repository for Eclipse 4.6 (Neon Release)"
 
 MIRRORS_URL_ARG=-Dp2MirrorsURL=${MIRRORURL_ARG}
 ART_REPO_ARG=-DartifactRepoDirectory=${REPO}
