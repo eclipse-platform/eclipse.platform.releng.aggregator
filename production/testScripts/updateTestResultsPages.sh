@@ -219,7 +219,7 @@ then
   echo
   echo " = = First, installing derby"
   # make sure derby.core is installed in basebuilder
-  perfrepoLocation=http://build.eclipse.org/eclipse/buildtools
+  perfrepoLocation=http://build.eclipse.org/eclipse/buildtools/
   #perfrepoLocation=file:///shared/eclipse/buildtools
   derby=org.apache.derby.core.feature.feature.group
   echo "   perfrepoLocation:   $perfrepoLocation"
