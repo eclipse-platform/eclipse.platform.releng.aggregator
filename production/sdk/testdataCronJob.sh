@@ -89,9 +89,9 @@ do
       # will be part of Hudson's log.
       if [[ "${RUNNING_ON_HUDSON}" == "false" ]]
       then
-        /bin/bash ${UTILITIES_HOME}/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
+        /bin/bash ${UTILITIES_HOME}/sdk/collect.sh $(cat $runningdatafile) 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
       else
-        /bin/bash ${UTILITIES_HOME}/sdk/collect.sh < $runningdatafile
+        /bin/bash ${UTILITIES_HOME}/sdk/collect.sh $($runningdatafile)
       fi
       # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
       # then try various types of files file names, etc.

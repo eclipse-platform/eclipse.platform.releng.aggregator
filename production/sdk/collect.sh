@@ -42,15 +42,11 @@ export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 
-read inputline
-echo " = = Properties in collect.sh == "
-echo "inputline: $inputline"
-
-job="$(echo $inputline | cut -d\  -f1)"
-buildNumber="$(echo $inputline | cut -d\  -f2)"
-buildId="$(echo $inputline | cut -d\  -f3)"
-eclipseStream="$(echo $inputline | cut -d\  -f4)"
-EBUILDER_HASH="$(echo $inputline | cut -d\  -f5)"
+job=$1
+buildNumber=$2
+buildId=$3
+eclipseStream=$4
+EBUILDER_HASH=$5
 
 echo "job: $job"
 echo "buildNumber: $buildNumber"
