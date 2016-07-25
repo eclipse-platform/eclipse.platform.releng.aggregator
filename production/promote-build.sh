@@ -38,17 +38,6 @@ fi
 echo -e "\n\t[DEBUG] SCRIPT_PATH in promote-build.sh: $SCRIPT_PATH"
 source $SCRIPT_PATH/build-functions.shsource
 
-# the cron job must know about and use the queueLocation
-# to look for its promotions scripts. (i.e. implicit tight coupling)
-queueLocation=/shared/eclipse/promotion/queue
-
-
-
-# directory should normally exist -- best to create first, with committer's ID --
-# but in case not
-mkdir -p "${queueLocation}"
-#env > env.txt
-
 if [[ -z ${STREAM} || -z ${BUILD_ID} ]]
 then
   echo "ERROR: This script requires STREAM and BUILD_ID"
