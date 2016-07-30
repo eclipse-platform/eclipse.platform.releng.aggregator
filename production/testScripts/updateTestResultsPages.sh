@@ -243,6 +243,18 @@ then
   # common location doesn't seem to work, with our multi-run method. So, will
   # make unique, for now. (Might work ok, if we just had "short set" and "long set" locations?
   ROOT_PERF_DATA=/shared/eclipse/perfdataDir
+  
+  # experiment with deleting previous .dat files, and regenerate all that are needed. 
+  # (I believe they are a "performance improvement" for the test analysis itself, but 
+  # I suspect they make a lot of assumptions that are no longer true. 
+  rm -fr ${ROOT_PERF_DATA}
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "Could not remove ${ROOT_PERF_DATA}. Return code was $RC. Exiting."
+    exit $RC
+  fi  
+  # re-create
   mkdir -p  ${ROOT_PERF_DATA}
   RC=$?
   if [[ $RC != 0 ]]
