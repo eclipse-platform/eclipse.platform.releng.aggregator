@@ -313,10 +313,20 @@ then
   mkdir -p "${fromDir}/performance"
   RAW_DATE_START=$( date -u +%s )
 
+  
+  # to get time stamp, first remove initial IMN:
+  baselineForBuildSuffix=${${buildId}/[IMN]/}
+  #Then remove final '-' in build id 
+  baselineForBuildSuffix=${baselineForBuildSuffix/-/}
+  # then form "final" baseline code with true base line with -timestamp
+  baselineForCurrent="R-4.6-201606061100-${baselineForBuildSuffix}"
+  
+
   #echo -e "\n\tDEBUG RAW Date Start: ${RAW_DATE_START} \n"
   echo -e "\n\tStart Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_START} ) \n" #>${PERF_OUTFILE}
   echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = " ##>>${PERF_OUTFILE}
   echo "   dev script:   $0" #>>${PERF_OUTFILE}
+  echo "   buildId:      $buildId"
   echo "   buildRoot:    $buildRoot" #>>${PERF_OUTFILE}
   echo "   BUILD_HOME:   ${BUILD_HOME}" #>>${PERF_OUTFILE}
   echo "   pathToDL:     $pathToDL" #>>${PERF_OUTFILE}
@@ -331,8 +341,9 @@ then
   echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS" #>> ${PERF_OUTFILE}
   echo "   current_prefix ${current_prefix}" #>> ${PERF_OUTFILE}
   echo #>> ${PERF_OUTFILE}
-
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.6-201606061100 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
+  
+ 
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline #(baselineForCurrent} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
   RC=$?
   if [[ $RC != 0 ]]
   then
