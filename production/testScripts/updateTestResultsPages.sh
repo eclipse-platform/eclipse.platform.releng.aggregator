@@ -316,7 +316,7 @@ then
   # TODO: avoid this hard coding of baseline value
   baselineCode="R-4.6-201606061100"
   # to get time stamp, first remove initial IMN:
-  baselineForBuildSuffix=${${buildId}/[IMN]/}
+  baselineForBuildSuffix=${buildId/[IMN]/}
   #Then remove final '-' in build id 
   baselineForBuildSuffix=${baselineForBuildSuffix/-/}
   # then form "final" baseline code with true base line with -timestamp
