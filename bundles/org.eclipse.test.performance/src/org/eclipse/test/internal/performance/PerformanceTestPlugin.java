@@ -132,6 +132,7 @@ public class PerformanceTestPlugin extends Plugin {
   public static String getDBLocation() {
     String dbloc = System.getProperty(ECLIPSE_PERF_DBLOC);
     if (dbloc != null) {
+      logInfo("System property " + ECLIPSE_PERF_DBLOC + " found to equal " + dbloc + " in getDBLocation"); //$NON-NLS-1$ //$NON-NLS-2$
       Variations keys = new Variations();
       keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
       return keys.getProperty(ECLIPSE_PERF_DBLOC);
@@ -142,6 +143,7 @@ public class PerformanceTestPlugin extends Plugin {
   public static String getDBName() {
     String dbloc = System.getProperty(ECLIPSE_PERF_DBLOC);
     if (dbloc != null) {
+      logInfo("System property " + ECLIPSE_PERF_DBLOC + " found to equal " + dbloc + " in getDBName"); //$NON-NLS-1$ //$NON-NLS-2$
       Variations keys = new Variations();
       keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
       return keys.getProperty(DB_NAME, DEFAULT_DB_NAME);
@@ -152,6 +154,7 @@ public class PerformanceTestPlugin extends Plugin {
   public static String getDBUser() {
     String dbloc = System.getProperty(ECLIPSE_PERF_DBLOC);
     if (dbloc != null) {
+      logInfo("System property " + ECLIPSE_PERF_DBLOC + " found to equal " + dbloc + " in getDBUser"); //$NON-NLS-1$ //$NON-NLS-2$
       Variations keys = new Variations();
       keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
       return keys.getProperty(DB_USER, DEFAULT_DB_USER);
@@ -282,6 +285,7 @@ public class PerformanceTestPlugin extends Plugin {
   public static String getDBPassword() {
     String dbloc = System.getProperty(ECLIPSE_PERF_DBLOC);
     if (dbloc != null) {
+      logInfo("System property " + ECLIPSE_PERF_DBLOC + " found to equal " + dbloc + " in getDBPassword"); //$NON-NLS-1$ //$NON-NLS-2$
       Variations keys = new Variations();
       keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
       return keys.getProperty(DB_PASSWD, DEFAULT_DB_PASSWORD);
