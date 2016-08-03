@@ -243,17 +243,17 @@ then
   # common location doesn't seem to work, with our multi-run method. So, will
   # make unique, for now. (Might work ok, if we just had "short set" and "long set" locations?
   ROOT_PERF_DATA=/shared/eclipse/perfdataDir
-  
-  # experiment with deleting previous .dat files, and regenerate all that are needed. 
-  # (I believe they are a "performance improvement" for the test analysis itself, but 
-  # I suspect they make a lot of assumptions that are no longer true. 
+
+  # experiment with deleting previous .dat files, and regenerate all that are needed.
+  # (I believe they are a "performance improvement" for the test analysis itself, but
+  # I suspect they make a lot of assumptions that are no longer true.
   rm -fr ${ROOT_PERF_DATA}
   RC=$?
   if [[ $RC != 0 ]]
   then
     echo "Could not remove ${ROOT_PERF_DATA}. Return code was $RC. Exiting."
     exit $RC
-  fi  
+  fi
   # re-create
   mkdir -p  ${ROOT_PERF_DATA}
   RC=$?
@@ -290,7 +290,7 @@ then
     fi
     XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfbErrorFile.txt"
     # --server-args -screen 0 1024x768x24"
-  else 
+  else
     echo -e "\n\t[INFO] Running on Hudson, be sure Xvnc is checked."
   fi
   #
@@ -308,7 +308,7 @@ then
   fi
 
   #PERF_OUTFILE="${fromDir}/performance/perfAnalysis_${buildId}_${JOB_NAME}_${JOB_NUMBER}.txt"
-  echo "Beginning performance analysis. 
+  echo "Beginning performance analysis.
   #Results in ${PERF_OUTFILE}."
   mkdir -p "${fromDir}/performance"
   RAW_DATE_START=$( date -u +%s )
@@ -317,11 +317,11 @@ then
   baselineCode="R-4.6-201606061100"
   # to get time stamp, first remove initial IMN:
   baselineForBuildSuffix=${buildId/[IMN]/}
-  #Then remove final '-' in build id 
+  #Then remove final '-' in build id
   baselineForBuildSuffix=${baselineForBuildSuffix/-/}
   # then form "final" baseline code with true base line with -timestamp
   baselineForCurrent="${baselineCode}-${baselineForBuildSuffix}"
-  
+
   #echo -e "\n\tDEBUG RAW Date Start: ${RAW_DATE_START} \n"
   echo -e "\n\tStart Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_START} ) \n" #>${PERF_OUTFILE}
   echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = " ##>>${PERF_OUTFILE}
@@ -346,7 +346,7 @@ then
   echo "   current_prefix ${current_prefix}" #>> ${PERF_OUTFILE}
   echo #>> ${PERF_OUTFILE}
 
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline $(baselineForCurrent} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline ${baselineForCurrent} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
   RC=$?
   if [[ $RC != 0 ]]
   then
