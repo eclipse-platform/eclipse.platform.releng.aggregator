@@ -50,7 +50,6 @@ else
 fi
 
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
-export SIGNOFF_BUG=495252
 if [[ -z "${SIGNOFF_BUG}" ]]
 then
   echo -e "\n\t[INFO] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
