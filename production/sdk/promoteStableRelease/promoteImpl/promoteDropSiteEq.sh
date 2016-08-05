@@ -79,6 +79,7 @@ MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
 # add buildHidden to "local" (buildMachine) directory
 touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
 # make "deferred" script to remove buildHidden later
+mkdir -p ${UTILITIES_HOME}/equinox/promotion/queue
 PROMOTE_VARIABLE=${MANUAL_PREFIX}
 DEF_PFILE="${UTILITIES_HOME}/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
 echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
