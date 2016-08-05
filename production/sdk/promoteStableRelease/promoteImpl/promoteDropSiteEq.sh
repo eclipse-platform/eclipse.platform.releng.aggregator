@@ -80,14 +80,14 @@ MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
 touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
 # make "deferred" script to remove buildHidden later
 PROMOTE_VARIABLE=${MANUAL_PREFIX}
-DEF_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+DEF_PFILE="${UTILITIES_HOME}/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
 echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
 echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
   "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" \
   > ${DEF_PFILE}
 #else
 PROMOTE_VARIABLE=${PROMOTE_PREFIX}
-IMMED_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+IMMED_PFILE="${UTILITIES_HOME}/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
 echo "# Script for immediate promotion" > ${IMMED_PFILE}
 #fi
 
