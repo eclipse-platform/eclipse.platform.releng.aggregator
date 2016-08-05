@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+echo -e "\n\n\tThis job $(basename $0) no longer needs to be ran. Function moved to Hudson."
+exit 1
+
 # cron job a committer can run,
 # say, every 15 minutes, or similar. If a
 # file appears in the promoteLocation, then execute it, and if all goes

@@ -115,7 +115,13 @@ function cleanBuildMachine ()
     buildType=M
     removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
-    removeOldPromotionScripts
+    # This function cleaned up promotion queues on 
+    # /shared/eclipse/
+    # which shoudl no longer be needed, since we "promote" from 
+    # Hudson, which cleans itself up, so to speak. 
+    # so we can remove this function. Will simply comment it 
+    # out, for now. 
+    # removeOldPromotionScripts
 
     INUSE_AFTER=$(nice -12 du /shared/eclipse/${buildmachine} -sh)
 
