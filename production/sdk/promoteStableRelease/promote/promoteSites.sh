@@ -175,7 +175,6 @@ fi
 if [[ -z "${WORKSPACE}" ]]
 then
   export UTILITIES_HOME=/shared/eclipse
-  export WORKSPACE=/shared/eclipse
 else
   export UTILITIES_HOME=${WORKSPACE}/utilities/production
 fi
@@ -186,7 +185,15 @@ export PROMOTE_IMPL=${UTILITIES_HOME}/sdk/promoteStableRelease/promoteImpl
 #export CL_SITE=${CL_SITE:-${UTILITIES_HOME}/sdk/promoteStableRelease/promote${TRAIN_NAME}}
 # stage 2 directory should be "outside" the normal working tree
 export STAGE2DIRSEG=stage2output${TRAIN_NAME}${CHECKPOINT}
-export CL_SITE=${WORKSPACE}/${STAGE2DIRSEG}
+# Here we intentionally use WORKSPACE, if it is defined, 
+# instead of UTILITIES_HOME to make it easier to find. 
+# else use PWD
+if [[ -z "${WORKSPACE}" ]]
+then
+  export CL_SITE=${PWD}/${STAGE2DIRSEG}
+else
+  export CL_SITE=${WORKSPACE}/${STAGE2DIRSEG}
+fi
 mkdir -p "${CL_SITE}"
 
 "${PROMOTE_IMPL}/promoteSitesCore.sh" 2>&1 | tee ${CL_SITE}/stage1PromotionLog.txt
