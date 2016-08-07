@@ -52,9 +52,8 @@ fi
 # This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
 if [[ -z "${SIGNOFF_BUG}" ]]
 then
-  echo -e "\n\t[INFO] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
-  echo -e "\t\tCan be added by hand to buildproperties.php"
-  exit 1
+  echo -e "\n\t[WARNING] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
+  echo -e "\t\tCan be added by hand to buildproperties.php in drop site, if in fact there were errors, and simply forgot to specify."
 else
   export SIGNOFF_BUG
   echo -e "\t\t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
