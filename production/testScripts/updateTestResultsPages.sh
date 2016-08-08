@@ -236,7 +236,7 @@ then
   echo " = = Now run performance.ui app = ="
   devworkspace="${fromDir}/workspace-updatePerfResults"
   eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//172.25.25.57:1527}
-  vmargs="-Xmx512m -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
+  vmargs="-Xmx1G -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
   # assuming for now the intent is that 'data' is meant to accumulate in common location
@@ -337,7 +337,7 @@ then
   echo "   siteDir:      $siteDir" #>>${PERF_OUTFILE}
   echo "   fromDir:      $fromDir" #>>${PERF_OUTFILE}
   echo "   devworkspace: $devworkspace" #>>${PERF_OUTFILE}
-  echo "   devArgs:      $devArgs" #>>${PERF_OUTFILE}
+  echo "   vmArgs:       $vmArgs" #>>${PERF_OUTFILE}
   echo "   devJRE:       $devJRE" #>>${PERF_OUTFILE}
   echo "   BUILDFILESTR: $BUILDFILESTR" #>> ${PERF_OUTFILE}
   echo "   JOB_NAME:     $JOB_NAME" #>> ${PERF_OUTFILE}
