@@ -23,6 +23,7 @@ export JAVA_HOME=${JAVA_8_HOME}
 buildIdToTest=${BUILD_ID:-"I20160314-2000"}
 
 # default is "latest release" though that typically only applies to M-builds.
+# so does not do much good to specify it here. 
 buildIdToCompare="4.6/R-4.6-201606061100"
 
 build_type=${buildIdToTest:0:1}
@@ -35,13 +36,17 @@ repo_root="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
 function latestSimpleRepo
 {
-  if [[ ?# != 1 ]]
+  if [[ ?# != 2 ]]
   then
-    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories."
+    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories and name pattern of repo required, such as M20*."
     exit 1
   fi
   parentDir=$1
-  latestDLrepo=find ${parentDir} -maxdepth 1 -type d | sort | tail -1
+  namePattern=$2
+  latestDLrepo=find ${parentDir} -maxdepth 1 -name ${namePattern} -type d | sort | tail -1
+  # we want to return only the "last part" of the directory name, since 
+  # rest of code is expecting that. Rest of code could be modified so it took
+  # "whole path", but that change should be done under separate bug, if/when desired.
   latestDLrepoSegment=${latestDLrepo##*/}
   # this echo is our "return" value, so can not echo anything else
   echo ${latestDLrepoSegment}
@@ -64,7 +69,7 @@ then
   #TODO should have a function that gets the "latest" simple repo under
   # 4.6-M-builds and use that automatically so each I-build automatically is
   # compared to the latest M-build, instead of having to manually update this value
-  latest_M_build=latestSimpleRepo ${repo_root}/4.6-M-builds
+  latest_M_build=latestSimpleRepo "${repo_root}/4.6-M-builds" "M20*"
   buildIdToCompare="4.6-M-builds/${latest_M_build}
 elif [[ ${build_type} == "Y" ]]
 then
