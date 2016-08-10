@@ -10,47 +10,88 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
-# Assuming this is ran before "promote", so data is read and written to build machine, 
+# Assuming this is ran before "promote", so data is read and written to build machine,
 # and then will be promoted with rest of build.
 
 source localBuildProperties.shsource 2>/dev/null
 
 JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
 export JAVA_HOME=${JAVA_8_HOME}
+
+# BUILD_ID is normally provided as an environment variable, but
+# can provide a default here (especially useful for local testing).
 buildIdToTest=${BUILD_ID:-"I20160314-2000"}
+
+# default is "latest release" though that typically only applies to M-builds.
 buildIdToCompare="4.6/R-4.6-201606061100"
+
 build_type=${buildIdToTest:0:1}
+
 build_dir_root="${BUILD_HOME}/4${build_type}/siteDir/eclipse/downloads/drops4"
+
 build_update_root="${BUILD_HOME}/4${build_type}/siteDir/updates"
 dl_dir_root="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
+repo_root="/home/data/httpd/download.eclipse.org/eclipse/updates"
+
+function latestSimpleRepo
+{
+  if [[ ?# != 1 ]]
+  then
+    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories."
+    exit 1
+  fi
+  parentDir=$1
+  latestDLrepo=find ${parentDir} -maxdepth 1 -type d | sort | tail -1
+  latestDLrepoSegment=${latestDLrepo##*/}
+  # this echo is our "return" value, so can not echo anything else
+  echo ${latestDLrepoSegment}
+}
+
 if [[ ${build_type} == "N" ]]
 then
   update_dir_segment="4.7-N-builds"
+  # Note: I am not sure all N-build comparisons are meaninful.
+  #       we may want a way to "skip" those comparisons.
+  latest_M_build=M20160803-1700
+  buildIdToCompare="4.6-M-builds/${latest_M_build}
 elif [[ ${build_type} == "M" ]]
 then
   update_dir_segment="4.6-M-builds"
+  buildIdToCompare="4.6/R-4.6-201606061100"
 elif [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.7-I-builds"
-elif [[ ${build_type} == "Y" ]] 
+  #TODO should have a function that gets the "latest" simple repo under
+  # 4.6-M-builds and use that automatically so each I-build automatically is
+  # compared to the latest M-build, instead of having to manually update this value
+  latest_M_build=latestSimpleRepo ${repo_root}/4.6-M-builds
+  buildIdToCompare="4.6-M-builds/${latest_M_build}
+elif [[ ${build_type} == "Y" ]]
 then
   update_dir_segment="4.7-Y-builds"
+  # Note: we use same value for Y-builds as for I-builds, since conceptually
+  # they are the same, except that Y-builds use some code from BETA_JAVA9 branch.
+  latest_M_build=M20160803-1700
+  buildIdToCompare="4.6-M-builds/${latest_M_build}
 else
   echo -e "\nERROR: Unhandled build type: ${build_type} so update_dir_segment undefined: $update_dir_segment"
+  echo -e "\n\tand repo reports not produced.
+  #TODO: we *might* want to do an 'exit 1' here (or similar) but we may also simply have a releng tests
+  #      that "fails" if the reports do not exists.
 fi
 
 if [[ -n "$update_dir_segment" ]]
 then
   buildToTest="${build_update_root}/${update_dir_segment}/${buildIdToTest}"
 
-  buildToCompare="/home/data/httpd/download.eclipse.org/eclipse/updates/${buildIdToCompare}"
+  buildToCompare="${repo_root}/${buildIdToCompare}"
 
 
   app_area="${build_dir_root}/${buildIdToTest}"
 
   output_dir="${build_dir_root}/${buildIdToTest}/buildlogs"
   #remove and re-create in case 'reports' exists from a previous run (eventually will not be needed)
-  if [[ -e ${output_dir}/reporeports ]] 
+  if [[ -e ${output_dir}/reporeports ]]
   then
     rm -rf ${output_dir}/reporeports
   fi
@@ -80,7 +121,7 @@ then
   #if [[ ! -F ${TMP_DIR}/${tar_name} ]]
   #then
   wget --no-proxy --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
-  #else 
+  #else
   #    echo "${TMP_DIR}/${tar_name} already existed, not re-fetched"
   #fi
   # always extract anew each time.
@@ -94,11 +135,13 @@ then
 
   tar -xf "${TMP_DIR}/${tar_name}" -C ${report_app_area}
 
+  # first do the "old" (normal) case
   ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
     -DreportRepoDir=${buildToTest} \
     -DreportOutputDir=${output_dir} \
     -DreferenceRepo=${buildToCompare}
 
+  # now run with "new api" which produced the color coded (experimental) reports
   ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx2g \
     -DuseNewApi=true \
     -DreportRepoDir=${buildToTest} \
