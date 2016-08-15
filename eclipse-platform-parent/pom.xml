@@ -233,36 +233,6 @@ No need to specify sonatype URL for "Tycho". released versions available on mave
   <build>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0.0</version>
-        <executions>
-          <execution>
-            <phase>validate</phase>
-            <goals>
-              <goal>read-project-properties</goal>
-            </goals>
-            <configuration>
-              <quiet>true</quiet>
-              <urls>
-                <!--
-                  This build-individual-repository.properties file is used to specify an alternative p2 repository from
-                  where to get the most recent prereqs of artifacts that are required by, but not built by, the "build-individual-repository"
-                  profile. On Eclipse.org Platform HIPP we change this to N-builds when doing infrequent I-builds, but use I-builds repository
-                  when doing frequent I-builds. To give another example of use, those doing "local builds" may want to point it to their
-                  own local build
-                  repository if they are working with a complex change that spans multiple repositories.
-                  But the property file is not required and for most uses the default of the latest I-build will suffice.
-                  Example contents of the file:
-                  eclipse-p2-repo.url=http://download.eclipse.org/eclipse/updates/4.7-N-builds
-                -->
-                <url>file:///${env.HOME}/.m2/build-individual-repository.properties</url>
-              </urls>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
         <version>${tycho.version}</version>
@@ -681,7 +651,8 @@ No need to specify sonatype URL for "Tycho". released versions available on mave
           This eclipse-p2-repo.url is specifically for the build individual bundles profile and Gerrit jobs.
           Default is set to N-builds for main development cycle, but set to I-builds during RC time
           and during milestone weeks (since there are no N-builds during these periods, but daily I-builds, see bug 477575).
-          For maintenance streams should always be "M-builds". 
+          For maintenance streams should always be "M-builds".
+          Ideally, this value would be provided by the environment, see bug 489789.
         -->
         <eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.7-N-builds</eclipse-p2-repo.url>
       </properties>
