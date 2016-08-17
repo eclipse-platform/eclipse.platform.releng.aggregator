@@ -25,11 +25,12 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
 public class AwtScreenshot {
+
+    private static final int TIMEOUT_SECONDS = 15;
 
     public static void main(String[] args) {
         try {
@@ -86,7 +87,7 @@ public class AwtScreenshot {
                 javaExe += ".exe"; // assume it's Windows
             }
             String[] args = new String[] { javaExe, "-cp", cp, AwtScreenshot.class.getName(), screenshotFile };
-            System.out.println("Start process: " + Arrays.asList(args));
+            // System.out.println("Start process: " + Arrays.asList(args));
             ProcessBuilder processBuilder = new ProcessBuilder(args);
             if ("Mac OS X".equals(System.getProperty("os.name"))) {
                 processBuilder.environment().put("AWT_TOOLKIT", "CToolkit");
@@ -94,8 +95,7 @@ public class AwtScreenshot {
             Process process = processBuilder.start();
             new StreamForwarder(process.getErrorStream(), System.out).start();
             new StreamForwarder(process.getInputStream(), System.out).start();
-            int screenshotTimeout = 15;
-            long end = System.currentTimeMillis() + screenshotTimeout * 1000;
+            long end = System.currentTimeMillis() + TIMEOUT_SECONDS * 1000;
             boolean done = false;
             do {
                 try {
@@ -108,8 +108,7 @@ public class AwtScreenshot {
                         // continue
                     }
                 }
-            }
-            while (!done && System.currentTimeMillis() < end);
+            } while (!done && System.currentTimeMillis() < end);
 
             if (done) {
                 int exitCode = process.exitValue();
@@ -118,7 +117,7 @@ public class AwtScreenshot {
                 }
             } else {
                 process.destroy();
-                System.out.println("Killed AwtScreenshot VM after " + screenshotTimeout + " seconds.");
+                System.out.println("Killed AwtScreenshot VM after " + TIMEOUT_SECONDS + " seconds.");
             }
         } catch (URISyntaxException e) {
             e.printStackTrace();

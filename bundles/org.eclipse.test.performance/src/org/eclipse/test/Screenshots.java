@@ -15,10 +15,15 @@ import java.io.File;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.test.internal.AwtScreenshot;
 
-public class Screenshots {
+/**
+ * Helper class to take screenshots from running tests.
+ * 
+ * @since 3.13
+ */
+public final class Screenshots {
 
     /**
-     * Takes a screenshot writes the path to the generated image file to System.out.
+     * Takes a screenshot and writes the path to the generated image file to System.out.
      * <p>
      * Workaround for missing {@link junit.framework.TestCase#getName()} in JUnit 4:
      * </p>
