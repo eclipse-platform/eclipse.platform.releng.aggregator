@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2000, 2016 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -8,10 +8,7 @@
 
 package org.eclipse.test.performance;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.runtime.Platform;
-
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.NullPerformanceMeter;
@@ -25,6 +22,8 @@ import org.eclipse.test.internal.performance.eval.Evaluator;
 import org.eclipse.test.internal.performance.eval.IEvaluator;
 import org.eclipse.test.internal.performance.eval.RelativeBandChecker;
 import org.osgi.framework.Bundle;
+
+import junit.framework.TestCase;
 
 /**
  * Helper for performance measurements. Currently provides performance meter creation and checking of measurements.
@@ -212,7 +211,7 @@ public class Performance {
         PerformanceMeterFactory instance = null;
         if (className != null && className.length() > 0) {
             try {
-                Class c = null;
+                Class<?> c = null;
                 if (Platform.isRunning()) {
                     int separator = className.indexOf(':');
                     Bundle bundle = null;

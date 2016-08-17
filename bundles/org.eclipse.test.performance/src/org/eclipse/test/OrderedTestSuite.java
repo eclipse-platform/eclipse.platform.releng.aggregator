@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2014 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.test;
@@ -45,10 +48,10 @@ public class OrderedTestSuite extends TestSuite {
      * @param testMethods
      *            the names of all test methods in the expected execution order
      */
-    public OrderedTestSuite(final Class testClass, String[] testMethods) {
+    public OrderedTestSuite(final Class<? extends TestCase> testClass, String[] testMethods) {
         super(testClass.getName());
 
-        Set existingMethods = new HashSet();
+        Set<String> existingMethods = new HashSet<String>();
         Method[] methods = testClass.getMethods(); // just public member methods
         for (int i = 0; i < methods.length; i++) {
             Method method = methods[i];
@@ -60,19 +63,14 @@ public class OrderedTestSuite extends TestSuite {
             if (existingMethods.remove(testMethod)) {
                 addTest(createTest(testClass, testMethod));
             } else {
-                addTest(error(testClass, testMethod, new IllegalArgumentException(
-                        "Class '" + testClass.getName() + " misses test method '" + testMethod + "'."))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                addTest(error(testClass, testMethod, new IllegalArgumentException("Class '" + testClass.getName() + " misses test method '" + testMethod + "'."))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
         }
 
-        for (Iterator iter = existingMethods.iterator(); iter.hasNext();) {
-            String existingMethod = (String) iter.next();
+        for (Iterator<String> iter = existingMethods.iterator(); iter.hasNext();) {
+            String existingMethod = iter.next();
             if (existingMethod.startsWith("test")) { //$NON-NLS-1$
-                addTest(error(
-                        testClass,
-                        existingMethod,
-                        new IllegalArgumentException(
-                                "Test method '" + existingMethod + "' not listed in OrderedTestSuite of class '" + testClass.getName() + "'."))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                addTest(error(testClass, existingMethod, new IllegalArgumentException("Test method '" + existingMethod + "' not listed in OrderedTestSuite of class '" + testClass.getName() + "'."))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
         }
 
@@ -85,7 +83,7 @@ public class OrderedTestSuite extends TestSuite {
      *            the JUnit-3-style test class
      * @since 3.9
      */
-    public OrderedTestSuite(Class testClass) {
+    public OrderedTestSuite(Class<? extends TestCase> testClass) {
         this(testClass, testClass.getName());
     }
 
@@ -98,11 +96,11 @@ public class OrderedTestSuite extends TestSuite {
      *            the name of the suite
      * @since 3.9
      */
-    public OrderedTestSuite(Class testClass, String name) {
+    public OrderedTestSuite(Class<? extends TestCase> testClass, String name) {
         super(name);
 
         TestSuite vmOrderSuite = new TestSuite(testClass);
-        ArrayList tests = Collections.list(vmOrderSuite.tests());
+        ArrayList<Test> tests = Collections.list(vmOrderSuite.tests());
 
         class SortingException extends RuntimeException {
 
@@ -114,11 +112,11 @@ public class OrderedTestSuite extends TestSuite {
         }
 
         try {
-            final List orderedMethodNames = getBytecodeOrderedTestNames(testClass);
-            Collections.sort(tests, new Comparator() {
+            final List<String> orderedMethodNames = getBytecodeOrderedTestNames(testClass);
+            Collections.sort(tests, new Comparator<Test>() {
 
                 @Override
-                public int compare(Object o1, Object o2) {
+                public int compare(Test o1, Test o2) {
                     if (o1 instanceof TestCase && o2 instanceof TestCase) {
                         TestCase t1 = (TestCase) o1;
                         TestCase t2 = (TestCase) o2;
@@ -130,16 +128,14 @@ public class OrderedTestSuite extends TestSuite {
                     throw new SortingException("suite failed to detect test order: " + o1 + ", " + o2); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             });
-        }
-        catch (SortingException e) {
+        } catch (SortingException e) {
             addTest(error(testClass, "suite failed to detect test order", e)); //$NON-NLS-1$
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             addTest(error(testClass, "suite failed to detect test order", e)); //$NON-NLS-1$
         }
 
-        for (Iterator iter = tests.iterator(); iter.hasNext();) {
-            Test test = (Test) iter.next();
+        for (Iterator<Test> iter = tests.iterator(); iter.hasNext();) {
+            Test test = iter.next();
             addTest(test);
         }
     }
@@ -156,9 +152,9 @@ public class OrderedTestSuite extends TestSuite {
      * 
      * @since 3.10
      */
-    public static List/* <String> */getBytecodeOrderedTestNames(Class testClass) throws IOException {
-        ArrayList orderedMethodNames = new ArrayList();
-        Class c = testClass;
+    public static List<String> getBytecodeOrderedTestNames(Class<? extends TestCase> testClass) throws IOException {
+        ArrayList<String> orderedMethodNames = new ArrayList<String>();
+        Class<?> c = testClass;
         while (Test.class.isAssignableFrom(c)) {
             addDeclaredTestMethodNames(c, orderedMethodNames);
             c = c.getSuperclass();
@@ -166,7 +162,7 @@ public class OrderedTestSuite extends TestSuite {
         return orderedMethodNames;
     }
 
-    private static void addDeclaredTestMethodNames(Class c, ArrayList methodNames) throws IOException {
+    private static void addDeclaredTestMethodNames(Class<?> c, ArrayList<String> methodNames) throws IOException {
         /*
          * XXX: This method needs to be updated if new constant pool tags are specified. Current supported major class file version:
          * 52 (Java SE 8).
@@ -225,8 +221,7 @@ public class OrderedTestSuite extends TestSuite {
                     skip(is, 4);
                     break;
                 default:
-                    throw new IOException(
-                            "unknown constant pool tag " + tag + " at index " + i + ". Class file version: " + major + "." + minor); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                    throw new IOException("unknown constant pool tag " + tag + " at index " + i + ". Class file version: " + major + "." + minor); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             }
         }
         skip(is, 2 * 3); // access_flags, this_class, super_class
@@ -273,7 +268,7 @@ public class OrderedTestSuite extends TestSuite {
         return is.readInt() & 0xFFFFffffL;
     }
 
-    private static Test error(Class testClass, String testMethod, Exception exception) {
+    private static Test error(Class<? extends TestCase> testClass, String testMethod, Exception exception) {
         final Throwable e2 = exception.fillInStackTrace();
         return new TestCase(testMethod + "(" + testClass.getName() + ")") { //$NON-NLS-1$ //$NON-NLS-2$
 
