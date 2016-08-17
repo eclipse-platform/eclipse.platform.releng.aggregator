@@ -350,6 +350,9 @@ fi
   cat $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt >> ${buildDirectory}/directory.txt
   echo "# " >> ${buildDirectory}/directory.txt
 
+  echo -e "\n\n\n#git submodule status output:" >> ${buildDirectory}/directory.txt
+  git submodule status --recursive >> ${buildDirectory}/directory.txt
+  echo "# " >> ${buildDirectory}/directory.txt
 
   # = = = = relengirectory.txt section
   echo "# " >> ${logsDirectory}/relengdirectory.txt
