@@ -13,6 +13,7 @@
 # Assuming this is ran before "promote", so data is read and written to build machine,
 # and then will be promoted with rest of build.
 
+echo -e "\n\n${0##*/} starting"
 source localBuildProperties.shsource 2>/dev/null
 
 JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
@@ -20,14 +21,19 @@ export JAVA_HOME=${JAVA_8_HOME}
 
 # BUILD_ID is normally provided as an environment variable, but
 # can provide a default here (especially useful for local testing).
-buildIdToTest=${BUILD_ID:-"I20160314-2000"}
+# But best to leave commented out if not doing testing script since 
+# otherwise may miss finding script errrors.
+#buildIdToTest=${BUILD_ID:-"I20160314-2000"}
+buildIdToTest=${BUILD_ID}
 
+
+echo -e "\tbuildIdToTest: ${BUILD_ID}"
 # default is "latest release" though that typically only applies to M-builds.
 # so does not do much good to specify it here. 
 buildIdToCompare="4.6/R-4.6-201606061100"
 
 build_type=${buildIdToTest:0:1}
-
+echo -e "\tbuild_type: ${build_type}"
 build_dir_root="${BUILD_HOME}/4${build_type}/siteDir/eclipse/downloads/drops4"
 
 build_update_root="${BUILD_HOME}/4${build_type}/siteDir/updates"
@@ -36,14 +42,14 @@ repo_root="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
 function latestSimpleRepo
 {
-  if [[ ?# != 2 ]]
+  if [[ $# != 2 ]]
   then
-    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories and name pattern of repo required, such as M20*."
-    exit 1
+    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories and name pattern of repo required, such as M2i0*."
+    exit 9
   fi
   parentDir=$1
   namePattern=$2
-  latestDLrepo=find ${parentDir} -maxdepth 1 -name ${namePattern} -type d | sort | tail -1
+  latestDLrepo=$(find ${parentDir} -maxdepth 1 -name ${namePattern} -type d | sort | tail -1)
   # we want to return only the "last part" of the directory name, since 
   # rest of code is expecting that. Rest of code could be modified so it took
   # "whole path", but that change should be done under separate bug, if/when desired.
@@ -57,40 +63,58 @@ then
   update_dir_segment="4.7-N-builds"
   # Note: I am not sure all N-build comparisons are meaninful.
   #       we may want a way to "skip" those comparisons.
-  latest_M_build=M20160803-1700
-  buildIdToCompare="4.6-M-builds/${latest_M_build}
+  latest_M_build=$(latestSimpleRepo "${repo_root}/4.6-M-builds" "M20*")
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+      exit $RC
+  fi
+  echo -e "\tlatest_M_build: $latest_M_build"
+  buildIdToCompare="4.6-M-builds/${latest_M_build}"
 elif [[ ${build_type} == "M" ]]
 then
   update_dir_segment="4.6-M-builds"
   buildIdToCompare="4.6/R-4.6-201606061100"
+  echo -e "\tlatest_R_build: R-4.6-201606061100"
 elif [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.7-I-builds"
   #TODO should have a function that gets the "latest" simple repo under
   # 4.6-M-builds and use that automatically so each I-build automatically is
   # compared to the latest M-build, instead of having to manually update this value
-  latest_M_build=latestSimpleRepo "${repo_root}/4.6-M-builds" "M20*"
-  buildIdToCompare="4.6-M-builds/${latest_M_build}
+  latest_M_build=$(latestSimpleRepo "${repo_root}/4.6-M-builds" "M20*")
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+      exit $RC
+  fi
+  echo -e "\tlatest_M_build: $latest_M_build"
+  buildIdToCompare="4.6-M-builds/${latest_M_build}"
 elif [[ ${build_type} == "Y" ]]
 then
   update_dir_segment="4.7-Y-builds"
   # Note: we use same value for Y-builds as for I-builds, since conceptually
   # they are the same, except that Y-builds use some code from BETA_JAVA9 branch.
-  latest_M_build=M20160803-1700
-  buildIdToCompare="4.6-M-builds/${latest_M_build}
+  latest_M_build=$(latestSimpleRepo "${repo_root}/4.6-M-builds" "M20*")
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+      exit $RC
+  fi
+  echo -e "\tlatest_M_build: $latest_M_build"
+  buildIdToCompare="4.6-M-builds/${latest_M_build}"
 else
   echo -e "\nERROR: Unhandled build type: ${build_type} so update_dir_segment undefined: $update_dir_segment"
-  echo -e "\n\tand repo reports not produced.
+  echo -e "\n\tand repo reports not produced."
   #TODO: we *might* want to do an 'exit 1' here (or similar) but we may also simply have a releng tests
   #      that "fails" if the reports do not exists.
 fi
-
+echo -e "\tbuildIdToCompare: ${buildIdToCompare}"
 if [[ -n "$update_dir_segment" ]]
 then
   buildToTest="${build_update_root}/${update_dir_segment}/${buildIdToTest}"
 
   buildToCompare="${repo_root}/${buildIdToCompare}"
-
 
   app_area="${build_dir_root}/${buildIdToTest}"
 
