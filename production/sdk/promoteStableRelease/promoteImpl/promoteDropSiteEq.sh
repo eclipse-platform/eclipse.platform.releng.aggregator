@@ -68,8 +68,8 @@ printf "\n\t%s\n" "Moving backup copy back to original."
 mv ${currentDropId}ORIG ${currentDropId}
 
 
-PROMOTE_PREFIX="promote"
-MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
+#PROMOTE_PREFIX="promote"
+#MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
 
 # assume "hide site" is always true (which it is, in practice) to simplify following logic. 
 # can improve later if needed. 
@@ -79,32 +79,27 @@ MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
 # add buildHidden to "local" (buildMachine) directory
 touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
 # make "deferred" script to remove buildHidden later
-mkdir -p ${UTILITIES_HOME}/equinox/promotion/queue
-PROMOTE_VARIABLE=${MANUAL_PREFIX}
-DEF_PFILE="${UTILITIES_HOME}/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
-echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
-echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
-  "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" \
-  > ${DEF_PFILE}
+#mkdir -p ${UTILITIES_HOME}/equinox/promotion/queue
+#PROMOTE_VARIABLE=${MANUAL_PREFIX}
+#DEF_PFILE="${UTILITIES_HOME}/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+#echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
+#echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
+#  "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" \
+#  > ${DEF_PFILE}
 #else
-PROMOTE_VARIABLE=${PROMOTE_PREFIX}
-IMMED_PFILE="${UTILITIES_HOME}/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
-echo "# Script for immediate promotion" > ${IMMED_PFILE}
+#PROMOTE_VARIABLE=${PROMOTE_PREFIX}
 #fi
 
-printf "\n\t%s\n" "Creating promote script."
-echo "rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
-  >> ${IMMED_PFILE}
+printf "\n\t%s\n" "Promoting Equinox"
+rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/
 
 # if doing a release, go ahead and archive too.
 # TODO: make deferred
 if [[ "${DL_TYPE}" == "R" ]]
 then
-  printf "\n\t%s\n" "Creating archive script."
-  echo "rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/archive.eclipse.org/equinox/drops/" \
-    >> ${IMMED_PFILE}
+  printf "\n\t%s\n" "Creating archive"
+  rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/archive.eclipse.org/equinox/drops/
 fi
 
-printf "\n\t%s\n" "Making sure Equinox promote scripts is executable ..."
-chmod -c +x ${IMMED_PFILE}
-chmod -c +x ${DEF_PFILE}
+#printf "\n\t%s\n" "Making sure Equinox promote scripts is executable ..."
+#chmod -c +x ${DEF_PFILE}
