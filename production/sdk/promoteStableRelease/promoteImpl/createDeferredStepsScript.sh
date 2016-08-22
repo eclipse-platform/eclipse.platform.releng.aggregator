@@ -38,8 +38,8 @@ echo "fi" >> "${CL_SITE}/deferredSteps.sh"
 #echo "# to avoid looking out of sync." >> "${CL_SITE}/deferredSteps.sh"
 #echo "mv ${UTILITIES_HOME}/equinox/promotion/queue/manual-promote-${DL_LABEL_EQ}.sh ${UTILITIES_HOME}/equinox/promotion/queue/promote-${DL_LABEL_EQ}.sh" >> "${CL_SITE}/deferredSteps.sh"
 #echo "" >> "${CL_SITE}/deferredSteps.sh"
-echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
-  "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" >> "${CL_SITE}/deferredSteps.sh"
+echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID_EQ}/buildHidden" \
+  "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID_EQ}/buildHiddenORIG" >> "${CL_SITE}/deferredSteps.sh"
 echo "mv /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/buildHidden /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/buildHiddenORIG" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 #echo "# variable, optional step (though, guess it doesn't hurt to always do it, just in case?) " >> "${CL_SITE}/deferredSteps.sh"
