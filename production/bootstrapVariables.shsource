@@ -14,18 +14,16 @@
 # boot strap basic variable values, to drive Eclipse Platform builds.
 
 # we set RAWDATE first thing, just to make it more accurate of "start of build"
-# we have found on Hudson that by the time the build starts, it is already 1 minute 
+# we have found on Hudson that by the time the build starts, it is often already 1 minute 
 # past the time we requested. While this may eventually be fixed in Hudson (follow bug 496403), 
-# in the meantime we will use a simple heuristic and deduct 60 from the RAWDATE we obtain, and then
-# use that new value through out. If this ever needs to be improved (for example, some builds start to 
-# look like that started at 59 minutes past the hour, then the heuristic will need to be more 
-# sophisticated. See bug 496345.
+# in the meantime we will use a simple heuristic and deduct 30 from the RAWDATE we obtain, and then
+# use that new value through out. We first deducted 60 (bug 496345), but that was too much (bug 500233).
 if [[ -z "${RAWDATE}" ]]
 then
   RAWDATE=$( date +%s )
-  RAWDATE=$((RAWDATE - 60))
+  RAWDATE=$((RAWDATE - 30))
   export RAWDATE
-  echo -e "\n\t[DEBUG] RAWDATE in ${0##*/} was empty (as expected) so setting to \"now\", ${RAWDATE}\n"
+  echo -e "\n\t[DEBUG] RAWDATE in ${0##*/} was empty (as expected) so setting to \"now-30\", ${RAWDATE}\n"
 fi
 if [[ -z "${SCRIPT_PATH}" ]]
 then
