@@ -13,17 +13,26 @@
 
 # boot strap basic variable values, to drive Eclipse Platform builds.
 
-# we set RAWDATE first thing, just to make it more accurate of "start of build"
-# we have found on Hudson that by the time the build starts, it is often already 1 minute 
-# past the time we requested. While this may eventually be fixed in Hudson (follow bug 496403), 
-# in the meantime we will use a simple heuristic and deduct 30 from the RAWDATE we obtain, and then
-# use that new value through out. We first deducted 60 (bug 496345), but that was too much (bug 500233).
+# We set RAWDATE first thing, just to make it more accurate of the "start of the build".
+# We have found on Hudson (but never by cron jobs) that by the time the build starts, it is often already 1 minute 
+# past the time we scheduled. This may eventually be fixed (or improved) in Hudson (see bug 496403). 
+# Initially we tried heuristic of deducting 60 seconds (bug 496345) but occasionally Hudson would start the job in, say 51 seconds, making
+# our build ID a minute less that it should be. Then we tried 30 seconds (bug 500233), but given a look at the long term history
+# of Hudson "start" times, it seems 30 seconds may fail at times too. 
+# So modified to truncate "epoch seconds" to the nearest 5 minutes since in our production builds we always schedule them 
+# to start at "even" times, such as "on the hour", occasionally "on the half hour", and rarely on "quarter hours" and maybe once at 10 after. :) 
+# So as long as schedule as it currently is, it seems truncating to nearest 5 minutes will always work. We have seen Hudson "delay times" range from 
+# about 20 seconds to at most about 2 minutes, but never any near 5 minutes so that shouldn't be a concern, 
+# unless Hudson delays start to get really long (over 5 minutes) for some reason.
 if [[ -z "${RAWDATE}" ]]
 then
   RAWDATE=$( date +%s )
-  RAWDATE=$((RAWDATE - 30))
+  remainder=$(( RAWDATE % 300 ))
+  RAWDATE=$((RAWDATE - remainder))
   export RAWDATE
-  echo -e "\n\t[DEBUG] RAWDATE in ${0##*/} was empty (as expected) so setting to \"now-30\", ${RAWDATE}\n"
+  echo -e "\n\t[DEBUG] RAWDATE in ${0##*/} was empty (as expected) so setting to \"now minus $remainder\" (truncating to nearest 5 minutes): ${RAWDATE}\n"
+else 
+  echo -e "\n\t[WARNING] RAWDATE in ${0##*/} was NOT empty as expected so there may be a program error? RAWDATE: ${RAWDATE}\n"
 fi
 if [[ -z "${SCRIPT_PATH}" ]]
 then
