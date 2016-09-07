@@ -105,15 +105,15 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 // $NEWS_ID needs to be added to buildproperties.php, such as $NEWS_ID="4.5/M4";
 // Once ready to display it.
 if (isset ($NEWS_ID)) {
-  echo "<h2><a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a></h2>\n";
+  echo "<a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a>\n";
 }
 // Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
 // And, are added by the promotion scripts, as long as we keep same conventions.
 if (isset ($ACK_ID)) {
-  echo "<h2><a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${ACK_ID}.php\">Acknowledgments</a></h2>\n";
+  echo "<a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${ACK_ID}.php\">Acknowledgments</a>\n";
 }
 if (isset ($README_ID)) {
-  echo "<h2><a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${README_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a></h2>\n";
+  echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${README_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a>\n";
 }
 
 if (file_exists("TEST_INVOCATION_FAILED.html")) {
