@@ -93,15 +93,15 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 // $NEWS_ID needs to be added to buildproperties.php, such as $NEWS_ID="4.5/M4";
 // Once ready to display it.
 if (isset ($NEWS_ID)) {
-  echo "<a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a>\n";
+  echo "<a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a><br>\n";
 }
 // linkToAcknowledgements is a pure "marker file"
 if (file_exists("linkToAcknowledgements")) {
-  echo "<a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${BUILD_ID}.php\">Acknowledgments</a>\n";
+  echo "<a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${BUILD_ID}.php\">Acknowledgments</a><br>\n";
 }
 // linkToReadme is a pure marker file
 if (file_exists("linkToReadme")) {
-  echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${BUILD_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a>\n";
+  echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${BUILD_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
 }
 
 if (isset ($BUILD_FAILED) ) {
