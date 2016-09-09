@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 Tomasz Zarna and others.
+ * Copyright (c) 2013, 2016 Tomasz Zarna and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
 	private IFile file1;
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
@@ -68,6 +69,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 		connect();
 	}
 
+	@Override
 	@After
 	public void tearDown() throws Exception {
 		if (project.exists())

@@ -54,11 +54,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -71,7 +71,7 @@ public class LocalDiskRepositoryTest {
 	private static int testCount;
 	protected PersonIdent committer;
 	private final File trash = new File(new File("target"), "trash");
-	private final List<Repository> toClose = new ArrayList<Repository>();
+	private final List<Repository> toClose = new ArrayList<>();
 
 	@Before
 	public void setUp() throws Exception {
@@ -82,8 +82,8 @@ public class LocalDiskRepositoryTest {
 	public void tearDown() throws Exception {
 		RepositoryCache.clear();
 		for (Iterator<Repository> it = toClose.iterator(); it.hasNext();) {
-			Repository r = it.next();
-			r.close();
+			try (Repository r = it.next()) {
+			}
 		}
 		toClose.clear();
 	}
@@ -111,7 +111,10 @@ public class LocalDiskRepositoryTest {
 	 */
 	private Repository createRepository(boolean bare) throws IOException {
 		File gitdir = createUniqueTestGitDir(bare);
-		Repository db = new FileRepository(gitdir);
+		FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
+		repositoryBuilder.setMustExist( true );
+		repositoryBuilder.setGitDir(gitdir);
+		Repository db = repositoryBuilder.build();
 		Assert.assertFalse(gitdir.exists());
 		db.create();
 		toClose.add(db);

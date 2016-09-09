@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,33 +103,17 @@ public class FileTool {
 		if(file1.length() != file2.length()){
 			return false;
 		}
-		InputStream is1 = null;
-		InputStream is2 = null;
-		try {
-			is1 = new BufferedInputStream(new FileInputStream(file1));
-			is2 = new BufferedInputStream(new FileInputStream(file2));
+		try (InputStream is1 = new BufferedInputStream(new FileInputStream(file1));
+				InputStream is2 = new BufferedInputStream(new FileInputStream(file2))) {
 			int a = 0;
 			int b = 0;
 			boolean same = true;
-			while(same && a != -1 && b != -1){
+			while (same && a != -1 && b != -1) {
 				a = is1.read();
 				b = is2.read();
 				same = a == b;
 			}
 			return same;
-		} finally {
-			if(is2 != null){
-				try {
-					is2.close();
-				} catch(IOException e){
-				}
-			}
-			if(is1 != null){
-				try {
-					is1.close();
-				} catch(IOException e){
-				}
-			}
 		}
 	}
 	/**
@@ -216,7 +200,7 @@ public class FileTool {
 	 * that are included and not explicitly excluded
 	 */
 	public static File[] getFiles(File dir, String[] include, String[] exclude) {
-		List list = new ArrayList();
+		List<File> list = new ArrayList<>();
 		String[] children = dir.list();
 		if(children == null){
 			return new File[0];
@@ -253,7 +237,7 @@ public class FileTool {
 				}
 			}
 		}
-		return (File[])list.toArray(new File[0]);
+		return list.toArray(new File[0]);
 	}
 	/**
 	 * Breaks the given file into its path name segments
@@ -274,12 +258,12 @@ public class FileTool {
 	 * @return the segments of the given string
 	 */
 	public static String[] getSegments(String s, char separator){
-		List result = new ArrayList();
+		List<String> result = new ArrayList<>();
 		StringTokenizer tokenizer = new StringTokenizer(s, "" + separator);
 		while(tokenizer.hasMoreTokens()){
 			result.add(tokenizer.nextToken());
 		}
-		return (String[])result.toArray(new String[0]);
+		return result.toArray(new String[0]);
 	}
 	/**
 	 * Returns a vector of <code>File</code> paths parsed from
@@ -290,12 +274,12 @@ public class FileTool {
 	 * the given paths string
 	 */
 	public static File[] parsePaths(String paths){
-		List result = new ArrayList();
+		List<File> result = new ArrayList<>();
 		StringTokenizer tokenizer = new StringTokenizer(paths, ";");
 		while(tokenizer.hasMoreTokens()){
 			result.add(new File(tokenizer.nextToken()));
 		}
-		return (File[])result.toArray(new File[0]);
+		return result.toArray(new File[0]);
 	}
 	/**
 	 * Copies all bytes in the given source file to
@@ -306,25 +290,10 @@ public class FileTool {
 	 */
 	public static void transferData(File source, File destination) throws IOException {
 		destination.getParentFile().mkdirs();
-		InputStream is = null;
-		OutputStream os = null;
-		try {
-			is = new BufferedInputStream(new FileInputStream(source));
-			os = new BufferedOutputStream(new FileOutputStream(destination));
+		try (InputStream is = new BufferedInputStream(new FileInputStream(source));
+				OutputStream os = new BufferedOutputStream(new FileOutputStream(destination));) {
+
 			transferData(is, os);
-		} finally {
-			if(os != null){
-				try {
-					os.close();
-				} catch(IOException e){
-				}
-			}
-			if(is != null){
-				try {
-					is.close();
-				} catch(IOException e){
-				}
-			}
 		}
 	}
 	/**
@@ -359,11 +328,11 @@ public class FileTool {
 	
 	private static void unzip(IZipFilter filter, ZipFile zipFile, File rootDstDir, File dstDir, int depth) throws IOException {
 	
-		Enumeration entries = zipFile.entries();
+		Enumeration<? extends ZipEntry> entries = zipFile.entries();
 	
 		try {
 			while(entries.hasMoreElements()){
-				ZipEntry entry = (ZipEntry)entries.nextElement();
+				ZipEntry entry = entries.nextElement();
 				if(entry.isDirectory()){
 					continue;
 				}
@@ -374,25 +343,9 @@ public class FileTool {
 					continue;
 				}
 				file.getParentFile().mkdirs();
-				InputStream src = null;
-				OutputStream dst = null;
-				try {
-					src = zipFile.getInputStream(entry);
-					dst = new FileOutputStream(file);
+				try (InputStream src = zipFile.getInputStream(entry);
+					OutputStream dst = new FileOutputStream(file)){
 					transferData(src, dst);
-				} finally {
-					if(dst != null){
-						try {
-							dst.close();
-						} catch(IOException e){
-						}
-					}
-					if(src != null){
-						try {
-							src.close();
-						} catch(IOException e){
-						}
-					}
 				}
 				if((entryName.endsWith(".zip") || entryName.endsWith(".jar")) && (filter == null || filter.shouldUnzip(fullEntryName, entryName, depth))) {
 					String fileName = file.getName();
@@ -488,26 +441,9 @@ public class FileTool {
 	 * information is logged
 	 */
 	public static void zip(File dir, File zipFile) throws IOException {
-		BufferedOutputStream bos = null;
-		ZipOutputStream zos = null;
-		try {
-			bos = new BufferedOutputStream(new FileOutputStream(zipFile));
-			zos = new ZipOutputStream(bos);
+		try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(zipFile));
+				ZipOutputStream zos = new ZipOutputStream(bos);) {
 			zip(dir, dir, zos);
-		} finally {
-			if(zos == null){
-				if(bos != null){
-					try {
-						bos.close();
-					} catch(IOException e){
-					}
-				}
-			} else {
-				try {
-					zos.close();
-				} catch(IOException e){
-				}
-			}
 		}
 	}
 	private static void zip(File root, File file, ZipOutputStream zos) throws IOException {
@@ -542,17 +478,8 @@ public class FileTool {
 			String zipEntryName = fileString.substring(rootString.length() + 1);
 			ZipEntry zipEntry = new ZipEntry(changeSeparator(zipEntryName, File.separatorChar, '/'));
 			zos.putNextEntry(zipEntry);
-			FileInputStream fos = null;
-			try {
-				fos = new FileInputStream(file);
+			try (FileInputStream fos = new FileInputStream(file)){
 				transferData(fos, zos);
-			} finally {
-				if(fos != null){
-					try {
-						fos.close();
-					} catch(IOException e){
-					}
-				}
 			}
 			zos.closeEntry();
 		}

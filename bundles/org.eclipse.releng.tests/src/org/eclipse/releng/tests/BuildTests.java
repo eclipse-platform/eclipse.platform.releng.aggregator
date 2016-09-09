@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: 
+ * IBM Corporation - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.releng.tests;
@@ -29,6 +32,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -57,11 +61,13 @@ public class BuildTests {
     private static FileTool.IZipFilter getTrueFilter() {
         return new FileTool.IZipFilter() {
 
-            public boolean shouldExtract(String fullEntryName, String entryName, int depth) {
+            @Override
+			public boolean shouldExtract(String fullEntryName, String entryName, int depth) {
                 return true;
             }
 
-            public boolean shouldUnzip(String fullEntryName, String entryName, int depth) {
+            @Override
+			public boolean shouldUnzip(String fullEntryName, String entryName, int depth) {
                 return true;
             }
         };
@@ -76,10 +82,8 @@ public class BuildTests {
     private boolean hasErrors(String string) {
 
         boolean result = false;
-        BufferedReader aReader = null;
 
-        try {
-            aReader = new BufferedReader(new InputStreamReader(new FileInputStream(string)));
+        try (BufferedReader aReader = new BufferedReader(new InputStreamReader(new FileInputStream(string)))){
             String aLine = aReader.readLine();
             while (aLine != null) {
                 int aNumber = parseLine(aLine);
@@ -97,17 +101,6 @@ public class BuildTests {
             System.out.println("Error reading log file: " + string);
             result = true;
         }
-        finally {
-            if (aReader != null) {
-                try {
-                    aReader.close();
-                }
-                catch (IOException e) {
-                    result = true;
-                }
-            }
-        }
-
         return result;
     }
     @Test
@@ -339,10 +332,8 @@ public class BuildTests {
             this.suffix = suffix;
         }
 
-        /**
-         * @see java.io.FilenameFilter#accept(java.io.File, java.lang.String)
-         */
-        public boolean accept(File dir, String name) {
+        @Override
+		public boolean accept(File dir, String name) {
             int lastDot = name.lastIndexOf('.');
             if (lastDot == -1) {
                 return false;
@@ -399,7 +390,7 @@ public class BuildTests {
     }
     @Test
     public void testFeatureFiles() {
-        List result = new ArrayList();
+        List<String> result = new ArrayList<>();
         String installDir = Platform.getInstallLocation().getURL().getPath();
 
         File featureDir = new File(installDir, "features");
@@ -409,15 +400,14 @@ public class BuildTests {
             if (!testDirectory(aFeature, REQUIRED_FEATURE_FILES, REQUIRED_FEATURE_SUFFIX)) {
                 result.add(aFeature.getPath());
             }
-
         }
 
         String aString = "";
         if (result.size() > 0) {
 
-            Iterator iter = result.iterator();
+            Iterator<String> iter = result.iterator();
             while (iter.hasNext()) {
-                String element = (String) iter.next();
+                String element = iter.next();
                 aString = aString + element + "; ";
             }
         }
@@ -425,7 +415,7 @@ public class BuildTests {
     }
     @Test
     public void testPluginFiles() {
-        List result = new ArrayList();
+        List<String> result = new ArrayList<>();
         String installDir = Platform.getInstallLocation().getURL().getPath();
         File pluginDir = new File(installDir, "plugins");
         File[] plugins = pluginDir.listFiles();
@@ -441,9 +431,9 @@ public class BuildTests {
         String aString = "";
         if (result.size() > 0) {
 
-            Iterator iter = result.iterator();
+            Iterator<String> iter = result.iterator();
             while (iter.hasNext()) {
-                String element = (String) iter.next();
+                String element = iter.next();
                 aString = aString + element + "; ";
             }
         }
@@ -493,9 +483,9 @@ public class BuildTests {
     }
 
     private boolean testPluginJar(File aDirectory, String[] requiredFiles) {
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<>();
         try (ZipFile jarredPlugin = new ZipFile(aDirectory)) {
-            Enumeration _enum = jarredPlugin.entries();
+            Enumeration<? extends ZipEntry> _enum = jarredPlugin.entries();
             while (_enum.hasMoreElements()) {
                 list.add(_enum.nextElement().toString());
             }
@@ -741,7 +731,7 @@ public class BuildTests {
 
     private class JavadocLog {
 
-        private ArrayList logs = new ArrayList();
+        private ArrayList<String> logs = new ArrayList<>();
 
         private JavadocLog(URL[] logs) {
             findProblems(logs);
@@ -814,7 +804,7 @@ public class BuildTests {
 
     private class ComparatorLog {
 
-        private ArrayList logs = new ArrayList();
+        private ArrayList<String> logs = new ArrayList<>();
 
         private ComparatorLog(URL comparatorLogs) {
             findProblems(comparatorLogs);
