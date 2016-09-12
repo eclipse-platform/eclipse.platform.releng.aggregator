@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.ui.testing.TestableObject;
  * 
  * @deprecated As using deprecated materials
  */ 
+@Deprecated
 public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApplication {
 
 	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.workbench"; //$NON-NLS-1$
@@ -46,9 +47,6 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 	private IApplicationContext appContext;
 	
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IPlatformRunnable
-	 */
 	public Object run(final Object args) throws Exception {
 		// Get the application to test
 		Object application = getApplication((String[])args);
@@ -186,9 +184,6 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 		return ((IPlatformRunnable) workbench).run(args);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.testing.ITestHarness#runTests()
-	 */
 	public void runTests() {
 		fTestableObject.testingStarting();
 		fTestableObject.runTest(new Runnable() {
