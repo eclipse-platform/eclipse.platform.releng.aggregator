@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2010 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,21 +15,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.eclipse.team.core.RepositoryProvider;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.List;
-
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IProject;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -42,7 +29,15 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
@@ -63,10 +58,7 @@ public class MapProjectSelectionPage extends WizardPage {
 		super(pageName, title, image);
 		this.settings = settings;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+
 	public void createControl(Composite parent) {
 		Composite topContainer = new Composite(parent, SWT.NONE);
 		topContainer.setLayout(new GridLayout());
@@ -97,8 +89,8 @@ public class MapProjectSelectionPage extends WizardPage {
 		ListViewer result = new ListViewer(tree);
 		result.setContentProvider(new IStructuredContentProvider() {
 			public Object[] getElements(Object inputElement) {
-				Set projects=(Set)inputElement;
-				return ((IProject[]) projects.toArray(new IProject[projects.size()]));
+				Set<IProject> projects=(Set<IProject>)inputElement;
+				return projects.toArray(new IProject[projects.size()]);
 			}
 			public void dispose() {	
 			}
@@ -115,20 +107,20 @@ public class MapProjectSelectionPage extends WizardPage {
 		return result;
 	}	
 
-	private static Set getMapFileProjects() {
-		Set projects = new HashSet();
+	private static Set<IProject> getMapFileProjects() {
+		Set<IProject> projects = new HashSet<IProject>();
 		MapFile[] mapFiles;
 		try {
 			mapFiles = MapFile.findAllMapFiles(RelEngPlugin.getWorkspace().getRoot());
 		} catch (CoreException ex) {
-			return Collections.EMPTY_SET;
+			return Collections.emptySet();
 		}
 		for (int i = 0; i < mapFiles.length; i++)
 			projects.add(mapFiles[i].getFile().getProject());
-		for (Iterator iterator= projects.iterator(); iterator.hasNext();) {
+		for (Iterator<IProject> iterator= projects.iterator(); iterator.hasNext();) {
 			MapProject mapProject= null;
 			try {
-				mapProject= new MapProject((IProject)iterator.next());
+				mapProject= new MapProject(iterator.next());
 				if (mapProject.getValidMapFiles().length == 0)
 					iterator.remove();
 			} catch (CoreException e) {

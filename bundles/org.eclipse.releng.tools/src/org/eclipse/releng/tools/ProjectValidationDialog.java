@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
@@ -20,17 +26,6 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
 import org.eclipse.team.ui.synchronize.ParticipantPageDialog;
 import org.eclipse.team.ui.synchronize.ParticipantPageSaveablePart;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.core.resources.IProject;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-
-import org.eclipse.compare.CompareConfiguration;
 
 
 /**
@@ -73,7 +68,7 @@ public class ProjectValidationDialog extends ParticipantPageDialog {
 		cc.setRightEditable(false);
 		ParticipantPageSaveablePart part = new ParticipantPageSaveablePart(shell, cc, configuration, participant);
 		try {
-			ProjectValidationDialog dialog = new ProjectValidationDialog(shell, part, participant); //$NON-NLS-1$
+			ProjectValidationDialog dialog = new ProjectValidationDialog(shell, part, participant);
 			dialog.open();
 		} finally {
 			part.dispose();

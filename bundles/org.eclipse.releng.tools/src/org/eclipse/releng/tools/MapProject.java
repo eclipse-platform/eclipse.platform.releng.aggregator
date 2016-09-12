@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,15 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.client.Command;
-import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
-import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -36,6 +27,13 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.team.core.TeamException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.client.Command;
+import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
+import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
 
 
 public class MapProject implements IResourceChangeListener {
@@ -111,14 +109,14 @@ public class MapProject implements IResourceChangeListener {
 	}
  
 	public MapFile[] getValidMapFiles(){
-		List list = new ArrayList();
+		List<MapFile> list = new ArrayList<MapFile>();
 		for (int i = 0; i <mapFiles.length; i++){
 			IProject[] projects = mapFiles[i].getAccessibleProjects(); 
 			if( projects!= null && projects.length > 0){
 				list.add(mapFiles[i]);
 			}
 		}
-		return (MapFile[])list.toArray(new MapFile[list.size()]);
+		return list.toArray(new MapFile[list.size()]);
 	}
 	
 	/**
@@ -148,12 +146,12 @@ public class MapProject implements IResourceChangeListener {
 	}
 	
 	public MapFile[] getMapFilesFor(IProject[] projects){
-		Set alist = new HashSet();		
+		Set<MapFile> alist = new HashSet<MapFile>();		
 		for(int i = 0; i<projects.length; i++){
 			MapFile aMapFile = getMapFile(projects[i]);
 			alist.add(aMapFile);
 		}
-		return (MapFile[])alist.toArray(new MapFile[alist.size()]);
+		return alist.toArray(new MapFile[alist.size()]);
 	}
 
 	/**
@@ -241,8 +239,8 @@ public class MapProject implements IResourceChangeListener {
 		return new MapFile(file);
 	}
 	private void addMapFile(MapFile aFile){
-		Set set = new HashSet(Arrays.asList(mapFiles));
+		Set<MapFile> set = new HashSet<MapFile>(Arrays.asList(mapFiles));
 		set.add(aFile);
-		mapFiles = (MapFile[])set.toArray(new MapFile[set.size()]); 
+		mapFiles = set.toArray(new MapFile[set.size()]); 
 	}
 }

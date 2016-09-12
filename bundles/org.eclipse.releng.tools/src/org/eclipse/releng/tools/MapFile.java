@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,16 +19,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 
 public class MapFile {
@@ -54,7 +53,7 @@ public class MapFile {
 	
 	protected void loadEntries() throws CoreException {
 		InputStream inputStream = null;
-		List list = new ArrayList();		
+		List<MapEntry> list = new ArrayList<MapEntry>();		
 
 		try {
 			inputStream = file.getContents();
@@ -107,7 +106,7 @@ public class MapFile {
 	}
 
 	public IProject[] getAccessibleProjects() {
-		Set list = new HashSet();
+		Set<IProject> list = new HashSet<IProject>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		if(entries == null || entries.length ==0) return null;
 		for (int i = 0; i < projects.length; i++) {
@@ -120,7 +119,7 @@ public class MapFile {
 				}
 			}
 		}
-		return (IProject[])list.toArray(new IProject[list.size()]);
+		return list.toArray(new IProject[list.size()]);
 	}
 
 	public String getName() {
@@ -136,7 +135,7 @@ public class MapFile {
 	 * @since 3.7
 	 */
 	public static MapFile[] findAllMapFiles(IResource resource) throws CoreException {
-		final ArrayList mapFiles = new ArrayList();
+		final ArrayList<MapFile> mapFiles = new ArrayList<MapFile>();
 		IResourceProxyVisitor visitor= new IResourceProxyVisitor() {
 			public boolean visit(IResourceProxy resourceProxy) throws CoreException {
 				if (!resourceProxy.isAccessible())
@@ -155,7 +154,7 @@ public class MapFile {
 		
 		resource.accept(visitor,IResource.NONE);
 		
-		return (MapFile[]) mapFiles.toArray(new MapFile[mapFiles.size()]);
+		return mapFiles.toArray(new MapFile[mapFiles.size()]);
 	}
 
 	public static boolean isMapFile(IFile aFile){

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 AGETO Service GmbH and others.
+ * Copyright (c) 2010, 2016 AGETO Service GmbH and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -21,12 +21,13 @@ import org.eclipse.team.core.RepositoryProviderType;
 public class GitCopyrightAdapterFactory implements IAdapterFactory,
 		IRepositoryProviderCopyrightAdapterFactory {
 
-	private static final Class[] ADAPTER_LIST = new Class[] { IRepositoryProviderCopyrightAdapterFactory.class };
+	private static final Class<?>[] ADAPTER_LIST = new Class[] { IRepositoryProviderCopyrightAdapterFactory.class };
 
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (IRepositoryProviderCopyrightAdapterFactory.class
 				.equals(adapterType)) {
-			return getGitCopyrightAdapter(adaptableObject);
+			return (T) getGitCopyrightAdapter(adaptableObject);
 		}
 		return null;
 	}
@@ -37,7 +38,7 @@ public class GitCopyrightAdapterFactory implements IAdapterFactory,
 		return this;
 	}
 
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return ADAPTER_LIST;
 	}
 

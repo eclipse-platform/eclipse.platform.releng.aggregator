@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,7 +121,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		data.grabExcessVerticalSpace = true;
 		projectList.setLayoutData(data);
 
-		Set projects = new HashSet();
+		Set<IProject> projects = new HashSet<IProject>();
 		MapFile[] mapFiles;
 		try {
 			mapFiles = MapFile.findAllMapFiles(RelEngPlugin.getWorkspace().getRoot());
@@ -130,7 +130,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		}
 		for (int i = 0; i < mapFiles.length; i++)
 			projects.add(mapFiles[i].getFile().getProject());
-		workspaceMapProjects = ((IProject[]) projects.toArray(new IProject[projects.size()]));
+		workspaceMapProjects = projects.toArray(new IProject[projects.size()]);
 
 		String[] projectNames = new String[workspaceMapProjects.length];
 		for (int i = 0; i < workspaceMapProjects.length; i++) {

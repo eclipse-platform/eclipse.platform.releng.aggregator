@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,24 +21,24 @@ import java.util.Map;
  * Don't implement the Map interface because we don't want people calling #entrySet
  * because order is important.
  */
-public class OrderedMap {
+public class OrderedMap<K, V> {
 
-	private List keys = new ArrayList();
-	private List values = new ArrayList();
+	private List<K> keys = new ArrayList<K>();
+	private List<V> values = new ArrayList<V>();
 
 	/* (non-Javadoc)
 	 * @see java.util.Map#clear()
 	 */
 	public void clear() {
-		keys = new ArrayList();
-		values = new ArrayList();
+		keys = new ArrayList<K>();
+		values = new ArrayList<V>();
 	}
 
 	/* (non-Javadoc)
 	 * @see java.util.Map#containsKey(java.lang.Object)
 	 */
-	public boolean containsKey(Object key) {
-		for (Iterator iter = keys.iterator(); iter.hasNext();) {
+	public boolean containsKey(K key) {
+		for (Iterator<K> iter = keys.iterator(); iter.hasNext();) {
 			if (key.equals(iter.next()))
 				return true;
 		}
@@ -48,8 +48,8 @@ public class OrderedMap {
 	/* (non-Javadoc)
 	 * @see java.util.Map#containsValue(java.lang.Object)
 	 */
-	public boolean containsValue(Object value) {
-		for (Iterator iter = values.iterator(); iter.hasNext();) {
+	public boolean containsValue(V value) {
+		for (Iterator<V> iter = values.iterator(); iter.hasNext();) {
 			if (value.equals(iter.next()))
 				return true;
 		}
@@ -59,7 +59,7 @@ public class OrderedMap {
 	/* (non-Javadoc)
 	 * @see java.util.Map#get(java.lang.Object)
 	 */
-	public Object get(Object key) {
+	public V get(K key) {
 		int index = indexOf(key);
 		return index == -1 ? null : values.get(index);
 	}
@@ -84,14 +84,14 @@ public class OrderedMap {
 	/* (non-Javadoc)
 	 * @see java.util.Map#put(java.lang.Object, java.lang.Object)
 	 */
-	public Object put(Object key, Object value) {
+	public V put(K key, V value) {
 		int index = indexOf(key);
 		if (index == -1) {
 			keys.add(key);
 			values.add(value);
 			return null;
 		}
-		Object oldValue = values.get(index);
+		V oldValue = values.get(index);
 		values.set(index, value);
 		return oldValue;
 	}
@@ -99,17 +99,17 @@ public class OrderedMap {
 	/* (non-Javadoc)
 	 * @see java.util.Map#putAll(java.util.Map)
 	 */
-	public void putAll(Map other) {
-		for (Iterator iter = other.entrySet().iterator(); iter.hasNext();) {
-			Object key = iter.next();
-			put(key, other.get(key));
+	public void putAll(Map<K, V> other) {
+		for (Iterator<Map.Entry<K, V>> iter = other.entrySet().iterator(); iter.hasNext();) {
+			Map.Entry<K, V> entry = iter.next();
+			put(entry.getKey(), entry.getValue());
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see java.util.Map#remove(java.lang.Object)
 	 */
-	public Object remove(Object key) {
+	public V remove(K key) {
 		int index = indexOf(key);
 		if (index == -1)
 			return null;
@@ -127,11 +127,11 @@ public class OrderedMap {
 	/* (non-Javadoc)
 	 * @see java.util.Map#values()
 	 */
-	public Collection values() {
+	public Collection<V> values() {
 		return values;
 	}
 	
-	public Collection keys() {
+	public Collection<K> keys() {
 		return keys;
 	}
 
@@ -142,9 +142,9 @@ public class OrderedMap {
 	public String toString() {
 		StringBuffer result = new StringBuffer();
 		result.append("{"); //$NON-NLS-1$
-		for (Iterator iter = keys().iterator(); iter.hasNext(); ) {
-			Object key = iter.next();
-			Object value = get(key);
+		for (Iterator<K> iter = keys().iterator(); iter.hasNext(); ) {
+			K key = iter.next();
+			V value = get(key);
 			result.append(key);
 			result.append('=');
 			result.append(value);

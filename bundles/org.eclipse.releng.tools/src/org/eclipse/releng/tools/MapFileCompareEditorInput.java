@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,9 +56,6 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 		mapProject = null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.compare.CompareEditorInput#prepareInput(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected Object prepareInput(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		CompareConfiguration config = getCompareConfiguration();
@@ -76,9 +73,6 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 		setDocuments(docs);
 		buildTree();
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.compare.CompareEditorInput#createDiffViewer(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public Viewer createDiffViewer(Composite parent) {
 		viewer =  super.createDiffViewer(parent);
@@ -132,14 +126,14 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 	private MapFile[] getChangedMapFiles() {
 		if (selectedProjects == null || selectedProjects.length == 0)
 			return null;
-		List projectList = new ArrayList();
+		List<IProject> projectList = new ArrayList<IProject>();
 		CVSTag[] tags = mapProject.getTagsFor(selectedProjects );
 		for(int i = 0; i < selectedProjects.length; i++){
 			if(!tags[i].getName().equals(tag)){
 				projectList.add(selectedProjects[i]);
 			}
 		}
-		IProject [] projects = (IProject[])projectList.toArray(new IProject[projectList.size()]);
+		IProject [] projects = projectList.toArray(new IProject[projectList.size()]);
 		return mapProject.getMapFilesFor(projects);
 	}
 	

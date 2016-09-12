@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,20 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -38,7 +26,16 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -192,24 +189,24 @@ public class ProjectSelectionPage extends WizardPage {
 	 * Returns all the checked items if they are IProject 
 	 */
 	public IProject[] getCheckedProjects(){
-		ArrayList projectsToRelease = new ArrayList();
+		ArrayList<IProject> projectsToRelease = new ArrayList<IProject>();
 		Object[] obj = viewer.getCheckedElements();
 		if (obj == null)return null;
 		for(int i = 0; i < obj.length; i++){
 			if (obj[i] instanceof IProject)
-				projectsToRelease.add(obj[i]); 
+				projectsToRelease.add((IProject) obj[i]); 
 		}
-		return (IProject[])projectsToRelease.toArray(new IProject[projectsToRelease.size()]);
+		return projectsToRelease.toArray(new IProject[projectsToRelease.size()]);
 	}	
 	
 	private void readProjectSettings(){
 		if( settings == null) return;
 		if(settings.getArray(SELECTED_ITEMS_KEY) != null){
-			ArrayList nameList = new ArrayList(Arrays.asList(settings.getArray(SELECTED_ITEMS_KEY)));
+			ArrayList<String> nameList = new ArrayList<String>(Arrays.asList(settings.getArray(SELECTED_ITEMS_KEY)));
 			if(nameList != null){
-				Iterator iter = nameList.iterator();
+				Iterator<String> iter = nameList.iterator();
 				while(iter.hasNext()){
-					String name = (String)iter.next();
+					String name = iter.next();
 					IProject project = getProjectWithName(name);
 					if(project != null){
 						viewer.setChecked(project,true);
@@ -236,13 +233,13 @@ public class ProjectSelectionPage extends WizardPage {
 	 */
 	public void saveSettings(){
 		Object[] obj = viewer.getCheckedElements();
-		ArrayList names = new ArrayList();
+		ArrayList<String> names = new ArrayList<String>();
 		for (int i = 0; i < obj.length; i++){
 			if(obj[i] instanceof IProject){
 				names.add(((IProject)obj[i]).getName());
 			}
 		}
-		settings.put(SELECTED_ITEMS_KEY, (String[])names.toArray(new String[names.size()]));
+		settings.put(SELECTED_ITEMS_KEY, names.toArray(new String[names.size()]));
 		settings.put(COMPARE_BUTTON_KEY, compareButtonChecked);
 	}
 

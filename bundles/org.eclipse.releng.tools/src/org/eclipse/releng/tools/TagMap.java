@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
@@ -26,24 +29,16 @@ import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.actions.TagInRepositoryAction;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
 
 /**
  * Tags the versions in a map file with another tag
  */
 public class TagMap extends TagInRepositoryAction {
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#getSelectedCVSResources()
-	 */
 	@Override
 	protected ICVSRemoteResource[] getSelectedRemoteResources() {
 		IResource[] resources = getSelectedResources();
-		List identifiers = new ArrayList();
+		List<String> identifiers = new ArrayList<String>();
 		for (int i = 0; i < resources.length; i++) {
 			IResource resource = resources[i];
 			try {
@@ -53,13 +48,13 @@ public class TagMap extends TagInRepositoryAction {
 				RelEngPlugin.log(e);
 			}
 		}
-		return getCVSResourcesFor((String[]) identifiers.toArray(new String[identifiers.size()]));
+		return getCVSResourcesFor(identifiers.toArray(new String[identifiers.size()]));
 	}
 
 	private ICVSRemoteResource[] getCVSResourcesFor(String[] referenceStrings) {
-		Map previouslySelectedRepositories = new HashMap();
+		Map<ICVSRepositoryLocation, ICVSRepositoryLocation> previouslySelectedRepositories = new HashMap<ICVSRepositoryLocation, ICVSRepositoryLocation>();
 		int size = referenceStrings.length;
-		List result = new ArrayList(size);
+		List<ICVSRemoteResource> result = new ArrayList<ICVSRemoteResource>(size);
 		for (int i = 0; i < size; i++) {
 			StringTokenizer tokenizer = new StringTokenizer(referenceStrings[i], ","); //$NON-NLS-1$
 			String version = tokenizer.nextToken();
@@ -88,7 +83,7 @@ public class TagMap extends TagInRepositoryAction {
 			    RelEngPlugin.log(e);
 			}
 		}
-		return (ICVSRemoteResource[]) result.toArray(new ICVSRemoteResource[result.size()]);
+		return result.toArray(new ICVSRemoteResource[result.size()]);
 	}
 	
 	private ICVSRepositoryLocation getLocationFromString(String repo) throws CVSException {
@@ -112,7 +107,7 @@ public class TagMap extends TagInRepositoryAction {
 	private ICVSRepositoryLocation getWritableRepositoryLocation(ICVSRepositoryLocation storedLocation) {
 		// Find out which repo locations are appropriate
 		ICVSRepositoryLocation[] locations = CVSUIPlugin.getPlugin().getRepositoryManager().getKnownRepositoryLocations();
-		List compatibleLocations = new ArrayList();
+		List<ICVSRepositoryLocation> compatibleLocations = new ArrayList<ICVSRepositoryLocation>();
 		for (int i = 0; i < locations.length; i++) {
 			ICVSRepositoryLocation location = locations[i];
 			// Only locations with the same host and root are eligible
@@ -121,15 +116,12 @@ public class TagMap extends TagInRepositoryAction {
 			compatibleLocations.add(location);
 		}
 		RepositorySelectionDialog dialog = new RepositorySelectionDialog(getShell());
-		dialog.setLocations((ICVSRepositoryLocation[])compatibleLocations.toArray(new ICVSRepositoryLocation[compatibleLocations.size()]));
+		dialog.setLocations(compatibleLocations.toArray(new ICVSRepositoryLocation[compatibleLocations.size()]));
 		dialog.open();
 		ICVSRepositoryLocation location = dialog.getLocation();
 		return location;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
-	 */
 	@Override
 	public boolean isEnabled() {
 		IResource[] resources = getSelectedResources();

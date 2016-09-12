@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,16 +12,13 @@ package org.eclipse.releng.tools;
 
 import java.util.ArrayList;
 
-import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
 
 /**
  * This is a helper class used for obtaining CVSTags and checking for projects that have no corresponding
@@ -29,11 +26,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
  */
 public class CVSTagHelper {
 
-	private ArrayList defaultTags;
+	private ArrayList<IResource> defaultTags;
 
 	//Returns an array of CVSTags for which no map entry could be found
 	public CVSTag[] findMissingMapEntries(IResource[] resources) {
-		defaultTags = new ArrayList();
+		defaultTags = new ArrayList<IResource>();
 		CVSTag[] tags = new CVSTag[resources.length];
 		for (int i = 0; i < resources.length; i++) {
 			tags[i] = getTag(resources[i]);

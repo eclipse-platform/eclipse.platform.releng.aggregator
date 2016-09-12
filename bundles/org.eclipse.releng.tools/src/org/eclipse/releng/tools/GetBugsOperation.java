@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,16 +84,13 @@ public class GetBugsOperation {
 
 					// task 1 -- get bug number from comments
 					syncInfos = syncInfoSet.getSyncInfos();
-					Set bugTree = getBugNumbersFromComments(syncInfos,
-							new SubProgressMonitor(monitor, 85,
-									SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					Set<Integer> bugTree = getBugNumbersFromComments(syncInfos,
+							new SubProgressMonitor(monitor, 85, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 
 					// task 2 -- create map of bugs and summaries
-					Integer[] bugs = (Integer[]) bugTree
-							.toArray(new Integer[0]);
-					final TreeMap map = (TreeMap) getBugzillaSummaries(bugs,
-							new SubProgressMonitor(monitor, 15,
-									SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					Integer[] bugs = bugTree.toArray(new Integer[0]);
+					final Map<Integer, String> map = getBugzillaSummaries(bugs,
+							new SubProgressMonitor(monitor, 15, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 					page.getShell().getDisplay().asyncExec(new Runnable() {
 						public void run() {
 							page.setMap(map);
@@ -109,10 +106,10 @@ public class GetBugsOperation {
 		}
 	}
 
-	protected Set getBugNumbersFromComments(SyncInfo[] syncInfos,
+	protected Set<Integer> getBugNumbersFromComments(SyncInfo[] syncInfos,
 			IProgressMonitor monitor) {
 		monitor.beginTask("Scanning comments for bug numbers", syncInfos.length);
-		TreeSet set = new TreeSet();
+		TreeSet<Integer> set = new TreeSet<Integer>();
 		for (int i = 0; i < syncInfos.length; i++) {
 			SyncInfo info = syncInfos[i];
 			getBugNumbersForSyncInfo(info, monitor, set);
@@ -123,7 +120,7 @@ public class GetBugsOperation {
 	}
 
 	private void getBugNumbersForSyncInfo(SyncInfo info,
-			IProgressMonitor monitor, Set set) {
+			IProgressMonitor monitor, Set<Integer> set) {
 		try {
 			CVSTag remoteTag = null;
 			CVSTag localTag = null;
@@ -198,7 +195,7 @@ public class GetBugsOperation {
 		return new CVSTag();
 	}
 
-	protected void findBugNumber(String comment, Set set) {
+	protected void findBugNumber(String comment, Set<Integer> set) {
 		if (comment == null) {
 			return;
 		}
@@ -213,14 +210,14 @@ public class GetBugsOperation {
 	 * Method uses set of bug numbers to query bugzilla and get summary of each
 	 * bug
 	 */
-	protected Map getBugzillaSummaries(Integer[] bugs, IProgressMonitor monitor) {
+	protected Map<Integer, String> getBugzillaSummaries(Integer[] bugs, IProgressMonitor monitor) {
 		monitor.beginTask(
 				Messages.getString("GetBugsOperation.1"), bugs.length + 1); //$NON-NLS-1$
 		HttpURLConnection hURL;
 		DataInputStream in;
 		URLConnection url;
 		StringBuffer buffer;
-		TreeMap map = new TreeMap();
+		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 		for (int i = 0; i < bugs.length; i++) {
 			try {
 				url = (new URL(BUG_DATABASE_PREFIX + bugs[i]

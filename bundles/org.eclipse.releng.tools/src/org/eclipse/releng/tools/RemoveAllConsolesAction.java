@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBH SYSTEMS GmbH.
+ * Copyright (c) 2014, 2016 IBH SYSTEMS GmbH.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ public class RemoveAllConsolesAction extends Action {
 
 	@Override
 	public void run() {
-		List consolesList = new ArrayList();
+		List<IConsole> consolesList = new ArrayList<IConsole>();
 
 		for (IConsole console : ConsolePlugin.getDefault().getConsoleManager()
 				.getConsoles()) {
@@ -40,7 +40,7 @@ public class RemoveAllConsolesAction extends Action {
 
 		IConsole[] consoles = new IConsole[consolesList.size()];
 		for (int i = 0; i < consoles.length; i++) {
-			consoles[i] = (IConsole) consolesList.get(i);
+			consoles[i] = consolesList.get(i);
 		}
 
 		ConsolePlugin.getDefault().getConsoleManager().removeConsoles(consoles);

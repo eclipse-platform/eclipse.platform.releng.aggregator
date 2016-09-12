@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 IBM Corporation and others.
+ *  Copyright (c) 2013, 2016 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -140,7 +140,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	 */
 	class PomVersionHandler extends DefaultHandler {
 		private Version version;
-		private Stack elements = new Stack();
+		private Stack<String> elements = new Stack<String>();
 		private boolean checkVersion = false;
 		private boolean isFeatureProject = false;
 		private Locator locator;
@@ -350,7 +350,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			// Get the manifest version
 			Version bundleVersion = Version.emptyVersion;
 			try {
-				Map headers = new HashMap();
+				Map<String, String> headers = new HashMap<String, String>();
 				ManifestElement.parseBundleManifest(manifest.getContents(), headers);
 				String ver = (String)headers.get(Constants.BUNDLE_VERSION);
 				if(ver == null) {
@@ -426,7 +426,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	 */
 	void reportMarker(String message, int lineNumber, int charStart, int charEnd, String correctedVersion, IFile pom, String severity) {
 		try {
-			HashMap attributes = new HashMap();
+			HashMap<String, Object> attributes = new HashMap<String, Object>();
 			attributes.put(IMarker.MESSAGE, message);
 			if (severity.equals(IPomVersionConstants.VALUE_WARNING)){
 				attributes.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_WARNING));

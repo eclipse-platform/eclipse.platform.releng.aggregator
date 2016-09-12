@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,23 +18,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.team.core.ProjectSetCapability;
 import org.eclipse.team.core.RepositoryProviderType;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
 import org.eclipse.team.internal.ccvs.ui.actions.CVSAction;
 import org.eclipse.team.internal.ui.UIProjectSetSerializationContext;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.action.IAction;
-
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 
@@ -74,13 +70,13 @@ public class LoadMap extends CVSAction {
 	 * @throws CoreException
 	 */
 	protected String[] getReferenceStrings(IResource[] mapFiles) throws CoreException {
-		List allStrings = new ArrayList();
+		List<String> allStrings = new ArrayList<String>();
 		for (int i = 0; i < mapFiles.length; i++) {
 			IResource resource = mapFiles[i];
 			String[] referenceStrings = readReferenceStrings((IFile)resource);
 			allStrings.addAll(Arrays.asList(referenceStrings));
 		}
-		return (String[]) allStrings.toArray(new String[allStrings.size()]);
+		return allStrings.toArray(new String[allStrings.size()]);
 	}
 	
 	/**
@@ -94,7 +90,7 @@ public class LoadMap extends CVSAction {
 		try {
 			try {
 				String line = reader.readLine();
-				List references = new ArrayList();
+				List<String> references = new ArrayList<String>();
 				while (line != null) {
 					String referenceString = new MapEntry(line).getReferenceString();
 					if (referenceString != null)  {
@@ -102,7 +98,7 @@ public class LoadMap extends CVSAction {
 					}
 					line = reader.readLine();
 				}
-				return (String[]) references.toArray(new String[references.size()]);
+				return references.toArray(new String[references.size()]);
 			} finally {
 				reader.close();
 			}

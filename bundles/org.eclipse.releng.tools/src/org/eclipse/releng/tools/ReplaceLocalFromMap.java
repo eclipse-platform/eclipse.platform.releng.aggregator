@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,12 @@ package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSException;
@@ -21,15 +27,6 @@ import org.eclipse.team.internal.ccvs.core.syncinfo.ResourceSyncInfo;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.operations.ReplaceOperation;
 import org.eclipse.team.internal.core.InfiniteSubProgressMonitor;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 
 /**
@@ -48,9 +45,6 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction#isEnabledForNonExistantResources()
-	 */
 	@Override
 	protected boolean isEnabledForNonExistantResources() {
 		return true;
@@ -100,9 +94,6 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 		return CompareLocalToMap.hasProjectFromMapFile();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.actions.ReplaceWithRemoteAction#performReplace(org.eclipse.core.resources.IResource[], org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	protected void performReplace(IResource[] resources, IProgressMonitor monitor) throws TeamException, InvocationTargetException, InterruptedException {
 		monitor.beginTask(null, 100 * resources.length);
 		try {
@@ -110,16 +101,13 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 				return;
 			for (int i = 0; i < resources.length; i++) {
 				IResource resource = resources[i];
-				new ReplaceOperation(getTargetPart(), new IResource[] { resource }, tags[i], true).run(new SubProgressMonitor(monitor, 100));
+				new ReplaceOperation(getTargetPart(), new IResource[] { resource }, tags[i], true).run(SubMonitor.convert(monitor, 100));
 			}
 		} finally {
 			monitor.done();
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
-	 */
 	@Override
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		//Start the MapProjectSelectionWizard

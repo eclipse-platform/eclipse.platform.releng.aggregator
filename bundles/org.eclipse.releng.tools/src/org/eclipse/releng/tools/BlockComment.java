@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ public class BlockComment {
 	private String contents;
 	private static String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
 	private String copyrightHolder;
-	private List nonIBMContributors = new ArrayList();
+	private List<String> nonIBMContributors = new ArrayList<String>();
 	private String commentEnd;
 
 	
@@ -103,7 +103,7 @@ public class BlockComment {
 	/**
 	 * 
 	 */
-	public List nonIBMContributors() {
+	public List<String> nonIBMContributors() {
 
 		String lowerCaseContents = contents.toLowerCase();
 		int start = lowerCaseContents.indexOf("contributors");

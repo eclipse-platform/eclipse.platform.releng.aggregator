@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -302,7 +302,7 @@ public class ReleaseWizard extends Wizard {
 						operation.moveTag();
 					}
 					monitor.beginTask(Messages.getString("ReleaseWizard.21"), 100); //$NON-NLS-1$
-					operation.run(new SubProgressMonitor(monitor, 90));
+					operation.run(SubMonitor.convert(monitor, 90));
 					if (operation.isMapFileUpdated()) {
 						try {						
 							if(tagPage.isValidateButtonSelected()){
@@ -313,7 +313,7 @@ public class ReleaseWizard extends Wizard {
 												((WizardDialog)parentDialog).showPage(validatePage);
 										}
 									});
-									validateRelease(new SubProgressMonitor(monitor, 10));
+									validateRelease(SubMonitor.convert(monitor, 10));
 								} catch (TeamException e) {
 									throw new InvocationTargetException(e);
 								}
@@ -367,11 +367,6 @@ public class ReleaseWizard extends Wizard {
 		this.parentDialog = p;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
-	 */
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page == mapSelectionPage) {
@@ -421,11 +416,11 @@ public class ReleaseWizard extends Wizard {
 		if (resources.length < 1) {
 			preSelectedProjects = null;
 		} else {
-			Set list = new HashSet();
+			Set<IProject> list = new HashSet<IProject>();
 			for (int i = 0; i < resources.length; i++) {
 				list.add(resources[i].getProject());
 			}
-			preSelectedProjects = (IProject[]) list.toArray(new IProject[list.size()]);
+			preSelectedProjects = list.toArray(new IProject[list.size()]);
 		}
 	}
 
@@ -504,9 +499,6 @@ public class ReleaseWizard extends Wizard {
 		return preSelectedProjects;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#canFinish()
-	 */
 	@Override
 	public boolean canFinish() {
 		// There must be projects selected

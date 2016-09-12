@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -30,12 +32,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
 
 
 /**
@@ -76,9 +73,7 @@ public class TagPage extends WizardPage{
 		super(pageName, title, image);
 		this.settings = settings;
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -299,9 +294,6 @@ public class TagPage extends WizardPage{
 		return tag;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -319,14 +311,14 @@ public class TagPage extends WizardPage{
 	}
 	
 	private String[] addToTagList(String[] history, String newEntry) {
-		ArrayList l = new ArrayList(Arrays.asList(history));
+		ArrayList<String> l = new ArrayList<String>(Arrays.asList(history));
 		addToTagList(l, newEntry);
 		String[] r = new String[l.size()];
 		l.toArray(r);
 		return r;
 	}
 	
-	private void addToTagList(List history, String newEntry) {
+	private void addToTagList(List<String> history, String newEntry) {
 		history.remove(newEntry);
 		history.add(0,newEntry);	
 		// since only one new item was added, we can be over the limit

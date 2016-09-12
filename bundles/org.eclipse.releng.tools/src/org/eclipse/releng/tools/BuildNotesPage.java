@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,23 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.team.core.synchronize.SyncInfoSet;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -33,27 +47,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardPage;
-
+import org.eclipse.team.core.synchronize.SyncInfoSet;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.internal.texteditor.SWTUtil;
 import org.eclipse.ui.model.WorkbenchContentProvider;
@@ -82,7 +77,7 @@ public class BuildNotesPage extends WizardPage {
 
 	private Text reportText;
 
-	private Map bugSummaryMap;
+	private Map<Integer, String> bugSummaryMap;
 
 	private boolean validPath;
 
@@ -328,17 +323,17 @@ public class BuildNotesPage extends WizardPage {
 				insertBuffer.append("  <p>Problem reports updated</p>\n");
 				insertBuffer.append("  <p>\n");
 
-				Iterator i = bugSummaryMap.entrySet().iterator();
+				Iterator<Map.Entry<Integer, String>> i = bugSummaryMap.entrySet().iterator();
 				while (i.hasNext()) {
-					Map.Entry entry = (Map.Entry) i.next();
-					Integer bug = (Integer) entry.getKey();
-					String summary = (String) entry.getValue();
+					Map.Entry<Integer, String> entry = i.next();
+					Integer bug = entry.getKey();
+					String summary = entry.getValue();
 					insertBuffer
 							.append("<a href=\"https://bugs.eclipse.org/bugs/show_bug.cgi?id=");
 					insertBuffer.append(bug);
 					insertBuffer.append("\">Bug ");
 					insertBuffer.append(bug);
-					insertBuffer.append("</a>. ");
+					insertBuffer.append("</a. ");
 					insertBuffer.append(summary + "<br>\n");
 				}
 				insertBuffer.append("  </p>");
@@ -465,12 +460,12 @@ public class BuildNotesPage extends WizardPage {
 		} else {
 			buffer
 					.append("The map file has been updated for the following Bug changes:\n");
-			Iterator i = bugSummaryMap.entrySet().iterator();
+			Iterator<Map.Entry<Integer, String>> i = bugSummaryMap.entrySet().iterator();
 
 			while (i.hasNext()) {
-				Map.Entry entry = (Map.Entry) i.next();
-				Integer bug = (Integer) entry.getKey();
-				String summary = (String) entry.getValue();
+				Map.Entry<Integer, String> entry = i.next();
+				Integer bug = entry.getKey();
+				String summary = entry.getValue();
 				buffer.append("+ Bug " + bug + ". " + summary + "\n");
 			}
 		}
@@ -483,7 +478,7 @@ public class BuildNotesPage extends WizardPage {
 		return buffer.toString();
 	}
 
-	public void setMap(Map map) {
+	public void setMap(Map<Integer, String> map) {
 		this.bugSummaryMap = map;
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ import org.eclipse.osgi.util.NLS;
 public abstract class SourceFile {
 	
 	IFile file;
-	List comments = new ArrayList();
+	List<BlockComment> comments = new ArrayList<BlockComment>();
 	StringWriter contents = new StringWriter();
 	private ITextFileBufferManager textFileBufferManager;
 	private String lineDelimiter;
@@ -246,9 +246,9 @@ public abstract class SourceFile {
 	 * @return BlockComment
 	 */
 	public BlockComment getFirstCopyrightComment() {
-		Iterator anIterator = comments.iterator();
+		Iterator<BlockComment> anIterator = comments.iterator();
 		while (anIterator.hasNext()) {
-			BlockComment aComment = (BlockComment) anIterator.next();
+			BlockComment aComment = anIterator.next();
 			if (aComment.isCopyright()) {
 				return aComment;
 			}
@@ -297,9 +297,9 @@ public abstract class SourceFile {
 	 */
 	public boolean hasMultipleCopyrights() {
 		int count = 0;
-		Iterator anIterator = comments.iterator();
+		Iterator<BlockComment> anIterator = comments.iterator();
 		while (anIterator.hasNext()) {
-			BlockComment aComment = (BlockComment) anIterator.next();
+			BlockComment aComment = anIterator.next();
 			if (aComment.isCopyright()) {
 				count++;
 			}

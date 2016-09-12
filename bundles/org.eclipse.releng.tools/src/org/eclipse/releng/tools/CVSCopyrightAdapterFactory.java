@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,12 +17,13 @@ import org.eclipse.team.core.RepositoryProviderType;
 public class CVSCopyrightAdapterFactory implements IAdapterFactory,
 		IRepositoryProviderCopyrightAdapterFactory {
 
-	private static final Class[] ADAPTER_LIST = new Class[] { IRepositoryProviderCopyrightAdapterFactory.class };
+	private static final Class<?>[] ADAPTER_LIST = new Class[] { IRepositoryProviderCopyrightAdapterFactory.class };
 
-	public Object getAdapter(Object adaptableObject, Class adapterType) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (IRepositoryProviderCopyrightAdapterFactory.class
 				.equals(adapterType)) {
-			return getCVSCopyrightAdapter(adaptableObject);
+			return (T) getCVSCopyrightAdapter(adaptableObject);
 		}
 		return null;
 	}
@@ -33,7 +34,7 @@ public class CVSCopyrightAdapterFactory implements IAdapterFactory,
 		return this;
 	}
 
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return ADAPTER_LIST;
 	}
 

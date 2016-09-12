@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,17 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.ICVSFolder;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
 
@@ -33,7 +39,7 @@ public class MapEntry {
 	private boolean valid = false;
 	private String type = EMPTY_STRING;
 	private String id = EMPTY_STRING;
-	private OrderedMap arguments = new OrderedMap();
+	private OrderedMap<String, String> arguments = new OrderedMap<String, String>();
 	private boolean legacy = false;
 	private String version;
 
@@ -137,8 +143,8 @@ public class MapEntry {
 	 * Build a table from the given array. In the new format,the array contains
 	 * key=value elements. Otherwise we fill in the key based on the old format.
 	 */
-	private OrderedMap populate(String[] entries) {
-		OrderedMap result = new OrderedMap();
+	private OrderedMap<String, String> populate(String[] entries) {
+		OrderedMap<String, String> result = new OrderedMap<String, String>();
 		for (int i=0; i<entries.length; i++) {
 			String entry = entries[i];
 			int index = entry.indexOf('=');
@@ -157,9 +163,9 @@ public class MapEntry {
 		return result;
 	}
 	
-	private OrderedMap legacyPopulate(String[] entries) {
+	private OrderedMap<String, String> legacyPopulate(String[] entries) {
 		legacy = true;
-		OrderedMap result = new OrderedMap();
+		OrderedMap<String, String> result = new OrderedMap<String, String>();
 		// must have at least tag and connect string
 		if (entries.length >= 2) {
 			// Version
@@ -188,7 +194,7 @@ public class MapEntry {
 	public static String[] getArrayFromStringWithBlank(String list, String separator) {
 		if (list == null || list.trim().length() == 0)
 			return new String[0];
-		List result = new ArrayList();
+		List<String> result = new ArrayList<String>();
 		boolean previousWasSeparator = true;
 		for (StringTokenizer tokens = new StringTokenizer(list, separator, true); tokens.hasMoreTokens();) {
 			String token = tokens.nextToken().trim();
@@ -201,7 +207,7 @@ public class MapEntry {
 				previousWasSeparator = false;
 			}
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	public String getTagName() {
@@ -283,9 +289,9 @@ public class MapEntry {
 		}
 		result.append('=');
 		result.append("CVS");
-		for (Iterator iter = arguments.keys().iterator(); iter.hasNext(); ) {
-			String key = (String) iter.next();
-			String value = (String) arguments.get(key);
+		for (Iterator<String> iter = arguments.keys().iterator(); iter.hasNext(); ) {
+			String key = iter.next();
+			String value = arguments.get(key);
 			if (value != null && value.length() > 0)
 				result.append(',' + key + '=' + value);
 		}
@@ -332,9 +338,6 @@ public class MapEntry {
 		return "Entry: " + getMapString();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof MapEntry) {

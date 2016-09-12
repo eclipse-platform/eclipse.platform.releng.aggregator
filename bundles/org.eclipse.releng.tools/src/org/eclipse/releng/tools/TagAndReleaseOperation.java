@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,15 @@ package org.eclipse.releng.tools;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
 import org.eclipse.team.internal.ccvs.ui.operations.TagOperation;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -41,9 +46,6 @@ public class TagAndReleaseOperation extends TagOperation {
 		this.mapProject = mapProject;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.operations.TagOperation#tag(org.eclipse.team.internal.ccvs.core.CVSTeamProvider, org.eclipse.core.resources.IResource[], org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public IStatus tag(
 		CVSTeamProvider provider,
@@ -54,20 +56,17 @@ public class TagAndReleaseOperation extends TagOperation {
 		
 		// Tag the resource
 		progress.beginTask("Releasing project " + provider.getProject().getName(), 100);
-		IStatus status = super.tag(provider, resources, recurse, new SubProgressMonitor(progress, 95));
+		IStatus status = super.tag(provider, resources, recurse, SubMonitor.convert(progress, 95));
 		if (status.getSeverity() == IStatus.ERROR) return status;
 		progress.done();
 		return status;
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.operations.CVSOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public void execute(IProgressMonitor monitor) throws CVSException, InterruptedException {
 		monitor.beginTask("Tagging with " + getTag().getName(), 100);
-		super.execute(new SubProgressMonitor(monitor, 95));
+		super.execute(SubMonitor.convert(monitor, 95));
 		
 		monitor.subTask("Updating and committing map files");
         // Always update the map file even if tagging failed
@@ -84,9 +83,6 @@ public class TagAndReleaseOperation extends TagOperation {
 		monitor.done();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation#getSchedulingRule(org.eclipse.team.internal.ccvs.core.CVSTeamProvider)
-	 */
 	@Override
 	protected ISchedulingRule getSchedulingRule(CVSTeamProvider provider) {
 		// We need a rule on both the provider and the releng map project

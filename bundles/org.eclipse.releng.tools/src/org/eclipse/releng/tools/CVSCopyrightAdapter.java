@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteFile;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
 import org.eclipse.team.internal.ccvs.core.ILogEntry;
@@ -38,7 +38,7 @@ public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
             if (cvsFile != null && cvsFile.isManaged()) {
                 // get the log entry for the revision loaded in the workspace
                 ILogEntry entry = ((ICVSRemoteFile)cvsFile)
-                        .getLogEntry(new SubProgressMonitor(monitor, 100));
+                        .getLogEntry(SubMonitor.convert(monitor, 100));
                 
                 String logComment = entry.getComment();
 				if (filterString != null && logComment.toLowerCase().indexOf(filterString) != -1) {

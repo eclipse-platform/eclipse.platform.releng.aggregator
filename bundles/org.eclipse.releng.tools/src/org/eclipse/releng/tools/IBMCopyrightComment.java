@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,11 +22,11 @@ public class IBMCopyrightComment extends CopyrightComment {
 
     private static final int DEFAULT_CREATION_YEAR = 2005;
 
-    private List contributors;
+    private List<String> contributors;
     private int yearRangeStart, yearRangeEnd;
     private String originalText;
 
-    private IBMCopyrightComment(int commentStyle, int creationYear, int revisionYear, List contributors, int yearRangeStart, int yearRangeEnd, String originalText) {
+    private IBMCopyrightComment(int commentStyle, int creationYear, int revisionYear, List<String> contributors, int yearRangeStart, int yearRangeEnd, String originalText) {
         super(commentStyle, creationYear == -1 ? DEFAULT_CREATION_YEAR : creationYear, revisionYear);
         this.contributors = contributors;
         this.yearRangeStart = yearRangeStart;
@@ -92,7 +92,7 @@ public class IBMCopyrightComment extends CopyrightComment {
    	    String contribComment = body.substring(contrib);
    	    StringTokenizer tokens = new StringTokenizer(contribComment, "\r\n"); //$NON-NLS-1$
    	    tokens.nextToken();
-   	    ArrayList contributors = new ArrayList();
+   	    ArrayList<String> contributors = new ArrayList<String>();
         String linePrefix = getLinePrefix(commentStyle);
    	    while(tokens.hasMoreTokens()) {
    	        String contributor = tokens.nextToken();
@@ -173,9 +173,9 @@ public class IBMCopyrightComment extends CopyrightComment {
 		if (contributors == null || contributors.size() <= 0)
 		    println(writer, linePrefix + "     IBM Corporation - initial API and implementation"); //$NON-NLS-1$
 		else {
-			Iterator i = contributors.iterator();
+			Iterator<String> i = contributors.iterator();
 			while (i.hasNext()) {
-				String contributor = (String) i.next();
+				String contributor = i.next();
 				if (contributor.length() > 0) {
 					if (Character.isWhitespace(contributor.charAt(0))) {
 					    println(writer, linePrefix + contributor);

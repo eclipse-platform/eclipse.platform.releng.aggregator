@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2014 IBM Corporation and others.
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
@@ -113,7 +113,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	}
 
 	private String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
-	private Map log = new HashMap();
+	private Map<String, List<String>> log = new HashMap<String, List<String>>();
 	private MessageConsole console;
 
 	// The current selection
@@ -127,10 +127,10 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	 * @return the selected resources
 	 */
 	protected IResource[] getSelectedResources() {
-		ArrayList resources = null;
+		ArrayList<IResource> resources = null;
 		if (!selection.isEmpty()) {
-			resources = new ArrayList();
-			Iterator elements = selection.iterator();
+			resources = new ArrayList<IResource>();
+			Iterator<?> elements = selection.iterator();
 			while (elements.hasNext()) {
 				addResource(elements.next(), resources);
 			}
@@ -143,9 +143,9 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		return new IResource[0];
 	}
 
-	private void addResource(Object element, ArrayList resources) {
+	private void addResource(Object element, ArrayList<IResource> resources) {
 		if (element instanceof IResource) {
-			resources.add(element);
+			resources.add((IResource) element);
 		} else if (element instanceof IWorkingSet) {
 			IWorkingSet ws = (IWorkingSet) element;
 			IAdaptable[] elements= ws.getElements();
@@ -153,7 +153,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 				addResource(elements[i], resources);
 		} else if (element instanceof IAdaptable) {
 			IAdaptable a = (IAdaptable) element;
-			addResource((IResource)a.getAdapter(IResource.class), resources);
+			addResource(a.getAdapter(IResource.class), resources);
 		}
 	}
 
@@ -167,7 +167,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
-		log = new HashMap();
+		log = new HashMap<String, List<String>>();
 		console = new FixConsole();
 		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] {console});
 		try {
@@ -188,7 +188,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					stream.println(NLS.bind(
 							Messages.getString("AdvancedFixCopyrightAction.3"), Integer.toString(results.length))); //$NON-NLS-1$
 					
-					monitor.subTask(Messages.getString("AdvancedFixCopyrightAction.22")); //'initializing' msg.
+					monitor.subTask(Messages.getString("AdvancedFixCopyrightAction.22")); //'initializing' msg. //$NON-NLS-1$
 					int totalFileCount = countFiles(results);	//this generates ~5% overhead. 
 					monitor.beginTask(Messages.getString("AdvancedFixCopyrightAction.4"), totalFileCount); //$NON-NLS-1$
 
@@ -198,9 +198,9 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 							throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, Messages.getString("AdvancedFixCopyrightAction.5"), null)); //$NON-NLS-1$
 						}
 					} else {
-						adapter.initialize(new SubProgressMonitor(monitor, 100));
+						adapter.initialize(SubMonitor.convert(monitor, 100));
 					}
-					List exceptions = new ArrayList();
+					List<CoreException> exceptions = new ArrayList<CoreException>();
 					for (int i = 0; i < results.length; i++) {
 						IResource resource = results[i];
 						stream.println(NLS.bind(
@@ -221,12 +221,12 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					if (!exceptions.isEmpty()) {
 						stream.println(Messages.getString("AdvancedFixCopyrightAction.9")); //$NON-NLS-1$
 						if (exceptions.size() == 1) {
-							throw (CoreException)exceptions.get(0);
+							throw exceptions.get(0);
 						} else {
-							List status = new ArrayList();
-							for (Iterator iterator = exceptions.iterator(); iterator
+							List<Status> status = new ArrayList<Status>();
+							for (Iterator<CoreException> iterator = exceptions.iterator(); iterator
 									.hasNext();) {
-								CoreException ce = (CoreException) iterator.next();
+								CoreException ce = iterator.next();
 								status.add(new Status(
 										ce.getStatus().getSeverity(), 
 										ce.getStatus().getPlugin(),
@@ -235,7 +235,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 										ce));
 							}
 							throw new CoreException(new MultiStatus(RelEngPlugin.ID,
-									0, (IStatus[]) status.toArray(new IStatus[status.size()]),
+									0, status.toArray(new IStatus[status.size()]),
 									Messages.getString("AdvancedFixCopyrightAction.10"), //$NON-NLS-1$
 									null));
 						}
@@ -286,7 +286,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		if(providerType == null) {
 			return null;
 		}
-		IRepositoryProviderCopyrightAdapterFactory factory = (IRepositoryProviderCopyrightAdapterFactory)providerType.getAdapter(IRepositoryProviderCopyrightAdapterFactory.class);
+		IRepositoryProviderCopyrightAdapterFactory factory = providerType.getAdapter(IRepositoryProviderCopyrightAdapterFactory.class);
 		if (factory == null) {
 			factory = (IRepositoryProviderCopyrightAdapterFactory)Platform.getAdapterManager().loadAdapter(providerType, IRepositoryProviderCopyrightAdapterFactory.class.getName());
 			if (factory == null) {
@@ -306,17 +306,17 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			File aFile = new File(Platform.getLocation().toFile(),
 					"copyrightLog.txt"); //$NON-NLS-1$
 			aStream = new FileOutputStream(aFile);
-			Set aSet = log.entrySet();
-			Iterator errorIterator = aSet.iterator();
+			Set<Map.Entry<String, List<String>>> aSet = log.entrySet();
+			Iterator<Map.Entry<String, List<String>>> errorIterator = aSet.iterator();
 			while (errorIterator.hasNext()) {
-				Map.Entry anEntry = (Map.Entry) errorIterator.next();
-				String errorDescription = (String) anEntry.getKey();
+				Map.Entry<String, List<String>> anEntry = errorIterator.next();
+				String errorDescription = anEntry.getKey();
 				aStream.write(errorDescription.getBytes());
 				aStream.write(newLine.getBytes());
-				List fileList = (List) anEntry.getValue();
-				Iterator listIterator = fileList.iterator();
+				List<String> fileList = anEntry.getValue();
+				Iterator<String> listIterator = fileList.iterator();
 				while (listIterator.hasNext()) {
-					String fileName = (String) listIterator.next();
+					String fileName = listIterator.next();
 					aStream.write("     ".getBytes()); //$NON-NLS-1$
 					aStream.write(fileName.getBytes());
 					aStream.write(newLine.getBytes());
@@ -332,14 +332,14 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 	private void displayLogs(MessageConsoleStream stream) {
 
-		Set aSet = log.entrySet();
-		Iterator errorIterator = aSet.iterator();
+		Set<Map.Entry<String, List<String>>> aSet = log.entrySet();
+		Iterator<Map.Entry<String, List<String>>> errorIterator = aSet.iterator();
 		while (errorIterator.hasNext()) {
-			Map.Entry anEntry = (Map.Entry) errorIterator.next();
-			String errorDescription = (String) anEntry.getKey();
+			Map.Entry<String, List<String>> anEntry = errorIterator.next();
+			String errorDescription = anEntry.getKey();
 			stream.println(errorDescription);
-			List fileList = (List) anEntry.getValue();
-			Iterator listIterator = fileList.iterator();
+			List<String> fileList = anEntry.getValue();
+			Iterator<String> listIterator = fileList.iterator();
 			while (listIterator.hasNext()) {
 				String fileName = (String) listIterator.next();
 				stream.println("     " + fileName); //$NON-NLS-1$
@@ -437,7 +437,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			// in the comment to the last modification time provided by adapter
 			if (lastMod < currentYear) {
 				try {
-					lastMod = adapter.getLastModifiedYear(file, new SubProgressMonitor(monitor, 1));
+					lastMod = adapter.getLastModifiedYear(file, SubMonitor.convert(monitor, 1));
 				} catch (CoreException e) {
 					// Let's log the exception and continue
 					RelEngPlugin
@@ -546,9 +546,9 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 	private void warn(IFile file, BlockComment firstBlockComment,
 			String errorDescription) {
-		List aList = (List) log.get(errorDescription);
+		List<String> aList = log.get(errorDescription);
 		if (aList == null) {
-			aList = new ArrayList();
+			aList = new ArrayList<String>();
 			log.put(errorDescription, aList);
 		}
 		aList.add(file.getFullPath().toString());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -299,7 +299,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	private void save() {
 		if(fDirty) {
 			try {
-				ArrayList changes = new ArrayList();
+				ArrayList<Key> changes = new ArrayList<Key>();
 				collectChanges(fLookupOrder[0], changes);
 				if(changes.size() > 0) {
 					fManager.applyChanges();
@@ -376,7 +376,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	 * Collects the keys that have changed on the page into the specified list
 	 * @param changes the {@link List} to collect changed keys into
 	 */
-	private void collectChanges(IScopeContext context, List changes) {
+	private void collectChanges(IScopeContext context, List<Key> changes) {
 		Key key = null;
 		String origval = null,
 			   newval = null;
