@@ -477,14 +477,13 @@ then
    #checkForErrorExit $? "Error occurred during createReports.sh"
 fi 
 
+# check for dirt in working tree. 
+$SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE >$logsDirectory/dirtReport.txt
+checkForErrorExit $? "Error occurred during dirt report"
+
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
-
-# check for dirt in working tree. Note. we want near very end, since even things
-# like "publishing" in theory could leave dirt behind.
-$SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE >$logsDirectory/dirtReport.txt
-checkForErrorExit $? "Error occurred during dirt report"
 
 fn-write-property-close
 
