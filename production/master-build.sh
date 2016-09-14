@@ -478,7 +478,7 @@ then
 fi 
 
 # check for dirt in working tree. 
-$SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE >$logsDirectory/dirtReport.txt
+$SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/dirtReport.txt
 checkForErrorExit $? "Error occurred during dirt report"
 
 # if all ended well, put "promotion scripts" in known locations
