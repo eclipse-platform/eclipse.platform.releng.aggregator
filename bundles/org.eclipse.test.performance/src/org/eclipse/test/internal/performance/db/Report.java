@@ -20,9 +20,9 @@ public class Report {
     private int                 fColumn;
     private int                 fRow;
     private int                 fRows;
-    private HashMap             fContent   = new HashMap();
-    private HashMap             fWidths    = new HashMap();
-    private HashMap             fAlignment = new HashMap();
+    private HashMap<String, String>             fContent   = new HashMap<>();
+    private HashMap<String, Integer>             fWidths    = new HashMap<>();
+    private HashMap<String, String>             fAlignment = new HashMap<>();
 
     public Report(int gap) {
         fGap = gap;
@@ -44,9 +44,9 @@ public class Report {
     }
 
     private void setCell(int x, int y, String value, String align) {
-        fContent.put(x + "/" + y, value); //$NON-NLS-1$
-        fAlignment.put(x + "/" + y, align); //$NON-NLS-1$
-        Integer w = (Integer) fWidths.get(Integer.toString(x));
+        fContent.put(String.valueOf(x + "/" + y), value); //$NON-NLS-1$
+        fAlignment.put(String.valueOf(x + "/" + y), align); //$NON-NLS-1$
+        Integer w = fWidths.get(Integer.toString(x));
         if (w == null)
             w = new Integer(value.length());
         else
@@ -56,14 +56,14 @@ public class Report {
     }
 
     private String getCell(int x, int y) {
-        return (String) fContent.get(x + "/" + y); //$NON-NLS-1$
+        return fContent.get(x + "/" + y); //$NON-NLS-1$
     }
 
     public void print(PrintStream ps) {
         int n = fWidths.size();
         for (int y = 0; y < fRows; y++) {
             for (int x = 0; x < n; x++) {
-                Integer w = (Integer) fWidths.get(Integer.toString(x));
+                Integer w = fWidths.get(Integer.toString(x));
                 int ww = w.intValue();
                 String s = getCell(x, y);
                 if (s == null)
@@ -74,7 +74,7 @@ public class Report {
                         ps.print(' ');
 
                 int www = ww - s.length();
-                String align = (String) fAlignment.get(x + "/" + y); //$NON-NLS-1$
+                String align = fAlignment.get(x + "/" + y); //$NON-NLS-1$
                 if (LEFT.equalsIgnoreCase(align))
                     ps.print(s);
                 for (int l = 0; l < www; l++)

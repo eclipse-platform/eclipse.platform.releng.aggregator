@@ -34,7 +34,7 @@ public class DataPoint {
         return (Dim[]) set.toArray(new Dim[set.size()]);
     }
 
-    public Collection getDimensions2() {
+    public Collection<?> getDimensions2() {
         return fScalars.keySet();
     }
 

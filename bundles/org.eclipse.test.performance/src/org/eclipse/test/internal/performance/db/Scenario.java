@@ -11,16 +11,15 @@ package org.eclipse.test.internal.performance.db;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Assert;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
+import org.junit.Assert;
 
 /**
  * A Scenario contains a series of data points for a single scenario. The axis of the data points can be specified when creating a
@@ -37,34 +36,34 @@ public class Scenario {
 
         private Variations fVariations;
         private String     fSeriesKey;
-        private Set        fQueryDimensions;
+        private Set<Dim>        fQueryDimensions;
         private String     fScenarioPattern;
-        private Map        fMessages;
+        private Map<String, Map>        fMessages;
 
         SharedState(Variations variations, String scenarioPattern, String seriesKey, Dim[] dimensions) {
             fVariations = variations;
             fScenarioPattern = scenarioPattern;
             fSeriesKey = seriesKey;
             if (dimensions != null && dimensions.length > 0) {
-                fQueryDimensions = new HashSet();
-                for (int i = 0; i < dimensions.length; i++)
-                    fQueryDimensions.add(dimensions[i]);
+                fQueryDimensions = new HashSet<>();
+                for (Dim dimension : dimensions)
+                    fQueryDimensions.add(dimension);
             }
         }
 
         String[] getFailures(String[] names, String scenarioId) {
             if (fMessages == null) {
-                fMessages = new HashMap();
+                fMessages = new HashMap<>();
                 Variations v = (Variations) fVariations.clone();
-                for (int i = 0; i < names.length; i++) {
-                    v.put(fSeriesKey, names[i]);
+                for (String name : names) {
+                    v.put(fSeriesKey, name);
                     Map map = DB.queryFailure(fScenarioPattern, v);
-                    fMessages.put(names[i], map);
+                    fMessages.put(name, map);
                 }
             }
             String[] result = new String[names.length];
             for (int i = 0; i < names.length; i++) {
-                Map messages = (Map) fMessages.get(names[i]);
+                Map messages = fMessages.get(names[i]);
                 if (messages != null)
                     result[i] = (String) messages.get(scenarioId);
             }
@@ -76,7 +75,7 @@ public class Scenario {
     private String              fScenarioName;
     private String[]            fSeriesNames;
     private StatisticsSession[] fSessions;
-    private Map                 fSeries = new HashMap();
+    private Map<Dim, TimeSeries>                 fSeries = new HashMap<>();
     private Dim[]               fDimensions;
 
     /**
@@ -128,7 +127,7 @@ public class Scenario {
 
     public TimeSeries getTimeSeries(Dim dim) {
         loadSessions();
-        TimeSeries ts = (TimeSeries) fSeries.get(dim);
+        TimeSeries ts = fSeries.get(dim);
         if (ts == null) {
             double[] ds = new double[fSessions.length];
             double[] sd = new double[fSessions.length];
@@ -150,13 +149,12 @@ public class Scenario {
 
         String[] timeSeriesLabels = getTimeSeriesLabels();
         r.addCell(key + ":"); //$NON-NLS-1$
-        for (int j = 0; j < timeSeriesLabels.length; j++)
-            r.addCellRight(timeSeriesLabels[j]);
+        for (String timeSeriesLabel : timeSeriesLabels)
+            r.addCellRight(timeSeriesLabel);
         r.nextRow();
 
         Dim[] dimensions = getDimensions();
-        for (int i = 0; i < dimensions.length; i++) {
-            Dim dim = dimensions[i];
+        for (Dim dim : dimensions) {
             r.addCell(dim.getName() + ':');
 
             TimeSeries ts = getTimeSeries(dim);
@@ -197,35 +195,31 @@ public class Scenario {
         Variations v = (Variations) fSharedState.fVariations.clone();
         if (DEBUG)
             start = System.currentTimeMillis();
-        ArrayList sessions = new ArrayList();
-        ArrayList names2 = new ArrayList();
+        ArrayList<StatisticsSession> sessions = new ArrayList<>();
+        ArrayList<String> names2 = new ArrayList<>();
         Set dims = new HashSet();
-        for (int t = 0; t < fSeriesNames.length; t++) {
-            v.put(fSharedState.fSeriesKey, fSeriesNames[t]);
+        for (String fSeriesName : fSeriesNames) {
+            v.put(fSharedState.fSeriesKey, fSeriesName);
             DataPoint[] dps = DB.queryDataPoints(v, fScenarioName, fSharedState.fQueryDimensions);
             if (DEBUG)
                 System.err.println("  dps length: " + dps.length); //$NON-NLS-1$
             if (dps.length > 0) {
                 dims.addAll(dps[0].getDimensions2());
                 sessions.add(new StatisticsSession(dps));
-                names2.add(fSeriesNames[t]);
+                names2.add(fSeriesName);
             }
         }
         if (DEBUG)
             System.err.println("data: " + (System.currentTimeMillis() - start)); //$NON-NLS-1$
 
-        fSessions = (StatisticsSession[]) sessions.toArray(new StatisticsSession[sessions.size()]);
-        fSeriesNames = (String[]) names2.toArray(new String[sessions.size()]);
+        fSessions = sessions.toArray(new StatisticsSession[sessions.size()]);
+        fSeriesNames = names2.toArray(new String[sessions.size()]);
 
         fDimensions = (Dim[]) dims.toArray(new Dim[dims.size()]);
-        Arrays.sort(fDimensions, new Comparator() {
-
-            @Override
-            public int compare(Object o1, Object o2) {
-                Dim d1 = (Dim) o1;
-                Dim d2 = (Dim) o2;
-                return d1.getName().compareTo(d2.getName());
-            }
+        Arrays.sort(fDimensions, (o1, o2) -> {
+            Dim d1 = o1;
+            Dim d2 = o2;
+            return d1.getName().compareTo(d2.getName());
         });
     }
 }

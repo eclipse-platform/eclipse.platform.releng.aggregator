@@ -51,7 +51,7 @@ public class OrderedTestSuite extends TestSuite {
     public OrderedTestSuite(final Class<? extends TestCase> testClass, String[] testMethods) {
         super(testClass.getName());
 
-        Set<String> existingMethods = new HashSet<String>();
+        Set<String> existingMethods = new HashSet<>();
         Method[] methods = testClass.getMethods(); // just public member methods
         for (int i = 0; i < methods.length; i++) {
             Method method = methods[i];
@@ -153,7 +153,7 @@ public class OrderedTestSuite extends TestSuite {
      * @since 3.10
      */
     public static List<String> getBytecodeOrderedTestNames(Class<? extends TestCase> testClass) throws IOException {
-        ArrayList<String> orderedMethodNames = new ArrayList<String>();
+        ArrayList<String> orderedMethodNames = new ArrayList<>();
         Class<?> c = testClass;
         while (Test.class.isAssignableFrom(c)) {
             addDeclaredTestMethodNames(c, orderedMethodNames);

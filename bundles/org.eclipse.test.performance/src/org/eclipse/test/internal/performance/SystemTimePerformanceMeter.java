@@ -24,8 +24,8 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
     private static final int DEFAULT_INITIAL_CAPACITY = 3;
 
     private long             fStartDate;
-    private List             fStartTime;
-    private List             fStopTime;
+    private List<Long>             fStartTime;
+    private List<Long>             fStopTime;
 
     /**
      * @param scenarioId
@@ -44,8 +44,8 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
      */
     public SystemTimePerformanceMeter(String scenarioId, int initalCapacity) {
         super(scenarioId);
-        fStartTime = new ArrayList(initalCapacity);
-        fStopTime = new ArrayList(initalCapacity);
+        fStartTime = new ArrayList<>(initalCapacity);
+        fStopTime = new ArrayList<>(initalCapacity);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
         for (int i = 0; i < fStartTime.size(); i++) {
             String occurence = String.valueOf(i + 1);
             System.out
-                    .println("Occurence " + replicate(" ", maxOccurenceLength - occurence.length()) + occurence + ": " + (((Long) fStopTime.get(i)).longValue() - ((Long) fStartTime.get(i)).longValue())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                    .println("Occurence " + replicate(" ", maxOccurenceLength - occurence.length()) + occurence + ": " + (fStopTime.get(i).longValue() - fStartTime.get(i).longValue())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
     }
 
@@ -95,15 +95,15 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 
         DataPoint[] data = new DataPoint[2 * fStartTime.size()];
         for (int i = 0; i < fStartTime.size(); i++) {
-            data[2 * i] = createDataPoint(BEFORE, InternalDimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
-            data[2 * i + 1] = createDataPoint(AFTER, InternalDimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
+            data[2 * i] = createDataPoint(BEFORE, InternalDimensions.SYSTEM_TIME, fStartTime.get(i).longValue());
+            data[2 * i + 1] = createDataPoint(AFTER, InternalDimensions.SYSTEM_TIME, fStopTime.get(i).longValue());
         }
 
         return new Sample(getScenarioName(), fStartDate, properties, data);
     }
 
     private DataPoint createDataPoint(int step, Dim dimension, long value) {
-        Map scalars = new HashMap();
+        Map<Dim, Scalar> scalars = new HashMap<>();
         scalars.put(dimension, new Scalar(dimension, value));
         return new DataPoint(step, scalars);
     }

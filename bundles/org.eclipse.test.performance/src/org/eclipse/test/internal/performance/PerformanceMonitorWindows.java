@@ -10,8 +10,6 @@ package org.eclipse.test.internal.performance;
 
 import java.util.Map;
 
-import org.eclipse.test.internal.performance.PerformanceMonitor;
-
 /**
  * The PerformanceMonitor for Windows.
  */

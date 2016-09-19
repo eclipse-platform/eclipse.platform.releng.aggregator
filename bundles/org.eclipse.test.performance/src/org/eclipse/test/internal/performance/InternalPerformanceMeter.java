@@ -31,11 +31,11 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
-    private static class DimensionComparator implements Comparator {
+    private static class DimensionComparator implements Comparator<Dim> {
 
         @Override
-        public int compare(Object o1, Object o2) {
-            return ((Dim) o1).getId() - ((Dim) o2).getId();
+        public int compare(Dim o1, Dim o2) {
+            return o1.getId() - o2.getId();
         }
 
     }
@@ -103,15 +103,14 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
             Dim[] dimensions = dataPoints[0].getDimensions();
             Arrays.sort(dimensions, new DimensionComparator());
             if (dimensions.length > 0) {
-                List badDimensions = new ArrayList();
+                List<Dim> badDimensions = new ArrayList<>();
                 long n = s.getCount(dimensions[0]);
                 MessageFormat format = new MessageFormat("({0,number,percent} in [{1}, {2}])"); //$NON-NLS-1$
 
                 String spaces = "                                                                                                       "; //$NON-NLS-1$
 
                 ps.println("(average over " + n + " samples):"); //$NON-NLS-1$ //$NON-NLS-2$
-                for (int i = 0; i < dimensions.length; i++) {
-                    Dim dimension = dimensions[i];
+                for (Dim dimension : dimensions) {
                     double mean = s.getAverage(dimension);
 
                     String nameString = "  " + dimension.getName() + ":"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -158,8 +157,8 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
                 if (!badDimensions.isEmpty()) {
                     ps.print("  Dimensions with unusable statistical properties: "); //$NON-NLS-1$
-                    for (Iterator iter = badDimensions.iterator(); iter.hasNext();) {
-                        Dim dimension = (Dim) iter.next();
+                    for (Iterator<Dim> iter = badDimensions.iterator(); iter.hasNext();) {
+                        Dim dimension = iter.next();
                         ps.print(dimension.getName());
                         if (iter.hasNext())
                             ps.print(", "); //$NON-NLS-1$
@@ -225,8 +224,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
             Arrays.sort(dimensions, new DimensionComparator());
             if (dimensions.length > 0) {
                 /* print dimensions */
-                for (int d = 0; d < dimensions.length; d++) {
-                    Dim dimension = dimensions[d];
+                for (Dim dimension : dimensions) {
                     ps.print(dimension.getName());
                     ps.print(SEPARATOR);
                 }
@@ -235,8 +233,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
                 for (int p = 0; p < dataPoints.length - 1; p += 2) {
                     DataPoint before = dataPoints[p];
                     DataPoint after = dataPoints[p + 1];
-                    for (int d = 0; d < dimensions.length; d++) {
-                        Dim dimension = dimensions[d];
+                    for (Dim dimension : dimensions) {
                         long valBefore = before.getScalar(dimension).getMagnitude();
                         long valAfter = after.getScalar(dimension).getMagnitude();
                         ps.print(valAfter - valBefore);

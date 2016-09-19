@@ -25,9 +25,9 @@ import org.eclipse.test.internal.performance.data.Scalar;
 class TestPerformanceMeter extends InternalPerformanceMeter {
 
     private long fStartTime;
-    private List fDataPoints = new ArrayList();
-    private Map  fStart      = new HashMap();
-    private Map  fStop       = new HashMap();
+    private List<DataPoint> fDataPoints = new ArrayList<>();
+    private Map<Dim, Scalar>  fStart      = new HashMap<>();
+    private Map<Dim, Scalar>  fStop       = new HashMap<>();
 
     /**
      * @param scenarioId
@@ -53,7 +53,7 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
     public Sample getSample() {
         if (fDataPoints != null)
             return new Sample(getScenarioName(), fStartTime, new HashMap(),
-                    (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
+                    fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
         return null;
     }
 

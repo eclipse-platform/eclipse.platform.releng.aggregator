@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +48,8 @@ public class DB {
     private static DB            fgDefault;
 
     private static String findClosest(final String[] names, final String name) {
-        for (int i = 0; i < names.length; i++) {
-            if (names[i].equals(name)) {
+        for (String name2 : names) {
+            if (name2.equals(name)) {
                 return name;
             }
         }
@@ -154,7 +153,7 @@ public class DB {
      * @deprecated Use queryDistinctValues instead
      */
     @Deprecated
-    public static void queryBuildNames(final List names, final Variations variationPatterns, final String scenarioPattern) {
+    public static void queryBuildNames(final List<String> names, final Variations variationPatterns, final String scenarioPattern) {
         getDefault().internalQueryDistinctValues(names, PerformanceTestPlugin.BUILD, variationPatterns, scenarioPattern);
     }
 
@@ -163,12 +162,12 @@ public class DB {
         return getDefault().internalQueryDataPoints(variations, scenarioName, dims);
     }
 
-    public static void queryDistinctValues(final List values, final String key, final Variations variationPatterns,
+    public static void queryDistinctValues(final List<String> values, final String key, final Variations variationPatterns,
             final String scenarioPattern) {
         getDefault().internalQueryDistinctValues(values, key, variationPatterns, scenarioPattern);
     }
 
-    public static Map queryFailure(final String scenarioPattern, final Variations variations) {
+    public static Map<String, String> queryFailure(final String scenarioPattern, final Variations variations) {
         return getDefault().internalQueryFailure(scenarioPattern, variations);
     }
 
@@ -521,7 +520,7 @@ public class DB {
         }
         ResultSet rs = null;
         try {
-            final ArrayList dataPoints = new ArrayList();
+            final ArrayList<DataPoint> dataPoints = new ArrayList<>();
             rs = fSQL.queryDataPoints(variations, scenarioName);
             if (DEBUG) {
                 final long time = System.currentTimeMillis();
@@ -532,7 +531,7 @@ public class DB {
                 final int datapoint_id = rs.getInt(1);
                 final int step = rs.getInt(2);
 
-                final HashMap map = new HashMap();
+                final HashMap<Dim, Scalar> map = new HashMap<>();
                 final ResultSet rs2 = fSQL.queryScalars(datapoint_id);
                 while (rs2.next()) {
                     final int dim_id = rs2.getInt(1);
@@ -557,7 +556,7 @@ public class DB {
                 final long time = System.currentTimeMillis();
                 System.out.println("		+ " + n + " datapoints created in " + (time - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
-            return (DataPoint[]) dataPoints.toArray(new DataPoint[n]);
+            return dataPoints.toArray(new DataPoint[n]);
 
         }
         catch (final SQLException e) {
@@ -580,7 +579,7 @@ public class DB {
     /*
      *
      */
-    private void internalQueryDistinctValues(final List values, final String seriesKey, final Variations variations,
+    private void internalQueryDistinctValues(final List<String> values, final String seriesKey, final Variations variations,
             final String scenarioPattern) {
         if (fSQL == null) {
             return;
@@ -621,7 +620,7 @@ public class DB {
         }
     }
 
-    private Map internalQueryFailure(final String scenarioPattern, final Variations variations) {
+    private Map<String, String> internalQueryFailure(final String scenarioPattern, final Variations variations) {
         if (fSQL == null) {
             return null;
         }
@@ -631,7 +630,7 @@ public class DB {
         }
         ResultSet result = null;
         try {
-            final Map map = new HashMap();
+            final Map<String, String> map = new HashMap<>();
             result = fSQL.queryFailure(variations, scenarioPattern);
             while (result.next()) {
                 final String scenario = result.getString(1);
@@ -675,11 +674,11 @@ public class DB {
         ResultSet result = null;
         try {
             result = fSQL.queryScenarios(variations, scenarioPattern);
-            final ArrayList scenarios = new ArrayList();
+            final ArrayList<String> scenarios = new ArrayList<>();
             while (result.next()) {
                 scenarios.add(result.getString(1));
             }
-            return (String[]) scenarios.toArray(new String[scenarios.size()]);
+            return scenarios.toArray(new String[scenarios.size()]);
 
         }
         catch (final SQLException e) {
@@ -717,52 +716,48 @@ public class DB {
             Assert.assertTrue(false);
         }
 
-        final ArrayList values = new ArrayList();
-        for (int i = 0; i < seriesPatterns.length; i++) {
-            if (seriesPatterns[i].indexOf('%') >= 0) {
+        final ArrayList<String> values = new ArrayList<>();
+        for (String seriesPattern : seriesPatterns) {
+            if (seriesPattern.indexOf('%') >= 0) {
                 if (!isCloned) {
                     v = (Variations) v.clone();
                     isCloned = true;
                 }
-                v.put(seriesKey, seriesPatterns[i]);
+                v.put(seriesKey, seriesPattern);
                 internalQueryDistinctValues(values, seriesKey, v, scenarioName);
             } else {
-                values.add(seriesPatterns[i]);
+                values.add(seriesPattern);
             }
         }
 
-        final String[] names = (String[]) values.toArray(new String[values.size()]);
+        final String[] names = values.toArray(new String[values.size()]);
 
         boolean sort = true;
         final Pattern pattern = Pattern.compile("20[0-9][3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
         final Matcher matcher = pattern.matcher(""); //$NON-NLS-1$
-        for (int i = 0; i < names.length; i++) {
-            matcher.reset(names[i]);
+        for (String name : names) {
+            matcher.reset(name);
             if (!matcher.find()) {
                 sort = false;
                 break;
             }
         }
         if (sort) {
-            Arrays.sort(names, new Comparator() {
+            Arrays.sort(names, (o1, o2) -> {
+                String s1 = o1;
+                String s2 = o2;
 
-                @Override
-                public int compare(final Object o1, final Object o2) {
-                    String s1 = (String) o1;
-                    String s2 = (String) o2;
-
-                    matcher.reset(s1);
-                    if (matcher.find()) {
-                        s1 = s1.substring(matcher.start());
-                    }
-
-                    matcher.reset(s2);
-                    if (matcher.find()) {
-                        s2 = s2.substring(matcher.start());
-                    }
-
-                    return s1.compareTo(s2);
+                matcher.reset(s1);
+                if (matcher.find()) {
+                    s1 = s1.substring(matcher.start());
                 }
+
+                matcher.reset(s2);
+                if (matcher.find()) {
+                    s2 = s2.substring(matcher.start());
+                }
+
+                return s1.compareTo(s2);
             });
         }
         return names;
@@ -778,7 +773,7 @@ public class DB {
         }
         ResultSet result = null;
         try {
-            final List fingerprints = new ArrayList();
+            final List<SummaryEntry> fingerprints = new ArrayList<>();
             if (scenarioPattern != null) {
                 result = fSQL.querySummaryEntries(variationPatterns, scenarioPattern);
             } else {
@@ -804,7 +799,7 @@ public class DB {
                             comment));
                 }
             }
-            return (SummaryEntry[]) fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
+            return fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
         }
         catch (final SQLException e) {
             PerformanceTestPlugin.log(e);
@@ -854,8 +849,7 @@ public class DB {
                 }
 
                 final Dimension[] summaryDimensions = sample.getSummaryDimensions();
-                for (int i = 0; i < summaryDimensions.length; i++) {
-                    final Dimension dimension = summaryDimensions[i];
+                for (final Dimension dimension : summaryDimensions) {
                     if (dimension instanceof Dim) {
                         fSQL.createSummaryEntry(variation_id, scenario_id, ((Dim) dimension).getId(), isGlobal, commentId);
                     }
@@ -893,22 +887,19 @@ public class DB {
                 final Dim[] dims = dataPoints[0].getDimensions();
 
                 int datapoint_id = fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
-                for (int i = 0; i < dims.length; i++) {
-                    final Dim dim = dims[i];
+                for (final Dim dim : dims) {
                     fSQL.insertScalar(datapoint_id, dim.getId(), (long) stats.getAverage(dim));
                 }
 
                 datapoint_id = fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.STDEV);
-                for (int i = 0; i < dims.length; i++) {
-                    final Dim dim = dims[i];
+                for (final Dim dim : dims) {
                     // see StatisticsSession
                     final long value = Double.doubleToLongBits(stats.getStddev(dim));
                     fSQL.insertScalar(datapoint_id, dim.getId(), value);
                 }
 
                 datapoint_id = fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.SIZE);
-                for (int i = 0; i < dims.length; i++) {
-                    final Dim dim = dims[i];
+                for (final Dim dim : dims) {
                     fSQL.insertScalar(datapoint_id, dim.getId(), stats.getCount(dim));
                 }
             } else {
@@ -916,8 +907,7 @@ public class DB {
                     final DataPoint dp = dataPoints[i];
                     final int datapoint_id = fSQL.createDataPoint(sample_id, i, dp.getStep());
                     final Scalar[] scalars = dp.getScalars();
-                    for (int j = 0; j < scalars.length; j++) {
-                        final Scalar scalar = scalars[j];
+                    for (final Scalar scalar : scalars) {
                         final int dim_id = scalar.getDimension().getId();
                         final long value = scalar.getMagnitude();
                         fSQL.insertScalar(datapoint_id, dim_id, value);

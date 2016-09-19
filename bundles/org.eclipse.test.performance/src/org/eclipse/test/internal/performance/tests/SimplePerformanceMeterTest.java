@@ -8,11 +8,11 @@
 
 package org.eclipse.test.internal.performance.tests;
 
-import junit.framework.TestCase;
-
 import org.eclipse.test.internal.performance.OSPerformanceMeter;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import junit.framework.TestCase;
 
 public class SimplePerformanceMeterTest extends TestCase {
 

@@ -11,6 +11,7 @@ package org.eclipse.test.internal.performance;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
 
@@ -21,7 +22,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 
     private PerformanceMonitor fPerformanceMonitor;
     private long               fStartTime;
-    private List               fDataPoints = new ArrayList();
+    private List<DataPoint>               fDataPoints = new ArrayList<>();
 
     /**
      * @param scenarioId
@@ -56,7 +57,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
             HashMap runProperties = new HashMap();
             collectRunInfo(runProperties);
             return new Sample(getScenarioName(), fStartTime, runProperties,
-                    (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
+                    fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
         }
         return null;
     }

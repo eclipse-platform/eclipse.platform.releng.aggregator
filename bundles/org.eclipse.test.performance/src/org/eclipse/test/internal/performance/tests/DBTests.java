@@ -200,7 +200,7 @@ public class DBTests extends TestCase {
         assertEquals(1000, s2.getMagnitude());
 
         //
-        Set dims = new HashSet();
+        Set<Dim> dims = new HashSet<>();
         dims.add(InternalDimensions.WORKING_SET);
         points = DB.queryDataPoints(v, SCENARIO_NAME_1, dims);
         assertEquals(1, points.length);
@@ -211,7 +211,7 @@ public class DBTests extends TestCase {
         assertEquals(1000, s.getMagnitude());
 
         //
-        List buildNames = new ArrayList();
+        List<String> buildNames = new ArrayList<>();
         Variations v2 = new Variations();
         v2.put(CONFIG, "%"); //$NON-NLS-1$
         v2.put(BUILD, "b%"); //$NON-NLS-1$
