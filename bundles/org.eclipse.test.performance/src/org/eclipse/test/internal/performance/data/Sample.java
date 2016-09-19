@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -21,7 +22,7 @@ public class Sample {
 
     String      fScenarioID;
     long        fStartTime;
-    Map         fProperties;
+    Map<String, String> fProperties;
     DataPoint[] fDataPoints;
 
     boolean     fIsSummary;
@@ -31,7 +32,7 @@ public class Sample {
     int         fCommentType;
     String      fComment;
 
-    public Sample(String scenarioID, long starttime, Map properties, DataPoint[] dataPoints) {
+    public Sample(String scenarioID, long starttime, Map<String, String> properties, DataPoint[] dataPoints) {
         Assert.assertTrue("scenarioID is null", scenarioID != null); //$NON-NLS-1$
         fScenarioID = scenarioID;
         fStartTime = starttime;
@@ -66,14 +67,14 @@ public class Sample {
     }
 
     public String getProperty(String name) {
-        return (String) fProperties.get(name);
+        return fProperties.get(name);
     }
 
     public String[] getPropertyKeys() {
         if (fProperties == null)
             return new String[0];
-        Set set = fProperties.keySet();
-        return (String[]) set.toArray(new String[set.size()]);
+        Set<String> set = fProperties.keySet();
+        return set.toArray(new String[set.size()]);
     }
 
     public DataPoint[] getDataPoints() {

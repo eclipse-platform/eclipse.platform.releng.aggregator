@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -18,9 +19,9 @@ import java.util.Set;
 public class DataPoint {
 
     private int fStep;
-    private Map fScalars;
+    private Map<Dim, Scalar> fScalars;
 
-    public DataPoint(int step, Map values) {
+    public DataPoint(int step, Map<Dim, Scalar> values) {
         fStep = step;
         fScalars = values;
     }
@@ -30,11 +31,11 @@ public class DataPoint {
     }
 
     public Dim[] getDimensions() {
-        Set set = fScalars.keySet();
-        return (Dim[]) set.toArray(new Dim[set.size()]);
+        Set<Dim> set = fScalars.keySet();
+        return set.toArray(new Dim[set.size()]);
     }
 
-    public Collection<?> getDimensions2() {
+    public Collection<Dim> getDimensions2() {
         return fScalars.keySet();
     }
 
@@ -43,11 +44,11 @@ public class DataPoint {
     }
 
     public Scalar[] getScalars() {
-        return (Scalar[]) fScalars.values().toArray(new Scalar[fScalars.size()]);
+        return fScalars.values().toArray(new Scalar[fScalars.size()]);
     }
 
     public Scalar getScalar(Dim dimension) {
-        return (Scalar) fScalars.get(dimension);
+        return fScalars.get(dimension);
     }
 
     @Override

@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2006 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2004, 2016 IBM Corporation and others. 
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -38,7 +39,7 @@ public class Scenario {
         private String     fSeriesKey;
         private Set<Dim>        fQueryDimensions;
         private String     fScenarioPattern;
-        private Map<String, Map>        fMessages;
+        private Map<String, Map<String, String>>        fMessages;
 
         SharedState(Variations variations, String scenarioPattern, String seriesKey, Dim[] dimensions) {
             fVariations = variations;
@@ -57,7 +58,7 @@ public class Scenario {
                 Variations v = (Variations) fVariations.clone();
                 for (String name : names) {
                     v.put(fSeriesKey, name);
-                    Map map = DB.queryFailure(fScenarioPattern, v);
+                    Map<String, String> map = DB.queryFailure(fScenarioPattern, v);
                     fMessages.put(name, map);
                 }
             }
@@ -197,7 +198,7 @@ public class Scenario {
             start = System.currentTimeMillis();
         ArrayList<StatisticsSession> sessions = new ArrayList<>();
         ArrayList<String> names2 = new ArrayList<>();
-        Set dims = new HashSet();
+        Set<Dim> dims = new HashSet<>();
         for (String fSeriesName : fSeriesNames) {
             v.put(fSharedState.fSeriesKey, fSeriesName);
             DataPoint[] dps = DB.queryDataPoints(v, fScenarioName, fSharedState.fQueryDimensions);
@@ -215,7 +216,7 @@ public class Scenario {
         fSessions = sessions.toArray(new StatisticsSession[sessions.size()]);
         fSeriesNames = names2.toArray(new String[sessions.size()]);
 
-        fDimensions = (Dim[]) dims.toArray(new Dim[dims.size()]);
+        fDimensions = dims.toArray(new Dim[dims.size()]);
         Arrays.sort(fDimensions, (o1, o2) -> {
             Dim d1 = o1;
             Dim d2 = o2;

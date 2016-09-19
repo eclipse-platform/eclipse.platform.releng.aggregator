@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2000, 2016 IBM Corporation and others. 
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -158,7 +159,7 @@ public class DB {
     }
 
     // Datapaoints
-    public static DataPoint[] queryDataPoints(final Variations variations, final String scenarioName, final Set dims) {
+    public static DataPoint[] queryDataPoints(final Variations variations, final String scenarioName, final Set<Dim> dims) {
         return getDefault().internalQueryDataPoints(variations, scenarioName, dims);
     }
 
@@ -509,7 +510,7 @@ public class DB {
         }
     }
 
-    private DataPoint[] internalQueryDataPoints(final Variations variations, final String scenarioName, final Set dimSet) {
+    private DataPoint[] internalQueryDataPoints(final Variations variations, final String scenarioName, final Set<Dim> dimSet) {
         if (fSQL == null) {
             return null;
         }
@@ -518,10 +519,9 @@ public class DB {
         if (DEBUG) {
             System.out.print("	- query data points from DB for scenario " + scenarioName + "..."); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        ResultSet rs = null;
-        try {
-            final ArrayList<DataPoint> dataPoints = new ArrayList<>();
-            rs = fSQL.queryDataPoints(variations, scenarioName);
+        
+        final ArrayList<DataPoint> dataPoints = new ArrayList<>();
+        try (ResultSet rs = fSQL.queryDataPoints(variations, scenarioName)){
             if (DEBUG) {
                 final long time = System.currentTimeMillis();
                 System.out.println("done in " + (time - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -532,25 +532,23 @@ public class DB {
                 final int step = rs.getInt(2);
 
                 final HashMap<Dim, Scalar> map = new HashMap<>();
-                final ResultSet rs2 = fSQL.queryScalars(datapoint_id);
-                while (rs2.next()) {
-                    final int dim_id = rs2.getInt(1);
-                    final long value = rs2.getBigDecimal(2).longValue();
-                    final Dim dim = Dim.getDimension(dim_id);
-                    if (dim != null) {
-                        if ((dimSet == null) || dimSet.contains(dim)) {
-                            map.put(dim, new Scalar(dim, value));
+                try (final ResultSet rs2 = fSQL.queryScalars(datapoint_id)) {
+                    while (rs2.next()) {
+                        final int dim_id = rs2.getInt(1);
+                        final long value = rs2.getBigDecimal(2).longValue();
+                        final Dim dim = Dim.getDimension(dim_id);
+                        if (dim != null) {
+                            if ((dimSet == null) || dimSet.contains(dim)) {
+                                map.put(dim, new Scalar(dim, value));
+                            }
                         }
                     }
-                }
-                if (map.size() > 0) {
-                    dataPoints.add(new DataPoint(step, map));
-                }
+                    if (map.size() > 0) {
+                        dataPoints.add(new DataPoint(step, map));
+                    }
 
-                rs2.close();
+                }
             }
-            rs.close();
-
             final int n = dataPoints.size();
             if (DEBUG) {
                 final long time = System.currentTimeMillis();
@@ -561,17 +559,6 @@ public class DB {
         }
         catch (final SQLException e) {
             PerformanceTestPlugin.log(e);
-
-        }
-        finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                }
-                catch (final SQLException e1) {
-                    // ignored
-                }
-            }
         }
         return null;
     }
@@ -588,9 +575,7 @@ public class DB {
         if (DEBUG) {
             System.out.print("	- query distinct values from DB for scenario pattern '" + scenarioPattern + "'..."); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        ResultSet result = null;
-        try {
-            result = fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
+        try (ResultSet result = fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern)){
             while (result.next()) {
                 final Variations v = new Variations();
                 v.parseDB(result.getString(1));
@@ -599,20 +584,10 @@ public class DB {
                     values.add(build);
                 }
             }
-        }
-        catch (final SQLException e) {
+        } catch (final SQLException e) {
             PerformanceTestPlugin.log(e);
 
-        }
-        finally {
-            if (result != null) {
-                try {
-                    result.close();
-                }
-                catch (final SQLException e1) {
-                    // ignored
-                }
-            }
+        } finally {
             if (DEBUG) {
                 final long time = System.currentTimeMillis();
                 System.out.println("done in " + (time - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -628,30 +603,18 @@ public class DB {
         if (DEBUG) {
             System.out.print("	- query failure from DB for scenario pattern '" + scenarioPattern + "'..."); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        ResultSet result = null;
-        try {
+        try (ResultSet result = fSQL.queryFailure(variations, scenarioPattern)) {
             final Map<String, String> map = new HashMap<>();
-            result = fSQL.queryFailure(variations, scenarioPattern);
             while (result.next()) {
                 final String scenario = result.getString(1);
                 final String message = result.getString(2);
                 map.put(scenario, message);
             }
             return map;
-        }
-        catch (final SQLException e) {
+        } catch (final SQLException e) {
             PerformanceTestPlugin.log(e);
 
-        }
-        finally {
-            if (result != null) {
-                try {
-                    result.close();
-                }
-                catch (final SQLException e1) {
-                    // ignored
-                }
-            }
+        } finally {
             if (DEBUG) {
                 final long time = System.currentTimeMillis();
                 System.out.println("done in " + (time - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -671,29 +634,15 @@ public class DB {
         if (DEBUG) {
             System.out.print("	- query scenario names from DB for scenario pattern '" + scenarioPattern + "'..."); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        ResultSet result = null;
-        try {
-            result = fSQL.queryScenarios(variations, scenarioPattern);
+        try (ResultSet result = fSQL.queryScenarios(variations, scenarioPattern)) {
             final ArrayList<String> scenarios = new ArrayList<>();
             while (result.next()) {
                 scenarios.add(result.getString(1));
             }
             return scenarios.toArray(new String[scenarios.size()]);
-
-        }
-        catch (final SQLException e) {
+        } catch (final SQLException e) {
             PerformanceTestPlugin.log(e);
-
-        }
-        finally {
-            if (result != null) {
-                try {
-                    result.close();
-                }
-                catch (final SQLException e1) {
-                    // ignored
-                }
-            }
+        } finally {
             if (DEBUG) {
                 final long time = System.currentTimeMillis();
                 System.out.println("done in " + (time - start) + "ms"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -788,10 +737,11 @@ public class DB {
                 int commentKind = 0;
                 String comment = null;
                 if (comment_id != 0) {
-                    final ResultSet rs2 = fSQL.getComment(comment_id);
-                    if (rs2.next()) {
-                        commentKind = rs2.getInt(1);
-                        comment = rs2.getString(2);
+                    try (final ResultSet rs2 = fSQL.getComment(comment_id)) {
+                        if (rs2.next()) {
+                            commentKind = rs2.getInt(1);
+                            comment = rs2.getString(2);
+                        }
                     }
                 }
                 if (dim_id != 0) {

@@ -64,13 +64,11 @@ public class AwtScreenshot {
 
         @Override
         public void run() {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(fProcessOutput));
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(fProcessOutput))) {
                 String line = null;
                 while ((line = reader.readLine()) != null) {
                     fStream.println(line);
                 }
-                reader.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

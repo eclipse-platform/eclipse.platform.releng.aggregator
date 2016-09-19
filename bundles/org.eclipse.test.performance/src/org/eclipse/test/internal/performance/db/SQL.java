@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -41,29 +42,30 @@ public class SQL {
         boolean needsFailures = true;
         boolean needsComments = true;
 
-        Statement statement = fConnection.createStatement();
-        ResultSet rs = statement
-                .executeQuery("select SYS.SYSTABLES.TABLENAME from SYS.SYSTABLES where SYS.SYSTABLES.TABLENAME not like 'SYS%'"); //$NON-NLS-1$
-        while (rs.next()) {
-            String tablename = rs.getString(1);
-            if ("SUMMARYENTRY".equals(tablename)) //$NON-NLS-1$
-                needsUpgrade = false;
-            else if ("CONFIG_ORG".equals(tablename)) //$NON-NLS-1$
-                fCompatibility = true;
-            else if ("VARIATION".equals(tablename)) //$NON-NLS-1$
-                needsInitialization = false;
-            else if ("FAILURE".equals(tablename)) //$NON-NLS-1$
-                needsFailures = false;
-            else if ("COMMENT".equals(tablename)) //$NON-NLS-1$
-                needsComments = false;
-        }
-        if (!fCompatibility) {
-            // check whether table SAMPLE still has the CONFIG_ID column
-            rs = statement
-                    .executeQuery("select count(*) from SYS.SYSTABLES, SYS.SYSCOLUMNS where SYS.SYSTABLES.TABLENAME = 'SAMPLE' and " + //$NON-NLS-1$
-                            "SYS.SYSTABLES.TABLEID = SYS.SYSCOLUMNS.REFERENCEID and SYS.SYSCOLUMNS.COLUMNNAME = 'CONFIG_ID' "); //$NON-NLS-1$
-            if (rs.next() && rs.getInt(1) == 1)
-                fCompatibility = true;
+        try (Statement statement = fConnection.createStatement()) {
+            try (ResultSet rs = statement.executeQuery("select SYS.SYSTABLES.TABLENAME from SYS.SYSTABLES where SYS.SYSTABLES.TABLENAME not like 'SYS%'")) { //$NON-NLS-1$
+                while (rs.next()) {
+                    String tablename = rs.getString(1);
+                    if ("SUMMARYENTRY".equals(tablename)) //$NON-NLS-1$
+                        needsUpgrade = false;
+                    else if ("CONFIG_ORG".equals(tablename)) //$NON-NLS-1$
+                        fCompatibility = true;
+                    else if ("VARIATION".equals(tablename)) //$NON-NLS-1$
+                        needsInitialization = false;
+                    else if ("FAILURE".equals(tablename)) //$NON-NLS-1$
+                        needsFailures = false;
+                    else if ("COMMENT".equals(tablename)) //$NON-NLS-1$
+                        needsComments = false;
+                }
+            }
+            if (!fCompatibility) {
+                // check whether table SAMPLE still has the CONFIG_ID column
+                try (ResultSet rs = statement.executeQuery("select count(*) from SYS.SYSTABLES, SYS.SYSCOLUMNS where SYS.SYSTABLES.TABLENAME = 'SAMPLE' and " + //$NON-NLS-1$
+                        "SYS.SYSTABLES.TABLEID = SYS.SYSCOLUMNS.REFERENCEID and SYS.SYSCOLUMNS.COLUMNNAME = 'CONFIG_ID' ")) { //$NON-NLS-1$
+                    if (rs.next() && rs.getInt(1) == 1)
+                        fCompatibility = true;
+                }
+            }
         }
 
         if (needsInitialization)
@@ -122,9 +124,7 @@ public class SQL {
     }
 
     private void initialize() throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = fConnection.createStatement();
+        try  (Statement stmt = fConnection.createStatement()) {
             stmt.executeUpdate("create table VARIATION (" + //$NON-NLS-1$
                     "ID int unique not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
                     "KEYVALPAIRS varchar(10000) not null " + //$NON-NLS-1$
@@ -206,17 +206,10 @@ public class SQL {
             fConnection.commit();
 
         }
-        finally {
-            if (stmt != null)
-                stmt.close();
-        }
     }
 
     private void upgradeDB() throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = fConnection.createStatement();
-
+        try (Statement stmt = fConnection.createStatement();){
             stmt.executeUpdate("create table SUMMARYENTRY (" + //$NON-NLS-1$
                     "VARIATION_ID int not null," + //$NON-NLS-1$
                     "SCENARIO_ID int not null," + //$NON-NLS-1$
@@ -235,17 +228,10 @@ public class SQL {
             fConnection.commit();
 
         }
-        finally {
-            if (stmt != null)
-                stmt.close();
-        }
     }
 
     private void addCommentTable() throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = fConnection.createStatement();
-
+        try (Statement stmt = fConnection.createStatement()){
             stmt.executeUpdate("create table COMMENT (" + //$NON-NLS-1$
                     "ID int unique not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
                     "KIND int not null," + //$NON-NLS-1$
@@ -258,17 +244,10 @@ public class SQL {
             fConnection.commit();
 
         }
-        finally {
-            if (stmt != null)
-                stmt.close();
-        }
     }
 
     private void addFailureTable() throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = fConnection.createStatement();
-
+        try (Statement stmt = fConnection.createStatement();){
             stmt.executeUpdate("create table FAILURE (" + //$NON-NLS-1$
                     "VARIATION_ID int not null," + //$NON-NLS-1$
                     "SCENARIO_ID int not null," + //$NON-NLS-1$
@@ -284,24 +263,16 @@ public class SQL {
             fConnection.commit();
 
         }
-        finally {
-            if (stmt != null)
-                stmt.close();
-        }
     }
 
     static int create(PreparedStatement stmt) throws SQLException {
         stmt.executeUpdate();
-        ResultSet rs = stmt.getGeneratedKeys();
-        if (rs != null) {
-            try {
+        try (ResultSet rs = stmt.getGeneratedKeys()) {
+            if (rs != null) {
                 if (rs.next()) {
                     BigDecimal idColVar = rs.getBigDecimal(1);
                     return idColVar.intValue();
                 }
-            }
-            finally {
-                rs.close();
             }
         }
         return 0;
@@ -311,10 +282,10 @@ public class SQL {
         if (fQueryScenario == null)
             fQueryScenario = fConnection.prepareStatement("select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
         fQueryScenario.setString(1, scenarioPattern);
-        ResultSet result = fQueryScenario.executeQuery();
-        while (result.next())
-            return result.getInt(1);
-
+        try (ResultSet result = fQueryScenario.executeQuery()) {
+            while (result.next())
+                return result.getInt(1);
+        }
         if (fInsertScenario == null)
             fInsertScenario = fConnection.prepareStatement(
                     "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
@@ -327,10 +298,10 @@ public class SQL {
             fQueryVariation = fConnection.prepareStatement("select ID from VARIATION where KEYVALPAIRS = ?"); //$NON-NLS-1$
         String exactMatchString = variations.toExactMatchString();
         fQueryVariation.setString(1, exactMatchString);
-        ResultSet result = fQueryVariation.executeQuery();
-        while (result.next())
-            return result.getInt(1);
-
+        try (ResultSet result = fQueryVariation.executeQuery()) {
+            while (result.next())
+                return result.getInt(1);
+        }
         if (fInsertVariation == null)
             fInsertVariation = fConnection.prepareStatement(
                     "insert into VARIATION (KEYVALPAIRS) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
@@ -438,10 +409,10 @@ public class SQL {
         fQuerySummaryEntry.setInt(3, dim_id);
         fQuerySummaryEntry.setShort(4, (short) (isGlobal ? 1 : 0));
         fQuerySummaryEntry.setInt(5, comment_id);
-        ResultSet result = fQuerySummaryEntry.executeQuery();
-        if (result.next() && result.getInt(1) > 0)
-            return;
-
+        try (ResultSet result = fQuerySummaryEntry.executeQuery()) {
+            if (result.next() && result.getInt(1) > 0)
+                return;
+        }
         if (fInsertSummaryEntry == null)
             fInsertSummaryEntry = fConnection
                     .prepareStatement("insert into SUMMARYENTRY (VARIATION_ID, SCENARIO_ID, DIM_ID, IS_GLOBAL, COMMENT_ID) values (?, ?, ?, ?, ?)"); //$NON-NLS-1$
@@ -522,10 +493,10 @@ public class SQL {
             fQueryComment = fConnection.prepareStatement("select ID from COMMENT where KIND = ? and TEXT = ?"); //$NON-NLS-1$
         fQueryComment.setInt(1, commentKind);
         fQueryComment.setString(2, comment);
-        ResultSet result = fQueryComment.executeQuery();
-        while (result.next())
-            return result.getInt(1);
-
+        try (ResultSet result = fQueryComment.executeQuery()) {
+            while (result.next())
+                return result.getInt(1);
+        }
         if (fInsertComment == null)
             fInsertComment = fConnection.prepareStatement(
                     "insert into COMMENT (KIND, TEXT) values (?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$

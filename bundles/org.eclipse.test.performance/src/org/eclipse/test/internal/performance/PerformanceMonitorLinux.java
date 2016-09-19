@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2003, 2016 IBM Corporation and others. 
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -138,22 +139,12 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
   }
 
   private StringTokenizer readTokens(String procPath, boolean skipFirst) {
-    BufferedReader rdr = null;
-    try {
-      rdr = new BufferedReader(new FileReader(procPath));
+    try (BufferedReader rdr = new BufferedReader(new FileReader(procPath));){
       if (skipFirst)
         rdr.readLine(); // throw away the heading line
       return new StringTokenizer(rdr.readLine());
     } catch (IOException e) {
       PerformanceTestPlugin.log(e);
-    }
-    finally {
-      try {
-        if (rdr != null)
-          rdr.close();
-      } catch (IOException e) {
-        // silently ignored
-      }
     }
     return null;
   }
