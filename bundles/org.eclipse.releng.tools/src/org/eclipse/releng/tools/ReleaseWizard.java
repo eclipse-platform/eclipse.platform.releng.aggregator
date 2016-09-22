@@ -14,16 +14,38 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
+import org.eclipse.team.core.TeamException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.client.Command;
+import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
+import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
+import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
+import org.eclipse.team.internal.ui.ITeamUIImages;
+import org.eclipse.team.internal.ui.TeamUIPlugin;
+import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
+import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
+
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -34,25 +56,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.client.Command;
-import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
-import org.eclipse.team.internal.ccvs.ui.CVSUIMessages;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
-import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
-import org.eclipse.team.internal.ui.ITeamUIImages;
-import org.eclipse.team.internal.ui.TeamUIPlugin;
-import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
-import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
 
 
 public class ReleaseWizard extends Wizard {
@@ -428,7 +431,7 @@ public class ReleaseWizard extends Wizard {
 	protected IProject[] performPrompting(IProject[] projects)  {
 		IResource[] resources;
 		PromptingDialog prompt = new PromptingDialog(getShell(), projects,
-			getPromptCondition(projects), CVSUIMessages.TagAction_uncommittedChangesTitle);
+			getPromptCondition(projects), Messages.getString("TagAction_uncommittedChangesTitle")); //$NON-NLS-1$
 		try {
 			 resources = prompt.promptForMultiple();
 		} catch(InterruptedException e) {
@@ -452,7 +455,7 @@ public class ReleaseWizard extends Wizard {
 				return CVSLightweightDecorator.isDirty(resource);
 			}
 			public String promptMessage(IResource resource) {
-				return NLS.bind(CVSUIMessages.TagAction_uncommittedChanges, new String[] { resource.getName() });
+				return NLS.bind(Messages.getString("TagAction_uncommittedChanges"), new String[] { resource.getName() }); //$NON-NLS-1$
 			}
 		};
 	}
