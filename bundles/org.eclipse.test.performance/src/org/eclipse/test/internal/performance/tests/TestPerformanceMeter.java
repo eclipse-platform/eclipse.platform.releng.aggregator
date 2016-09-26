@@ -1,5 +1,6 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2004, 2016 IBM Corporation and others. 
+ * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -52,7 +53,7 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
     @Override
     public Sample getSample() {
         if (fDataPoints != null)
-            return new Sample(getScenarioName(), fStartTime, new HashMap(),
+            return new Sample(getScenarioName(), fStartTime, new HashMap<>(),
                     fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
         return null;
     }

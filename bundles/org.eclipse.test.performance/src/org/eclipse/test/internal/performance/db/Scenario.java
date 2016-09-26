@@ -64,9 +64,9 @@ public class Scenario {
             }
             String[] result = new String[names.length];
             for (int i = 0; i < names.length; i++) {
-                Map messages = fMessages.get(names[i]);
+                Map<String, String> messages = fMessages.get(names[i]);
                 if (messages != null)
-                    result[i] = (String) messages.get(scenarioId);
+                    result[i] = messages.get(scenarioId);
             }
             return result;
         }
