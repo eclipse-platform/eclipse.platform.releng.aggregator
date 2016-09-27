@@ -720,7 +720,6 @@ public class DB {
         if (DEBUG) {
             System.out.print("	- query summaries from DB for scenario pattern '" + scenarioPattern + "'..."); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        @SuppressWarnings("resource")
         ResultSet result = null;
         try {
             final List<SummaryEntry> fingerprints = new ArrayList<>();
