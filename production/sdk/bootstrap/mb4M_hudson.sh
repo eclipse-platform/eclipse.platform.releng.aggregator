@@ -80,7 +80,7 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
 export BRANCH=R4_6_maintenance
 export BUILD_TYPE=M
-export STREAM=4.6.1
+export STREAM=4.6.2
 
 eclipseStreamMajor=${STREAM:0:1}
 
