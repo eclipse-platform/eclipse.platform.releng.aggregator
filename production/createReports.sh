@@ -30,7 +30,7 @@ buildIdToTest=${BUILD_ID}
 echo -e "\tbuildIdToTest: ${BUILD_ID}"
 # default is "latest release" though that typically only applies to M-builds.
 # so does not do much good to specify it here. 
-buildIdToCompare="4.6/R-4.6-201606061100"
+buildIdToCompare="4.6/R-4.6.1-201609071200"
 
 build_type=${buildIdToTest:0:1}
 echo -e "\tbuild_type: ${build_type}"
@@ -74,8 +74,8 @@ then
 elif [[ ${build_type} == "M" ]]
 then
   update_dir_segment="4.6-M-builds"
-  buildIdToCompare="4.6/R-4.6-201606061100"
-  echo -e "\tlatest_R_build: R-4.6-201606061100"
+  buildIdToCompare="4.6/R-4.6.1-201609071200"
+  echo -e "\tlatest_R_build: R-4.6.1-201609071200"
 elif [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.7-I-builds"
