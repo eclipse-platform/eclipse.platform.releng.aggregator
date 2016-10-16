@@ -22,14 +22,17 @@ export JAVA_HOME=${JAVA_8_HOME}
 # BUILD_ID is normally provided as an environment variable, but
 # can provide a default here (especially useful for local testing).
 # But best to leave commented out if not doing testing script since 
-# otherwise may miss finding script errrors.
+# otherwise may miss finding script errors.
 #buildIdToTest=${BUILD_ID:-"I20160314-2000"}
 buildIdToTest=${BUILD_ID}
 
 
 echo -e "\tbuildIdToTest: ${BUILD_ID}"
 # default is "latest release" though that typically only applies to M-builds.
-# so does not do much good to specify it here. 
+# so does not do much good to specify it here.
+# TODO: we could have a "previous_release" sort of variable that 
+# would be defined in parent pom or build_eclipse_org.shsource so that
+# we do not need to change this source. 
 buildIdToCompare="4.6/R-4.6.1-201609071200"
 
 build_type=${buildIdToTest:0:1}
@@ -67,7 +70,7 @@ then
   RC=$?
   if [[ $RC != 0 ]]
   then
-      exit $RC
+    exit $RC
   fi
   echo -e "\tlatest_M_build: $latest_M_build"
   buildIdToCompare="4.6-M-builds/${latest_M_build}"
@@ -79,14 +82,16 @@ then
 elif [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.7-I-builds"
-  #TODO should have a function that gets the "latest" simple repo under
+  # We use a function that gets the "latest" simple repo under
   # 4.6-M-builds and use that automatically so each I-build automatically is
   # compared to the latest M-build, instead of having to manually update this value
+  # TODO: But, the "4.6" part has to be updated every year. There is probably
+  # some other variable to "infer" that from so this script never has to change.
   latest_M_build=$(latestSimpleRepo "${repo_root}/4.6-M-builds" "M20*")
   RC=$?
   if [[ $RC != 0 ]]
   then
-      exit $RC
+    exit $RC
   fi
   echo -e "\tlatest_M_build: $latest_M_build"
   buildIdToCompare="4.6-M-builds/${latest_M_build}"
@@ -99,7 +104,7 @@ then
   RC=$?
   if [[ $RC != 0 ]]
   then
-      exit $RC
+    exit $RC
   fi
   echo -e "\tlatest_M_build: $latest_M_build"
   buildIdToCompare="4.6-M-builds/${latest_M_build}"
