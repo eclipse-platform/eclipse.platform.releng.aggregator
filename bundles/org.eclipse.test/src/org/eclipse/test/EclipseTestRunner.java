@@ -412,7 +412,6 @@ public class EclipseTestRunner implements TestListener {
 								// Time elapsed time to do each dump, so we'll
 								// know if/when we get too close to the 2
 								// minutes we allow
-								// Get current time
 								long start = System.currentTimeMillis();
 
 								// Dump all stacks:
@@ -423,6 +422,7 @@ public class EclipseTestRunner implements TestListener {
 										+ Runtime.getRuntime().totalMemory());
 								System.err.println("freeMemory (before GC): "
 										+ Runtime.getRuntime().freeMemory());
+								System.err.flush(); // bug 420258: flush aggressively, we could be low on memory
 								System.gc();
 								System.err.println("freeMemory (after GC):  "
 										+ Runtime.getRuntime().freeMemory());
@@ -431,6 +431,7 @@ public class EclipseTestRunner implements TestListener {
 										.format(new Date());
 								System.err.println("Thread dump " + num
 										+ " at " + time + ":");
+								System.err.flush();
 								Map<Thread, StackTraceElement[]> stackTraces = Thread
 										.getAllStackTraces();
 								for (Entry<Thread, StackTraceElement[]> entry : stackTraces
@@ -442,7 +443,7 @@ public class EclipseTestRunner implements TestListener {
 									exception.setStackTrace(stack);
 									exception.printStackTrace();
 								}
-								System.err.flush(); // for bug 420258
+								System.err.flush();
 								
 								if (!dumpSwtDisplay(num)) {
 									String screenshotFile= getScreenshotFile(num);
