@@ -377,10 +377,10 @@ public class EclipseTestRunner implements TestListener {
 			int timeout = Integer.parseInt(timeoutArg) - delay;
 			String time0 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z",
 					Locale.US).format(new Date());
-			System.err.println("starting EclipseTestRunnerTimer with timeout="
+			System.err.println("starting EclipseTestRunner Timer with timeout="
 					+ timeout + " at " + time0);
 			if (timeout > 0) {
-				new Timer("EclipseTestRunnerTimer", true).schedule(
+				new Timer("EclipseTestRunner Timer", true).schedule(
 						new TimerTask() {
 							
 							volatile boolean assumeUiThreadIsResponsive;
