@@ -415,35 +415,8 @@ public class EclipseTestRunner implements TestListener {
 								long start = System.currentTimeMillis();
 
 								// Dump all stacks:
-								System.err
-										.println("EclipseTestRunner almost reached timeout '"
-												+ timeoutArg + "'.");
-								System.err.println("totalMemory:            "
-										+ Runtime.getRuntime().totalMemory());
-								System.err.println("freeMemory (before GC): "
-										+ Runtime.getRuntime().freeMemory());
-								System.err.flush(); // bug 420258: flush aggressively, we could be low on memory
-								System.gc();
-								System.err.println("freeMemory (after GC):  "
-										+ Runtime.getRuntime().freeMemory());
-								String time = new SimpleDateFormat(
-										"yyyy-MM-dd HH:mm:ss Z", Locale.US)
-										.format(new Date());
-								System.err.println("Thread dump " + num
-										+ " at " + time + ":");
-								System.err.flush();
-								Map<Thread, StackTraceElement[]> stackTraces = Thread
-										.getAllStackTraces();
-								for (Entry<Thread, StackTraceElement[]> entry : stackTraces
-										.entrySet()) {
-									String name = entry.getKey().getName();
-									StackTraceElement[] stack = entry
-											.getValue();
-									ThreadDump exception = new ThreadDump("for thread \"" + name + "\"");
-									exception.setStackTrace(stack);
-									exception.printStackTrace();
-								}
-								System.err.flush();
+								dumpStackTraces(num, System.err);
+								dumpStackTraces(num, System.out); // System.err could be blocked, see https://bugs.eclipse.org/506304
 								
 								if (!dumpSwtDisplay(num)) {
 									String screenshotFile= getScreenshotFile(num);
@@ -460,6 +433,38 @@ public class EclipseTestRunner implements TestListener {
 										+ num + ": " + elapsedTimeSec);
 							}
 
+							private void dumpStackTraces(int num, PrintStream out) {
+								out
+										.println("EclipseTestRunner almost reached timeout '"
+												+ timeoutArg + "'.");
+								out.println("totalMemory:            "
+										+ Runtime.getRuntime().totalMemory());
+								out.println("freeMemory (before GC): "
+										+ Runtime.getRuntime().freeMemory());
+								out.flush(); // bug 420258: flush aggressively, we could be low on memory
+								System.gc();
+								out.println("freeMemory (after GC):  "
+										+ Runtime.getRuntime().freeMemory());
+								String time = new SimpleDateFormat(
+										"yyyy-MM-dd HH:mm:ss Z", Locale.US)
+										.format(new Date());
+								out.println("Thread dump " + num
+										+ " at " + time + ":");
+								out.flush();
+								Map<Thread, StackTraceElement[]> stackTraces = Thread
+										.getAllStackTraces();
+								for (Entry<Thread, StackTraceElement[]> entry : stackTraces
+										.entrySet()) {
+									String name = entry.getKey().getName();
+									StackTraceElement[] stack = entry
+											.getValue();
+									ThreadDump exception = new ThreadDump("for thread \"" + name + "\"");
+									exception.setStackTrace(stack);
+									exception.printStackTrace();
+								}
+								out.flush();
+							}
+
 							String getScreenshotFile(final int num) {
 								if (!outputDirectory.exists()) {
 									outputDirectory.mkdirs();
@@ -473,6 +478,7 @@ public class EclipseTestRunner implements TestListener {
 								return filename;
 							}
 
+							@SuppressWarnings("deprecation")
 							private boolean dumpSwtDisplay(final int num) {
 								try {
 									final Display display = Display.getDefault();
@@ -506,36 +512,8 @@ public class EclipseTestRunner implements TestListener {
 										public void run() {
 											assumeUiThreadIsResponsive= true;
 											
-											// Dump focus control, parents, and
-											// shells:
-											Control focusControl = display
-													.getFocusControl();
-											if (focusControl != null) {
-												System.err
-														.println("FocusControl: ");
-												StringBuilder indent = new StringBuilder(
-														"  ");
-												do {
-													System.err.println(indent
-															.toString()
-															+ focusControl);
-													focusControl = focusControl
-															.getParent();
-													indent.append("  ");
-												} while (focusControl != null);
-											}
-											Shell[] shells = display.getShells();
-											if (shells.length > 0) {
-												System.err.println("Shells: ");
-												for (int i = 0; i < shells.length; i++) {
-													Shell shell = shells[i];
-													System.err.println((shell
-															.isVisible() ? "  visible: "
-															: "  invisible: ")
-															+ shell);
-												}
-											}
-											System.err.flush(); // for bug 420258
+											dumpDisplayState(System.err);
+											dumpDisplayState(System.out); // System.err could be blocked, see https://bugs.eclipse.org/506304
 	
 											// Take a screenshot:
 											GC gc = new GC(display);
@@ -549,10 +527,42 @@ public class EclipseTestRunner implements TestListener {
 													.getImageData() };
 											String filename= getScreenshotFile(num);
 											loader.save(filename, SWT.IMAGE_PNG);
-											System.err
-													.println("Screenshot saved to: "
-															+ filename);
+											System.err.println("Screenshot saved to: " + filename);
+											System.out.println("Screenshot saved to: " + filename);
 											image.dispose();
+										}
+
+										private void dumpDisplayState(PrintStream out) {
+											// Dump focus control, parents, and
+											// shells:
+											Control focusControl = display
+													.getFocusControl();
+											if (focusControl != null) {
+												out
+														.println("FocusControl: ");
+												StringBuilder indent = new StringBuilder(
+														"  ");
+												do {
+													out.println(indent
+															.toString()
+															+ focusControl);
+													focusControl = focusControl
+															.getParent();
+													indent.append("  ");
+												} while (focusControl != null);
+											}
+											Shell[] shells = display.getShells();
+											if (shells.length > 0) {
+												out.println("Shells: ");
+												for (int i = 0; i < shells.length; i++) {
+													Shell shell = shells[i];
+													out.println((shell
+															.isVisible() ? "  visible: "
+															: "  invisible: ")
+															+ shell);
+												}
+											}
+											out.flush(); // for bug 420258
 										}
 									});
 									return true;
