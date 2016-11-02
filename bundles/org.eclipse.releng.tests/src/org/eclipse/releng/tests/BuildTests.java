@@ -637,7 +637,7 @@ public class BuildTests {
         System.out.println("DEBUG: MAX_ALLOWED_BYTES: " + MAX_ALLOWED_BYTES);
         String buildId = System.getProperty("buildId");
         assertNotNull("buildId property must be specified for testDirtyLogSize test", buildId);
-        String downloadHost = "http://build.eclipse.org/eclipse/builds/4" + buildId.charAt(0) + "/siteDir";
+        String downloadHost = "build.eclipse.org/eclipse/builds/4" + buildId.charAt(0) + "/siteDir";
         String urlOfFile = "http://" + downloadHost + "/eclipse/downloads/drops4/" + buildId + "/buildlogs/dirtReport.txt";
         URL logURL = new URL(urlOfFile);
 
