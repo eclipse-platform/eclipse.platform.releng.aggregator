@@ -435,10 +435,16 @@ fi
   fi
 fi
 
+# check for dirt in working tree. 
+$SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/dirtReport.txt
+checkForErrorExit $? "Error occurred during dirt report"
+sync
+sync
+sync
+
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 printf "%-35s %s\n" "Load after publish-eclipse: " "$(uptime)" >> ${loadLog}
-
 
 # We don't publish repo if there was a build failure, it likely doesn't exist.
 if [[ -z "${BUILD_FAILED}" ]]
@@ -476,10 +482,6 @@ then
    # Since it did once while moving to triggering builds from Hudson (bug 487044).
    #checkForErrorExit $? "Error occurred during createReports.sh"
 fi 
-
-# check for dirt in working tree. 
-$SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/dirtReport.txt
-checkForErrorExit $? "Error occurred during dirt report"
 
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
