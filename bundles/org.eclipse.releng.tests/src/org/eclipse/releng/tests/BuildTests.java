@@ -620,6 +620,7 @@ public class BuildTests {
     }
     @Test
     public void testDirtyLogSize() throws Exception {
+        return; // disabling these due to Bug 499147
         final boolean DEBUG_DIRTY_TEST = true;
         // MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
         // "dirReport" always contains some information
