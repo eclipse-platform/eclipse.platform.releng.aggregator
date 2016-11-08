@@ -11,7 +11,10 @@
 
 package org.eclipse.releng.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -175,7 +178,7 @@ public class BuildTests {
     /**
      * Method getChkpiiString.
      * 
-     * @param HTML
+     * @param type
      * @return String
      */
     private String getChkpiiString(int type) {
@@ -222,7 +225,7 @@ public class BuildTests {
     /**
      * Method getOutputFile.
      * 
-     * @param HTML
+     * @param type
      * @return String
      */
 
@@ -250,7 +253,7 @@ public class BuildTests {
     /**
      * Method getFilesToTest.
      * 
-     * @param HTML
+     * @param type
      * @return String
      */
 
@@ -618,9 +621,8 @@ public class BuildTests {
         message = message.concat("See the javadoc logs linked from the test results page for details");
         assertTrue(message, !problemLogsExist);
     }
-    @Test
+    @Test @Ignore("see bug 499147")
     public void testDirtyLogSize() throws Exception {
-        return; // disabling these due to Bug 499147
         final boolean DEBUG_DIRTY_TEST = true;
         // MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
         // "dirReport" always contains some information
