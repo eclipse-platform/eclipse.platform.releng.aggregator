@@ -22,10 +22,10 @@ fi
 echo -e "\n\tDaily clean of ${HOSTNAME} download server on $(date )\n"
 
 cDir="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
-buildType="N*"
-allOldBuilds=$( find ${cDir} -maxdepth 1 -type d -ctime +3 -name "${buildType}" )
+buildType="I*2000"
+allOldBuilds=$( find ${cDir} -maxdepth 1 -type d -ctime +7 -name "${buildType}" )
 nbuilds=$( find ${cDir} -maxdepth 1 -type d -name "${buildType}" | wc -l )
-echo -e "\tNumber of N-builds before cleaning: $nbuilds"
+echo -e "\tNumber of I-builds before cleaning: $nbuilds"
 #echo -e "\n\tDEBUG: allOldBuilds: \n${allOldBuilds}"
 
 # Make sure we leave at least 4 on DL server, no matter how old
@@ -57,13 +57,24 @@ for buildname in ${allOldBuilds}; do
   then
     echo -e "\tDEBUG: Not removed (since one of 4 newest, even though old): \n\t$buildname"
   else
-    rm -fr $buildname
-    RC=$?
-    if [[ $RC = 0 ]]
+    buildId=$(basename $buildName)
+    yy=$(echo $buildId|cut -b2-5)
+    mm=$(echo $buildId|cut -b6-7)
+    dd=$(echo $buildId|cut -b8-9)
+    day=${dd}-${mm}-${yy}
+    dayOfWeek=$(date -d $day +%u)
+    
+    #Make sure donot remove I builds from Monday
+    if [ $dayOfWeek != 1 ]
     then
-      echo -e "Removed: $buildname"
-    else
-      echo -e "\n\tAn Error occurred removing $buildname. RC: $RC"
+        rm -fr $buildname
+        RC=$?
+        if [[ $RC = 0 ]]
+        then
+            echo -e "Removed: $buildname"
+        else
+            echo -e "\n\tAn Error occurred removing $buildname. RC: $RC"
+        fi
     fi
   fi
 done
