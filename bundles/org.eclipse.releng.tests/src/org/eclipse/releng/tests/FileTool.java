@@ -385,49 +385,47 @@ public class FileTool {
 	 * @param filter filters out unwanted zip entries
 	 * @param dstDir the destination directory
 	 */
-	public static void unzip(IZipFilter filter, File dstDir) throws IOException {
+	public static void unzip(IZipFilter filter, File dstDir) {
 		unzip(filter, dstDir, dstDir, 0);
 	}
 	
-	private static void unzip(IZipFilter filter, File rootDstDir, File dstDir, int depth) throws IOException {
+	private static void unzip(IZipFilter filter, File rootDstDir, File dstDir, int depth) {
 	
-		File [] entries = rootDstDir.listFiles();
-	
-		try {
-			for(int i=0;i<entries.length;i++){
-				if(entries[i].isDirectory()){
-					unzip (filter,entries[i],dstDir,depth);
-				}
-				File entry = entries[i];
+		File[] entries = rootDstDir.listFiles();
 
-				String entryName = entry.getName();
-				File file = new File(dstDir, FileTool.changeSeparator(entryName, '/', File.separatorChar));
-				if (entryName.endsWith(".zip") || entryName.endsWith(".jar"))  {
-					String fileName = file.getName();
-					String dirName = fileName.substring(0, fileName.length() - 4) + "_" + fileName.substring(fileName.length() - 3);
-					ZipFile innerZipFile = null;
-					try {
-						innerZipFile = new ZipFile(entry);
-						File innerDstDir = new File(entry.getParentFile(), dirName);
-						unzip(filter, innerZipFile, rootDstDir, innerDstDir, depth + 1);
-						//entry.delete();
-					} catch (IOException e) {
-						if(innerZipFile != null){
-							try {
-								innerZipFile.close();
-								System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
-							} catch(IOException e2){
-							}
-						} else
-							System.out.println("Could not unzip: " + fileName + ". InnerZip = <null>");
-						e.printStackTrace();
-					}
-				
-				}
+		for (int i = 0; i < entries.length; i++) {
+			if (entries[i].isDirectory()) {
+				unzip(filter, entries[i], dstDir, depth);
 			}
-		} catch(IOException e){
-			e.printStackTrace();
-		}	
+			File entry = entries[i];
+
+			String entryName = entry.getName();
+			File file = new File(dstDir, FileTool.changeSeparator(entryName, '/', File.separatorChar));
+			if (entryName.endsWith(".zip") || entryName.endsWith(".jar")) {
+				String fileName = file.getName();
+				String dirName = fileName.substring(0, fileName.length() - 4) + "_"
+						+ fileName.substring(fileName.length() - 3);
+				ZipFile innerZipFile = null;
+				try {
+					innerZipFile = new ZipFile(entry);
+					File innerDstDir = new File(entry.getParentFile(), dirName);
+					unzip(filter, innerZipFile, rootDstDir, innerDstDir, depth + 1);
+					// entry.delete();
+				} catch (IOException e) {
+					if (innerZipFile != null) {
+						try {
+							innerZipFile.close();
+							System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName()
+									+ ". Lenght: " + innerZipFile.getName().length());
+						} catch (IOException e2) {
+						}
+					} else
+						System.out.println("Could not unzip: " + fileName + ". InnerZip = <null>");
+					e.printStackTrace();
+				}
+
+			}
+		}
 	}
 	/**
 	 * Zips the given directory to the given zip file.
