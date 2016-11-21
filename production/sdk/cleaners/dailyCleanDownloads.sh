@@ -57,7 +57,7 @@ for buildname in ${allOldBuilds}; do
   then
     echo -e "\tDEBUG: Not removed (since one of 4 newest, even though old): \n\t$buildname"
   else
-    buildId=$(basename $buildName)
+    buildId=$(basename $buildname)
     yy=$(echo $buildId|cut -b2-5)
     mm=$(echo $buildId|cut -b6-7)
     dd=$(echo $buildId|cut -b8-9)
