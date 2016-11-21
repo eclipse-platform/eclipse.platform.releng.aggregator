@@ -61,7 +61,7 @@ for buildname in ${allOldBuilds}; do
     yy=$(echo $buildId|cut -b2-5)
     mm=$(echo $buildId|cut -b6-7)
     dd=$(echo $buildId|cut -b8-9)
-    day=${dd}-${mm}-${yy}
+    day=${mm}/${dd}/${yy}
     dayOfWeek=$(date -d $day +%u)
     
     #Make sure donot remove I builds from Monday
