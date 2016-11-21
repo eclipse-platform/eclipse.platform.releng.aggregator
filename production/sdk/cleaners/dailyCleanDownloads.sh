@@ -22,7 +22,7 @@ fi
 echo -e "\n\tDaily clean of ${HOSTNAME} download server on $(date )\n"
 
 cDir="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
-buildType="I*2000"
+buildType="I*"
 allOldBuilds=$( find ${cDir} -maxdepth 1 -type d -ctime +7 -name "${buildType}" )
 nbuilds=$( find ${cDir} -maxdepth 1 -type d -name "${buildType}" | wc -l )
 echo -e "\tNumber of I-builds before cleaning: $nbuilds"
