@@ -455,6 +455,10 @@ else
   echo "No repo published, since BUILD_FAILED"
 fi
 
+echo -e "\n\n\n#jdeps -jdkinternals output:" > ${logsDirectory}/jdepsReport.txt
+find ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-I-builds/${BUILD_ID}/ -name "*.jar" -exec ${JAVA_HOME}/bin/jdeps -jdkinternals {} \; >> ${logsDirectory}/jdepsReport.txt 2>&1
+echo "# " >> ${logsDirectory}/jdepsReport.txt
+
 #For now, only "publish equinox and promote" if N, I or M build, skip if P, X, or Y
 
 # TODO: probably never need to promote equinox, for patch build?
