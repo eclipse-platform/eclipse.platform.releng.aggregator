@@ -300,28 +300,37 @@ function syncRepoSite ()
   fi
 
 
-  # update composite!
-  # add ${buildId} to {toDir}
+  comparatorLogPath="${logsDirectory}/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"
+  logSize=$(stat -c '%s' ${comparatorLogPath} )
 
-  # runAntRunner requires basebuilder to be installed at drop site, so we'll check here if it exists yet,
-  # and if not, fetch it.
-
-  dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" )
-  EBuilderDir=$dropFromBuildDir/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-
-  # assume ant is on the path
-  ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$dropFromBuildDir
-
-  if [[ "${buildType}" != "P" ]]
+  if [[ $logSize -lt 250 ]]
   then
-    ${PROMOTION_SCRIPT_PATH}/runAntRunner.sh ${buildId} ${eclipseStream} ${PROMOTION_SCRIPT_PATH}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
-    RC=$?
-  else
-    echo -e "\n\tREMINDER: patch build must be added to composite after confirmation\n"
+    # update composite!
+    # add ${buildId} to {toDir}
+
+    # runAntRunner requires basebuilder to be installed at drop site, so we'll check here if it exists yet,
+    # and if not, fetch it.
+
+    dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" )
+    EBuilderDir=$dropFromBuildDir/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+
+    # assume ant is on the path
+    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$dropFromBuildDir
+
+    if [[ "${buildType}" != "P" ]]
+    then
+      ${PROMOTION_SCRIPT_PATH}/runAntRunner.sh ${buildId} ${eclipseStream} ${PROMOTION_SCRIPT_PATH}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
+      RC=$?
+    else
+      echo -e "\n\tREMINDER: patch build must be added to composite after confirmation\n"
+      RC=0
+    fi
+  else 
+    dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
+    echo "<p>This build has been marked unstable due to <a href='http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>" ${dlSite}/${buildId}/buildUnstable
     RC=0
   fi
   return $RC
-
 }
 
 
