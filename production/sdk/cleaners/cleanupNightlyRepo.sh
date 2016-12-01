@@ -211,6 +211,8 @@ eclipseNRepo="${remoteBase}/eclipse/updates/4.7-N-builds"
 eclipseIRepo="${remoteBase}/eclipse/updates/4.7-I-builds"
 eclipseMRepo="${remoteBase}/eclipse/updates/4.6-M-builds"
 eclipseSRepo="${remoteBase}/eclipse/updates/4.7milestones"
+eclipseYRepo="${remoteBase}/eclipse/updates/4.7-Y-builds"
+eclipsePRepo="${remoteBase}/eclipse/updates/4.7-P-builds"
 
 #doDryrun=dryrun
 doDryrun=
@@ -221,6 +223,10 @@ declare -a reposToRemove=()
 cleanRepo $eclipseIRepo I 4 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseMRepo M 4 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipseYRepo Y 2 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipsePRepo P 2 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseSRepo S 2 $doDryrun
 
