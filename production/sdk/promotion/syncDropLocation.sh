@@ -301,7 +301,7 @@ function syncRepoSite ()
 
 
   set -x
-  comparatorLogPath=${logsDirectory}/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
+  comparatorLogPath="${logsDirectory}/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"
   logSize=$(stat -c '%s' ${comparatorLogPath} )
 
   if [[ $logSize -lt 250 ]]
@@ -328,7 +328,7 @@ function syncRepoSite ()
     fi
   else 
     dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
-    echo "<p>This build has been marked unstable due to <a href='http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>" ${dlSite}/${buildId}/buildUnstable
+    echo "<p>This build has been marked unstable due to <a href='http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>">> ${dlSite}/${buildId}/buildUnstable
     RC=0
   fi
   set +x
