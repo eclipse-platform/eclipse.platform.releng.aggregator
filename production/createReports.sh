@@ -47,7 +47,7 @@ function latestSimpleRepo
 {
   if [[ $# != 2 ]]
   then
-    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories and name pattern of repo required, such as M2i0*."
+    echo "\n\t[ERROR] Program error. ${0##*/} requires parent directory of simple repositories and name pattern of repo required, such as M20*."
     exit 9
   fi
   parentDir=$1
