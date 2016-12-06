@@ -152,15 +152,13 @@ then
     mkdir -p ${TMP_DIR}
   fi
 
-  # Let's always refetch for now
-  # TODO: turned off proxy for now. Ideally would set proper environment variables!
-  # --no-verbose -quiet
-  #if [[ ! -F ${TMP_DIR}/${tar_name} ]]
-  #then
-  wget --no-proxy --no-cache -O "${TMP_DIR}/${tar_name}" http://download.eclipse.org/cbi/updates/analyzers/4.6/${analyzersBuildId}/${tar_name} 2>&1
-  #else
-  #    echo "${TMP_DIR}/${tar_name} already existed, not re-fetched"
-  #fi
+  # turned off proxy for now. Ideally would set proper environment variables!
+  if [[ ! -f ${TMP_DIR}/${tar_name} ]]
+  then
+    wget --no-proxy --no-verbose --no-cache -O "${TMP_DIR}/${tar_name}" http://download.eclipse.org/cbi/updates/analyzers/4.6/${analyzersBuildId}/${tar_name} 2>&1
+  else
+    echo -e "repo analyzer tar.gz not re-fetched, since already exists at \n\t${TMP_DIR}/${tar_name}"
+  fi
   # always extract anew each time.
   if [[ -e ${report_app_area} ]]
   then
