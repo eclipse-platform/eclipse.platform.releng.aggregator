@@ -132,7 +132,10 @@ then
   # just in case does not exist yet
   mkdir -p ${output_dir}
 
-  tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
+  # This analyzersBuildId can (currently) be found by "drilling down" at 
+  # http://download.eclipse.org/cbi/updates/analyzers/4.6/
+  analyzersBuildId=I20161201-1633
+  tar_name=org.eclipse.cbi.p2repo.analyzers.product_${analyzersBuildId}_linux.gtk.x86_64.tar.gz
 
   report_app_area="${app_area}/reportApplication"
 
@@ -154,7 +157,7 @@ then
   # --no-verbose -quiet
   #if [[ ! -F ${TMP_DIR}/${tar_name} ]]
   #then
-  wget --no-proxy --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+  wget --no-proxy --no-cache -O "${TMP_DIR}/${tar_name}" http://download.eclipse.org/cbi/updates/analyzers/4.6/${analyzersBuildId}/${tar_name} 2>&1
   #else
   #    echo "${TMP_DIR}/${tar_name} already existed, not re-fetched"
   #fi
