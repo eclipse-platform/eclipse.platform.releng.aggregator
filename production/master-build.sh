@@ -457,7 +457,7 @@ fi
 
 set -x
 echo -e "\n\n\n#jdeps -jdkinternals output:" > ${logsDirectory}/jdepsReport.txt
-find ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-I-builds/${BUILD_ID}/ -name "*.jar" -exec ${JAVA_HOME}/bin/jdeps -jdkinternals {} \; >> ${logsDirectory}/jdepsReport.txt 2>&1
+find ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-I-builds/${BUILD_ID}/ -name "*.jar" -exec ${JAVA_HOME}/bin/jdeps -jdkinternals {} \; >> ${logsDirectory}/jdepsReport.txt 
 echo "# " >> ${logsDirectory}/jdepsReport.txt
 set +x
 
