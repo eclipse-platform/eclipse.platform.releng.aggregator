@@ -134,8 +134,9 @@ then
 
   # This analyzersBuildId can (currently) be found by "drilling down" at 
   # http://download.eclipse.org/cbi/updates/analyzers/4.6/
-  analyzersBuildId=I20161201-1633
-  tar_name=org.eclipse.cbi.p2repo.analyzers.product_${analyzersBuildId}_linux.gtk.x86_64.tar.gz
+  # analyzersBuildId=I20161201-1633
+  # We use analyzer from hipp this way we have one less version to track
+  tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
 
   report_app_area="${app_area}/reportApplication"
 
@@ -153,12 +154,9 @@ then
   fi
 
   # turned off proxy for now. Ideally would set proper environment variables!
-  if [[ ! -f ${TMP_DIR}/${tar_name} ]]
-  then
-    wget --no-proxy --no-verbose --no-cache -O "${TMP_DIR}/${tar_name}" http://download.eclipse.org/cbi/updates/analyzers/4.6/${analyzersBuildId}/${tar_name} 2>&1
-  else
-    echo -e "repo analyzer tar.gz not re-fetched, since already exists at \n\t${TMP_DIR}/${tar_name}"
-  fi
+  # Let's fetch always. otherwise we'll miss any upgrades
+  wget --no-proxy --no-verbose --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers_cleanAndDeploy/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+  
   # always extract anew each time.
   if [[ -e ${report_app_area} ]]
   then
@@ -171,13 +169,13 @@ then
   tar -xf "${TMP_DIR}/${tar_name}" -C ${report_app_area}
 
   # first do the "old" (normal) case
-  ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
+  ${report_app_area}/p2analyze/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
     -DreportRepoDir=${buildToTest} \
     -DreportOutputDir=${output_dir} \
     -DreferenceRepo=${buildToCompare}
 
   # now run with "new api" which produced the color coded (experimental) reports
-  ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx2g \
+  ${report_app_area}/p2analyze/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx2g \
     -DuseNewApi=true \
     -DreportRepoDir=${buildToTest} \
     -DreportOutputDir=${output_dir} \
