@@ -328,6 +328,8 @@ function syncRepoSite ()
     fi
   else 
     dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
+    mkdir -p ${dlSite}/${buildId}
+    touch ${dlSite}/${buildId}/buildUnstable
     echo "<p>This build has been marked unstable due to <a href='http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>">> ${dlSite}/${buildId}/buildUnstable
     RC=0
   fi
