@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.team.core.synchronize.SyncInfo;
 import org.eclipse.team.core.synchronize.SyncInfoSet;
 import org.eclipse.team.internal.ccvs.core.CVSException;
@@ -75,29 +74,21 @@ public class GetBugsOperation {
 
 	protected void run(final BuildNotesPage page) {
 		try {
-			wizard.getContainer().run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) {
-					final int totalWork = 101;
-					monitor
-							.beginTask(
-									Messages.getString("GetBugsOperation.0"), totalWork); //$NON-NLS-1$
+			wizard.getContainer().run(true, true, monitor -> {
+				final int totalWork = 101;
+				monitor.beginTask(Messages.getString("GetBugsOperation.0"), totalWork); //$NON-NLS-1$
 
-					// task 1 -- get bug number from comments
-					syncInfos = syncInfoSet.getSyncInfos();
-					Set<Integer> bugTree = getBugNumbersFromComments(syncInfos,
-							new SubProgressMonitor(monitor, 85, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				// task 1 -- get bug number from comments
+				syncInfos = syncInfoSet.getSyncInfos();
+				Set<Integer> bugTree = getBugNumbersFromComments(syncInfos,
+						new SubProgressMonitor(monitor, 85, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 
-					// task 2 -- create map of bugs and summaries
-					Integer[] bugs = bugTree.toArray(new Integer[0]);
-					final Map<Integer, String> map = getBugzillaSummaries(bugs,
-							new SubProgressMonitor(monitor, 15, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-					page.getShell().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							page.setMap(map);
-						}
-					});
-					monitor.done();
-				}
+				// task 2 -- create map of bugs and summaries
+				Integer[] bugs = bugTree.toArray(new Integer[0]);
+				final Map<Integer, String> map = getBugzillaSummaries(bugs,
+						new SubProgressMonitor(monitor, 15, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				page.getShell().getDisplay().asyncExec(() -> page.setMap(map));
+				monitor.done();
 			});
 		} catch (InterruptedException e) {
 			CVSUIPlugin.openError(wizard.getShell(), null, null, e);

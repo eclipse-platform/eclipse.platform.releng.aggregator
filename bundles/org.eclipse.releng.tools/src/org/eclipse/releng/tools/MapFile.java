@@ -22,7 +22,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -136,20 +135,18 @@ public class MapFile {
 	 */
 	public static MapFile[] findAllMapFiles(IResource resource) throws CoreException {
 		final ArrayList<MapFile> mapFiles = new ArrayList<MapFile>();
-		IResourceProxyVisitor visitor= new IResourceProxyVisitor() {
-			public boolean visit(IResourceProxy resourceProxy) throws CoreException {
-				if (!resourceProxy.isAccessible())
-					return false;
+		IResourceProxyVisitor visitor= resourceProxy -> {
+			if (!resourceProxy.isAccessible())
+				return false;
 
-				int type= resourceProxy.getType();
-				if (type == IResource.PROJECT)
-					return RelEngPlugin.isShared((IProject)resourceProxy.requestResource());
+			int type= resourceProxy.getType();
+			if (type == IResource.PROJECT)
+				return RelEngPlugin.isShared((IProject)resourceProxy.requestResource());
 
-				if (type == IResource.FILE && resourceProxy.getName().endsWith(MAP_FILE_NAME_ENDING))
-					mapFiles.add(new MapFile((IFile)resourceProxy.requestResource()));
+			if (type == IResource.FILE && resourceProxy.getName().endsWith(MAP_FILE_NAME_ENDING))
+				mapFiles.add(new MapFile((IFile)resourceProxy.requestResource()));
 
-				return true;
-			}
+			return true;
 		};
 		
 		resource.accept(visitor,IResource.NONE);

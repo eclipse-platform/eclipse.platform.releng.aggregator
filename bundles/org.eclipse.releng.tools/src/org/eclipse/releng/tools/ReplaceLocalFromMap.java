@@ -123,16 +123,14 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 		}
 		
 		final IResource[][] resources = new IResource[][] {null};
-		run(new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InterruptedException, InvocationTargetException {
-				try {
-					monitor.beginTask(null, 100);					
-					resources[0] = checkOverwriteOfDirtyResources(getSelectedResources(), new InfiniteSubProgressMonitor(monitor, 100));
-				} catch (TeamException e) {
-					throw new InvocationTargetException(e);
-				} finally {
-					monitor.done();
-				}
+		run((IRunnableWithProgress) monitor -> {
+			try {
+				monitor.beginTask(null, 100);					
+				resources[0] = checkOverwriteOfDirtyResources(getSelectedResources(), new InfiniteSubProgressMonitor(monitor, 100));
+			} catch (TeamException e) {
+				throw new InvocationTargetException(e);
+			} finally {
+				monitor.done();
 			}
 		}, false /* cancelable */, PROGRESS_BUSYCURSOR);
 		
@@ -147,13 +145,11 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 		if (operationCancelled || tags == null)
 			return;
 		
-		run(new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				try {
-					performReplace(resources[0], monitor);
-				} catch (TeamException e) {
-					throw new InvocationTargetException(e);
-				}
+		run((IRunnableWithProgress) monitor -> {
+			try {
+				performReplace(resources[0], monitor);
+			} catch (TeamException e) {
+				throw new InvocationTargetException(e);
 			}
 		}, true, PROGRESS_DIALOG);
 		

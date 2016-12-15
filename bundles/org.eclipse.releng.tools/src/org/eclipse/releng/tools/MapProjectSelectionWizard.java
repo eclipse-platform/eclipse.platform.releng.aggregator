@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,10 +93,6 @@ public class MapProjectSelectionWizard extends Wizard {
 		return (dialog.open() == Window.OK);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#addPages()
-	 */
 	@Override
 	public void addPages() {
 		mapProjectSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage", //$NON-NLS-1$
@@ -106,10 +102,6 @@ public class MapProjectSelectionWizard extends Wizard {
 		addPage(mapProjectSelectionPage);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 		mapProjectSelectionPage.saveSettings();
@@ -119,10 +111,6 @@ public class MapProjectSelectionWizard extends Wizard {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#performCancel()
-	 */
 	@Override
 	public boolean performCancel() {
 		operationCancelled = true;

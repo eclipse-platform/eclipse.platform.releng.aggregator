@@ -18,9 +18,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -86,11 +84,6 @@ public class ProjectSelectionPage extends WizardPage {
 		this.settings = settings;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		
@@ -120,11 +113,7 @@ public class ProjectSelectionPage extends WizardPage {
 			}});
 		viewer.setInput(mapProject);
 		viewer.expandAll();
-		viewer.addCheckStateListener(new ICheckStateListener(){
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				updatePageComplete();				
-			}
-		});
+		viewer.addCheckStateListener(event -> updatePageComplete());
 		
 		compareButton = new Button(topContainer,SWT.CHECK);
 		compareButton.setText(Messages.getString("ProjectSelectionPage.3")); //$NON-NLS-1$

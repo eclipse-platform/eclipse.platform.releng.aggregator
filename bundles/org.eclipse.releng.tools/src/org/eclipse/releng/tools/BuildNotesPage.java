@@ -27,18 +27,14 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -127,31 +123,29 @@ public class BuildNotesPage extends WizardPage {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		filePath = new Text(composite, SWT.BORDER);
 		filePath.setLayoutData(data);
-		filePath.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				Path path = new Path(filePath.getText());
-				validPath = false;
-				if (!path.isEmpty()) {
-					IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-					if (path.isValidPath(filePath.getText())
-							&& file.getParent().exists()) {
-						if (path.getFileExtension().equals(EXT_HTML)) {
-							setErrorMessage(null);
-							validPath = true;
-							iFile = file;
-						} else {
-							setErrorMessage(Messages
-									.getString("BuildNotesPage.5")); //$NON-NLS-1$
-						}
+		filePath.addModifyListener(e -> {
+			Path path = new Path(filePath.getText());
+			validPath = false;
+			if (!path.isEmpty()) {
+				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+				if (path.isValidPath(filePath.getText())
+						&& file.getParent().exists()) {
+					if (path.getFileExtension().equals(EXT_HTML)) {
+						setErrorMessage(null);
+						validPath = true;
+						iFile = file;
 					} else {
-						setErrorMessage(Messages.getString("BuildNotesPage.6")); //$NON-NLS-1$
+						setErrorMessage(Messages
+								.getString("BuildNotesPage.5")); //$NON-NLS-1$
 					}
 				} else {
-					// path is empty
-					setErrorMessage(Messages.getString("BuildNotesPage.7")); //$NON-NLS-1$
+					setErrorMessage(Messages.getString("BuildNotesPage.6")); //$NON-NLS-1$
 				}
-				updateButtons();
+			} else {
+				// path is empty
+				setErrorMessage(Messages.getString("BuildNotesPage.7")); //$NON-NLS-1$
 			}
+			updateButtons();
 		});
 
 		browse = new Button(composite, SWT.PUSH);
@@ -236,52 +230,37 @@ public class BuildNotesPage extends WizardPage {
 			} else {
 				if (file.getParent().exists()) {
 					try {
-						getContainer().run(true, true,
-								new IRunnableWithProgress() {
-									public void run(IProgressMonitor monitor)
-											throws InvocationTargetException,
-											InterruptedException {
-										monitor
-												.beginTask(
-														Messages
-																.getString("BuildNotesPage.11"), //$NON-NLS-1$
-														100);
-										StringBuffer buffer = new StringBuffer();
-										buffer
-												.append("<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">\n");
-										buffer.append("<html>\n\n");
-										buffer.append("<head>\n");
-										buffer
-												.append("   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n");
-										buffer
-												.append("   <meta name=\"Build\" content=\"Build\">\n");
-										buffer
-												.append("   <title>Eclipse Platform Release Notes (3.3) - JFace and Workbench</title>\n");
-										buffer.append("</head>\n\n");
-										buffer.append("<body>\n\n");
-										buffer
-												.append("<h1>Eclipse Platform Build Notes (3.3)<br>\n");
-										buffer
-												.append("JFace and Workbench</h1>");
+						getContainer().run(true, true, monitor -> {
+							monitor.beginTask(Messages.getString("BuildNotesPage.11"), //$NON-NLS-1$
+									100);
+							StringBuffer buffer = new StringBuffer();
+							buffer.append("<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">\n");
+							buffer.append("<html>\n\n");
+							buffer.append("<head>\n");
+							buffer.append(
+									"   <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n");
+							buffer.append("   <meta name=\"Build\" content=\"Build\">\n");
+							buffer.append(
+									"   <title>Eclipse Platform Release Notes (3.3) - JFace and Workbench</title>\n");
+							buffer.append("</head>\n\n");
+							buffer.append("<body>\n\n");
+							buffer.append("<h1>Eclipse Platform Build Notes (3.3)<br>\n");
+							buffer.append("JFace and Workbench</h1>");
 
-										ByteArrayInputStream c = new ByteArrayInputStream(
-												buffer.toString().getBytes());
-										try {
-											file.create(c, true, monitor);
-										} catch (CoreException e) {
-											CVSUIPlugin.openError(getShell(),
-													null, null, e);
-										}
+							ByteArrayInputStream c = new ByteArrayInputStream(buffer.toString().getBytes());
+							try {
+								file.create(c, true, monitor);
+							} catch (CoreException e1) {
+								CVSUIPlugin.openError(getShell(), null, null, e1);
+							}
 
-										try {
-											c.close();
-										} catch (IOException e) {
-											CVSUIPlugin.openError(getShell(),
-													null, null, e);
-										}
-										monitor.done();
-									}
-								});
+							try {
+								c.close();
+							} catch (IOException e2) {
+								CVSUIPlugin.openError(getShell(), null, null, e2);
+							}
+							monitor.done();
+						});
 					} catch (InvocationTargetException e) {
 						CVSUIPlugin.openError(getShell(), null, null, e);
 					} catch (InterruptedException e) {
@@ -340,26 +319,18 @@ public class BuildNotesPage extends WizardPage {
 				buffer.insert(index, "\n" + insertBuffer.toString());
 
 				try {
-					getContainer().run(true, true, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor)
-								throws InvocationTargetException,
-								InterruptedException {
-							monitor.beginTask(Messages
-									.getString("BuildNotesPage.38"), 100); //$NON-NLS-1$
-							ByteArrayInputStream c = new ByteArrayInputStream(
-									buffer.toString().getBytes());
-							try {
-								file.setContents(c, true, true, monitor);
-								c.close();
-							} catch (CoreException e) {
-								CVSUIPlugin
-										.openError(getShell(), null, null, e);
-							} catch (IOException e) {
-								CVSUIPlugin
-										.openError(getShell(), null, null, e);
-							}
-							monitor.done();
+					getContainer().run(true, true, monitor -> {
+						monitor.beginTask(Messages.getString("BuildNotesPage.38"), 100); //$NON-NLS-1$
+						ByteArrayInputStream c = new ByteArrayInputStream(buffer.toString().getBytes());
+						try {
+							file.setContents(c, true, true, monitor);
+							c.close();
+						} catch (CoreException e1) {
+							CVSUIPlugin.openError(getShell(), null, null, e1);
+						} catch (IOException e2) {
+							CVSUIPlugin.openError(getShell(), null, null, e2);
 						}
+						monitor.done();
 					});
 				} catch (InvocationTargetException e) {
 					CVSUIPlugin.openError(getShell(), null, null, e);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,14 @@ package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
 import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
 import org.eclipse.team.internal.ccvs.core.CVSException;
@@ -20,18 +28,6 @@ import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
 import org.eclipse.team.ui.TeamUI;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.OperationCanceledException;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
-import org.eclipse.core.resources.IResourceProxyVisitor;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 
 /**
@@ -62,23 +58,21 @@ public class CompareLocalToMap extends WorkspaceAction {
 		try {
 			final MapFile[] mapFiles= MapFile.findAllMapFiles(ResourcesPlugin.getWorkspace().getRoot());
 
-			IResourceProxyVisitor visitor= new IResourceProxyVisitor() {
-				public boolean visit(IResourceProxy resourceProxy) throws CoreException {
-					if (resourceProxy.getType() == IResource.ROOT)
-						return true;
+			IResourceProxyVisitor visitor= resourceProxy -> {
+				if (resourceProxy.getType() == IResource.ROOT)
+					return true;
 
-					if (resourceProxy.getType() != IResource.PROJECT || !resourceProxy.isAccessible())
-						return false;
-
-					IProject project= (IProject)resourceProxy.requestResource();
-					if (!RelEngPlugin.isShared(project))
-						return false;
-
-					if (contains(mapFiles, project))
-						throw new OperationCanceledException(FOUND);
-
+				if (resourceProxy.getType() != IResource.PROJECT || !resourceProxy.isAccessible())
 					return false;
-				}
+
+				IProject project= (IProject)resourceProxy.requestResource();
+				if (!RelEngPlugin.isShared(project))
+					return false;
+
+				if (contains(mapFiles, project))
+					throw new OperationCanceledException(FOUND);
+
+				return false;
 			};
 			ResourcesPlugin.getWorkspace().getRoot().accept(visitor, IResource.NONE);
 			return false;

@@ -18,7 +18,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -71,9 +70,7 @@ public class ProjectComparePage extends WizardPage{
 		super(pageName, title, image);
 		this.settings = settings;
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		GridData data = new GridData(GridData.FILL_BOTH);
@@ -130,10 +127,6 @@ public class ProjectComparePage extends WizardPage{
 		}		
 	}
 	
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -148,17 +141,14 @@ public class ProjectComparePage extends WizardPage{
 				final CVSTag[] tags = mapProject.getTagsFor(projects);			
 				
 				//Collect all the out-of-sync projects from selected projects and update the selected project again 
-				getContainer().run(true, true, new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor)
-							throws InvocationTargetException, InterruptedException {
-						IResource[] r = null;
-						if(projects != null && projects.length != 0){
-							try {
-								r = getOutOfSyncProjects(projects, tags, monitor);
-								wizard.setSelectedProjects(r);
-							} catch (TeamException e) {
-								throw new InvocationTargetException(e);
-							}						
+				getContainer().run(true, true, monitor -> {
+					IResource[] r = null;
+					if (projects != null && projects.length != 0) {
+						try {
+							r = getOutOfSyncProjects(projects, tags, monitor);
+							wizard.setSelectedProjects(r);
+						} catch (TeamException e) {
+							throw new InvocationTargetException(e);
 						}
 					}
 				});

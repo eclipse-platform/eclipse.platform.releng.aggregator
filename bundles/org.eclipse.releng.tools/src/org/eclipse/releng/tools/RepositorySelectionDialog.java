@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,7 @@ package org.eclipse.releng.tools;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -74,23 +70,17 @@ public class RepositorySelectionDialog extends Dialog {
 				return locations;
 			}
 		});
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-				if (selection.isEmpty()) {
-					location = null;
-					okButton.setEnabled(false);
-				} else {
-					location = (ICVSRepositoryLocation)selection.getFirstElement();
-					okButton.setEnabled(true);
-				}
+		viewer.addSelectionChangedListener(event -> {
+			IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+			if (selection.isEmpty()) {
+				location = null;
+				okButton.setEnabled(false);
+			} else {
+				location = (ICVSRepositoryLocation)selection.getFirstElement();
+				okButton.setEnabled(true);
 			}
 		});
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				okPressed();
-			}
-		});
+		viewer.addDoubleClickListener(event -> okPressed());
 		viewer.setInput(locations);
 		return composite;
 	}

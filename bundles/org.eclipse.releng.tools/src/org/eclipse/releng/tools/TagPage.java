@@ -28,7 +28,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -87,11 +86,9 @@ public class TagPage extends WizardPage{
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		label.setFont(font);
 		
-		Listener listener = new Listener() {
-			public void handleEvent(Event event) {
-				tagString = null;
-				modifyTag();
-			}
+		Listener listener = event -> {
+			tagString = null;
+			modifyTag();
 		};
 		
 		tagCombo = new Combo(composite,SWT.NONE);

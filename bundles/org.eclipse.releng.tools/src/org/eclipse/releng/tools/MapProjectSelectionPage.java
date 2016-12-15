@@ -21,11 +21,9 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
@@ -98,11 +96,7 @@ public class MapProjectSelectionPage extends WizardPage {
 			}
 		});
 		result.setLabelProvider(new WorkbenchLabelProvider());
-		result.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {				
-				updateOthers();
-			}
-		});
+		result.addSelectionChangedListener(event -> updateOthers());
 		result.setComparator((new ResourceComparator(ResourceComparator.NAME)));
 		return result;
 	}	

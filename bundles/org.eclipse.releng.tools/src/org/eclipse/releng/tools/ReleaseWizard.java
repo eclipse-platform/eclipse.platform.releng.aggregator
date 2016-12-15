@@ -14,8 +14,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.client.Command;
@@ -27,35 +51,6 @@ import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
-
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 
 
 public class ReleaseWizard extends Wizard {
@@ -241,21 +236,14 @@ public class ReleaseWizard extends Wizard {
 		if (buildNotesPage.isUpdateNotesButtonChecked() && projectComparePage.isBuildNotesButtonChecked()) {
 			buildNotesPage.updateNotesFile();
 			try {
-				getContainer().run(true, true, new IRunnableWithProgress() {
-					public void run(IProgressMonitor monitor)
-							throws InvocationTargetException,
-							InterruptedException {
-						IFile iFile = buildNotesPage.getIFile();
-						IProject iProject = iFile.getProject();
-						monitor.beginTask(Messages.getString("ReleaseWizard.20"), 100); //$NON-NLS-1$
-						new CommitOperation(
-								null,
-								RepositoryProviderOperation
-										.asResourceMappers(new IResource[] { iProject }),
-								new Command.LocalOption[0], commentPage
-										.getComment()).run(monitor);
-						monitor.done();
-					}
+				getContainer().run(true, true, monitor -> {
+					IFile iFile = buildNotesPage.getIFile();
+					IProject iProject = iFile.getProject();
+					monitor.beginTask(Messages.getString("ReleaseWizard.20"), 100); //$NON-NLS-1$
+					new CommitOperation(null,
+							RepositoryProviderOperation.asResourceMappers(new IResource[] { iProject }),
+							new Command.LocalOption[0], commentPage.getComment()).run(monitor);
+					monitor.done();
 				});
 			} catch (InterruptedException e) {
 				// Cancelled.
@@ -293,53 +281,51 @@ public class ReleaseWizard extends Wizard {
 		if (projectSelectionPage.isCompareButtonChecked() && !buildNotesOperation()) {
 			return true; // Build notes file update cancelled. Close dialog.
 		}
-		
+
 		try {
-			getContainer().run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					CVSTag tag = new CVSTag(tagPage.getTagString(), CVSTag.VERSION);
-					TagAndReleaseOperation operation = new TagAndReleaseOperation(null, mapProject, 
-							selectedProjects, tag,commentPage.getComment() );
-					if (tagPage.isMoveButtonSelected()) {
-						operation.moveTag();
-					}
-					monitor.beginTask(Messages.getString("ReleaseWizard.21"), 100); //$NON-NLS-1$
-					operation.run(SubMonitor.convert(monitor, 90));
-					if (operation.isMapFileUpdated()) {
-						try {						
-							if(tagPage.isValidateButtonSelected()){
-								try {
-									getShell().getDisplay().asyncExec(new Runnable() {
-										public void run() {
-											if (parentDialog instanceof WizardDialog)
-												((WizardDialog)parentDialog).showPage(validatePage);
-										}
-									});
-									validateRelease(SubMonitor.convert(monitor, 10));
-								} catch (TeamException e) {
-									throw new InvocationTargetException(e);
-								}
+			getContainer().run(true, true, monitor -> {
+				CVSTag tag = new CVSTag(tagPage.getTagString(), CVSTag.VERSION);
+				TagAndReleaseOperation operation = new TagAndReleaseOperation(null, mapProject, selectedProjects, tag,
+						commentPage.getComment());
+				if (tagPage.isMoveButtonSelected()) {
+					operation.moveTag();
+				}
+				monitor.beginTask(Messages.getString("ReleaseWizard.21"), 100); //$NON-NLS-1$
+				operation.run(SubMonitor.convert(monitor, 90));
+				if (operation.isMapFileUpdated()) {
+					try {
+						if (tagPage.isValidateButtonSelected()) {
+							try {
+								getShell().getDisplay().asyncExec(() -> {
+									if (parentDialog instanceof WizardDialog)
+										((WizardDialog) parentDialog).showPage(validatePage);
+								});
+								validateRelease(SubMonitor.convert(monitor, 10));
+							} catch (TeamException e) {
+								throw new InvocationTargetException(e);
 							}
-						} finally {
-							monitor.done();
 						}
-					} else {
-						// The map file update didn't occur and no exception was thrown.
-						// Let the user know of the failure
-						IStatus[] errors = operation.getErrors();
-						IStatus status;
-                        if (errors.length == 0) {
-                            status = new Status(IStatus.ERROR, RelEngPlugin.ID, 0, Messages.getString("ReleaseWizard.22"), null); //$NON-NLS-1$
-                        } else if (errors.length == 1) {
-							status = errors[0];
-						} else {
-							status = new MultiStatus(RelEngPlugin.ID, 0, errors, Messages.getString("ReleaseWizard.23"), null); //$NON-NLS-1$
-						}
-						ErrorDialog.openError(getShell(), Messages.getString("ReleaseWizard.24"),  //$NON-NLS-1$
-								Messages.getString("ReleaseWizard.25"),  //$NON-NLS-1$
-								status, IStatus.ERROR | IStatus.WARNING);
+					} finally {
+						monitor.done();
 					}
+				} else {
+					// The map file update didn't occur and no exception was
+					// thrown.
+					// Let the user know of the failure
+					IStatus[] errors = operation.getErrors();
+					IStatus status;
+					if (errors.length == 0) {
+						status = new Status(IStatus.ERROR, RelEngPlugin.ID, 0, Messages.getString("ReleaseWizard.22"), //$NON-NLS-1$
+								null);
+					} else if (errors.length == 1) {
+						status = errors[0];
+					} else {
+						status = new MultiStatus(RelEngPlugin.ID, 0, errors, Messages.getString("ReleaseWizard.23"), //$NON-NLS-1$
+								null);
+					}
+					ErrorDialog.openError(getShell(), Messages.getString("ReleaseWizard.24"), //$NON-NLS-1$
+							Messages.getString("ReleaseWizard.25"), //$NON-NLS-1$
+							status, IStatus.ERROR | IStatus.WARNING);
 				}
 			});
 			if (!defaultBeingUsed) {
