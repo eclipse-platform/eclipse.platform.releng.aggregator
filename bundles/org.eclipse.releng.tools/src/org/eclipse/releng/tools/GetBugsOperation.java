@@ -100,7 +100,7 @@ public class GetBugsOperation {
 	protected Set<Integer> getBugNumbersFromComments(SyncInfo[] syncInfos,
 			IProgressMonitor monitor) {
 		monitor.beginTask("Scanning comments for bug numbers", syncInfos.length);
-		TreeSet<Integer> set = new TreeSet<Integer>();
+		TreeSet<Integer> set = new TreeSet<>();
 		for (int i = 0; i < syncInfos.length; i++) {
 			SyncInfo info = syncInfos[i];
 			getBugNumbersForSyncInfo(info, monitor, set);
@@ -208,7 +208,7 @@ public class GetBugsOperation {
 		DataInputStream in;
 		URLConnection url;
 		StringBuffer buffer;
-		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+		TreeMap<Integer, String> map = new TreeMap<>();
 		for (int i = 0; i < bugs.length; i++) {
 			try {
 				url = (new URL(BUG_DATABASE_PREFIX + bugs[i]

@@ -84,6 +84,7 @@ public class ProjectSelectionPage extends WizardPage {
 		this.settings = settings;
 	}
 	
+	@Override
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		
@@ -178,7 +179,7 @@ public class ProjectSelectionPage extends WizardPage {
 	 * Returns all the checked items if they are IProject 
 	 */
 	public IProject[] getCheckedProjects(){
-		ArrayList<IProject> projectsToRelease = new ArrayList<IProject>();
+		ArrayList<IProject> projectsToRelease = new ArrayList<>();
 		Object[] obj = viewer.getCheckedElements();
 		if (obj == null)return null;
 		for(int i = 0; i < obj.length; i++){
@@ -191,7 +192,7 @@ public class ProjectSelectionPage extends WizardPage {
 	private void readProjectSettings(){
 		if( settings == null) return;
 		if(settings.getArray(SELECTED_ITEMS_KEY) != null){
-			ArrayList<String> nameList = new ArrayList<String>(Arrays.asList(settings.getArray(SELECTED_ITEMS_KEY)));
+			ArrayList<String> nameList = new ArrayList<>(Arrays.asList(settings.getArray(SELECTED_ITEMS_KEY)));
 			if(nameList != null){
 				Iterator<String> iter = nameList.iterator();
 				while(iter.hasNext()){
@@ -222,7 +223,7 @@ public class ProjectSelectionPage extends WizardPage {
 	 */
 	public void saveSettings(){
 		Object[] obj = viewer.getCheckedElements();
-		ArrayList<String> names = new ArrayList<String>();
+		ArrayList<String> names = new ArrayList<>();
 		for (int i = 0; i < obj.length; i++){
 			if(obj[i] instanceof IProject){
 				names.add(((IProject)obj[i]).getName());

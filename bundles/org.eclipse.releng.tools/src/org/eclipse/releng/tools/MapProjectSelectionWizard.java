@@ -69,10 +69,12 @@ public class MapProjectSelectionWizard extends Wizard {
 		}
 
 		getShell().addControlListener(new ControlListener() {
+			@Override
 			public void controlMoved(ControlEvent e) {
 				storeBounds(e);
 			}
 
+			@Override
 			public void controlResized(ControlEvent e) {
 				storeBounds(e);
 			}

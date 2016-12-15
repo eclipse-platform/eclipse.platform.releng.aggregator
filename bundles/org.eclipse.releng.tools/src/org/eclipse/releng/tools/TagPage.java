@@ -73,6 +73,7 @@ public class TagPage extends WizardPage{
 		this.settings = settings;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -308,7 +309,7 @@ public class TagPage extends WizardPage{
 	}
 	
 	private String[] addToTagList(String[] history, String newEntry) {
-		ArrayList<String> l = new ArrayList<String>(Arrays.asList(history));
+		ArrayList<String> l = new ArrayList<>(Arrays.asList(history));
 		addToTagList(l, newEntry);
 		String[] r = new String[l.size()];
 		l.toArray(r);

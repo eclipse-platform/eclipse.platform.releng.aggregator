@@ -77,6 +77,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			this.monitor = monitor;
 		}
 
+		@Override
 		public boolean visit(IResource resource) throws CoreException {
 			if (!monitor.isCanceled()) {
 				if (resource.getType() == IResource.FILE) {
@@ -100,6 +101,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			this.fileCount = 0;
 		}
 
+		@Override
 		public boolean visit(IResource resource) throws CoreException {
 			if (resource.getType() == IResource.FILE) {
 				fileCount += UNIT_OF_WORK;
@@ -113,7 +115,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	}
 
 	private String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
-	private Map<String, List<String>> log = new HashMap<String, List<String>>();
+	private Map<String, List<String>> log = new HashMap<>();
 	private MessageConsole console;
 
 	// The current selection
@@ -129,7 +131,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	protected IResource[] getSelectedResources() {
 		ArrayList<IResource> resources = null;
 		if (!selection.isEmpty()) {
-			resources = new ArrayList<IResource>();
+			resources = new ArrayList<>();
 			Iterator<?> elements = selection.iterator();
 			while (elements.hasNext()) {
 				addResource(elements.next(), resources);
@@ -160,14 +162,16 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	/**
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 	}
 
 	/**
 	 * @see IActionDelegate#run(IAction)
 	 */
+	@Override
 	public void run(IAction action) {
-		log = new HashMap<String, List<String>>();
+		log = new HashMap<>();
 		console = new FixConsole();
 		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] {console});
 		try {
@@ -200,7 +204,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					} else {
 						adapter.initialize(SubMonitor.convert(monitor, 100));
 					}
-					List<CoreException> exceptions = new ArrayList<CoreException>();
+					List<CoreException> exceptions = new ArrayList<>();
 					for (int i = 0; i < results.length; i++) {
 						IResource resource = results[i];
 						stream.println(NLS.bind(
@@ -223,7 +227,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 						if (exceptions.size() == 1) {
 							throw exceptions.get(0);
 						} else {
-							List<Status> status = new ArrayList<Status>();
+							List<Status> status = new ArrayList<>();
 							for (Iterator<CoreException> iterator = exceptions.iterator(); iterator
 									.hasNext();) {
 								CoreException ce = iterator.next();
@@ -548,7 +552,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			String errorDescription) {
 		List<String> aList = log.get(errorDescription);
 		if (aList == null) {
-			aList = new ArrayList<String>();
+			aList = new ArrayList<>();
 			log.put(errorDescription, aList);
 		}
 		aList.add(file.getFullPath().toString());
@@ -557,6 +561,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	/**
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			this.selection = (IStructuredSelection) selection;

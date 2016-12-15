@@ -51,11 +51,10 @@ public class MapFile {
 	}
 	
 	protected void loadEntries() throws CoreException {
-		InputStream inputStream = null;
-		List<MapEntry> list = new ArrayList<MapEntry>();		
+		List<MapEntry> list = new ArrayList<>();		
 
-		try {
-			inputStream = file.getContents();
+		try (InputStream inputStream = file.getContents();){
+			
 			BufferedReader aReader = new BufferedReader(new InputStreamReader(
 					inputStream));
 			String aLine = aReader.readLine();
@@ -67,14 +66,6 @@ public class MapFile {
 			}
 		} catch (IOException e) {
 			throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "An I/O Error occurred process map file " + file.getFullPath().toString(), e));
-		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException e) {
-					// Ignore close exceptions so we don't mask another exception
-				}
-			}
 		}
 
 		this.entries = list.toArray(new MapEntry[list.size()]);
@@ -105,7 +96,7 @@ public class MapFile {
 	}
 
 	public IProject[] getAccessibleProjects() {
-		Set<IProject> list = new HashSet<IProject>();
+		Set<IProject> list = new HashSet<>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		if(entries == null || entries.length ==0) return null;
 		for (int i = 0; i < projects.length; i++) {
@@ -134,7 +125,7 @@ public class MapFile {
 	 * @since 3.7
 	 */
 	public static MapFile[] findAllMapFiles(IResource resource) throws CoreException {
-		final ArrayList<MapFile> mapFiles = new ArrayList<MapFile>();
+		final ArrayList<MapFile> mapFiles = new ArrayList<>();
 		IResourceProxyVisitor visitor= resourceProxy -> {
 			if (!resourceProxy.isAccessible())
 				return false;

@@ -17,16 +17,17 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.releng.tools.AdvancedFixCopyrightAction.FixConsole;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class RemoveAllConsolesAction extends Action {
 	public RemoveAllConsolesAction() {
 		super(
-				Messages.getString("RemoveAllConsolesAction.Text"), RelEngPlugin.imageDescriptorFromPlugin(RelEngPlugin.ID, "icons/full/elcl16/console_remall.png")); //$NON-NLS-1$//$NON-NLS-2$
+				Messages.getString("RemoveAllConsolesAction.Text"), AbstractUIPlugin.imageDescriptorFromPlugin(RelEngPlugin.ID, "icons/full/elcl16/console_remall.png")); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	@Override
 	public void run() {
-		List<IConsole> consolesList = new ArrayList<IConsole>();
+		List<IConsole> consolesList = new ArrayList<>();
 
 		for (IConsole console : ConsolePlugin.getDefault().getConsoleManager()
 				.getConsoles()) {

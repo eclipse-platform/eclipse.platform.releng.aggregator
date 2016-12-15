@@ -27,7 +27,7 @@ public class BlockComment {
 	private String contents;
 	private static String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
 	private String copyrightHolder;
-	private List<String> nonIBMContributors = new ArrayList<String>();
+	private List<String> nonIBMContributors = new ArrayList<>();
 	private String commentEnd;
 
 	

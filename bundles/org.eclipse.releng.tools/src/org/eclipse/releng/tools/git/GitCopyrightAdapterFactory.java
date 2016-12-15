@@ -23,6 +23,7 @@ public class GitCopyrightAdapterFactory implements IAdapterFactory,
 
 	private static final Class<?>[] ADAPTER_LIST = new Class[] { IRepositoryProviderCopyrightAdapterFactory.class };
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (IRepositoryProviderCopyrightAdapterFactory.class
@@ -38,10 +39,12 @@ public class GitCopyrightAdapterFactory implements IAdapterFactory,
 		return this;
 	}
 
+	@Override
 	public Class<?>[] getAdapterList() {
 		return ADAPTER_LIST;
 	}
 
+	@Override
 	public RepositoryProviderCopyrightAdapter createAdapater(
 			IResource[] resources) {
 		return new GitCopyrightAdapter(resources);

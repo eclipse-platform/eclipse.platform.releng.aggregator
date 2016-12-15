@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ public class CommitCommentPage extends CVSWizardPage {
 		commitCommentArea = new CommitCommentArea();
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite top = new Composite(parent, SWT.NONE);
 		top.setLayout(new GridLayout());
@@ -46,9 +47,6 @@ public class CommitCommentPage extends CVSWizardPage {
 		return commitCommentArea.getComment(true);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);

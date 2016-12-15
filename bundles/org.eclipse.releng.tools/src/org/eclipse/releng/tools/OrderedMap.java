@@ -23,15 +23,15 @@ import java.util.Map;
  */
 public class OrderedMap<K, V> {
 
-	private List<K> keys = new ArrayList<K>();
-	private List<V> values = new ArrayList<V>();
+	private List<K> keys = new ArrayList<>();
+	private List<V> values = new ArrayList<>();
 
 	/* (non-Javadoc)
 	 * @see java.util.Map#clear()
 	 */
 	public void clear() {
-		keys = new ArrayList<K>();
-		values = new ArrayList<V>();
+		keys = new ArrayList<>();
+		values = new ArrayList<>();
 	}
 
 	/* (non-Javadoc)

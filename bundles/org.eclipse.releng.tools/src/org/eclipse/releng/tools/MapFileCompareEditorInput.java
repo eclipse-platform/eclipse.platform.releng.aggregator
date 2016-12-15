@@ -126,7 +126,7 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 	private MapFile[] getChangedMapFiles() {
 		if (selectedProjects == null || selectedProjects.length == 0)
 			return null;
-		List<IProject> projectList = new ArrayList<IProject>();
+		List<IProject> projectList = new ArrayList<>();
 		CVSTag[] tags = mapProject.getTagsFor(selectedProjects );
 		for(int i = 0; i < selectedProjects.length; i++){
 			if(!tags[i].getName().equals(tag)){

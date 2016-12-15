@@ -109,10 +109,12 @@ public class ReleaseWizard extends Wizard {
 		
 		getShell().addControlListener(new ControlListener() {
 
+			@Override
 			public void controlMoved(ControlEvent e) {
 				storeBounds(e);
 			}
 
+			@Override
 			public void controlResized(ControlEvent e) {
 				storeBounds(e);
 			}
@@ -405,7 +407,7 @@ public class ReleaseWizard extends Wizard {
 		if (resources.length < 1) {
 			preSelectedProjects = null;
 		} else {
-			Set<IProject> list = new HashSet<IProject>();
+			Set<IProject> list = new HashSet<>();
 			for (int i = 0; i < resources.length; i++) {
 				list.add(resources[i].getProject());
 			}
@@ -437,9 +439,11 @@ public class ReleaseWizard extends Wizard {
 
 	protected IPromptCondition getPromptCondition(IResource[] resources) {
 		return new IPromptCondition() {
+			@Override
 			public boolean needsPrompt(IResource resource) {
 				return CVSLightweightDecorator.isDirty(resource);
 			}
+			@Override
 			public String promptMessage(IResource resource) {
 				return NLS.bind(Messages.getString("TagAction_uncommittedChanges"), new String[] { resource.getName() }); //$NON-NLS-1$
 			}

@@ -39,7 +39,7 @@ public class MapEntry {
 	private boolean valid = false;
 	private String type = EMPTY_STRING;
 	private String id = EMPTY_STRING;
-	private OrderedMap<String, String> arguments = new OrderedMap<String, String>();
+	private OrderedMap<String, String> arguments = new OrderedMap<>();
 	private boolean legacy = false;
 	private String version;
 
@@ -144,7 +144,7 @@ public class MapEntry {
 	 * key=value elements. Otherwise we fill in the key based on the old format.
 	 */
 	private OrderedMap<String, String> populate(String[] entries) {
-		OrderedMap<String, String> result = new OrderedMap<String, String>();
+		OrderedMap<String, String> result = new OrderedMap<>();
 		for (int i=0; i<entries.length; i++) {
 			String entry = entries[i];
 			int index = entry.indexOf('=');
@@ -165,7 +165,7 @@ public class MapEntry {
 	
 	private OrderedMap<String, String> legacyPopulate(String[] entries) {
 		legacy = true;
-		OrderedMap<String, String> result = new OrderedMap<String, String>();
+		OrderedMap<String, String> result = new OrderedMap<>();
 		// must have at least tag and connect string
 		if (entries.length >= 2) {
 			// Version
@@ -194,7 +194,7 @@ public class MapEntry {
 	public static String[] getArrayFromStringWithBlank(String list, String separator) {
 		if (list == null || list.trim().length() == 0)
 			return new String[0];
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		boolean previousWasSeparator = true;
 		for (StringTokenizer tokens = new StringTokenizer(list, separator, true); tokens.hasMoreTokens();) {
 			String token = tokens.nextToken().trim();

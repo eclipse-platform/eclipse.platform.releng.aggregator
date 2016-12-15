@@ -70,7 +70,7 @@ public class LoadMap extends CVSAction {
 	 * @throws CoreException
 	 */
 	protected String[] getReferenceStrings(IResource[] mapFiles) throws CoreException {
-		List<String> allStrings = new ArrayList<String>();
+		List<String> allStrings = new ArrayList<>();
 		for (int i = 0; i < mapFiles.length; i++) {
 			IResource resource = mapFiles[i];
 			String[] referenceStrings = readReferenceStrings((IFile)resource);
@@ -86,11 +86,11 @@ public class LoadMap extends CVSAction {
 	 */
 
 	protected static String[] readReferenceStrings(IFile file) throws CoreException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(file.getContents()));
-		try {
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getContents()))) {
 			try {
 				String line = reader.readLine();
-				List<String> references = new ArrayList<String>();
+				List<String> references = new ArrayList<>();
 				while (line != null) {
 					String referenceString = new MapEntry(line).getReferenceString();
 					if (referenceString != null)  {

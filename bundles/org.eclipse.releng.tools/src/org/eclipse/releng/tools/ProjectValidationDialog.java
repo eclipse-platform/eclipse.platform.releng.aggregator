@@ -42,12 +42,10 @@ public class ProjectValidationDialog extends ParticipantPageDialog {
 			participant.refreshNow(p, Messages.getString("ReleaseWizard.20"), monitor); //$NON-NLS-1$
 			
 			if (!monitor.isCanceled() && !participant.getSyncInfoSet().isEmpty()) {
-				Display.getDefault().syncExec(new Runnable() {
-					public void run() {
-                        if (MessageDialog.openQuestion(shell, "Workspace Differs From Released Contents",
-                                "The local workspace contents does not match what is released. There is a good chance that the release failed. Do you want to see the difference?"))
-                            openValidationFailedDialog(shell, participant);
-					}
+				Display.getDefault().syncExec(() -> {
+				    if (MessageDialog.openQuestion(shell, "Workspace Differs From Released Contents",
+				            "The local workspace contents does not match what is released. There is a good chance that the release failed. Do you want to see the difference?"))
+				        openValidationFailedDialog(shell, participant);
 				});	
 			}
 		} finally {

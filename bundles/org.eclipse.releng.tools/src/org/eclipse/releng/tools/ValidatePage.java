@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,13 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 
 /**
@@ -32,21 +31,16 @@ public class ValidatePage extends WizardPage {
 		setDescription(Messages.getString("ValidatePage.description")); //$NON-NLS-1$
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		setControl(new Label(parent, SWT.NONE));
 	}
 	
-	/*
-	 * @see org.eclipse.jface.wizard.WizardPage#canFlipToNextPage()
-	 */
 	@Override
 	public boolean canFlipToNextPage() {
 		return false;
 	}
 	
-	/*
-	 * @see org.eclipse.jface.wizard.WizardPage#getPreviousPage()
-	 */
 	@Override
 	public IWizardPage getPreviousPage() {
 		return null;

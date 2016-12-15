@@ -30,7 +30,7 @@ public class CVSTagHelper {
 
 	//Returns an array of CVSTags for which no map entry could be found
 	public CVSTag[] findMissingMapEntries(IResource[] resources) {
-		defaultTags = new ArrayList<IResource>();
+		defaultTags = new ArrayList<>();
 		CVSTag[] tags = new CVSTag[resources.length];
 		for (int i = 0; i < resources.length; i++) {
 			tags[i] = getTag(resources[i]);

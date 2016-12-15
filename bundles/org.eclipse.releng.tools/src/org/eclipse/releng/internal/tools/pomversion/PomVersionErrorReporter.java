@@ -63,6 +63,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 
 	class PomResourceDeltaVisitor implements IResourceDeltaVisitor {
 
+		@Override
 		public boolean visit(IResourceDelta delta) {
 			if (delta != null) {
 				IResource resource = delta.getResource();
@@ -140,7 +141,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	 */
 	class PomVersionHandler extends DefaultHandler {
 		private Version version;
-		private Stack<String> elements = new Stack<String>();
+		private Stack<String> elements = new Stack<>();
 		private boolean checkVersion = false;
 		private boolean isFeatureProject = false;
 		private Locator locator;
@@ -350,7 +351,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			// Get the manifest version
 			Version bundleVersion = Version.emptyVersion;
 			try {
-				Map<String, String> headers = new HashMap<String, String>();
+				Map<String, String> headers = new HashMap<>();
 				ManifestElement.parseBundleManifest(manifest.getContents(), headers);
 				String ver = headers.get(Constants.BUNDLE_VERSION);
 				if(ver == null) {
@@ -426,7 +427,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	 */
 	void reportMarker(String message, int lineNumber, int charStart, int charEnd, String correctedVersion, IFile pom, String severity) {
 		try {
-			HashMap<String, Object> attributes = new HashMap<String, Object>();
+			HashMap<String, Object> attributes = new HashMap<>();
 			attributes.put(IMarker.MESSAGE, message);
 			if (severity.equals(IPomVersionConstants.VALUE_WARNING)){
 				attributes.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_WARNING));
@@ -474,9 +475,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
-	 */
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta delta = event.getDelta();
 		if(delta != null) {
@@ -489,9 +488,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener#preferenceChange(org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent)
-	 */
+	@Override
 	public void preferenceChange(PreferenceChangeEvent event) {
 		if(IPomVersionConstants.POM_VERSION_ERROR_LEVEL.equals(event.getKey())) {
 			final String newSeverity = (String) event.getNewValue();

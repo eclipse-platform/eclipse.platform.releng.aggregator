@@ -109,7 +109,7 @@ public class MapProject implements IResourceChangeListener {
 	}
  
 	public MapFile[] getValidMapFiles(){
-		List<MapFile> list = new ArrayList<MapFile>();
+		List<MapFile> list = new ArrayList<>();
 		for (int i = 0; i <mapFiles.length; i++){
 			IProject[] projects = mapFiles[i].getAccessibleProjects(); 
 			if( projects!= null && projects.length > 0){
@@ -130,7 +130,7 @@ public class MapProject implements IResourceChangeListener {
 		MapContentDocument changed = new MapContentDocument(aFile);
 		changed.updateTag(aProject, tag);
 		if (changed.isChanged()) {
-			aFile.getFile().setContents(changed.getContents(), IFile.KEEP_HISTORY, null);
+			aFile.getFile().setContents(changed.getContents(), IResource.KEEP_HISTORY, null);
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class MapProject implements IResourceChangeListener {
 	}
 	
 	public MapFile[] getMapFilesFor(IProject[] projects){
-		Set<MapFile> alist = new HashSet<MapFile>();		
+		Set<MapFile> alist = new HashSet<>();		
 		for(int i = 0; i<projects.length; i++){
 			MapFile aMapFile = getMapFile(projects[i]);
 			alist.add(aMapFile);
@@ -182,6 +182,7 @@ public class MapProject implements IResourceChangeListener {
 	/**
 	 * @see IResourceChangeListener#resourceChanged(IResourceChangeEvent)
 	 */
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta root = event.getDelta();
 		
@@ -239,7 +240,7 @@ public class MapProject implements IResourceChangeListener {
 		return new MapFile(file);
 	}
 	private void addMapFile(MapFile aFile){
-		Set<MapFile> set = new HashSet<MapFile>(Arrays.asList(mapFiles));
+		Set<MapFile> set = new HashSet<>(Arrays.asList(mapFiles));
 		set.add(aFile);
 		mapFiles = set.toArray(new MapFile[set.size()]); 
 	}

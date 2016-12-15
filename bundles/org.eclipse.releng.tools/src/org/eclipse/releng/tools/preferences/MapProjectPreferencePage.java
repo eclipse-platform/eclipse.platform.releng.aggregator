@@ -121,7 +121,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		data.grabExcessVerticalSpace = true;
 		projectList.setLayoutData(data);
 
-		Set<IProject> projects = new HashSet<IProject>();
+		Set<IProject> projects = new HashSet<>();
 		MapFile[] mapFiles;
 		try {
 			mapFiles = MapFile.findAllMapFiles(RelEngPlugin.getWorkspace().getRoot());
@@ -169,9 +169,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		setValid(isValid);
 	}
 
-	/*
-	 * @see IWorkbenchPreferencePage#init(IWorkbench)
-	 */
+	@Override
 	public void init(IWorkbench workbench) {
 		// do nothing
 	}

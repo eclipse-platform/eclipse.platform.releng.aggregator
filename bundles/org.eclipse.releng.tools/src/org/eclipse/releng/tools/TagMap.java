@@ -38,7 +38,7 @@ public class TagMap extends TagInRepositoryAction {
 	@Override
 	protected ICVSRemoteResource[] getSelectedRemoteResources() {
 		IResource[] resources = getSelectedResources();
-		List<String> identifiers = new ArrayList<String>();
+		List<String> identifiers = new ArrayList<>();
 		for (int i = 0; i < resources.length; i++) {
 			IResource resource = resources[i];
 			try {
@@ -52,9 +52,9 @@ public class TagMap extends TagInRepositoryAction {
 	}
 
 	private ICVSRemoteResource[] getCVSResourcesFor(String[] referenceStrings) {
-		Map<ICVSRepositoryLocation, ICVSRepositoryLocation> previouslySelectedRepositories = new HashMap<ICVSRepositoryLocation, ICVSRepositoryLocation>();
+		Map<ICVSRepositoryLocation, ICVSRepositoryLocation> previouslySelectedRepositories = new HashMap<>();
 		int size = referenceStrings.length;
-		List<ICVSRemoteResource> result = new ArrayList<ICVSRemoteResource>(size);
+		List<ICVSRemoteResource> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			StringTokenizer tokenizer = new StringTokenizer(referenceStrings[i], ","); //$NON-NLS-1$
 			String version = tokenizer.nextToken();
@@ -107,7 +107,7 @@ public class TagMap extends TagInRepositoryAction {
 	private ICVSRepositoryLocation getWritableRepositoryLocation(ICVSRepositoryLocation storedLocation) {
 		// Find out which repo locations are appropriate
 		ICVSRepositoryLocation[] locations = CVSUIPlugin.getPlugin().getRepositoryManager().getKnownRepositoryLocations();
-		List<ICVSRepositoryLocation> compatibleLocations = new ArrayList<ICVSRepositoryLocation>();
+		List<ICVSRepositoryLocation> compatibleLocations = new ArrayList<>();
 		for (int i = 0; i < locations.length; i++) {
 			ICVSRepositoryLocation location = locations[i];
 			// Only locations with the same host and root are eligible

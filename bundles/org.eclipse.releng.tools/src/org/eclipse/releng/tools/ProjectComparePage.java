@@ -71,6 +71,7 @@ public class ProjectComparePage extends WizardPage{
 		this.settings = settings;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Font font = parent.getFont();
 		GridData data = new GridData(GridData.FILL_BOTH);

@@ -299,7 +299,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	private void save() {
 		if(fDirty) {
 			try {
-				ArrayList<Key> changes = new ArrayList<Key>();
+				ArrayList<Key> changes = new ArrayList<>();
 				collectChanges(fLookupOrder[0], changes);
 				if(changes.size() > 0) {
 					fManager.applyChanges();

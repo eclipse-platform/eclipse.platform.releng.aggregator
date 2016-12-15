@@ -89,6 +89,7 @@ public class BuildNotesPage extends WizardPage {
 		this.settings = settings;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		GridData data = new GridData(GridData.FILL_BOTH);
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -247,15 +248,12 @@ public class BuildNotesPage extends WizardPage {
 							buffer.append("<h1>Eclipse Platform Build Notes (3.3)<br>\n");
 							buffer.append("JFace and Workbench</h1>");
 
-							ByteArrayInputStream c = new ByteArrayInputStream(buffer.toString().getBytes());
-							try {
-								file.create(c, true, monitor);
-							} catch (CoreException e1) {
-								CVSUIPlugin.openError(getShell(), null, null, e1);
-							}
-
-							try {
-								c.close();
+							try (ByteArrayInputStream c = new ByteArrayInputStream(buffer.toString().getBytes())) {
+								try {
+									file.create(c, true, monitor);
+								} catch (CoreException e1) {
+									CVSUIPlugin.openError(getShell(), null, null, e1);
+								}
 							} catch (IOException e2) {
 								CVSUIPlugin.openError(getShell(), null, null, e2);
 							}

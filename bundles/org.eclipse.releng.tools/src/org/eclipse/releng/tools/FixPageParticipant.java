@@ -18,10 +18,12 @@ import org.eclipse.ui.part.IPageBookViewPage;
 
 public class FixPageParticipant implements IConsolePageParticipant {
 
+	@Override
 	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
 
+	@Override
 	public void init(IPageBookViewPage page, IConsole console) {
 		IActionBars actionBars = page.getSite().getActionBars();
 		actionBars.getToolBarManager().appendToGroup(
@@ -31,12 +33,15 @@ public class FixPageParticipant implements IConsolePageParticipant {
 				IConsoleConstants.LAUNCH_GROUP, new RemoveAllConsolesAction());
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void activated() {
 	}
 
+	@Override
 	public void deactivated() {
 	}
 

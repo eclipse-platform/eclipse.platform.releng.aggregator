@@ -57,6 +57,7 @@ public class MapProjectSelectionPage extends WizardPage {
 		this.settings = settings;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite topContainer = new Composite(parent, SWT.NONE);
 		topContainer.setLayout(new GridLayout());
@@ -86,12 +87,15 @@ public class MapProjectSelectionPage extends WizardPage {
 		tree.setLayoutData(gd);
 		ListViewer result = new ListViewer(tree);
 		result.setContentProvider(new IStructuredContentProvider() {
+			@Override
 			public Object[] getElements(Object inputElement) {
 				Set<IProject> projects=(Set<IProject>)inputElement;
 				return projects.toArray(new IProject[projects.size()]);
 			}
+			@Override
 			public void dispose() {	
 			}
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 		});
@@ -102,7 +106,7 @@ public class MapProjectSelectionPage extends WizardPage {
 	}	
 
 	private static Set<IProject> getMapFileProjects() {
-		Set<IProject> projects = new HashSet<IProject>();
+		Set<IProject> projects = new HashSet<>();
 		MapFile[] mapFiles;
 		try {
 			mapFiles = MapFile.findAllMapFiles(RelEngPlugin.getWorkspace().getRoot());

@@ -92,7 +92,7 @@ public class IBMCopyrightComment extends CopyrightComment {
    	    String contribComment = body.substring(contrib);
    	    StringTokenizer tokens = new StringTokenizer(contribComment, "\r\n"); //$NON-NLS-1$
    	    tokens.nextToken();
-   	    ArrayList<String> contributors = new ArrayList<String>();
+   	    ArrayList<String> contributors = new ArrayList<>();
         String linePrefix = getLinePrefix(commentStyle);
    	    while(tokens.hasMoreTokens()) {
    	        String contributor = tokens.nextToken();
@@ -124,15 +124,13 @@ public class IBMCopyrightComment extends CopyrightComment {
 	        return null;
 
 	    StringWriter out = new StringWriter();
-		PrintWriter writer = new PrintWriter(out);
-		try {
+		
+		try (PrintWriter writer = new PrintWriter(out)) {
 		    writeCommentStart(writer);
 			writeLegal(writer, linePrefix);
 			writeContributions(writer, linePrefix);
 		    writeCommentEnd(writer);
 			return out.toString();
-		} finally {
-		    writer.close();
 		}
 	}
 
@@ -141,16 +139,14 @@ public class IBMCopyrightComment extends CopyrightComment {
 	 */
 	public String getOriginalCopyrightComment() {
 	    StringWriter out = new StringWriter();
-		PrintWriter writer = new PrintWriter(out);
-		try {
+		
+		try (PrintWriter writer = new PrintWriter(out)) {
 			writer.print(originalText.substring(0, yearRangeStart));
 			writer.print(getCreationYear());
 			if (hasRevisionYear() && getRevisionYear() != getCreationYear())
 		        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
 			writer.print(originalText.substring(yearRangeEnd));
 			return out.toString();
-		} finally {
-		    writer.close();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013 IBM Corporation and others.
+ *  Copyright (c) 2013, 2016 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -10,25 +10,20 @@
  *******************************************************************************/
 package org.eclipse.releng.internal.tools.pomversion;
 
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.releng.tools.RelEngPlugin;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.releng.tools.RelEngPlugin;
 import org.eclipse.ui.IMarkerResolution;
 
 
@@ -49,16 +44,12 @@ public class PomVersionMarkerResolution implements IMarkerResolution {
 		this.correctedVersion = correctedVersion;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IMarkerResolution#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		return NLS.bind(Messages.PomVersionMarkerResolution_label, correctedVersion);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IMarkerResolution#run(org.eclipse.core.resources.IMarker)
-	 */
+	@Override
 	public void run(IMarker marker) {
 		if (correctedVersion == null || correctedVersion.trim().length() == 0) {
 			return;

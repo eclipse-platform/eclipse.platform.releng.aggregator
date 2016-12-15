@@ -40,7 +40,7 @@ import org.eclipse.osgi.util.NLS;
 public abstract class SourceFile {
 	
 	IFile file;
-	List<BlockComment> comments = new ArrayList<BlockComment>();
+	List<BlockComment> comments = new ArrayList<>();
 	StringWriter contents = new StringWriter();
 	private ITextFileBufferManager textFileBufferManager;
 	private String lineDelimiter;
@@ -118,50 +118,51 @@ public abstract class SourceFile {
 			}
 			
 			lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
-			BufferedReader aReader = new BufferedReader(new StringReader(document.get()));
-			String aLine = aReader.readLine();
-			String comment = ""; //$NON-NLS-1$
-			BufferedWriter contentsWriter = new BufferedWriter(contents);
-			int lineNumber = 0;
-			int commentStart = 0;
-			int commentEnd = 0;
-			boolean inComment = false;
-			String commentStartString = ""; //$NON-NLS-1$
-			
-			//Loop over the document, extract the comment.
-			while (aLine != null) {
-				contentsWriter.write(aLine);
-				contentsWriter.newLine();
-				if (!inComment && isCommentStart(aLine)) {
-					// start saving comment
-					inComment = true;
-					commentStart = lineNumber;
-					commentStartString = aLine;
-				}
-				
-				if (inComment) {
-					comment = comment + aLine + lineDelimiter;
-								
-					if (isCommentEnd(aLine, commentStartString) && commentStart != lineNumber) {
-						// stop saving comment
-						inComment = false;
-						commentEnd = lineNumber;
-						String commentEndString = aLine.trim();
-						commentEndString = commentEndString.substring(commentEndString.length()-2);
-						BlockComment aComment = new BlockComment(commentStart, commentEnd, comment.toString(), commentStartString, commentEndString);
-						comments.add(aComment);
-						comment = ""; //$NON-NLS-1$
-						commentStart = 0;
-						commentEnd = 0;
-						commentStartString = ""; //$NON-NLS-1$
+			try (BufferedReader aReader = new BufferedReader(new StringReader(document.get()))) {
+				String aLine = aReader.readLine();
+				String comment = ""; //$NON-NLS-1$
+				BufferedWriter contentsWriter = new BufferedWriter(contents);
+				int lineNumber = 0;
+				int commentStart = 0;
+				int commentEnd = 0;
+				boolean inComment = false;
+				String commentStartString = ""; //$NON-NLS-1$
+
+				// Loop over the document, extract the comment.
+				while (aLine != null) {
+					contentsWriter.write(aLine);
+					contentsWriter.newLine();
+					if (!inComment && isCommentStart(aLine)) {
+						// start saving comment
+						inComment = true;
+						commentStart = lineNumber;
+						commentStartString = aLine;
 					}
+
+					if (inComment) {
+						comment = comment + aLine + lineDelimiter;
+
+						if (isCommentEnd(aLine, commentStartString) && commentStart != lineNumber) {
+							// stop saving comment
+							inComment = false;
+							commentEnd = lineNumber;
+							String commentEndString = aLine.trim();
+							commentEndString = commentEndString.substring(commentEndString.length() - 2);
+							BlockComment aComment = new BlockComment(commentStart, commentEnd, comment.toString(),
+									commentStartString, commentEndString);
+							comments.add(aComment);
+							comment = ""; //$NON-NLS-1$
+							commentStart = 0;
+							commentEnd = 0;
+							commentStartString = ""; //$NON-NLS-1$
+						}
+					}
+
+					aLine = aReader.readLine();
+					lineNumber++;
 				}
-				
-				aLine = aReader.readLine();
-				lineNumber++;
+
 			}
-			
-			aReader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,17 +17,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 
 
 public class MapContentDocument implements ITypedElement, IStreamContentAccessor{
@@ -94,35 +90,23 @@ public class MapContentDocument implements ITypedElement, IStreamContentAccessor
 	public boolean isChanged() {
 		return !(oldContents.equals(newContents));
 	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.compare.ITypedElement#getName()
-	 */
+
+	@Override
 	public String getName() {
 		return mapFile.getFile().getName();
 	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.compare.ITypedElement#getImage()
-	 */
+
+	@Override
 	public Image getImage() {
 		return null;
 	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.compare.ITypedElement#getType()
-	 */
+
+	@Override
 	public String getType() {
 		return mapFile.getFile().getFileExtension();
 	}
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.compare.IStreamContentAccessor#getContents()
-	 */
+
+	@Override
 	public InputStream getContents() throws CoreException {
 		return new ByteArrayInputStream(getNewContent().getBytes());
 	}
