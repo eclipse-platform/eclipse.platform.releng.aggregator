@@ -174,7 +174,7 @@ public abstract class SourceFile {
 		if (comments.isEmpty()) {
 			return null;
 		} else {
-			return (BlockComment) comments.get(0);
+			return comments.get(0);
 		}
 	}
 

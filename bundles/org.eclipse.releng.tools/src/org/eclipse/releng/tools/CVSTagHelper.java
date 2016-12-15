@@ -46,7 +46,7 @@ public class CVSTagHelper {
 			return false;
 		String message = (errorMessage + "\n"); //$NON-NLS-1$
 		for (int i = 0; i < defaultTags.size(); i++) {
-			IResource aNotFoundResource = (IResource) defaultTags.get(i);
+			IResource aNotFoundResource = defaultTags.get(i);
 			message = message.concat("\n" + aNotFoundResource.getName()); //$NON-NLS-1$
 		}
 		message = message.concat("\n\n" + Messages.getString("CVSTagHelper.1")); //$NON-NLS-1$//$NON-NLS-2$

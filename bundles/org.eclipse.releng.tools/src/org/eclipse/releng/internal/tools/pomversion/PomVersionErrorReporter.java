@@ -352,7 +352,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			try {
 				Map<String, String> headers = new HashMap<String, String>();
 				ManifestElement.parseBundleManifest(manifest.getContents(), headers);
-				String ver = (String)headers.get(Constants.BUNDLE_VERSION);
+				String ver = headers.get(Constants.BUNDLE_VERSION);
 				if(ver == null) {
 					return;
 				}

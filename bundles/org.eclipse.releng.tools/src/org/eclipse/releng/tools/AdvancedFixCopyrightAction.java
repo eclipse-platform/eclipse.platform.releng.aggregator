@@ -341,7 +341,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			List<String> fileList = anEntry.getValue();
 			Iterator<String> listIterator = fileList.iterator();
 			while (listIterator.hasNext()) {
-				String fileName = (String) listIterator.next();
+				String fileName = listIterator.next();
 				stream.println("     " + fileName); //$NON-NLS-1$
 			}
 		}

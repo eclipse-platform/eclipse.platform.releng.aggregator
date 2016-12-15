@@ -78,7 +78,7 @@ public class MapFile {
 			}
 		}
 
-		this.entries = (MapEntry[]) list.toArray(new MapEntry[list.size()]);
+		this.entries = list.toArray(new MapEntry[list.size()]);
 	}
 	
 	private boolean isMapLine(String line) {

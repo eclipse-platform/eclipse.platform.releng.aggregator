@@ -132,8 +132,8 @@ public class MapEntry {
 
 		String[] args = getArrayFromStringWithBlank(entryLine.substring(end + 1), ",");
 		this.arguments = populate(args);
-		String tag = (String) arguments.get(KEY_TAG);
-		String repo = (String) arguments.get(KEY_CVSROOT);
+		String tag = arguments.get(KEY_TAG);
+		String repo = arguments.get(KEY_CVSROOT);
 		if (tag == null || tag.length() == 0 || repo == null || repo.length() == 0)
 			return;
 		valid = true;
@@ -211,7 +211,7 @@ public class MapEntry {
 	}
 
 	public String getTagName() {
-		String value = (String) arguments.get(KEY_TAG);
+		String value = arguments.get(KEY_TAG);
 		return value == null  || HEAD.equals(value) ? EMPTY_STRING : value;
 	}
 	
@@ -221,7 +221,7 @@ public class MapEntry {
 	}
 	
 	public String getPassword() {
-		String value = (String) arguments.get(KEY_PASSWORD);
+		String value = arguments.get(KEY_PASSWORD);
 		return value == null ? EMPTY_STRING : value;
 	}
 
@@ -230,17 +230,17 @@ public class MapEntry {
 	}
 
 	private String internalGetCVSModule()  {
-		String module = (String) arguments.get(KEY_PATH);
+		String module = arguments.get(KEY_PATH);
 		return module == null ? id : module;
 	}
 	
 	public String getCVSModule() {
-		String value = (String) arguments.get(KEY_PATH);
+		String value = arguments.get(KEY_PATH);
 		return value == null ? EMPTY_STRING : value;
 	}
 
 	public String getRepo() {
-		String value = (String) arguments.get(KEY_CVSROOT);
+		String value = arguments.get(KEY_CVSROOT);
 		return value == null ? EMPTY_STRING : value;
 	}
 
