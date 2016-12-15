@@ -47,6 +47,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 	private IApplicationContext appContext;
 	
 	
+	@Override
 	public Object run(final Object args) throws Exception {
 		// Get the application to test
 		Object application = getApplication((String[])args);
@@ -159,46 +160,48 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 		// for the first time only.
 		final boolean[] started = { false };
 		workbench.addWindowListener(new IWindowListener() {
+			@Override
 			public void windowOpened(IWorkbenchWindow w) {
 				if (started[0])
 					return;
-				w.getShell().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						started[0] = true;
-						try {
-							fTestRunnerResult = EclipseTestRunner.run((String[]) args);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						workbench.close();
+				w.getShell().getDisplay().asyncExec(() -> {
+					started[0] = true;
+					try {
+						fTestRunnerResult = EclipseTestRunner.run((String[]) args);
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
+					workbench.close();
 				});
 			}
+			@Override
 			public void windowActivated(IWorkbenchWindow window) {
 			}
+			@Override
 			public void windowDeactivated(IWorkbenchWindow window) {
 			}
+			@Override
 			public void windowClosed(IWorkbenchWindow window) {
 			}
 		});
 		return ((IPlatformRunnable) workbench).run(args);
 	}
 
+	@Override
 	public void runTests() {
 		fTestableObject.testingStarting();
-		fTestableObject.runTest(new Runnable() {
-			public void run() {
-				try {
-					fTestRunnerResult = EclipseTestRunner.run(Platform.getCommandLineArgs());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+		fTestableObject.runTest(() -> {
+			try {
+				fTestRunnerResult = EclipseTestRunner.run(Platform.getCommandLineArgs());
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		});
 		fTestableObject.testingFinished();
 	}
 
 
+	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		this.appContext = context;
 		String[] args = (String[]) appContext.getArguments().get("application.args");
@@ -208,6 +211,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 	}
 
 
+	@Override
 	public void stop() {
 		// TODO Auto-generated method stub
 		

@@ -108,8 +108,7 @@ public class EclipseTestRunner implements TestListener {
 
 		@Override
 		public void run() {
-			try {
-				BufferedReader reader= new BufferedReader(new InputStreamReader(fProcessOutput));
+			try (BufferedReader reader= new BufferedReader(new InputStreamReader(fProcessOutput))) {
 				String line= null;
 				while ((line= reader.readLine()) != null) {
 					fStream.println(line);
@@ -168,11 +167,11 @@ public class EclipseTestRunner implements TestListener {
 	/**
 	 * Formatters from the command line.
 	 */
-	private static Vector<JUnitResultFormatter> fgFromCmdLine = new Vector<JUnitResultFormatter>();
+	private static Vector<JUnitResultFormatter> fgFromCmdLine = new Vector<>();
 	/**
 	 * Holds the registered formatters.
 	 */
-	private Vector<JUnitResultFormatter> formatters = new Vector<JUnitResultFormatter>();
+	private Vector<JUnitResultFormatter> formatters = new Vector<>();
 	/**
 	 * Do we stop on errors.
 	 */
@@ -272,9 +271,9 @@ public class EclipseTestRunner implements TestListener {
 			} else if (args[i].startsWith("formatter=")) {
 				formatterString = args[i].substring(10);
 			} else if (args[i].startsWith("propsfile=")) {
-				FileInputStream in = new FileInputStream(args[i].substring(10));
-				props.load(in);
-				in.close();
+				try (FileInputStream in = new FileInputStream(args[i].substring(10))) {
+					props.load(in);
+				}
 			} else if (args[i].equals("-testlistener")) {
             	System.err.println("The -testlistener option is no longer supported\nuse the formatter= option instead");
 				return ERRORS;
@@ -509,6 +508,7 @@ public class EclipseTestRunner implements TestListener {
 									assumeUiThreadIsResponsive = false;
 									
 									display.asyncExec(new Runnable() {
+										@Override
 										public void run() {
 											assumeUiThreadIsResponsive= true;
 											
@@ -788,18 +788,21 @@ public class EclipseTestRunner implements TestListener {
 	/*
 	 * @see TestListener.addFailure
 	 */
+	@Override
 	public void startTest(Test t) {
 	}
 
 	/*
 	 * @see TestListener.addFailure
 	 */
+	@Override
 	public void endTest(Test test) {
 	}
 
 	/*
 	 * @see TestListener.addFailure
 	 */
+	@Override
 	public void addFailure(Test test, AssertionFailedError t) {
 		if (fHaltOnFailure) {
 			fTestResult.stop();
@@ -809,6 +812,7 @@ public class EclipseTestRunner implements TestListener {
 	/*
 	 * @see TestListener.addError
 	 */
+	@Override
 	public void addError(Test test, Throwable t) {
 		if (fHaltOnError) {
 			fTestResult.stop();

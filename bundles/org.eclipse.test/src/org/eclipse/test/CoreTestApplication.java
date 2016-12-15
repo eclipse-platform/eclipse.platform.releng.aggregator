@@ -28,6 +28,7 @@ public class CoreTestApplication implements IPlatformRunnable {
 	 * This is the platform application entry point.
 	 * @see IPlatformRunnable
 	 */
+	@Override
 	public Object run(Object arguments) throws Exception {
 		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
 		return new Integer(runTests(args));
