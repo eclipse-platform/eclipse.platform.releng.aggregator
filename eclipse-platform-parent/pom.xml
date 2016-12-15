@@ -67,8 +67,16 @@
     <releaseNumberPlatform>4.7</releaseNumberPlatform>
 
 
-    <tycho.version>0.27.0-SNAPSHOT</tycho.version>
-    <tycho-extras.version>0.27.0-SNAPSHOT</tycho-extras.version>
+    <!-- Using snapshot, or locally built (forked) snapshot version for bug 484000.
+         Need to enable the tycho-snapshot-repo in <pluginRepositories> further down!
+    -->
+      <tycho.version>0.27.0-SNAPSHOT</tycho.version>
+      <tycho-extras.version>0.27.0-SNAPSHOT</tycho-extras.version>
+
+	<!-- using released version (normal case)
+    <tycho.version>0.26.0</tycho.version>
+    <tycho-extras.version>0.26.0</tycho-extras.version>
+    -->
 
     <cbi-plugins.version>1.1.4-SNAPSHOT</cbi-plugins.version>
 
@@ -91,12 +99,9 @@
 
     <ecf-repo.url>http://download.eclipse.org/rt/ecf/3.13.1/site.p2/</ecf-repo.url>
 
-    <!-- using snapshot repo for Tycho 0.27.0-SNAPSHOT, such as for bug 461207 -->
+    <!-- only used when Tycho snapshot repo is enabled in <pluginRepositories> further down -->
     <tycho-snapshot-repo.url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</tycho-snapshot-repo.url>
-    <!-- No need to specify sonatype URL for "Tycho". released versions available on maven central, 
-    which is now mirrored to Eclipse.org. 
-    <tycho-repo.url>https://oss.sonatype.org/content/repositories/public/</tycho-repo.url>
-    -->
+
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
     <!-- jdt.core and jdt.compiler.apt should "match", come from same build, and be signed
@@ -171,17 +176,11 @@
   </distributionManagement>
   <pluginRepositories>
 
-    <!-- only for staged Tycho builds 
-   <pluginRepository>
-     <id>tycho-0.25.0-staged</id>
-     <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1036/</url>
-   </pluginRepository>
-No need to specify sonatype URL for "Tycho". released versions available on maven central, 
-    which is now mirrored to Eclipse.org. 
-    Only need if using snapshots.
--->
+    <!-- Released Tycho versions are available on maven central, which is now mirrored to Eclipse.org.
+         The tycho-snapshot-repo is only needed when using snapshots.
+    -->
     <pluginRepository>
-      <id>tycho</id>
+      <id>tycho-snapshots</id>
       <url>${tycho-snapshot-repo.url}</url>
       <releases>
         <enabled>true</enabled>
