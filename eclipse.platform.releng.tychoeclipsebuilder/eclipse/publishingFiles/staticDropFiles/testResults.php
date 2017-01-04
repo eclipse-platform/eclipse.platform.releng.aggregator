@@ -52,7 +52,7 @@ echo "<div id=\"midcolumn\">".PHP_EOL;
 
 echo "<h1>Test Results for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID;
 if (file_exists("buildUnstable")) {
-    echo "&nbsp;<b style='color:red;'> Unstable!</b>\n";
+        echo "&nbsp<a href=\"https://wiki.eclipse.org/Platform-releng/Unstable_build\" title=\"Unstable Build\" style='color:red;'>Unstable!</a>\n";
 }
 echo "</a></h1>".PHP_EOL;
 if (file_exists("buildUnstable")) {

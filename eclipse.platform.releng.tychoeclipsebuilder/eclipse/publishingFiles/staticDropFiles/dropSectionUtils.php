@@ -43,7 +43,12 @@ function genLinks($zipfile) {
   global $BUILD_DIR_SEG;
 
   $filetarget = "$clickthroughstr$zipfile";
-  $filelink =  "<a style=\"align:left\" href=\"$filetarget\">$zipfile</a>";
+  if (file_exists("./buildUnstable"))
+  {
+    $filelink =  "<img style=\"border:0px\" src=\"../../../images/caution.gif\" title=\"Build is unstable\" alt=\"Build is unstable\"><a style=\"align:left\" href=\"$filetarget\">$zipfile</a>";
+  } else {
+    $filelink =  "<a style=\"align:left\" href=\"$filetarget\">$zipfile</a>";
+  }
   $filesize = getDropSize($zipfile);
 
   echo "<td>$filelink</td>\n";

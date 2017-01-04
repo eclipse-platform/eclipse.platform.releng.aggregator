@@ -92,17 +92,19 @@ require("DL.thin.header.php.html");
 <h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?>
 <?php
     if (file_exists("buildUnstable")) {
-        echo "&nbsp;<b style='color:red;'> Unstable!</b>\n";
+        echo "&nbsp<a href=\"https://wiki.eclipse.org/Platform-releng/Unstable_build\" title=\"Unstable Build\" style='color:red;'>Unstable!</a>\n";
     }
 ?>
 </h1>
-<p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform build along with
-is logs and tests.</p>
 <?php
 if (file_exists("buildUnstable")) {
   $bu_file = file_get_contents("buildUnstable");
   echo "$bu_file";
 }
+?>
+<p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform build along with
+is logs and tests.</p>
+<?php
 if (file_exists("pom_updates/index.html")) {
   echo "<h2><a href=\"pom_updates/\">POM updates made</a></h2>";
 }
