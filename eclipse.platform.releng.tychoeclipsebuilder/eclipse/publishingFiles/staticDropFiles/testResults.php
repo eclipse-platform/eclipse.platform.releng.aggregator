@@ -50,7 +50,15 @@ require("DL.thin.header.php.html");
 
 echo "<div id=\"midcolumn\">".PHP_EOL;
 
-echo "<h1>Test Results for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID."</a></h1>".PHP_EOL;
+echo "<h1>Test Results for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID;
+if (file_exists("buildUnstable")) {
+    echo "&nbsp;<b style='color:red;'> Unstable!</b>\n";
+}
+echo "</a></h1>".PHP_EOL;
+if (file_exists("buildUnstable")) {
+  $bu_file = file_get_contents("buildUnstable");
+  echo "$bu_file";
+}
 
 echo "<h3 id=\"Logs\"> Logs for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID."</a></h3>".PHP_EOL;
 echo "<ul>";
