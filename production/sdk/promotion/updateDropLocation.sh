@@ -255,11 +255,28 @@ function sendTestResultsMail ()
       echo -e "\n\tProgramming error. We should always match!?"
       echo -e "\n\tDEBUG: line: ${line}"
     fi
+    
+    platform=$(echo ${JOB_NAME}|cut -b 12-16)
+    case "$platform" in
+        "cen64")
+            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/platform/view/Unit Tests"
+            ;;
+        "lin64")
+            if [ "${buildType}" == "M" ]
+            then
+                HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox"
+            else
+                HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/platform/view/Unit Tests"
+            fi
+        *)
+            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox"
+            ;;
+    esac
 
     # Now read "elapsed time" duration from Hudson. (The time above is the sum of all unit tests times,
     # so does not include "overhead" and is deceptive.) The "-O -" means send output to standard out (instead of file).
     # Discovered that "xpath plugin 1.03" was needed. Initially had 1.0.2 on local test system.
-    elapsedTimeDuration=$( wget -O - "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/job/${JOB_NAME}/${JOB_NUMBER}/api/xml?xpath=/*/duration/text%28%29")
+    elapsedTimeDuration=$( wget -O - "${HUDSON_URL}/job/${JOB_NAME}/${JOB_NUMBER}/api/xml?xpath=/*/duration/text%28%29")
 
     # Subject is similar to "build finished" subject in syncDropLocation.sh.
     # 4.3.0 I-Build: I20120411-2034: 7 failures from ep46I-unit-mac64
@@ -287,10 +304,10 @@ function sendTestResultsMail ()
 
     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Tests Passed: ${testsPassed} &nbsp;&nbsp;&nbsp; Total Number of Tests: $(( testsFailed + testsPassed )) &nbsp;&nbsp;&nbsp; Total Tests Time: $(show_hours_minutes ${testsDuration}) &nbsp;&nbsp;&nbsp; Total Elapsed Time: $(show_hours_minutes ${elapsedTimeDuration} )</p>\n"
 
-    link=$(linkURL "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/")
+    link=$(linkURL "${HUDSON_URL}/")
     message1="${message1}<br /><p>&nbsp;&nbsp;&nbsp;In general, the tests can be viewed on Hudson at <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
 
-    link=$(linkURL "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/job/${JOB_NAME}/${JOB_NUMBER}/")
+    link=$(linkURL "${HUDSON_URL}/job/${JOB_NAME}/${JOB_NUMBER}/")
     message1="${message1}<br /><p>&nbsp;&nbsp;&nbsp;For this specific test the specific Hudson job results can be viewed at<br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
 
     sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
