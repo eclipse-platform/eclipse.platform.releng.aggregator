@@ -175,7 +175,7 @@ else {
 
 
   //  We will always display link to logs (as normal link, not using color:inherit;)
-  echo "<li>View the <a  style=\"text-decoration:none\" title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
+  echo "<li>View the <a title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
 
   // This section if for overall status if anything failed, overall is failed
   // -3 is special code meaning no testResults directory exists yet.
