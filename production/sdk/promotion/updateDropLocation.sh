@@ -268,6 +268,7 @@ function sendTestResultsMail ()
             else
                 HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/platform/view/Unit Tests"
             fi
+            ;;
         *)
             HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox"
             ;;
