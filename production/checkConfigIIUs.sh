@@ -36,25 +36,24 @@ ECLIPSE_BUILD_DIR="${AGGR_DIR}/eclipse.platform.releng.tychoeclipsebuilder"
 
 declare -a PLATFORMS=( \
 cocoa.macosx.x86_64 \
-gtk.aix.ppc \
-gtk.aix.ppc64 \
-gtk.hpux.ia64 \
 gtk.linux.ppc \
 gtk.linux.ppc64 \
 gtk.linux.ppc64le \
-gtk.linux.s390 \
-gtk.linux.s390x \
 gtk.linux.x86 \
 gtk.linux.x86_64 \
-gtk.solaris.sparcv9 \
-gtk.solaris.x86 \
 win32.win32.x86 \
 win32.win32.x86_64 \
 )
 # M builds, as of 4.4.x had Mac 32 bit
 if [[ ${BUILD_TYPE} == "M" ]]
 then
-    PLATFORMS+=(cocoa.macosx.x86)
+    PLATFORMS+=(gtk.linux.s390)
+    PLATFORMS+=(gtk.linux.s390x)
+    PLATFORMS+=(gtk.solaris.sparcv9)
+    PLATFORMS+=(gtk.solaris.x86)
+    PLATFORMS+=(gtk.aix.ppc)
+    PLATFORMS+=(gtk.aix.ppc64)
+    PLATFORMS+=(gtk.hpux.ia64)
 fi
 NPLATFORMS=${#PLATFORMS[@]}
 
