@@ -456,9 +456,7 @@ else
 fi
 
 set -x
-echo -e "\n\n\n#jdeps -jdkinternals output:" > ${logsDirectory}/jdepsReport.txt
-find ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-I-builds/${BUILD_ID}/ -name "*.jar" -exec ${JAVA_HOME}/bin/jdeps -jdkinternals {} \; >> ${logsDirectory}/jdepsReport.txt 
-echo "# " >> ${logsDirectory}/jdepsReport.txt
+${SCRIPT_PATH}/reports/jdepsReport.sh ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds/${BUILD_ID}/ ${logsDirectory}/jdepsReport.txt 
 set +x
 
 #For now, only "publish equinox and promote" if N, I or M build, skip if P, X, or Y
