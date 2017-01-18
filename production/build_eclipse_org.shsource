@@ -77,12 +77,15 @@ export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.8.0_x64-latest}
 export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.9.6}
 # we "add to" ANT_OPTS, since Hudson may define some required values
 export ANT_OPTS="${ANT_OPTS} -Dbuild.sysclasspath=ignore -Dincludeantruntime=false"
+# use separate temp dir for maven like RAMDISK
+export MAVEN_TMP_DIR=${MAVEN_TMP_DIR:-${TMP_DIR}}
+mkdir -p ${MAVEN_TMP_DIR}
 #
 # remember, MaxPermSize is specific to "Oracle VMs". It has to be removed (or over ridden)
 # for other VMs or the VM might fail to start due to unrecognized -XX option.
 # Normally should not use -Declipse.p2.mirrors=false, especially on a regular basis.
 # Lower mx since less needed with Tycho 0.23.1. But, still higher than our previous 4G, since we do use near 4G.
-export MAVEN_OPTS=${MAVEN_OPTS:--Xms2048m -Xmx5120m -Djava.io.tmpdir=${TMP_DIR} -Dtycho.localArtifacts=ignore ${MIRROR_SETTING}}
+export MAVEN_OPTS=${MAVEN_OPTS:--Xms2048m -Xmx5120m -Djava.io.tmpdir=${MAVEN_TMP_DIR} -Dtycho.localArtifacts=ignore ${MIRROR_SETTING}}
 
 export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.3.3/bin}
 

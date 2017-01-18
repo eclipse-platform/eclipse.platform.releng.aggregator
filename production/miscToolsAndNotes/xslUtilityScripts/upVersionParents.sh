@@ -14,7 +14,9 @@ export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}}
 
 TMP_DIR=${TMP_DIR:-$(pwd)/../tmp}
 mkdir -p $TMP_DIR
-export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR}"}
+MAVEN_TMP_DIR=${MAVEN_TMP_DIR:-${TMP_DIR}}
+mkdir -p ${MAVEN_TMP_DIR}
+export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${MAVEN_TMP_DIR}"}
 export MAVEN_PATH=${MAVEN_PATH:-/opt/local/apache-maven-3.1.1/bin}
 export PATH=${JAVA_HOME}/bin:${MAVEN_PATH}:${PATH}
 

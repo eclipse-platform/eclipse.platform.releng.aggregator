@@ -372,6 +372,9 @@ fn-maven-build-aggregator ()
 
   MARGS="$MARGS ${MAVEN_BREE}"
 
+  export MAVEN_TMP_DIR=${MAVEN_TMP_DIR:-${TMP_DIR}}
+  mkdir -p ${MAVEN_TMP_DIR}
+
   # Here we count on $BUILD_TYPE being exported. TODO: make parameter later?
   if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]]
   then
@@ -425,7 +428,7 @@ fn-maven-build-aggregator ()
     clean verify \
     -DskipTests=true \
     -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
-    -Dtycho.debug.artifactcomparator \
+    -Dtycho.debug.artifactcomparator -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
     -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
     -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
   rc=$?
@@ -599,15 +602,22 @@ fn-pom-version-updater ()
   echo "DEBUG: DEBUG: $DEBUG"
   echo "DEBUG: QUIET: $QUIET"
   echo "DEBUG: MARGS: $MARGS"
+
+  export MAVEN_TMP_DIR=${MAVEN_TMP_DIR:-${TMP_DIR}}
+  mkdir -p ${MAVEN_TMP_DIR}
+
   # fail fast if not set up correctly
   rc=$(fn-check-dir-exists TMP_DIR)
+  checkForErrorExit "$rc" "$rc"
+
+  rc=$(fn-check-dir-exists MAVEN_TMP_DIR)
   checkForErrorExit "$rc" "$rc"
 
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
   pushd "$REPO_DIR"
   mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
     org.eclipse.tycho:tycho-versions-plugin:0.26.0:update-pom \
-    -Dmaven.repo.local=$LOCAL_REPO \
+    -Dmaven.repo.local=$LOCAL_REPO -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
     -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
   RC=$?
   if [[ $RC != 0 ]]
