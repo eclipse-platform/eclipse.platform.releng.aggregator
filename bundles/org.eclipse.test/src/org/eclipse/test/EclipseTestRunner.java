@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -290,11 +290,11 @@ public class EclipseTestRunner implements TestListener {
 			props.put(key, p.get(key));
 		}
 
-		if (timeoutString == null || timeoutString.length() == 0) {
+		if (timeoutString == null || timeoutString.isEmpty()) {
 			System.err.println("INFO: optional timeout was not specified.");
 		} else {
 			String timeoutScreenOutputDir = null;
-			if (junitReportOutput == null || junitReportOutput.length() == 0) {
+			if (junitReportOutput == null || junitReportOutput.isEmpty()) {
 				timeoutScreenOutputDir = "timeoutScreens";
 			} else {
 				timeoutScreenOutputDir = junitReportOutput + "/timeoutScreens";
@@ -538,10 +538,8 @@ public class EclipseTestRunner implements TestListener {
 											Control focusControl = display
 													.getFocusControl();
 											if (focusControl != null) {
-												out
-														.println("FocusControl: ");
-												StringBuilder indent = new StringBuilder(
-														"  ");
+												out.println("FocusControl: ");
+												StringBuilder indent = new StringBuilder("  ");
 												do {
 													out.println(indent
 															.toString()
@@ -623,7 +621,7 @@ public class EclipseTestRunner implements TestListener {
 		}
 		Method suiteMethod = null;
 		try {
-			suiteMethod = testClass.getMethod(SUITE_METHODNAME, new Class[0]);
+			suiteMethod = testClass.getMethod(SUITE_METHODNAME);
 		} catch (Exception e) {
 			// try to extract a test suite automatically
 			clearStatus();
@@ -638,10 +636,8 @@ public class EclipseTestRunner implements TestListener {
 			}
 			if (jUnit4TestAdapterClass != null) {
 				try {
-					Constructor<?> jUnit4TestAdapterCtor = jUnit4TestAdapterClass
-							.getConstructor(new Class[] { Class.class });
-					return (Test) jUnit4TestAdapterCtor
-							.newInstance(new Object[] { testClass });
+					Constructor<?> jUnit4TestAdapterCtor = jUnit4TestAdapterClass.getConstructor(Class.class);
+					return (Test) jUnit4TestAdapterCtor.newInstance(testClass);
 				} catch (Exception e1) {
 					runFailed(new InvocationTargetException(e1,
 							"Failed to create a JUnit4TestAdapter for \""
@@ -658,8 +654,7 @@ public class EclipseTestRunner implements TestListener {
 		}
 		Test test = null;
 		try {
-			test = (Test) suiteMethod.invoke(null, (Object[]) new Class[0]); // static
-																				// method
+			test = (Test) suiteMethod.invoke(null); // static method
 			if (test == null)
 				return test;
 		} catch (InvocationTargetException e) {
@@ -785,23 +780,14 @@ public class EclipseTestRunner implements TestListener {
 		return fRetCode;
 	}
 
-	/*
-	 * @see TestListener.addFailure
-	 */
 	@Override
 	public void startTest(Test t) {
 	}
 
-	/*
-	 * @see TestListener.addFailure
-	 */
 	@Override
 	public void endTest(Test test) {
 	}
 
-	/*
-	 * @see TestListener.addFailure
-	 */
 	@Override
 	public void addFailure(Test test, AssertionFailedError t) {
 		if (fHaltOnFailure) {
@@ -809,9 +795,6 @@ public class EclipseTestRunner implements TestListener {
 		}
 	}
 
-	/*
-	 * @see TestListener.addError
-	 */
 	@Override
 	public void addError(Test test, Throwable t) {
 		if (fHaltOnError) {
@@ -915,9 +898,7 @@ public class EclipseTestRunner implements TestListener {
 		Object o = null;
 		try {
 			o = f.newInstance();
-		} catch (InstantiationException e) {
-			throw new BuildException(e);
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException|IllegalAccessException e) {
 			throw new BuildException(e);
 		}
 
@@ -978,9 +959,7 @@ public class EclipseTestRunner implements TestListener {
 				process.destroy();
 				System.err.println("Killed AwtScreenshot VM after " + screenshotTimeout + " seconds.");
 			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (URISyntaxException|IOException e) {
 			e.printStackTrace();
 		}
 	}
