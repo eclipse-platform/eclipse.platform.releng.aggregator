@@ -27,7 +27,14 @@ then
   echo "ERROR: No JVM define, or the defined one was found to not be executable"
   exit 1
 fi
-echo "jvm: $jvm"
+#Extract GTK Version and host name
+
+gtkType=$(echo ${testedPlatform}|cut -d- -f4|cut -d_ -f1)
+gtkVersion=$(rpm -q ${gtkType}|cut -d- -f2)
+
+echo "Jvm        : ${jvm}"
+echo "Host       : $(hostname)"
+echo "GTK Version: ${gtkVersion}"
 
 stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/workarea/${buildId}/eclipse-testing/platformLocation/}
 # Note: test.xml will "reinstall" fresh install of what we are testing,
