@@ -14,14 +14,14 @@
 # deferredCompositeAdd script
 
 # TODO: if another build has taken place (such as a PATCH build) we 
-# may need to 'pull' aggegator first before we can push our tag
+# may need to 'pull' aggregator first before we can push our tag
 
 echo "#!/usr/bin/env bash" > ${CL_SITE}/deferredTag.sh
 echo "# navigate to gitcache aggregator" >> ${CL_SITE}/deferredTag.sh
 echo "pushd ${BUILD_ROOT}/${AGGR_LOCATION}" >> ${CL_SITE}/deferredTag.sh
 echo "" >> ${CL_SITE}/deferredTag.sh
 echo "# DROP_ID == BUILD_ID, which should already exist as tag (for all I and M builds)" >> ${CL_SITE}/deferredTag.sh
-echo "git submodule foreach git tag ${NEW_TAG} ${DROP_ID}" >> ${CL_SITE}/deferredTag.sh
+echo "git submodule foreach git tag -a -m \"${NEW_ANNOTATION}\" ${NEW_TAG} ${DROP_ID}" >> ${CL_SITE}/deferredTag.sh
 echo "git tag -a -m \"${NEW_ANNOTATION}\" ${NEW_TAG} ${DROP_ID}" >> ${CL_SITE}/deferredTag.sh
 echo "RC=\$?" >> ${CL_SITE}/deferredTag.sh
 echo "if [[ \$RC != 0 ]]" >> ${CL_SITE}/deferredTag.sh
