@@ -10,8 +10,8 @@
 include("buildproperties.php");
 
 $expectedTestConfigs = array();
-$expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-unit-cen64_linux.gtk.x86_64_8.0";
-$expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-unit-lin64_linux.gtk.x86_64_8.0";
+$expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-unit-cen64-gtk3_linux.gtk.x86_64_8.0";
+$expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-unit-cen64-gtk2_linux.gtk.x86_64_8.0";
 $expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-unit-mac64_macosx.cocoa.x86_64_8.0";
 $expectedTestConfigs[]="ep46$TESTED_BUILD_TYPE-unit-win32_win32.win32.x86_8.0";
 
