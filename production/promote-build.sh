@@ -10,11 +10,7 @@
 #     David Williams - initial API and implementation
 #*******************************************************************************
 
-# Utility to trigger the promotion of build. This utility just creates
-# a file to be executed by cron job. The actual promotion is done by files
-# in sdk directory of build machine. This "cron job approach" is required since
-# a different user id must promote things to "downloads". The promotion scripts
-# also trigger the unit tests on Hudson.
+# Utility to promote the build and trigger the unit tests on Hudson.
 
 function usage ()
 {
@@ -44,11 +40,10 @@ then
   exit 1
 fi
 
-scriptName=promote-${STREAM}-${BUILD_ID}.sh
 if [[ "${testbuildonly}" == "true" ]]
 then
-  # allows the "test" creation of promotion script, but, not have it "seen" be cron job
-  scriptName=TEST-$scriptName
+  echo "Did not promote build since testbuildonly is true."
+  exit 0
 fi
 
 # if EBUILDER_HASH is not defined, assume master, so order of following parameters are maintained.
