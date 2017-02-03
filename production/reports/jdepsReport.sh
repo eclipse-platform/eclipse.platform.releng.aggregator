@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #*******************************************************************************
 # Copyright (c) 2017 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
@@ -45,5 +45,20 @@ fi
 mkdir -p ${outputDir}
 
 echo -e "\n\n\n#jdeps -jdkinternals output:" > ${outputFile}
-find ${repo} -name "*.jar" -exec ${JAVA_HOME}/bin/jdeps -jdkinternals {} \; >> ${outputFile}
+find ${repo} -name "*.jar" -print > ${outputFile}.tmp
+for i in $(cat ${outputFile}.tmp)
+do
+  ${JAVA_HOME}/bin/jdeps -jdkinternals ${i} > ${outputFile}.interim
+  fileSize=$(stat -c %s ${outputFile}.interim)
+  if [ $fileSize -gt 0 ]
+  then
+    echo -e "\n###### Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
+    cat ${outputFile}.interim >> ${outputFile}
+    echo -e "\n\n" >> ${outputFile}
+    rm ${outputFile}.interim
+  fi
+done
 echo "# " >> ${outputFile}
+
+#Cleanup
+rm ${outputFile}.tmp
