@@ -56,8 +56,8 @@ do
     cat ${outputFile}.interim >> ${outputFile}
     echo -e "\n###### End of Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
     echo -e "\n" >> ${outputFile}
-    rm ${outputFile}.interim
   fi
+  rm ${outputFile}.interim
 done
 echo "# " >> ${outputFile}
 
