@@ -52,9 +52,10 @@ do
   fileSize=$(stat -c %s ${outputFile}.interim)
   if [ $fileSize -gt 0 ]
   then
-    echo -e "\n###### Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
+    echo -e "\n###### Start of Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
     cat ${outputFile}.interim >> ${outputFile}
-    echo -e "\n\n" >> ${outputFile}
+    echo -e "\n###### End of Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
+    echo -e "\n" >> ${outputFile}
     rm ${outputFile}.interim
   fi
 done
