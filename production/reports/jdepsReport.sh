@@ -46,7 +46,7 @@ mkdir -p ${outputDir}
 
 echo -e "\n\n\n#jdeps -jdkinternals output:" > ${outputFile}
 find ${repo} -name "*.jar" -print > ${outputFile}.tmp
-for i in $(cat ${outputFile}.tmp)
+for i in $(sort ${outputFile}.tmp)
 do
   ${JAVA_HOME}/bin/jdeps -jdkinternals ${i} > ${outputFile}.interim
   fileSize=$(stat -c %s ${outputFile}.interim)
