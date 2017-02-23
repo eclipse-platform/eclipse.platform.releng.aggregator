@@ -47,7 +47,6 @@ clean() {
 
 echo -e "\n\tCurrent date: $(date +%Y\ %m%d\ %H:%M)"
 echo -e "\tRemoving drops from downloads server at ${equinoxBuilds}\n"
-clean $equinoxBuilds N
 clean $equinoxBuilds I
 clean $equinoxBuilds M2
 clean $equinoxBuilds M-
