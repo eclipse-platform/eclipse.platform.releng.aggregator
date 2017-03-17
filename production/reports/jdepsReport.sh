@@ -53,7 +53,7 @@ do
   if [ $fileSize -gt 0 ]
   then
     echo -e "\n###### Start of Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
-    cat ${outputFile}.interim >> ${outputFile}
+    head -n-5 ${outputFile}.interim >> ${outputFile}
     echo -e "\n###### End of Java internal API usage report for $(basename ${i}) \n">> ${outputFile}
     echo -e "\n" >> ${outputFile}
   fi
