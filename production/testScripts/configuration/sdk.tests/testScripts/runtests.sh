@@ -50,7 +50,7 @@ then
   exit 1
 else
   echo "stableEclipseInstallation directory found, as expected, at ${stableEclipseInstallLocation}"
-  # should only be one tar file there, with a name similar to eclipse-platform-4.6.2-linux-gtk-x86_64.tar.gz 
+  # should only be one tar file there, with a name similar to eclipse-platform-4.6.3-linux-gtk-x86_64.tar.gz 
   # so for simplicity, we'll assume all is well and untar what ever we find. 
   tar -xf ${stableEclipseInstallLocation}/*tar.gz -C ${stableEclipseInstallLocation}
 fi
