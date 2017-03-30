@@ -42,6 +42,7 @@
     <td><b>Compile Logs (Jar Files)</b></td>
     <td><b>Forbidden Access Warnings</b></td>
     <td><b>Discouraged Access Warnings</b></td>
+    <td><b>Informational Warnings</b></td>
   </tr>
 
   %accesseslogs%
