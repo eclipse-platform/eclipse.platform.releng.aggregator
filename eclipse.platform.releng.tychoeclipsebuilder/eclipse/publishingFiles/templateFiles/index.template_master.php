@@ -130,7 +130,7 @@ if (isset ($README_ID)) {
 
 if (file_exists("TEST_INVOCATION_FAILED.html")) {
   $tf_file = file_get_contents("TEST_INVOCATION_FAILED.html");
-  echo "<h2>Test Invocation Failed</h2>$tf_file";
+  echo "<h3>Test Invocation Failed</h3>$tf_file";
 }
 
 if (isset ($BUILD_FAILED) ) {
