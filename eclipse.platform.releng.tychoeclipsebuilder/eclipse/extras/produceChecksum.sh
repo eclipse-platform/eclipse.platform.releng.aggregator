@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
-
+#*******************************************************************************
+# Copyright (c) 2017 IBM Corporation and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#     David Williams - initial API and implementation
+#*******************************************************************************
+#
 # this localBuildProperties.shsource file is to ease local builds to
 # override some variables.
 # It should not be used for production builds.
@@ -63,6 +73,17 @@ do
     echo [sha512] ${zipfile}
     sha512sum -b ${zipfile} | tee checksum/${zipfile}.sha512  >>${allCheckSumsSHA512}
   fi
+done
+
+#array of dmgfiles
+dmgfiles=`ls *.zip`
+
+for dmgfile in ${dmgfiles}
+do
+  echo [sha256] ${dmgfile}
+  sha256sum -b ${dmgfile} | tee checksum/${zipfile}.sha256 >>${allCheckSumsSHA256}
+  echo [sha512] ${dmgfile}
+  sha512sum -b ${dmgfile} | tee checksum/${zipfile}.sha512  >>${allCheckSumsSHA512}
 done
 
 #array of tar.gzip files

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #*******************************************************************************
-# Copyright (c) 2016 IBM Corporation and others.
+# Copyright (c) 2017 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
@@ -84,6 +84,7 @@ fn-eq-gather-starterkit ()
     cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz
 
     cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.dmg "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.dmg
 
 
     cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip
