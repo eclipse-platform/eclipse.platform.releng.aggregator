@@ -128,11 +128,6 @@ if (isset ($README_ID)) {
   echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${README_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
 }
 
-if (file_exists("TEST_INVOCATION_FAILED.html")) {
-  $tf_file = file_get_contents("TEST_INVOCATION_FAILED.html");
-  echo "<h3>Test Invocation Failed</h3>$tf_file";
-}
-
 if (isset ($BUILD_FAILED) ) {
   echo "<h2>Build Failed</h2><p>See <a href=\"buildlogs.php\">logs</a>.</p>\n";
   $PATTERN='!(.*)(/buildlogs/)(.*)!';
@@ -257,6 +252,10 @@ else {
 
   echo "</ul>\n";
 
+  if (file_exists("TEST_INVOCATION_FAILED.html")) {
+    $tf_file = file_get_contents("TEST_INVOCATION_FAILED.html");
+    echo "<h3>Test Invocation Failed for some Machines</h3>$tf_file";
+  }
 
   echo "<h3>Summary of Unit Tests Results</h3>";
   echo "<table class=\"testTable\">\n";
