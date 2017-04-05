@@ -7,7 +7,7 @@ $pageAuthor   = "David Williams and Christopher Guindon";
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
 $eclipseStream="4";
-include('dlconfig4.php');
+include('dlYconfig4.php');
 $subdirDrops="drops4";
 $expectedtestConfigs=0;
 $testConfigs = array();
