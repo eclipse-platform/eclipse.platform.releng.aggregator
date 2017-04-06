@@ -76,7 +76,7 @@ do
 done
 
 #array of dmgfiles
-dmgfiles=`ls *.zip`
+dmgfiles=`ls *.dmg`
 
 for dmgfile in ${dmgfiles}
 do
