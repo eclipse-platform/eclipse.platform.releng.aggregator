@@ -81,9 +81,9 @@ dmgfiles=`ls *.dmg`
 for dmgfile in ${dmgfiles}
 do
   echo [sha256] ${dmgfile}
-  sha256sum -b ${dmgfile} | tee checksum/${zipfile}.sha256 >>${allCheckSumsSHA256}
+  sha256sum -b ${dmgfile} | tee checksum/${dmgfile}.sha256  >>${allCheckSumsSHA256}
   echo [sha512] ${dmgfile}
-  sha512sum -b ${dmgfile} | tee checksum/${zipfile}.sha512  >>${allCheckSumsSHA512}
+  sha512sum -b ${dmgfile} | tee checksum/${dmgfile}.sha512  >>${allCheckSumsSHA512}
 done
 
 #array of tar.gzip files
