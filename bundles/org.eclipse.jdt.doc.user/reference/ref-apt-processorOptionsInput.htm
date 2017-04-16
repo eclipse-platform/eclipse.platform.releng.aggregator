@@ -13,6 +13,7 @@
     </h1>
     <p>The Processor Option input dialog is reached from the <a href="ref-apt-config.htm">Annotation Processing
     preferences pane</a>.  It allows processor options to be added or modified.</p>  
+
     <p>Options entered here will be presented to processors using the Java 5 Mirror APIs through the 
     AnnotationProcessorEnvironment interface, or to processors using the Java 6 annotation processing
     APIs through the ProcessingEnvironment interface.  For Java 5 processors, in order to be compatible
@@ -21,15 +22,24 @@
     &quot;-Akey=value&quot;. For instance, an option with key &quot;foo&quot; and value &quot;bar&quot; would be presented
     both that way and as key &quot;-Afoo=bar&quot;, value null. For Java 6 processors, the options are
     simply presented as a map of key/value pairs, without the -A and without the combined -Akey=value form.</p>
-    <p>Option values representing paths may begin with a percent-delimited token such as <code>%FOO%/</code>.  
-    If the token is the name of a classpath variable, it will be replaced with the current
-    value of the variable at processor execution time.  The special value <code>ROOT</code> expands
-    to the absolute path of the workspace.  For example, <code>%ROOT%/foo/bar.xml</code> might 
-    expand to <code>d:/my_workspace/foo/bar.xml</code>, and <code>%JRE_LIB%/rt.jar</code> might 
-    expand to <code>c:/jdk1.5.0/lib/rt.jar</code>.  Similarly, the special value <code>PROJECT.DIR</code>
-    expands to the absolute path of the current project.</p>
-    <p>Certain options are automatically provided to the processors; entering them in this dialog
-    will have no effect, since the automatically provided values will override any values set here.  
-    The automatic options are described <a href="ref-apt-automaticProcessorOptions.htm">here</a>.</p>
+
+    <p>Option values representing paths may begin with a percent-delimited token such as <code>%FOO%/</code>. 
+    If the token is the name of a <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-classpath-variables.htm">
+    classpath variable</a>, it will be replaced with the current value of the variable at processor execution time. 
+    For example, if <code>FOO</code> is a classpath variable that points to <code>d:/foo</code>, then 
+    <code>%FOO%/bar.txt</code> will resolve to <code>d:/foo/bar.txt</code> when the processor is called. If the 
+    classpath variable does not exist, then the raw string (&quot;%FOO%&quot; in this example) will be added to the 
+    environment options. However, the remainder of the string (&quot;bar.txt&quot; in this example) does not need to exist. 
+    The special value <code>ROOT</code> expands to the absolute path of the workspace. For example, 
+    <code>%ROOT%/foo/bar.xml</code> might expand to <code>d:/my_workspace/foo/bar.xml</code>. When using ROOT, the first 
+    segment of the path must actually exist: in the example, the project <code>foo</code> must exist, but 
+    <code>bar.xml</code> need not. Similarly, the special value <code>PROJECT.DIR</code> expands to the absolute path of 
+    the current project.</p>
+
+    <p>Certain options such as <code>-classpath</code> and <code>-sourcepath</code> are automatically provided to the 
+    processors (for Java 5 processors; entering them in this dialog will have no effect, since the automatically provided 
+    values will override any values set here), or provided to the processors as variables such as <code>%classpath%</code> 
+    or <code>%sourcepath%</code> (for Java 6 processors). The automatic options are described 
+    <a href="ref-apt-automaticProcessorOptions.htm">here</a>.</p>
   </body>
 </html>
