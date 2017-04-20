@@ -343,30 +343,34 @@ public class BuildTests {
 
     }
 
-    public static final String[] REQUIRED_FEATURE_FILES  = { "epl-v10.html", "feature.properties", "feature.xml", "license.html" };
-    public static final String   REQUIRED_FEATURE_SUFFIX = "";
+	public static final List<String> REQUIRED_FEATURE_FILES = Arrays
+			.asList(new String[] { "epl-v10.html", "feature.properties", "feature.xml", "license.html" });
+	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
-    public static final String[] REQUIRED_PLUGIN_FILES  = { "about.html", "plugin.properties", "plugin.xml" };
-    public static final String   REQUIRED_PLUGIN_SUFFIX = ".jar";
+	public static final List<String> REQUIRED_PLUGIN_FILES = Arrays
+			.asList(new String[] { "about.html", "plugin.properties", "plugin.xml" });
+	public static final String REQUIRED_PLUGIN_SUFFIX = ".jar";
 
-    public static final String[] REQUIRED_FEATURE_PLUGIN_FILES  = { "about.html", "about.ini", "about.mappings", "about.properties",
-            "plugin.properties", "plugin.xml" };
-    public static final String   REQUIRED_FEATURE_PLUGIN_SUFFIX = ".gif";
+	public static final List<String> REQUIRED_FEATURE_PLUGIN_FILES = Arrays.asList(new String[] { "about.html",
+			"about.ini", "about.mappings", "about.properties", "plugin.properties", "plugin.xml" });
+	public static final String REQUIRED_FEATURE_PLUGIN_SUFFIX = ".gif";
 
-    public static final String[] REQUIRED_FRAGMENT_FILES  = { "fragment.xml" };
-    public static final String   REQUIRED_FRAGMENT_SUFFIX = "";
+	public static final List<String> REQUIRED_FRAGMENT_FILES = Arrays.asList(new String[] { "fragment.xml" });
+	public static final String REQUIRED_FRAGMENT_SUFFIX = "";
 
-    public static final String[] REQUIRED_SWT_FRAGMENT_FILES  = { "fragment.properties" };
-    public static final String   REQUIRED_SWT_FRAGMENT_SUFFIX = "";
+	public static final List<String> REQUIRED_SWT_FRAGMENT_FILES = Arrays
+			.asList(new String[] { "fragment.properties" });
+	public static final String REQUIRED_SWT_FRAGMENT_SUFFIX = "";
 
-    public static final String[] REQUIRED_SOURCE_FILES  = { "about.html" };
-    public static final String   REQUIRED_SOURCE_SUFFIX = ".zip";
+	public static final List<String> REQUIRED_SOURCE_FILES = Arrays.asList(new String[] { "about.html" });
+	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
 
-    public static final String[] REQUIRED_BUNDLE_FILES    = { "about.html" };
-    public static final String   REQUIRED_BUNDLE_MANIFEST = "MANIFEST.MF";
-    public static final String   REQUIRED_BUNDLE_SUFFIX   = ".jar";
+	public static final List<String> REQUIRED_BUNDLE_FILES = Arrays.asList(new String[] { "about.html" });
+	public static final String REQUIRED_BUNDLE_MANIFEST = "MANIFEST.MF";
+	public static final String REQUIRED_BUNDLE_SUFFIX = ".jar";
 
-    public static final String[] SUFFIX_EXEMPT_LIST = { "org.eclipse.swt", "org.apache.ant" };
+	public static final List<String> SUFFIX_EXEMPT_LIST = Arrays
+			.asList(new String[] { "org.eclipse.swt", "org.apache.ant" });
 
     public static final int PLUGIN_COUNT  = 84; // - 20; // Note this number
     // must include non-shipping
@@ -472,7 +476,7 @@ public class BuildTests {
         return false;
     }
 
-    private boolean testPluginJar(File aDirectory, String[] requiredFiles) {
+    private boolean testPluginJar(File aDirectory, List<String> requiredFiles) {
         ArrayList<String> list = new ArrayList<>();
         try (ZipFile jarredPlugin = new ZipFile(aDirectory)) {
             Enumeration<? extends ZipEntry> _enum = jarredPlugin.entries();
@@ -483,17 +487,17 @@ public class BuildTests {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        if (!list.containsAll(Arrays.asList(requiredFiles))) {
+        if (!list.containsAll(requiredFiles)) {
             return false;
         }
         return true;
     }
 
-    private boolean testDirectory(File aDirectory, String[] requiredFiles, String requiredSuffix) {
+    private boolean testDirectory(File aDirectory, List<String> requiredFiles, String requiredSuffix) {
         if (aDirectory.getName().endsWith(".jar")) {
             return testPluginJar(aDirectory, requiredFiles);
         } else {
-            if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
+            if (!Arrays.asList(aDirectory.list()).containsAll(requiredFiles)) {
                 return false;
             }
 
@@ -504,7 +508,7 @@ public class BuildTests {
 
             String plainName = aDirectory.getName().substring(0, index);
 
-            if (requiredSuffix.isEmpty() || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+            if (requiredSuffix.isEmpty() || SUFFIX_EXEMPT_LIST.contains(plainName)) {
                 return true;
             } else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
                 return false;
@@ -513,11 +517,11 @@ public class BuildTests {
         return true;
     }
 
-    private boolean testBundleDirectory(File aDirectory, String[] requiredFiles, String manifestFile, String requiredSuffix) {
+    private boolean testBundleDirectory(File aDirectory, List<String> requiredFiles, String manifestFile, String requiredSuffix) {
         if (aDirectory.getName().endsWith(".jar")) {
             return testPluginJar(aDirectory, requiredFiles);
         } else {
-            if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
+            if (!Arrays.asList(aDirectory.list()).containsAll(requiredFiles)) {
                 return false;
             }
 
@@ -545,7 +549,7 @@ public class BuildTests {
                 return false;
             }
 
-            if (requiredSuffix.isEmpty() || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+            if (requiredSuffix.isEmpty() || SUFFIX_EXEMPT_LIST.contains(plainName)) {
                 return true;
             } else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
                 return false;
