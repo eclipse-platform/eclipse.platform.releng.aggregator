@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -138,7 +137,7 @@ public class BuildTests {
         String sniffFolder = Platform.getLocation().toOSString();
 
         try {
-            if (zipFile.equals("")) {
+            if (zipFile.isEmpty()) {
                 FileTool.unzip(getTrueFilter(), new File(sniffFolder));
             } else {
                 FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
@@ -200,9 +199,7 @@ public class BuildTests {
         // String installDir = BootLoader.getInstallURL().getPath() + "..";
         File aFile = new File(installDir);
 
-        File[] files = aFile.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = files[i];
+        for (File file : aFile.listFiles()) {
             String fileName = file.getName();
             if (fileName.startsWith("eclipse-SDK-") && fileName.endsWith(".zip")) {
                 return file.getPath();
@@ -397,33 +394,26 @@ public class BuildTests {
         String installDir = Platform.getInstallLocation().getURL().getPath();
 
         File featureDir = new File(installDir, "features");
-        File[] features = featureDir.listFiles();
-        for (int i = 0; i < features.length; i++) {
-            File aFeature = features[i];
+        for (File aFeature : featureDir.listFiles()) {
             if (!testDirectory(aFeature, REQUIRED_FEATURE_FILES, REQUIRED_FEATURE_SUFFIX)) {
                 result.add(aFeature.getPath());
             }
         }
 
         String aString = "";
-        if (result.size() > 0) {
-
-            Iterator<String> iter = result.iterator();
-            while (iter.hasNext()) {
-                String element = iter.next();
+        if (!result.isEmpty()) {
+            for (String element: result) {
                 aString = aString + element + "; ";
             }
         }
-        assertTrue("Feature directory missing required files: " + aString, result.size() == 0);
+        assertTrue("Feature directory missing required files: " + aString, result.isEmpty());
     }
     @Test
     public void testPluginFiles() {
         List<String> result = new ArrayList<>();
         String installDir = Platform.getInstallLocation().getURL().getPath();
         File pluginDir = new File(installDir, "plugins");
-        File[] plugins = pluginDir.listFiles();
-        for (int i = 0; i < plugins.length; i++) {
-            File aPlugin = plugins[i];
+        for (File aPlugin : pluginDir.listFiles()) {
             if (aPlugin.getName().indexOf("test") == -1) {
                 if (!testPluginFile(aPlugin)) {
                     result.add(aPlugin.getPath());
@@ -432,15 +422,12 @@ public class BuildTests {
         }
 
         String aString = "";
-        if (result.size() > 0) {
-
-            Iterator<String> iter = result.iterator();
-            while (iter.hasNext()) {
-                String element = iter.next();
+        if (!result.isEmpty()) {
+            for (String element : result) {
                 aString = aString + element + "; ";
             }
         }
-        assertTrue("Plugin directory missing required files: " + aString, result.size() == 0);
+        assertTrue("Plugin directory missing required files: " + aString, result.isEmpty());
     }
 
     private boolean testPluginFile(File aPlugin) {
@@ -517,7 +504,7 @@ public class BuildTests {
 
             String plainName = aDirectory.getName().substring(0, index);
 
-            if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+            if (requiredSuffix.isEmpty() || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
                 return true;
             } else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
                 return false;
@@ -547,8 +534,7 @@ public class BuildTests {
             if (metaFiles == null) {
                 return (false);
             } else {
-                for (int i = 0; i < metaFiles.length; i++) {
-                    String filename = metaFiles[i];
+                for (String filename : metaFiles) {
                     if (filename == manifestFile) {
                         return true;
                     }
@@ -559,7 +545,7 @@ public class BuildTests {
                 return false;
             }
 
-            if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+            if (requiredSuffix.isEmpty() || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
                 return true;
             } else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
                 return false;
@@ -585,8 +571,7 @@ public class BuildTests {
             return false;
         }
 
-        for (int i = 0; i < sourceDirs.length; i++) {
-            File aSourceDir = sourceDirs[i];
+        for ( File aSourceDir : sourceDirs) {
             if (!testDirectory(aSourceDir, REQUIRED_SOURCE_FILES, REQUIRED_SOURCE_SUFFIX)) {
                 return false;
             }
@@ -745,10 +730,8 @@ public class BuildTests {
             String JAVADOC_ERROR = ": error";
             String JAVADOC_JAVA = ".java:";
 
-            BufferedReader in = null;
             for (int i = 0; i < javadocLogs.length; i++) {
-                try {
-                    in = new BufferedReader(new InputStreamReader(javadocLogs[i].openStream()));
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(javadocLogs[i].openStream()))){
                     String tmp;
                     while ((tmp = in.readLine()) != null) {
                         tmp = tmp.toLowerCase();
@@ -759,8 +742,6 @@ public class BuildTests {
                                 logs.add(fileName);
                         }
                     }
-                    in.close();
-
                 }
                 catch (FileNotFoundException e) {
                     logs.add("Unable to find " + new File(javadocLogs[i].getFile()).getName() + " to read.");
@@ -817,10 +798,7 @@ public class BuildTests {
 
             String COMPARATOR_ERROR = "difference found";
 
-            BufferedReader in = null;
-
-            try {
-                in = new BufferedReader(new InputStreamReader(comparatorLogs.openStream()));
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(comparatorLogs.openStream()))){
                 String tmp;
                 while ((tmp = in.readLine()) != null) {
                     tmp = tmp.toLowerCase();
@@ -830,8 +808,6 @@ public class BuildTests {
                             logs.add(fileName);
                     }
                 }
-                in.close();
-
             }
             catch (FileNotFoundException e) {
                 logs.add("Unable to find " + new File(comparatorLogs.getFile()).getName() + " to read.");
@@ -856,12 +832,7 @@ public class BuildTests {
         Properties properties = new Properties();
         try {
             properties.load(new BufferedInputStream(new FileInputStream(CONFIG_FILENAME)));
-        }
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
