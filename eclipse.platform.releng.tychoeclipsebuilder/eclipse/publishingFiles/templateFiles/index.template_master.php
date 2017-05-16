@@ -259,7 +259,13 @@ else {
 
   echo "<h3>Summary of Unit Tests Results</h3>";
   echo "<table class=\"testTable\">\n";
-  echo "<caption>".$boxesDisplay." of ".count($expectedTestConfigs)." integration and unit test configurations are complete.</caption> \n";
+  echo "<caption> \n";
+  echo "<p>".$boxesDisplay." of ".count($expectedTestConfigs)." integration and unit test configurations are complete.</p> \n";
+  if (file_exists("testNotes.html")) {
+    $my_file = file_get_contents("testNotes.html");
+    echo $my_file;
+  }
+  echo "</caption> \n";
   echo "<tr><th style=\"width:40%\">Tested Platform</th><th>Failed</th><th>Passed</th><th>Total</th><th>Test&nbsp;Time&nbsp;(s)</th></tr>\n";
 
   foreach ($expectedTestConfigs as $config) {
