@@ -173,11 +173,4 @@ then
     -DreportRepoDir=${buildToTest} \
     -DreportOutputDir=${output_dir} \
     -DreferenceRepo=${buildToCompare}
-
-  # now run with "new api" which produced the color coded (experimental) reports
-  ${report_app_area}/p2analyze/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx2g \
-    -DuseNewApi=true \
-    -DreportRepoDir=${buildToTest} \
-    -DreportOutputDir=${output_dir} \
-    -DreferenceRepo=${buildToCompare}
 fi

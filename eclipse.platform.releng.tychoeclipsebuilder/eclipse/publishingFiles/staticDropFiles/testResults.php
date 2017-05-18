@@ -69,12 +69,6 @@ if (file_exists("buildlogs/reporeports/index.html")) {
         <li>
         <a href="buildlogs/reporeports/index.html"><b> Repository Reports </b></a>
         </li>
-        <?php }
-           if (file_exists("buildlogs/errors-and-moderate_warnings.html")) {
-         ?>
-        <li>
-        <a href="buildlogs/errors-and-moderate_warnings.html"><b> Repository Reports (Experimental) </b></a>
-        </li>
         <?php } ?>
 
         <li>
