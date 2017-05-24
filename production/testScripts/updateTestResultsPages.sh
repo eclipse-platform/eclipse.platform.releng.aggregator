@@ -346,7 +346,7 @@ then
   echo "   current_prefix ${current_prefix}" #>> ${PERF_OUTFILE}
   echo #>> ${PERF_OUTFILE}
 
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline ${baselineForCurrent} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline ${baselineForCurrent} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 12 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
   RC=$?
   if [[ $RC != 0 ]]
   then
