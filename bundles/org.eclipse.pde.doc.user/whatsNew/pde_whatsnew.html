@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Neon (PDE)</title>
+<title>What's New in Oxygen (PDE)</title>
 </head>
 
 <body>
-<h2>What's New in Neon (PDE)</h2>
+<h2>What's New in Oxygen (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Plug-in Development Environment (PDE)
-for the Neon (4.6) release of Eclipse. They are grouped into:</p>
+for the Oxygen (4.7) release of Eclipse. They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
 	<li><a href="#dialogs-editors-views">Dialogs, Editors, and Views</a></li>
 	<li><a href="#declarative-services">OSGi Declarative Services</a></li>
@@ -49,257 +49,358 @@ documents.</p>
   <tr>
     <td id="dialogs-editors-views" class="section" colspan="2"><h2>Dialogs, Editors, and Views</h2></td>
   </tr>
-
-  <tr id="product-editor">
-    <td class="title">Product editor "Dependencies" tab renamed to "Content"</td>
+  
+  <tr id="layout-spy">
+    <td class="title">New Layout Spy Tool</td>
     <td class="content">
-        The "Dependencies" tab in the product editor was renamed to the more descriptive term "Content".
-        This avoids confusion with the "Dependencies" tab in the MANIFEST.MF editor.
+      PDE has added a new tool for debugging SWT layouts. To activate it, use the
+      shortcut <b>Ctrl+Alt+Shift+F9</b> from any window.
+      <p>Usage:</p>
+      <ul>
+      <li>Click <b>Select Control</b> then click the control you want to inspect</li>
+      <li>Enable <b>Show Overlay</b> and navigate the widget hierarchy until you find a
+          control whose boundary is correct (the red rectangle) and whose child's boundary
+          is incorrect (the yellow rectangle).</li>
+      <li>Look at the results of computeSize. If the result of computeSize is correct,
+          the problem is in the parent layout or its attributes. Otherwise the problem
+          is in the child widget.</li>
+      </ul>
+        <p>
+          <img src="images/layout-spy.png" alt="" />
+        </p>
+    </td>
+  </tr>
+  
+  <tr id="nested-categories-support">
+    <td class="title">Support for Nested categories</td>
+    <td class="content">
+      You can now organize features into hierarchies by using the nested categories support in the <b>Category Definition</b> editor.
       <p>
-       <img src="images/producteditor.png" alt="New label for content in the product"/>
+      The created definition can be used as input for the <b>Categorize repository</b> parameter in the <b>Options</b> tab of <b>File &gt; Export... &gt; Deployable features</b> wizard.
+      They are also visible in the <b>Install</b> dialog.
+      </p>
+      <p>
+        <img src="images/pde-support-for-nested-categories.png" alt=""/>
       </p>
     </td>
   </tr>
-
-  <tr id="pde-debug-option-help">
-    <td class="title">Tooltips for options in Tracing dialog </td>
+  
+  <tr id="manage-versions-for-included-features">
+    <td class="title">Manage versions for included features</td>
     <td class="content">
-    	In the <b>Tracing </b> tab of Eclipse launch configuration, the options now have tooltips which display
-    	more information about that option.
-		<p>
-			<img src="images/pde-tracing-options-help.png" alt="" />
-    	</p>
-    	The information gets extracted from comments in the declaring bundle's .options file.
+      The <b>PDE Feature editor</b> now allows you to manage versions for included features (previously this was possible for included plug-ins only).
+      In the <b>Included Features</b> tab, a new <b>Versions...</b> button has been added, which allows you to synchronize the current feature with
+      actual versions of included features, or sets included feature versions to be synchronized on build.
+      <p>
+        <img src="images/pde-version-included-feature.png" alt=""/>
+      </p>
     </td>
   </tr>
-
-  <tr id="pde-project-explorer">
-    <td class="title">PDE perspective uses Project Explorer</td>
+  
+<tr id="workspace-overriding-target-option">
+    <td class="title">Option added for workspace plug-ins overriding target plug-ins </td>
     <td class="content">
-      The PDE perspective now uses the <b>Project Explorer</b> instead of the <b>Package Explorer</b> view by default.
+       A new option to specify if workspace plug-ins should override target platform plug-ins with the same id has been 
+       added on the <b>Plug-in Development </b> preference page.
+       <p>
+        	<img src="images/workspace-plugins-override-target.png" alt=""/>
+       </p>
+       <p>
+       This option is enabled by default. When it's disabled, all plug-in versions from the workspace and target platform will 
+       be used and the best available plug-in for a plug-in id will be chosen.
+       </p>
     </td>
   </tr>
-
-  <tr id="pdebuildwarning">
-    <td class="title">Warnings for missing build entries for model fragments and the application model</td>
+  
+  <tr id="error-log-show-in-console">
+    <td class="title">'Show In Console' added to context menu of Error Log view</td>
     <td class="content">
-    	If an Eclipse 4 model fragment or application model file is not included in the build.properties file, 
-    	PDE will issue warnings.  
-		<p>
-      		<img src="images/pdewarnings.png" alt="Build warnings"/>
-      	</p>
+       In the <b>Error Log</b> view, the context menu now includes <b>Show In Console</b>, which performs the same
+       action as <b>Show Stack Trace in Console View</b> from the view toolbar.
+      <p>
+        <img src="images/pde-show-in-console-view-context-menu-error-log-view.png" alt=""/>
+      </p>
     </td>
   </tr>
-
-  <tr id="pde-importpackages">
-    <td class="title">Import and export packages in Plug-in Manifest editor supports prefix wildcard matching by default</td>
+  
+  <tr id="reload-target-editor">
+    <td class="title">Reload Target Editor</td>
     <td class="content">
-	The import and export package dialog in the <b> Plug-in Manifest editor </b> uses wildcards by default. For example, to add
-	<code>org.eclipse.e4.core.services</code> as package dependency,
-	you can type in <code>services</code> instead of <code>*services</code>.
+      When a target platform is already active, the <b>Target Editor</b> now shows a <b>Reload Target Platform</b> link instead of <b>Set Active Platform</b>. 
+      The reload link has the same effect as clicking the <b>Reload</b> button in the <b>Plug-in Development &gt; Target Platform</b> preference page.
+      <p>
+        <img src="images/pde-target-editor-reload.png" alt=""/>
+      </p>
+      If the .target file has been modified, clicking the
+      link will now ask you to save the target editor and then reload the target.
     </td>
   </tr>
-
-  <tr id="pde-plugin-image-browser-filter">
-    <td class="title">Plug-in Image Browser Filtering</td>
+  
+  <tr id="target-definition-generic-editor-extension">
+    <td class="title">Target definition files can be edited with the Generic Editor</td>
     <td class="content">
-
-     In <b>Plug-in Image Browser</b> view, it is now possible to filter icons by
-     their full path or name.
-
-     <p>
-     Use the new ImageFilter field to provide the search criteria (? = any character, * = any string) 
-     to find the icons with matching path or name. 
-     </p>
-
-     <p>
-      <img src="images/pde-plugin-image-browser-filter.png" alt="" />
+      The <b>Generic Editor</b> has been extended to enable it to edit target definition files (.target files). It supports syntax highlighting for the most used keywords.
+      It also supports content assist for tags and their attributes, installable units for a given repository, and the available versions for a given installable unit.
+      <p>
+        <img src="images/target-editor-screenshot.png" alt=""/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="p2-inf-editor">
+    <td class="title">p2.inf files open in Properties Editor</td>
+    <td class="content">
+      The <b>Properties File Editor</b> is now the default editor associated with <code>p2.inf</code> files. 
+    </td>
+  </tr>
+  
+  <tr id="search-in-features">
+    <td class="title">Search finds plug-in references in features</td>
+    <td class="content">
+      <b>Search > Plug-ins...</b> that finds references to a plug-in now also finds references to a plug-in in features.
+    <p>
+        	<img src="images/pde-search-plugin-in-feature.png" alt=""/>
     </p>
     </td>
   </tr>
-
-   <tr id="pde-image-browser-pagination">
-    <td class="title">Pagination control in Plug-in Image Browser</td>
+  
+  <tr id="quickfix-adds-import-statement">
+    <td class="title"> Quick Fix to add bundle or package adds import statement</td>
     <td class="content">
-    	In the <b>Plug-in Image Browser</b>,  at the end of the view, there are pagination controls 
-    	to move to the next page of images.
-		<p>
-			<img src="images/pde-plugin-image-browser-pagination.png" alt="" />
-    	</p>
+      The Quick Fix that adds an <code>Import-Package</code> or <code>Require-Bundle</code> dependency
+      in the <code>MANIFEST.MF</code> now also adds the relevant import statement for the unresolved type in the <b>Java editor</b>.
     </td>
   </tr>
-
-  <tr id="prompt-for-unsaved-features">
-    <td class="title">Product launch prompts for unsaved features</td>
+  
+    <tr id="validate-launch-configuration">
+    <td class="title">Validate launch configuration activated by default</td>
     <td class="content">
-      In case you have an unsaved feature included in your product configuration file, 
-      PDE will prompt you to save it before the launch.
-      
-       <p>
-        <img src="images/prompt-unsaved-feature-pde.png" alt=""/>
+      When you create a new Eclipse Application launch configuration, PDE will now by default enable the option to
+      <b>Validate Plug-ins automatically prior to launching</b>.
+      <p>
+       This helps identify missing plug-in dependencies before the start of the application and makes it easier for new plug-in
+       and RCP developers to identify common problems.
+       This validation can be disabled in the <b>Plug-ins</b> tab of the launch configuration dialog.
+       </p>
+    <p>
+        	<img src="images/validate-launch-config-by-default.png" alt=""/>
+    </p>
+    </td>
+  </tr>
+  
+  <tr id="tracing-tab-restore-defaults">
+    <td class="title">'Restore to defaults' buttons added to Tracing tab</td>
+    <td class="content">
+       In the <b> Tracing</b> tab of the launch configuration dialog, new options to <b>Restore Selected to Defaults</b>
+       and <b>Restore All to Defaults</b> have been added.
+      <p>
+        <img src="images/pde-restore-default-tracing-tab.png" alt=""/>
       </p>
-      
+     
     </td>
   </tr>
-
+  
   <!-- ******************** OSGi Declarative Services ********************** -->
   <tr>
     <td id="declarative-services" class="section" colspan="2"><h2>OSGi Declarative Services</h2></td>
   </tr>
-
+  
   <tr id="ds-annotations">
-    <td class="title">Support for OSGi Declarative Services Annotations</td>
+    <td class="title">Support for Declarative Services Annotations v1.3</td>
     <td class="content">
-    	OSGi Declarative Services provide a powerful mechanism for developing complex, service-oriented
-    	applications. With proper tooling, annotations, which were added to Declarative Services
-    	in version 1.2, make it easy to generate and maintain the required component descriptor files.
+    	Version 1.3 of OSGi Declarative Services delivers a number of improvements, including
+    	Component Property Types for strongly-typed configuration parameter handling,
+    	Field Strategy for dependency injection, service/reference scoping, and others.
     	<p>
-    	When enabled, PDE automatically generates and updates Declarative Services component 
-    	descriptor files from appropriately annotated Java source. This is done without requiring 
-    	any additional builder to be configured in your project.
-    	</p>
-    	<p>
-    	When you annotate your component implementation classes with <code>@Component</code>, and any
-    	reference bind methods with <code>@Reference</code>, PDE will validate your annotations
-    	and generate the corresponding component descriptor files. Any errors discovered during validation
-    	are highlighted and reported.
+    	PDE now supports the enhanced annotations and new usage options. It generates component
+    	properties from any Component Property Types that you may use in your component lifecycle
+    	methods. It also creates reference entries from <code>@Reference</code> annotations
+    	specified directly in <code>@Component</code> as well as annotated member fields. New
+    	reference event method signatures are also supported.
     	</p>
     	<p>
 			<img src="images/ds-annotations.png" alt="" />
     	</p>
     	<p>
-    	In addition, PDE will also maintain the project's MANIFEST.MF and build.properties file
-    	-- generated component descriptor files are automatically added to the manifest
-    	and included in the build.
-		</p>
-		<p>
-		To enable this feature, go to <b>Preferences</b> or <b>Project Properties &gt; Plug-in Development &gt; DS Annotations</b>
-		and check <b>Generate descriptors from annotated sources</b>. 
-		</p>
+      To enable this feature, go to <b>Preferences</b> or <b>Project Properties &gt; Plug-in Development &gt; DS Annotations</b>
+      and check <b>Generate descriptors from annotated sources</b>.
+    </p>
     </td>
   </tr>
-
-  <tr id="ds-annotation-bapl">
-    <td class="title">DS Annotations Bundle-ActivationPolicy generation</td>
-    <td class="content">
-		The Declarative Service Annotations support can now be configured to generate the bundle header for lazy activation.
-		The <code>Bundle-ActivationPolicy: lazy</code> header is necessary when starting an Eclipse application that uses the Equinox launcher.
-		Otherwise, the bundle that provides the declarative service will not be started automatically and therefore the service won't be available.
-		In a plain OSGi environment, this header is not necessary and might not have any effect. Therefore, it can be configured via preferences 
-		whether the header should be generated or not.
-        <p>
-          <img src="images/ds-annotations-bapl.png" alt="" />
-        </p>
-    </td>
-  </tr>
-
-  <tr id="ds-annotations-template">
-    <td class="title">Updated OSGi Declarative Services Example</td>
-    <td class="content">
-    	The OSGi Declarative Services Example now uses annotations.
-    	<p>
-    	Instead of creating a Component Definition file for each component class and adding it
-    	to the manifest and build.properties, the wizard creates component classes annotated with
-    	the appropriate DS annotations, which are then used by PDE to automatically generate
-    	the corresponding component descriptor files.  
-		</p>
-    </td>
-  </tr>
-
-
+  
   <!-- ******************** Wizards ********************** -->
   <tr>
     <td id="wizards" class="section" colspan="2"><h2>Wizards</h2></td>
   </tr>
-
-  <tr id="plugin-wizard-activator-creation">
-    <td class="title">New Plug-in wizard does not create activator by default</td>
+  
+  <tr id="generic-editor-template">
+    <td class="title">Plug-in project template added for Generic Text Editor</td>
     <td class="content">
-	   By default, the new plug-in wizard does not suggest the creation of an activator class anymore. 
-	   Functionality in activators can in most cases be replaced with other means (e.g. OSGi declarative services), and activators
-	   can slow down the startup of an application.
+      A plug-in project template has been added to show off the new extensible generic editor functionality. It will kick-start you with a sample .target file editor with syntax highlighting.
+    <p>
+        	<img src="images/pde-generic-editor.png" alt=""/>
+    </p>
     </td>
   </tr>
   
-  <tr id="e4wizard">
-    <td class="title">Retirement of the Eclipse 4 project wizard</td>
+  <tr id="plug-in-template-names">
+    <td class="title">More descriptive plug-in template names</td>
     <td class="content">
-        As PDE offers now Eclipse 4 RCP templates, the separate Eclipse 4 project generation wizard has been retired.
+      The template name for plug-ins have been modified to be more descriptive.
+      <p>
+        <img src="images/pde-plugin-template-names.png" alt=""/>
+      </p>
     </td>
   </tr>
-
-   <tr id="plug-in-with-an-e4-swt-view">
-    <td class="title">Plug-in template with an Eclipse 4 SWT view</td>
+  
+  <tr id="new-feature-project-filtered-tree">
+    <td class="title">Plug-in selection filter in Feature project wizard</td>
     <td class="content">
-      In the plug-in templates, it is now possible to choose:
-        plug-in with an Eclipse 4 SWT view.
-
-    <p>
-      To get this template, create a new plug-in project and answer 'no' to the question:
-      Would you like to create a Rich Client Application?
-    </p>
-
-    <p>
-      Then, the 'Plug-in with an Eclipse 4 SWT View' template will be proposed in the list:
-    </p>
-
-    <p>
-      <img src="images/plug-in-with-an-e4-swt-view.png" alt="" />
-    </p>
-    <p>
-      The generated plug-in will contain a model fragment with a sample E4 view that:
-    </p>
-      <ul>
-       <li> manages the single and the multiple selection using the injection mechanism</li>
-       <li> is added to any E3 compat or pure E4 application thanks to the 'xpath:/' notation</li>
-       <li> is present in the <b>Window &gt; Show view</b> dialog </li>
-      </ul>
-
+      You can now use a text filter when selecting plug-ins in the <b>New > Feature Project</b> wizard.
+      <p>
+        <img src="images/new-feature-project-filtered-tree.png" alt=""/>
+      </p>
     </td>
   </tr>
-
-  <tr id="plug-in-with-an-e4-handler">
-    <td class="title">Plug-in template with an Eclipse 4 Handler</td>
+  
+  <tr id="plugin-and-feature-export-wizards-filtered-selection">
+    <td class="title">Filter in plug-in and feature export wizards</td>
     <td class="content">
-      In the plug-in templates, it is now possible to choose:
-        plug-in with an Eclipse 4 handler.
-
-    <p>
-      To get this template, create a new plug-in project and answer 'no' to the question:
-      Would you like to create a Rich Client Application?
-    </p>
-
-    <p>
-      Then, the 'Plug-in with an Eclipse 4 Handler' template will be proposed in the list:
-    </p>
-
-    <p>
-      <img src="images/plug-in-with-an-e4-handler.png" alt="" />
-    </p>
-    <p>
-      The generated plug-in will contain a model fragment with a sample E4 hello world command that appears:
-    </p>
-      <ul>
-       <li> in the 'E4 Handler' main menu </li>
-       <li> in the 'E4 Handler' submenu in any popup menu </li>
-      </ul>
-
+	  You can now use a text filter when selecting plug-ins in the <b>Export.. > Deployable plug-ins and fragments</b> or
+	  features in the <b>Export.. > Deployable features</b> wizards.
+      <p>
+        <img src="images/plugin-and-feature-export-wizards-filtered-selection.png" alt=""/>
+      </p>
     </td>
   </tr>
-
-
+  
   <!-- ******************** APITools ********************** -->
   <tr>
     <td id="APITools" class="section" colspan="2"><h2>API Tools</h2></td>
   </tr>
 
-  <tr id="multi-version-baseline-support">
-    <td class="title">Multi-version support for API analysis builder</td>
+  <tr id="changed-exec-env-version-problem">
+    <td class="title">Change in Execution Environment creates a version problem</td>
     <td class="content">
-	The API Analysis Builder now supports API baselines with multi-version bundles.
-	While doing API analysis for a bundle for which multiple versions exist in the baseline,
-	the comparisons are performed with the bundle in the baseline which best matches
-	the development bundle that is being built.
+       Changing the <b>Execution Environments </b> in a plug-in now creates a problem marker indicating that the minor version should be increased. This happens
+       if the minor version is not already increased with respect to the baseline. 
+       <p>
+         The preference to control the severity of this problem is located in
+         the <b>Version Management</b> tab of the <b>Plug-in Development &gt; API Errors/Warnings</b> preference page.
+       </p>
+      <p>
+        <img src="images/pde-changed-exec-env-version-problem.png" alt=""/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="default-method-addition">
+    <td class="title">Default method addition reported as a breaking change</td>
+    <td class="content">
+      The API Tools now reports the addition of a default method in an API interface that can be implemented by 
+      clients as a <a href="https://wiki.eclipse.org/Evolving_Java-based_APIs_2#Evolving_API_Interfaces">
+      breaking change</a>.
+      <p>
+       On the <b>Plug-in Development &gt; API Errors/Warnings</b> preference page in the <b>API Compatibility</b> tab,
+       there is a new option in the <b>Interface</b> section to configure the severity of a "default method addition" API change.
+      </p>
+      <p>
+        By default, this option is set to "Error" because adding the same method in multiple interfaces can break
+        existing clients at run time (<a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.5.6">JLS8 13.5.6</a>).
+      </p>
+      <p>
+        	<img src="images/pde-default-method-addition-api-compat-option.png" alt=""/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="field-addition-to-class">
+    <td class="title">Field addition to Class reported as a breaking change</td>
+     <td class="content">
+       The API Tools now reports the addition of a field to a Class that is extendable by clients as a <a href="https://wiki.eclipse.org/Evolving_Java-based_APIs_2#add-api-field ">breaking change.</a>
+       <p>
+       On the <b>Plug-in Development &gt; API Errors/Warnings</b> preference page in the <b>API Compatibility</b> tab,
+       there is a new option in the <b>Class</b> section to configure the severity of a "field addition to class".
+       Also, there is a new link at the top of <b>API Compatibility</b> tab that has more details on achieving API binary compatibility.
+      </p>
+      <p>
+        <img src="images/pde-api-tools-field-addition-to-class-preference-ui.png" alt=""/>
+      </p>
+      
+      The field addition error has a Quick Fix that opens help to explain the incompatibility in greater detail.
+      <p>
+        <img src="images/pde-api-tools-field-addition-to-class-quickfix.png" alt=""/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="field-addition-to-annotation-option">
+    <td class="title">Option for field addition to an annotation</td>
+    <td class="content">
+      On the <b>Plug-in Development &gt; API Errors/Warnings</b> preference page in the <b>API Compatibility</b> tab,
+      there is a new option in the <b>Annotation</b> section to configure the severity of a "field addition to annotation".
+      <p>
+        <img src="images/pde-field-addition-to-annotation.png" alt=""/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="api-tools-noimplement-noextend-leak">
+    <td class="title">Types marked with <code>@noimplement</code> and <code>@noextend</code> processed by API leak analysis</td>
+    <td class="content">
+       Extending or implementing an interface marked as <code>@noimplement</code> is now reported as an API leak. This is because 
+       adding a field or method to the interface marked as <code>@noimplement</code> may break a client that is using 
+       the extended or implemented type. 
+       <p>
+        Also, extending a type marked as <code>@noextend</code> is now reported as an API leak. This is because it may indirectly 
+        leak API types if the extended type is further extended by the client. 
+       </p>
+        Some of the new kinds of leak warnings are shown below:
+       <p>
+        <img src="images/pde-api-tool-warning-leak-noimplement-noextend.png" alt=""/>
+       </p>
+    </td>
+  </tr>
+  
+  <tr id="quick-fix-for-apitool-pde-compiler-problems">
+    <td class="title">Quick Fix to configure problem severity</td>
+    <td class="content">
+      You can now configure the severity of an <b>API Tools </b>problem or a <b>PDE compiler</b> problem by invoking the new <b>Quick Fix (Ctrl+1)</b>.
+      <br/>
+      <br/>
+      <p>
+        <img src="images/pde-configure-problem-api-tool.png" alt=""/>
+      </p>
+      For API tools problems, the Quick Fix will open the <b>Plug-in Development &gt; Errors/Warnings</b>
+      preference page and highlight the configurable problem.
+      
+      <br/>
+      <br/>
+      <p>
+        <img src="images/pde-configure-problem-pde-compiler.png" alt=""/>
+      </p>
+       For PDE compiler problems, the Quick Fix will open the <b>Plug-in Development &gt; Compilers</b>
+       preference page and highlight the configurable problem.
+     
+    </td>
+  </tr>
+  
+  <tr id="reorganized-version-management-tab">
+    <td class="title">Reorganized Version Management preferences tab</td>
+    <td class="content">
+      The <b>Version Management</b> tab of the <b>Plug-in Development &gt; API Errors/Warnings</b> preference page has been
+      reorganized as shown below:
+      <ul>
+       <li>
+       The sub-options to control major/minor version change without API breakage/changes have been converted into normal options
+       and they are set to warning by default.</li>
+       <li>
+       The option 'Report changed execution environment incompatibility' has been moved
+       to the bottom of the tab.</li>
+      </ul>
+       <p>
+         <img src="images/pde-version-management-tab-preference.png" alt="" />
+       </p>
     </td>
   </tr>
 
