@@ -242,14 +242,6 @@ else {
     echo "<li>View the <a  class=\"${linkColor}\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a></li>\n";
   }
 
-  /* performance tests line item */
-  $generated=file_exists("performance/global_fp.php");
-  if (file_exists("performance/performance.php") && $generated) {
-    echo "<li>View the <a href=\"performance/performance.php\">performance test results</a> for the current build.</li>\n";
-  } else {
-    echo "<li>Performance tests are pending.</li>\n";
-  }
-
   echo "</ul>\n";
 
   if (file_exists("TEST_INVOCATION_FAILED.html")) {

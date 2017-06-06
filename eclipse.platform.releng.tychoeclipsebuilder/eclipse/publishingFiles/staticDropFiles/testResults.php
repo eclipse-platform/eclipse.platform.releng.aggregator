@@ -120,17 +120,6 @@ if (file_exists("buildlogs/reporeports/index.html")) {
   echo"<li>base platform used to start unit tests: $BASEBUILDER_TAG</li> ";
 
 ?>
-<?php
-  echo "<li>\n";
-  $generated=file_exists("performance/global_fp.php");
-  if (file_exists("performance/performance.php") && $generated) {
-    echo "View the <a href=\"performance/performance.php\">performance test results</a> for the current build.\n";
-  } else {
-    echo "Performance tests are pending.\n";
-  }
-  echo "</li>\n";
-  echo "</ul>\n";
-?>
 </div> <!-- end mid column (logs) section -->
 <div class="resultsSection">
 <?php
