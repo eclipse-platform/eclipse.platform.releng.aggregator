@@ -207,12 +207,12 @@ function cleanRepo ()
 
 remoteBase="/home/data/httpd/download.eclipse.org"
 
-eclipseNRepo="${remoteBase}/eclipse/updates/4.7-N-builds"
-eclipseIRepo="${remoteBase}/eclipse/updates/4.7-I-builds"
-eclipseMRepo="${remoteBase}/eclipse/updates/4.6-M-builds"
-eclipseSRepo="${remoteBase}/eclipse/updates/4.7milestones"
-eclipseYRepo="${remoteBase}/eclipse/updates/4.7-Y-builds"
-eclipsePRepo="${remoteBase}/eclipse/updates/4.7-P-builds"
+eclipseNRepo="${remoteBase}/eclipse/updates/4.8-N-builds"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.8-I-builds"
+eclipseMRepo="${remoteBase}/eclipse/updates/4.7-M-builds"
+eclipseSRepo="${remoteBase}/eclipse/updates/4.8milestones"
+eclipseYRepo="${remoteBase}/eclipse/updates/4.8-Y-builds"
+eclipsePRepo="${remoteBase}/eclipse/updates/4.8-P-builds"
 
 #doDryrun=dryrun
 doDryrun=
