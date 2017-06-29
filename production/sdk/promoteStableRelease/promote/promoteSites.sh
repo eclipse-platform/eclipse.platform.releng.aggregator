@@ -20,7 +20,7 @@
 # On Hudson, the job must be defined as a parameterized job, with the parameters 
 # in this file defined with the same names as in this file. 
 # From a command line, the script can be ran, or tested, with something similar to 
-#  DROP_ID=I20160602-0112 CHECKPOINT=RC4 SIGNOFF_BUG="" TRAIN_NAME=Neon STREAM=4.6.0 DL_TYPE=S DRYRUN=false ./promoteSites.sh
+#  DROP_ID=I20160602-0112 CHECKPOINT=RC4 SIGNOFF_BUG="" TRAIN_NAME=Oxygen STREAM=4.7.0 DL_TYPE=S DRYRUN=false ./promoteSites.sh
 
 
 # These first three variables DROP_ID, CHECKPOINT, and SIGNOFF_BUG 
