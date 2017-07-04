@@ -294,6 +294,7 @@ if (! isset($PATCH_BUILD)) {
   <ul class="midlist">
     <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_4_5.xml#target_environments">Target Platforms and Environments</a></li>
     <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
+    <li><a href="gitLog.txt">Git log.</a></li>
     <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
   </ul>
 <?php
