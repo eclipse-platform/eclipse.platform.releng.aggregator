@@ -43,17 +43,6 @@ gtk.linux.x86_64 \
 win32.win32.x86 \
 win32.win32.x86_64 \
 )
-# M builds, as of 4.4.x had Mac 32 bit
-if [[ ${BUILD_TYPE} == "M" ]]
-then
-    PLATFORMS+=(gtk.linux.s390)
-    PLATFORMS+=(gtk.linux.s390x)
-    PLATFORMS+=(gtk.solaris.sparcv9)
-    PLATFORMS+=(gtk.solaris.x86)
-    PLATFORMS+=(gtk.aix.ppc)
-    PLATFORMS+=(gtk.aix.ppc64)
-    PLATFORMS+=(gtk.hpux.ia64)
-fi
 NPLATFORMS=${#PLATFORMS[@]}
 
 echo "Build Type: $BUILD_TYPE"
