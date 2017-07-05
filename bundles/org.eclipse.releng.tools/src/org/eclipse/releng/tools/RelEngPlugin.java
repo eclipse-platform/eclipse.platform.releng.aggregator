@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,6 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.Assert;
@@ -108,13 +107,6 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the workspace instance.
-	 */
-	public static IWorkspace getWorkspace() {
-		return ResourcesPlugin.getWorkspace();
-	}
-
-	/**
 	 * Returns the string from the plugin's resource bundle,
 	 * or 'key' if not found.
 	 */
@@ -199,31 +191,4 @@ public class RelEngPlugin extends AbstractUIPlugin {
 		return provider != null && !BINARY_REPOSITORY_PROVIDER_CLASS_NAME.equals(provider.getClass().getName());
 	}
 
-	/**
-	 * The following code is a sample of how to assign a
-	 * RelEng nature to a project.  This only ever needed
-	 * to be done once to set up org.eclipse.releng project
-	 * with the desired nature
-	 */
-//	private void assignNature() {
-//		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-//		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-//		IProject aProject = workspaceRoot.getProject();
-//		
-//		
-//		try {
-//			IProjectDescription description;
-//			description = aProject.getDescription();
-//			String[] natures = description.getNatureIds();
-//			String[] newNatures = new String[natures.length + 1];
-//			System.arraycopy(natures, 0, newNatures, 0, natures.length);
-//			newNatures[natures.length] = "org.eclipse.releng.tools.relEngNature";
-//			description.setNatureIds(newNatures);
-//			aProject.setDescription(description, null);
-//		} catch (CoreException e) {
-//			System.out.println("Failed to set nature");
-//			e.printStackTrace();
-//		}
-//		
-//	}
 }

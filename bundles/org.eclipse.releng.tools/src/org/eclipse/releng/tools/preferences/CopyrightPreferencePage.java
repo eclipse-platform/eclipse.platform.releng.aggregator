@@ -136,9 +136,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 
 
 		KeyListener listener1 = new KeyAdapter() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.swt.events.KeyAdapter#keyReleased(org.eclipse.swt.events.KeyEvent)
-			 */
 			@Override
 			public void keyReleased(KeyEvent e) {
 				validateValues();
@@ -146,14 +143,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		};
 		fCreationYear.addKeyListener(listener1);
 		fRevisionYear.addKeyListener(listener1);
-		
-		// disable fix up existing copyright till it works better
-//		SelectionListener listener2 = new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent e) {
-//				handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), fFixExisting.getSelection());
-//			}
-//		};
-//		fReplaceAllExisting.addSelectionListener(listener2);
 		
 		initializeValues();
 		applyDialogFont(fComposite);
@@ -192,26 +181,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		data.horizontalSpan = 2;
 		control.setLayoutData(data);
 		
-		// TODO add content assist support
-//		viewer.addTextListener(new ITextListener() {
-//			public void textChanged(TextEvent event) {
-//				if (event.getDocumentEvent() != null)
-//					doSourceChanged(event.getDocumentEvent().getDocument());
-//			}
-//		});
-//
-//		viewer.addSelectionChangedListener(new ISelectionChangedListener() {			
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				updateSelectionDependentActions();
-//			}
-//		});
-//
-//	 	viewer.prependVerifyKeyListener(new VerifyKeyListener() {
-//			public void verifyKey(VerifyEvent event) {
-//				handleVerifyKeyPressed(event);
-//			}
-//		});
-		
 		return viewer;
 	}
 	
@@ -223,17 +192,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 	 */
 	private SourceViewer createViewer(Composite parent) {
 		SourceViewer viewer= new SourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		SourceViewerConfiguration configuration= new SourceViewerConfiguration() {
-			// TODO add content assist support
-//			public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
-//				
-//				ContentAssistant assistant= new ContentAssistant();
-//				assistant.enableAutoActivation(true);
-//				assistant.enableAutoInsert(true);
-//				assistant.setContentAssistProcessor(fTemplateProcessor, IDocument.DEFAULT_CONTENT_TYPE);
-//				return assistant;
-//			}
-		};
+		SourceViewerConfiguration configuration= new SourceViewerConfiguration();
 		viewer.configure(configuration);
 		return viewer;
 	}
@@ -284,27 +243,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		setValid(errorMsg == null);
 	}
 	
-	// disable fix up existing copyright till it works better
-//	/**
-//	 * Handles when the Replace all copyrights checkbox is checked/unchecked.
-//	 * When checked, fix up copyright checkbox is disabled and checked
-//	 * When unchecked, fix up copyright checkbox is enabled and set to default value 
-//	 * @param replaceAll
-//	 * @param defaultValue
-//	 */
-//	private void handleReplaceAllEnabled(boolean replaceAll, boolean defaultValue) {
-//		if (fReplaceAllExisting.isEnabled() && !replaceAll)
-//			fFixExisting.setEnabled(true);
-//		else
-//			fFixExisting.setEnabled(false);
-//		
-//		if (replaceAll) {
-//			fFixExisting.setSelection(replaceAll);
-//		} else {
-//			fFixExisting.setSelection(defaultValue);
-//		}
-//	}
-
 	@Override
 	protected IPreferenceStore doGetPreferenceStore() {
 		return RelEngPlugin.getDefault().getPreferenceStore();

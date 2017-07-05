@@ -56,9 +56,6 @@ public class ShellMakeFile extends SourceFile {
 		return CopyrightComment.SHELL_MAKE_COMMENT;
 	}
 
-        /* (non-Javadoc)
-         * @see org.eclipse.releng.tools.SourceFile#doInsert(java.lang.String, org.eclipse.jface.text.IDocument)
-         */
         @Override
 		protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
                 // find insert offset (we must skip instructions)

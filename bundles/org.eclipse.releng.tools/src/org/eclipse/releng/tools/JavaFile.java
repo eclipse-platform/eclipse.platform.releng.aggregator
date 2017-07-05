@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,6 @@ package org.eclipse.releng.tools;
 import org.eclipse.core.resources.IFile;
 
 
-/**
- * @author droberts
- */
 public class JavaFile extends SourceFile {
 
 	/**
@@ -25,17 +22,11 @@ public class JavaFile extends SourceFile {
 		super(file);
 	}
 
-	/* (non-Javadoc)
-	 * @see Test.popup.actions.SourceFile#getCommentStart()
-	 */
 	@Override
 	public String getCommentStart() {
 		return "/*"; //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see Test.popup.actions.SourceFile#getCommentEnd()
-	 */
 	@Override
 	public String getCommentEnd() {
 		return "*/"; //$NON-NLS-1$
