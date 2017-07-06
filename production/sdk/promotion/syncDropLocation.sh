@@ -140,7 +140,7 @@ function sendPromoteMail ()
   if [[ -z "${BUILD_FAILED}" ]]
   then
     # custom message if doing patch build
-    if [[ "${buildType}" == "P" ]]
+    if [[ "${buildType}" == "P" || "${buildType}" == "U" ]]
     then 
       link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
       message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
@@ -155,7 +155,7 @@ function sendPromoteMail ()
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
-  if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYX]  ]]
+  if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYXU]  ]]
   then
     link=$(linkURL http://${SITE_HOST}/equinox/drops/${buildId})
     message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
@@ -219,7 +219,7 @@ function startTests()
   echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
 
   # finally, execute ... unless its a patch build
-  if [[ "${buildType}" != "P" ]]
+  if [[ "${buildType}" != "P" && "${buildType}" != "U" ]]
   then
     ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
   else
@@ -318,7 +318,7 @@ function syncRepoSite ()
     # assume ant is on the path
     ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$dropFromBuildDir
 
-    if [[ "${buildType}" != "P" ]]
+    if [[ "${buildType}" != "P" && "${buildType}" != "U" ]]
     then
       ${PROMOTION_SCRIPT_PATH}/runAntRunner.sh ${buildId} ${eclipseStream} ${PROMOTION_SCRIPT_PATH}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
       RC=$?

@@ -179,7 +179,7 @@ function printTestSummaryStatus() {
   $boxesTitle="";
 
   // We skip the main "tests" part for patch builds, since don't expect any (for now).
-  if ($BUILD_TYPE !== "P" && $boxes !== -2) {
+  if ($BUILD_TYPE !== "P" && $BUILD_TYPE !== "U" && $boxes !== -2) {
 
     // always put in links, since someone may want to look at logs, even if not tests results, per se
     // don't forget to end link, after images decided.
@@ -225,7 +225,7 @@ function printTestSummaryStatus() {
     $testimage="results.gif";
     $testalt="Logs from build";
     echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-    if ($BUILD_TYPE == "P") {
+    if ($BUILD_TYPE == "P" || $BUILD_TYPE == "U") {
       echo "&nbsp;(No automated tests)";
     } elseif ($boxes == -2) {
       echo "&nbsp;(No expected tests)";
