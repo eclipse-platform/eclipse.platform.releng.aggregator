@@ -81,7 +81,7 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 # use BETA_JAVA9 to do a "complete build" that includes Java 9 beta code
 # use master to literally build "just the three" bundles that are required.
 #export BRANCH=BETA_JAVA9
-export BRANCH=R4_7_maintenance
+export BRANCH=master
 export BUILD_TYPE=U
 export STREAM=4.7.0
 export PATCH_BUILD=junit5patch
