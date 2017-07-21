@@ -79,6 +79,9 @@ public class AwtScreenshot {
         try {
             URL location = AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
             String cp = location.toURI().getPath();
+            if (new File(cp).isDirectory() && !cp.endsWith(File.separatorChar + "bin" + File.separatorChar)) {
+                cp += "bin" + File.separatorChar;
+            }
             String javaHome = System.getProperty("java.home");
             String javaExe = javaHome + File.separatorChar + "bin" + File.separatorChar + "java";
             if (File.separatorChar == '\\') {
