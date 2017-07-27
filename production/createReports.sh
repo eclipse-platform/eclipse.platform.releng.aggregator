@@ -82,19 +82,8 @@ then
 elif [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.8-I-builds"
-  # We use a function that gets the "latest" simple repo under
-  # 4.7-M-builds and use that automatically so each I-build automatically is
-  # compared to the latest M-build, instead of having to manually update this value
-  # TODO: But, the "4.7" part has to be updated every year. There is probably
-  # some other variable to "infer" that from so this script never has to change.
-  latest_M_build=$(latestSimpleRepo "${repo_root}/4.7-M-builds" "M20*")
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    exit $RC
-  fi
-  echo -e "\tlatest_M_build: $latest_M_build"
-  buildIdToCompare="4.7-M-builds/${latest_M_build}"
+  buildIdToCompare="4.7/R-4.7-201706120950"
+  echo -e "\tlatest_R_build: R-4.7-201706120950"
 elif [[ ${build_type} == "Y" ]]
 then
   update_dir_segment="4.8-Y-builds"
