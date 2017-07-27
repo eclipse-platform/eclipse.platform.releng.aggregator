@@ -424,14 +424,24 @@ fn-maven-build-aggregator ()
   # bug 471835 (See bug 478483)
   # Note: reactorBuildTimestampProperty was added as a work around for bug 486698.
   # It should be removed once bug 486783 is fixed. I created bug 489510 as a reminder to remove the workaround.
-  mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
-    clean verify \
-    -DskipTests=true \
-    -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
-    -Dtycho.debug.artifactcomparator -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
-    -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
-    -DaggregatorBuild=true \
-    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
+  if [[ "${PATCH_BUILD}" == "junit5" ]] then
+    mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
+      clean verify \
+      -DskipTests=true \
+      -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
+      -Dtycho.debug.artifactcomparator -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
+      -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
+      -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
+  else
+    mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
+      clean verify \
+      -DskipTests=true \
+      -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
+      -Dtycho.debug.artifactcomparator -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
+      -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
+      -DaggregatorBuild=true \
+      -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
+  fi
   rc=$?
   popd
   return $rc
@@ -616,11 +626,18 @@ fn-pom-version-updater ()
 
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
   pushd "$REPO_DIR"
-  mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
-    org.eclipse.tycho:tycho-versions-plugin:1.1.0-SNAPSHOT:update-pom \
-    -Dmaven.repo.local=$LOCAL_REPO -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
-    -DaggregatorBuild=true \
-    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
+  if [[ "${PATCH_BUILD}" == "junit5" ]] then
+    mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
+      org.eclipse.tycho:tycho-versions-plugin:1.1.0-SNAPSHOT:update-pom \
+      -Dmaven.repo.local=$LOCAL_REPO -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
+      -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
+  else
+    mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
+      org.eclipse.tycho:tycho-versions-plugin:1.1.0-SNAPSHOT:update-pom \
+      -Dmaven.repo.local=$LOCAL_REPO -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
+      -DaggregatorBuild=true \
+      -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
+  fi
   RC=$?
   if [[ $RC != 0 ]]
   then
