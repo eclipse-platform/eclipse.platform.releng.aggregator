@@ -97,6 +97,19 @@ then
   fi
   echo -e "\tlatest_M_build: $latest_M_build"
   buildIdToCompare="4.7-M-builds/${latest_M_build}"
+elif [[ ${build_type} == "U" ]]
+then
+  update_dir_segment="4.7-U-builds"
+  # Note: we use same value for Y-builds as for I-builds, since conceptually
+  # they are the same, except that Y-builds use some code from BETA_JAVA9 branch.
+  latest_M_build=$(latestSimpleRepo "${repo_root}/4.7-M-builds" "M20*")
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    exit $RC
+  fi
+  echo -e "\tlatest_M_build: $latest_M_build"
+  buildIdToCompare="4.7-M-builds/${latest_M_build}"
 else
   echo -e "\nERROR: Unhandled build type: ${build_type} so update_dir_segment undefined: $update_dir_segment"
   echo -e "\n\tand repo reports not produced."
