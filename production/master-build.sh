@@ -390,6 +390,10 @@ fi
     fi
   fi
 
+  pushd "$aggDir"
+    mvn clean verify -DbuildId=$BUILD_ID -f eclipse-platform-sources/pom.xml
+  popd
+  
   #if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
   #then
   #  echo "[WARNING] Did not run pom-version-updater due to other variable settings"
