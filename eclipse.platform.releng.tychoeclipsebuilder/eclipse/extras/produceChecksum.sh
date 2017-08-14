@@ -97,6 +97,17 @@ do
   sha512sum -b ${gzipfile} | tee checksum/${gzipfile}.sha512 >>${allCheckSumsSHA512}
 done
 
+#array of tar.bz2 files
+bzipfiles=`ls *.bz2`
+
+for bzipfile in ${bzipfiles}
+do
+  echo [sha256] ${bzipfile}
+  sha256sum -b ${bzipfile} | tee checksum/${bzipfile}.sha256 >>${allCheckSumsSHA256}
+  echo [sha512] ${bzipfile}
+  sha512sum -b ${bzipfile} | tee checksum/${bzipfile}.sha512 >>${allCheckSumsSHA512}
+done
+
 
 #array of .jar files
 jarfiles=`ls *.jar`
