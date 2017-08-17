@@ -97,15 +97,15 @@ do
   sha512sum -b ${gzipfile} | tee checksum/${gzipfile}.sha512 >>${allCheckSumsSHA512}
 done
 
-#array of tar.bz2 files
-bzipfiles=`ls *.bz2`
+#array of tar.xz files
+xzfiles=`ls *.tar.xz`
 
-for bzipfile in ${bzipfiles}
+for xzfile in ${xzfiles}
 do
-  echo [sha256] ${bzipfile}
-  sha256sum -b ${bzipfile} | tee checksum/${bzipfile}.sha256 >>${allCheckSumsSHA256}
-  echo [sha512] ${bzipfile}
-  sha512sum -b ${bzipfile} | tee checksum/${bzipfile}.sha512 >>${allCheckSumsSHA512}
+  echo [sha256] ${xzfile}
+  sha256sum -b ${xzfile} | tee checksum/${xzfile}.sha256 >>${allCheckSumsSHA256}
+  echo [sha512] ${xzfile}
+  sha512sum -b ${xzfile} | tee checksum/${xzfile}.sha512 >>${allCheckSumsSHA512}
 done
 
 
