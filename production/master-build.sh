@@ -150,7 +150,7 @@ then
   # the "day of the week" is Monday (day=1) so it is cleaned once 
   # per week. We pick Monday since that is typically right before I-build, 
   # so might avoid some surprises. 
-  if [[ "$BUILD_TYPE" =~ [MIXYPS] || $(date +%u) == 1 ]]
+  if [[ "$BUILD_TYPE" =~ [MIXYPSU] || $(date +%u) == 1 ]]
   then
     rm -fr ${LOCAL_REPO}.bak 2>/dev/null
     mv ${LOCAL_REPO} ${LOCAL_REPO}.bak
@@ -167,6 +167,8 @@ elif [ "$BUILD_TYPE" = X ]; then
   BUILD_TYPE_NAME="Experimental Branch"
 elif [ "$BUILD_TYPE" = Y ]; then
   BUILD_TYPE_NAME="BETA_JAVA9 Branch"
+elif [ "$BUILD_TYPE" = U ]; then
+  BUILD_TYPE_NAME="BETA_JUNIT5 Branch"
 elif [ "$BUILD_TYPE" = P ]; then
   BUILD_TYPE_NAME="Patch"
 elif [ "$BUILD_TYPE" = S ]; then
@@ -327,7 +329,7 @@ else
   echo "# (when repository is a branch, which it typically is)."  >> ${buildDirectory}/directory.txt
   echo "# " >> ${buildDirectory}/directory.txt
 
-  if [[ $BUILD_TYPE =~ [IMXYP] ]]
+  if [[ $BUILD_TYPE =~ [IMXYPU] ]]
   then
     AGGRCOMMIT=$( git rev-parse HEAD )
     echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt

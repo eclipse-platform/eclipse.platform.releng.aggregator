@@ -155,7 +155,7 @@ function sendPromoteMail ()
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
-  if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYX]  ]]
+  if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYXU]  ]]
   then
     link=$(linkURL http://${SITE_HOST}/equinox/drops/${buildId})
     message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"

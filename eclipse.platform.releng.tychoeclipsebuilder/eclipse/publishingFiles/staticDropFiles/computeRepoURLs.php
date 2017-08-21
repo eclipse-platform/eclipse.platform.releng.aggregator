@@ -49,7 +49,7 @@ function computeSTREAM_REPO_NAME () {
         if ($BUILD_TYPE === "M" && isRRC($BUILD_ID)) {
             $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."milestones";
         } else {
-            if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || $BUILD_TYPE === "M" || $BUILD_TYPE === "P" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y") {
+            if ($BUILD_TYPE === "N" || $BUILD_TYPE === "U" || $BUILD_TYPE === "I" || $BUILD_TYPE === "M" || $BUILD_TYPE === "P" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y") {
                 $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
             } else {
                 if ($BUILD_TYPE === "S") {
@@ -78,7 +78,7 @@ function computeSTREAM_REPO_URL () {
 function computeBUILD_REPO_NAME () {
     global $BUILD_ID, $BUILD_TYPE, $TIMESTAMP ; 
     // There are two types of M builds, some RCs, some not.
-    if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || $BUILD_TYPE === "P" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y" || $BUILD_TYPE === "M" && ! ((isSRRC($BUILD_ID)) || isRRC($BUILD_ID))) {
+    if ($BUILD_TYPE === "N" || $BUILD_TYPE === "U" || $BUILD_TYPE === "I" || $BUILD_TYPE === "P" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y" || $BUILD_TYPE === "M" && ! ((isSRRC($BUILD_ID)) || isRRC($BUILD_ID))) {
         $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/".$BUILD_ID;
     } else {
         $timestamp = str_replace('-', '', $TIMESTAMP);
