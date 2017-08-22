@@ -219,7 +219,7 @@ function startTests()
   echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
 
   # finally, execute ... unless its a patch build
-  if [[ "${buildType}" != "P" && "${buildType}" != "U" ]]
+  if [[ "${buildType}" != "P" ]]
   then
     ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
   else
