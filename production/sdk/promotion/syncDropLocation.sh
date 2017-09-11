@@ -304,7 +304,7 @@ function syncRepoSite ()
   comparatorLogPath="${logsDirectory}/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"
   logSize=$(stat -c '%s' ${comparatorLogPath} )
 
-  if [[ $logSize -lt 250 ]]
+  if [[ $logSize -lt 250 || "${buildType}" == "Y" ]]
   then
     # update composite!
     # add ${buildId} to {toDir}
