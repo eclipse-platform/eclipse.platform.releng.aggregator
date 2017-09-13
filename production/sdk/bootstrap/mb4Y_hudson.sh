@@ -81,7 +81,7 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 #export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
 #export CBI_JDT_VERSION="3.9.2.v20140309-1413"
 
-export BRANCH=master
+export BRANCH=R4_7_maintenance
 export BUILD_TYPE=Y
 export STREAM=4.7.0
 export PATCH_OR_BRANCH_LABEL=masterjava9
