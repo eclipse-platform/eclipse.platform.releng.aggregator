@@ -158,6 +158,8 @@
 
     <qualifier.format>'v'yyyyMMdd-HHmm</qualifier.format>
 
+    <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
+
   </properties>
 
   <distributionManagement>
@@ -372,6 +374,27 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+       <groupId>org.eclipse.tycho.extras</groupId>
+       <artifactId>tycho-p2-extras-plugin</artifactId>
+       <version>${tycho.version}</version>
+       <executions>
+         <execution> <!-- Checks versions are properly bumped from one stream to the other -->
+           <id>compare-attached-artifacts-with-release</id>
+           <goals>
+             <goal>compare-version-with-baselines</goal>
+           </goals>
+           <configuration>
+             <skip>${compare-version-with-baselines.skip}</skip>
+             <baselines>
+               <baseline>http://download.eclipse.org/eclipse/updates/4.7-M-builds/</baseline> <!-- upcoming maintenance build of previous release -->
+               <baseline>http://download.eclipse.org/eclipse/updates/4.8/</baseline> <!-- Next release (useful after 4.8 is released to compare upcoming 4.8 maitenance with last 4.8 release) -->
+             </baselines>
+             <comparator>zip</comparator>
+           </configuration>
+         </execution>
+       </executions>
+     </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
