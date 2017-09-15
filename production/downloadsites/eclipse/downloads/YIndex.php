@@ -205,7 +205,7 @@ function printBuildColumns($fileName, $parts) {
     $boxesTitle="";
 
     // We skip the main "tests" part for patch builds, since don't expect any (for now).
-    if ($buildType !== "P" && $buildType !== "U" && $boxes !== -2) {
+    if ($buildType !== "P" && $boxes !== -2) {
 
       // always put in links, since someone may want to look at logs, even if not tests results, per se
       // don't forget to end link, after images decided.
@@ -251,7 +251,7 @@ function printBuildColumns($fileName, $parts) {
       $testimage="results.gif";
       $testalt="Logs from build";
       echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-      if ($buildType == "P" || $buildType == "U") {
+      if ($buildType == "P") {
         echo "&nbsp;(No automated tests)";
       } elseif ($boxes == -2) {
         echo "&nbsp;(No expected tests)";
