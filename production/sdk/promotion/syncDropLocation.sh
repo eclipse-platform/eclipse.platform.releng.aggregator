@@ -103,7 +103,7 @@ function sendPromoteMail ()
   fi
 
   # 4.3.0 Build: I20120411-2034
-  if [[ "${buildType} == "M" ]]
+  if [[ "${buildType}" == "M" ]]
   then
     SUBJECT="${eclipseStream}a ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"  
   else
