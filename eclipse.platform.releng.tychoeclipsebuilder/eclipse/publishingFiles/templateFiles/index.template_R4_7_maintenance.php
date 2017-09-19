@@ -89,7 +89,7 @@ require("DL.thin.header.php.html");
 <?php } ?>
 
 <div id="midcolumn">
-<h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?>
+<h1>Eclipse <?php echo $STREAM; ?>a <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?>
 <?php
     if (file_exists("buildUnstable")) {
         echo "&nbsp<a href=\"https://wiki.eclipse.org/Platform-releng/Unstable_build\" title=\"Unstable Build\" style='color:red;'>Unstable!</a>\n";
