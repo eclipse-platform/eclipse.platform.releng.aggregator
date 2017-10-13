@@ -57,5 +57,5 @@ export TESTING_TEST_XML=true
 #    to simply test the test script itself. The test-all target runs all of those tests.
 #ant -f test.xml test-all
 
-ant -f test.xml test-all  -propertyfile vm.properties -DbuildId=I20160430-0237 -DeclipseStream=4.7.1 -Dosgi.os=linux
+ant -f test.xml test-all  -propertyfile vm.properties -DbuildId=I20160430-0237 -DeclipseStream=4.7.1a -Dosgi.os=linux
 
