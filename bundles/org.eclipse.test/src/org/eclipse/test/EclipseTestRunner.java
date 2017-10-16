@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -64,7 +63,6 @@ import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestListener;
 import junit.framework.TestResult;
-import junit.framework.TestSuite;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters and running
@@ -599,7 +597,7 @@ public class EclipseTestRunner implements TestListener {
 	}
 
 	protected Test getTest(String suiteClassName) throws TestFailedException {
-		if (suiteClassName.length() <= 0) {
+		if (suiteClassName.isEmpty()) {
 			clearStatus();
 			return null;
 		}
@@ -625,28 +623,7 @@ public class EclipseTestRunner implements TestListener {
 		} catch (Exception e) {
 			// try to extract a test suite automatically
 			clearStatus();
-
-			Class<?> jUnit4TestAdapterClass = null;
-			try {
-				jUnit4TestAdapterClass = loadSuiteClass("junit.framework.JUnit4TestAdapter");
-			} catch (ClassNotFoundException e1) {
-				// JUnit4 is not available
-			} catch (UnsupportedClassVersionError e1) {
-				// running with a VM < 1.5
-			}
-			if (jUnit4TestAdapterClass != null) {
-				try {
-					Constructor<?> jUnit4TestAdapterCtor = jUnit4TestAdapterClass.getConstructor(Class.class);
-					return (Test) jUnit4TestAdapterCtor.newInstance(testClass);
-				} catch (Exception e1) {
-					runFailed(new InvocationTargetException(e1,
-							"Failed to create a JUnit4TestAdapter for \""
-									+ suiteClassName + "\":"));
-					return null;
-				}
-			} else { // the JUnit 3 way
-				return new TestSuite(testClass);
-			}
+			return new junit.framework.JUnit4TestAdapter(testClass);
 		}
 		if (!Modifier.isStatic(suiteMethod.getModifiers())) {
 			runFailed("suite() method must be static");
