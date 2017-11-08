@@ -101,13 +101,13 @@ public class StatisticsSession {
         Set<Integer> steps = new HashSet<>();
         for (int j = 0; j < fDataPoints.length; j++) {
             DataPoint dp = fDataPoints[j];
-            steps.add(new Integer(dp.getStep()));
+            steps.add(Integer.valueOf(dp.getStep()));
         }
 
-        if (steps.contains(new Integer(InternalPerformanceMeter.AVERAGE))) {
+        if (steps.contains(Integer.valueOf(InternalPerformanceMeter.AVERAGE))) {
             // an already aggregated set of data points from the DB
             stats = computeStatsFromAggregates(dimension);
-        } else if (steps.contains(new Integer(InternalPerformanceMeter.AFTER))) {
+        } else if (steps.contains(Integer.valueOf(InternalPerformanceMeter.AFTER))) {
             // raw values from measurement
             stats = computeStatsFromMeasurements(dimension, steps);
         } else {
@@ -132,7 +132,7 @@ public class StatisticsSession {
             if (scalar == null)
                 continue;
 
-            Integer aggregate = new Integer(point.getStep());
+            Integer aggregate = Integer.valueOf(point.getStep());
             // allow for multiple measurements that were each stored with their own
             // aggregate values
             // Assert.assertTrue(acquiredAggregates.add(aggregate));

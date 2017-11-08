@@ -48,9 +48,9 @@ public class Report {
         fAlignment.put(String.valueOf(x + "/" + y), align); //$NON-NLS-1$
         Integer w = fWidths.get(Integer.toString(x));
         if (w == null)
-            w = new Integer(value.length());
+            w = Integer.valueOf(value.length());
         else
-            w = new Integer(Math.max(w.intValue(), value.length()));
+            w = Integer.valueOf(Math.max(w.intValue(), value.length()));
         fWidths.put(Integer.toString(x), w);
         fRows = Math.max(fRows, y + 1);
     }

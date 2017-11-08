@@ -50,12 +50,12 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 
     @Override
     public void start() {
-        fStartTime.add(new Long(System.currentTimeMillis()));
+        fStartTime.add(Long.valueOf(System.currentTimeMillis()));
     }
 
     @Override
     public void stop() {
-        fStopTime.add(new Long(System.currentTimeMillis()));
+        fStopTime.add(Long.valueOf(System.currentTimeMillis()));
     }
 
     @Override
