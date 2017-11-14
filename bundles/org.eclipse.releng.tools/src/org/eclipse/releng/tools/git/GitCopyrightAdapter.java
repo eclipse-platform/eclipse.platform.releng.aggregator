@@ -78,7 +78,7 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 							}
 
 							boolean isPlatform= file.getProject().getName().equals("eclipse.platform"); //$NON-NLS-1$
-							if (isPlatform && (logComment.indexOf("Merge in ant and update from origin/master") != -1 || logComment.indexOf("Fixed bug 381684: Remove update from repository and map files") != -1 || logComment.indexOf("Restored 'org.eclipse.update.core'") != -1)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							if (isPlatform && (logComment.indexOf("Merge in ant and update from origin/master") != -1 || logComment.indexOf("Fixed bug 381684: Remove update from repository and map files") != -1)) { //$NON-NLS-1$ //$NON-NLS-2$
 								// ignore commits with above comments
 								return 0;
 							}
