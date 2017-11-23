@@ -3,7 +3,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta name="copyright" content=
-"Copyright (c) IBM Corporation and others 2000, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+"Copyright (c) IBM Corporation and others 2000, 2017. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
@@ -74,6 +74,7 @@ Each directory or file can specify access rules for types between '[' and ']'.
 <p>If no bootclasspath is specified, the compiler will infer it using the following system properties <code>sun.boot.class.path</code>, <code>vm.boot.class.path</code> or
 
 <code>org.apache.harmony.boot.class.path</code> in this order respectively.</p>
+<p>This option is not supported when compliance is 9 over later.</p>
 </td>
 </tr>
 <tr>
@@ -90,17 +91,62 @@ yet.</td>
 <tr>
 <td valign="top" width="250" id="extdirs">-extdirs &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
 
-<td valign="top" colspan="3">This is a list of directories used to specify the location of extension zip/jar files. Entries are separated by the platform path separator.</td>
+<td valign="top" colspan="3">This is a list of directories used to specify the location of extension zip/jar files. 
+Entries are separated by the platform path separator.  This option is not supported when compliance is 9 over later.</td>
 </tr>
 <tr>
 <td valign="top" width="250" id="endorseddirs">-endorseddirs &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
-<td valign="top" colspan="3">This is a list of directories used to specify the location of endorsed zip/jar files. Entries are separated by the platform path separator.</td>
+<td valign="top" colspan="3">This is a list of directories used to specify the location of endorsed zip/jar files. 
+Entries are separated by the platform path separator. This option is not supported when compliance is 9 over later.</td>
 </tr>
 
 <tr>
 <td valign="top" width="250" id="sourcepath">-sourcepath &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
 <td valign="top" colspan="3">This is a list of directories used to specify the source files. Entries are separated by the platform path separator.<br />
 Each directory can specify access rules for types between '[' and ']'.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="modulepath">--module-path &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign="top" colspan="3">This is a list of directories used to specify module locations. Entries are separated by the platform path separator.<br />
+Each directory can specify access rules for types between '[' and ']'.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="modulesourcepath">--module-source-path &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign="top" colspan="3">This is a list of directories used to specify the source modules that need to be compiler. Entries are separated by the platform path separator.<br />
+Each directory can specify access rules for types between '[' and ']'.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="processormodulepath">--processor-module-path &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign="top" colspan="3">This is a list of directories used to specify the module oriented annotation processors. Entries are separated by the platform path separator.<br />
+Each directory can specify access rules for types between '[' and ']'.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="system">--system</td>
+<td valign="top" colspan="3">This is a directory pointing to the system modules.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="addexports">--add-exports &lt;module&gt;/&lt;package&gt;=&lt;other-module&gt;(,&lt;other-module&gt;)*</td>
+<td valign="top" colspan="3">Specifies a package to be considered as exported from its defining module to additional modules.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="addreads">--add-reads &lt;module&gt;=&lt;other-module&gt;(,&lt;other-module&gt;)*</td>
+<td valign="top" colspan="3">Specifies additional modules to be considered as required by a given module.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="addmodules">--add-modules &lt;module&gt;(,&lt;module&gt;)*</td>
+<td valign="top" colspan="3">Specifies root modules to resolve in addition to the initial modules, or all modules.</td>
+</tr>
+<tr>
+
+<td valign="top" width="250" id="limitmodules">--limit-modules &lt;module&gt;(,&lt;module&gt;)*</td>
+<td valign="top" colspan="3">Limits the observable modules to the list of specified modules.</td>
 </tr>
 <tr>
 
@@ -133,7 +179,24 @@ encoding.</li>
 <th colspan="4">Compliance options</th>
 </tr>
 <tr>
-<td valign="top" width="250" id="target">-target 1.1 to 1.8 (or 8, 8.0, etc.)</td>
+<td valign="top" width="250" id="release">--release 6, 7, 8 and 9 </td>
+
+<td colspan="3">This specifies the VM version that source files should be compiled for.
+<ul>
+<li><span class="c3">6</span> (major version: 50 minor: 0)</li>
+<li><span class="c3">7</span> (major version: 51 minor: 0)</li>
+<li><span class="c3">8</span> (major version: 52 minor: 0)</li>
+<li><span class="c3">9</span> (major version: 53 minor: 0)</li>
+</ul>
+Passing <span class="c3">--release 8</span> to the compiler implicitly sets 
+<span class="c3">-source 1.8</span> and <span class="c3">-target 1.8</span>. 
+However, using <span class="c3">-source</span>, <span class="c3">-target</span> or 
+<span class="c3">1.7, 1.8</span> etc. together with <span class="c3">--release</span> is
+disallowed.
+</td>
+</tr>
+<tr>
+<td valign="top" width="250" id="target">-target 1.1 to 9 (or 8, 8.0, etc.)</td>
 
 <td colspan="3">This specifies the .class file target setting. The possible value are:
 <ul>
@@ -145,6 +208,7 @@ encoding.</li>
 <li><span class="c3">1.6</span>, <span class="c3">6</span> or <span class="c3">6.0</span> (major version: 50 minor: 0)</li>
 <li><span class="c3">1.7</span>, <span class="c3">7</span> or <span class="c3">7.0</span> (major version: 51 minor: 0)</li>
 <li><span class="c3">1.8</span>, <span class="c3">8</span> or <span class="c3">8.0</span> (major version: 52 minor: 0)</li>
+<li><span class="c3">9</span> (major version: 53 minor: 0)</li>
 </ul>
 Defaults are:
 <ul>
@@ -154,6 +218,7 @@ Defaults are:
 <li><span class="c3">1.6</span> in <span class="c3">-1.6</span> mode</li>
 <li><span class="c3">1.7</span> in <span class="c3">-1.7</span> mode</li>
 <li><span class="c3">1.8</span> in <span class="c3">-1.8</span> mode</li>
+<li><span class="c3">9</span> in <span class="c3">-9</span> mode</li>
 </ul>
 <p>clcd1.1 can be used to generate the StackMap attribute.</p>
 </td>
@@ -184,9 +249,13 @@ Defaults are:
 <td valign="top" id="_1.8">-1.8</td>
 <td colspan="3">Set compliance level to <span class="c3">1.8</span>. Implicit -source 1.8 -target 1.8.</td>
 </tr>
+<tr>
+<td valign="top" id="_9">-9</td>
+<td colspan="3">Set compliance level to <span class="c3">9</span>. Implicit -source 9 -target 9.</td>
+</tr>
 
 <tr>
-<td valign="top" width="250" id="source">-source 1.1 to 1.8 (or 8, 8.0, etc.)</td>
+<td valign="top" width="250" id="source">-source 1.1 to 9 (or 8, 8.0, etc.)</td>
 <td colspan="3">This is used to specify the source level expected by the compiler.<br />
 The possible value are:
 <ul>
@@ -196,6 +265,7 @@ The possible value are:
 <li><span class="c3">1.6</span>, <span class="c3">6</span> or <span class="c3">6.0</span></li>
 <li><span class="c3">1.7</span>, <span class="c3">7</span> or <span class="c3">7.0</span></li>
 <li><span class="c3">1.8</span>, <span class="c3">8</span> or <span class="c3">8.0</span></li>
+<li><span class="c3">9</span></li>
 </ul>
 Defaults are:
 <ul>
@@ -206,6 +276,7 @@ Defaults are:
 <li><span class="c3">1.6</span> in <span class="c3">-1.6</span> mode</li>
 <li><span class="c3">1.7</span> in <span class="c3">-1.7</span> mode</li>
 <li><span class="c3">1.8</span> in <span class="c3">-1.8</span> mode</li>
+<li><span class="c3">9</span> in <span class="c3">-9</span> mode</li>
 </ul>
 In <span class="c3">1.4</span>, <span class="c3"><i>assert</i></span> is treated as a keyword. In <span class="c3">1.5</span> and <span class="c3">1.6</span>, <span class="c3"><i>enum</i></span> and
 
