@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #*******************************************************************************
 # Copyright (c) 2017 IBM Corporation and others.
 # All rights reserved. This program and the accompanying materials

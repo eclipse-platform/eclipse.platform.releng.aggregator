@@ -312,13 +312,13 @@ else
 
   $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
   checkForErrorExit $? "Error occurred during tag of build input"
-
-
+  set -x
   CHECK_SWT_INPUT=$logsDirectory/check-swt-buildinput_output.txt
   $SCRIPT_PATH/check-swt-buildinput.sh $BUILD_ENV_FILE 2>&1 | tee $CHECK_SWT_INPUT
-  if [ $? -ne 0 ] 
+  if [ $? -eq 0 ] 
   then
     buildrc=1
+    set +x
     echo "BUILD FAILED. See ${CHECK_SWT_INPUT}."
     BUILD_FAILED="${BUILD_FAILED} \n${CHECK_SWT_INPUT}"
     fn-write-property BUILD_FAILED
@@ -328,6 +328,7 @@ else
     # So is a good point to capture listing of build input to directory.txt file.
     # TODO: hard to find good/easy git commands that work for any repo,
     # to query actual branches/commits/tags on remote, in a reliable way?
+    set +x
     pushd "$aggDir"
     # = = = = directtory.txt section
     echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
