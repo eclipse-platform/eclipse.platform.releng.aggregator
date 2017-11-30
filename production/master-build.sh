@@ -313,6 +313,9 @@ else
   $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
   checkForErrorExit $? "Error occurred during tag of build input"
 
+  $SCRIPT_PATH/check-swt-buildinput.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/check-swt-buildinput_output.txt
+  checkForErrorExit $? "Error occurred during verification of swt build input"
+
   # At this point, everything should be checked out, updated, and tagged
   # (tagged unless N build or test build)
   # So is a good point to capture listing of build input to directory.txt file.
