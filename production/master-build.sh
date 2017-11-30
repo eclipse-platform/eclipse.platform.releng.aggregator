@@ -313,135 +313,143 @@ else
   $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
   checkForErrorExit $? "Error occurred during tag of build input"
 
-  $SCRIPT_PATH/check-swt-buildinput.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/check-swt-buildinput_output.txt
-  checkForErrorExit $? "Error occurred during verification of swt build input"
 
-  # At this point, everything should be checked out, updated, and tagged
-  # (tagged unless N build or test build)
-  # So is a good point to capture listing of build input to directory.txt file.
-  # TODO: hard to find good/easy git commands that work for any repo,
-  # to query actual branches/commits/tags on remote, in a reliable way?
-  pushd "$aggDir"
-  # = = = = directtory.txt section
-  echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
-
-  echo "# " >> ${buildDirectory}/directory.txt
-  echo "# This is simply a listing of repositories.txt. Remember that for N-builds, "  >> ${buildDirectory}/directory.txt
-  echo "# 'master' is always used, and N-builds are not tagged."  >> ${buildDirectory}/directory.txt
-  echo "# I and M builds are tagged with buildId: ${BUILD_ID} "  >> ${buildDirectory}/directory.txt
-  echo "# (when repository is a branch, which it typically is)."  >> ${buildDirectory}/directory.txt
-  echo "# " >> ${buildDirectory}/directory.txt
-
-  if [[ $BUILD_TYPE =~ [IMXYPU] ]]
-  then
-    AGGRCOMMIT=$( git rev-parse HEAD )
-    echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
-    echo "       http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=${AGGRCOMMIT}"  >> ${buildDirectory}/directory.txt
-  fi
-  
-if [[ ! -e "$STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt" ]]
-then 
-   echo -e "\n\t[ERROR] repositories file did not exist."
-   echo -e "\t[ERROR] expected file: repositories_${PATCH_OR_BRANCH_LABEL}.txt"
-   echo -e "\t[ERROR] to be in directory: $STREAMS_PATH\n"
-   exit 1
-else 
-   echo -e "\n\t[INFO] Using repositories file: $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt\n"
-fi
-
-  echo "# " >> ${buildDirectory}/directory.txt
-  echo "# .../streams/repositories_${PATCH_OR_BRANCH_LABEL}.txt" >> ${buildDirectory}/directory.txt
-  echo "# " >> ${buildDirectory}/directory.txt
-  cat $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt >> ${buildDirectory}/directory.txt
-  echo "# " >> ${buildDirectory}/directory.txt
-
-  echo -e "\n\n\n#git submodule status output:" >> ${buildDirectory}/directory.txt
-  git submodule status --recursive >> ${buildDirectory}/directory.txt
-  echo "# " >> ${buildDirectory}/directory.txt
-
-  # = = = = relengirectory.txt section
-  echo "# " >> ${logsDirectory}/relengdirectory.txt
-  echo "# Build Input: " >> ${logsDirectory}/relengdirectory.txt
-  $SCRIPT_PATH/git-doclog >> ${logsDirectory}/relengdirectory.txt
-  git submodule foreach --quiet $SCRIPT_PATH/git-doclog >> ${logsDirectory}/relengdirectory.txt
-  echo "# " >> ${logsDirectory}/relengdirectory.txt
-  popd
-
-  if [[ "true" == "${PATCH_TYCHO}" ]]
-  then
-    echo "About to patch Tycho. LOCAL_REPO: ${LOCAL_REPO}"
-    ${SCRIPT_PATH}/buildTycho.sh  2>&1 | tee ${logsDirectory}/tycho23.log.txt
-    rc=$?
-    echo "buildTycho returned $rc"
-    if [[ $rc != 0 ]]
-    then
-      echo "[ERROR] buildTycho.sh returned error code: $rc"
-      exit $rc
-    fi
-  fi
-
-  if [[ "true" == "${PATCH_SWT}" ]]
-  then
-    echo "About to patchSWT"
-    ${SCRIPT_PATH}/patchSWT.sh
-    rc=$?
-    echo "patchSWT returned $rc"
-    if [[ $rc != 0 ]]
-    then
-      echo "[ERROR] patchSWT returned error code: $rc"
-      exit $rc
-    fi
-  fi
-
-  pushd "$aggDir"
-    mvn clean verify -DbuildId=$BUILD_ID -f eclipse-platform-sources/pom.xml
-  popd
-  
-  #if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
-  #then
-  #  echo "[WARNING] Did not run pom-version-updater due to other variable settings"
-  #else
-  $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
-  printf "%-35s %s\n" "Load after run-version-updater: " "$(uptime)" >> ${loadLog}
-  #fi
-  # if file exists, pom update failed
-  if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
+  CHECK_SWT_INPUT=$logsDirectory/check-swt-buildinput_output.txt
+  $SCRIPT_PATH/check-swt-buildinput.sh $BUILD_ENV_FILE 2>&1 | tee $CHECK_SWT_INPUT
+  if [ $? -ne 0 ] 
   then
     buildrc=1
-    /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
-    echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}."
-    BUILD_FAILED="${BUILD_FAILED} \n${POM_VERSION_UPDATE_BUILD_LOG}"
+    echo "BUILD FAILED. See ${CHECK_SWT_INPUT}."
+    BUILD_FAILED="${BUILD_FAILED} \n${CHECK_SWT_INPUT}"
     fn-write-property BUILD_FAILED
   else
-    # if updater failed, something fairly large is wrong, so no need to compile,
-    # else, we compile - build here.
-    $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
-    printf "%-35s %s\n" "Load after run-maven-build: " "$(uptime)" >> ${loadLog}
-    # if file exists, then run maven build failed.
-    if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+    # At this point, everything should be checked out, updated, and tagged
+    # (tagged unless N build or test build)
+    # So is a good point to capture listing of build input to directory.txt file.
+    # TODO: hard to find good/easy git commands that work for any repo,
+    # to query actual branches/commits/tags on remote, in a reliable way?
+    pushd "$aggDir"
+    # = = = = directtory.txt section
+    echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
+
+    echo "# " >> ${buildDirectory}/directory.txt
+    echo "# This is simply a listing of repositories.txt. Remember that for N-builds, "  >> ${buildDirectory}/directory.txt
+    echo "# 'master' is always used, and N-builds are not tagged."  >> ${buildDirectory}/directory.txt
+    echo "# I and M builds are tagged with buildId: ${BUILD_ID} "  >> ${buildDirectory}/directory.txt
+    echo "# (when repository is a branch, which it typically is)."  >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+
+    if [[ $BUILD_TYPE =~ [IMXYPU] ]]
     then
-      buildrc=1
-      /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
-      BUILD_FAILED="${BUILD_FAILED} \n${RUN_MAVEN_BUILD_LOG}"
-      fn-write-property BUILD_FAILED
-      # TODO: eventually put in more logic to "track" the failure, so
-      # proper actions and e-mails can be sent. For example, we'd still want to
-      # publish what we have, but not start the tests.
-      echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}."
-    else
-      # if build run maven build failed, no need to gather parts
-      $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
-      printf "%-35s %s\n" "Load after gather-parts: " "$(uptime)" >> ${loadLog}
-      if [[ -f "${buildDirectory}/buildFailed-gather-parts" ]]
+      AGGRCOMMIT=$( git rev-parse HEAD )
+      echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
+      echo "       http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=${AGGRCOMMIT}"  >> ${buildDirectory}/directory.txt
+    fi
+  
+    if [[ ! -e "$STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt" ]]
+    then 
+      echo -e "\n\t[ERROR] repositories file did not exist."
+      echo -e "\t[ERROR] expected file: repositories_${PATCH_OR_BRANCH_LABEL}.txt"
+      echo -e "\t[ERROR] to be in directory: $STREAMS_PATH\n"
+      exit 1
+    else 
+      echo -e "\n\t[INFO] Using repositories file: $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt\n"
+    fi
+
+    echo "# " >> ${buildDirectory}/directory.txt
+    echo "# .../streams/repositories_${PATCH_OR_BRANCH_LABEL}.txt" >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+    cat $STREAMS_PATH/repositories_${PATCH_OR_BRANCH_LABEL}.txt >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+
+    echo -e "\n\n\n#git submodule status output:" >> ${buildDirectory}/directory.txt
+    git submodule status --recursive >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+
+    # = = = = relengirectory.txt section
+    echo "# " >> ${logsDirectory}/relengdirectory.txt
+    echo "# Build Input: " >> ${logsDirectory}/relengdirectory.txt
+    $SCRIPT_PATH/git-doclog >> ${logsDirectory}/relengdirectory.txt
+    git submodule foreach --quiet $SCRIPT_PATH/git-doclog >> ${logsDirectory}/relengdirectory.txt
+    echo "# " >> ${logsDirectory}/relengdirectory.txt
+    popd
+
+    if [[ "true" == "${PATCH_TYCHO}" ]]
+    then
+      echo "About to patch Tycho. LOCAL_REPO: ${LOCAL_REPO}"
+      ${SCRIPT_PATH}/buildTycho.sh  2>&1 | tee ${logsDirectory}/tycho23.log.txt
+      rc=$?
+      echo "buildTycho returned $rc"
+      if [[ $rc != 0 ]]
       then
-        buildrc=1
-        /bin/grep -i "ERROR" "${GATHER_PARTS_BUILD_LOG}" >> "${buildDirectory}/buildFailed-gather-parts"
-        BUILD_FAILED="${BUILD_FAILED} \n${GATHER_PARTS_BUILD_LOG}"
-        fn-write-property BUILD_FAILED
-        echo "BUILD FAILED. See ${GATHER_PARTS_BUILD_LOG}."
+        echo "[ERROR] buildTycho.sh returned error code: $rc"
+        exit $rc
       fi
     fi
-  fi
+
+    if [[ "true" == "${PATCH_SWT}" ]]
+    then
+      echo "About to patchSWT"
+      ${SCRIPT_PATH}/patchSWT.sh
+      rc=$?
+      echo "patchSWT returned $rc"
+      if [[ $rc != 0 ]]
+        then
+        echo "[ERROR] patchSWT returned error code: $rc"
+        exit $rc
+      fi
+    fi
+
+    pushd "$aggDir"
+    mvn clean verify -DbuildId=$BUILD_ID -f eclipse-platform-sources/pom.xml
+    popd
+  
+    #if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
+    #then
+    #  echo "[WARNING] Did not run pom-version-updater due to other variable settings"
+    #else
+    $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+    printf "%-35s %s\n" "Load after run-version-updater: " "$(uptime)" >> ${loadLog}
+    #fi
+    # if file exists, pom update failed
+    if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
+    then
+      buildrc=1
+      /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
+      echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}."
+      BUILD_FAILED="${BUILD_FAILED} \n${POM_VERSION_UPDATE_BUILD_LOG}"
+      fn-write-property BUILD_FAILED
+    else
+      # if updater failed, something fairly large is wrong, so no need to compile,
+      # else, we compile - build here.
+      $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
+      printf "%-35s %s\n" "Load after run-maven-build: " "$(uptime)" >> ${loadLog}
+      # if file exists, then run maven build failed.
+      if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+      then
+        buildrc=1
+        /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
+        BUILD_FAILED="${BUILD_FAILED} \n${RUN_MAVEN_BUILD_LOG}"
+        fn-write-property BUILD_FAILED
+        # TODO: eventually put in more logic to "track" the failure, so
+        # proper actions and e-mails can be sent. For example, we'd still want to
+        # publish what we have, but not start the tests.
+        echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}."
+      else
+        # if build run maven build failed, no need to gather parts
+        $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
+        printf "%-35s %s\n" "Load after gather-parts: " "$(uptime)" >> ${loadLog}
+        if [[ -f "${buildDirectory}/buildFailed-gather-parts" ]]
+        then
+          buildrc=1
+          /bin/grep -i "ERROR" "${GATHER_PARTS_BUILD_LOG}" >> "${buildDirectory}/buildFailed-gather-parts"
+          BUILD_FAILED="${BUILD_FAILED} \n${GATHER_PARTS_BUILD_LOG}"
+          fn-write-property BUILD_FAILED
+          echo "BUILD FAILED. See ${GATHER_PARTS_BUILD_LOG}."
+        fi
+      fi
+    fi
+  fi  
 fi
 
 # check for dirt in working tree. 
@@ -464,9 +472,7 @@ else
   echo "No repo published, since BUILD_FAILED"
 fi
 
-set -x
 ${SCRIPT_PATH}/reports/jdepsReport.sh ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds/${BUILD_ID}/ ${logsDirectory}/jdepsReport.txt 
-set +x
 
 #For now, only "publish equinox and promote" if N, I or M build, skip if P, X, or Y
 
