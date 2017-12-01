@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ public class PomVersionResolutionGenerator implements IMarkerResolutionGenerator
 				if (marker.getType().equals(IPomVersionConstants.PROBLEM_MARKER_TYPE)){
 					String correctedVersion = (String) marker.getAttribute(IPomVersionConstants.POM_CORRECT_VERSION);
 					if (correctedVersion != null && correctedVersion.length() > 0){
-						return new IMarkerResolution[] {new PomVersionMarkerResolution(correctedVersion)};
+						return new IMarkerResolution[] {new PomVersionMarkerResolution(marker,correctedVersion)};
 					}
 				}
 			} catch (CoreException e){

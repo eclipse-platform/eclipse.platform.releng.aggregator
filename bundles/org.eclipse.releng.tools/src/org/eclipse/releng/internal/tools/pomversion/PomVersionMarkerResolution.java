@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2013, 2016 IBM Corporation and others.
+ *  Copyright (c) 2013, 2017 IBM Corporation and others.
  *  All rights reserved. This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License v1.0
  *  which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.releng.internal.tools.pomversion;
+
+import java.util.HashSet;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -24,7 +26,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.RelEngPlugin;
-import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
 
 /**
@@ -32,15 +35,23 @@ import org.eclipse.ui.IMarkerResolution;
  * Replaces the version string to one based on the version in the manifest.  The corrected
  * version must have been stored on the marker at creation time.
  */
-public class PomVersionMarkerResolution implements IMarkerResolution {
+public class PomVersionMarkerResolution extends WorkbenchMarkerResolution {
 
+	private IMarker marker;
 	private String correctedVersion;
 
 	/**
 	 * New marker resolution that will offer to replace the current POM version with corrected version
 	 * @param correctedVersion new version to insert
+	 * @deprecated Use PomVersionMarkerResolution(IMarker marker,String correctedVersion) instead
 	 */
+	@Deprecated
 	public PomVersionMarkerResolution(String correctedVersion) {
+		this.correctedVersion = correctedVersion;
+	}
+
+	public PomVersionMarkerResolution(IMarker marker,String correctedVersion) {
+		this.marker = marker;
 		this.correctedVersion = correctedVersion;
 	}
 
@@ -51,6 +62,11 @@ public class PomVersionMarkerResolution implements IMarkerResolution {
 
 	@Override
 	public void run(IMarker marker) {
+		 try {
+			correctedVersion = (String) marker.getAttribute(IPomVersionConstants.POM_CORRECT_VERSION);
+		} catch (CoreException e1) {
+			RelEngPlugin.log(e1);
+		}
 		if (correctedVersion == null || correctedVersion.trim().length() == 0) {
 			return;
 		}
@@ -93,5 +109,32 @@ public class PomVersionMarkerResolution implements IMarkerResolution {
 				}
 			}
 		}
+	}
+
+	@Override
+	public String getDescription() {
+		return null;
+	}
+
+	@Override
+	public Image getImage() {
+		return null ;
+	}
+
+	@Override
+	public IMarker[] findOtherMarkers(IMarker[] markers) {
+		HashSet<IMarker> mset = new HashSet<>(markers.length);
+		for (IMarker iMarker : markers) {
+			if (iMarker.equals(marker))
+				continue;
+			try {
+				if (iMarker.getType().equals(IPomVersionConstants.PROBLEM_MARKER_TYPE))
+					mset.add(iMarker);
+			} catch (CoreException e) {
+			
+			}
+		}
+		int size = mset.size();
+		return mset.toArray(new IMarker[size]);
 	}
 }
