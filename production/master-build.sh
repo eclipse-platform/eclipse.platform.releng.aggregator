@@ -315,7 +315,8 @@ else
   set -x
   CHECK_SWT_INPUT=$logsDirectory/check-swt-buildinput_output.txt
   $SCRIPT_PATH/check-swt-buildinput.sh $BUILD_ENV_FILE 2>&1 | tee $CHECK_SWT_INPUT
-  if [ $? -eq 0 ] 
+  /bin/grep "SWT build input successful" $CHECK_SWT_INPUT 
+  if [ $? -ne 0 ]
   then
     buildrc=1
     set +x

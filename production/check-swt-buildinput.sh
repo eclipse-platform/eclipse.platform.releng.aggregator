@@ -28,7 +28,7 @@ commit=$(git log --pretty=oneline -1|cut -d' ' -f2-)
 popd
 
 if [[ $commit == v[0-9][0-9][0-9][0-9] ]]; then
-  echo "SWT build input succesful"
+  echo "SWT build input successful"
   exit 0
 else
   echo "SWT build input failed"
