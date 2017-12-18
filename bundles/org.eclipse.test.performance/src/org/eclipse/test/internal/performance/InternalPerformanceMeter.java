@@ -13,6 +13,10 @@
 
 package org.eclipse.test.internal.performance;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -52,6 +56,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
     public static final int       AFTER                              = 1;
 
     protected static final String VERBOSE_PERFORMANCE_METER_PROPERTY = "InternalPrintPerformanceResults"; //$NON-NLS-1$
+    protected static final String CSV_PERFORMANCE_METER_PROPERTY = "InternalPrintCsvPerformanceResults"; //$NON-NLS-1$
 
     private String                fScenarioId;
 
@@ -96,6 +101,16 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
             if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
                 printSample(System.out, sample);
                 // printSampleCSV(System.out, sample);
+            }
+            String property = System.getProperty(CSV_PERFORMANCE_METER_PROPERTY);
+            if (property != null) {
+                File output = new File(property);
+                try (PrintStream ps = new PrintStream(new FileOutputStream(output))) {
+                    printSampleCSV(ps, sample);
+                } catch (IOException e) {
+                    // It turns out you cannot write.
+                    e.printStackTrace();
+                }
             }
         }
     }
