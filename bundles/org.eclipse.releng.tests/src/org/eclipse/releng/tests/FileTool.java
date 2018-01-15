@@ -135,6 +135,9 @@ public class FileTool {
 	public static void copy(File root, File src, File dst) throws IOException {
 		if(src.isDirectory()){
 			String[] children = src.list();
+			if (children == null) {
+				throw new IOException("Content from directory '" + src.getAbsolutePath() + "' can not be listed."); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			for(int i = 0; i < children.length; ++i){
 				File child = new File(src, children[i]);
 				copy(root, child, dst);
@@ -158,6 +161,9 @@ public class FileTool {
 		if(file.exists()){
 			if(file.isDirectory()){
 				String[] children = file.list();
+				if(children == null) {
+					children = new String[0];
+				}
 				for(int i = 0; i < children.length; ++i) {
 					File child = new File(file, children[i]);
 					delete(child);
@@ -392,7 +398,9 @@ public class FileTool {
 	private static void unzip(IZipFilter filter, File rootDstDir, File dstDir, int depth) {
 	
 		File[] entries = rootDstDir.listFiles();
-
+		if (entries == null) {
+			entries = new File[0];
+		}
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i].isDirectory()) {
 				unzip(filter, entries[i], dstDir, depth);
@@ -447,6 +455,10 @@ public class FileTool {
 	private static void zip(File root, File file, ZipOutputStream zos) throws IOException {
 		if(file.isDirectory()){
 			String name = file.getName();
+			String[] list = file.list();
+			if (list == null) {
+				throw new IOException("Content from directory '" + file.getAbsolutePath() + "' can not be listed."); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 			if(name.endsWith("_zip") || name.endsWith("_jar")){
 				String rootString = root.toString();
 				String fileString = file.toString();
@@ -456,7 +468,6 @@ public class FileTool {
 				ZipEntry zipEntry = new ZipEntry(changeSeparator(zipEntryName, File.separatorChar, '/'));
 				zos.putNextEntry(zipEntry);
 				ZipOutputStream zos2 = new ZipOutputStream(zos);
-				String[] list = file.list();
 				for(int i = 0; i < list.length; ++i){
 					File item = new File(file, list[i]);
 					zip(file, item, zos2);
@@ -464,7 +475,6 @@ public class FileTool {
 				zos2.finish();
 				zos.closeEntry();
 			} else {
-				String[] list = file.list();
 				for(int i = 0; i < list.length; ++i){
 					File item = new File(file, list[i]);
 					zip(root, item, zos);
