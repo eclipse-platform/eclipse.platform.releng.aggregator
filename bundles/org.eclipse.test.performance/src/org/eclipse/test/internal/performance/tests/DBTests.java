@@ -46,7 +46,7 @@ public class DBTests extends TestCase {
 
     private static final String DBLOC           = "testDBs";          //$NON-NLS-1$
     //private static final String DBLOC= "net://localhost"; //$NON-NLS-1$
-    private static String       DBNAME;
+    private String              DBNAME;
     private static final String DBUSER          = "testUser";         //$NON-NLS-1$
     private static final String DBPASSWD        = "testPassword";     //$NON-NLS-1$
 

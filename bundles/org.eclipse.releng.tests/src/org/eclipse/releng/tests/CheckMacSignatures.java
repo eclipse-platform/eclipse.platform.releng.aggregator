@@ -8,8 +8,8 @@ import org.junit.Test;
 
 public class CheckMacSignatures {
 
-    static boolean runningOnMac;
-    static String  eclipseInstall;
+    private boolean runningOnMac;
+    private String  eclipseInstall;
 
     public CheckMacSignatures() {
 
