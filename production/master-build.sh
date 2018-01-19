@@ -320,7 +320,7 @@ else
   then
     buildrc=1
     set +x
-    echo "BUILD FAILED. See ${CHECK_SWT_INPUT}."
+    echo "BUILD FAILED. See ${CHECK_SWT_INPUT}." | tee "${buildDirectory}/buildFailed-swt-buildinput-error" 
     BUILD_FAILED="${BUILD_FAILED} \n${CHECK_SWT_INPUT}"
     fn-write-property BUILD_FAILED
   else
