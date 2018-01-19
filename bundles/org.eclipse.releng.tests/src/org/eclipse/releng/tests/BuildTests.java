@@ -596,7 +596,7 @@ public class BuildTests {
         message = message.concat("See the javadoc logs linked from the test results page for details");
         assertTrue(message, !problemLogsExist);
     }
-    @Test @Ignore("see bug 499147")
+    @Test
     public void testDirtyLogSize() throws Exception {
         final boolean DEBUG_DIRTY_TEST = true;
         // MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
