@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -642,6 +642,25 @@ public class BuildTests {
                         + ". But NOTE: results may not be accurate, if there are other errors in build, so diff is recommended.",
                 nBytes < MAX_ALLOWED_BYTES);
 
+    }
+
+    @Test
+    public void testJarSign() throws Exception {
+ 
+    	String buildId = System.getProperty("buildId");
+        assertNotNull("buildId property must be specified for testJarSign test", buildId);
+        String downloadHost = "build.eclipse.org/eclipse/builds/4" + buildId.charAt(0) + "/siteDir";
+        String urlOfFile = "http://" + downloadHost + "/eclipse/downloads/drops4/" + buildId + "/buildlogs/reporeports/reports/unsigned8.txt";
+        URL logURL = new URL(urlOfFile);
+
+        URLConnection urlConnection = logURL.openConnection();
+        long nBytes = urlConnection.getContentLength();
+        // if find "response does not contain length, on a regular basis, for
+        // some servers, will have to read contents.
+        assertTrue(
+                "Some bundles are unsigned please refer  "
+                        + urlOfFile,
+                ((-1 == nBytes)));
     }
 
     private String getDownloadHost() {
