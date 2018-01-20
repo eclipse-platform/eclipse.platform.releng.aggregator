@@ -36,7 +36,6 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Platform;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BuildTests {
