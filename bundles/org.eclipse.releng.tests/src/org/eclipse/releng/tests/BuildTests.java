@@ -654,12 +654,13 @@ public class BuildTests {
 
         URLConnection urlConnection = logURL.openConnection();
         long nBytes = urlConnection.getContentLength();
-        // if find "response does not contain length, on a regular basis, for
-        // some servers, will have to read contents.
+        // nBytes will be -1 if the file doesn't exist
+        // it will be more than 3 if there are unsigned jars. (atlear jar extention will be listed
+        
         assertTrue(
                 "Some bundles are unsigned please refer  "
                         + urlOfFile,
-                ((-1 == nBytes)));
+                ((2 > nBytes)));
     }
 
     private String getDownloadHost() {
