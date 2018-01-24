@@ -114,12 +114,16 @@ function calcTestConfigsRan($testResultsDirName) {
               $jobname=jobname($expectedTestConfigs[$i]);
               //echo "DEBUG: jobname: " . $jobname;
               if (substr_startswith($summFileName, $testResultsDirName."/".$jobname)) {
-                //echo "DEBUG: found matching summary file: $summFileName<br />";
-                $xmlResults = simplexml_load_file($summFileName);
-                $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
-                $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
-                $testResults[$expectedTestConfigs[$i]]["passCount"]=$xmlResults->passCount;
-                $testResults[$expectedTestConfigs[$i]]["skipCount"]=$xmlResults->skipCount;
+                $summFileJava9=strpos($summFileName, "java9");
+                $jobnameJava9=strpos($testResultsDirName."/".$jobname, "java9");
+                if ($summFileJava9 == $jobnameJava9 ) {
+                  //echo "DEBUG: found matching summary file: $summFileName<br />";
+                  $xmlResults = simplexml_load_file($summFileName);
+                  $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
+                  $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
+                  $testResults[$expectedTestConfigs[$i]]["passCount"]=$xmlResults->passCount;
+                  $testResults[$expectedTestConfigs[$i]]["skipCount"]=$xmlResults->skipCount;
+                }
               }
             }
           }
