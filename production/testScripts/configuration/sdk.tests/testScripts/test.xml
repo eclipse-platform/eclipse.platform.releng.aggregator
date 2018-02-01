@@ -1336,7 +1336,43 @@
     <property
       name="junit-stylesheet"
       value="${executionDir}/JUNIT.XSL" />
+    <fileset
+      id="plugin.test"
+      dir="${eclipse-home}/plugins">
+      <filename name="${testPlugin}_*/test.xml" />
+    </fileset>
+    <property
+      name="plugintest"
+      refid="plugin.test" />
     <echo>trying to find ${testPlugin}_*/test.xml</echo>
+    <condition
+      property="plugintest.present"
+      value="true">
+      <not>
+        <equals
+          arg1="${plugintest}"
+          arg2="" />
+      </not>
+    </condition>
+    <fileset
+      id="plugin.jar"
+      dir="${eclipse-home}/plugins">
+      <filename name="${testPlugin}_*.jar" />
+    </fileset>
+    <property
+      name="pluginjar"
+      refid="plugin.jar" />
+    <echo>trying to find ${testPlugin}_*.jar</echo>
+    <condition
+      property="pluginjar.present"
+      value="true">
+      <not>
+        <equals
+          arg1="${pluginjar}"
+          arg2="" />
+      </not>
+    </condition>
+    <antcall target="extractTestXml" />
     <fileset
       id="test.plugin.file"
       dir="${eclipse-home}/plugins">
@@ -1357,6 +1393,19 @@
     </condition>
     <antcall target="runSuite" />
     <antcall target="genResults" />
+  </target>
+
+  <target
+    name="extractTestXml"
+    if="pluginjar.present"
+    unless="plugintest.present">
+    <echo>extracting jar</echo>
+    <basename property="plugindirectory" file="${eclipse-home}/plugins/${pluginjar}" suffix=".jar"/>
+    <unzip src="${eclipse-home}/plugins/${pluginjar}" dest="${eclipse-home}/plugins/${plugindirectory}" overwrite="true">
+      <patternset>
+       <include name="test.xml"/>
+      </patternset>
+    </unzip>
   </target>
 
   <target
@@ -1439,7 +1488,43 @@
       name="library-file"
       value="${executionDir}/library.xml" />
 
-    <echo>trying to find ${testPlugin}_*</echo>
+    <fileset
+      id="plugin.test"
+      dir="${eclipse-home}/plugins">
+      <filename name="${testPlugin}_*/test.xml" />
+    </fileset>
+    <property
+      name="plugintest"
+      refid="plugin.test" />
+    <echo>trying to find ${testPlugin}_*/test.xml</echo>
+    <condition
+      property="plugintest.present"
+      value="true">
+      <not>
+        <equals
+          arg1="${plugintest}"
+          arg2="" />
+      </not>
+    </condition>
+    <fileset
+      id="plugin.jar"
+      dir="${eclipse-home}/plugins">
+      <filename name="${testPlugin}_*.jar" />
+    </fileset>
+    <property
+      name="pluginjar"
+      refid="plugin.jar" />
+    <echo>trying to find ${testPlugin}_*.jar</echo>
+    <condition
+      property="pluginjar.present"
+      value="true">
+      <not>
+        <equals
+          arg1="${pluginjar}"
+          arg2="" />
+      </not>
+    </condition>
+    <antcall target="extractTestXml" />
     <fileset
       id="test.plugin.file"
       dir="${eclipse-home}/plugins">
