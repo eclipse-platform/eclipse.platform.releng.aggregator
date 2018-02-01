@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
+ * Copyright (c) 2000, 2018 IBM Corporation and others. All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
@@ -7,6 +7,8 @@
  *******************************************************************************/
 
 package org.eclipse.test.performance;
+
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.test.internal.performance.InternalDimensions;
@@ -226,18 +228,16 @@ public class Performance {
                 } else {
                     c = Class.forName(className);
                 }
-                instance = (PerformanceMeterFactory) c.newInstance();
-            }
-            catch (ClassNotFoundException e) {
-                PerformanceTestPlugin.log(e);
-            }
-            catch (InstantiationException e) {
-                PerformanceTestPlugin.log(e);
-            }
-            catch (IllegalAccessException e) {
-                PerformanceTestPlugin.log(e);
-            }
-            catch (ClassCastException e) {
+                instance = (PerformanceMeterFactory) c.getDeclaredConstructor().newInstance();
+            } catch (
+                    ClassNotFoundException |
+                    InstantiationException |
+                    IllegalAccessException |
+                    ClassCastException |
+                    IllegalArgumentException |
+                    InvocationTargetException |
+                    NoSuchMethodException |
+                    SecurityException e) {
                 PerformanceTestPlugin.log(e);
             }
         }
