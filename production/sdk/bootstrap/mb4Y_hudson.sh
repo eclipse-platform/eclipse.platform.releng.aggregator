@@ -83,8 +83,8 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
 export BRANCH=R4_7_maintenance
 export BUILD_TYPE=Y
-export STREAM=4.7.0
-export PATCH_OR_BRANCH_LABEL=masterjava9
+export STREAM=4.7.3
+export PATCH_OR_BRANCH_LABEL=java10
 eclipseStreamMajor=${STREAM:0:1}
 
 # unique short name for stream and build type
