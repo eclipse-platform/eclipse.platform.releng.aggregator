@@ -48,7 +48,7 @@
       for greater flexibility in what to test?)
     -->
 
-    <antcall target="triggerHudsonTests">
+    <antcall target="triggerHudsonWinTests">
       <param
         name="job"
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32" />
@@ -60,31 +60,24 @@
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
     </antcall>
 
-  </target>
-  
-    <target
-    name="GTK3JUnitTests"
-    depends="init">
-
     <!--
       currently we test on four platforms.
       These GTK3 tests are "just like the others", except the URL to "send it to" differs.
     -->
-
     
-    <antcall target="triggerHudsonLinuxTests">
+    <antcall target="triggerHudsonTests">
       <param
         name="job"
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk2" />
     </antcall>
 
-    <antcall target="triggerHudsonLinuxTests">
+    <antcall target="triggerHudsonTests">
       <param
         name="job"
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3" />
     </antcall>
 
-    <antcall target="triggerHudsonLinuxTests">
+    <antcall target="triggerHudsonTests">
       <param
         name="job"
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java9" />
@@ -204,8 +197,9 @@
         value="${unitErrorOutput}" />
     </antcall>
   </target>
+
   <target
-    name="triggerHudsonLinuxTests"
+    name="triggerHudsonWinTests"
     depends="init">
     <!--
       baseURL used to be "required parameter" for Hudson job, but seemed overly complicated so
@@ -236,10 +230,10 @@
     <echo message="env.HUDSON_PROTOCOL: ${env.HUDSON_PROTOCOL}" />
     <echo message="env.HUDSON_HOST: ${env.HUDSON_HOST}" />
     <echo message="env.HUDSON_PORT: ${env.HUDSON_PORT}" />
-    <echo message="env.HUDSON_GTK3_ROOT_URI: ${env.HUDSON_GTK3_ROOT_URI}" />
+    <echo message="env.HUDSON_WIN32_ROOT_URI: ${env.HUDSON_WIN32_ROOT_URI}" />
     <echo message="json for unit curl post: ${json}" />
     <echo message="job: ${job}" />
-    <echo message="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_GTK3_ROOT_URI}/job/${job}/build" />
+    <echo message="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_WIN32_ROOT_URI}/job/${job}/build" />
 
     <exec
       executable="curl"
@@ -247,7 +241,7 @@
       outputproperty="unitOutput"
       errorproperty="unitErrorOutput">
       <arg line="-X POST" />
-      <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_GTK3_ROOT_URI}/job/${job}/build" />
+      <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_WIN32_ROOT_URI}/job/${job}/build" />
       <arg line="-d token=${env.HUDSON_TOKEN}" />
       <arg value="--fail" />
       <arg value="--data-urlencode" />
@@ -406,7 +400,7 @@
 
     <property
       name="env.HUDSON_HOST"
-      value="hudson.eclipse.org" />
+      value="ci.eclipse.org" />
     <property
       name="env.HUDSON_PROTOCOL"
       value="https" />
@@ -415,13 +409,13 @@
       value="443" />
     <property
       name="env.HUDSON_ROOT_URI"
+      value="releng" />
+    <property
+      name="env.HUDSON_WIN32_ROOT_URI"
       value="shared" />
     <property
-      name="env.HUDSON_GTK3_ROOT_URI"
-      value="platform" />
-    <property
       name="env.HUDSON_PERF_HOST"
-      value="hudson.eclipse.org" />
+      value="ci.eclipse.org" />
     <property
       name="env.HUDSON_PERF_PROTOCOL"
       value="https" />

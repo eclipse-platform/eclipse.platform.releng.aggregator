@@ -258,11 +258,11 @@ function sendTestResultsMail ()
     
     platform=$(echo ${JOB_NAME}|cut -b 12-16)
     case "$platform" in
-        "cen64")
-            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/platform/view/Unit Tests"
+        "win32")
+            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/shared/view/Eclipse and Equinox"
             ;;
         *)
-            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox"
+            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Automated tests"
             ;;
     esac
 

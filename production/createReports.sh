@@ -157,7 +157,7 @@ then
 
   # turned off proxy for now. Ideally would set proper environment variables!
   # Let's fetch always. otherwise we'll miss any upgrades
-  wget --no-proxy --no-verbose --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers_cleanAndDeploy/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+  wget --no-proxy --no-verbose --no-cache -O "${TMP_DIR}/${tar_name}" https://ci.eclipse.org/cbi/job/cbi.p2repo.analyzers_cleanAndDeploy/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
   
   # always extract anew each time.
   if [[ -e ${report_app_area} ]]
