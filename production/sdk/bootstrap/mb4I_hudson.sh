@@ -54,7 +54,7 @@ echo "locale charmap: $(locale charmap)"
 
 # all optional
 # normally, when ran from crobjob, none should be specified
-while getopts 'ht' OPTION
+while getopts 'hti' OPTION
 do
   case $OPTION in
     h)    usage
@@ -62,8 +62,11 @@ do
       ;;
     t)    export testbuildonly=true
       ;;
+    i)    export invisibleBuild=true
+      ;;
   esac
 done
+
 
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.

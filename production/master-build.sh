@@ -259,6 +259,12 @@ then
   fn-write-property testbuildonly
 fi
 
+# any value of interest/usefulness can be added to BUILD_ENV_FILE
+if [[ "${invisibleBuild}" == "true" ]]
+then
+  fn-write-property invisibleBuild
+fi
+
 # Temp variables
 #fn-write-property USING_TYCHO_SNAPSHOT
 fn-write-property PATCH_TYCHO

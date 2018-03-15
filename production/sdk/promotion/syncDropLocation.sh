@@ -318,7 +318,7 @@ function syncRepoSite ()
     # assume ant is on the path
     ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$dropFromBuildDir
 
-    if [[ "${buildType}" != "P" ]]
+    if [[ "${buildType}" != "P" && "${invisibleBuild}" != "true" ]]
     then
       ${PROMOTION_SCRIPT_PATH}/runAntRunner.sh ${buildId} ${eclipseStream} ${PROMOTION_SCRIPT_PATH}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
       RC=$?
