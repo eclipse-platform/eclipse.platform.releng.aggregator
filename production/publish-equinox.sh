@@ -167,6 +167,11 @@ fn-publish-equinox ()
     -DbuildDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
     -Djava.io.tmpdir=$TMP_DIR \
     publish
+
+  if [[ "$invisibleBuild" == "true" ]]
+  then
+    touch buildHidden
+  fi
   popd
 }
 
