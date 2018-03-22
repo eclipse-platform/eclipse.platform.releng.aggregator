@@ -282,7 +282,12 @@ function sendTestResultsMail ()
     else
       failures="failures"
     fi
-    SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId}: ${testsFailed} ${failures} from ${JOB_NAME}"
+    if [[ "${buildType}" == "M" ]]
+    then
+        SUBJECT="${eclipseStream}a ${buildType}-Build: ${buildId}: ${testsFailed} ${failures} from ${JOB_NAME}"
+    else
+        SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId}: ${testsFailed} ${failures} from ${JOB_NAME}"
+    fi
 
     setToAndFromAddresses
 
