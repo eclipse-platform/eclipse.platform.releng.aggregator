@@ -103,7 +103,7 @@ if (file_exists("buildUnstable")) {
 }
 ?>
 <p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform build along with
-is logs and tests.</p>
+its logs and tests.</p>
 <?php
 if (file_exists("pom_updates/index.html")) {
   echo "<h2><a href=\"pom_updates/\">POM updates made</a></h2>";
