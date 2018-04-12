@@ -33,7 +33,7 @@ echo -e "\tbuildIdToTest: ${BUILD_ID}"
 # TODO: we could have a "previous_release" sort of variable that 
 # would be defined in parent pom or build_eclipse_org.shsource so that
 # we do not need to change this source. 
-buildIdToCompare="4.7/R-4.7.3-201803010715"
+buildIdToCompare="4.7/R-4.7.3a-201803300640"
 
 build_type=${buildIdToTest:0:1}
 echo -e "\tbuild_type: ${build_type}"
@@ -77,13 +77,13 @@ then
 elif [[ ${build_type} == "M" ]]
 then
   update_dir_segment="4.7-M-builds"
-  buildIdToCompare="4.7/R-4.7.3-201803010715"
-  echo -e "\tlatest_R_build: R-4.7.3-201803010715"
+  buildIdToCompare="4.7/R-4.7.3a-201803300640"
+  echo -e "\tlatest_R_build: R-4.7.3a-201803300640"
 elif [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.8-I-builds"
-  buildIdToCompare="4.7/R-4.7.3-201803010715"
-  echo -e "\tlatest_R_build: R-4.7.3-201803010715"
+  buildIdToCompare="4.7/R-4.7.3a-201803300640"
+  echo -e "\tlatest_R_build: R-4.7.3a-201803300640"
 elif [[ ${build_type} == "Y" ]]
 then
   update_dir_segment="4.8-Y-builds"
