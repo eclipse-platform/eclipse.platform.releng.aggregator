@@ -257,14 +257,7 @@ function sendTestResultsMail ()
     fi
     
     platform=$(echo ${JOB_NAME}|cut -b 12-16)
-    case "$platform" in
-        "win32")
-            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/shared/view/Eclipse and Equinox"
-            ;;
-        *)
-            HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Automated tests"
-            ;;
-    esac
+    HUDSON_URL="${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Automated tests"
 
     # Now read "elapsed time" duration from Hudson. (The time above is the sum of all unit tests times,
     # so does not include "overhead" and is deceptive.) The "-O -" means send output to standard out (instead of file).
