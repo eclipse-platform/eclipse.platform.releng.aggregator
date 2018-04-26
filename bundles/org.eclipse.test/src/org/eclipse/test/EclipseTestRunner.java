@@ -84,7 +84,7 @@ public class EclipseTestRunner implements TestListener {
 			super(e);
 		}
 	}
-	
+
 	static class ThreadDump extends Exception {
 
 		private static final long serialVersionUID = 1L;
@@ -100,18 +100,17 @@ public class EclipseTestRunner implements TestListener {
 		private PrintStream fStream;
 
 		public StreamForwarder(InputStream processOutput, PrintStream stream) {
-			fProcessOutput= processOutput;
-			fStream= stream;
+			fProcessOutput = processOutput;
+			fStream = stream;
 		}
 
 		@Override
 		public void run() {
-			try (BufferedReader reader= new BufferedReader(new InputStreamReader(fProcessOutput))) {
-				String line= null;
-				while ((line= reader.readLine()) != null) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(fProcessOutput))) {
+				String line = null;
+				while ((line = reader.readLine()) != null) {
 					fStream.println(line);
 				}
-				reader.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -133,20 +132,18 @@ public class EclipseTestRunner implements TestListener {
 
 	private static final String SUITE_METHODNAME = "suite";
 	/**
-	 * SECONDS_BEFORE_TIMEOUT_BUFFER is the time we allow ourselves to take
-	 * stack traces, get a screen shot, delay "SECONDS_BETWEEN_DUMPS", then do
-	 * it again. On current build machine, it takes about 30 seconds to do all
-	 * that, so 2 minutes should be suffiencient time allowed for most machines.
-	 * Though, should increase, say, if we increase the "time beteen dumps" to a
-	 * minute or more.
+	 * SECONDS_BEFORE_TIMEOUT_BUFFER is the time we allow ourselves to take stack
+	 * traces, get a screen shot, delay "SECONDS_BETWEEN_DUMPS", then do it again.
+	 * On current build machine, it takes about 30 seconds to do all that, so 2
+	 * minutes should be suffiencient time allowed for most machines. Though, should
+	 * increase, say, if we increase the "time beteen dumps" to a minute or more.
 	 */
 	private static final int SECONDS_BEFORE_TIMEOUT_BUFFER = 120;
 
 	/**
-	 * SECONDS_BETWEEN_DUMPS is the time we wait from first to second dump of
-	 * stack trace and screenshots. In most cases, this should suffice to
-	 * determine if still busy doing something, or, hung, or waiting for user
-	 * input.
+	 * SECONDS_BETWEEN_DUMPS is the time we wait from first to second dump of stack
+	 * trace and screenshots. In most cases, this should suffice to determine if
+	 * still busy doing something, or, hung, or waiting for user input.
 	 */
 	private static final int SECONDS_BETWEEN_DUMPS = 5;
 
@@ -273,7 +270,8 @@ public class EclipseTestRunner implements TestListener {
 					props.load(in);
 				}
 			} else if (args[i].equals("-testlistener")) {
-            	System.err.println("The -testlistener option is no longer supported\nuse the formatter= option instead");
+				System.err
+						.println("The -testlistener option is no longer supported\nuse the formatter= option instead");
 				return ERRORS;
 			} else if (args[i].equals("-timeout")) {
 				if (i < args.length - 1)
@@ -299,8 +297,7 @@ public class EclipseTestRunner implements TestListener {
 			}
 			System.err.println("INFO: timeoutScreenOutputDir: " + timeoutScreenOutputDir);
 			System.err.println("INFO: timeout: " + timeoutString);
-			startStackDumpTimeoutTimer(timeoutString, new File(
-					timeoutScreenOutputDir), className);
+			startStackDumpTimeoutTimer(timeoutString, new File(timeoutScreenOutputDir), className);
 		}
 
 		if (testPluginsNames != null && classesNames != null) {
@@ -319,8 +316,7 @@ public class EclipseTestRunner implements TestListener {
 			for (String oneClassName : suiteClasses) {
 				JUnitTest t = new JUnitTest(oneClassName);
 				t.setProperties(props);
-				EclipseTestRunner runner = new EclipseTestRunner(t, testPlugins[j],
-						haltError, haltFail);
+				EclipseTestRunner runner = new EclipseTestRunner(t, testPlugins[j], haltError, haltFail);
 				transferFormatters(runner, j);
 				runner.run();
 				j++;
@@ -343,246 +339,209 @@ public class EclipseTestRunner implements TestListener {
 
 		t.setProperties(props);
 
-	    EclipseTestRunner runner= new EclipseTestRunner(t, testPluginName, haltError, haltFail);
+		EclipseTestRunner runner = new EclipseTestRunner(t, testPluginName, haltError, haltFail);
 		transferFormatters(runner);
 		runner.run();
 		return runner.getRetCode();
 	}
 
 	/**
-	 * Starts a timer that dumps interesting debugging information shortly
-	 * before the given timeout expires.
+	 * Starts a timer that dumps interesting debugging information shortly before
+	 * the given timeout expires.
 	 * 
-	 * @param timeoutArg
-	 *            the -timeout argument from the command line
-	 * @param outputDirectory
-	 *            where the test results end up
-	 * @param classname
-	 *            the class that is running the tests suite
+	 * @param timeoutArg      the -timeout argument from the command line
+	 * @param outputDirectory where the test results end up
+	 * @param classname       the class that is running the tests suite
 	 */
-	private static void startStackDumpTimeoutTimer(final String timeoutArg,
-			final File outputDirectory, final String classname) {
+	private static void startStackDumpTimeoutTimer(final String timeoutArg, final File outputDirectory,
+			final String classname) {
 		try {
 			/*
-			 * The delay (in ms) is the sum of - the expected time it took for
-			 * launching the current VM and reaching this method - the time it
-			 * will take to run the garbage collection and dump all the infos
-			 * (twice)
+			 * The delay (in ms) is the sum of - the expected time it took for launching the
+			 * current VM and reaching this method - the time it will take to run the
+			 * garbage collection and dump all the infos (twice)
 			 */
 			int delay = SECONDS_BEFORE_TIMEOUT_BUFFER * 1000;
 
 			int timeout = Integer.parseInt(timeoutArg) - delay;
-			String time0 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z",
-					Locale.US).format(new Date());
-			System.err.println("starting EclipseTestRunner Timer with timeout="
-					+ timeout + " at " + time0);
+			String time0 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(new Date());
+			System.err.println("starting EclipseTestRunner Timer with timeout=" + timeout + " at " + time0);
 			if (timeout > 0) {
-				new Timer("EclipseTestRunner Timer", true).schedule(
-						new TimerTask() {
-							
-							volatile boolean assumeUiThreadIsResponsive;
-							
-							@Override
-							public void run() {
-								assumeUiThreadIsResponsive = true;
-								dump(0);
+				new Timer("EclipseTestRunner Timer", true).schedule(new TimerTask() {
+
+					volatile boolean assumeUiThreadIsResponsive;
+
+					@Override
+					public void run() {
+						assumeUiThreadIsResponsive = true;
+						dump(0);
+						try {
+							Thread.sleep(SECONDS_BETWEEN_DUMPS * 1000);
+						} catch (InterruptedException e) {
+							// continue
+						}
+						dump(SECONDS_BETWEEN_DUMPS);
+					}
+
+					/**
+					 * 
+					 * @param num num is purely a lable used in naming the screen capture files. By
+					 *            convention, we pass in 0 or "SECONDS_BETWEEN_DUMPS" just as a
+					 *            subtle reminder of how much time as elapsed. Thus, files end up
+					 *            with names similar to <classname>_screen0.png,
+					 *            <classname>_screem5.png in a directory named "timeoutScreens"
+					 *            under "results", such as
+					 *            .../results/linux.gtk.x86_64/timeoutScreens/
+					 */
+					private void dump(final int num) {
+						// Time elapsed time to do each dump, so we'll
+						// know if/when we get too close to the 2
+						// minutes we allow
+						long start = System.currentTimeMillis();
+
+						// Dump all stacks:
+						dumpStackTraces(num, System.err);
+						dumpStackTraces(num, System.out); // System.err could be blocked, see
+															// https://bugs.eclipse.org/506304
+
+						if (!dumpSwtDisplay(num)) {
+							String screenshotFile = getScreenshotFile(num);
+							dumpAwtScreenshot(screenshotFile);
+						}
+
+						// Elapsed time in milliseconds
+						long elapsedTimeMillis = System.currentTimeMillis() - start;
+
+						// Print in seconds
+						float elapsedTimeSec = elapsedTimeMillis / 1000F;
+						System.err.println("INFO: Seconds to do dump " + num + ": " + elapsedTimeSec);
+					}
+
+					private void dumpStackTraces(int num, PrintStream out) {
+						out.println("EclipseTestRunner almost reached timeout '" + timeoutArg + "'.");
+						out.println("totalMemory:            " + Runtime.getRuntime().totalMemory());
+						out.println("freeMemory (before GC): " + Runtime.getRuntime().freeMemory());
+						out.flush(); // bug 420258: flush aggressively, we could be low on memory
+						System.gc();
+						out.println("freeMemory (after GC):  " + Runtime.getRuntime().freeMemory());
+						String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(new Date());
+						out.println("Thread dump " + num + " at " + time + ":");
+						out.flush();
+						Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+						for (Entry<Thread, StackTraceElement[]> entry : stackTraces.entrySet()) {
+							String name = entry.getKey().getName();
+							StackTraceElement[] stack = entry.getValue();
+							ThreadDump exception = new ThreadDump("for thread \"" + name + "\"");
+							exception.setStackTrace(stack);
+							exception.printStackTrace();
+						}
+						out.flush();
+					}
+
+					String getScreenshotFile(final int num) {
+						if (!outputDirectory.exists()) {
+							outputDirectory.mkdirs();
+						}
+						String filename = outputDirectory.getAbsolutePath() + "/" + classname + "_screen" + num
+								+ ".png";
+						return filename;
+					}
+
+					@SuppressWarnings("deprecation")
+					private boolean dumpSwtDisplay(final int num) {
+						try {
+							final Display display = Display.getDefault();
+
+							if (!assumeUiThreadIsResponsive) {
+								String message = "trying to make UI thread respond";
+								IllegalStateException toThrow = new IllegalStateException(message);
+								Thread t = display.getThread();
+								// Initialize the cause. Its stack trace will be that of the current thread.
+								toThrow.initCause(new RuntimeException(message));
+								// Set the stack trace to that of the target thread.
+								toThrow.setStackTrace(t.getStackTrace());
+								// Stop the thread using the specified throwable.
 								try {
-									Thread.sleep(SECONDS_BETWEEN_DUMPS * 1000);
-								} catch (InterruptedException e) {
-									// continue
+									t.stop(toThrow);
+								} catch (UnsupportedOperationException e) {
+									// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
+									try {
+										Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
+										stop0.setAccessible(true);
+										stop0.invoke(t, toThrow);
+									} catch (Exception e1) {
+										e1.printStackTrace();
+									}
 								}
-								dump(SECONDS_BETWEEN_DUMPS);
 							}
 
-							/**
-							 * 
-							 * @param num 
-							 *     num is purely a lable used in naming the screen capture files. 
-							 *     By convention, we pass in 0 or "SECONDS_BETWEEN_DUMPS" just as 
-							 *     a subtle reminder of how much time as elapsed.  
-							 *     Thus, files end up with names similar to 
-							 *     <classname>_screen0.png, <classname>_screem5.png
-                             *     in a directory named "timeoutScreens" under "results", 
-                             *     such as .../results/linux.gtk.x86_64/timeoutScreens/ 
-							 */
-							private void dump(final int num) {
-								// Time elapsed time to do each dump, so we'll
-								// know if/when we get too close to the 2
-								// minutes we allow
-								long start = System.currentTimeMillis();
+							assumeUiThreadIsResponsive = false;
 
-								// Dump all stacks:
-								dumpStackTraces(num, System.err);
-								dumpStackTraces(num, System.out); // System.err could be blocked, see https://bugs.eclipse.org/506304
-								
-								if (!dumpSwtDisplay(num)) {
-									String screenshotFile= getScreenshotFile(num);
-									dumpAwtScreenshot(screenshotFile);
+							display.asyncExec(new Runnable() {
+								@Override
+								public void run() {
+									assumeUiThreadIsResponsive = true;
+
+									dumpDisplayState(System.err);
+									dumpDisplayState(System.out); // System.err could be blocked, see
+																	// https://bugs.eclipse.org/506304
+
+									// Take a screenshot:
+									GC gc = new GC(display);
+									final Image image = new Image(display, display.getBounds());
+									gc.copyArea(image, 0, 0);
+									gc.dispose();
+
+									ImageLoader loader = new ImageLoader();
+									loader.data = new ImageData[] { image.getImageData() };
+									String filename = getScreenshotFile(num);
+									loader.save(filename, SWT.IMAGE_PNG);
+									System.err.println("Screenshot saved to: " + filename);
+									System.out.println("Screenshot saved to: " + filename);
+									image.dispose();
 								}
-								
-								// Elapsed time in milliseconds
-								long elapsedTimeMillis = System
-										.currentTimeMillis() - start;
 
-								// Print in seconds
-								float elapsedTimeSec = elapsedTimeMillis / 1000F;
-								System.err.println("INFO: Seconds to do dump "
-										+ num + ": " + elapsedTimeSec);
-							}
-
-							private void dumpStackTraces(int num, PrintStream out) {
-								out
-										.println("EclipseTestRunner almost reached timeout '"
-												+ timeoutArg + "'.");
-								out.println("totalMemory:            "
-										+ Runtime.getRuntime().totalMemory());
-								out.println("freeMemory (before GC): "
-										+ Runtime.getRuntime().freeMemory());
-								out.flush(); // bug 420258: flush aggressively, we could be low on memory
-								System.gc();
-								out.println("freeMemory (after GC):  "
-										+ Runtime.getRuntime().freeMemory());
-								String time = new SimpleDateFormat(
-										"yyyy-MM-dd HH:mm:ss Z", Locale.US)
-										.format(new Date());
-								out.println("Thread dump " + num
-										+ " at " + time + ":");
-								out.flush();
-								Map<Thread, StackTraceElement[]> stackTraces = Thread
-										.getAllStackTraces();
-								for (Entry<Thread, StackTraceElement[]> entry : stackTraces
-										.entrySet()) {
-									String name = entry.getKey().getName();
-									StackTraceElement[] stack = entry
-											.getValue();
-									ThreadDump exception = new ThreadDump("for thread \"" + name + "\"");
-									exception.setStackTrace(stack);
-									exception.printStackTrace();
-								}
-								out.flush();
-							}
-
-							String getScreenshotFile(final int num) {
-								if (!outputDirectory.exists()) {
-									outputDirectory.mkdirs();
-								}
-								String filename = outputDirectory.getAbsolutePath()
-										+ "/"
-										+ classname
-										+ "_screen"
-										+ num
-										+ ".png";
-								return filename;
-							}
-
-							@SuppressWarnings("deprecation")
-							private boolean dumpSwtDisplay(final int num) {
-								try {
-									final Display display = Display.getDefault();
-									
-									if (!assumeUiThreadIsResponsive) {
-										String message = "trying to make UI thread respond";
-										IllegalStateException toThrow = new IllegalStateException(message);
-										Thread t = display.getThread();
-										// Initialize the cause. Its stack trace will be that of the current thread.
-										toThrow.initCause(new RuntimeException(message));
-										// Set the stack trace to that of the target thread.
-										toThrow.setStackTrace(t.getStackTrace());
-										// Stop the thread using the specified throwable.
-										try {
-											t.stop(toThrow);
-										} catch (UnsupportedOperationException e) {
-											// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
-											try {
-												Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
-												stop0.setAccessible(true);
-												stop0.invoke(t, toThrow);
-											} catch (Exception e1) {
-												e1.printStackTrace();
-											}
+								private void dumpDisplayState(PrintStream out) {
+									// Dump focus control, parents, and
+									// shells:
+									Control focusControl = display.getFocusControl();
+									if (focusControl != null) {
+										out.println("FocusControl: ");
+										StringBuilder indent = new StringBuilder("  ");
+										do {
+											out.println(indent.toString() + focusControl);
+											focusControl = focusControl.getParent();
+											indent.append("  ");
+										} while (focusControl != null);
+									}
+									Shell[] shells = display.getShells();
+									if (shells.length > 0) {
+										out.println("Shells: ");
+										for (Shell shell : shells) {
+											out.println((shell.isVisible() ? "  visible: " : "  invisible: ") + shell);
 										}
 									}
-	
-									assumeUiThreadIsResponsive = false;
-									
-									display.asyncExec(new Runnable() {
-										@Override
-										public void run() {
-											assumeUiThreadIsResponsive= true;
-											
-											dumpDisplayState(System.err);
-											dumpDisplayState(System.out); // System.err could be blocked, see https://bugs.eclipse.org/506304
-	
-											// Take a screenshot:
-											GC gc = new GC(display);
-											final Image image = new Image(display,
-													display.getBounds());
-											gc.copyArea(image, 0, 0);
-											gc.dispose();
-	
-											ImageLoader loader = new ImageLoader();
-											loader.data = new ImageData[] { image
-													.getImageData() };
-											String filename= getScreenshotFile(num);
-											loader.save(filename, SWT.IMAGE_PNG);
-											System.err.println("Screenshot saved to: " + filename);
-											System.out.println("Screenshot saved to: " + filename);
-											image.dispose();
-										}
-
-										private void dumpDisplayState(PrintStream out) {
-											// Dump focus control, parents, and
-											// shells:
-											Control focusControl = display
-													.getFocusControl();
-											if (focusControl != null) {
-												out.println("FocusControl: ");
-												StringBuilder indent = new StringBuilder("  ");
-												do {
-													out.println(indent
-															.toString()
-															+ focusControl);
-													focusControl = focusControl
-															.getParent();
-													indent.append("  ");
-												} while (focusControl != null);
-											}
-											Shell[] shells = display.getShells();
-											if (shells.length > 0) {
-												out.println("Shells: ");
-												for (int i = 0; i < shells.length; i++) {
-													Shell shell = shells[i];
-													out.println((shell
-															.isVisible() ? "  visible: "
-															: "  invisible: ")
-															+ shell);
-												}
-											}
-											out.flush(); // for bug 420258
-										}
-									});
-									return true;
-								} catch (SWTException e) {
-									e.printStackTrace();
-									return false;
+									out.flush(); // for bug 420258
 								}
-							}
-							
-						}, timeout);
+							});
+							return true;
+						} catch (SWTException e) {
+							e.printStackTrace();
+							return false;
+						}
+					}
+
+				}, timeout);
 			} else {
-				System.err
-						.println("EclipseTestRunner argument error: '-timeout "
-								+ timeoutArg
-								+ "' was too short to accommodate time delay required ("
-								+ delay + ").");
+				System.err.println("EclipseTestRunner argument error: '-timeout " + timeoutArg
+						+ "' was too short to accommodate time delay required (" + delay + ").");
 			}
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public EclipseTestRunner(JUnitTest test, String testPluginName,
-			boolean haltOnError, boolean haltOnFailure) {
+	public EclipseTestRunner(JUnitTest test, String testPluginName, boolean haltOnError, boolean haltOnFailure) {
 		fJunitTest = test;
 		fTestPluginName = testPluginName;
 		fHaltOnError = haltOnError;
@@ -635,8 +594,7 @@ public class EclipseTestRunner implements TestListener {
 			if (test == null)
 				return test;
 		} catch (InvocationTargetException e) {
-			runFailed("Failed to invoke suite():"
-					+ e.getTargetException().toString());
+			runFailed("Failed to invoke suite():" + e.getTargetException().toString());
 			return null;
 		} catch (IllegalAccessException e) {
 			runFailed("Failed to invoke suite():" + e.toString());
@@ -660,17 +618,16 @@ public class EclipseTestRunner implements TestListener {
 	}
 
 	/**
-	 * Loads the class either with the system class loader or a plugin class
-	 * loader if a plugin name was specified
+	 * Loads the class either with the system class loader or a plugin class loader
+	 * if a plugin name was specified
 	 */
-	protected Class<?> loadSuiteClass(String suiteClassName)
-			throws ClassNotFoundException {
+	protected Class<?> loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		if (fTestPluginName == null)
 			return Class.forName(suiteClassName);
 		Bundle bundle = Platform.getBundle(fTestPluginName);
 		if (bundle == null) {
-			throw new ClassNotFoundException(suiteClassName, new Exception(
-					"Could not find plugin \"" + fTestPluginName + "\""));
+			throw new ClassNotFoundException(suiteClassName,
+					new Exception("Could not find plugin \"" + fTestPluginName + "\""));
 		}
 
 		// is the plugin a fragment?
@@ -681,11 +638,9 @@ public class EclipseTestRunner implements TestListener {
 			// we need to find which is our host
 			ManifestElement[] hostElement = null;
 			try {
-				hostElement = ManifestElement.parseHeader(
-						Constants.FRAGMENT_HOST, hostHeader);
+				hostElement = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, hostHeader);
 			} catch (BundleException e) {
-				throw new RuntimeException("Could not find host for fragment:"
-						+ fTestPluginName, e);
+				throw new RuntimeException("Could not find host for fragment:" + fTestPluginName, e);
 			}
 			Bundle host = Platform.getBundle(hostElement[0].getValue());
 			// we really want to get the host not the fragment
@@ -696,9 +651,6 @@ public class EclipseTestRunner implements TestListener {
 	}
 
 	public void run() {
-		// IPerformanceMonitor pm =
-		// PerfMsrCorePlugin.getPerformanceMonitor(true);
-
 		fTestResult = new TestResult();
 		fTestResult.addListener(this);
 		for (int i = 0; i < formatters.size(); i++) {
@@ -730,10 +682,8 @@ public class EclipseTestRunner implements TestListener {
 				fSystemError = null;
 				fSystemOut.close();
 				fSystemOut = null;
-				sendOutAndErr(new String(outStrm.toByteArray()), new String(
-						errStrm.toByteArray()));
-				fJunitTest.setCounts(fTestResult.runCount(),
-						fTestResult.failureCount(), fTestResult.errorCount());
+				sendOutAndErr(new String(outStrm.toByteArray()), new String(errStrm.toByteArray()));
+				fJunitTest.setCounts(fTestResult.runCount(), fTestResult.failureCount(), fTestResult.errorCount());
 				fJunitTest.setRunTime(System.currentTimeMillis() - start);
 			}
 		}
@@ -798,8 +748,7 @@ public class EclipseTestRunner implements TestListener {
 	/**
 	 * Line format is: formatter=<classname>(,<pathname>)?
 	 */
-	private static void createAndStoreFormatter(String line)
-			throws BuildException {
+	private static void createAndStoreFormatter(String line) throws BuildException {
 		String formatterClassName = null;
 		File formatterFile = null;
 
@@ -812,15 +761,13 @@ public class EclipseTestRunner implements TestListener {
 																// package
 																// visible
 		}
-		fgFromCmdLine.addElement(createFormatter(formatterClassName,
-				formatterFile));
+		fgFromCmdLine.addElement(createFormatter(formatterClassName, formatterFile));
 	}
 
 	/**
 	 * Line format is: formatter=<pathname>
 	 */
-	private static void createAndStoreFormatter(String line,
-			String... suiteClassesNames) throws BuildException {
+	private static void createAndStoreFormatter(String line, String... suiteClassesNames) throws BuildException {
 		String formatterClassName = null;
 		File formatterFile = null;
 
@@ -839,8 +786,7 @@ public class EclipseTestRunner implements TestListener {
 				pathname = outputDirectory.getAbsolutePath() + "/" + pathname;
 			}
 			formatterFile = new File(pathname);
-			fgFromCmdLine.addElement(createFormatter(formatterClassName,
-					formatterFile));
+			fgFromCmdLine.addElement(createFormatter(formatterClassName, formatterFile));
 		}
 
 	}
@@ -858,8 +804,7 @@ public class EclipseTestRunner implements TestListener {
 	/*
 	 * DUPLICATED from FormatterElement, since it is package visible only
 	 */
-	private static JUnitResultFormatter createFormatter(String classname,
-			File outfile) throws BuildException {
+	private static JUnitResultFormatter createFormatter(String classname, File outfile) throws BuildException {
 		OutputStream out = System.out;
 
 		if (classname == null) {
@@ -881,8 +826,7 @@ public class EclipseTestRunner implements TestListener {
 		}
 
 		if (!(o instanceof JUnitResultFormatter)) {
-			throw new BuildException(classname
-					+ " is not a JUnitResultFormatter");
+			throw new BuildException(classname + " is not a JUnitResultFormatter");
 		}
 
 		JUnitResultFormatter r = (JUnitResultFormatter) o;
@@ -900,12 +844,12 @@ public class EclipseTestRunner implements TestListener {
 
 	public static void dumpAwtScreenshot(String screenshotFile) {
 		try {
-			URL location= AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
-			String cp= location.toURI().getPath();
-			String javaHome= System.getProperty("java.home");
-			String javaExe= javaHome + File.separatorChar + "bin" + File.separatorChar + "java";
+			URL location = AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
+			String cp = location.toURI().getPath();
+			String javaHome = System.getProperty("java.home");
+			String javaExe = javaHome + File.separatorChar + "bin" + File.separatorChar + "java";
 			if (File.separatorChar == '\\') {
-				javaExe+= ".exe"; // assume it's Windows
+				javaExe += ".exe"; // assume it's Windows
 			}
 			String[] args = new String[] { javaExe, "-cp", cp, AwtScreenshot.class.getName(), screenshotFile };
 			System.err.println("Start process: " + Arrays.asList(args));
@@ -913,16 +857,16 @@ public class EclipseTestRunner implements TestListener {
 			if ("Mac OS X".equals(System.getProperty("os.name"))) {
 				processBuilder.environment().put("AWT_TOOLKIT", "CToolkit");
 			}
-			Process process= processBuilder.start();
+			Process process = processBuilder.start();
 			new StreamForwarder(process.getErrorStream(), System.err).start();
 			new StreamForwarder(process.getInputStream(), System.err).start();
-			int screenshotTimeout= 15;
-			long end= System.currentTimeMillis() + screenshotTimeout * 1000;
-			boolean done= false;
+			int screenshotTimeout = 15;
+			long end = System.currentTimeMillis() + screenshotTimeout * 1000;
+			boolean done = false;
 			do {
 				try {
 					process.exitValue();
-					done= true;
+					done = true;
 				} catch (IllegalThreadStateException e) {
 					try {
 						Thread.sleep(100);
@@ -930,22 +874,20 @@ public class EclipseTestRunner implements TestListener {
 					}
 				}
 			} while (!done && System.currentTimeMillis() < end);
-			
+
 			if (done) {
 				System.err.println("AwtScreenshot VM finished with exit code " + process.exitValue() + ".");
 			} else {
 				process.destroy();
 				System.err.println("Killed AwtScreenshot VM after " + screenshotTimeout + " seconds.");
 			}
-		} catch (URISyntaxException|IOException e) {
+		} catch (URISyntaxException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void sendOutAndErr(String out, String err) {
-		for (int i = 0; i < formatters.size(); i++) {
-			JUnitResultFormatter formatter = formatters.elementAt(i);
-
+		for (JUnitResultFormatter formatter : formatters) {
 			formatter.setSystemOutput(out);
 			formatter.setSystemError(err);
 		}
