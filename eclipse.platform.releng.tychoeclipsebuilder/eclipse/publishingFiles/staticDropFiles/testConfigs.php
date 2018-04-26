@@ -14,5 +14,5 @@ $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-cen64-
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-cen64-gtk3_linux.gtk.x86_64_8.0";
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-cen64-gtk3-java9_linux.gtk.x86_64_9";
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-mac64_macosx.cocoa.x86_64_8.0";
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-win32_win32.win32.x86_8.0";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-win32_win32.win32.x86_64_8.0";
 
