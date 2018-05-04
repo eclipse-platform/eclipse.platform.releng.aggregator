@@ -196,6 +196,46 @@ document in the plug-in developer's guide.</p>
   	</td>
   </tr>
   
+  <tr id="prototype-launch-configuration">
+    <td class="title">Launch configuration prototypes</td>
+    <td class="content">
+      A launch configuration can now be based on a prototype.
+      <p>
+        <img src="images/prototype-java-launch-configuration.png" alt="Prototype Launch Configuration" />
+      </p>
+      A prototype seeds attributes in its associated launch configurations with the settings specified in the Prototype tab.
+      <p>
+        <img src="images/prototype-tab-java-launch-configuration-1.png" alt="Prototype Tab Launch Configuration 1" />
+      </p>
+      Once a launch configuration has been created, you can override any initial settings from the prototype.
+      You can also reset the settings of a launch configuration with the ones from its prototype. A launch configuration maintains 
+      a link to its prototype, but is a complete stand-alone launch configuration than can be launched, exported, shared, etc.
+      <p>
+        <img src="images/prototype-tab-java-launch-configuration-2.png" alt="Prototype Tab Launch Configuration 2" />
+      </p>
+      Prototypes are already enabled for JDT and PDE launch configurations.
+      Others projects have to enable prototypes in <code>org.eclipse.debug.core.launchConfigurationTypes</code> extension point:
+<pre>
+&lt;extension
+    point="org.eclipse.debug.core.launchConfigurationTypes"&gt;
+    &lt;launchConfigurationType
+      <b>allowPrototypes="true"</b>
+      delegate="org.eclipse.jdt.launching.sourcelookup.advanced.AdvancedJavaLaunchDelegate"
+      delegateDescription="%localJavaApplicationDelegate.description"
+      delegateName="%eclipseJDTLauncher.name"
+      id="org.eclipse.jdt.launching.localJavaApplication"
+      migrationDelegate="org.eclipse.jdt.internal.launching.JavaMigrationDelegate"
+      modes="run, debug"
+      name="%localJavaApplication"
+      sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+      sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"&gt;
+    &lt;/launchConfigurationType&gt;
+&lt;/extension&gt;
+</pre>
+       and also implement <code>org.eclipse.debug.ui.AbstractLaunchConfigurationTab.initializeAttributes()</code> for their specifics tabs.
+    </td>
+  </tr>
+  
   <!-- ******************* Editors ************************************* -->
   <tr>
     <td id="Editor" class="section" colspan="2">
