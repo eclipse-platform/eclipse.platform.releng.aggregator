@@ -34,13 +34,13 @@ source localBuildProperties.shsource 2>/dev/null
 # If running on Hudson, we access the repo directly with file://
 # protocol. If not (i.e. if WORKSPACE is not defined) then we use
 # git://git.eclipse.org/
-export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"file:///gitroot"}
+export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"ssh://genie.releng@git.eclipse.org:29418"}
 if [[ -z "${WORKSPACE}" ]]
 then
   echo -e "\n\t[WARNING] This script is intend to be ran in Hudson."
   echo -e "\t\t But since WORKSPACE was not defined, will define it as PWD for local testing.\n\n"
   export WORKSPACE=${PWD}
-  export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"git://git.eclipse.org/gitroot"}
+  export REPO_AND_ACCESS=${REPO_AND_ACCESS:-"ssh://genie.releng@git.eclipse.org:29418"}
 fi
 
 if [[ -e ${WORKSPACE}/utilities ]]
