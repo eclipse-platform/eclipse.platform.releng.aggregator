@@ -152,6 +152,19 @@
 
     <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
 
+    <!--
+      Declaration of properties that contribute to the arg line for the tycho-surefire-plugin.
+      The properties are declared empty by default and are overridden by automatic activation
+      of the profiles 'macos' and 'jdk9-or-newer' or specific configuration in modules.
+    -->
+    <!-- any additional surefire args; to be defined by a test-plugin -->
+    <surefire.testArgLine></surefire.testArgLine>
+    <!-- platform/OS specific JVM args -->
+    <surefire.platformSystemProperties></surefire.platformSystemProperties>
+    <!-- properties related to Java modules on Java 9+ -->
+    <surefire.moduleProperties></surefire.moduleProperties>
+    <!-- system specific JVM args; if needed provided by system properties to the build command -->
+    <surefire.systemProperties></surefire.systemProperties>
   </properties>
 
   <organization>
@@ -510,6 +523,9 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
           <version>${tycho.version}</version>
+          <configuration>
+            <argLine>${surefire.testArgLine} ${surefire.platformSystemProperties} ${surefire.systemProperties} ${surefire.moduleProperties}</argLine>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -966,6 +982,28 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <profile>
+      <id>macos</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <surefire.platformSystemProperties>-XstartOnFirstThread</surefire.platformSystemProperties>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>jdk9-or-newer</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <surefire.moduleProperties>--add-modules=ALL-SYSTEM</surefire.moduleProperties>
+      </properties>
     </profile>
   </profiles>
 </project>
