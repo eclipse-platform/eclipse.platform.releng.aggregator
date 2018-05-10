@@ -24,7 +24,7 @@ import org.eclipse.tips.json.JsonTipProvider;
 
 public class JDTTipProvider extends JsonTipProvider {
 
-	private static final String EMPTY = "";
+	private static final String EMPTY = ""; //$NON-NLS-1$
 	private static final String FILENAME = "jdttips.json"; //$NON-NLS-1$
 	private String fUrl;
 	private File fStateLocation;
@@ -44,22 +44,22 @@ public class JDTTipProvider extends JsonTipProvider {
 		try {
 
 			SubMonitor monitor = SubMonitor.convert(pMonitor, 1);
-			monitor.setTaskName("Fetching content..");
+			monitor.setTaskName(Messages.JDTTipProvider_1);
 			File localFile = fetchContent();
 			try {
 				setJsonUrl(localFile.toURI().toURL().toString());
 			} catch (MalformedURLException e) {
-				getManager().log(getStatus("Could not get local URL", e));
+				getManager().log(getStatus(Messages.JDTTipProvider_2, e));
 			}
 			monitor.worked(1);
 			return super.loadNewTips(pMonitor);
 		} catch (Exception e) {
-			return getStatus("Could not load new Tips", e);
+			return getStatus(Messages.JDTTipProvider_3, e);
 		}
 	}
 
 	private IStatus getStatus(String message, Exception pException) {
-		return new Status(IStatus.ERROR, "org.eclipse.jdt.tips.user", message, pException);
+		return new Status(IStatus.ERROR, "org.eclipse.jdt.tips.user", message, pException); //$NON-NLS-1$
 	}
 
 	private File fetchContent() throws IOException {
@@ -133,7 +133,7 @@ public class JDTTipProvider extends JsonTipProvider {
 
 		if (!fStateLocation.canRead() || !fStateLocation.canWrite()) {
 			throw new IOException(
-					MessageFormat.format("Statelocation {0} not accessible.", fStateLocation.getAbsolutePath()));
+					MessageFormat.format(Messages.JDTTipProvider_5, fStateLocation.getAbsolutePath()));
 		}
 		return fStateLocation;
 	}
