@@ -25,7 +25,7 @@ import org.eclipse.tips.json.JsonTipProvider;
 public class JDTTipProvider extends JsonTipProvider {
 
 	private static final String EMPTY = ""; //$NON-NLS-1$
-	private static final String FILENAME = "jdttips.json"; //$NON-NLS-1$
+	private static final String FILENAME = "provider.json"; //$NON-NLS-1$
 	private String fUrl;
 	private File fStateLocation;
 
@@ -34,7 +34,7 @@ public class JDTTipProvider extends JsonTipProvider {
 		if (fUrl != null) {
 			setJsonUrl(fUrl);
 		} else {
-			fUrl = "http://www.eclipse.org/downloads/download.php?r=1&file=/eclipse/tips/" + FILENAME; //$NON-NLS-1$
+			fUrl = "http://www.eclipse.org/downloads/download.php?r=1&file=/eclipse/tips/org.eclipse.jdt.tips.user/" + FILENAME; //$NON-NLS-1$
 			setJsonUrl(fUrl);
 		}
 	}
@@ -108,9 +108,11 @@ public class JDTTipProvider extends JsonTipProvider {
 	}
 
 	/**
-	 * Returns the state location of the IDE tips. First the property
-	 * "org.eclipse.tips.statelocation" is read. If it does not exist then the state
-	 * location will be <b>${user.home}/.eclipse/org.eclipse.tips.state</b>
+	 * Returns the state location of this provider. First the property
+	 * <code>getID() + ".statelocation"</code> is read. If it does not exist then
+	 * the state location "org.eclipse.tips.statelocation" property is read. If it
+	 * does not exist then the state location will be
+	 * <b>${user.home}/.eclipse/org.eclipse.tips.state</b>
 	 * 
 	 * @return the state location file
 	 * @throws IOException if something went wrong
@@ -123,8 +125,11 @@ public class JDTTipProvider extends JsonTipProvider {
 
 		String stateLocation = System.getProperty(getID() + ".statelocation"); //$NON-NLS-1$
 		if (stateLocation == null) {
-			stateLocation = System.getProperty("user.home") + File.separator + ".eclipse" + File.separator //$NON-NLS-1$ //$NON-NLS-2$
-					+ getID() + ".state"; //$NON-NLS-1$
+			stateLocation = System.getProperty("org.eclipse.tips.statelocation"); //$NON-NLS-1$
+			if (stateLocation == null) {
+				stateLocation = System.getProperty("user.home") + File.separator + ".eclipse" + File.separator //$NON-NLS-1$ //$NON-NLS-2$
+						+ getID() + ".state"; //$NON-NLS-1$
+			}
 		}
 		fStateLocation = new File(stateLocation);
 		if (!fStateLocation.exists()) {
@@ -132,8 +137,7 @@ public class JDTTipProvider extends JsonTipProvider {
 		}
 
 		if (!fStateLocation.canRead() || !fStateLocation.canWrite()) {
-			throw new IOException(
-					MessageFormat.format(Messages.JDTTipProvider_5, fStateLocation.getAbsolutePath()));
+			throw new IOException(MessageFormat.format(Messages.JDTTipProvider_5, fStateLocation.getAbsolutePath()));
 		}
 		return fStateLocation;
 	}
