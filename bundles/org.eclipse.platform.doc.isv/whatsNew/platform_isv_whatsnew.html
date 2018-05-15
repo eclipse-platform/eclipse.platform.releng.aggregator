@@ -370,7 +370,33 @@ public class ProgressMonitorPart extends Composite implements
 		<p>No code change is needed to adopt to the migration.</p>
 	</td>
   </tr>
-  
+  <tr id="generic-editor-enablewhen">
+    <td class="title">Support 'enabledWhen' for the all Generic Editor extension points</td>
+    <td class="content">
+      All extension points targeting the Generic Edtor (<code>autoEditStrategies</code>, <code>contentAssistProcessors</code>, <code>highlightReconcilers</code>,
+      <code>hoverProviders</code>, <code>presentationReconcilers</code>, <code>reconcilers</code>) now allows an <code>enabledWhen</code> child elements for
+      contributions. This <code>enableWhen</code> is a Core Expression that controls whether the declared extension is enabled when insantiating the editor.
+      The evaluation context defines extra variables you can use in the expression: <code>viewer</code>, <code>editor</code> and <code>editorInput</code>.
+      <p>This example shows how LSP4E contributes server highlight reconciler only for editor input supporting a language server:</p>
+      <pre>
+&lt;extension
+      point="org.eclipse.ui.genericeditor.highlightReconcilers">
+   &lt;highlightReconciler
+         class="org.eclipse.lsp4e.operations.highlight.HighlightReconciler"
+         contentType="org.eclipse.core.runtime.text">
+      &lt;enabledWhen>
+         &lt;with
+               variable="editorInput">
+            &lt;test
+                  property="org.eclipse.lsp4e.hasLanguageServer">
+            &lt;/test>
+         &lt;/with>
+      &lt;/enabledWhen>
+   &lt;/highlightReconciler>
+&lt;/extension>
+      </pre>
+    </td>
+  </tr>
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
@@ -534,7 +560,30 @@ text.setLineSpacingProvider(lineIndex -> {
       This already works on Windows and GTK.
     </td>
   </tr>
-  
+
+ <tr id="monitor-getzoom">
+    <td class="title">New API Monitor#getZoom() added</td>
+    <td class="content">
+		A new API <code>Monitor.getZoom()</code> has been added which returns the zoom value used by SWT for the Monitor.
+		<p>
+		 The zoom value returned by the API is the zoom used by SWT that is controlled by the <code>swt.autoScale</code> property. It may not be the same value
+		 as that is set in the system. It can be used in other SWT APIs that require zoom as an input such as <code>Image.getImageData(zoom)</code> to get the ImageData
+		 at the zoom level for the specific Monitor on which it'll be drawn.
+		</p>
+		<p>
+		 There are two use-cases of the API:
+		</p>
+		<ul>
+		 <li>
+		  When the DPI of the monitor changes dynamically, the API can be used to return the new DPI.
+		 </li>
+		 <li>
+		  On platforms that support a multi-monitor setup where different monitors can have different DPIs, the API can be used to get the DPI of the specific monitor
+		  on which a Control is drawn.
+		 </li>
+		</ul>
+    </td>
+  </tr>
    <!-- ******************** Equinox ********************** -->
   <tr>
     <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
