@@ -61,7 +61,7 @@ document for changes in the Platform.</p>
     <td class="content">
     <a href="http://docs.oracle.com/javase/10/">Java&trade; 10</a> is here, and JDT supports it completely.
     <ul>
-		<li>The Eclipse compiler for Java (ECJ) implements the new Java 10 <a href="https://docs.oracle.com/javase/10/language">language enhancement</a> 
+		<li>The Eclipse compiler for Java (ECJ) implements the new Java 10 <a href="https://docs.oracle.com/javase/10/language">language enhancement</a>
 		which is the support for <a href="http://openjdk.java.net/jeps/286" target="_top"><b>local variable type inference (JEP 286)</b></a>.</li>
 	</ul>
 	<ul>
@@ -72,7 +72,7 @@ document for changes in the Platform.</p>
 				It can be added from the <b>Package Explorer</b> as well using the project's context menu.
 				<p><img src="images/j10.png" alt=""/></p>
 				</li>
-				
+
 				<li>An option to set compiler compliance to 10 on a Java project is provided.
 				<p><img src="images/j10.compliance.png" alt=""/></p>
 				</li>
@@ -85,37 +85,37 @@ document for changes in the Platform.</p>
 				<li>Eclipse supports compilation of <code>var</code> as shown below:
 				<p><img src="images/var.compile.png" alt=""/></p>
 				</li>
-			
-				<li>When the type of <code>var</code> cannot be inferred, it is flagged as a compiler error as expected. 
+
+				<li>When the type of <code>var</code> cannot be inferred, it is flagged as a compiler error as expected.
 				An example is shown below:
 				<p><img src="images/var.nocompile.png" alt=""/></p>
 				</li>
 			</ul>
 		</li>
-		
+
 		<li>
 		<p><b>Code Completion for <code>var</code></b></p>
 			<ul>
 				<li>Code completion is offered at places where <code>var</code> is allowed.
 				<p><img src="images/var.complete.png" alt=""/></p>
 				</li>
-	
+
 				<li>Code completion of var is not offered at places where <code>var</code> is not allowed.
 				<p><img src="images/var.nocomplete.png" alt=""/></p>
 				</li>
 			</ul>
 		</li>
-		
+
 		<li>
 		<p>Hover over <code>var</code> shows the javadoc of the inferred type.</p>
 		<p><img src="images/var.hover.png" alt=""/></p>
 		</li>
-		
+
 		<li>
 		<p>Quick Assist to convert from <code>var</code> to the appropriate type is provided.</p>
 			<p><img src="images/var.vartotype.png" alt=""/></p>
 		</li>
-		
+
 		<li>
 		<p>Quick Assist to convert from type to <code>var</code> is provided.</p>
 			<p><img src="images/var.typetovar.png" alt=""/></p>
@@ -123,7 +123,14 @@ document for changes in the Platform.</p>
 	</ul>
    </td>
   </tr>
-  
+
+  <tr id="quickfix-change-compliance-10">
+    <td class="title">Quick fix to change project compliance and JRE to 10</td>
+    <td class="content">
+    A quick fix <b>Change project compliance and JRE to 10</b> is provided to quickly change the current project to be compatible with Java 10.
+    <p><img src="images/quickfix-change-compliance-10.png" alt=""/></p>
+    </td>
+  </tr>
    <!-- ******************* Java 9 Support ************************************* -->
   <tr>
     <td id="Java9" class="section" colspan="2">
@@ -247,7 +254,37 @@ document for changes in the Platform.</p>
     </ul> 
     </td>
   </tr>
+
+  <tr>
+    <td class="title">New <code>--release</code> on the Java compiler preference page</td>
+    <td class="content">
+    <p>A new option <code>--release</code> is available on the Java compiler preference page.</p>
+	<p>This option will be enabled only if the JRE being used is a Java 9 or above.</p>
+	<p>Workspace Preference:</p>
+	<p><img src="images/java9_release_option_workspace_preference_page.png" alt=""/></p>
+	<p>Project Preference:</p>
+	<p><img src="images/java9_release_option_project_preference_page.png" alt=""/></p>
+    <p>In the past, it was possible to compile for an older version of the Java language.</p>
+    <p>However, the compiler always compiled against the platform APIs that is found in the project's build path.</p>
+    <p><b>For Example:</b> If the JRE being used is  java 1.8 and the compliance level is set to 1.7, the API's that are available are from the Java8  library, even if they were not part of Java 1.7.</p>
+    <p>The new --release compiler option now allows the user to configure compilation against a platform API version of user's choice.</p>
+    <p><b>For Example:</b> Using --release option if the JRE being used is 9 and the compliance level is set to 1.7, the API's that are available will be from JRE 1.7 even if JRE 1.7 is not available in your workspace.</p>
+    <p>The --release option supports versions 1.6 and above. That is the --release option is enabled for JRE 9 and above, if the compliance is set to 1.6 or above</p>
+    <p>In the below picture, compliance is set to 1.5, therefore the --release option is disabled.</p>
+    <p><img src="images/java9_release_option_disabled_project_preference_page.png" alt=""/></p>
+    <p>The --release option is enabled by default for all new projects created using JRE 9 or above.</p>
+    </td>
+  </tr>
   
+  <tr>
+    <td class="title">Use <code>--release</code> option for Default Access rules and EE descriptor</td>
+    <td class="content">
+    <p>Java 9 onwards, Access rules intrinsic to JRE will not be available by default. Users must use the --release option to configure compilation against the version of Java library of his or her preference.</p>
+    <p>From Java 10 and beyond, API tools Execution Environment Descriptions will not be provided to determine if references are present in execution environment or not. Users must  use the --release option to configure compilation
+     against platform API of his or her preference. If the user intends to enforce a particular version of Java for determining Java API references in a project, he or she can store this preference in the project settings.</p>
+
+    </td>
+  </tr>
   <!-- ******************* JUnit ************************************* -->
   <tr>
     <td id="JUnit" class="section" colspan="2">
@@ -479,7 +516,18 @@ module hello {
       <p>After:<br/><img src="images/inherited_after.png" alt="after"/></p>
     </td>
   </tr>
-  
+
+  <tr>
+    <td class="title">Quick fix for <code>Non-existing or empty package</code> on <code> exports directive</code></td>
+    <td class="content">
+    <p>A new quick fix is available when you have a <code> non-existing or an empty package</code> in an <code>exports directive</code> in module-info.java file.</p>
+	<p>This quick fix is applicable if the project is a Java9 project or above and has a <code>module-info.java</code> file.</p>
+    <p>The quick fix can be invoked from the editor:</p>
+    <p><img src="images/java9_quickfix_empty_nonexistant_package_on_exports_directive.png" alt=""/></p>
+    <p>A quick fix is provided to create either a Class, or an Interface or an Annotation or an Enum in the given package.</p>
+    <p>If the package does not exist, a new package is created and the new element is created in the package.</p>
+    </td>
+  </tr>
   <!-- ******************* Java Views and Dialogs ************************************* -->
   <tr>
     <td id="JavaViewsAndDialogs" class="section" colspan="2">
@@ -723,7 +771,28 @@ These command line options are part of what can be overridden using the new <a h
       <p>The setting previously known as <b>Indent Javadoc tags</b> is now called <b>Align descriptions to tag width</b>. The two settings related to <b>@param tags</b> also had their labels changed to better describe what they do.</p>
     </td>
   </tr>
-  
+
+  <tr id="formatter-dark-theme">
+    <td class="title">Java code formatter preferences now styled for the dark theme</td>
+    <td class="content">
+      The formatter preferences tree styling has been fixed to work properly in the dark theme.
+    </td>
+  </tr>
+
+  <tr id="jdt-remove-redundant-modifiers-cleanup">
+    <td class="title">New Cleanup Action "Remove redundant modifiers"</td>
+    <td class="content">
+      The new cleanup action "Remove redundant modifiers" removes unnecessary modifiers on types, methods and fields. The following modifiers are removed:
+      <ul>
+      <li>Interface field declarations: <code>public</code>, <code>static</code>, <code>final</code></li>
+      <li>Interface method declarations: <code>public</code>, <code>abstract</code></li>
+      <li>Nested interfaces: <code>static</code></li>
+      <li>Method declarations in final classes: <code>final</code></li>
+      </ul>
+      The cleanup action can be configured as save action on the <i>Unnecessary Code</i> page.
+      <p><img src="images/jdt_remove_redundant_modifiers.png" alt=""/></p>
+    </td>
+  </tr>
   <!-- *********************** Debug ******************************** -->
   <tr>
     <td id="Debug" class="section" colspan="2">
@@ -838,9 +907,15 @@ These command line options are part of what can be overridden using the new <a h
       module declarations. No other flag (for eg.<code>SearchPattern#R_CASE_SENSITIVE</code>) should be used in
       disjunction with this match rule.
     </td>
-  </tr> 
+  </tr>
   
 </tbody>
 </table>
+<script type="text/javascript" src="scripts.js"></script>
+
+  <p style="text-align:center">
+    <a href="platform.php">Previous</a> <a style="margin:1em" href=".">Up</a> <a href="platform_isv.php">Next</a>
+  </p>
+
 </body>
 </html>
