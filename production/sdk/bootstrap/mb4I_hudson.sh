@@ -78,9 +78,9 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) "
 
 echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
-export BRANCH=R4_7_maintenance
+export BRANCH=master
 export BUILD_TYPE=I
-export STREAM=4.7.0
+export STREAM=4.9.0
 
 eclipseStreamMajor=${STREAM:0:1}
 
@@ -101,7 +101,7 @@ export ALL_PROXY=${ALL_PROXY:-proxy.eclipse.org:9898}
 # default (later) is set to 'true'. 
 # set to false here for less output.
 # setting to false until  bug 495750 is fixed, else too much output.
-# export MVN_DEBUG=false
+export MVN_DEBUG=false
 
 
 export PRODUCTION_SCRIPTS_DIR=production

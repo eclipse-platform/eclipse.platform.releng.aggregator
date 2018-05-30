@@ -29,6 +29,10 @@ repoList="\
 /eclipse/updates/4.7/ \
 /eclipse/updates/4.8-I-builds/ \
 /eclipse/updates/4.8milestones/ \
+/eclipse/updates/4.8/ \
+/eclipse/updates/4.9-I-builds/ \
+/eclipse/updates/4.9-Y-builds/ \
+/eclipse/updates/4.9milestones/ \
 
 "
 
