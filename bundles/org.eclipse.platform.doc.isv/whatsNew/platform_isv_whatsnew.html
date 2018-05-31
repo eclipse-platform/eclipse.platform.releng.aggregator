@@ -222,6 +222,34 @@ public ColorAnnotation extends LineContentAnnotation {
 		location would be ignored.</p>
 	</td>
   </tr>
+  
+  <tr id="generic-editor-enablewhen">
+    <td class="title">Support 'enabledWhen' for the all Generic Editor extension points</td>
+    <td class="content">
+      All extension points targeting the Generic Edtor (<code>autoEditStrategies</code>, <code>contentAssistProcessors</code>, <code>highlightReconcilers</code>,
+      <code>hoverProviders</code>, <code>presentationReconcilers</code>, <code>reconcilers</code>) now allows an <code>enabledWhen</code> child elements for
+      contributions. This <code>enableWhen</code> is a Core Expression that controls whether the declared extension is enabled when insantiating the editor.
+      The evaluation context defines extra variables you can use in the expression: <code>viewer</code>, <code>editor</code> and <code>editorInput</code>.
+      <p>This example shows how LSP4E contributes server highlight reconciler only for editor input supporting a language server:</p>
+      <pre>
+&lt;extension
+      point="org.eclipse.ui.genericeditor.highlightReconcilers">
+   &lt;highlightReconciler
+         class="org.eclipse.lsp4e.operations.highlight.HighlightReconciler"
+         contentType="org.eclipse.core.runtime.text">
+      &lt;enabledWhen>
+         &lt;with
+               variable="editorInput">
+            &lt;test
+                  property="org.eclipse.lsp4e.hasLanguageServer">
+            &lt;/test>
+         &lt;/with>
+      &lt;/enabledWhen>
+   &lt;/highlightReconciler>
+&lt;/extension>
+      </pre>
+    </td>
+  </tr>
 
   <tr id="prototype-launch-configuration">
     <td class="title">Launch configuration prototypes</td>
@@ -370,33 +398,7 @@ public class ProgressMonitorPart extends Composite implements
 		<p>No code change is needed to adopt to the migration.</p>
 	</td>
   </tr>
-  <tr id="generic-editor-enablewhen">
-    <td class="title">Support 'enabledWhen' for the all Generic Editor extension points</td>
-    <td class="content">
-      All extension points targeting the Generic Edtor (<code>autoEditStrategies</code>, <code>contentAssistProcessors</code>, <code>highlightReconcilers</code>,
-      <code>hoverProviders</code>, <code>presentationReconcilers</code>, <code>reconcilers</code>) now allows an <code>enabledWhen</code> child elements for
-      contributions. This <code>enableWhen</code> is a Core Expression that controls whether the declared extension is enabled when insantiating the editor.
-      The evaluation context defines extra variables you can use in the expression: <code>viewer</code>, <code>editor</code> and <code>editorInput</code>.
-      <p>This example shows how LSP4E contributes server highlight reconciler only for editor input supporting a language server:</p>
-      <pre>
-&lt;extension
-      point="org.eclipse.ui.genericeditor.highlightReconcilers">
-   &lt;highlightReconciler
-         class="org.eclipse.lsp4e.operations.highlight.HighlightReconciler"
-         contentType="org.eclipse.core.runtime.text">
-      &lt;enabledWhen>
-         &lt;with
-               variable="editorInput">
-            &lt;test
-                  property="org.eclipse.lsp4e.hasLanguageServer">
-            &lt;/test>
-         &lt;/with>
-      &lt;/enabledWhen>
-   &lt;/highlightReconciler>
-&lt;/extension>
-      </pre>
-    </td>
-  </tr>
+  
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
