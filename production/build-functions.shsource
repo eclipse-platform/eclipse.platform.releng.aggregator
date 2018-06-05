@@ -424,15 +424,6 @@ fn-maven-build-aggregator ()
   # bug 471835 (See bug 478483)
   # Note: reactorBuildTimestampProperty was added as a work around for bug 486698.
   # It should be removed once bug 486783 is fixed. I created bug 489510 as a reminder to remove the workaround.
-  if [[ "${PATCH_BUILD}" == "junit5" ]]; then
-    mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
-      clean verify \
-      -DskipTests=true \
-      -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
-      -Dtycho.debug.artifactcomparator -Djava.io.tmpdir=${MAVEN_TMP_DIR} \
-      -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
-      -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
-  else
     mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
       clean verify \
       -DskipTests=true \
@@ -441,7 +432,6 @@ fn-maven-build-aggregator ()
       -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
       -DaggregatorBuild=true \
       -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
-  fi
   rc=$?
   popd
   return $rc
@@ -626,18 +616,11 @@ fn-pom-version-updater ()
 
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
   pushd "$REPO_DIR"
-  if [[ "${PATCH_BUILD}" == "junit5" ]]; then
     mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
       org.eclipse.tycho:tycho-versions-plugin:1.2.0:update-pom \
       -Dmaven.repo.local=$LOCAL_REPO -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
-      -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}"
-  else
-    mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
-      org.eclipse.tycho:tycho-versions-plugin:1.1.0:update-pom \
-      -Dmaven.repo.local=$LOCAL_REPO -Djava.io.tmpdir=${MAVEN_TMP_DIR}\
       -DaggregatorBuild=true \
       -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"
-  fi
   RC=$?
   if [[ $RC != 0 ]]
   then
@@ -668,34 +651,8 @@ fn-gather-repo ()
   BUILD_ID="$1"; shift
   REPO_DIR="$1"; shift
   BUILD_DIR="$1"; shift
-  if [[ -n "${PATCH_BUILD}" ]]
-  then
-    case "${PATCH_BUILD}" in
-      "junit5" )
-            PATCH_BUILD_GENERIC=junit5
-            ;;
-      "java9patch47" )
-      		PATCH_BUILD_GENERIC=java9patch
-      		;;
-      * )
-      		PATCH_BUILD_GENERIC=java10patch
-      		;;   
-    esac
-    ORIG_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD_GENERIC}/target/site
-    TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD_GENERIC}/target/repository
-    ORIG_DIR_REPOSITORY=$REPO_DIR/${ORIG_PATH}
-    REPO_DIR_REPOSITORY=$REPO_DIR/${TARGET_PATH}
-    # old site update-site repos are created in 'site', so we move to 'repository'
-    # newer eclipse-repository are in 'repository' already.
-    if [[ -e "${ORIG_PATH}" ]]
-    then
-      mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
-    fi
-
-  else
-    TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
-    REPO_DIR_REPOSITORY=$REPO_DIR/$TAGET_PATH
-  fi
+  TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
+  REPO_DIR_REPOSITORY=$REPO_DIR/$TAGET_PATH
   if [[ -d "$REPO_DIR_REPOSITORY" ]]
   then
     pushd "$REPO_DIR"
