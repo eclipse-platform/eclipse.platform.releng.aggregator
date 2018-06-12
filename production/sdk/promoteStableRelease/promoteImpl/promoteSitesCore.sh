@@ -60,10 +60,7 @@ then
 else
   export DL_LABEL=${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_SERVICE}${CHECKPOINT}
 fi
-
-# Bug 535500 - Modify equinox naming convention as we no longer name an eclipse release
-# export DL_LABEL_EQ=${TRAIN_NAME}${CHECKPOINT}
-export DL_LABEL_EQ=${DL_LABEL}
+export DL_LABEL_EQ=${TRAIN_NAME}${CHECKPOINT}
 
 # This is DL_DROP_ID for Eclipse. The one for equinox has DL_LABEL_EQ in middle.
 export DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
