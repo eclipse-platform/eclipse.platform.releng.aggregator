@@ -114,9 +114,9 @@ function calcTestConfigsRan($testResultsDirName) {
               $jobname=jobname($expectedTestConfigs[$i]);
               //echo "DEBUG: jobname: " . $jobname;
               if (substr_startswith($summFileName, $testResultsDirName."/".$jobname)) {
-                $summFileJava9=strpos($summFileName, "java9");
-                $jobnameJava9=strpos($testResultsDirName."/".$jobname, "java9");
-                if ($summFileJava9 == $jobnameJava9 ) {
+                $summFileJava10=strpos($summFileName, "java10");
+                $jobnameJava10=strpos($testResultsDirName."/".$jobname, "java10");
+                if ($summFileJava10 == $jobnameJava10 ) {
                   //echo "DEBUG: found matching summary file: $summFileName<br />";
                   $xmlResults = simplexml_load_file($summFileName);
                   $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
