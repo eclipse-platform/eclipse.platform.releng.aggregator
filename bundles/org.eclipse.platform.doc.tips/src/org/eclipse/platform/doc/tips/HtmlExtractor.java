@@ -55,7 +55,7 @@ public final class HtmlExtractor {
 		Elements trElements = doc.select("tr"); //$NON-NLS-1$
 		if (!trElements.isEmpty()) {
 			List<Tip> subjectAndHtmlList = new ArrayList<>();
-			SubMonitor subMonitor = SubMonitor.convert(monitor, "BrowserTips - Parsing lists", trElements.size());
+			SubMonitor subMonitor = SubMonitor.convert(monitor, Messages.HtmlExtractor_0, trElements.size());
 			for (Element element : trElements) {
 				DefaultHtmlTip browserTip = createBrowserTip(providerId, lastModifiedValue, element,
 						subMonitor.split(1));

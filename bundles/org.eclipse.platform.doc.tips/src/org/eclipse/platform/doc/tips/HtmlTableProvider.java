@@ -36,7 +36,7 @@ public class HtmlTableProvider extends TipProvider {
 
 	@Override
 	public String getDescription() {
-		return "Eclipse Platform Tips";
+		return Messages.HtmlTableProvider_0;
 	}
 
 	@Override
@@ -50,7 +50,7 @@ public class HtmlTableProvider extends TipProvider {
 			Bundle bundle = FrameworkUtil.getBundle(getClass());
 
 			try {
-				tipImage = new TipImage(bundle.getEntry("icons/48/tips.png"));
+				tipImage = new TipImage(bundle.getEntry("icons/48/tips.png")); //$NON-NLS-1$
 			} catch (IOException ex) {
 				getManager().log(new Status(IStatus.ERROR, bundle.getSymbolicName(), ex.getMessage(), ex));
 			}
@@ -62,8 +62,8 @@ public class HtmlTableProvider extends TipProvider {
 	public IStatus loadNewTips(IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 
-		Bundle bundle = Platform.getBundle("org.eclipse.platform.doc.user");
-		URL platformTipsURL = bundle.getEntry("tips/platform_tips.html");
+		Bundle bundle = Platform.getBundle("org.eclipse.platform.doc.user"); //$NON-NLS-1$
+		URL platformTipsURL = bundle.getEntry("tips/platform_tips.html"); //$NON-NLS-1$
 
 		try {
 			String platformTipsHtmlContents = IOUtils.toString(platformTipsURL.openStream(),
