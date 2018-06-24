@@ -14,6 +14,8 @@ package org.eclipse.platform.doc.tips;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -42,29 +44,42 @@ public final class HtmlExtractor {
 	 * in the left column and content in the right column. New and noteworthy or
 	 * help contents from Eclipse is usually structured like that.
 	 * 
-	 * @param html              String containing HTML
-	 * @param lastModifiedValue last modified date of the tip
-	 * @param monitor           {@link IProgressMonitor}
+	 * @param html    String containing HTML
+	 * @param monitor {@link IProgressMonitor}
 	 * @return a list of {@link Tip} objects
 	 * @throws OperationCanceledException
 	 * @throws IOException
 	 */
-	public static List<Tip> getTipsFromEclipseHtmlTable(String providerId, String html, Date lastModifiedValue,
-			IProgressMonitor monitor) throws OperationCanceledException, IOException {
+	public static List<Tip> getTips(String providerId, String html, IProgressMonitor monitor)
+			throws OperationCanceledException, IOException {
 		Document doc = Jsoup.parse(html);
+		Date date = getDate();
 		Elements trElements = doc.select("tr"); //$NON-NLS-1$
 		if (!trElements.isEmpty()) {
 			List<Tip> subjectAndHtmlList = new ArrayList<>();
 			SubMonitor subMonitor = SubMonitor.convert(monitor, Messages.HtmlExtractor_0, trElements.size());
 			for (Element element : trElements) {
-				DefaultHtmlTip browserTip = createBrowserTip(providerId, lastModifiedValue, element,
-						subMonitor.split(1));
+				DefaultHtmlTip browserTip = createBrowserTip(providerId, date, element, subMonitor.split(1));
 				subjectAndHtmlList.add(browserTip);
 			}
 			return subjectAndHtmlList;
 		}
 
 		return Collections.emptyList();
+	}
+
+	/**
+	 * Date is important because it is part of the hashcode for tip used to maintain
+	 * the read state.
+	 * 
+	 * @return the photon release date date
+	 */
+	private static Date getDate() {
+		try {
+			return new SimpleDateFormat("dd/MM/yyyy").parse("27/06/2018"); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (ParseException e) {
+			return null;
+		}
 	}
 
 	private static DefaultHtmlTip createBrowserTip(String providerId, Date lastModifiedValue, Element element,

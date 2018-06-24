@@ -15,7 +15,6 @@ package org.eclipse.platform.doc.tips;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -30,7 +29,7 @@ import org.eclipse.tips.core.TipProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-public class HtmlTableProvider extends TipProvider {
+public class HtmlTableTipProvider extends TipProvider {
 
 	private TipImage tipImage;
 
@@ -61,20 +60,16 @@ public class HtmlTableProvider extends TipProvider {
 	@Override
 	public IStatus loadNewTips(IProgressMonitor monitor) {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
-
 		Bundle bundle = Platform.getBundle("org.eclipse.platform.doc.user"); //$NON-NLS-1$
 		URL platformTipsURL = bundle.getEntry("tips/platform_tips.html"); //$NON-NLS-1$
-
 		try {
 			String platformTipsHtmlContents = IOUtils.toString(platformTipsURL.openStream(),
 					StandardCharsets.UTF_8.name());
-			List<Tip> browserTips = HtmlExtractor.getTipsFromEclipseHtmlTable(getID(), platformTipsHtmlContents,
-					new Date(), subMonitor);
+			List<Tip> browserTips = HtmlExtractor.getTips(getID(), platformTipsHtmlContents, subMonitor);
 			setTips(browserTips);
 		} catch (IOException ex) {
 			return new Status(IStatus.ERROR, bundle.getSymbolicName(), ex.getMessage(), ex);
 		}
-
 		return Status.OK_STATUS;
 	}
 
