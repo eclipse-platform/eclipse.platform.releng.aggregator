@@ -329,7 +329,7 @@ public class BuildTests {
     }
 
 	public static final List<String> REQUIRED_FEATURE_FILES = Arrays
-			.asList(new String[] { "epl-v10.html", "feature.properties", "feature.xml", "license.html" });
+			.asList(new String[] { "epl-2.0.html", "feature.properties", "feature.xml", "license.html" });
 	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
 	public static final List<String> REQUIRED_PLUGIN_FILES = Arrays
