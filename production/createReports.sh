@@ -33,7 +33,7 @@ echo -e "\tbuildIdToTest: ${BUILD_ID}"
 # TODO: we could have a "previous_release" sort of variable that 
 # would be defined in parent pom or build_eclipse_org.shsource so that
 # we do not need to change this source. 
-buildIdToCompare="4.7/R-4.7.3a-201803300640"
+buildIdToCompare="4.8/R-4.8-201806110500"
 
 build_type=${buildIdToTest:0:1}
 echo -e "\tbuild_type: ${build_type}"
@@ -64,8 +64,8 @@ function latestSimpleRepo
 if [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.9-I-builds"
-  buildIdToCompare="4.8milestones/S-4.8RC2-201805240900"
-  echo -e "\tlatest_R_build: S-4.8RC2-201805240900"
+  buildIdToCompare="4.8/R-4.8-201806110500"
+  echo -e "\tlatest_R_build: R-4.8-201806110500"
 elif [[ ${build_type} == "Y" ]]
 then
   update_dir_segment="4.9-Y-builds"
@@ -104,7 +104,7 @@ then
   mkdir -p ${output_dir}
 
   # This analyzersBuildId can (currently) be found by "drilling down" at 
-  # http://download.eclipse.org/cbi/updates/analyzers/4.7/
+  # http://download.eclipse.org/cbi/updates/analyzers/4.8/
   # analyzersBuildId=I20161201-1633
   # We use analyzer from hipp this way we have one less version to track
   tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz

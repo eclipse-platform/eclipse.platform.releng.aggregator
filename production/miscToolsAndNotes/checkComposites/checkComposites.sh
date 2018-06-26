@@ -19,16 +19,13 @@
 # and then executed in "bash script" build step.
 
 baseEclipseAccessDir=/home/data/httpd/download.eclipse.org
-baseEclipseDirSegment=eclipse/downloads/drops4/R-4.7.3a-201803300640
-baseEclipse=eclipse-platform-4.7.3a-linux-gtk-x86_64.tar.gz
+baseEclipseDirSegment=eclipse/downloads/drops4/R-4.8-201806110500
+baseEclipse=eclipse-platform-4.8-linux-gtk-x86_64.tar.gz
 repoFileAccess=file:///home/data/httpd/download.eclipse.org/
 repoHttpAccess=http://download.eclipse.org
 repoAccess=${repoFileAccess}
 # TODO: reduce this list soon
 repoList="\
-/eclipse/updates/4.7/ \
-/eclipse/updates/4.8-I-builds/ \
-/eclipse/updates/4.8milestones/ \
 /eclipse/updates/4.8/ \
 /eclipse/updates/4.9-I-builds/ \
 /eclipse/updates/4.9-Y-builds/ \
