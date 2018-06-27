@@ -95,22 +95,27 @@ function cleanBuildMachine ()
 
     major=4
 
-    minor=8
+    minor=9
     days="+4"
     buildType=P
     removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
-    minor=8
+    minor=9
     days="+2"
     buildType=N
     removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
-    minor=8
+    minor=9
     days="+4"
     buildType=I
     removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
-    minor=7
+    minor=9
+    days="+4"
+    buildType=Y
+    removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
+
+    minor=8
     days="+4"
     buildType=M
     removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
