@@ -54,13 +54,15 @@ echo "locale charmap: $(locale charmap)"
 
 # all optional
 # normally, when ran from crobjob, none should be specified
-while getopts 'ht' OPTION
+while getopts 'hti' OPTION
 do
   case $OPTION in
     h)    usage
       exit
       ;;
     t)    export testbuildonly=true
+      ;;
+    i)    export invisibleBuild=true
       ;;
   esac
 done
@@ -81,10 +83,10 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 #export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
 #export CBI_JDT_VERSION="3.9.2.v20140309-1413"
 
-export BRANCH=R4_7_maintenance
+export BRANCH=master
 export BUILD_TYPE=Y
-export STREAM=4.7.3
-export PATCH_OR_BRANCH_LABEL=java10
+export STREAM=4.9.0
+export PATCH_OR_BRANCH_LABEL=java11
 eclipseStreamMajor=${STREAM:0:1}
 
 # unique short name for stream and build type
@@ -104,7 +106,7 @@ export ALL_PROXY=${ALL_PROXY:-proxy.eclipse.org:9898}
 # default (later) is set to 'true'. 
 # set to false here for less output.
 # setting to false until  bug 495750 is fixed, else too much output.
-# export MVN_DEBUG=false
+export MVN_DEBUG=false
 
 
 export PRODUCTION_SCRIPTS_DIR=production
