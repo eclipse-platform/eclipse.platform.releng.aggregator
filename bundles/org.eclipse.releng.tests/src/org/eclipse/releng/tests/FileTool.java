@@ -344,6 +344,11 @@ public class FileTool {
 				}
 				String entryName = entry.getName();
 				File file = new File(dstDir, FileTool.changeSeparator(entryName, '/', File.separatorChar));
+				String destCanPath = dstDir.getCanonicalPath();
+				String fileCanPath = file.getCanonicalPath();
+				if (!fileCanPath.startsWith(destCanPath + File.separatorChar)) {
+					throw new IOException("Entry is out side of target dir: " + entryName);
+				}
 				String fullEntryName = FileTool.changeSeparator(file.toString().substring(rootDstDir.toString().length() + 1), File.separatorChar, '/');
 				if(!(filter == null || filter.shouldExtract(fullEntryName, entryName, depth))){
 					continue;
