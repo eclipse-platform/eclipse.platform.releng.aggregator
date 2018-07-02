@@ -31,7 +31,7 @@ import org.junit.Assert;
  */
 public class Scenario {
 
-    private final static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     public static class SharedState {
 

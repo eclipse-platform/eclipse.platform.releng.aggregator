@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: 
+ * Contributors:
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
 
@@ -62,7 +62,7 @@ public class BuildTests {
 
     /**
      * Method hasErrors.
-     * 
+     *
      * @param string
      * @return boolean
      */
@@ -161,7 +161,7 @@ public class BuildTests {
 
     /**
      * Method getChkpiiString.
-     * 
+     *
      * @param type
      * @return String
      */
@@ -172,7 +172,7 @@ public class BuildTests {
 
     /**
      * Method locateEclipseZip.
-     * 
+     *
      * @return String
      */
     private String locateEclipseZip() {
@@ -196,7 +196,7 @@ public class BuildTests {
 
     /**
      * Method getExcludeFiles.
-     * 
+     *
      * @return String
      */
     private String getExcludeFile() {
@@ -206,7 +206,7 @@ public class BuildTests {
 
     /**
      * Method getOutputFile.
-     * 
+     *
      * @param type
      * @return String
      */
@@ -234,7 +234,7 @@ public class BuildTests {
 
     /**
      * Method getFilesToTest.
-     * 
+     *
      * @param type
      * @return String
      */
@@ -261,7 +261,7 @@ public class BuildTests {
 
     /**
      * Method getExec.
-     * 
+     *
      * @return String
      */
 
@@ -290,7 +290,7 @@ public class BuildTests {
 
     /**
      * Method parseLine.
-     * 
+     *
      * @param aLine
      * @return -1 if not an error or warning line or the number of errors or warnings.
      */
@@ -545,7 +545,7 @@ public class BuildTests {
 
     /**
      * Return true if the receiver is a source plugin, false otherwise A separate method because this is a little tricky.
-     * 
+     *
      * @param aPlugin
      * @return boolean
      */
@@ -645,7 +645,7 @@ public class BuildTests {
 
     @Test
     public void testJarSign() throws Exception {
- 
+
     	String buildId = System.getProperty("buildId");
         assertNotNull("buildId property must be specified for testJarSign test", buildId);
         String downloadHost = "build.eclipse.org/eclipse/builds/4" + buildId.charAt(0) + "/siteDir";
@@ -656,7 +656,7 @@ public class BuildTests {
         long nBytes = urlConnection.getContentLength();
         // nBytes will be -1 if the file doesn't exist
         // it will be more than 3 if there are unsigned jars. (atlear jar extention will be listed
-        
+
         assertTrue(
                 "Some bundles are unsigned please refer  "
                         + urlOfFile,
@@ -763,5 +763,5 @@ public class BuildTests {
             }
         }
     }
-    
+
 }

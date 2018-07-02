@@ -34,14 +34,14 @@ public class FileTool {
 
 	/**
 	 * A zip filter which is used to filter out unwanted entries while extracting a zip file.
-	 * 
+	 *
 	 * @see FileTool#unzip
 	 */
 	public interface IZipFilter {
 		/**
 		 * Returns a boolean indicating whether the entry with the
 		 * specified name should be extracted from the zip file.
-		 * 
+		 *
 		 * @param fullEntryName the full entry name; includes full
 		 * path segments for nested zip entries
 		 * @param entryName the partial entry name; only includes
@@ -52,12 +52,12 @@ public class FileTool {
 		 * @return a boolean indicating whether the entry with the
 		 * specified name should be extracted from the zip file
 		 */
-		public boolean shouldExtract(String fullEntryName, String entryName, int depth);
+		boolean shouldExtract(String fullEntryName, String entryName, int depth);
 		/**
 		 * Returns a boolean indicating whether the entry (which
 		 * is a zip/jar file) with the specified name should be
 		 * extracted from the zip file and then unzipped.
-		 * 
+		 *
 		 * @param fullEntryName the full entry name; includes full
 		 * path segments for nested zip entries
 		 * @param entryName the partial entry name; only includes
@@ -69,7 +69,7 @@ public class FileTool {
 		 * is a zip/jar file) with the specified name should be
 		 * extracted from the zip file and then unzipped
 		 */
-		public boolean shouldUnzip(String fullEntryName, String entryName, int depth);
+		boolean shouldUnzip(String fullEntryName, String entryName, int depth);
 	}
 	/**
 	 * A buffer.
@@ -79,7 +79,7 @@ public class FileTool {
 	 * Returns the given file path with its separator
 	 * character changed from the given old separator to the
 	 * given new separator.
-	 * 
+	 *
 	 * @param path a file path
 	 * @param oldSeparator a path separator character
 	 * @param newSeparator a path separator character
@@ -93,7 +93,7 @@ public class FileTool {
 	/**
 	 * Returns a boolean indicating whether the given files
 	 * have the same content.
-	 * 
+	 *
 	 * @param file1 the first file
 	 * @param file2 the second file
 	 * @return a boolean indicating whether the given files
@@ -118,7 +118,7 @@ public class FileTool {
 	}
 	/**
 	 * Copies the given source file to the given destination file.
-	 * 
+	 *
 	 * @param src the given source file
 	 * @param dst the given destination file
 	 */
@@ -127,7 +127,7 @@ public class FileTool {
 	}
 	/**
 	 * Copies the given source file to the given destination file.
-	 * 
+	 *
 	 * @param root
 	 * @param src the given source file
 	 * @param dst the given destination file
@@ -154,7 +154,7 @@ public class FileTool {
 	 * deleted recursively. If the file or directory can
 	 * not be deleted, a warning message is written to
 	 * stdout.
-	 * 
+	 *
 	 * @param file a file or directory
 	 */
 	public static void delete(File file) {
@@ -172,13 +172,13 @@ public class FileTool {
 			if(!file.delete()){
 				System.out.println("WARNING: could not delete " + file);
 			}
-				
+
 		}
 	}
 	/**
 	 * Returns a new <code>File</code> from the given path
 	 * name segments.
-	 * 
+	 *
 	 * @param segments the given path name segments
 	 * @return a new <code>File</code> from the given path
 	 * name segments
@@ -198,7 +198,7 @@ public class FileTool {
 	 * except those that are explicitly excluded. If exclude
 	 * is <code>null</code> no files are excluded except those
 	 * that are not included.
-	 * 
+	 *
 	 * @param dir the given directory
 	 * @param include a list of filenames to include
 	 * @param exclude a list of filenames to exclude
@@ -248,7 +248,7 @@ public class FileTool {
 	/**
 	 * Breaks the given file into its path name segments
 	 * and returns the result.
-	 * 
+	 *
 	 * @param file a file or directory
 	 * @return the path name segments of the given file
 	 */
@@ -258,7 +258,7 @@ public class FileTool {
 	/**
 	 * Breaks the given string into segments and returns the
 	 * result.
-	 * 
+	 *
 	 * @param s a string
 	 * @param separator the segment separator
 	 * @return the segments of the given string
@@ -274,7 +274,7 @@ public class FileTool {
 	/**
 	 * Returns a vector of <code>File</code> paths parsed from
 	 * the given paths string.
-	 * 
+	 *
 	 * @param paths a paths string
 	 * @return a vector of <code>File</code> paths parsed from
 	 * the given paths string
@@ -290,7 +290,7 @@ public class FileTool {
 	/**
 	 * Copies all bytes in the given source file to
 	 * the given destination file.
-	 * 
+	 *
 	 * @param source the given source file
 	 * @param destination the given destination file
 	 */
@@ -306,7 +306,7 @@ public class FileTool {
 	 * Copies all bytes in the given source stream to
 	 * the given destination stream. Neither streams
 	 * are closed.
-	 * 
+	 *
 	 * @param source the given source stream
 	 * @param destination the given destination stream
 	 */
@@ -323,7 +323,7 @@ public class FileTool {
 	 * Unzips the given zip file to the given destination directory
 	 * extracting only those entries the pass through the given
 	 * filter.
-	 * 
+	 *
 	 * @param filter filters out unwanted zip entries
 	 * @param zipFile the zip file to unzip
 	 * @param dstDir the destination directory
@@ -331,11 +331,11 @@ public class FileTool {
 	public static void unzip(IZipFilter filter, ZipFile zipFile, File dstDir) throws IOException {
 		unzip(filter, zipFile, dstDir, dstDir, 0);
 	}
-	
+
 	private static void unzip(IZipFilter filter, ZipFile zipFile, File rootDstDir, File dstDir, int depth) throws IOException {
-	
+
 		Enumeration<? extends ZipEntry> entries = zipFile.entries();
-	
+
 		try {
 			while(entries.hasMoreElements()){
 				ZipEntry entry = entries.nextElement();
@@ -373,7 +373,7 @@ public class FileTool {
 							System.out.println("Could not unzip: " + fileName + ". InnerZip = <null>");
 						e.printStackTrace();
 					}
-				
+
 				}
 			}
 		} finally {
@@ -387,16 +387,16 @@ public class FileTool {
 	 * Unzips the inner zip files in the given destination directory
 	 * extracting only those entries the pass through the given
 	 * filter.
-	 * 
+	 *
 	 * @param filter filters out unwanted zip entries
 	 * @param dstDir the destination directory
 	 */
 	public static void unzip(IZipFilter filter, File dstDir) {
 		unzip(filter, dstDir, dstDir, 0);
 	}
-	
+
 	private static void unzip(IZipFilter filter, File rootDstDir, File dstDir, int depth) {
-	
+
 		File[] entries = rootDstDir.listFiles();
 		if (entries == null) {
 			entries = new File[0];
@@ -440,7 +440,7 @@ public class FileTool {
 	 * Directories are zipped recursively. Inner zip files are
 	 * created for directories that end with "_zip" or "_jar".
 	 * If verbose is true, progress information is logged.
-	 * 
+	 *
 	 * @param dir the directory to zip
 	 * @param zipFile the resulting zip file
 	 * @param verbose a boolean indicating whether progress

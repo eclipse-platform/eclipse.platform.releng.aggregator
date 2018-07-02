@@ -81,7 +81,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
 	@Test
 	public void testLastModifiedYear() throws Exception {
-		
+
 		try (final Git git = new Git(db)) {
 			git.add().addFilepattern(PROJECT_NAME + "/" + FILE1_NAME).call();
 			final PersonIdent committer2011 = new PersonIdent(committer, getDateForYear(2011));
@@ -101,7 +101,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
 	@Test
 	public void testCopyrightUpdateComment() throws Exception {
-		
+
 		try (final Git git = new Git(db)) {
 			git.add().addFilepattern(PROJECT_NAME + "/" + FILE1_NAME).call();
 			git.commit().setMessage("copyright update").call();
