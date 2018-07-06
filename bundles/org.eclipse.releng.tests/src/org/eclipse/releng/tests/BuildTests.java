@@ -323,8 +323,10 @@ public class BuildTests {
 
     }
 
-	public static final List<String> REQUIRED_FEATURE_FILES = Arrays
+	public static final List<String> REQUIRED_FEATURE_FILES_EPL2 = Arrays
 			.asList(new String[] { "epl-2.0.html", "feature.properties", "feature.xml", "license.html" });
+	public static final List<String> REQUIRED_FEATURE_FILES_EPL1 = Arrays
+			.asList(new String[] { "epl-v10.html", "feature.properties", "feature.xml", "license.html" });
 	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
 	public static final List<String> REQUIRED_PLUGIN_FILES = Arrays
@@ -379,7 +381,12 @@ public class BuildTests {
 
         File featureDir = new File(installDir, "features");
         for (File aFeature : featureDir.listFiles()) {
-            if (!testDirectory(aFeature, REQUIRED_FEATURE_FILES, REQUIRED_FEATURE_SUFFIX)) {
+        	List<String> testFiles = REQUIRED_FEATURE_FILES_EPL2;
+			// EMF and ECF features are still EPL 1.0
+			if (aFeature.getName().startsWith("org.eclipse.ecf") || aFeature.getName().startsWith("org.eclipse.emf")) {
+				testFiles = REQUIRED_FEATURE_FILES_EPL1;
+			}
+			if (!testDirectory(aFeature, testFiles, REQUIRED_FEATURE_SUFFIX)) {
                 result.add(aFeature.getPath());
             }
         }
