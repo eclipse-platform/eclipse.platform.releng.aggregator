@@ -8,7 +8,6 @@
  * Contributors:
  * IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.releng.tests;
 
 import static org.junit.Assert.assertFalse;
@@ -30,7 +29,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -101,16 +100,14 @@ public class BuildTests {
             while (aBufferedReader.readLine() != null) {
             }
             aProcess.waitFor();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             // skip chkpii test if chkpii cannot be run.
         	System.out.println("testChkpii-NotInstalled");
             System.out.println(e.getMessage());
             System.out.println("Skipping chkpii test.");
             assertTrue(true);
             return;
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -148,12 +145,10 @@ public class BuildTests {
             while (aBufferedReader.readLine() != null) {
             }
             aProcess.waitFor();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return false;
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             return false;
         }
         return !hasErrors(getOutputFile(type));
@@ -657,10 +652,7 @@ public class BuildTests {
         // nBytes will be -1 if the file doesn't exist
         // it will be more than 3 if there are unsigned jars. (atlear jar extention will be listed
 
-        assertTrue(
-                "Some bundles are unsigned please refer  "
-                        + urlOfFile,
-                ((2 > nBytes)));
+		assertTrue("Some bundles are unsigned please refer  " + urlOfFile, ((2 > nBytes)));
     }
 
     private String getDownloadHost() {
@@ -674,11 +666,9 @@ public class BuildTests {
     private void printHeaders(URLConnection urlConnection) {
         System.out.println("Debug: Headers for urlConnection to " + urlConnection.getURL());
         Map<String, List<String>> allFields = urlConnection.getHeaderFields();
-        Set<String> keys = allFields.keySet();
-        for (String key : keys) {
-            List<String> values = allFields.get(key);
-            for (String value : values) {
-                System.out.printf("Debug: %-20s %-30s %n", "key: " + key, "value: " + value);
+        for (Entry<String, List<String>> entry : allFields.entrySet()) {
+            for (String value : entry.getValue()) {
+                System.out.printf("Debug: %-20s %-30s %n", "key: " + entry.getKey(), "value: " + value);
             }
         }
     }
@@ -739,25 +729,25 @@ public class BuildTests {
             String JAVADOC_ERROR = ": error";
             String JAVADOC_JAVA = ".java:";
 
-            for (int i = 0; i < javadocLogs.length; i++) {
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(javadocLogs[i].openStream()))){
+            for (URL javadocLog : javadocLogs) {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(javadocLog.openStream()))){
                     String tmp;
                     while ((tmp = in.readLine()) != null) {
                         tmp = tmp.toLowerCase();
                         if (tmp.indexOf(JAVADOC_ERROR) != -1 || tmp.indexOf(JAVADOC_WARNING) != -1
                                 || tmp.indexOf(JAVADOC_JAVA) != -1) {
-                            String fileName = new File(javadocLogs[i].getFile()).getName();
+                            String fileName = new File(javadocLog.getFile()).getName();
                             if (!logs.contains(fileName))
                                 logs.add(fileName);
                         }
                     }
                 }
                 catch (FileNotFoundException e) {
-                    logs.add("Unable to find " + new File(javadocLogs[i].getFile()).getName() + " to read.");
+                    logs.add("Unable to find " + new File(javadocLog.getFile()).getName() + " to read.");
                     e.printStackTrace();
                 }
                 catch (IOException e) {
-                    logs.add("Unable to read " + new File(javadocLogs[i].getFile()).getName());
+                    logs.add("Unable to read " + new File(javadocLog.getFile()).getName());
                     e.printStackTrace();
                 }
             }
