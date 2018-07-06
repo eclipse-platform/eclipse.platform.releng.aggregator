@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,8 +138,8 @@ public class FileTool {
 			if (children == null) {
 				throw new IOException("Content from directory '" + src.getAbsolutePath() + "' can not be listed."); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			for(int i = 0; i < children.length; ++i){
-				File child = new File(src, children[i]);
+			for (String element : children) {
+				File child = new File(src, element);
 				copy(root, child, dst);
 			}
 		} else {
@@ -164,8 +164,8 @@ public class FileTool {
 				if(children == null) {
 					children = new String[0];
 				}
-				for(int i = 0; i < children.length; ++i) {
-					File child = new File(file, children[i]);
+				for (String element : children) {
+					File child = new File(file, element);
 					delete(child);
 				}
 			}
@@ -211,19 +211,19 @@ public class FileTool {
 		if(children == null){
 			return new File[0];
 		}
-		for(int i = 0; i < children.length; ++i){
-			File child = new File(dir, children[i]);
+		for (String element : children) {
+			File child = new File(dir, element);
 			String name = child.getName();
 			if(child.isDirectory()){
 				File[] result = getFiles(child, include, exclude);
-				for(int j = 0; j < result.length; ++j){
-					list.add(result[j]);
+				for (File element2 : result) {
+					list.add(element2);
 				}
 			} else {
 				boolean includeFile = include == null;
 				if(include != null){
-					for(int j = 0; j < include.length; ++j){
-						if(name.endsWith(include[j])){
+					for (String element2 : include) {
+						if (name.endsWith(element2)) {
 							includeFile = true;
 							break;
 						}
@@ -231,8 +231,8 @@ public class FileTool {
 				}
 				boolean excludeFile = exclude != null;
 				if(exclude != null){
-					for(int j = 0; j < exclude.length; ++j){
-						if(name.endsWith(exclude[j])){
+					for (String element2 : exclude) {
+						if (name.endsWith(element2)) {
 							excludeFile = true;
 							break;
 						}
@@ -406,12 +406,10 @@ public class FileTool {
 		if (entries == null) {
 			entries = new File[0];
 		}
-		for (int i = 0; i < entries.length; i++) {
-			if (entries[i].isDirectory()) {
-				unzip(filter, entries[i], dstDir, depth);
+		for (File entry : entries) {
+			if (entry.isDirectory()) {
+				unzip(filter, entry, dstDir, depth);
 			}
-			File entry = entries[i];
-
 			String entryName = entry.getName();
 			File file = new File(dstDir, FileTool.changeSeparator(entryName, '/', File.separatorChar));
 			if (entryName.endsWith(".zip") || entryName.endsWith(".jar")) {
@@ -473,15 +471,15 @@ public class FileTool {
 				ZipEntry zipEntry = new ZipEntry(changeSeparator(zipEntryName, File.separatorChar, '/'));
 				zos.putNextEntry(zipEntry);
 				ZipOutputStream zos2 = new ZipOutputStream(zos);
-				for(int i = 0; i < list.length; ++i){
-					File item = new File(file, list[i]);
+				for (String element : list) {
+					File item = new File(file, element);
 					zip(file, item, zos2);
 				}
 				zos2.finish();
 				zos.closeEntry();
 			} else {
-				for(int i = 0; i < list.length; ++i){
-					File item = new File(file, list[i]);
+				for (String element : list) {
+					File item = new File(file, element);
 					zip(root, item, zos);
 				}
 			}
