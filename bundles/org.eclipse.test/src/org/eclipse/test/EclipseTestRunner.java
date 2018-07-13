@@ -44,7 +44,9 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
@@ -199,7 +201,7 @@ public class EclipseTestRunner implements TestListener {
 	/**
 	 * The main entry point (the parameters are not yet consistent with the Ant
 	 * JUnitTestRunner, but eventually they should be). Parameters
-	 * 
+	 *
 	 * <pre>
 	 * -className: the name of the testSuite
 	 * -testPluginName: the name of the containing plugin
@@ -207,7 +209,7 @@ public class EclipseTestRunner implements TestListener {
 	 * haltOnFailure: halt test on failures?
 	 * -testlistener listenerClass: deprecated
 	 * 		print a warning that this option is deprecated
-	 * formatter: a JUnitResultFormatter given as classname,filename. 
+	 * formatter: a JUnitResultFormatter given as classname,filename.
 	 *  	If filename is ommitted, System.out is assumed.
 	 * </pre>
 	 */
@@ -348,7 +350,7 @@ public class EclipseTestRunner implements TestListener {
 	/**
 	 * Starts a timer that dumps interesting debugging information shortly before
 	 * the given timeout expires.
-	 * 
+	 *
 	 * @param timeoutArg      the -timeout argument from the command line
 	 * @param outputDirectory where the test results end up
 	 * @param classname       the class that is running the tests suite
@@ -384,7 +386,7 @@ public class EclipseTestRunner implements TestListener {
 					}
 
 					/**
-					 * 
+					 *
 					 * @param num num is purely a lable used in naming the screen capture files. By
 					 *            convention, we pass in 0 or "SECONDS_BETWEEN_DUMPS" just as a
 					 *            subtle reminder of how much time as elapsed. Thus, files end up
@@ -403,6 +405,7 @@ public class EclipseTestRunner implements TestListener {
 						dumpStackTraces(num, System.err);
 						dumpStackTraces(num, System.out); // System.err could be blocked, see
 															// https://bugs.eclipse.org/506304
+						logStackTraces(num);              // make this available in the log, see bug 533367
 
 						if (!dumpSwtDisplay(num)) {
 							String screenshotFile = getScreenshotFile(num);
@@ -415,6 +418,14 @@ public class EclipseTestRunner implements TestListener {
 						// Print in seconds
 						float elapsedTimeSec = elapsedTimeMillis / 1000F;
 						System.err.println("INFO: Seconds to do dump " + num + ": " + elapsedTimeSec);
+					}
+
+					private void logStackTraces(int num) {
+						ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+						dumpStackTraces(num, new PrintStream(outputStream));
+						String symbolicName = "org.eclipse.test";
+						IStatus warningStatus = new Status(IStatus.WARNING, symbolicName, outputStream.toString());
+						Platform.getLog(Platform.getBundle(symbolicName)).log(warningStatus);
 					}
 
 					private void dumpStackTraces(int num, PrintStream out) {
@@ -700,7 +711,7 @@ public class EclipseTestRunner implements TestListener {
 
 	/**
 	 * Returns what System.exit() would return in the standalone version.
-	 * 
+	 *
 	 * @return 2 if errors occurred, 1 if tests failed else 0.
 	 */
 	public int getRetCode() {
