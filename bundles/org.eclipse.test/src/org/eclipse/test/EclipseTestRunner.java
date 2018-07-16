@@ -444,7 +444,7 @@ public class EclipseTestRunner implements TestListener {
 							StackTraceElement[] stack = entry.getValue();
 							ThreadDump exception = new ThreadDump("for thread \"" + name + "\"");
 							exception.setStackTrace(stack);
-							exception.printStackTrace();
+							exception.printStackTrace(out);
 						}
 						out.flush();
 					}
