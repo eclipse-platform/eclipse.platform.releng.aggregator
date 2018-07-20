@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.test;
 
 import java.io.PrintStream;
@@ -173,7 +183,6 @@ public class TracingSuite extends Suite {
 			fDescription = description;
 		}
 
-		@SuppressWarnings("deprecation")
 		@Override
 		public void run() {
 			// There are situation where a blocked main thread apparently also blocks output to
@@ -192,25 +201,25 @@ public class TracingSuite extends Suite {
 				System.err.println("Timeout screenshot saved to " + screenshotFile);
 			}
 
-			if (main != null && fTracingOptions.throwExceptionInMainThread()) {
-				Throwable toThrow = new IllegalStateException("main thread killed by " + TracingSuite.class.getSimpleName() + " timeout");
-				toThrow.initCause(new RuntimeException(toThrow.getMessage()));
-				// Set the stack trace to that of the target thread.
-				toThrow.setStackTrace(main.getStackTrace());
-				try {
-					main.stop(toThrow);
-				} catch (UnsupportedOperationException e) {
-					// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
-					try {
-						Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
-						stop0.setAccessible(true);
-						stop0.invoke(main, toThrow);
-					} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-							| IllegalArgumentException | InvocationTargetException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}
+            if (main != null && fTracingOptions.throwExceptionInMainThread()) {
+                Throwable toThrow = new IllegalStateException("main thread killed by " + TracingSuite.class.getSimpleName() + " timeout");
+                toThrow.initCause(new RuntimeException(toThrow.getMessage()));
+                // Set the stack trace to that of the target thread.
+                toThrow.setStackTrace(main.getStackTrace());
+                // Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
+                try {
+                    Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
+                    stop0.setAccessible(true);
+                    stop0.invoke(main, toThrow);
+                } catch (
+                        NoSuchMethodException |
+                        SecurityException |
+                        IllegalAccessException |
+                        IllegalArgumentException |
+                        InvocationTargetException e1) {
+                    e1.printStackTrace();
+                }
+            }
 		}
 
 		private Thread dumpStackTraces(PrintStream stream) {
