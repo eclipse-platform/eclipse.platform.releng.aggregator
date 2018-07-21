@@ -8,11 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Anthony Dahanne  <anthony.dahanne@compuware.com> - enhance ETF to be able to launch several tests in several bundles - https://bugs.eclipse.org/330613
- *     Lucas Bullen (Red Hat Inc.) - JUnit 5 support
  *******************************************************************************/
 package org.eclipse.test;
-
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -24,31 +21,33 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
+import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.optional.junitlauncher.TestExecutionContext;
+import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
+import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.GC;
@@ -58,16 +57,14 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.TestIdentifier;
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
-import org.junit.platform.launcher.core.LauncherFactory;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestListener;
+import junit.framework.TestResult;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters and running
@@ -76,7 +73,20 @@ import org.osgi.framework.wiring.BundleWiring;
  * formatter=org.apache.tools.ant.taskdefs.optional.junit
  * .XMLJUnitResultFormatter
  */
-public class EclipseTestRunner {
+public class EclipseTestRunner implements TestListener {
+	class TestFailedException extends Exception {
+
+		private static final long serialVersionUID = 6009335074727417445L;
+
+		TestFailedException(String message) {
+			super(message);
+		}
+
+		TestFailedException(Throwable e) {
+			super(e);
+		}
+	}
+
 	static class ThreadDump extends Exception {
 
 		private static final long serialVersionUID = 1L;
@@ -122,6 +132,7 @@ public class EclipseTestRunner {
 	 */
 	public static final int ERRORS = 2;
 
+	private static final String SUITE_METHODNAME = "suite";
 	/**
 	 * SECONDS_BEFORE_TIMEOUT_BUFFER is the time we allow ourselves to take stack
 	 * traces, get a screen shot, delay "SECONDS_BETWEEN_DUMPS", then do it again.
@@ -139,20 +150,68 @@ public class EclipseTestRunner {
 	private static final int SECONDS_BETWEEN_DUMPS = 5;
 
 	/**
+	 * The current test result
+	 */
+	private TestResult fTestResult;
+	/**
+	 * The name of the plugin containing the test
+	 */
+	private String fTestPluginName;
+	/**
+	 * The corresponding testsuite.
+	 */
+	private Test fSuite;
+	/**
+	 * Formatters from the command line.
+	 */
+	private static Vector<JUnitResultFormatter> fgFromCmdLine = new Vector<>();
+	/**
+	 * Holds the registered formatters.
+	 */
+	private Vector<JUnitResultFormatter> formatters = new Vector<>();
+	/**
+	 * Do we stop on errors.
+	 */
+	private boolean fHaltOnError = false;
+	/**
+	 * Do we stop on test failures.
+	 */
+	private boolean fHaltOnFailure = false;
+	/**
+	 * The TestSuite we are currently running.
+	 */
+	private JUnitTest fJunitTest;
+	/**
+	 * output written during the test
+	 */
+	private PrintStream fSystemError;
+	/**
+	 * Error output during the test
+	 */
+	private PrintStream fSystemOut;
+	/**
+	 * Exception caught in constructor.
+	 */
+	private Exception fException;
+	/**
+	 * Returncode
+	 */
+	private int fRetCode = SUCCESS;
+
+	/**
 	 * The main entry point (the parameters are not yet consistent with the Ant
 	 * JUnitTestRunner, but eventually they should be). Parameters
 	 *
 	 * <pre>
-	 * -className=&lt;testSuiteName&gt;
-	 * -testPluginName&lt;containingpluginName&gt;
-	 * -formatter=&lt;classname&gt;(,&lt;path&gt;)
+	 * -className: the name of the testSuite
+	 * -testPluginName: the name of the containing plugin
+	 * haltOnError: halt test on errors?
+	 * haltOnFailure: halt test on failures?
+	 * -testlistener listenerClass: deprecated
+	 * 		print a warning that this option is deprecated
+	 * formatter: a JUnitResultFormatter given as classname,filename.
+	 *  	If filename is ommitted, System.out is assumed.
 	 * </pre>
-	 * Where &lt;classname&gt; is the formatter classname, currently ignored as only
-	 * LegacyXmlResultFormatter is used. The path is either the path to the
-	 * result file and should include the file extension (xml) if a single test
-	 * is being run or should be the path to the result directory where result
-	 * files should be created if multiple tests are being run. If no path is
-	 * given, the standard output is used.
 	 */
 	public static void main(String[] args) throws IOException {
 		System.exit(run(args));
@@ -163,9 +222,12 @@ public class EclipseTestRunner {
 		String classesNames = null;
 		String testPluginName = null;
 		String testPluginsNames = null;
-		String resultPathString = null;
+		String formatterString = null;
 		String timeoutString = null;
 		String junitReportOutput = null;
+
+		boolean haltError = false;
+		boolean haltFail = false;
 
 		Properties props = new Properties();
 
@@ -200,19 +262,19 @@ public class EclipseTestRunner {
 					junitReportOutput = args[i + 1];
 				i++;
 			} else if (args[i].startsWith("haltOnError=")) {
-				System.err.println("The haltOnError option is no longer supported");
+				haltError = Project.toBoolean(args[i].substring(12));
 			} else if (args[i].startsWith("haltOnFailure=")) {
-				System.err.println("The haltOnFailure option is no longer supported");
+				haltFail = Project.toBoolean(args[i].substring(14));
 			} else if (args[i].startsWith("formatter=")) {
-				String formatterString = args[i].substring(10);
-				int seperatorIndex = formatterString.indexOf(',');
-				resultPathString = formatterString.substring(seperatorIndex + 1);
+				formatterString = args[i].substring(10);
 			} else if (args[i].startsWith("propsfile=")) {
 				try (FileInputStream in = new FileInputStream(args[i].substring(10))) {
 					props.load(in);
 				}
 			} else if (args[i].equals("-testlistener")) {
-				System.err.println("The testlistener option is no longer supported");
+				System.err
+						.println("The -testlistener option is no longer supported\nuse the formatter= option instead");
+				return ERRORS;
 			} else if (args[i].equals("-timeout")) {
 				if (i < args.length - 1)
 					timeoutString = args[i + 1];
@@ -245,133 +307,44 @@ public class EclipseTestRunner {
 			// names
 			String[] testPlugins = testPluginsNames.split(",");
 			String[] suiteClasses = classesNames.split(",");
+			try {
+				createAndStoreFormatter(formatterString, suiteClasses);
+			} catch (BuildException be) {
+				System.err.println(be.getMessage());
+				return ERRORS;
+			}
 			int returnCode = 0;
 			int j = 0;
-			EclipseTestRunner runner = new EclipseTestRunner();
 			for (String oneClassName : suiteClasses) {
-				int result = runner.runTests(props, testPlugins[j], oneClassName, resultPathString, true);
+				JUnitTest t = new JUnitTest(oneClassName);
+				t.setProperties(props);
+				EclipseTestRunner runner = new EclipseTestRunner(t, testPlugins[j], haltError, haltFail);
+				transferFormatters(runner, j);
+				runner.run();
 				j++;
-				if(result != 0) {
-					returnCode = result;
+				if (runner.getRetCode() != 0) {
+					returnCode = runner.getRetCode();
 				}
 			}
 			return returnCode;
 		}
+		try {
+			createAndStoreFormatter(formatterString);
+		} catch (BuildException be) {
+			System.err.println(be.getMessage());
+			return ERRORS;
+		}
 		if (className == null)
 			throw new IllegalArgumentException("Test class name not specified");
-		EclipseTestRunner runner = new EclipseTestRunner();
-		return runner.runTests(props, testPluginName, className, resultPathString, false);
-	}
 
-	private int runTests(Properties props, String testPluginName, String testClassName, String resultPath, boolean multiTest) {
-		ClassLoader currentTCCL = Thread.currentThread().getContextClassLoader();
-		ExecutionListener executionListener = new ExecutionListener();
-		if(testPluginName == null) {
-			testPluginName = ClassLoaderTools.getClassPlugin(testClassName);
-		}
-		if(testPluginName == null)
-			throw new IllegalArgumentException("Test class not found");
-		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-				.selectors(selectClass(testClassName))
-				.build();
+		JUnitTest t = new JUnitTest(className);
 
-		try {
-			Thread.currentThread().setContextClassLoader(ClassLoaderTools.getJUnit5Classloader(getPlatformEngines()));
-			final Launcher launcher = LauncherFactory.create();
+		t.setProperties(props);
 
-			Thread.currentThread().setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPluginName, currentTCCL));
-			try(LegacyXmlResultFormatter legacyXmlResultFormatter = new LegacyXmlResultFormatter()){
-				try (OutputStream fileOutputStream = getResultOutputStream(resultPath,testClassName,multiTest)){
-					legacyXmlResultFormatter.setDestination(fileOutputStream);
-					legacyXmlResultFormatter.setContext(new ExecutionContext(props));
-					launcher.execute(request, legacyXmlResultFormatter, executionListener);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				return ERRORS;
-			}
-		} finally {
-			Thread.currentThread().setContextClassLoader(currentTCCL);
-		}
-		return executionListener.didExecutionContainedFailures() ? FAILURES : SUCCESS;
-	}
-
-	private OutputStream getResultOutputStream(String resultPathString, String testClassName, boolean multiTest) throws IOException {
-		if(resultPathString == null)
-			return System.out;
-		File resultFile;
-		if(multiTest) {
-			Path resultDirectoryPath = new Path(resultPathString);
-			File testDirectory = resultDirectoryPath.toFile();
-			if(!testDirectory.exists())
-				testDirectory.mkdirs();
-			resultFile = resultDirectoryPath.append("TEST-"+testClassName+".xml").toFile();
-		}else {
-			resultFile = new Path(resultPathString).toFile();
-			File resultDirectory = resultFile.getParentFile();
-			if(!resultDirectory.exists())
-				resultDirectory.mkdirs();
-		}
-		if(!resultFile.exists()) {
-			resultFile.createNewFile();
-		}
-		return new FileOutputStream(resultFile);
-	}
-
-
-	private List<String> getPlatformEngines(){
-		List<String> platformEngines = new ArrayList<>();
-		Bundle bundle = FrameworkUtil.getBundle(getClass());
-		Bundle[] bundles = bundle.getBundleContext().getBundles();
-		for (Bundle iBundle : bundles) {
-			try {
-				BundleWiring bundleWiring = Platform.getBundle(iBundle.getSymbolicName()).adapt(BundleWiring.class);
-				Collection<String> listResources = bundleWiring.listResources("META-INF/services", "org.junit.platform.engine.TestEngine", BundleWiring.LISTRESOURCES_LOCAL);
-				if (!listResources.isEmpty())
-					platformEngines.add(iBundle.getSymbolicName());
-			} catch (Exception e) {
-				// check the next bundle
-			}
-		}
-		return platformEngines;
-	}
-
-	private final class ExecutionListener implements TestExecutionListener {
-		private boolean executionContainedFailures;
-
-		public ExecutionListener() {
-			this.executionContainedFailures = false;
-		}
-
-		public boolean didExecutionContainedFailures() {
-			return executionContainedFailures;
-		}
-
-		@Override
-		public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-			if(testExecutionResult.getStatus() == org.junit.platform.engine.TestExecutionResult.Status.FAILED) {
-				executionContainedFailures = true;
-			}
-		}
-	}
-
-	private final class ExecutionContext implements TestExecutionContext {
-
-		private final Properties props;
-
-		ExecutionContext(Properties props) {
-			this.props = props;
-		}
-
-		@Override
-		public Properties getProperties() {
-			return this.props;
-		}
-
-		@Override
-		public Optional<Project> getProject() {
-			return null;
-		}
+		EclipseTestRunner runner = new EclipseTestRunner(t, testPluginName, haltError, haltFail);
+		transferFormatters(runner);
+		runner.run();
+		return runner.getRetCode();
 	}
 
 	/**
@@ -431,7 +404,7 @@ public class EclipseTestRunner {
 						// Dump all stacks:
 						dumpStackTraces(num, System.err);
 						dumpStackTraces(num, System.out); // System.err could be blocked, see
-						// https://bugs.eclipse.org/506304
+															// https://bugs.eclipse.org/506304
 						logStackTraces(num);              // make this available in the log, see bug 533367
 
 						if (!dumpSwtDisplay(num)) {
@@ -522,7 +495,7 @@ public class EclipseTestRunner {
 
 									dumpDisplayState(System.err);
 									dumpDisplayState(System.out); // System.err could be blocked, see
-									// https://bugs.eclipse.org/506304
+																	// https://bugs.eclipse.org/506304
 
 									// Take a screenshot:
 									GC gc = new GC(display);
@@ -579,6 +552,307 @@ public class EclipseTestRunner {
 		}
 	}
 
+	public EclipseTestRunner(JUnitTest test, String testPluginName, boolean haltOnError, boolean haltOnFailure) {
+		fJunitTest = test;
+		fTestPluginName = testPluginName;
+		fHaltOnError = haltOnError;
+		fHaltOnFailure = haltOnFailure;
+
+		try {
+			fSuite = getTest(test.getName());
+		} catch (Exception e) {
+			fRetCode = ERRORS;
+			fException = e;
+		}
+	}
+
+	protected Test getTest(String suiteClassName) throws TestFailedException {
+		if (suiteClassName.isEmpty()) {
+			clearStatus();
+			return null;
+		}
+		Class<?> testClass = null;
+		try {
+			testClass = loadSuiteClass(suiteClassName);
+		} catch (ClassNotFoundException e) {
+			if (e.getCause() != null) {
+				runFailed(e.getCause());
+			}
+			String clazz = e.getMessage();
+			if (clazz == null)
+				clazz = suiteClassName;
+			runFailed("Class not found \"" + clazz + "\"");
+			return null;
+		} catch (Exception e) {
+			runFailed(e);
+			return null;
+		}
+		Method suiteMethod = null;
+		try {
+			suiteMethod = testClass.getMethod(SUITE_METHODNAME);
+		} catch (Exception e) {
+			// try to extract a test suite automatically
+			clearStatus();
+			return new junit.framework.JUnit4TestAdapter(testClass);
+		}
+		if (!Modifier.isStatic(suiteMethod.getModifiers())) {
+			runFailed("suite() method must be static");
+			return null;
+		}
+		Test test = null;
+		try {
+			test = (Test) suiteMethod.invoke(null); // static method
+			if (test == null)
+				return test;
+		} catch (InvocationTargetException e) {
+			runFailed("Failed to invoke suite():" + e.getTargetException().toString());
+			return null;
+		} catch (IllegalAccessException e) {
+			runFailed("Failed to invoke suite():" + e.toString());
+			return null;
+		}
+		clearStatus();
+		return test;
+	}
+
+	protected void runFailed(String message) throws TestFailedException {
+		System.err.println(message);
+		throw new TestFailedException(message);
+	}
+
+	protected void runFailed(Throwable e) throws TestFailedException {
+		e.printStackTrace();
+		throw new TestFailedException(e);
+	}
+
+	protected void clearStatus() {
+	}
+
+	/**
+	 * Loads the class either with the system class loader or a plugin class loader
+	 * if a plugin name was specified
+	 */
+	protected Class<?> loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
+		if (fTestPluginName == null)
+			return Class.forName(suiteClassName);
+		Bundle bundle = Platform.getBundle(fTestPluginName);
+		if (bundle == null) {
+			throw new ClassNotFoundException(suiteClassName,
+					new Exception("Could not find plugin \"" + fTestPluginName + "\""));
+		}
+
+		// is the plugin a fragment?
+		Dictionary<String, String> headers = bundle.getHeaders();
+		String hostHeader = headers.get(Constants.FRAGMENT_HOST);
+		if (hostHeader != null) {
+			// we are a fragment for sure
+			// we need to find which is our host
+			ManifestElement[] hostElement = null;
+			try {
+				hostElement = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, hostHeader);
+			} catch (BundleException e) {
+				throw new RuntimeException("Could not find host for fragment:" + fTestPluginName, e);
+			}
+			Bundle host = Platform.getBundle(hostElement[0].getValue());
+			// we really want to get the host not the fragment
+			bundle = host;
+		}
+
+		return bundle.loadClass(suiteClassName);
+	}
+
+	public void run() {
+		fTestResult = new TestResult();
+		fTestResult.addListener(this);
+		for (int i = 0; i < formatters.size(); i++) {
+			fTestResult.addListener(formatters.elementAt(i));
+		}
+
+		long start = System.currentTimeMillis();
+		fireStartTestSuite();
+
+		if (fException != null) { // had an exception in the constructor
+			for (int i = 0; i < formatters.size(); i++) {
+				formatters.elementAt(i).addError(null, fException);
+			}
+			fJunitTest.setCounts(1, 0, 1);
+			fJunitTest.setRunTime(0);
+		} else {
+			ByteArrayOutputStream errStrm = new ByteArrayOutputStream();
+			fSystemError = new PrintStream(errStrm);
+
+			ByteArrayOutputStream outStrm = new ByteArrayOutputStream();
+			fSystemOut = new PrintStream(outStrm);
+
+			try {
+				// pm.snapshot(1); // before
+				fSuite.run(fTestResult);
+			} finally {
+				// pm.snapshot(2); // after
+				fSystemError.close();
+				fSystemError = null;
+				fSystemOut.close();
+				fSystemOut = null;
+				sendOutAndErr(new String(outStrm.toByteArray()), new String(errStrm.toByteArray()));
+				fJunitTest.setCounts(fTestResult.runCount(), fTestResult.failureCount(), fTestResult.errorCount());
+				fJunitTest.setRunTime(System.currentTimeMillis() - start);
+			}
+		}
+		fireEndTestSuite();
+
+		if (fRetCode != SUCCESS || fTestResult.errorCount() != 0) {
+			fRetCode = ERRORS;
+		} else if (fTestResult.failureCount() != 0) {
+			fRetCode = FAILURES;
+		}
+
+		// pm.upload(getClass().getName());
+	}
+
+	/**
+	 * Returns what System.exit() would return in the standalone version.
+	 *
+	 * @return 2 if errors occurred, 1 if tests failed else 0.
+	 */
+	public int getRetCode() {
+		return fRetCode;
+	}
+
+	@Override
+	public void startTest(Test t) {
+	}
+
+	@Override
+	public void endTest(Test test) {
+	}
+
+	@Override
+	public void addFailure(Test test, AssertionFailedError t) {
+		if (fHaltOnFailure) {
+			fTestResult.stop();
+		}
+	}
+
+	@Override
+	public void addError(Test test, Throwable t) {
+		if (fHaltOnError) {
+			fTestResult.stop();
+		}
+	}
+
+	private void fireStartTestSuite() {
+		for (int i = 0; i < formatters.size(); i++) {
+			formatters.elementAt(i).startTestSuite(fJunitTest);
+		}
+	}
+
+	private void fireEndTestSuite() {
+		for (int i = 0; i < formatters.size(); i++) {
+			formatters.elementAt(i).endTestSuite(fJunitTest);
+		}
+	}
+
+	public void addFormatter(JUnitResultFormatter f) {
+		formatters.addElement(f);
+	}
+
+	/**
+	 * Line format is: formatter=<classname>(,<pathname>)?
+	 */
+	private static void createAndStoreFormatter(String line) throws BuildException {
+		String formatterClassName = null;
+		File formatterFile = null;
+
+		int pos = line.indexOf(',');
+		if (pos == -1) {
+			formatterClassName = line;
+		} else {
+			formatterClassName = line.substring(0, pos);
+			formatterFile = new File(line.substring(pos + 1)); // the method is
+																// package
+																// visible
+		}
+		fgFromCmdLine.addElement(createFormatter(formatterClassName, formatterFile));
+	}
+
+	/**
+	 * Line format is: formatter=<pathname>
+	 */
+	private static void createAndStoreFormatter(String line, String... suiteClassesNames) throws BuildException {
+		String formatterClassName = null;
+		File formatterFile = null;
+
+		int pos = line.indexOf(',');
+		if (pos == -1) {
+			formatterClassName = line;
+		} else {
+			formatterClassName = line.substring(0, pos);
+		}
+		File outputDirectory = new File(line.substring(pos + 1));
+		outputDirectory.mkdir();
+		for (String suiteClassName : suiteClassesNames) {
+
+			String pathname = "TEST-" + suiteClassName + ".xml";
+			if (outputDirectory.exists()) {
+				pathname = outputDirectory.getAbsolutePath() + "/" + pathname;
+			}
+			formatterFile = new File(pathname);
+			fgFromCmdLine.addElement(createFormatter(formatterClassName, formatterFile));
+		}
+
+	}
+
+	private static void transferFormatters(EclipseTestRunner runner, int j) {
+		runner.addFormatter(fgFromCmdLine.elementAt(j));
+	}
+
+	private static void transferFormatters(EclipseTestRunner runner) {
+		for (int i = 0; i < fgFromCmdLine.size(); i++) {
+			runner.addFormatter(fgFromCmdLine.elementAt(i));
+		}
+	}
+
+	/*
+	 * DUPLICATED from FormatterElement, since it is package visible only
+	 */
+	private static JUnitResultFormatter createFormatter(String classname, File outfile) throws BuildException {
+		OutputStream out = System.out;
+
+		if (classname == null) {
+			throw new BuildException("you must specify type or classname");
+		}
+		Class<?> f = null;
+		try {
+			f = EclipseTestRunner.class.getClassLoader().loadClass(classname);
+		} catch (ClassNotFoundException e) {
+			throw new BuildException(e);
+		}
+
+		Object o = null;
+		try {
+			o = f.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new BuildException(e);
+		}
+
+		if (!(o instanceof JUnitResultFormatter)) {
+			throw new BuildException(classname + " is not a JUnitResultFormatter");
+		}
+
+		JUnitResultFormatter r = (JUnitResultFormatter) o;
+
+		if (outfile != null) {
+			try {
+				out = new FileOutputStream(outfile);
+			} catch (java.io.IOException e) {
+				throw new BuildException(e);
+			}
+		}
+		r.setOutput(out);
+		return r;
+	}
+
 	public static void dumpAwtScreenshot(String screenshotFile) {
 		try {
 			URL location = AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
@@ -620,6 +894,25 @@ public class EclipseTestRunner {
 			}
 		} catch (URISyntaxException | IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void sendOutAndErr(String out, String err) {
+		for (JUnitResultFormatter formatter : formatters) {
+			formatter.setSystemOutput(out);
+			formatter.setSystemError(err);
+		}
+	}
+
+	protected void handleOutput(String line) {
+		if (fSystemOut != null) {
+			fSystemOut.println(line);
+		}
+	}
+
+	protected void handleErrorOutput(String line) {
+		if (fSystemError != null) {
+			fSystemError.println(line);
 		}
 	}
 }
