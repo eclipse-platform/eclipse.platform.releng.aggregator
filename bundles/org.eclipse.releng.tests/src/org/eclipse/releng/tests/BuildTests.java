@@ -383,7 +383,7 @@ public class BuildTests {
         for (File aFeature : featureDir.listFiles()) {
         	List<String> testFiles = REQUIRED_FEATURE_FILES_EPL2;
 			// EMF and ECF features are still EPL 1.0
-			if (aFeature.getName().startsWith("org.eclipse.ecf") || aFeature.getName().startsWith("org.eclipse.emf")) {
+			if (aFeature.getName().startsWith("org.eclipse.ecf")) {
 				testFiles = REQUIRED_FEATURE_FILES_EPL1;
 			}
 			if (!testDirectory(aFeature, testFiles, REQUIRED_FEATURE_SUFFIX)) {
