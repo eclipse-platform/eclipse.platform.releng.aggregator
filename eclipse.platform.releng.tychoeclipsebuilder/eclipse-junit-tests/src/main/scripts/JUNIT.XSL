@@ -253,7 +253,7 @@
                 <xsl:sort select="@package"/>
                 <xsl:variable name="testsuites-in-package" select="/testsuites/testsuite[./@package = current()/@package]"/>
                 <xsl:variable name="testCount" select="sum($testsuites-in-package/@tests)"/>
-                <xsl:variable name="errorCount" select="sum($testsuites-in-package/@aborted|$testsuites-in-package/@errors)"/>
+                <xsl:variable name="errorCount" select="sum($testsuites-in-package/@errors)"/>
                 <xsl:variable name="failureCount" select="sum($testsuites-in-package/@failures)"/>
                 <xsl:variable name="timeCount" select="sum($testsuites-in-package/@time)"/>
 
@@ -325,11 +325,6 @@
                         <td colspan="4"><xsl:apply-templates select="./error"/></td>
                     </tr>
                 </xsl:if>
-                 <xsl:if test="./aborted">
-                    <tr class="Error">
-                        <td colspan="4"><xsl:apply-templates select="./aborted"/></td>
-                    </tr>
-                </xsl:if>
                 <xsl:apply-templates select="./testcase" mode="print.test"/>
             </table>
             <div class="Properties">
@@ -347,7 +342,7 @@
     <xsl:template name="summary">
         <h2>Summary</h2>
         <xsl:variable name="testCount" select="sum(testsuite/@tests)"/>
-        <xsl:variable name="errorCount" select="sum(testsuite/@aborted|testsuite/@errors)"/>
+        <xsl:variable name="errorCount" select="sum(testsuite/@errors)"/>
         <xsl:variable name="failureCount" select="sum(testsuite/@failures)"/>
         <xsl:variable name="timeCount" select="sum(testsuite/@time)"/>
         <xsl:variable name="successRate" select="($testCount - $failureCount - $errorCount) div $testCount"/>
@@ -465,7 +460,6 @@
         <xsl:attribute name="class">
             <xsl:choose>
                 <xsl:when test="@failures[.&gt; 0]">Failure</xsl:when>
-                <xsl:when test="@aborted[.&gt; 0]">Error</xsl:when>
                 <xsl:when test="@errors[.&gt; 0]">Error</xsl:when>
             </xsl:choose>
         </xsl:attribute>
@@ -473,7 +467,7 @@
         <!-- print testsuite information -->
         <td><a href="#{@name}"><xsl:value-of select="@name"/></a></td>
         <td><xsl:value-of select="@tests"/></td>
-        <td><xsl:value-of select="@aborted|@errors"/></td>
+        <td><xsl:value-of select="@errors"/></td>
         <td><xsl:value-of select="@failures"/></td>
         <td>
             <xsl:call-template name="display-time">
@@ -489,7 +483,7 @@
     <tr valign="top">
         <xsl:attribute name="class">
             <xsl:choose>
-                <xsl:when test="failure | error | aborted">Error</xsl:when>
+                <xsl:when test="failure | error">Error</xsl:when>
             </xsl:choose>
         </xsl:attribute>
         <td>
@@ -504,10 +498,6 @@
             <xsl:when test="error">
                 <td>Error</td>
                 <td><xsl:apply-templates select="error"/></td>
-            </xsl:when>
-             <xsl:when test="aborted">
-                <td>Error</td>
-                <td><xsl:apply-templates select="aborted"/></td>
             </xsl:when>
             <xsl:otherwise>
                 <td>Success</td>
@@ -528,9 +518,6 @@
 </xsl:template>
 
 <xsl:template match="error">
-    <xsl:call-template name="display-failures"/>
-</xsl:template>
-<xsl:template match="aborted">
     <xsl:call-template name="display-failures"/>
 </xsl:template>
 
