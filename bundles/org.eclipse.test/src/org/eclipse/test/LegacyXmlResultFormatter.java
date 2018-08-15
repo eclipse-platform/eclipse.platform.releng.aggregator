@@ -49,6 +49,7 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 	final Map<TestIdentifier, Stats> testIds = new ConcurrentHashMap<>();
 	final Map<TestIdentifier, Optional<String>> skipped = new ConcurrentHashMap<>();
 	final Map<TestIdentifier, Optional<Throwable>> failed = new ConcurrentHashMap<>();
+	final Map<TestIdentifier, Optional<Throwable>> errored = new ConcurrentHashMap<>();
 	final Map<TestIdentifier, Optional<Throwable>> aborted = new ConcurrentHashMap<>();
 
 	TestPlan testPlan;
@@ -56,6 +57,7 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 	long testPlanEndedAt = -1;
 	final AtomicLong numTestsRun = new AtomicLong(0);
 	final AtomicLong numTestsFailed = new AtomicLong(0);
+	final AtomicLong numTestsErrored = new AtomicLong(0);
 	final AtomicLong numTestsSkipped = new AtomicLong(0);
 	final AtomicLong numTestsAborted = new AtomicLong(0);
 
@@ -120,8 +122,14 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 			break;
 		}
 		case FAILED: {
-			this.numTestsFailed.incrementAndGet();
-			this.failed.put(testIdentifier, testExecutionResult.getThrowable());
+			Optional<Throwable> throwableOptional = testExecutionResult.getThrowable();
+			if(throwableOptional.isPresent() && throwableOptional.get() instanceof AssertionError) {
+				this.numTestsFailed.incrementAndGet();
+				this.failed.put(testIdentifier, testExecutionResult.getThrowable());
+			}else {
+				this.numTestsErrored.incrementAndGet();
+				this.errored.put(testIdentifier, testExecutionResult.getThrowable());
+			}
 			break;
 		}
 		}
@@ -154,6 +162,7 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 		private static final String ELEM_TESTCASE = "testcase";
 		private static final String ELEM_SKIPPED = "skipped";
 		private static final String ELEM_FAILURE = "failure";
+		private static final String ELEM_ERROR = "error";
 		private static final String ELEM_ABORTED = "aborted";
 		private static final String ELEM_SYSTEM_OUT = "system-out";
 		private static final String ELEM_SYSTEM_ERR = "system-err";
@@ -166,6 +175,7 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 		private static final String ATTR_TIMESTAMP = "timestamp";
 		private static final String ATTR_NUM_ABORTED = "aborted";
 		private static final String ATTR_NUM_FAILURES = "failures";
+		private static final String ATTR_NUM_ERRORS = "errors";
 		private static final String ATTR_NUM_TESTS = "tests";
 		private static final String ATTR_NUM_SKIPPED = "skipped";
 		private static final String ATTR_MESSAGE = "message";
@@ -198,6 +208,7 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 			writer.writeAttribute(ATTR_TIMESTAMP, timestamp);
 			writer.writeAttribute(ATTR_NUM_TESTS, String.valueOf(numTestsRun.longValue()));
 			writer.writeAttribute(ATTR_NUM_FAILURES, String.valueOf(numTestsFailed.longValue()));
+			writer.writeAttribute(ATTR_NUM_ERRORS, String.valueOf(numTestsErrored.longValue()));
 			writer.writeAttribute(ATTR_NUM_SKIPPED, String.valueOf(numTestsSkipped.longValue()));
 			writer.writeAttribute(ATTR_NUM_ABORTED, String.valueOf(numTestsAborted.longValue()));
 
@@ -248,6 +259,8 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 				writeSkipped(writer, testId);
 				// failed element if the test failed
 				writeFailed(writer, testId);
+				// errored element if the test failed with an error
+				writeErrored(writer, testId);
 				// aborted element if the test was aborted
 				writeAborted(writer, testId);
 
@@ -273,6 +286,24 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 			}
 			writer.writeStartElement(ELEM_FAILURE);
 			final Optional<Throwable> cause = failed.get(testIdentifier);
+			if (cause.isPresent()) {
+				final Throwable t = cause.get();
+				final String message = t.getMessage();
+				if (message != null && !message.trim().isEmpty()) {
+					writer.writeAttribute(ATTR_MESSAGE, message);
+				}
+				writer.writeAttribute(ATTR_TYPE, t.getClass().getName());
+				writer.writeCharacters(ExceptionUtils.readStackTrace(t));
+			}
+			writer.writeEndElement();
+		}
+
+		private void writeErrored(final XMLStreamWriter writer, final TestIdentifier testIdentifier) throws XMLStreamException {
+			if (!errored.containsKey(testIdentifier)) {
+				return;
+			}
+			writer.writeStartElement(ELEM_ERROR);
+			final Optional<Throwable> cause = errored.get(testIdentifier);
 			if (cause.isPresent()) {
 				final Throwable t = cause.get();
 				final String message = t.getMessage();
