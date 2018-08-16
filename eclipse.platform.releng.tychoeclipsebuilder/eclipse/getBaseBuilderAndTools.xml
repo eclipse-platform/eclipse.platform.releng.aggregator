@@ -146,6 +146,13 @@
     <echo message="eclipserun-repo: ${eclipserun-repo}" />
 
     <property
+      name="ide.repository"
+      value="${eclipserun-repo}" />
+    <property
+      name="ide.iu"
+      value="org.eclipse.platform.ide" />
+
+    <property
       name="apiTools.repository"
       value="${eclipserun-repo}" />
     <property
@@ -284,7 +291,11 @@
       <arg value="${eclipserun-repo},${buildTools.repository},${webtools.repository}" />
       <arg value="-installIU" />
       <arg
-        value="${apiTools.iu}/${apiTools.iu.version},${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version},${buildTools.derby.feature}/${buildTools.derby.feature.version}" />
+        value="${ide.iu},${apiTools.iu}/${apiTools.iu.version},${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version},${buildTools.derby.feature}/${buildTools.derby.feature.version}" />
+      <arg value="-destination" />
+      <arg value="${WORKSPACE}/${folderName}" />
+      <arg value="-profile" />
+      <arg value="SDKProfile" />
       <arg value="-vm" />
       <arg value="${java8vmbindir}" />
       <!-- vmargs must come last -->
@@ -292,11 +303,18 @@
       <arg value="-Djava.io.tmpdir=${TMP}" />
     </exec>
 
-    <!-- we "move" so the directory structure so it flat under basebuilder ...
-      for compatibility to very old code/scripts -->
+    <!-- we generate basebuilder directly in the destination folder. no need of this
+     so the directory structure so it flat under basebuilder ...
+      for compatibility to very old code/scripts 
     <move todir="${WORKSPACE}/${folderName}">
       <fileset dir="${TMP}/eclipse/" />
     </move>
+    -->
+  	
+  	<delete>
+		<fileset dir="${TMP}/eclipse/" />
+  	</delete>
+
 
     <echo
       message="platform and tools installed. platformURL: ${platformURL} platform: ${platformFile}, fetched using tychoeclipsebuilder/getBaseBuilderAndTools.xml" />
