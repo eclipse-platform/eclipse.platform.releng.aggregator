@@ -17,14 +17,14 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in Photon</title>
+<title>Eclipse Platform What's New in 4.9</title>
 </head>
 
 <body>
-<h2>What's New in Photon </h2>
+<h2>What's New in 4.9 </h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
 made to the Eclipse <a href="#Platform">Platform</a>, <a href="#SWT">SWT</a>  and 
-<a href="#Equinox">Equinox</a> for the Photon (4.8) release of Eclipse.
+<a href="#Equinox">Equinox</a> for the 4.9 release of Eclipse.
 </p>
 
 <p>
@@ -45,197 +45,56 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  
-  <tr id="codemining-sourceviewer-support">
-    <td class="title">CodeMining support with SourceViewer</td>
+
+  <tr id="type-parameters-core-databinding">
+    <td class="title">Type parameters on Core Databinding classes</td>
     <td class="content">
-      A <b>code mining</b> represents the content (ex: label, icons) that should be shown along with source text, like the number of references, 
-      a way to run tests (with run/debug icons), etc. The main goal of code mining is to enable the developer to have a better understanding of the code and also help in writing better code.
+      Type parameters have been added to relevant classes and methods in the
+      <code>org.eclipse.core.databinding</code> bundle. This includes
+      <code>DataBindingContext</code>, <code>IConverter</code> and <code>IValidator</code>.
+      This makes code using these classes more explicit and clear and
+      can help catching bugs in an early stage.
       <p>
-      A code mining is represented by <code>org.eclipse.jface.text.codemining.ICodeMining</code> which are provided by <code>org.eclipse.jface.text.codemining.ICodeMiningProvider</code>.
-      The <code>org.eclipse.jface.text.source.ISourceViewerExtension5</code> provides the capability to register <code>org.eclipse.jface.text.codemining.ICodeMiningProvider</code> and update the code minings.
+      Code example:
+      </p>
+      <pre>
+    IObservableValue&lt;String&gt; o1 = ...;
+    IObservableValue&lt;Integer&gt; o2 = ...;
+    DataBindingContext cont = ...;
+    IConverter&lt;String, Integer&gt; c = IConverter.create(String.class, Integer.class, Integer::decode);
+    UpdateValueStrategy&lt;String, Integer&gt; s = new UpdateValueStrategy&lt;&gt;();
+    s.setConverter(c);
+    cont.bindValue(o1, o2, s, null);
+      </pre>
+      <p>
+      These changes are part of an ongoing effort to make the databinding API more typesafe. 
+      This effort started with the addition of type parameters to the bundles
+      <code>org.eclipse.core.databinding.property</code> and
+      <code>org.eclipse.core.databinding.observable</code>, and will continue with the bundles
+      <code>org.eclipse.core.databinding.beans</code> and <code>org.eclipse.jface.databinding</code>
+      in a future release.
       </p>
       <p>
-    	The example <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.jface.text.examples/src/org/eclipse/jface/text/examples/codemining/CodeMiningDemo.java">CodeMiningDemo</a> 
-    	draws the <b>Class references and implementations</b> code minings:
-      </p>
-      <p>
-        <img src="images/codemining-sourceviewer-support.png" alt="" />
+      Note: Users of databinding APIs that are not yet updated to take advantage of the type 
+      parameters will find that the new type parameters cause raw type warnings in their code. 
+      The best way to handle warnings from code that can't be updated is often to suppress these 
+      warnings using <code>@SuppressWarnings("rawtypes")</code>. Since the implementation of 
+      the databinding classes has not changed, suppressing warnings is a safe thing to do in this
+      case.
       </p>
     </td>
   </tr>
 
-  <tr id="codemining-extension-point">
-    <td class="title">CodeMining provider extension point</td>
+  <tr id="generic-editor-folding">
+    <td class="title">Contribute folding to the Generic Editor</td>
     <td class="content">
-      The <b>org.eclipse.ui.workbench.texteditor.codeMiningProviders</b> extension point gives the capability to register a code mining provider <code>org.eclipse.jface.text.codemining.ICodeMiningProvider</code> in a text editor using <code>ISourceViewerExtension5</code>.
-      <p>
-      Associating providers via this extension doesn't automatically enable code-mining, so clients are also supposed to use a reconciler or whatever event mechanism to invoke <code>ISourceViewerExtension5.updateCodeMinings()</code>.
-      For instance you can consume the <code>org.eclipse.jface.text.codemining.CodeMiningReconciler</code> to update the registered CodeMining providers. 
-      </p>
-      <p>
-    	The <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.ui.genericeditor.examples">GenericEditor Example</a> displays the number of referenced projects: 
-      </p>
-      <p>
-        <img src="images/codemining-extension-point.png" alt="" />
-      </p>
-      <p>
-    	This sample consumes the code mining provider <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.ui.genericeditor.examples/src/org/eclipse/ui/genericeditor/examples/dotproject/codemining/ProjectReferencesCodeMiningProvider.java" >ProjectReferencesCodeMiningProvider</a> 
-    	which is registered	with the <code>org.eclipse.ui.workbench.texteditor.codeMiningProviders</code> extension point:
-      </p>
-<pre>
-&lt;extension
-   point="org.eclipse.ui.workbench.texteditor.codeMiningProviders"&gt;
-   &lt;codeMiningProvider
-        class="org.eclipse.ui.genericeditor.examples.dotproject.codemining.ProjectReferencesCodeMiningProvider"
-        id="org.eclipse.ui.genericeditor.examples.dotproject.codemining.references"
-        label="Project references"&gt;
-        &lt;enabledWhen&gt;
-        	  &lt;with variable="editorInput"&gt;
-              &lt;adapt type="org.eclipse.core.resources.IFile"&gt;
-                &lt;test property="org.eclipse.core.resources.contentTypeId" value="org.eclipse.ui.genericeditor.examples.dotproject" /&gt;
-              &lt;/adapt&gt;
-        	  &lt;/with&gt;
-        &lt;/enabledWhen&gt;
-   &lt;/codeMiningProvider&gt;
-&lt;/extension&gt;
-      </pre>    	
-      <p>This code mining provider is updated with the <code>org.eclipse.jface.text.codemining.CodeMiningReconciler</code> reconciler.  
-      </p>
-<pre>
-&lt;extension
-      point="org.eclipse.ui.genericeditor.reconcilers"&gt;
-   &lt;reconciler
-         class="org.eclipse.jface.text.codemining.CodeMiningReconciler"
-         contentType="org.eclipse.ui.genericeditor.examples.dotproject"&gt;
-   &lt;/reconciler&gt;
-&lt;/extension&gt;
-</pre>
-    </td>
-  </tr>
-  
-   <tr id="inlined-annotations-support">
-    <td class="title">Inlined annotation support</td>
-    <td class="content">
-      <code>org.eclipse.jface.text.source.inlined.InlinedAnnotationSupport</code> draws the content of the annotations in the StyledText without the actual payload text nor modifying the line numbers.
-      Each annotation takes care of placing the necessary space, vertically or horizontally, in the StyledText widget to draw the content.
-      <p>
-    	The example <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.jface.text.examples/src/org/eclipse/jface/text/examples/sources/inlined/InlinedAnnotationDemo.java">InlinedAnnotationDemo</a> draws:
-      </p>
-      <ul>
-    	<li>The <b>colored square</b> of the RGB color declaration in the <b>line content</b> (use of LineContentAnnotation).</li>
-    	<li>The result <b>status (OK! / ERROR!)</b> of parsing the RGB color declaration in the <b>line header</b> (use of LineHeaderAnnotation).</li>
-      </ul>
-      <p>
-        <img src="images/inlined_annotations_support.png" alt="" />
-      </p>
-    </td>
-  </tr>
-  
-  <tr id="inlined-annotations-action">
-    <td class="title">Action for Inlined Annotations</td>
-    <td class="content">
-      <b>Inlined Annotation</b> can define an action to execute when you click on the annotation with <code>Consumer&lt;MouseEvent&gt; getAction(MouseEvent e)</code>.       
-      <p>
-    	The example <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.jface.text.examples/src/org/eclipse/jface/text/examples/sources/inlined/InlinedAnnotationDemo.java">InlinedAnnotationDemo</a> defines 
-    	an action to open the <code>org.eclipse.swt.widgets.ColorDialog</code> when you click on the color annotation:
-      </p>
-      <pre>
-public ColorAnnotation extends LineContentAnnotation {
-...
-  @Override
-  public Consumer&lt;MouseEvent&gt; getAction(MouseEvent e) {
-    return ev -> {
-      // Open the Color dialog when color annotation is clicked
-    };
-  }
-}
-</pre>
-      <p>
-        <img src="images/inlined-annotations-action.png" alt="" />
-      </p>
-    </td>
-  </tr>
-  
-  <tr id="generic-editor-highlighter">
-    <td class="title">Contribute highlight reconcilers to the Generic Editor</td>
-    <td class="content">
-      The <b>Generic Editor</b> now supports a new extension point to override the default highlighter and add multiple <code>org.eclipse.jface.text.reconciler.IReconciler</code> for highlighting to provided content-types.
-      <p>Reconcilers attached to this extension point that listen to the preference <code>org.eclipse.ui.genericeditor.togglehighlight</code> will be toggled with the <b>Toggle Highlight</b> button.</p>
-      <pre>
-&lt;extension point="org.eclipse.ui.genericeditor.highlightReconcilers">
-    &lt;highlightReconciler
-          class="org.eclipse.ui.genericeditor.examples.TagHighlightReconciler"
-          contentType="org.eclipse.core.runtime.xml"/>
-&lt;/extension>
-      </pre>
-    </td>
-  </tr>
-
-  <tr id="adapt-textselection-to-debug-variable">
-    <td class="title">Default debug hover contribution on Generic Editor</td>
-    <td class="content">
-      The Debug framework contributes to the <b>Generic Editor</b> when the hover represented by an <code>ITextSelection</code>
-      can be adapted to an <code>IVariable</code>. So, in order to take advantage of debug details on hover in the Generic
-      Editor, you can simply use the <code>org.eclipse.core.runtime.adpaters</code> extension point and define an <code>IAdapterFactory</code>
-      from <code>ITextSelection</code> to <code>IVariable</code> to enable this feature.
-      <p>If the current selection cannot be adapted (all adapter factories return null), the contribution to Generic Editor is ignored.</p>
-      <p>The JDT project already contributes such an adapter.</p>
-    </td>
-  </tr>
-
- <tr id="generic-editor-autoeditstrategies">
-    <td class="title">Contribute auto-edit strategies and reconcilers to the Generic Editor</td>
-    <td class="content">
-      The <b>Generic Editor</b> now supports two new extension points to add an <code>org.eclipse.jface.text.IAutoEditStrategy</code>
-       or <code>org.eclipse.jface.text.reconciler.IReconciler</code> respectively for a provided content-type.<br/>
-      Typical use cases for auto-edit strategies would be auto-indent, auto-closing braces or other syntax rules.
-      <pre>
-&lt;extension point="org.eclipse.ui.genericeditor.autoEditStrategies">
-    &lt;autoEditStrategy
-          class="org.eclipse.ui.genericeditor.demo.CloseTagAutoEditStrategy"
-          contentType="org.eclipse.core.runtime.xml"/>
-&lt;/extension>
-      </pre>
-      Possible use cases for reconcilers would be code folding or a spell checker.
-      <pre>
-&lt;extension point="org.eclipse.ui.genericeditor.reconcilers">
-    &lt;reconciler
-          class="org.eclipse.ui.genericeditor.demo.TagFoldingReconciler"
-          contentType="org.eclipse.core.runtime.xml"/>
-&lt;/extension>
-      </pre>
-    </td>
-  </tr>
-  
-  <tr id="generic-editor-aggregates-hover">
-    <td class="title">Generic Editor aggregates hover from multiple sources</td>
-	<td class="content">
-		The hover included in the <b>Generic Editor</b> now aggregates the hover content from multiple
-		sources instead of picking only one.
-		<p>This allows, for example, to contribute 3 distinct
-		hovers for problem details, code documentation and debug details via the
-		<code>org.eclipse.ui.genericeditor.hoverProviders</code> extension point, and to get
-		those 3 contributions shown simultaneously when hovering in the Generic Editor.</p>
-		<img src="images/aggregated-hovers.png" alt=""/>
-		<p>Hovers that return <code>null</code> as hover range or hover info for a given
-		location would be ignored.</p>
-	</td>
-  </tr>
-  
-  <tr id="generic-editor-enablewhen">
-    <td class="title">Support 'enabledWhen' for the all Generic Editor extension points</td>
-    <td class="content">
-      All extension points targeting the Generic Edtor (<code>autoEditStrategies</code>, <code>contentAssistProcessors</code>, <code>highlightReconcilers</code>,
-      <code>hoverProviders</code>, <code>presentationReconcilers</code>, <code>reconcilers</code>) now allows an <code>enabledWhen</code> child elements for
-      contributions. This <code>enableWhen</code> is a Core Expression that controls whether the declared extension is enabled when insantiating the editor.
-      The evaluation context defines extra variables you can use in the expression: <code>viewer</code>, <code>editor</code> and <code>editorInput</code>.
-      <p>This example shows how LSP4E contributes server highlight reconciler only for editor input supporting a language server:</p>
+      The Generic Editor provides a new extension point <code>org.eclipse.ui.genericeditor.foldingReconcilers</code> to customize folding.
+      <p>This example shows how LSP4E could contribute folding reconciler only for editor input supporting a language server:</p>
       <pre>
 &lt;extension
-      point="org.eclipse.ui.genericeditor.highlightReconcilers">
-   &lt;highlightReconciler
-         class="org.eclipse.lsp4e.operations.highlight.HighlightReconciler"
+      point="org.eclipse.ui.genericeditor.foldingReconcilers">
+   &lt;foldingReconciler
+         class="org.eclipse.lsp4e.operations.folding.FoldingReconciler"
          contentType="org.eclipse.core.runtime.text">
       &lt;enabledWhen>
          &lt;with
@@ -245,416 +104,92 @@ public ColorAnnotation extends LineContentAnnotation {
             &lt;/test>
          &lt;/with>
       &lt;/enabledWhen>
-   &lt;/highlightReconciler>
+   &lt;/foldingReconciler>
 &lt;/extension>
       </pre>
+        When no other folding reconciler is registered for current document,
+        the generic editor uses a strategy which folds blocks of lines based on whitespaces and indentation:
+	    <p>
+	      <img src="images/generic-editor-folding.png" alt="" />
+	    </p>
     </td>
   </tr>
 
-  <tr id="prototype-launch-configuration">
-    <td class="title">Launch configuration prototypes</td>
+  <tr id="generic-editor-character-pair-matcher">
+    <td class="title">Contribute character pair matcher to the Generic Editor</td>
     <td class="content">
-      A <b>Launch configuration</b> can now be based on a prototype.
-      <p>
-        <img src="images/prototype-java-launch-configuration.png" alt="Prototype Launch Configuration" />
-      </p>
-      A prototype seeds attributes in its associated launch configurations with the settings specified in the Prototype tab.
-      <p>
-        <img src="images/prototype-tab-java-launch-configuration-1.png" alt="Prototype Tab Launch Configuration 1" />
-      </p>
-      Once a launch configuration has been created, you can override any initial settings from the prototype.
-      You can also reset the settings of a launch configuration with the ones from its prototype. A launch configuration maintains 
-      a link to its prototype, but is a complete stand-alone launch configuration than can be launched, exported, shared, etc.
-      <p>
-        <img src="images/prototype-tab-java-launch-configuration-2.png" alt="Prototype Tab Launch Configuration 2" />
-      </p>
-      Prototypes are already enabled for JDT and PDE launch configurations.
-      Others projects have to enable prototypes with <code>org.eclipse.debug.core.launchConfigurationTypes</code> extension point:
-<pre>
-&lt;extension
-    point="org.eclipse.debug.core.launchConfigurationTypes"&gt;
-    &lt;launchConfigurationType
-      <b>allowPrototypes="true"</b>
-      delegate="org.eclipse.jdt.launching.sourcelookup.advanced.AdvancedJavaLaunchDelegate"
-      delegateDescription="%localJavaApplicationDelegate.description"
-      delegateName="%eclipseJDTLauncher.name"
-      id="org.eclipse.jdt.launching.localJavaApplication"
-      migrationDelegate="org.eclipse.jdt.internal.launching.JavaMigrationDelegate"
-      modes="run, debug"
-      name="%localJavaApplication"
-      sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
-      sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"&gt;
-    &lt;/launchConfigurationType&gt;
-&lt;/extension&gt;
-</pre>
-       and also implement <code>org.eclipse.debug.ui.AbstractLaunchConfigurationTab.initializeAttributes()</code> for their specifics tabs.
-    </td>
-  </tr>
-  
-  <tr id="dialog-settings-customization">
-    <td class="title">Dialog settings customization</td>
-    <td class="content">
-      Platform now allows Eclipse product maintainers to specify initial dialog settings for
-		various bundles by providing the following:
-		<ol>
-		<li><b>plugin_customization.ini</b> with an entry in the URL notation like:
-			<p>
-			org.eclipse.ui/default_dialog_settings_rootUrl=http://mycompany/dialog_settings
-			org.eclipse.ui/default_dialog_settings_rootUrl=file:/etc/mycompany/dialog_settings
-			org.eclipse.ui/default_dialog_settings_rootUrl=platform:/plugin/my.company.bundle/dialog_settings
-			</p>
-		</li>
-		<li>
-			Directory at the URL specified above, containing
-			<b>&lt;bundle_id&gt;/dialog_settings.xml</b> files for every bundle to customize,
-			e.g: <b>org.eclipse.jdt.ui/dialog_settings.xml</b>.
-		</li>
-		</ol>
-		AbstractUIPlugin.loadDialogSettings() now checks if the preference
-		<b>org.eclipse.ui/default_dialog_settings_rootUrl</b> is specified and tries to
-		load <b>&lt;default_dialog_settings_rootUrl&gt;/&lt;current_bundle_id&gt;/dialog_settings.xml</b>
-		file in case the workspace has no persisted dialog settings file for the
-		current bundle.
-    </td>
-  </tr>
-  
-  <tr id="throttler-api">
-    <td class="title">Throttler</td>
-    <td class="content">
-      UI updates in tight loops can degrade a system's performance, and users are also not capable of reading information that fast.
-      In such cases, class <code>org.eclipse.jface.util.Throttler</code> can now be used to limit the rate updates on the UI thread
-      with a specified time while executing the task wrapped in a <code>Runnable</code>.
-      <p>
-      An example use case is updates to a progress monitor, like in EGit's Import Project wizard. This wizard scans a directory
-      and reports any file found to the progress (actually a <code>org.eclipse.jface.wizard.ProgressMonitorPart</code>). This happens
-      so fast that it can't be read, but overall it degrades the wizard's performance.
-      </p>
-      Usage example:
+      The Generic Editor provide a new extension point <code>org.eclipse.ui.genericeditor.characterPairMatchers</code> to customize character pair matchers (matching brackets).
+      <p>The <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.ui.genericeditor.examples">Generic Editor examples</a> shows how to manage matching 
+      bracket for tag elements of .project file:</p>
       <pre>
-public class ProgressMonitorPart extends Composite implements
-        IProgressMonitorWithBlocking {
-    [...]
-    private Throttler throttledUpdate;
-    [...]
-    throttledUpdate = new Throttler(fLabel.getDisplay(), Duration.ofMillis(100), this::updateLabel);
-    [...]
-    protected void queueUpdateLabel() {
-       throttledUpdate.throttledExec();
-    }
+&lt;extension
+      point="org.eclipse.ui.genericeditor.characterPairMatchers"&gt;
+   &lt;characterPairMatcher
+         class="org.eclipse.ui.genericeditor.examples.dotproject.TagCharacterPairMatcher"
+         contentType="org.eclipse.ui.genericeditor.examples.dotproject"&gt;
+   &lt;/characterPairMatcher&gt;
+&lt;/extension&gt;
       </pre>
+	  <p>
+	    <img src="images/generic-editor-character-pair-matcher.png" alt="" />
+	  </p>      
     </td>
   </tr>
-  
-  <tr id="parallel-build-workspace-description">
-    <td class="title">Configure workspace description to allow independent projects to build in parallel</td>
-    <td class="content">
-      The <code>IWorkspaceDescription</code> has received a new API method <code>setMaxConcurrentBuilds(int n)</code>
-      which allows to configure the maximum number of threads/jobs that will be used in case workspace can
-      build independent projects in parallel.
-      <p>At the moment, parallel builds with happen when under safe circumstances, depending on the scheduling rules involved
-      in <code>IncrementalProjectBuilder.getRule()</code>. Having all builders specifying a "relaxed" scheduling rule (not
-      containing workspace root) is a requirement for paralllel builds to happen. As such, to take advantage of parallel
-      builds, consider refining the implementation of <code>getRule()</code> in your builders.</p>
-      <p>Passing a value of <code>1</code> to <code>setMaxConcurrentBuilds(int n)</code> will disable the parallel builds
-      in general, and will make workspace build behave as it's used to, building projects sequentially. This it still the
-      default value and behavior, so it makes parallel builds of independent project an opt-in feature so far.</p>
-      <p>The optimal value for throttling depends on your machine and workspace projects specificities. We do recommend to try relatively
-      low values (such as <code>4</code>) first which already allow to save time, when projects allow it, while not risking to
-      overload your CPU.</p>
-    </td>
-  </tr>
-  
-  <tr id="org.eclipse.e4.core.di-api">
-    <td class="title">New API: org.eclipse.e4.core.di</td>
-    <td class="content">
-    The package org.eclipse.e4.core.di in bundle org.eclipse.e4.core.di has been released as API.
-    This package contains the following mentionable types:
-    <ul>
-  		<li><b>InjectionException:</b> When using the ContextInjectionFactory to manually trigger dependency injection, all methods eventually throw an InjectionException. By making org.eclipse.e4.core.di API, this InjectionException becomes API, too and can therefore be processed properly.</li>
-  		<li><b>IInjector:</b> To manually trigger dependency injection on a more fine-grained level, e.g. without using the IEclipseContext as an ObjectSupplier.</li>
-  		<li><b>InjectorFactory:</b> To create an instance of IInjector.</li>
-  	</ul>
-    </td>
-  </tr>
-  
-  <tr id="removal-eclipse-update">
-    <td class="title">Removal of Update Manager API</td>
-    <td class="content">
-      The Update Manager API was dropped in favor of p2. All remaining references to the API have now finally been removed. The org.eclipse.update.* bundles are removed from all configurations.
-    </td>
-  </tr>
-  
-    <tr id="batik-upgrade">
-    <td class="title">CSS Engine upgraded to use Batik 1.9 instead of 1.8</td>
-	<td class="content">
-		The <b>Theme Engine</b> in Platform UI was upgraded to use Batik 1.9 instead of 1.8.
-		<p>The following Orbit bundle changes happened:</p>
-		<ul>
-			<li><code>org.apache.batik.css</code> was upgraded to version <code>1.9.0</code></li>
-			<li><code>org.apache.batik.util</code> was upgraded to version <code>1.9.0</code></li>
-			<li><code>org.apache.batik.i18n</code> version <code>1.9.0</code> was added</li>
-			<li><code>org.apache.batik.util.gui</code> version <code>1.8.0</code> was removed</li>
-		</ul>
-		<p>No code change is needed to adopt to the migration.</p>
-	</td>
-  </tr>
-  
+
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
   
-  <tr id="dropped-xulr-support">
-    <td class="title">Dropped support for XULRunner</td>
+  <tr id="calendar-weeknumbers">
+    <td class="title">Display week numbers in DateTime calendar</td>
     <td class="content">
-    	  Eclipse/SWT has dropped support for XULRunner as a browser rendering engine on all platforms.
-    	  <p>
-    	  	<code>SWT.MOZILLA</code> style is deprecated. When it is used in the SWT Browser constructor <code>org.eclipse.swt.browser.Browser.Browser(Composite, int)</code>, it'll be ignored and 
-    	  	the browser will be created with <code>SWT.NONE</code> style, if no other style is specified.
-    	  </p>
-    </td>
-  </tr>
-  
-  <tr id="webkit2default">
-    <td class="title">Webkit2 is now the default Browser renderer on Linux/GTK</td>
-    <td class="content">
-      <a href="https://www.eclipse.org/eclipse/news/4.4/M6/#swt-webkit" target="_blank">Preliminary support for Webkit2</a> on Linux/GTK was added in Eclipse Luna.
-      Webkit2 support is now complete and has replaced Webkit1 as the default renderer for the SWT Browser widget on Linux/GTK.
-      <p>Webkit1 was known to crash at times. Webkit2 is stable and runs in a separate process, thus providing enhanced performance and is more secure.</p>
-      <p>Webkit2 was also necessary because Webkit1 is no longer being provided on newer Linux distributions (e.g Fedora 27)</p>
-      <p>To fallback to using Webkit1 (if needed), you can set the environment variable using: <code>export SWT_WEBKIT2=0</code></p>
-      <p>To inspect which version of Webkit you're running Eclipse under, set variable: <code>export SWT_LIB_VERSIONS=1</code>, launch
-         Eclipse/SWT and open an internal browser instance. You should see "<code>SWT_LIB  Webkit (1 or 2) </code>" in the console </p>
-         <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=528844" target="_blank">Webkit2 port bug</a> for more details.</p>
-    </td>
-  </tr>
-  
-  <tr id="openurl-api">
-    <td class="title">New event SWT.OpenUrl added</td>
-    <td class="content">
-      A new event type <code>SWT.OpenUrl</code> has been added to SWT to notify clients that an URL should be opened.
-      Listeners for OpenUrl event should be added to a Display. The event's text field contains the URL to be opened.
       <p>
-      URLs can be passed to Eclipse in the same way in which file paths are passed from the command line (i.e, as arguments to the default action
-      <code>--launcher.openFile</code>). An URL can also be passed by configuring a custom URL handler for the platform.
-      </p>
-    </td>
-  </tr>
-  
-  <tr id="styledtext-api">
-    <td class="title">New API getOffsetAtLocation(Point) added to StyledText</td>
-    <td class="content">
-      The new method <code>StyledText#getOffsetAtPoint(Point)</code> is a replacement for
-      <code>StyledText#getOffsetAtLocation(Point)</code>. It behaves similar, except that it does
-      not throw an <code>IllegalArgumentException</code> when no character is at the given location,
-      but returns -1 instead.
-      <p>
-      Using the new method will result in better performance when used in tight loops. Especially the
-      <b>Show Whitespace</b> editor feature benefits from using the new API.
+       The <code>SWT.DateTime</code> calendar widget will now display week numbers, when the <code>SWT.CALENDAR_WEEKNUMBERS</code> style flag is set.
       </p>
       <p>
-      The method <code>StyledText#getOffsetAtLocation(Point)</code> has been deprecated.
+        <img src="images/calendar-weeknumbers.png" alt="" />
       </p>
-    </td>
-  </tr>
-  
-  <tr id="styledtext-linespacing-provider">
-    <td class="title">Added new API in StyledText to customize different line spacing</td>
-    <td class="content">
-      <code>StyledText.setLineSpacingProvider(StyledTextLineSpacingProvider lineSpacingProvider)</code> can be used to customize different line spacing by implementing the 
-      <code>org.eclipse.swt.custom.StyledTextLineSpacingProvider</code> interface.
       <p>
-    	For an example, see <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet369.java">Snippet369</a>
-    	which implements <code>org.eclipse.swt.custom.StyledTextLineSpacingProvider</code> interface to customize line spacing according to the typed text:
-      </p>
-      <pre>
-text.setLineSpacingProvider(lineIndex -> {
-	String line = text.getLine(lineIndex).trim();
-	try {
-		return Integer.parseInt(line);
-	} catch(NumberFormatException e) {
-		return null;
-	}
-});
-      </pre>
-      <p>
-        <img src="images/styledtext_linespacing_provider.png" alt="" />
-      </p>
-    </td>
-  </tr>
-  
-  <tr id="fontmetrics-api">
-    <td class="title">New API getAverageCharacterWidth added to FontMetrics</td>
-    <td class="content">
-      A new method has been added in <code>FontMetrics</code>:
-      <p><code>double getAverageCharacterWidth()</code></p> which is a replacement for
-      <p><code>int getAverageCharWidth()</code></p> They are similar in function, except that the new method returns the average character width of the Font as 
-      a double-precision floating point value instead of a integer value. 
-      <p>
-      The method <code>FontMetrics#getAverageCharWidth()</code> has been deprecated.
-      </p>
-    </td>
-  </tr>
-  
-  <tr id="swt-lambda-style-keylistener">
-    <td class="title">Lambda as Listener</td>
-	<td class="content">Listener interfaces in SWT
-		were enhanced to provide static helper methods that accept
-		lambdas and method references as listeners. These methods are alternatives to using Adapter classes.
-		<ul>
-			<li><code>org.eclipse.swt.events.ControlListener</code></li>
-			<li><code>org.eclipse.swt.events.ExpandListener</code></li>
-			<li><code>org.eclipse.swt.events.MenuListener</code></li>
-			<li><code>org.eclipse.swt.events.TreeListener</code></li>
-			<li><code>org.eclipse.swt.events.MouseTrackListener</code></li>
-			<li><code>org.eclipse.swt.events.ShellListener</code></li>
-			<li><code>org.eclipse.swt.custom.ControlListener</code></li>
-			<li><code>org.eclipse.swt.browser.LocationListener</code></li>
-			<li><code>org.eclipse.swt.browser.ProgressListener</code></li>
-			<li><code>org.eclipse.swt.browser.VisibilityWindowListener</code></li>
-		</ul>
-	</td>
-  </tr>
-  
-  <tr id="datetime-localization-support">
-    <td class="title">Datetime on Gtk now has support for localization</td>
-    <td class="content">
-    Datetime on Gtk now has support for localized date format.<br/>
-    A snippet to demonstrate can be found <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet370.java">Snippet370 </a>.<br/>
-    <img src="images/datetime.png" alt="" />
-    </td>
-  </tr>
-  
-  <tr id="swt-gtk3-transparency-support">
-    <td class="title">Transparent color support on GTK3</td>
-	<td class="content">The SWT GTK3 port now includes support for transparent colors.
-		Previously, SWT <code>Color</code> on GTK only supported Red, Green and Blue (RGB) values
-		(all colors were opaque by default). Now, users can set alpha values to manipulate the transparency
-		property of SWT colors on GTK3.
-		<p>The image below shows a red Canvas widget that is half transparent (alpha set to 0.5).</p>
-		<img src="images/canvas_red_half_transparent.png" alt=""/>
-	</td>
-  </tr>
-
-  <tr id="group-text-color-stylable-on-windows">
-    <td class="title">Group widget text color stylable on Windows</td>
-    <td class="content">
-      The <code>Group</code> widget text can now have a different color than the system default. Client can use <code>Group#setForeground(Color)</code>
-      to change the text color. Screen-shot for reference:
-      <p>
-        <img src="images/group-text-color-stylable-on-windows.png" alt="Group text in red" />
+      	Note: This is a HINT and currently only works on Windows and Linux/GTK.
       </p>
     </td>
   </tr>
 
-  <tr id="button-bgcolor-mac">
-    <td class="title">Set Button background color on Mac</td>
-    <td class="content">
-      <code>Button.setBackground()</code> can now set the background color for a <code>Button</code> on Mac.
-      <p><img src="images/colored-buttons-mac.png" alt=""/></p>
-    </td>
-  </tr>
-  
-  <tr id="bg-searchbox">
-    <td class="title">Background color for search box on Mac</td>
-    <td class="content">
-      <code>Text.setBackground(Color)</code> can be used to set the background color of a Text widget with <code>SWT.SEARCH</code> style on Mac as well. 
-      This already works on Windows and GTK.
-    </td>
+  <tr id="alt-gr-display-post">
+  	<td class="title">New SWT.ALT_GR constant and support for non-US keyboard layouts</td>
+  	<td class="content">
+  		SWT on GTK3 has added a <code>SWT.ALT_GR</code> constant which can be used to generate special characters requiring the AltGr modifier using
+  		the <code>Display.post(Event)</code> method. 
+  		<p>
+  		 The <code>Display.post(Event)</code> method now supports simulating key events for non-US
+  		 keyboard layouts and the option to send key modifiers together with key characters in a single event.
+  		</p>
+  	</td>
   </tr>
 
- <tr id="monitor-getzoom">
-    <td class="title">New API Monitor#getZoom() added</td>
+  <tr id="zoom-changed-api">
+    <td class="title">New event SWT.ZoomChanged added</td>
     <td class="content">
-		A new API <code>Monitor.getZoom()</code> has been added which returns the zoom value used by SWT for the Monitor.
-		<p>
-		 The zoom value returned by the API is the zoom used by SWT that is controlled by the <code>swt.autoScale</code> property. It may not be the same value
-		 as that is set in the system. It can be used in other SWT APIs that require zoom as an input such as <code>Image.getImageData(zoom)</code> to get the ImageData
-		 at the zoom level for the specific Monitor on which it'll be drawn.
-		</p>
-		<p>
-		 There are two use-cases of the API:
-		</p>
-		<ul>
-		 <li>
-		  When the DPI of the monitor changes dynamically, the API can be used to return the new DPI.
-		 </li>
-		 <li>
-		  On platforms that support a multi-monitor setup where different monitors can have different DPIs, the API can be used to get the DPI of the specific monitor
-		  on which a Control is drawn.
-		 </li>
-		</ul>
-    </td>
-  </tr>
-   <!-- ******************** Equinox ********************** -->
-  <tr>
-    <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
-  </tr>
-
- <tr id="generic-reqs-caps-handling">
-    <td class="title">P2 handles generic bundle requirements/capabilities</td>
-    <td class="content">
-        As more OSGi technologies rely heavily on abstract dependencies to wire a consistent application it
-        became important for p2 to have first class handling of such dependencies. You are now able to use p2 to
-        provision "soft" bundle dependencies that cannot be expressed as <code>Import-Package</code> or
-        <code>Require-Bundle</code> manifest headers. Such dependencies are described by the
-        <code>Require-Capability</code> and <code>Provide-Capability</code> manifest headers, which p2 can now process.
+      A new event type <code>SWT.ZoomChanged</code> has been added to SWT to notify clients that SWT zoom has changed.
+      Listeners for ZoomChanged event should be added to a Shell. The event's detail field contains the new zoom SWT level.
       <p>
-        For example, a consumer bundle may import the API package of an OSGi service (<code>Import-Package</code>) and
-        also require an implementation of the API (<code>Require-Capability</code>). A provider bundle may also import
-        the API package in order to implement it (<code>Import-Package</code>) and then declare it
-        provides an implementation of the service (<code>Provide-Capability</code>). The API package can be distributed
-        by a third party that maintains the service specification. When the consumer bundle is provisioned p2 will also
-        provision the API and the provider bundles. The case used to be that p2 would provision only the consumer and
-        the API, leaving to you the task to discover a provider.
+      Note: This operation is a hint and is supported on Windows 10 only.
       </p>
     </td>
   </tr>
 
-<tr id="equinox-sha-256-checksum">
-    <td class="title">Use SHA-256 to check artifact's data integrity</td>
+  <tr id="dark-theme-table-tree-header">
+    <td class="title">Improved Table and Tree header under dark theme</td>
     <td class="content">
-      To ensure data integrity of artifacts, alongside MD5, p2 now also generates and checks checksums using SHA-256 MessageDigest implementation, provided by any JRE. These checksums are stored in two new artifact's metadata properties:
+      SWT on Windows made below improvements into <code>Table</code> and <code>Tree</code> headers, which improves the dark theme visibility.
       <ul>
-	<li><code>download.checksum.sha-256</code></li>
-	<li><code>artifact.checksum.sha-256</code></li>
+		<li> Added a new line separator between <code>Table</code> and <code>Tree</code> header and the first row.</li>
+		<li> Also now drawing the header column separators irrespective of line visibility of <code>Table</code> and <code>Tree</code>.</li>
       </ul>
-      In standalone applications like a mirror application, use <code>org.eclipse.equinox.artifact.comparator.checksum.sha-256</code> as a comparator ID.
-    </td>
-  </tr>
-
-  <tr id="equinox-messagedigest-checksum">
-    <td class="title">Support any MessageDigest implementation as artifact's checksum algorithm</td>
-    <td class="content">
-      With the new extension point <code>org.eclipse.equinox.p2.artifact.repository.artifactChecksums</code>, it is now possible to contribute any MessageDigest implementation as a way to calculate and check artifact's checksums:
-
-      <ul>
-        <li>Register your contribution:
-        <pre>
-          <code>
-            &lt;extension point="org.eclipse.equinox.p2.artifact.repository.artifactChecksums"&gt;
-              &lt;artifactChecksum algorithm="TIGER" id="tiger"/&gt;
-            &lt;/extension&gt;
-          </code>
-        </pre>
-        </li>
-        <li>In your bundle's Activator, register a SecurityProvider that provides an actual MessageDigest implementation:
-        <pre>
-          <code>
-            public void start(BundleContext context) throws Exception {
-              Security.addProvider(new BouncyCastleProvider());
-            }
-          </code>
-        </pre>
-        </li>
-        <li>Create p2 repository
-        <p>Artifact's checksum will be calculated using your implementation and stored in two new properties, <code>download.checksum.tiger</code> and <code>artifact.checksum.tiger</code>.</p>
-        </li>
-        <li>Consume in p2 client
-        <p>If p2 client has no support for such MessageDigest implementation, it will ignore it.</p>
-        </li>
-      </ul>
-      For more information, check <code>artifactChecksums</code> extension point's documentation.
+      <p>
+        <img src="images/dark_theme_table_header.png" alt="" />
+      </p>
     </td>
   </tr>
 
