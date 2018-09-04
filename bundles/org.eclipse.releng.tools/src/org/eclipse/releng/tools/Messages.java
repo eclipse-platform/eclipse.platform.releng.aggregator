@@ -21,11 +21,9 @@ public class Messages {
 			.getBundle(BUNDLE_NAME);
 
 	private Messages() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	public static String getString(String key) {
-		// TODO Auto-generated method stub
 		try {
 			return RESOURCE_BUNDLE.getString(key);
 		} catch (MissingResourceException e) {
