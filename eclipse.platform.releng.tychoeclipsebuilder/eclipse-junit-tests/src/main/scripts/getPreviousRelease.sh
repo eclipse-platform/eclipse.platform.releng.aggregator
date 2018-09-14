@@ -7,8 +7,8 @@
 
 
 mkdir -p workarea/${buildId}/eclipse-testing
-#cp /home/files/buildzips/oxygen/R/R-4.8-201806110500/eclipse-SDK-4.8-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/
-cp /home/files/buildzips/oxygen/R/R-4.8-201806110500/eclipse-platform-4.8-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/platformLocation/
+#cp /home/files/buildzips/oxygen/R/R-4.9-201809060745/eclipse-SDK-4.9-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/
+cp /home/files/buildzips/oxygen/R/R-4.9-201809060745/eclipse-platform-4.9-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/platformLocation/
 
 cp ../../eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz workarea/${buildId}/eclipse-testing/
 

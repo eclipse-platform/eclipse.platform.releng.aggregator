@@ -210,8 +210,8 @@ function cleanRepo ()
 
 remoteBase="/home/data/httpd/download.eclipse.org"
 
-eclipseIRepo="${remoteBase}/eclipse/updates/4.9-I-builds"
-eclipseSRepo="${remoteBase}/eclipse/updates/4.9milestones"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.10-I-builds"
+eclipseSRepo="${remoteBase}/eclipse/updates/4.10milestones"
 eclipseYRepo="${remoteBase}/eclipse/updates/4.9-Y-builds"
 eclipsePRepo="${remoteBase}/eclipse/updates/4.9-P-builds"
 

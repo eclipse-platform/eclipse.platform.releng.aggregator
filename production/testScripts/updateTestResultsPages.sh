@@ -314,7 +314,7 @@ then
   RAW_DATE_START=$( date -u +%s )
 
   # TODO: avoid this hard coding of baseline value
-  baselineCode="R-4.8-201806110500"
+  baselineCode="R-4.9-201809060745"
   # to get time stamp, first remove initial IMN:
   baselineForBuildSuffix=${buildId/[IMN]/}
   #Then remove final '-' in build id
