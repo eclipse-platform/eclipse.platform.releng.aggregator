@@ -30,7 +30,7 @@ pushd $BUILD_ROOT/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.s
 commit=$(git log --pretty=oneline -1|cut -d' ' -f2-)
 popd
 
-if [[ $commit == v[0-9][0-9][0-9][0-9]r[0-9]* ]]; then
+if [[ $commit == v[0-9][0-9][0-9][0-9]* ]]; then
   echo "SWT build input successful"
   exit 0
 else
