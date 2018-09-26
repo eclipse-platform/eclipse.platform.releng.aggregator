@@ -116,7 +116,17 @@ function calcTestConfigsRan($testResultsDirName) {
               if (substr_startswith($summFileName, $testResultsDirName."/".$jobname)) {
                 $summFileJava10=strpos($summFileName, "java10");
                 $jobnameJava10=strpos($testResultsDirName."/".$jobname, "java10");
-                if ($summFileJava10 == $jobnameJava10 ) {
+                if (($summFileJava10 > 0) && ($summFileJava10 == $jobnameJava10 )) {
+	              //echo "DEBUG: found matching summary file: $summFileName<br />";
+	              $xmlResults = simplexml_load_file($summFileName);
+	              $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
+	              $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
+	              $testResults[$expectedTestConfigs[$i]]["passCount"]=$xmlResults->passCount;
+	              $testResults[$expectedTestConfigs[$i]]["skipCount"]=$xmlResults->skipCount;
+	            }
+                $summFileJava11=strpos($summFileName, "java11");
+                $jobnameJava11=strpos($testResultsDirName."/".$jobname, "java11");
+                if (($summFileJava11 > 0) && ($summFileJava11 == $jobnameJava11 )) {
                   //echo "DEBUG: found matching summary file: $summFileName<br />";
                   $xmlResults = simplexml_load_file($summFileName);
                   $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
