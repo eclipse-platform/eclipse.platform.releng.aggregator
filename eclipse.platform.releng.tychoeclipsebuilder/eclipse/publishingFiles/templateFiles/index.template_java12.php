@@ -1,37 +1,40 @@
 <?php
+// global variables
+$expectedTestConfigs=array();
+$testResults = array();
+$testResultsSummaryFiles=array();
+$expectedtestConfigs=0;
+$testConfigs = array();
+include_once("buildproperties.php");
+include_once("utilityFunctions.php");
+
 # Begin: page-specific settings.
-$pageTitle    = "Eclipse Project Downloads";
+$pageTitle    = "$BUILD_ID - Eclipse Project Downloads";
 $pageKeywords = "eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide";
 $pageAuthor   = "David Williams and Christopher Guindon";
 
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
 
-$expectedtestConfigs=0;
-$testConfigs = array();
+
 
 if (array_key_exists("SERVER_NAME", $_SERVER)) {
-    $servername = $_SERVER["SERVER_NAME"];
-    if ($servername === "build.eclipse.org") {
-         $clickthroughstr="";
-      }
-      else {
-          $clickthroughstr="download.php?dropFile=";
+  $servername = $_SERVER["SERVER_NAME"];
+  if ($servername === "build.eclipse.org") {
+    $clickthroughstr="";
+  }
+  else {
+    $clickthroughstr="download.php?dropFile=";
 
-      }
+  }
 }
 else {
-    $servername = "localhost";
-    $clickthroughstr="";
+  $servername = "localhost";
+  $clickthroughstr="";
 }
 
-include_once("buildproperties.php");
-include_once("utilityFunctions.php");
 
-// global variables
-$expectedTestConfigs=array();
-$testResults = array();
-$testResultsSummaryFiles=array();
+
 
 $streamArr = explode(".", $STREAM);
 $STREAM_MAJOR = $streamArr[0];
@@ -52,7 +55,7 @@ changed, in the interest of staying consistent.
 See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 
  */
-
+$endingBreadCrumbs="<li class=\"active\">$BUILD_ID</li>";
 require("DL.thin.header.php.html");
 
 ?>
@@ -61,25 +64,46 @@ require("DL.thin.header.php.html");
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
 <aside class="col-md-6" id="leftcol" style="margin-top:20px;" >
-<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 80px 3px">
-<li><a href="#Repository">Eclipse p2 Repository (patch only)</a></li>
-<li><a href="#ZippedRepo">Zipped repository (patch only)</a></li>
-<li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
+<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px">
+    <li><a href="#Repository">Eclipse p2 Repository</a></li>
+    <li><a href="#EclipseSDK">Eclipse SDK</a></li>
+    <li><a href="#JUnitPlugin">Tests and Testing Framework</a></li>
+    <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
+    <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
+    <li><a href="#RCPSDK">RCP SDK</a></li>
+ <!--   <li><a href="#DeltaPack">Delta Pack</a></li> -->
+    <li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
+    <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
+    <li><a href="#JDTSDK">JDT SDK</a></li>
+    <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
+    <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
+    <li><a href="#PDESDK">PDE SDK</a></li>
+    <li><a href="#CVSRuntime">CVS Runtime</a></li>
+    <li><a href="#CVSSDK">CVS SDK</a></li>
+    <li><a href="#SWT">SWT binary and Source</a></li>
+    <li><a href="#org.eclipse.releng">Releng Tools</a></li>
 </ul>
 </aside>
 
 <!-- end 'not build failed' -->
 <?php } ?>
 
-<div>
-<h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?> </h1>
-<p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform Project.</p>
-<p>This page has a patch feature that provides an implementation of JDT that supports Java 10. This is an implementation
-of an early-draft specification developed under the Java
-Community Process (JCP) and is made available for testing and evaluation purposes
-only. The code is not compatible with any specification of the JCP. For more information on our early Java 10 work,
-see the <a href="https://wiki.eclipse.org/Java9">Eclipse wiki page on that topic</a>.</p>
-<p>This patch is for the Neon (4.7) stream of Eclipse.</p>
+<div id="midcolumn">
+<h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?>
+<?php
+    if (file_exists("buildUnstable")) {
+        echo "&nbsp<a href=\"https://wiki.eclipse.org/Platform-releng/Unstable_build\" title=\"Unstable Build\" style='color:red;'>Unstable!</a>\n";
+    }
+?>
+</h1>
+<?php
+if (file_exists("buildUnstable")) {
+  $bu_file = file_get_contents("buildUnstable");
+  echo "$bu_file";
+}
+?>
+<p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform build along with
+its logs and tests.</p>
 <?php
 if (file_exists("pom_updates/index.html")) {
   echo "<h2><a href=\"pom_updates/\">POM updates made</a></h2>";
@@ -95,13 +119,13 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 if (isset ($NEWS_ID)) {
   echo "<a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a><br>\n";
 }
-// linkToAcknowledgements is a pure "marker file"
-if (file_exists("linkToAcknowledgements")) {
-  echo "<a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${BUILD_ID}.php\">Acknowledgments</a><br>\n";
+// Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
+// And, are added by the promotion scripts, as long as we keep same conventions.
+if (isset ($ACK_ID)) {
+  echo "<a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${ACK_ID}.php\">Acknowledgments</a><br>\n";
 }
-// linkToReadme is a pure marker file
-if (file_exists("linkToReadme")) {
-  echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${BUILD_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
+if (isset ($README_ID)) {
+  echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${README_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
 }
 
 if (isset ($BUILD_FAILED) ) {
@@ -117,29 +141,13 @@ if (isset ($BUILD_FAILED) ) {
     echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any).</p>\n";
   }
 
-
 }
 else {
 ?>
 
-</div>
-
-<div id="midcolumn">
-
 <h3>Logs and Test Links</h3>
 
 <?php
-
-  // build notes are put at the top of the list under the assumption if there is something
-  // there, then it it pretty important for everyone to read. Such as "this build does not export" or
-  // something like that.
-  if (file_exists("buildnotes/")) {
-      $fileArray=glob("buildnotes/buildnotes_*.html");
-      if (count($fileArray) > 0) {
-          echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
-      }
-  }
-
   // for current (modern) builds, test results are always in
   // 'testresults'. That directory only exists after first results
   // have finished and been "published".
@@ -161,6 +169,18 @@ else {
 
   //  echo "<ul class='midlist'>";
   echo "<ul>";
+
+  // build notes are put at the top of the list under the assumption if there is something
+  // there, then it it pretty important for everyone to read. Such as "this build does not export" or
+  // something like that.
+  if (file_exists("buildnotes/")) {
+      $fileArray=glob("buildnotes/buildnotes_*.html");
+      if (count($fileArray) > 0) {
+          echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
+      }
+  }
+
+
   //  We will always display link to logs (as normal link, not using color:inherit;)
   echo "<li>View the <a title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
 
@@ -215,7 +235,7 @@ else {
     }
   }
 
-if (! isset($PATCH_BUILD)) {
+
   if ($testResultsStatus == "pending")   {
     echo "<li>Integration and unit tests are pending.</li>\n";
   } else {
@@ -229,13 +249,17 @@ if (! isset($PATCH_BUILD)) {
   } else {
     echo "<li>Performance tests are pending.</li>\n";
   }
-}
+
   echo "</ul>\n";
 
-if (! isset($PATCH_BUILD)) {
+  if (file_exists("TEST_INVOCATION_FAILED.html")) {
+    $tf_file = file_get_contents("TEST_INVOCATION_FAILED.html");
+    echo "<h3>Test Invocation Failed for some Machines</h3>$tf_file";
+  }
+
   echo "<h3>Summary of Unit Tests Results</h3>";
   echo "<table class=\"testTable\">\n";
-  echo "<caption>\n";
+  echo "<caption> \n";
   echo "<p>".$boxesDisplay." of ".count($expectedTestConfigs)." integration and unit test configurations are complete.</p> \n";
   if (file_exists("testNotes.html")) {
     $my_file = file_get_contents("testNotes.html");
@@ -245,7 +269,8 @@ if (! isset($PATCH_BUILD)) {
   echo "<tr><th style=\"width:40%\">Tested Platform</th><th>Failed</th><th>Passed</th><th>Total</th><th>Test&nbsp;Time&nbsp;(s)</th></tr>\n";
 
   foreach ($expectedTestConfigs as $config) {
-
+  //var_dump($testResults);
+    $displayConfig = computeDisplayConfig($config);
     if (isset($testResults[$config])) {
       $testRes = $testResults[$config];
       $failed = $testRes['failCount'];
@@ -257,7 +282,7 @@ if (! isset($PATCH_BUILD)) {
       }
       else {
         if ($failed > 0) {
-          /* note we don't override  'inherit' cases, just 'failed'. */
+          // note we don't override  'inherit' cases, just 'failed'.
           if (file_exists("overrideTestColor")) {
             $linkColor='text-success';
           } else {
@@ -269,17 +294,17 @@ if (! isset($PATCH_BUILD)) {
       }
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
-      echo "<a class=\"${linkColor}\" href=\"testResults.php\">".$config."</a>";
+      echo "<a class=\"${linkColor}\" href=\"testResults.php\">".$displayConfig."</a>";
       echo "</td>\n";
       echo "<td>$failed</td><td>$passed</td><td>$total</td><td>$duration</td>\n";
       echo "</tr>\n";
     }
     else {
-      /* Yes, all configs intentionally links, since all go to the same place, but if no results yet, would not look like one. */
+      // Yes, all configs intentionally links, since all go to the same place, but if no results yet, would not look like one.
       $linkColor = 'text-muted';
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
-      echo "<a class=\"${linkColor}\" href=\"testResults.php\">".$config."</a>";
+      echo "<a class=\"${linkColor}\" href=\"testResults.php\">".$displayConfig."</a>";
       echo "</td>\n";
       echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>\n";
       echo "</tr>\n";
@@ -287,12 +312,11 @@ if (! isset($PATCH_BUILD)) {
   }
   echo "</table>\n";
 
-}
 ?>
 
   <h3>Related Links</h3>
   <ul class="midlist">
-    <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_4_5.xml#target_environments">Target Platforms and Environments</a></li>
+    <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments</a></li>
     <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
     <li><a href="gitLog.txt">Git log.</a></li>
     <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
@@ -301,12 +325,13 @@ if (! isset($PATCH_BUILD)) {
 
   $sums512file="checksum/eclipse-$BUILD_ID-SUMSSHA512";
   $sums512file_asc=$sums512file.".asc";
-
+  
   if ((file_exists($sums512file)) && (file_exists($sums512file_asc))) {
     echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
   } else if (file_exists($sums512file)) {
     echo "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>";
   }
+
 ?>
 <?php
   # place holder: we don't currently produce these reports, and
@@ -332,10 +357,10 @@ if (! isset($PATCH_BUILD)) {
 <?php startTable(); ?>
 
 <?php
-    $STREAM_REPO_NAME=computeSTREAM_REPO_NAME();
-    $STREAM_REPO_URL=computeSTREAM_REPO_URL();
-    $BUILD_REPO_NAME=computeBUILD_REPO_NAME();
-    $BUILD_REPO_URL=computeBUILD_REPO_URL();
+  $STREAM_REPO_NAME=computeSTREAM_REPO_NAME();
+  $STREAM_REPO_URL=computeSTREAM_REPO_URL();
+  $BUILD_REPO_NAME=computeBUILD_REPO_NAME();
+  $BUILD_REPO_URL=computeBUILD_REPO_URL();
   if ((file_exists("$relativePath3/updates/".$STREAM_REPO_NAME)) || (file_exists("$relativePath4/updates/".$STREAM_REPO_NAME))) {
     echo "<tr><td> \n";
     echo "To update your Eclipse installation to this development stream, you can use the software repository at<br />\n";
@@ -351,20 +376,8 @@ if (! isset($PATCH_BUILD)) {
 ?>
 </table>
 
-<?php if (isset($PATCH_BUILD)) { ?>
-    <h3 id="ZippedRepo">Zipped Repository for offline use.</h3>
-    <?php startTable(); ?>
-    <tr>
-       <?php columnHeads(); ?>
-    </tr>
-    <td><img src = "repo.gif" alt="Zipped Repo" />Patch, in zipped repo</td>
-    <?php genLinks("${PATCH_BUILD}-${BUILD_ID}-repository.zip"); ?>
-    </tr>
-    </table>
-<?php } ?>
 
 
-<?php if (! isset($PATCH_BUILD)) { ?>
 <h3 id="EclipseSDK">Eclipse SDK&nbsp;<a href="details.html#EclipseSDK"><i class="fa fa-info-circle">&nbsp;</i></a>
 </h3>
 
@@ -451,8 +464,6 @@ if (! isset($PATCH_BUILD)) {
 %jdtsdk%
 </table>
 
-<?php } ?>
-
 <h3 id="JDTCORE">JDT Core Batch Compiler &nbsp;<a href="details.html#JDTCORE"><i class="fa fa-info-circle">&nbsp;</i></a>
 </h3>
 <?php startTable(); ?>
@@ -462,7 +473,6 @@ if (! isset($PATCH_BUILD)) {
 %jdtc%
 </table>
 
-<?php if (! isset($PATCH_BUILD)) { ?>
 <h3 id="PDERuntime">PDE Runtime Binary&nbsp;<a href="details.html#PDERuntime"><i class="fa fa-info-circle">&nbsp;</i></a>
 </h3>
 <?php startTable(); ?>
@@ -516,11 +526,10 @@ if (! isset($PATCH_BUILD)) {
 </tr>
 %relengtools%
 </table>
-<?php } ?>
+
 <?php } ?>
 </div> <!-- end dropsection -->
-</div> <!-- close div classs=container -->
-</main> <!-- close main role="main" element -->
+</main> <!-- close main element -->
 </body>
 </html>
 <?php
