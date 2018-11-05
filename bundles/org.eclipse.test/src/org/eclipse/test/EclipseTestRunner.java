@@ -494,7 +494,6 @@ public class EclipseTestRunner {
 						return filename;
 					}
 
-					@SuppressWarnings({ "removal" })
 					private boolean dumpSwtDisplay(final int num) {
 						try {
 							final Display display = Display.getDefault();
