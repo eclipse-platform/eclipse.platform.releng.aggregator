@@ -208,8 +208,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 						adapter.initialize(SubMonitor.convert(monitor, 100));
 					}
 					List<CoreException> exceptions = new ArrayList<>();
-					for (int i = 0; i < results.length; i++) {
-						IResource resource = results[i];
+					for (IResource resource : results) {
 						stream.println(NLS.bind(
 								Messages.getString("AdvancedFixCopyrightAction.6"), resource.getName())); //$NON-NLS-1$
 						try {
@@ -231,20 +230,14 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 							throw exceptions.get(0);
 						} else {
 							List<Status> status = new ArrayList<>();
-							for (Iterator<CoreException> iterator = exceptions.iterator(); iterator
-									.hasNext();) {
-								CoreException ce = iterator.next();
-								status.add(new Status(
-										ce.getStatus().getSeverity(), 
-										ce.getStatus().getPlugin(),
-										ce.getStatus().getCode(),
-										ce.getStatus().getMessage(),
-										ce));
+							for (CoreException ce : exceptions) {
+								status.add(new Status(ce.getStatus().getSeverity(), ce.getStatus().getPlugin(),
+										ce.getStatus().getCode(), ce.getStatus().getMessage(), ce));
 							}
-							throw new CoreException(new MultiStatus(RelEngPlugin.ID,
-									0, status.toArray(new IStatus[status.size()]),
-									Messages.getString("AdvancedFixCopyrightAction.10"), //$NON-NLS-1$
-									null));
+							throw new CoreException(
+									new MultiStatus(RelEngPlugin.ID, 0, status.toArray(new IStatus[status.size()]),
+											Messages.getString("AdvancedFixCopyrightAction.10"), //$NON-NLS-1$
+											null));
 						}
 					}
 				} finally {
@@ -279,8 +272,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	protected RepositoryProviderCopyrightAdapter createCopyrightAdapter(
 			IResource[] results) throws CoreException {
 		RepositoryProviderType providerType = null;
-		for (int i = 0; i < results.length; i++) {
-			IResource resource = results[i];
+		for (IResource resource : results) {
 			RepositoryProvider p = RepositoryProvider.getProvider(resource.getProject());
 			if (p != null) {
 				if (providerType == null) {

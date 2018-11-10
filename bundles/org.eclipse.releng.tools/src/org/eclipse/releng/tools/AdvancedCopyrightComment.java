@@ -272,8 +272,7 @@ public class AdvancedCopyrightComment extends CopyrightComment {
      */
     private void writeLegal(PrintWriter writer, String linePrefix) {
         String[] legalLines = getLegalLines();
-        for (int i = 0; i < legalLines.length; ++i) {
-            String currentLine = legalLines[i];
+        for (String currentLine : legalLines) {
             int offset = currentLine.indexOf(DATE_VAR);
             // if this is the line, containing the ${date}, add in the year
             if (offset > -1) {

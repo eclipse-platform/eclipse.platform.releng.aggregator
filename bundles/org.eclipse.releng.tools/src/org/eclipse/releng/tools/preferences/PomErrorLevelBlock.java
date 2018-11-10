@@ -380,12 +380,10 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	 * @param changes the {@link List} to collect changed keys into
 	 */
 	private void collectChanges(IScopeContext context, List<Key> changes) {
-		Key key = null;
 		String origval = null,
 			   newval = null;
 		boolean complete = fOldProjectSettings == null;
-		for(int i = 0; i < fgAllKeys.length; i++) {
-			key = fgAllKeys[i];
+		for (Key key : fgAllKeys) {
 			origval = key.getStoredValue(context, null);
 			newval = key.getStoredValue(context, fManager);
 			if(newval == null) {

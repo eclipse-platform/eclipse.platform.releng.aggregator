@@ -26,11 +26,10 @@ public class GitCopyrightAdapterFactory implements IAdapterFactory,
 	private static final Class<?>[] ADAPTER_LIST = new Class[] { IRepositoryProviderCopyrightAdapterFactory.class };
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object adaptableObject, Class<T> adapterType) {
 		if (IRepositoryProviderCopyrightAdapterFactory.class
 				.equals(adapterType)) {
-			return (T) getGitCopyrightAdapter(adaptableObject);
+			return adapterType.cast(getGitCopyrightAdapter(adaptableObject));
 		}
 		return null;
 	}

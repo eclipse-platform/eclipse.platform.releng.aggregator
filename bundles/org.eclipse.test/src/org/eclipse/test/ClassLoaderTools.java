@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -53,8 +52,7 @@ class ClassLoaderTools {
 
 	public static ClassLoader getJUnit5Classloader(List<String> platformEngine) {
 		List<Bundle> platformEngineBundles = new ArrayList<>();
-		for (Iterator<String> iterator = platformEngine.iterator(); iterator.hasNext();) {
-			String string = iterator.next();
+		for (String string : platformEngine) {
 			Bundle bundle = Platform.getBundle(string);
 			platformEngineBundles.add(bundle);
 		}
@@ -88,10 +86,9 @@ class ClassLoaderTools {
 			return url;
 		}
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
 		@Override
-		protected Enumeration findResources(String name) throws IOException {
-			Enumeration enumeration = bundle.getResources(name);
+		protected Enumeration<URL> findResources(String name) throws IOException {
+			Enumeration<URL> enumeration = bundle.getResources(name);
 			if(enumeration == null) {
 				enumeration = currentTCCL.getResources(name);
 			}
@@ -165,17 +162,16 @@ class ClassLoaderTools {
 			return url;
 		}
 
-		@SuppressWarnings({"rawtypes", "unchecked"})
 		@Override
-		protected Enumeration findResources(String name) throws IOException {
-			Enumeration enumFinal = null;
+		protected Enumeration<URL> findResources(String name) throws IOException {
+			Enumeration<URL> enumFinal = null;
 			for (int i = 0; i < bundleList.size(); i++) {
 				if (i == 0) {
 					enumFinal = bundleList.get(i).getResources(name);
 					continue;
 				}
-				Enumeration e2 = bundleList.get(i).getResources(name);
-				Vector temp = new Vector();
+				Enumeration<URL> e2 = bundleList.get(i).getResources(name);
+				Vector<URL> temp = new Vector<>();
 				while (enumFinal != null && enumFinal.hasMoreElements()) {
 					temp.add(enumFinal.nextElement());
 				}
