@@ -16,7 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.internal.performance.data.Scalar;
 
 /**
  * Performance meter that makes its measurements with OS functionality.
@@ -57,7 +59,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
     @Override
     public Sample getSample() {
         if (fDataPoints != null) {
-            HashMap runProperties = new HashMap();
+            HashMap<String, String> runProperties = new HashMap<>();
             collectRunInfo(runProperties);
             return new Sample(getScenarioName(), fStartTime, runProperties,
                     fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
@@ -68,7 +70,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
     // ---- private stuff ------
 
     private void snapshot(int step) {
-        HashMap map = new HashMap();
+        HashMap<Dim, Scalar> map = new HashMap<>();
         fPerformanceMonitor.collectOperatingSystemCounters(map);
         fDataPoints.add(new DataPoint(step, map));
     }
