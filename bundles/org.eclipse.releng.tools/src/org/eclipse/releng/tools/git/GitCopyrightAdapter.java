@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2012 AGETO Service GmbH and others.
+ * Copyright (c) 2010, 2018 AGETO Service GmbH and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -55,10 +55,9 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 			if (mapping != null) {
 				final Repository repo = mapping.getRepository();
 				if (repo != null) {
-					RevWalk walk = null;
-					try {
+					try (RevWalk walk = new RevWalk(repo)) {
 						final ObjectId start = repo.resolve(Constants.HEAD);
-						walk = new RevWalk(repo);
+						
 						walk.setTreeFilter(AndTreeFilter.create(PathFilter
 								.create(mapping.getRepoRelativePath(file)),
 								TreeFilter.ANY_DIFF));
@@ -97,9 +96,6 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 								RelEngPlugin.ID, 0, NLS.bind(
 										"An error occured when processing {0}",
 										file.getName()), e));
-					} finally {
-						if (walk != null)
-							walk.close();
 					}
 				}
 			}
