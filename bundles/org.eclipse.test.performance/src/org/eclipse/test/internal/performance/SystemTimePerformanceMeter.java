@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.test.internal.performance.data.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;

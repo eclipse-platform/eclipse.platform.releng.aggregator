@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.test.internal.performance.data.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.test.internal.performance.data.Dim;
 
 /**
