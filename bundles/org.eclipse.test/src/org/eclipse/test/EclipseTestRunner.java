@@ -507,17 +507,13 @@ public class EclipseTestRunner {
 								// Set the stack trace to that of the target thread.
 								toThrow.setStackTrace(t.getStackTrace());
 								// Stop the thread using the specified throwable.
+								// Thread#stop(Throwable) doesn't work any more in JDK 8 and is removed in Java 11 so it's not gonna be tried at all. Try stop0:
 								try {
-									t.stop(toThrow);
-								} catch (UnsupportedOperationException e) {
-									// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
-									try {
-										Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
-										stop0.setAccessible(true);
-										stop0.invoke(t, toThrow);
-									} catch (Exception e1) {
-										e1.printStackTrace();
-									}
+									Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
+									stop0.setAccessible(true);
+									stop0.invoke(t, toThrow);
+								} catch (Exception e1) {
+									e1.printStackTrace();
 								}
 							}
 
