@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,15 +14,15 @@
 package org.eclipse.test;
 
 import java.io.IOException;
-import org.eclipse.core.runtime.IPlatformRunnable;
+
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
 
 /**
  * A an application that launches tests once it is started.
- * @deprecated As using deprecated materials
  */
-@Deprecated
-public class CoreTestApplication implements IPlatformRunnable {
+public class CoreTestApplication implements IApplication {
 	/** true if workspace tests should log their deltas */
 	private static boolean deltas= false;
 	
@@ -31,10 +31,22 @@ public class CoreTestApplication implements IPlatformRunnable {
 	 * This is the platform application entry point.
 	 * @see IPlatformRunnable
 	 */
-	@Override
 	public Object run(Object arguments) throws Exception {
 		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
 		return Integer.valueOf(runTests(args));
+	}
+	
+	@Override
+	public Object start(IApplicationContext context) throws Exception {
+		String[] args = (String[]) context.getArguments().get("application.args");
+		if (args == null)
+			args = new String[0];
+		return run(args);
+	}
+	
+	@Override
+	public void stop() {
+
 	}
 
 	protected int runTests(String[] args) throws IOException {
