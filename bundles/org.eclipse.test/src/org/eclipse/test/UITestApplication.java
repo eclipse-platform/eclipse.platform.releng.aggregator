@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,60 +14,40 @@
 package org.eclipse.test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
-import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.testing.ITestHarness;
 import org.eclipse.ui.testing.TestableObject;
 
 /**
  * A Workbench that runs a test suite specified in the command line arguments.
- *
- * @deprecated As using deprecated materials
  */
-@Deprecated
-public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApplication {
+public class UITestApplication  implements ITestHarness, IApplication {
 
 	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.workbench"; //$NON-NLS-1$
-	private static final String DEFAULT_APP_PRE_3_0 = "org.eclipse.ui.workbench"; //$NON-NLS-1$
 
-	private boolean fInDeprecatedMode = false;
 	private TestableObject fTestableObject;
 	int fTestRunnerResult = -1;
 	private IApplicationContext appContext;
 
-
-	@Override
 	public Object run(final Object args) throws Exception {
 		// Get the application to test
 		Object application = getApplication((String[])args);
 		assertNotNull(application);
 
-		Object result;
-		if (fInDeprecatedMode && (application instanceof IPlatformRunnable)) {
-			result = runDeprecatedApplication((IPlatformRunnable)application, args);
-		}
-		else {
-			result = runApplication(application, args);
-		}
-		if (!IPlatformRunnable.EXIT_OK.equals(result)) {
-			System.err.println("UITestRunner: Unexpected result from running application " + application + ": " + result);
-		}
+		fTestableObject = PlatformUI.getTestableObject();
+		fTestableObject.setTestHarness(this);
+		((IApplication) application).start(appContext);
 		return Integer.valueOf(fTestRunnerResult);
 	}
-
 
 	/*
 	 * return the application to run, or null if not even the default application
@@ -84,17 +64,6 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 						Platform.PT_APPLICATIONS,
 						getApplicationToRun(args));
 
-		// If no 3.0 extension can be found, search the registry
-		// for the pre-3.0 default workbench application, i.e. org.eclipse ui.workbench
-		// Set the deprecated flag to true
-		if (extension == null) {
-			extension = Platform.getExtensionRegistry().getExtension(
-					Platform.PI_RUNTIME,
-					Platform.PT_APPLICATIONS,
-					DEFAULT_APP_PRE_3_0);
-			fInDeprecatedMode = true;
-		}
-
 		assertNotNull(extension);
 
 		// If the extension does not have the correct grammar, return null.
@@ -104,8 +73,6 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 			IConfigurationElement[] runs = elements[0].getChildren("run"); //$NON-NLS-1$
 			if (runs.length > 0) {
 				Object runnable = runs[0].createExecutableExtension("class"); //$NON-NLS-1$
-				if (runnable instanceof IPlatformRunnable)
-					return runnable;
 				if (runnable instanceof IApplication)
 					return runnable;
 			}
@@ -126,67 +93,6 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 				return args[i+1];
 		}
 		return DEFAULT_APP_3_0;
-	}
-
-	/**
-	 * In 3.0 mode
-	 *
-	 */
-	private Object runApplication(Object application, Object args) throws Exception {
-		fTestableObject = PlatformUI.getTestableObject();
-		fTestableObject.setTestHarness(this);
-		if (application instanceof IPlatformRunnable) {
-			return ((IPlatformRunnable) application).run(args);
-		}
-		return ((IApplication) application).start(appContext);
-
-	}
-
-	/*
-	 * If we are in pre-3.0 mode, then the application to run is
-	 * "org.eclipse.ui.workbench" Therefore, we safely cast the runnable object
-	 * to IWorkbenchWindow. We add a listener to it, so that we know when the
-	 * window opens so that we can start running the tests. When the tests are
-	 * done, we explicitly call close() on the workbench.
-	 */
-	private Object runDeprecatedApplication(
-			IPlatformRunnable object,
-			final Object args)
-					throws Exception {
-
-		assertTrue(object instanceof IWorkbench);
-
-		final IWorkbench workbench = (IWorkbench) object;
-		// the 'started' flag is used so that we only run tests when the window
-		// is opened
-		// for the first time only.
-		final boolean[] started = { false };
-		workbench.addWindowListener(new IWindowListener() {
-			@Override
-			public void windowOpened(IWorkbenchWindow w) {
-				if (started[0])
-					return;
-				w.getShell().getDisplay().asyncExec(() -> {
-					started[0] = true;
-					try {
-						fTestRunnerResult = EclipseTestRunner.run((String[]) args);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					workbench.close();
-				});
-			}
-			@Override
-			public void windowActivated(IWorkbenchWindow window) {
-			}
-			@Override
-			public void windowDeactivated(IWorkbenchWindow window) {
-			}
-			@Override
-			public void windowClosed(IWorkbenchWindow window) {
-			}
-		});
-		return ((IPlatformRunnable) workbench).run(args);
 	}
 
 	@Override
@@ -212,10 +118,8 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 		return run(args);
 	}
 
-
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
 
 	}
 
