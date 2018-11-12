@@ -14,7 +14,6 @@
 package org.eclipse.releng.tools.preferences;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -237,11 +236,6 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	
 	
 	/**
-	 * Stored old fProject specific settings. 
-	 */
-	private IdentityHashMap fOldProjectSettings = null;
-	
-	/**
 	 * Flag used to know if the page needs saving or not
 	 */
 	boolean fDirty = false;
@@ -261,7 +255,6 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 		else {
 			fManager = container.getWorkingCopyManager();
 		}
-		fOldProjectSettings = null;
 	}
 	
 	/**
@@ -382,7 +375,6 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	private void collectChanges(IScopeContext context, List<Key> changes) {
 		String origval = null,
 			   newval = null;
-		boolean complete = fOldProjectSettings == null;
 		for (Key key : fgAllKeys) {
 			origval = key.getStoredValue(context, null);
 			newval = key.getStoredValue(context, fManager);
@@ -390,10 +382,8 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 				if(origval != null) {
 					changes.add(key);
 				}
-				else if(complete) {
 					key.setStoredValue(context, key.getStoredValue(fLookupOrder, true, fManager), fManager);
 					changes.add(key);
-				}
 			}
 			else if(!newval.equals(origval)) {
 				changes.add(key);
