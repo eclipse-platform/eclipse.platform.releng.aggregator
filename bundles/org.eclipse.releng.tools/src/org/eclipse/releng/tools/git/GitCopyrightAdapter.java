@@ -46,56 +46,52 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 	}
 
 	@Override
-	public int getLastModifiedYear(IFile file, IProgressMonitor monitor)
-			throws CoreException {
+	public int getLastModifiedYear(IFile file, IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask("Fetching logs from Git", 100); //$NON-NLS-1$
-			final RepositoryMapping mapping = RepositoryMapping
-					.getMapping(file);
+			final RepositoryMapping mapping = RepositoryMapping.getMapping(file);
 			if (mapping != null) {
 				final Repository repo = mapping.getRepository();
 				if (repo != null) {
 					try (RevWalk walk = new RevWalk(repo)) {
 						final ObjectId start = repo.resolve(Constants.HEAD);
-						
-						walk.setTreeFilter(AndTreeFilter.create(PathFilter
-								.create(mapping.getRepoRelativePath(file)),
+
+						walk.setTreeFilter(AndTreeFilter.create(PathFilter.create(mapping.getRepoRelativePath(file)),
 								TreeFilter.ANY_DIFF));
 						walk.markStart(walk.lookupCommit(start));
 						final RevCommit commit = walk.next();
 						if (commit != null) {
 							if (filterString != null
-									&& commit.getFullMessage().toLowerCase()
-											.indexOf(filterString) != -1) {
-								// the last update was a copyright check in - ignore
+									&& commit.getFullMessage().toLowerCase().indexOf(filterString) != -1) {
+								// the last update was a copyright check in -
+								// ignore
 								return 0;
 							}
 
-							boolean isSWT= file.getProject().getName().startsWith("org.eclipse.swt"); //$NON-NLS-1$
-							String logComment= commit.getFullMessage();
-							if (isSWT && (logComment.indexOf("restore HEAD after accidental deletion") != -1 || logComment.indexOf("fix permission of files") != -1)) { //$NON-NLS-1$ //$NON-NLS-2$
+							boolean isSWT = file.getProject().getName().startsWith("org.eclipse.swt"); //$NON-NLS-1$
+							String logComment = commit.getFullMessage();
+							if (isSWT && (logComment.indexOf("restore HEAD after accidental deletion") != -1 //$NON-NLS-1$
+									|| logComment.indexOf("fix permission of files") != -1)) { //$NON-NLS-1$
 								// ignore commits with above comments
 								return 0;
 							}
 
-							boolean isPlatform= file.getProject().getName().equals("eclipse.platform"); //$NON-NLS-1$
-							if (isPlatform && (logComment.indexOf("Merge in ant and update from origin/master") != -1 || logComment.indexOf("Fixed bug 381684: Remove update from repository and map files") != -1)) { //$NON-NLS-1$ //$NON-NLS-2$
+							boolean isPlatform = file.getProject().getName().equals("eclipse.platform"); //$NON-NLS-1$
+							if (isPlatform && (logComment.indexOf("Merge in ant and update from origin/master") != -1 //$NON-NLS-1$
+									|| logComment.indexOf(
+											"Fixed bug 381684: Remove update from repository and map files") != -1)) { //$NON-NLS-1$
 								// ignore commits with above comments
 								return 0;
 							}
-
 
 							final Calendar calendar = Calendar.getInstance();
 							calendar.setTimeInMillis(0);
-							calendar.add(Calendar.SECOND,
-									commit.getCommitTime());
+							calendar.add(Calendar.SECOND, commit.getCommitTime());
 							return calendar.get(Calendar.YEAR);
 						}
 					} catch (final IOException e) {
-						throw new CoreException(new Status(IStatus.ERROR,
-								RelEngPlugin.ID, 0, NLS.bind(
-										"An error occured when processing {0}",
-										file.getName()), e));
+						throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0,
+								NLS.bind("An error occured when processing {0}", file.getName()), e));
 					}
 				}
 			}
