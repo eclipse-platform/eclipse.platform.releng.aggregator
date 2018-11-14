@@ -68,7 +68,6 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		}
 	}
 
-	private static final int UNIT_OF_WORK = 1;
 
 	public class FixCopyrightVisitor implements IResourceVisitor {
 		private final IProgressMonitor monitor;
@@ -85,7 +84,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 				if (resource.getType() == IResource.FILE) {
 					monitor.subTask(((IFile) resource).getFullPath().toOSString());
 					processFile((IFile) resource, adapter, monitor);
-					monitor.worked(UNIT_OF_WORK);
+					monitor.worked(1);
 				}
 			}
 			return true;
@@ -106,7 +105,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		@Override
 		public boolean visit(IResource resource) throws CoreException {
 			if (resource.getType() == IResource.FILE) {
-				fileCount += UNIT_OF_WORK;
+				fileCount += 1;
 			}
 			return true;
 		}
@@ -131,20 +130,17 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	 * @return the selected resources
 	 */
 	protected IResource[] getSelectedResources() {
-		ArrayList<IResource> resources = null;
+		ArrayList<IResource> resources = new ArrayList<>();
 		if (!selection.isEmpty()) {
-			resources = new ArrayList<>();
+
 			Iterator<?> elements = selection.iterator();
 			while (elements.hasNext()) {
 				addResource(elements.next(), resources);
 			}
 		}
-		if (resources != null && !resources.isEmpty()) {
-			IResource[] result = new IResource[resources.size()];
-			resources.toArray(result);
-			return result;
-		}
-		return new IResource[0];
+		IResource[] result = new IResource[resources.size()];
+		resources.toArray(result);
+		return result;
 	}
 
 	private void addResource(Object element, ArrayList<IResource> resources) {
@@ -195,11 +191,9 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					stream.println(NLS.bind(Messages.getString("AdvancedFixCopyrightAction.3"), //$NON-NLS-1$
 							Integer.toString(results.length)));
 
-					monitor.subTask(Messages.getString("AdvancedFixCopyrightAction.22")); // 'initializing' //$NON-NLS-1$
-																							// msg.
-					int totalFileCount = countFiles(results); // this generates
-																// ~5% overhead.
-					monitor.beginTask(Messages.getString("AdvancedFixCopyrightAction.4"), totalFileCount); //$NON-NLS-1$
+					int totalFileCount = countFiles(results); 
+					SubMonitor subMonitor = SubMonitor.convert(monitor, totalFileCount);
+					subMonitor.beginTask(Messages.getString("AdvancedFixCopyrightAction.4"), totalFileCount); //$NON-NLS-1$
 
 					RepositoryProviderCopyrightAdapter adapter = createCopyrightAdapter(results);
 					if (adapter == null) {
@@ -209,14 +203,14 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 									Messages.getString("AdvancedFixCopyrightAction.5"), null)); //$NON-NLS-1$
 						}
 					} else {
-						adapter.initialize(SubMonitor.convert(monitor, 100));
+						adapter.initialize(subMonitor);
 					}
 					List<CoreException> exceptions = new ArrayList<>();
 					for (IResource resource : results) {
 						stream.println(
 								NLS.bind(Messages.getString("AdvancedFixCopyrightAction.6"), resource.getName())); //$NON-NLS-1$
 						try {
-							resource.accept(new FixCopyrightVisitor(adapter, monitor));
+							resource.accept(new FixCopyrightVisitor(adapter, subMonitor));
 						} catch (CoreException e1) {
 							exceptions.add(e1);
 						}
@@ -451,7 +445,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			// in the comment to the last modification time provided by adapter
 			if (lastMod < currentYear) {
 				try {
-					lastMod = adapter.getLastModifiedYear(file, SubMonitor.convert(monitor, 1));
+					lastMod = adapter.getLastModifiedYear(file, monitor);
 				} catch (CoreException e) {
 					// Let's log the exception and continue
 					RelEngPlugin.log(IStatus.ERROR,

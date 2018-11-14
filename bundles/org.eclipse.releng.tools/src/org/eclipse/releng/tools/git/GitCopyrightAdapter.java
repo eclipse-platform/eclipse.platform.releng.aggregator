@@ -47,8 +47,6 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 
 	@Override
 	public int getLastModifiedYear(IFile file, IProgressMonitor monitor) throws CoreException {
-		try {
-			monitor.beginTask("Fetching logs from Git", 100); //$NON-NLS-1$
 			final RepositoryMapping mapping = RepositoryMapping.getMapping(file);
 			if (mapping != null) {
 				final Repository repo = mapping.getRepository();
@@ -95,9 +93,6 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 					}
 				}
 			}
-		} finally {
-			monitor.done();
-		}
 		return -1;
 	}
 
