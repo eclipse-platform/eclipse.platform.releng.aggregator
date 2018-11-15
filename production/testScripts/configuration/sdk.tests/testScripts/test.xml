@@ -2133,6 +2133,14 @@
 
   </target>
 
+  <target
+    name="sdkTests"
+    depends="init">
+    <antcall target="quickTests" />
+    <antcall target="sdkLongRunningTests" />
+
+  </target>
+
   <!-- This and all the performance specific targets
     are temporary, just to help investigate which work, which
     don't, etc. -->
@@ -2298,7 +2306,59 @@
 
   </target>
 
-  <!--
+	  <target
+	    name="sdkLongRunningTests"
+	    depends="init">
+
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="start longRunningTests" />
+	    </antcall>
+
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="start sdkPlatformLR" />
+	    </antcall>
+	    <antcall target="sdkPlatformLR" />
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="end sdkPlatformLR" />
+	    </antcall>
+
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="start jdtLR" />
+	    </antcall>
+	    <antcall target="jdtLR" />
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="end jdtLR" />
+	    </antcall>
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="start pdeLR" />
+	    </antcall>
+	    <antcall target="pdeLR" />
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="end pdeLR" />
+	    </antcall>
+	    <antcall target="markCurrentTime">
+	      <param
+	        name="message"
+	        value="end longRunningTests" />
+	    </antcall>
+
+	  </target>
+
+	<!--
     admittedly, not quite all of 'platform', but for
     now serves dual purpose of a "short set" of tests, that area
     relatively quick, and relatively reliable on build.eclipse.org hardware
@@ -2370,6 +2430,18 @@
       antcall target="uiviews" /
     -->
   </target>
+
+	  <target
+	    name="sdkPlatformLR"
+	    depends="init">
+	    <antcall target="osgi" />
+	    <antcall target="coreresources" />
+	    <antcall target="equinoxp2" />
+	    <antcall target="jface" />
+	    <antcall target="ui" />
+	    <antcall target="uiperformance" />
+	  </target>
+
 
   <target
     name="pde"
