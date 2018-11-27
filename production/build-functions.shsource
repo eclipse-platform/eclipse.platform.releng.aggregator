@@ -561,10 +561,15 @@ fn-tag-build-inputs ()
     # mail message, so it would be good to know if we are much delayed in getting that message out.
     echo -e "\tThe tagging, and this report, were done at about $REPORTTIMESTAMP\n\n" >> ${GITLOG_FILE}
     # This first one is for aggregator itself.
+    echo "Repository eclipse.platform.releng.aggregator" >> ${GITLOG_FILE}
+    echo;echo >> ${GITLOG_FILE}
     git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
+    echo >> ${GITLOG_FILE}
+    echo >> ${GITLOG_FILE}
     # And now all submodules. Note we use --quiet specifically not to have the
     # "Entering <submodule>" messages printed.
-    git submodule --quiet foreach git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
+    TMP_GIT_LOG=${TMP_DIR}/gitlog.txt
+    git submodule --quiet foreach "git log ${lastTag}..${BUILD_ID}>${TMP_GIT_LOG};FILESIZE=\$(stat -c%s ${TMP_GIT_LOG});if [ \$FILESIZE -ne 0 ]; then echo Repository: \$path;echo;cat ${TMP_GIT_LOG};echo;echo;fi" >> ${GITLOG_FILE}
   else
     echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > ${GITLOG_FILE}
   fi
