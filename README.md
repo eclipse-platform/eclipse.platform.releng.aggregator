@@ -1,7 +1,15 @@
-eclipse.platform.releng.aggregator
-==================================
+Aggregator repo for Eclipse SDK builds
+======================================
 
-Aggregator repo for Eclipse SDK builds.
+This repo is used to build the Eclipse SDK which provides the framework for Eclipse based applications, the Java development tooling and the Plug-in development tooling.
+To clone it, it is recommented to use one of the URLs found on the following website: 
+https://git.eclipse.org/r/#/admin/projects/platform/eclipse.platform.releng.aggregator
+
+An anonymous clone can be done via the following command:
+
+```
+git clone https://git.eclipse.org/r/platform/eclipse.platform.releng.aggregator
+```
 
 How to build the Eclipse SDK
 ----------------------------
