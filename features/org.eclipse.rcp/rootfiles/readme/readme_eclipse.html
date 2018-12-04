@@ -24,7 +24,7 @@ https://validator.w3.org/check?uri=http%3A%2F%2Fwww.eclipse.org%2Feclipse%2Fdeve
   <p>
     <a
       class="mozTocH1"
-      name="mozTocId299852">Last revised Nov 28, 2018</a>
+      name="mozTocId299852">Last revised Dec 4, 2018</a>
   </p>
   <!-- 
 This following link to www.eclipse.org should be commented out
@@ -119,7 +119,6 @@ after the release.
               </ol></li>
             <li><a href="#mozTocId428861">Java development tools (JDT)</a>
               <ol>
-                <li><a href="#mozTocId521249">Deprecation of ITerminalSymbols#TokenNameIdentifier</a></li>
                 <li><a href="#mozTocId180305">Multiple regions formatting in a given source snippet</a></li>
                 <li><a href="#mozTocId589358">Searching for constant field references</a></li>
                 <li><a href="#mozTocId577868">Cut, copy, paste not working for linked resources in views showing Java elements</a></li>
@@ -138,7 +137,6 @@ after the release.
                 <li><a href="#mozTocId666507">Debugging over slow connections</a></li>
                 <li><a href="#mozTocId207158">Updating of inspected values</a></li>
                 <li><a href="#mozTocId821393">Stepping over native methods that perform I/O</a></li>
-                <li><a href="#mozTocId724969">VM and process termination running on IBM 1.3 JVM on Linux (Linux only)</a></li>
                 <li><a href="#mozTocId606104">Java Annotation Processing</a></li>
                 <li><a href="#mozTocId188069">Java indexing encounters problems when a folder is used both as a source and a class folder</a></li>
               </ol></li>
@@ -153,6 +151,9 @@ after the release.
                 <li><a href="#mozTocId73293">Importing in Eclipse application fails if plug-in exists in host workspace</a></li>
                 <li><a href="#mozTocId914239">Reusing a workspace after changing architectures silently breaks PDE models</a></li>
                 <li><a href="#mozTocId624312">Missing @since tag API Tools problems on interface fields containing @noreference tag</a></li>
+                <li><a href="#mozTocId624319">"Premature end of file" error in creating a new target file</a></li>
+               </ol></li>
+                
               </ol></li>
           </ol></li>
         <li><a href="#mozTocId19817">Running Eclipse</a>
@@ -406,11 +407,9 @@ after the release.
     <li><a href="http://download.eclipse.org/eclipse/downloads/">http://download.eclipse.org/eclipse/downloads/</a></li>
   </ul>
   <p>
-    It is imperative that 64-bit builds are downloaded and used if a 64-bit Java runtime environment has been installed. Below are two sample tarball names of version 4.9 of the Eclipse SDK packaged
-    for 32-bit and 64-bit processors.<br />
-    <code>eclipse-SDK-4.9-linux-gtk.tar.gz (32-bit)</code>
-    <br />
-    <code>eclipse-SDK-4.9-linux-gtk-x86_64.tar.gz (64-bit)</code>
+    It is imperative that 64-bit builds are downloaded and used if a 64-bit Java runtime environment has been installed. Below is a sample tarball names of version 4.10 of the Eclipse SDK packaged
+    for 64-bit processors.<br />
+    <code>eclipse-SDK-4.10-linux-gtk-x86_64.tar.gz (64-bit)</code>
   </p>
   <p>
     To run Eclipse with an alternate Java runtime environment, the path to the Java virtual machine's binary must be identified. With an Eclipse installation from the distribution, altering the $PATH
@@ -427,14 +426,14 @@ after the release.
   <p>
     For an actual example, it might look something like the following:<br />
     <code>
-      ./eclipse -vm /usr/lib/jvm/sun-java-6/bin/java<br /> ./eclipse -vm /opt/sun-jdk-1.6.0.02/bin/java
+      ./eclipse -vm /usr/lib/jvm/java-8/bin/java<br /> ./eclipse -vm /opt/jdk-1.8/bin/java
     </code>
   </p>
   <p>
     If this seems to solve the problem, it is likely that the problem really was related to the use of GCJ as the Java runtime for running Eclipse. The eclipse.ini file located within Eclipse's folder
     can be altered to automatically pass this argument to Eclipse at startup. An example of its content is presented below:<br />
     <code>
-      -showsplash<br /> org.eclipse.platform<br /> -vm<br /> /opt/sun-jdk-1.6.0.02/bin/java<br /> -vmargs<br /> -Xms40m<br /> -Xmx512m
+      -showsplash<br /> org.eclipse.platform<br /> -vm<br /> /opt/jdk-1.8/bin/java<br /> -vmargs<br /> -Xms256m<br /> -Xmx1024m
     </code>
   </p>
   <p>
@@ -995,22 +994,6 @@ after the release.
   <h4>
     <a
       class="mozTocH4"
-      name="mozTocId521249">Deprecation of <code>ITerminalSymbols#TokenNameIdentifier</code></a>
-  </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId521249"> With the introduction of "restricted keywords" in Java 9, 
-      classification of tokens by a scanner is inherently unreliable. 
-      Any token classified as an identifier could still be a "restricted keyword". 
-      Future versions of Java will introduce more words that have special syntactical 
-      meaning in specific contexts. For reliably detecting an identifier the only real 
-      solution is to use a parser instead (see also the caveat at the top of the interface 
-      documentation of IScanner and bug </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=521249">521249</a>)
-  </p>
-  <h4>
-    <a
-      class="mozTocH4"
       name="mozTocId180305">Multiple regions formatting in a given source snippet</a>
   </h4>
   <p>
@@ -1143,7 +1126,6 @@ after the release.
     <a
       class="mozTocH4"
       name="mozTocId324283"> Most class libraries do not properly support the creation of a system process (via <code>java.lang.Runtime.exec(...)</code> ) when the specified command line contains
-      GB18030 characters. Since Javadoc is created using the Javadoc executable provided with the JDK, generating Javadoc fails if the package or class name contains GB18030 characters. (bug
     </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=32215">32215</a>)
   </p>
   <h4>
@@ -1419,6 +1401,17 @@ after the release.
       create an API Tools filter for the missing @since tag problem. This filter can be removed as soon as the API baseline has been regenerated. (bug </a><a
       href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=402393">402393</a>)
   </p>
+    <h4>
+    <a
+      class="mozTocH4"
+      name="mozTocId624319">"Premature end of file" error in creating a new target file</a>
+  </h4>
+  <p>
+    <a
+      class="mozTocH4"
+       name="mozTocId624319">[4.9] On Mac and linux machines, there is a "Premature end of file" error in creating a new target file. Restarting eclipse may fix this issue. (bug </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=541678">541678</a>)
+
+  </p>
   <h2 id="RunningEclipse">
     <a
       class="mozTocH2"
@@ -1429,7 +1422,7 @@ after the release.
       class="mozTocH2"
       name="mozTocId19817"> After installing the Eclipse SDK in a directory, you can start the Workbench by running the Eclipse executable included with the release (you also need a Java SE 8 JRE,
       not included with the Eclipse SDK). On Windows, the executable file is called <samp>eclipse.exe</samp> , and is located in the <code>eclipse</code> sub-directory of the install. If installed at
-      <code>c:\eclipse-SDK-4.6-win32</code> , the executable is <code>c:\eclipse-SDK-4.6-win32\eclipse\eclipse.exe</code> . <b>Note:</b> Set-up on most other operating environments is analogous.
+      <code>c:\eclipse-SDK-4.10-win32</code> , the executable is <code>c:\eclipse-SDK-4.10-win32\eclipse\eclipse.exe</code> . <b>Note:</b> Set-up on most other operating environments is analogous.
       Special instructions for Mac OS X are listed
     </a><a href="#macosx">below</a>.
   </p>
