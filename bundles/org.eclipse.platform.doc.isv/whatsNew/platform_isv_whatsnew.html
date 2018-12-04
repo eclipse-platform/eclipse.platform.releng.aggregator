@@ -17,14 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.9</title>
+<title>Eclipse Platform What's New in 4.10</title>
 </head>
 
 <body>
-<h2>What's New in 4.9 </h2>
+<h2>What's New in 4.10 </h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse <a href="#Platform">Platform</a>, <a href="#SWT">SWT</a>  and 
-<a href="#Equinox">Equinox</a> for the 4.9 release of Eclipse.
+made to the Eclipse <a href="#Platform">Platform</a> and <a href="#SWT">SWT</a> for the 4.10 release of Eclipse.
 </p>
 
 <p>
@@ -34,176 +33,88 @@ can be viewed in the
 section of the Workbench User Guide.
 </p>
 
+<!-- ****************** START OF N&N TABLE****************** -->
 <table class="news">
 <colgroup>
   <col class="title" />
   <col />
 </colgroup>
 <tbody>
-
   <!-- ******************** Platform ********************** -->
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-    <tr id="e4-lifecycle-annotations">
-    <td class="title">Graduation of E4 Lifecycle Annotations</td>
-    <td class="content">
-      Four annotations that have been preliminary API for some time have been graduated.
-      The relevant classes are in package <code>org.eclipse.e4.ui.workbench.lifecycle</code> in the 
-      <code>org.eclipse.e4.ui.workbench</code> bundle. This includes
-      <code>PostContextCreate</code>, <code>PreSave</code>, <code>ProcessAdditions</code> and <code>ProcessRemovals</code>.
-      These changes are part of an ongoing effort to finalize the E4 API.
-    </td>
-  </tr>
-  <tr id="type-parameters-core-databinding">
-    <td class="title">Type parameters on Core Databinding classes</td>
-    <td class="content">
-      Type parameters have been added to relevant classes and methods in the
-      <code>org.eclipse.core.databinding</code> bundle. This includes
-      <code>DataBindingContext</code>, <code>IConverter</code> and <code>IValidator</code>.
-      This makes code using these classes more explicit and clear and
-      can help catching bugs in an early stage.
-      <p>
-      Code example:
-      </p>
-      <pre>
-    IObservableValue&lt;String&gt; o1 = ...;
-    IObservableValue&lt;Integer&gt; o2 = ...;
-    DataBindingContext cont = ...;
-    IConverter&lt;String, Integer&gt; c = IConverter.create(String.class, Integer.class, Integer::decode);
-    UpdateValueStrategy&lt;String, Integer&gt; s = new UpdateValueStrategy&lt;&gt;();
-    s.setConverter(c);
-    cont.bindValue(o1, o2, s, null);
-      </pre>
-      <p>
-      These changes are part of an ongoing effort to make the databinding API more typesafe. 
-      This effort started with the addition of type parameters to the bundles
-      <code>org.eclipse.core.databinding.property</code> and
-      <code>org.eclipse.core.databinding.observable</code>, and will continue with the bundles
-      <code>org.eclipse.core.databinding.beans</code> and <code>org.eclipse.jface.databinding</code>
-      in a future release.
-      </p>
-      <p>
-      Note: Users of databinding APIs that are not yet updated to take advantage of the type 
-      parameters will find that the new type parameters cause raw type warnings in their code. 
-      The best way to handle warnings from code that can't be updated is often to suppress these 
-      warnings using <code>@SuppressWarnings("rawtypes")</code>. Since the implementation of 
-      the databinding classes has not changed, suppressing warnings is a safe thing to do in this
-      case.
-      </p>
-    </td>
-  </tr>
 
-  <tr id="generic-editor-folding">
-    <td class="title">Contribute folding to the Generic Editor</td>
+  <tr id="contentassistant-enable-completion-proposal-trigger-chars"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539165 -->
+    <td class="title">Enable/Disable completion proposal trigger characters in ContentAssistant</td>
     <td class="content">
-      The Generic Editor provides a new extension point <code>org.eclipse.ui.genericeditor.foldingReconcilers</code> to customize folding.
-      <p>This example shows how LSP4E could contribute folding reconciler only for editor input supporting a language server:</p>
-      <pre>
-&lt;extension
-      point="org.eclipse.ui.genericeditor.foldingReconcilers">
-   &lt;foldingReconciler
-         class="org.eclipse.lsp4e.operations.folding.FoldingReconciler"
-         contentType="org.eclipse.core.runtime.text">
-      &lt;enabledWhen>
-         &lt;with
-               variable="editorInput">
-            &lt;test
-                  property="org.eclipse.lsp4e.hasLanguageServer">
-            &lt;/test>
-         &lt;/with>
-      &lt;/enabledWhen>
-   &lt;/foldingReconciler>
-&lt;/extension>
-      </pre>
-        When no other folding reconciler is registered for current document,
-        the generic editor uses a strategy which folds blocks of lines based on whitespaces and indentation:
-	    <p>
-	      <img src="images/generic-editor-folding.png" alt="" />
-	    </p>
+       The <code>ContentAssistant</code> class received methods to allow consumer to configure whether the
+       completion proposal trigger characters (which can be used additionally to <i>Enter</i> key to insert
+       the current completion proposal) are honored or ignored.
+       <p>
+        If <code>ContentAssistant.enableCompletionProposalTriggerChars(false)</code> was used,
+        then completion proposal trigger characters are ignored and user needs to press the <i>Enter</i> key to
+        trigger insertion.<br/>
+        If <code>ContentAssistant.enableCompletionProposalTriggerChars(true)</code>, then completion proposal
+        trigger characters can be used as well as <i>Enter</i> to insert the proposal.<br/>
+        Default behavior if the <code>enableCompletionProposalTriggerChars(boolean)</code> method was not called is equivalent
+        to <code>enableCompletionProposalTriggerChars(true)</code> so extra trigger characters are honored.
+      </p>
+      <p>
+       This feature is useful if your content-assist is configured to automatically trigger quite often (such
+       as on every character insertion). Coupling heavy usage of auto-activation of content-assist and extra
+       insertion trigger characters often results in undesired insertions, making it preferable to only keep
+       Enter as insertion character (<code>ContentAssistant.enableCompletionProposalTriggerChars(false)</code>).
+      </p>
     </td>
   </tr>
-
-  <tr id="generic-editor-character-pair-matcher">
-    <td class="title">Contribute character pair matcher to the Generic Editor</td>
-    <td class="content">
-      The Generic Editor provides a new extension point <code>org.eclipse.ui.genericeditor.characterPairMatchers</code> to customize character pair matchers (matching brackets).
-      <p>The <a href="http://git.eclipse.org/c/platform/eclipse.platform.text.git/tree/org.eclipse.ui.genericeditor.examples">Generic Editor examples</a> shows how to manage matching 
-      bracket for tag elements of .project file:</p>
-      <pre>
-&lt;extension
-      point="org.eclipse.ui.genericeditor.characterPairMatchers"&gt;
-   &lt;characterPairMatcher
-         class="org.eclipse.ui.genericeditor.examples.dotproject.TagCharacterPairMatcher"
-         contentType="org.eclipse.ui.genericeditor.examples.dotproject"&gt;
-   &lt;/characterPairMatcher&gt;
-&lt;/extension&gt;
-      </pre>
-	  <p>
-	    <img src="images/generic-editor-character-pair-matcher.png" alt="" />
-	  </p>      
-    </td>
-  </tr>
+  <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  
-  <tr id="calendar-weeknumbers">
-    <td class="title">Display week numbers in DateTime calendar</td>
+
+  <tr id="experimental-gtk4-support"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=541173 -->
+      <td class="title"><a href="#experimental-gtk4-support">Added experimental support for GTK4</a></td>
+      <td class="content">
+          SWT has introduced basic, experimental support for <b>GTK4</b>. The GTK bindings can be built using the build script 
+          (<a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/bundles/org.eclipse.swt/Eclipse%20SWT%20PI/gtk/library/build.sh">build.sh</a>) with the arguments <code>-gtk4 install</code>.
+          Currently only <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet1.java">Snippet1</a> works,
+          further GTK4 support will be introduced in the Eclipse 4.11 release.
+      </td>
+  </tr>
+
+  <tr id="read-only-combo"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=508634 -->
+      <td class="title"><a href="#read-only-combo">Styling of Read-only Combo on Windows</a></td>
+      <td class="content">
+          Setting the background and foreground color of a <code>SWT.READ_ONLY Combo</code> on Windows is now supported.
+          <p><img src="images/readonly_combo_windows.png" alt="Read only ComboBox on Windows"/></p>
+      </td>
+  </tr>
+
+  <tr id="styledtext-line-vertical-indent"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539618 -->
+    <td class="title"><a href="#styledtext-line-vertical-indent">API added to customize line vertical indent in StyledText</a></td>
     <td class="content">
+      A new API <code>StyledText.setLineVerticalIndent(int lineIndex, int verticalLineIndent)</code> has been added to customize the vertical indent of a specified line.
+      The corresponding getter <code>StyledText.getLineVerticalIndent(int index)</code> has also been added.
       <p>
-       The <code>SWT.DateTime</code> calendar widget will now display week numbers, when the <code>SWT.CALENDAR_WEEKNUMBERS</code> style flag is set.
+       For an example, see <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet374.java">Snippet374</a>
+       which sets the vertical indent for the first line:
       </p>
+      <pre>
+       text.setText("word1 word2 word3 word4");
+       text.setLineVerticalIndent(0, 20);
+      </pre>
       <p>
-        <img src="images/calendar-weeknumbers.png" alt="" />
-      </p>
-      <p>
-      	Note: This is a HINT and currently only works on Windows and Linux/GTK.
+        <img src="images/styledtext_line_vertical_indent.png" alt="" />
       </p>
     </td>
   </tr>
-
-  <tr id="alt-gr-display-post">
-  	<td class="title">New SWT.ALT_GR constant and support for non-US keyboard layouts</td>
-  	<td class="content">
-  		SWT on GTK3 has added a <code>SWT.ALT_GR</code> constant which can be used to generate special characters requiring the AltGr modifier using
-  		the <code>Display.post(Event)</code> method. 
-  		<p>
-  		 The <code>Display.post(Event)</code> method now supports simulating key events for non-US
-  		 keyboard layouts and the option to send key modifiers together with key characters in a single event.
-  		</p>
-  	</td>
-  </tr>
-
-  <tr id="zoom-changed-api">
-    <td class="title">New event SWT.ZoomChanged added</td>
-    <td class="content">
-      A new event type <code>SWT.ZoomChanged</code> has been added to SWT to notify clients that the SWT zoom has changed.
-      Listeners for the ZoomChanged event should be added to a <code>Shell</code>. The event's detail field contains the new SWT zoom level.
-      <p>
-      Note: This operation is a hint and is supported on Windows 10 only.
-      </p>
-    </td>
-  </tr>
-
-  <tr id="dark-theme-table-tree-header">
-    <td class="title">Improved Table and Tree header under dark theme</td>
-    <td class="content">
-      SWT on Windows has made the following improvements to <code>Table</code> and <code>Tree</code> headers, which improve their visibility in Dark theme:
-      <ul>
-		<li> Add a new line separator between header and the first row.</li>
-		<li> Draw the header column separators always (irrespective of the value of <code>getLinesVisible()</code>).</li>
-      </ul>
-      <p>
-        <img src="images/dark_theme_table_header.png" alt="" />
-      </p>
-    </td>
-  </tr>
-
-  </tbody>
+  <!-- *********************** End of SWT *********************** -->
+</tbody>
 </table>
+<!-- ****************** END OF N&N TABLE ****************** -->
 
 </body>
 </html>

@@ -17,16 +17,17 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in 4.9 (PDE)</title>
+<title>What's New in 4.10 (PDE)</title>
 </head>
 
 <body>
-<h2>What's New in 4.9 (PDE)</h2>
+<h2>What's New in 4.10 (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Plug-in Development Environment (PDE)
-for the 4.9 release of Eclipse. They are grouped into:</p>
+for the 4.10 release of Eclipse. They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
 	<li><a href="#dialogs-wizards-views">Dialogs, Wizards and Views</a></li>
-	<li><a href="#pde-compiler">PDE Compiler</a></li>
+	<li><a href="#editors">Editors</a></li>
+	<li><a href="#APITools">API Tools</a></li>
 </ul>
 <p>See also the
 <b><a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New</a></b>
@@ -36,58 +37,102 @@ documents.</p>
 <p>We also recommend to read the <a href="../tips/pde_tips.htm">Tips and Tricks</a>.</p>
 <br/>
 
+<!-- ****************** START OF N&N TABLE****************** -->
 <table class="news">
 <colgroup>
   <col class="title" />
   <col />
 </colgroup>
 <tbody>
-
-
   <!-- ******************** Dialogs, Editors and Views ********************** -->
   <tr>
     <td id="dialogs-wizards-views" class="section" colspan="2"><h2>Dialogs, Wizards and Views</h2></td>
   </tr>
   
-    <tr id="pde-show-command-line">
-    <td class="title">Show Command Line button in PDE Launch Configuration</td>
+   <tr id="module-info-file-creation-on-pde-project"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=527052 -->
+   <td class="title">Plug-in project can be converted to modular project</td>
     <td class="content">
-      A new button <b>Show Command Line</b> has been added in the PDE launch configuration dialog. 
-      <p>
-        <img src="images/pde_show_command_line.png" alt=""/>
-      </p>
-      Clicking the button will open a dialog to show the command line used for launching the application.
+     You can now convert a plug-in project to a modular project by selecting the <b>Configure &gt; Create module-info.java</b>
+     context menu. This creates the module-info.java file for the project.
+     <p>
+        <img src="images/pde-create-module-info.png" alt="" />
+     </p>
+      However, the module-info.java file that is created and the manifest file in the project may not be synchronized. 
+      A warning dialog is shown to inform users about this issue.
+     <p>
+        <img src="images/pde-module-info-sync-warning.png" alt="" />
+    </p>
     </td>
   </tr>
-  
-  
-  <tr id="extension-point-description-dark-theme">
-    <td class="title">Extension point description on dark theme</td>
-    <td class="content">
-      When extension point descriptions were displayed in a wizard page, the text background and foreground were not styled correctly for the dark theme. This has now been corrected.
+  <!-- ******************** End of Dialogs, Editors and Views ********************** -->
 
-      <p>
-        <img src="images/extension-point-description-dark-theme.png" alt="" />
-      </p>
-    </td>
-  </tr>
-
-  <!-- ******************** PDE Compiler ********************** -->
+  <!-- ******************** Editors ********************** -->
   <tr>
-    <td id="pde-compiler" class="section" colspan="2"><h2>PDE Compiler</h2></td>
+    <td id="editors" class="section" colspan="2"><h2>Editors</h2></td>
   </tr>
-  <tr id="builder-scheduling-rule">
-    <td class="title">Relaxed scheduling rule for builders</td>
+  
+   <tr id="asynchronous-code-completion-manifest"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539234 -->
+   <td class="title">Asynchronous content assist in manifest editor</td>
     <td class="content">
-      The scheduling rule for PDE builders was relaxed. Instead of using the workspace
-      root, it now uses a composition of all PDE projects.
+      The code completion in the MANIFEST.MF editor has been changed to be asynchronous so that the UI is not blocked anymore.
+    </td>
+  </tr>
+  <tr id="target-definition-code-mining"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=534758 -->
+   <td class="title">Code mining in Target Definition editor</td>
+    <td class="content">
+      You can now activate or reload a target platform by clicking-on the corresponding code-mining in the <b>Target definition editor</b>.
+     <p>
+        <img src="images/target-definition-code-mining.png" alt="" />
+     </p>
+    </td>
+  </tr>
+  <!-- ******************** End of Editors ********************** -->
+
+  <!-- ******************** APITools ********************** -->
+  <tr>
+    <td id="APITools" class="section" colspan="2"><h2>API Tools</h2></td>
+  </tr>
+
+  <tr id="breaking-interface-implementation-reported"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=539244 -->
+    <td class="title">Breaking interface implementation to class reported</td>
+    <td class="content">
+	When a class implements an interface or extends an abstract class that can cause
+	a breaking change in the client, it is reported as a problem by API tools.
+	 <p>
+        <img src="images/breaking-change-by-interface-abs-class-add-to-class.png" alt="" />
+    </p>
+    </td>
+  </tr>
+  
+  <tr id="disable-api-analysis-builder">  <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=539408 -->
+  <td class="title">Option added for disabling API analysis</td>
+    <td class="content">
+       A new option that disables API analysis builder has been 
+       added on the <b>Plug-in Development </b> preference page.
+       <p>
+        <img src="images/pde-disable-analysis-builder.png" alt="" />
+       </p>
+       <p>
+        This option is disabled by default. 
+       </p>
+    </td>
+  </tr>
+  
+  <tr id="possible-api-baseline-mismatch">  <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=538904 -->
+  <td class="title">Report possible API baseline mismatch</td>
+    <td class="content">
+      API tools now identifies a situation when none of the workspace projects is in the baseline and reports
+      it as a possible API baseline mismatch.
       <p>
-      	As a result, distinct PDE projects won't build in parallel, but PDE doesn't prevent
-      	independent non-PDE projects from building in parallel.
+       The error/warning is controlled by the existing <b>Missing API baseline</b> option in
+       <b>Plug-in Development &gt; API Baselines</b> preference page.
+      </p>
+      <p>
+        <img src="images/pde-possible-baseline-mismatch.png" alt="" />
       </p>
     </td>
   </tr>
-
+  <!-- ******************** End of APITools ********************** -->
 </tbody>
 </table>
 </body>
