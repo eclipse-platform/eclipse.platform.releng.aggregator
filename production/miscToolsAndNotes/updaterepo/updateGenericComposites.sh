@@ -69,8 +69,8 @@ fi
 maintenanceStream=$2
 if [[ -z "${maintenanceStream}" ]]
 then
-  printf "\n\t%s\t%s\n" "WARNING:" "Maintenance stream version not specified on command line, assuming 4.9"
-  maintenanceStream="4.9"
+  printf "\n\t%s\t%s\n" "WARNING:" "Maintenance stream version not specified on command line, assuming 4.10"
+  maintenanceStream="4.10"
 fi
 
 
