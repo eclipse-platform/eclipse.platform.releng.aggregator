@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #*******************************************************************************
 # Copyright (c) 2018 IBM Corporation and others.
 #
@@ -20,7 +20,9 @@ BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
 BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
 BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
 
-for i in $(ls mbscripts|sort)
+pushd mbscripts
+for i in $(ls |sort)
 do
   fn-run-command ./$i $BUILD_ENV_FILE
 done
+popd
