@@ -89,7 +89,7 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 						}
 					} catch (final IOException e) {
 						throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0,
-								NLS.bind("An error occured when processing {0}", file.getName()), e));
+								NLS.bind("An error occured when processing {0}", file.getName()), e)); //$NON-NLS-1$
 					}
 				}
 			}
