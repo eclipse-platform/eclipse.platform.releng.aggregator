@@ -509,7 +509,7 @@ fn-tag-build-inputs ()
 
   # == Step 1 of git logging.
   # TODO: This may not work right if "streams/repositories.txt" contains tags.
-  GITLOG_FILENAME=gitLog.txt
+  GITLOG_FILENAME=gitLog.html
   GITLOG_FILE=${buildDirectory}/${GITLOG_FILENAME}
   echo "Creating ${GITLOG_FILENAME}"
   # we set REPORTDATE first thing, to get some idea of "time elapsed" since start of build.
@@ -555,21 +555,22 @@ fn-tag-build-inputs ()
   # == Step 2 of Git logging.
   if [[ -n "${lastTag}" ]]
   then
-    # TODO: other log options to consider? --pretty=oneline?
-    echo -e "\n\tGit log from ${lastTag} (previous) to ${BUILD_ID} (current)\n" > ${GITLOG_FILE}
-    # We include the "time of report" since this report might be included in a "build has started"
-    # mail message, so it would be good to know if we are much delayed in getting that message out.
-    echo -e "\tThe tagging, and this report, were done at about $REPORTTIMESTAMP\n\n" >> ${GITLOG_FILE}
-    # This first one is for aggregator itself.
-    echo "Repository eclipse.platform.releng.aggregator" >> ${GITLOG_FILE}
-    echo;echo >> ${GITLOG_FILE}
-    git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
-    echo >> ${GITLOG_FILE}
-    echo >> ${GITLOG_FILE}
-    # And now all submodules. Note we use --quiet specifically not to have the
-    # "Entering <submodule>" messages printed.
     TMP_GIT_LOG=${TMP_DIR}/gitlog.txt
-    git submodule --quiet foreach "git log ${lastTag}..${BUILD_ID}>${TMP_GIT_LOG};FILESIZE=\$(stat -c%s ${TMP_GIT_LOG});if [ \$FILESIZE -ne 0 ]; then echo Repository: \$path;echo;cat ${TMP_GIT_LOG};echo;echo;fi" >> ${GITLOG_FILE}
+    echo -e "<h2>Git log from ${lastTag} (previous) to ${BUILD_ID} (current)</h2>" > ${GITLOG_FILE}
+    echo -e "<h2>The tagging, and this report, were done at about $REPORTTIMESTAMP</h2>" >> ${GITLOG_FILE}
+    git log ${lastTag}..${BUILD_ID} --format=format:"<tr><td class=\"cell\">%cd</td><td class=\"cell\"><a href=\"https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=%H\">%s</a></td><td class=\"cell\">%aN</td></tr>">> ${TMP_GIT_LOG}
+    FILESIZE1=$(stat -c%s ${TMP_GIT_LOG})
+    if [ $FILESIZE1 -eq 0 ]
+    then
+        echo "<h3>No code changes from last build</h3>"
+    else
+        echo "<table width=\"80%\"><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: eclipse.platform.releng.aggregator</th></tr>" >> ${GITLOG_FILE}
+        echo "<tr> <th class=\"cell\">Date</th> <th class=\"cell\">Summary</th> <th class=\"cell\">Author</th> </tr>" >> ${GITLOG_FILE}
+        cat ${TMP_GIT_LOG} >> ${GITLOG_FILE}
+        echo  "</tbody></table><br><br>">> ${GITLOG_FILE}
+        echo  >> ${GITLOG_FILE}
+        git submodule --quiet foreach "comp=\$(echo \$path|cut -d. -f2);git log ${lastTag}..${BUILD_ID} --format=format:\"<tr><td class=\\\"cell\\\">%cd</td><td class=\\\"cell\\\"><a href=\\\"https://git.eclipse.org/c/\$comp/\$path.git/commit/?id=%H\\\">%s</a></td><td class=\\\"cell\\\">%aN</td></tr>\">${TMP_GIT_LOG};FILESIZE=\$(stat -c%s ${TMP_GIT_LOG});if [ \$FILESIZE -ne 0 ]; then echo \"<table width=\\\"80%\\\"><tbody> <tr><th class=\\\"cell\\\" colspan=\\\"3\\\">Repository: \$path</th></tr>\";echo \"<tr> <th class=\\\"cell\\\">Date</th> <th class=\\\"cell\\\">Summary</th> <th class=\\\"cell\\\">Author</th> </tr>\";cat ${TMP_GIT_LOG};echo \"</tbody></table><br><br>\";echo;fi" >> ${GITLOG_FILE}
+    fi
   else
     echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > ${GITLOG_FILE}
   fi

@@ -138,7 +138,8 @@ if (isset ($BUILD_FAILED) ) {
     $SPECIFIC_LOG=$MATCHES[3];
     echo "<p>Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>, \n";
     echo "or a <a href=\"$summaryFile[0]\">summary</a>. <br /> \n";
-    echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any).</p>\n";
+    echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any).\n";
+    echo "See recent changes in the <a href="gitLog.php">git log</a>.</p>\n";
   }
 
 }
@@ -318,7 +319,7 @@ else {
   <ul class="midlist">
     <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments</a></li>
     <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
-    <li><a href="gitLog.txt">Git log.</a></li>
+    <li><a href="gitLog.php">Git log.</a></li>
     <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
   </ul>
 <?php
