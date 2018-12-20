@@ -39,7 +39,7 @@ require("DL.thin.header.php.html");
 
 echo "<h1>Git Log for <a href=\"../".$BUILD_DIR_SEG."\">".$BUILD_ID;
 echo "</a></h1>".PHP_EOL;
-echo "<div class=\"resultsSection\">";
+echo "<div class=\"gitLogSection\">";
 if (file_exists("gitLog.html")) {
   $log_file = file_get_contents("gitLog.html");
   echo "$log_file";
