@@ -38,7 +38,7 @@ fi
 
 # Assumed there is an Eclipse SDK already installed. 
 # remember, the eclipse install must match the VM used (e.g. both 64 bit, both 32 bit, etc).
-ECLIPSE_EXE=${ECLIPSE_EXE:-utilities/eclipse.platform.releng.tychoeclipsebuilder/eclipse/org.eclipse.releng.basebuilder/eclipse}}
+ECLIPSE_EXE=${ECLIPSE_EXE:-utilities/eclipse.platform.releng.tychoeclipsebuilder/eclipse/org.eclipse.releng.basebuilder/eclipse}
 
 if [[ ! -n ${ECLIPSE_EXE} && -x ${ECLIPSE_EXE} ]]
 then
