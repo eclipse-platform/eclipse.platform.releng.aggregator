@@ -483,8 +483,6 @@ else
   echo "No repo published, since BUILD_FAILED"
 fi
 
-${SCRIPT_PATH}/reports/jdepsReport.sh ${BUILD_ROOT}/siteDir/updates/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds/${BUILD_ID}/ ${logsDirectory}/jdepsReport.txt 
-
 #For now, only "publish equinox and promote" if N, I or M build, skip if P, X, or Y
 
 # TODO: probably never need to promote equinox, for patch build?
