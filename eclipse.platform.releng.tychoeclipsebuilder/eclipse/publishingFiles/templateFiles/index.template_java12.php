@@ -139,7 +139,7 @@ if (isset ($BUILD_FAILED) ) {
     echo "<p>Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>, \n";
     echo "or a <a href=\"$summaryFile[0]\">summary</a>. <br /> \n";
     echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any).\n";
-    echo "See recent changes in the <a href="gitLog.php">git log</a>.</p>\n";
+    echo "See recent changes in the <a href=\"gitLog.php\">git log</a>.</p>\n";
   }
 
 }
