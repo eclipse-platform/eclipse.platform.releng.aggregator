@@ -560,17 +560,15 @@ fn-tag-build-inputs ()
     echo -e "<h2>The tagging, and this report, were done at about $REPORTTIMESTAMP</h2>" >> ${GITLOG_FILE}
     git log ${lastTag}..${BUILD_ID} --date=short --format=format:"<tr><td class=\"datecell\">%cd</td><td class=\"commitcell\"><a href=\"https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=%H\">%s</a></td><td class=\"authorcell\">%aN</td></tr>"> ${TMP_GIT_LOG}
     FILESIZE1=$(stat -c%s ${TMP_GIT_LOG})
-    if [ $FILESIZE1 -eq 0 ]
+    if [ $FILESIZE1 -ne 0 ]
     then
-        echo "<h3>No code changes from last build</h3>"
-    else
         echo "<table width=\"80%\"><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: eclipse.platform.releng.aggregator</th></tr>" >> ${GITLOG_FILE}
         echo "<tr> <th class=\"datecell\">Date</th> <th class=\"commitcell\">Commit message</th> <th class=\"authorcell\">Author</th> </tr>" >> ${GITLOG_FILE}
         cat ${TMP_GIT_LOG} >> ${GITLOG_FILE}
         echo  "</tbody></table><br><br>">> ${GITLOG_FILE}
         echo  >> ${GITLOG_FILE}
-        git submodule --quiet foreach "comp=\$(echo \$path|cut -d. -f2);git log ${lastTag}..${BUILD_ID} --date=short --format=format:\"<tr><td class=\\\"datecell\\\">%cd</td><td class=\\\"commitcell\\\"><a href=\\\"https://git.eclipse.org/c/\$comp/\$path.git/commit/?id=%H\\\">%s</a></td><td class=\\\"authorcell\\\">%aN</td></tr>\">${TMP_GIT_LOG};FILESIZE=\$(stat -c%s ${TMP_GIT_LOG});if [ \$FILESIZE -ne 0 ]; then echo \"<table width=\\\"80%\\\"><tbody> <tr><th class=\\\"cell\\\" colspan=\\\"3\\\">Repository: \$path</th></tr>\";echo \"<tr> <th class=\\\"datecell\\\">Date</th> <th class=\\\"commitcell\\\">Commit message</th> <th class=\\\"authorcell\\\">Author</th> </tr>\";cat ${TMP_GIT_LOG};echo \"</tbody></table><br><br>\";echo;fi" >> ${GITLOG_FILE}
     fi
+    git submodule --quiet foreach "comp=\$(echo \$path|cut -d. -f2);git log ${lastTag}..${BUILD_ID} --date=short --format=format:\"<tr><td class=\\\"datecell\\\">%cd</td><td class=\\\"commitcell\\\"><a href=\\\"https://git.eclipse.org/c/\$comp/\$path.git/commit/?id=%H\\\">%s</a></td><td class=\\\"authorcell\\\">%aN</td></tr>\">${TMP_GIT_LOG};FILESIZE=\$(stat -c%s ${TMP_GIT_LOG});if [ \$FILESIZE -ne 0 ]; then echo \"<table width=\\\"80%\\\"><tbody> <tr><th class=\\\"cell\\\" colspan=\\\"3\\\">Repository: \$path</th></tr>\";echo \"<tr> <th class=\\\"datecell\\\">Date</th> <th class=\\\"commitcell\\\">Commit message</th> <th class=\\\"authorcell\\\">Author</th> </tr>\";cat ${TMP_GIT_LOG};echo \"</tbody></table><br><br>\";echo;fi" >> ${GITLOG_FILE}
   else
     echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > ${GITLOG_FILE}
   fi
