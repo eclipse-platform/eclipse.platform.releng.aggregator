@@ -11,7 +11,7 @@ include("buildproperties.php");
 
 $expectedTestConfigs = array();
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-cen64-gtk3-java8_linux.gtk.x86_64_8.0";
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-mac64_macosx.cocoa.x86_64_8.0";
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-win32_win32.win32.x86_64_8.0";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-mac64-java8_macosx.cocoa.x86_64_8.0";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-win32-java8_win32.win32.x86_64_8.0";
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-cen64-gtk3-java11_linux.gtk.x86_64_11";
 
