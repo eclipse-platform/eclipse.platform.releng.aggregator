@@ -49,6 +49,6 @@ do
 		then 
 			continue
 		fi
-		fn-addToPropFiles $key $value
+		fn-addToPropFiles $key "$value"
 	fi
 done < ../buildproperties.txt
