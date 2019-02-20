@@ -1,6 +1,6 @@
 #!/bin/bash -x
 #*******************************************************************************
-# Copyright (c) 2018 IBM Corporation and others.
+# Copyright (c) 2019 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,11 @@
 #     Sravan Kumar Lakkimsetti - initial API and implementation
 #*******************************************************************************
 
-source common/common-functions.shsource
-
-buildDirectory=$(pwd)/siteDir
-BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
-BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
-BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
+source $WORKSPACE/cje-production/scripts/common-functions.shsource
 
 pushd mbscripts
-for i in $(ls |sort)
+for i in $(ls | sort)
 do
-  fn-run-command ./$i $BUILD_ENV_FILE
+  fn-run-command ./$i $WORKSPACE/cje-production/buildproperties.shsource
 done
 popd

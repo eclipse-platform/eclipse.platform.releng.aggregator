@@ -22,6 +22,15 @@ fi
 source $WORKSPACE/cje-production/scripts/common-functions.shsource
 source $1
 
-git clone -b $BRANCH --recursive $GIT_ROOT$AGG_REPO ../$AGG_DIR
-cd ../$AGG_DIR
-git submodule foreach 'git fetch; SUBMODULE_BRANCH=$(grep $name: ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt | cut -f2 -d\ ); SUBMODULE_BRANCH=${SUBMODULE_BRANCH:-$BRANCH}; echo Checking out origin/$SUBMODULE_BRANCH; git checkout origin/$SUBMODULE_BRANCH'
+cd $WORKSPACE/cje-production/gitCache/eclipse.platform.releng.aggregator
+mvn clean verify -DskipTests=true -Pbree-libs \
+  -Dtycho.debug.artifactcomparator \
+  -Dcbi.jarsigner.continueOnFail=true \
+  -Djgit.dirtyWorkingTree=error \
+  -Dmaven.repo.local=$LOCAL_REPO \
+  -Djava.io.tmpdir=$WORKSPACE/cje-production/tmp \
+  -DaggregatorBuild=true \
+  -DbuildTimestamp=$TIMESTAMP \
+  -DbuildType=$BUILD_TYPE \
+  -DbuildId=$BUILD_ID \
+  -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE
