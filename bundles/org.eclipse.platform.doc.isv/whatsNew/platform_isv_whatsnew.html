@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2018. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2018, 2019. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" type="text/css"/>
@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.10</title>
+<title>Eclipse Platform What's New in 4.11</title>
 </head>
 
 <body>
-<h2>What's New in 4.10 </h2>
+<h2>What's New in 4.11 </h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse <a href="#Platform">Platform</a> and <a href="#SWT">SWT</a> for the 4.10 release of Eclipse.
+made to the Eclipse <a href="#Platform">Platform</a> and <a href="#SWT">SWT</a> for the 4.11 release of Eclipse.
 </p>
 
 <p>
@@ -45,72 +45,69 @@ section of the Workbench User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
-  <tr id="contentassistant-enable-completion-proposal-trigger-chars"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539165 -->
-    <td class="title">Enable/Disable completion proposal trigger characters in ContentAssistant</td>
+  <tr id="move-error-log"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=50517 -->
+   <td class="title">Error Log view moved to Platform</td>
     <td class="content">
-       New methods have been added to the <code>ContentAssistant</code> class to allow consumers to configure whether the
-       completion proposal trigger characters (which can be used in addition to <b>Enter</b> key to insert
-       the current completion proposal) are honored or ignored.
-       <p>
-        If <code>ContentAssistant.enableCompletionProposalTriggerChars(false)</code> is used,
-        then completion proposal trigger characters are ignored and user needs to press the <b>Enter</b> key to
-        trigger insertion.<br/>
-        If <code>ContentAssistant.enableCompletionProposalTriggerChars(true)</code> is used, then completion proposal
-        trigger characters can be used in addition to the <b>Enter</b> key to insert the proposal.<br/>
-        If the <code>enableCompletionProposalTriggerChars(boolean)</code> method is not called, then the default behavior is equivalent
-        to calling <code>enableCompletionProposalTriggerChars(true)</code> so that extra trigger characters are honored.
-      </p>
-      <p>
-       This feature is useful if your content-assist is configured to automatically trigger often (such
-       as on every character insertion). Coupling heavy usage of auto-activation of content-assist and extra
-       insertion trigger characters often results in undesired insertions, making it preferable to keep only
-       Enter as the insertion character (<code>ContentAssistant.enableCompletionProposalTriggerChars(false)</code>).
-      </p>
+      The Error Log view has been moved from the PDE project to the Platform project. 
+      ISVs should examine their build infrastructure for inclusion of the <strong>org.eclipse.ui.views.log</strong> 
+      plug-in. The inclusion in your own features and/or products may be redundant because this 
+      view now ships with the base platform. See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=50517">bug 50517</a> for details. 
     </td>
   </tr>
+  
+  
+  <tr id="non-persisted-ui"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=378815 -->
+    <td class="title">Transient UI Elements</td>
+     <td class="content">
+      UI model elements can be marked as transient, which means they do not get persisted when the
+      application is closed. This allows to create views and other UI elements dynamically from code
+      without the need to clean them up properly before the workbench is closed. It also allows to contribute static model fragments which are not persisted and therefore removed once 
+      the plug-in gets uninstalled.
+      <p>To mark an element as transient simply call
+      <code>uiElement.getPersistedState().put(IWorkbench.PERSIST_STATE, "false");</code></p>
+     </td>
+   </tr>  
+  
+  <tr id="css-value-unset"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=544352 -->
+   <td class="title">CSS value 'unset'</td>
+    <td class="content">
+      The value <code>unset</code> is now supported as CSS value and is mapped to the Java value <code>null</code>. 
+      For example, when used for the <code>background-color</code> property, the
+      widget will revert to the specific native look, if it has one, or inherit the background from the parent widget. 
+    </td>
+  </tr>
+  
+  <tr id="widget-factories"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539014 -->
+   <td class="title">Widget factories</td>
+    <td class="content">
+      New widget factories have been created for some SWT widgets. They follow the same approach as <code>GridLayoutFactory</code> and <code>GridDataFactory</code> i.e. a fluent, re-usable API.
+      <p>The entry point is <code>WidgetFactory</code>.</p>
+      <p>For example, to create a button:</p>
+      <code>WidgetFactory.button(SWT.PUSH).text("Click me!").onSelect(event -> buttonClicked(event).create(parent);</code>
+      <p>This is a work in progress and more factories will follow soon.</p>
+    </td>
+  </tr>
+  
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-
-  <tr id="experimental-gtk4-support"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=541173 -->
-      <td class="title">Added experimental support for GTK4</td>
-      <td class="content">
-          SWT has introduced basic, experimental support for <b>GTK4</b>. The GTK bindings can be built using the build script 
-          (<a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/bundles/org.eclipse.swt/Eclipse%20SWT%20PI/gtk/library/build.sh">build.sh target="_blank"</a>) with the arguments <code>-gtk4 install</code>.
-          Currently only <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet1.java" target="_blank">Snippet1</a> works,
-          further GTK4 support will be introduced in the Eclipse 4.11 release.
-      </td>
-  </tr>
-
-  <tr id="read-only-combo"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=508634 -->
-      <td class="title">Styling of read-only Combo on Windows</td>
-      <td class="content">
-          Setting the background and foreground color of a <code>SWT.READ_ONLY Combo</code> on Windows is now supported.
-          <p><img src="images/readonly_combo_windows.png" alt="Read only ComboBox on Windows"/></p>
-      </td>
-  </tr>
-
-  <tr id="styledtext-line-vertical-indent"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539618 -->
-    <td class="title">API added to customize line vertical indent in StyledText</td>
-    <td class="content">
-      A new API <code>StyledText.setLineVerticalIndent(int lineIndex, int verticalLineIndent)</code> has been added to customize the vertical indent of the line with the specified line index.
-      The corresponding getter <code>StyledText.getLineVerticalIndent(int index)</code> has also been added.
-      <p>
-       For an example, see <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet374.java" target="_blank">Snippet374</a>
-       which sets the vertical indent for the first line:
-      </p>
-      <pre>
-       text.setText("word1 word2 word3 word4");
-       text.setLineVerticalIndent(0, 20);
-      </pre>
-      <p>
-        <img src="images/styledtext_line_vertical_indent.png" alt="" />
-      </p>
-    </td>
-  </tr>
+  
+  <tr id="mouse-navigation-styledtext"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=542777 -->
+    <td class="title">Mouse navigation support for StyledText</td>
+     <td class="content">
+      The StyledText widget now supports mouse navigation scrolling similar to most web browsers.
+      When enabled, a StyledText widget can be scrolled by clicking the mouse's scroll wheel,
+      and then moving the mouse. Clicking the scroll wheel again cancels the scrolling, and returns
+      the widget to its default state.
+      <p>To enable mouse navigation, simply call:
+      <code>StyledText.setMouseNavigatorEnabled(true);</code></p>
+      <p><img src="images/StyledText-mouse-navigation.png" alt=""/></p>
+     </td>
+   </tr>
+   
   <!-- *********************** End of SWT *********************** -->
 </tbody>
 </table>
