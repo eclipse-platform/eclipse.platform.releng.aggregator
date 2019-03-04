@@ -13,7 +13,7 @@
 #     Sravan Kumar Lakkimsetti - initial API and implementation
 #*******************************************************************************
 
-CJE_ROOT=${CJE_ROOT:-`pwd`}
+export CJE_ROOT=${CJE_ROOT:-`pwd`}
 source $CJE_ROOT/scripts/common-functions.shsource
 
 pushd mbscripts
