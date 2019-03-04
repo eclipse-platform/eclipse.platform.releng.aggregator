@@ -26,7 +26,7 @@ qualifiedBaseBuilder="$CJE_ROOT/$BASEBUILDER_DIR"
 TMP="$CJE_ROOT/$BASEBUILDER_DIR/tmp"
 mkdir -p $TMP
 pushd $TMP
-wget -O eclipsePlatform.tar.gz https://$ARCHIVE_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz&r=1
+wget -O eclipsePlatform.tar.gz https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz&r=1
 tar zxf eclipsePlatform.tar.gz
 popd
 
