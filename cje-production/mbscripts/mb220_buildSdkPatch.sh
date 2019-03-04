@@ -19,16 +19,16 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-source $WORKSPACE/cje-production/scripts/common-functions.shsource
+source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-cd $WORKSPACE/cje-production/gitCache/eclipse.platform.releng.aggregator
+cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
 mvn clean verify -DskipTests=true -Pbree-libs \
   -Dtycho.debug.artifactcomparator \
   -Dcbi.jarsigner.continueOnFail=true \
   -Djgit.dirtyWorkingTree=error \
   -Dmaven.repo.local=$LOCAL_REPO \
-  -Djava.io.tmpdir=$WORKSPACE/cje-production/tmp \
+  -Djava.io.tmpdir=$CJE_ROOT/tmp \
   -DaggregatorBuild=true \
   -DbuildTimestamp=$TIMESTAMP \
   -DbuildType=$BUILD_TYPE \

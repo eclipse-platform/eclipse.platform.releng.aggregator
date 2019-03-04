@@ -19,7 +19,7 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-source $WORKSPACE/cje-production/scripts/common-functions.shsource
+source $CJE_ROOT/scripts/common-functions.shsource
 
 shEnvFile=$(basename $1)
 buildDir=$(dirname $1)
@@ -27,9 +27,9 @@ baseEnvFile=$(echo $shEnvFile |cut -d. -f1)
 phpEnvFile=$(echo $baseEnvFile.php)
 propEnvFile=$(echo $baseEnvFile.properties)
 
-BUILD_ENV_FILE=$WORKSPACE/cje-production/${shEnvFile}
-BUILD_ENV_FILE_PHP=$WORKSPACE/cje-production/${phpEnvFile}
-BUILD_ENV_FILE_PROP=$WORKSPACE/cje-production/${propEnvFile}
+BUILD_ENV_FILE=$CJE_ROOT/${shEnvFile}
+BUILD_ENV_FILE_PHP=$CJE_ROOT/${phpEnvFile}
+BUILD_ENV_FILE_PROP=$CJE_ROOT/${propEnvFile}
 
 fn-addToPropFiles ()
 {

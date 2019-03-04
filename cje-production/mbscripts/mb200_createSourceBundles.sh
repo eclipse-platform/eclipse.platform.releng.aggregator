@@ -19,8 +19,8 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-source $WORKSPACE/cje-production/scripts/common-functions.shsource
+source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-cd $WORKSPACE/cje-production/gitCache/eclipse.platform.releng.aggregator
+cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
 mvn clean verify -f eclipse-platform-sources/pom.xml -DbuildId=$BUILD_ID

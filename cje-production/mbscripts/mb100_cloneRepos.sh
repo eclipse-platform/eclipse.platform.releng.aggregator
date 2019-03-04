@@ -19,7 +19,7 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-source $WORKSPACE/cje-production/scripts/common-functions.shsource
+source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 git clone -b $BRANCH --recursive $GIT_ROOT$AGG_REPO ../$AGG_DIR

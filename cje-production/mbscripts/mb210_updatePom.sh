@@ -19,15 +19,15 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
-source $WORKSPACE/cje-production/scripts/common-functions.shsource
+source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-mkdir $WORKSPACE/cje-production/tmp
+mkdir $CJE_ROOT/tmp
 
-cd $WORKSPACE/cje-production/gitCache/eclipse.platform.releng.aggregator
+cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
 mvn --update-snapshots org.eclipse.tycho:tycho-versions-plugin:1.3.0:update-pom \
   -Dmaven.repo.local=$LOCAL_REPO \
-  -Djava.io.tmpdir=$WORKSPACE/cje-production/tmp \
+  -Djava.io.tmpdir=$CJE_ROOT/tmp \
   -DaggregatorBuild=true \
   -DbuildTimestamp=$TIMESTAMP \
   -DbuildType=$BUILD_TYPE \

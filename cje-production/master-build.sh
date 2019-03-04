@@ -13,11 +13,12 @@
 #     Sravan Kumar Lakkimsetti - initial API and implementation
 #*******************************************************************************
 
-source $WORKSPACE/cje-production/scripts/common-functions.shsource
+CJE_ROOT=${CJE_ROOT:-`pwd`}
+source $CJE_ROOT/scripts/common-functions.shsource
 
 pushd mbscripts
 for i in $(ls | sort)
 do
-  fn-run-command ./$i $WORKSPACE/cje-production/buildproperties.shsource
+  fn-run-command ./$i $CJE_ROOT/buildproperties.shsource
 done
 popd
