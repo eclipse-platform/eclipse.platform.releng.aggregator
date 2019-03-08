@@ -36,7 +36,7 @@ echo -e "\tbuildIdToTest: ${BUILD_ID}"
 # TODO: we could have a "previous_release" sort of variable that 
 # would be defined in parent pom or build_eclipse_org.shsource so that
 # we do not need to change this source. 
-buildIdToCompare="4.10/R-4.10-201812060815"
+buildIdToCompare="4.11milestones/S-4.11RC2-201903070500"
 
 build_type=${buildIdToTest:0:1}
 echo -e "\tbuild_type: ${build_type}"
@@ -67,8 +67,8 @@ function latestSimpleRepo
 if [[ ${build_type} == "I" ]]
 then
   update_dir_segment="4.12-I-builds"
-  buildIdToCompare="4.10/R-4.10-201812060815"
-  echo -e "\tlatest_R_build: R-4.10-201812060815"
+  buildIdToCompare="4.11milestones/S-4.11RC2-201903070500"
+  echo -e "\tlatest_R_build: S-4.11RC2-201903070500"
 elif [[ ${build_type} == "Y" ]]
 then
   update_dir_segment="4.12-Y-builds"
