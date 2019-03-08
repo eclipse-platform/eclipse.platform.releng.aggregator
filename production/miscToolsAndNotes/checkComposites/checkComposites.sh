@@ -30,9 +30,11 @@ repoAccess=${repoFileAccess}
 # TODO: reduce this list soon
 repoList="\
 /eclipse/updates/4.11/ \
-/eclipse/updates/4.10/ \
-/eclipse/updates/4.10-I-builds/ \
-/eclipse/updates/4.10milestones/ \
+/eclipse/updates/4.12/ \
+/eclipse/updates/4.12-I-builds/ \
+/eclipse/updates/4.12milestones/ \
+/eclipse/updates/4.12-Y-builds/ \
+/eclipse/updates/4.12-P-builds/ \
 /eclipse/updates/4.11-I-builds/ \
 /eclipse/updates/4.11milestones/ \
 /eclipse/updates/4.11-Y-builds/ \
