@@ -39,7 +39,14 @@ fn-addToPropFiles ()
 }
 
 echo "#!/bin/bash" >> $BUILD_ENV_FILE
-fn-addToPropFiles TIMESTAMP "\"$(date +%Y%m%d-%H%M --date='@'$(date +%s))\""
+
+# We set RAWDATE first thing here to make the "start of build" timestamp more accurate.
+# Note that a roundup is added to compensate the occasional delay.
+RAWDATE=$(date +%s)
+REMAINDER=$((RAWDATE % 600))
+RAWDATE_TRUNC=$((RAWDATE - REMAINDER))
+export RAWDATE
+fn-addToPropFiles TIMESTAMP "\"$(date +%Y%m%d-%H%M --date='@'$RAWDATE_TRUNC)\""
 
 while read propLine
 do
