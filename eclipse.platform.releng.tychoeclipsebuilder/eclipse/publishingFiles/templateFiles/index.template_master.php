@@ -127,6 +127,7 @@ if (isset ($ACK_ID)) {
 if (isset ($README_ID)) {
   echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${README_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
 }
+echo "<a href=\"https://www.eclipse.org/projects/project-plan.php?planurl=http://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_${STREAMMajor}_${STREAMMinor}.xml\">Eclipse Project Plan</a><br>\n";
 
 if (isset ($BUILD_FAILED) ) {
   echo "<h2>Build Failed</h2><p>See <a href=\"buildlogs.php\">logs</a>.</p>\n";
