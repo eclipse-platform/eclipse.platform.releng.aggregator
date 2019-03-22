@@ -16,6 +16,8 @@
 export CJE_ROOT=${CJE_ROOT:-`pwd`}
 source $CJE_ROOT/scripts/common-functions.shsource
 
+chmod -R +x .
+
 pushd mbscripts
 for i in $(ls | sort)
 do
