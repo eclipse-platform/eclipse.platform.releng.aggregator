@@ -18,9 +18,17 @@ source $CJE_ROOT/scripts/common-functions.shsource
 
 chmod -R +x .
 
+logDir=$CJE_ROOT/siteDir/buildlogs
+mkdir -p $logDir
+
 pushd mbscripts
 for i in $(ls | sort)
 do
-  fn-run-command ./$i $CJE_ROOT/buildproperties.shsource
+  fn-run-command ./$i $CJE_ROOT/buildproperties.shsource 2>&1 |tee $logDir/$i.log
 done
 popd
+
+source $CJE_ROOT/buildproperties.shsource 
+
+mv -r $logDir $CJE_ROOT/$DROP_DIR/$BUILD_ID
+mv $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
