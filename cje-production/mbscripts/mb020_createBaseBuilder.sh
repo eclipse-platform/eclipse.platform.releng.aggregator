@@ -40,4 +40,4 @@ ${TMP}/eclipse/eclipse -nosplash \
       -destination \
       ${qualifiedBaseBuilder} \
       -profile \
-      SDKProfile &
+      SDKProfile
