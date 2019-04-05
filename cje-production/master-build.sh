@@ -32,5 +32,5 @@ wait
 
 source $CJE_ROOT/buildproperties.shsource 
 
-mv -f $logDir $CJE_ROOT/$DROP_DIR/$BUILD_ID
+cp -r $logDir/* $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/.
 mv $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
