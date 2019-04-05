@@ -24,5 +24,5 @@ source $1
 
 mkdir -p $CJE_ROOT/$TMP_DIR
 pushd $CJE_ROOT/$TMP_DIR
-$CJE_ROOT/$BASEBUILDER_DIR/eclipse -nosplash -application org.eclipse.equinox.p2.artifact.repository.mirrorApplication -source https://$DOWNLOAD_HOST/eclipse/updates/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID/ -destination file:$CJE_ROOT/$TMP_DIR/$PREVIOUS_RELEASE_ID/
+wget --recursive --no-parent --no-verbose http://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID &
 popd
