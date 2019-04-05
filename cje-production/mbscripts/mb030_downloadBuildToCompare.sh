@@ -24,5 +24,5 @@ source $1
 
 mkdir -p $CJE_ROOT/$TMP_DIR
 pushd $CJE_ROOT/$TMP_DIR
-wget --recursive --no-parent --no-verbose http://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID
+wget --recursive --no-parent --no-verbose http://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID &
 popd

@@ -28,7 +28,9 @@ do
 done
 popd
 
+wait
+
 source $CJE_ROOT/buildproperties.shsource 
 
-mv -r $logDir $CJE_ROOT/$DROP_DIR/$BUILD_ID
+mv -f $logDir $CJE_ROOT/$DROP_DIR/$BUILD_ID
 mv $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
