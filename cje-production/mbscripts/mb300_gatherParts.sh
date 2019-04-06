@@ -23,7 +23,6 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/repository
-mkdir -p $CJE_ROOT/$TMP_DIR
 
 # gather repo
 echo $PATCH_BUILD
