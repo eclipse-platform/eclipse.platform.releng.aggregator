@@ -114,6 +114,7 @@ if [ -z $PATCH_BUILD ]; then
       -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
       -DequinoxPostingDirectory=$CJE_ROOT/siteDir/equinox/drops \
       -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR
+    popd
   fi
 fi
 
