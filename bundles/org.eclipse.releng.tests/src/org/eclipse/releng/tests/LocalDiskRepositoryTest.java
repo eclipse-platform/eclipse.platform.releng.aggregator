@@ -111,11 +111,11 @@ public class LocalDiskRepositoryTest {
 	 */
 	private Repository createRepository(boolean bare) throws IOException {
 		File gitdir = createUniqueTestGitDir(bare);
+		Assert.assertFalse(gitdir.exists());
 		FileRepositoryBuilder repositoryBuilder = new FileRepositoryBuilder();
-		repositoryBuilder.setMustExist( true );
+		repositoryBuilder.setMustExist(false);
 		repositoryBuilder.setGitDir(gitdir);
 		Repository db = repositoryBuilder.build();
-		Assert.assertFalse(gitdir.exists());
 		db.create();
 		toClose.add(db);
 		return db;
