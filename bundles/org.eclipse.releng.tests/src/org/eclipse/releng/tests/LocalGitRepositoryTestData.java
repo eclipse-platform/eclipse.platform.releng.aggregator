@@ -65,9 +65,11 @@ import org.junit.Before;
 
 /**
  * This class is a modified version of org.eclipse.jgit.junit.LocalDiskRepositoryTestCase
- *
+ * <p>
+ * Base class for tests requiring a local Git repository for testing.
+ * </p>
  */
-public class LocalDiskRepositoryTest {
+public abstract class LocalGitRepositoryTestData {
 	private static int testCount;
 	protected PersonIdent committer;
 	private final File trash = new File(new File("target"), "trash");

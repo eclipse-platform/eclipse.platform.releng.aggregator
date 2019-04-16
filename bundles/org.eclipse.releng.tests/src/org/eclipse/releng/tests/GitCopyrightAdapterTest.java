@@ -40,7 +40,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
+public class GitCopyrightAdapterTest extends LocalGitRepositoryTestData {
 
 	private static final IProgressMonitor NULL_MONITOR = new NullProgressMonitor();
 
