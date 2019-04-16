@@ -70,6 +70,9 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 						walk.setTreeFilter(AndTreeFilter.create(PathFilter.create(mapping.getRepoRelativePath(file)),
 								TreeFilter.ANY_DIFF));
 						walk.markStart(walk.lookupCommit(start));
+						// dramatically increase performance for this use case
+						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=468850#c17
+						walk.setRewriteParents(false);
 						final RevCommit commit = walk.next();
 						if (commit != null) {
 							if (filterString != null
@@ -117,8 +120,6 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 
 	@Override
 	public void initialize(IProgressMonitor monitor) throws CoreException {
-		// TODO We should perform a bulk "log" command to get the last modified
-		// year
 	}
 
 }
