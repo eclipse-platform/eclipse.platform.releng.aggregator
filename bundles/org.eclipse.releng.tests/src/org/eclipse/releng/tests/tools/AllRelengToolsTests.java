@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Tomasz Zarna and others.
+ * Copyright (c) 2013, 2019 Tomasz Zarna and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  * Contributors:
  *     Tomasz Zarna <tzarna@gmail.com> - initial API and implementation
  *******************************************************************************/
-package org.eclipse.releng.tests;
+package org.eclipse.releng.tests.tools;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.AllTests;
@@ -19,12 +19,15 @@ import org.junit.runners.AllTests;
 import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestSuite;
 
+/**
+ * Tests for integration and nightly builds.
+ */
 @RunWith(AllTests.class)
-public class AllRelengTests {
+public class AllRelengToolsTests {
 
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite();
-		suite.addTest(new JUnit4TestAdapter(BuildTests.class));
+		suite.addTest(new JUnit4TestAdapter(AdvancedCopyrightCommentTestsJunit4.class));
 		if (isJGitAvailable())
 			suite.addTest(new JUnit4TestAdapter(GitCopyrightAdapterTest.class));
 		return suite;

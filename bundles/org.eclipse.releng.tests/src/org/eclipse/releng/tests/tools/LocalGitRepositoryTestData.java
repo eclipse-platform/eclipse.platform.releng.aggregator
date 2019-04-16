@@ -46,7 +46,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.eclipse.releng.tests;
+package org.eclipse.releng.tests.tools;
 
 import java.io.File;
 import java.io.IOException;

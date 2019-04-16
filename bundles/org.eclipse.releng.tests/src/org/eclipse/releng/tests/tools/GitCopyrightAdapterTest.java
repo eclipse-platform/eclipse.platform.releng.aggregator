@@ -11,7 +11,7 @@
  * Contributors:
  *     Tomasz Zarna <tzarna@gmail.com> - initial API and implementation
  *******************************************************************************/
-package org.eclipse.releng.tests;
+package org.eclipse.releng.tests.tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
