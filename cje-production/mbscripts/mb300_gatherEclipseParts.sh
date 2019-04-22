@@ -23,6 +23,7 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/repository
+mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 
 # gather repo
 echo $PATCH_BUILD
@@ -112,8 +113,9 @@ if [ -z $PATCH_BUILD ]; then
       -DbuildRepo=$PLATFORM_REPO_DIR \
       -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
       -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
-      -DequinoxPostingDirectory=$CJE_ROOT/siteDir/equinox/drops \
-      -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR
+      -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
+      -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+      -v
     popd
   fi
 fi
