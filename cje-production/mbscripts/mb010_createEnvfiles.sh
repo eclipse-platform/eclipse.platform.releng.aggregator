@@ -33,9 +33,9 @@ BUILD_ENV_FILE_PROP=$CJE_ROOT/${propEnvFile}
 
 fn-addToPropFiles ()
 {
-	echo "export $1=$2" >> $BUILD_ENV_FILE
-	echo "\$$1 = $2;" >> $BUILD_ENV_FILE_PHP
-	echo "$1 = $2" >> $BUILD_ENV_FILE_PROP
+  echo "export $1=$2" >> $BUILD_ENV_FILE
+  echo "\$$1 = $2;" >> $BUILD_ENV_FILE_PHP
+  echo "$1 = $2" >> $BUILD_ENV_FILE_PROP
 }
 
 echo "#!/bin/bash" >> $BUILD_ENV_FILE
@@ -50,19 +50,24 @@ fn-addToPropFiles TIMESTAMP "\"$(date +%Y%m%d-%H%M --date='@'$RAWDATE_TRUNC)\""
 
 while read propLine
 do
-	if [[ ${propLine:0:1} == "#" ]]
-	then 
-		continue
-	else
-		key=$(echo $propLine|cut -d= -f1)
-		value=$(echo $propLine|cut -d= -f2-)
-		if [[ -z $key ]]
-		then 
-			continue
-		fi
-		fn-addToPropFiles $key "$value"
-	fi
+  if [[ ${propLine:0:1} == "#" ]]; then 
+    continue
+  else
+    key=$(echo $propLine|cut -d= -f1)
+    value=$(echo $propLine|cut -d= -f2-)
+    if [[ -z $key ]]; then 
+      continue
+    fi
+    fn-addToPropFiles $key "$value"
+  fi
 done < ../buildproperties.txt
 
 source $BUILD_ENV_FILE
+# add BUILD_ENV_FILE* variables to prop files before using fn-write-property in common-functions.shsource
+fn-addToPropFiles BUILD_ENV_FILE "\"$BUILD_ENV_FILE\""
+fn-addToPropFiles BUILD_ENV_FILE_PHP "\"$BUILD_ENV_FILE_PHP\""
+fn-addToPropFiles BUILD_ENV_FILE_PROP "\"$BUILD_ENV_FILE_PROP\""
+# variables in buildproperties.txt are now defined, add other commonly used variables to prop files
 fn-addToPropFiles BUILD_ID "\"$BUILD_TYPE$TIMESTAMP\""
+fn-addToPropFiles ECLIPSE_BUILDER_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder\""
+fn-addToPropFiles PLATFORM_REPO_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository\""

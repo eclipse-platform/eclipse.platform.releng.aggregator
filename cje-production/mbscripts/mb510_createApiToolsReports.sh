@@ -22,8 +22,7 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-LAUNCHER_JAR=$(find $CJE_ROOT/$BASEBUILDER_DIR -name org.eclipse.equinox.launcher_*.jar | tail -1)
-ANT_SCRIPT=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/api-tools-builder.xml
+ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml
 
 # Change to appropriate versions and uncomment when entering API freeze
 #FREEZE_PARAMS="-DfreezeBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/S-4.12RC1-yyyymmddhhmm/eclipse-SDK-4.12RC1-win32-x86_64.zip -DfreezeName=Eclipse-SDK-4.12RC1 -DfreezeFilename=eclipse-SDK-4.12RC1-win32-x86_64.zip"
@@ -31,12 +30,11 @@ ANT_SCRIPT=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclips
 FREEZE_PARAMS=" "
 
 pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
-
 java -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
-  -data $CJE_ROOT/$DROP_DIR/$BUILD_ID/workspace-apitoolingsLogs \
-  -DEBuilderDir=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder \
+  -data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
+  -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -DbuildId=$BUILD_ID \
   -DbuildLabel=$BUILD_ID \
@@ -47,5 +45,4 @@ java -jar $LAUNCHER_JAR \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
   $FREEZE_PARAMS \
   apiToolsReports
-
 popd

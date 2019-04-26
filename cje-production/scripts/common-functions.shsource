@@ -27,22 +27,9 @@
 
 fn-write-property ()
 {
-  checkNArgs $# 1
-  if [[ $? != 0 ]]; then return 1; fi
-  VAR_NAME=$1
-  if [[ -z "${VAR_NAME}" ]]
-  then
-    echo "VAR_NAME must be passed to this script, $0."
-    return 1
-  fi
-
-  # bash scripts (export may be overkill ... but, just in case needed)
-  echo "export ${VAR_NAME}=\"${!VAR_NAME//\"/\\\"}\"" >> $BUILD_ENV_FILE
-  # PHP, suitable for direct "include"
-  echo "\$${VAR_NAME} = \"${!VAR_NAME//\"/\\\"}\";" >> $BUILD_ENV_FILE_PHP
-  # standard properties file
-  echo "${VAR_NAME} = \"${!VAR_NAME//\"/\\\"}\"" >> $BUILD_ENV_FILE_PROP
-
+  echo "export $1=$2" >> $BUILD_ENV_FILE
+  echo "\$$1 = $2;" >> $BUILD_ENV_FILE_PHP
+  echo "$1 = $2" >> $BUILD_ENV_FILE_PROP
 }
 
 # this function executes command passed as command line parameter and
@@ -51,8 +38,7 @@ fn-run-command ()
 {
   $*
   returnCode=$?
-  if [ $returnCode != 0 ]
-  then
+  if [ $returnCode != 0 ]; then
     echo "Execution of \"$*\" failed with return code : $returnCode"
     exit $returnCode
   fi

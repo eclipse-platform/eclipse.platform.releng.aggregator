@@ -23,7 +23,7 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 # gather Equinox Starter Kit
-REPO_DIR=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/equinox.starterkit.product/target/products
+REPO_DIR=$ECLIPSE_BUILDER_DIR/equinox.starterkit.product/target/products
   
 if [ -d $REPO_DIR ]; then
   pushd $REPO_DIR
@@ -36,7 +36,7 @@ if [ -d $REPO_DIR ]; then
 fi
 
 # gather Equinox SDK
-REPO_DIR=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/equinox-sdk/target
+REPO_DIR=$ECLIPSE_BUILDER_DIR/equinox-sdk/target
   
 if [ -d $REPO_DIR ]; then
   pushd $REPO_DIR
@@ -51,27 +51,25 @@ fi
 
 # publish Equinox
 pushd $CJE_ROOT
-mkdir -p $CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/equinox/$TMP_DIR
-REPO_DIR=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
-LAUNCHER_JAR=$(find $CJE_ROOT/$BASEBUILDER_DIR -name org.eclipse.equinox.launcher_*.jar | tail -1)
-ANT_SCRIPT=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/equinox/helper.xml
+mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
+ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/equinox/helper.xml
 java -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
-  -data $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/workspace-publishEquinox \
-  -DEBuilderDir=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder \
+  -data $CJE_ROOT/$TMP_DIR/workspace-publishEquinox \
+  -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDir=$BUILD_ID \
   -DbuildDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
   -DbuildId=$BUILD_ID \
-  -DbuildRepo=$REPO_DIR \
+  -DbuildRepo=$PLATFORM_REPO_DIR \
   -DbuildType=$BUILD_TYPE \
   -DpostingDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
-  -DeqpublishingContent=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/equinox/publishingFiles \
-  -DdropTemplateFileName=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/templateFiles/index.template_$PATCH_OR_BRANCH_LABEL.php \
+  -DeqpublishingContent=$ECLIPSE_BUILDER_DIR/equinox/publishingFiles \
+  -DdropTemplateFileName=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles/templateFiles/index.template_$PATCH_OR_BRANCH_LABEL.php \
   -DindexFileName=index.php \
   -DeclipseStream=$STREAM \
-  -Dequinox.build.configs=$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/equinox/buildConfigs \
+  -Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \
   -Dbase.builder=$CJE_ROOT/$BASEBUILDER_DIR \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
   -v \

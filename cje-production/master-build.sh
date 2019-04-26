@@ -18,7 +18,7 @@ source $CJE_ROOT/scripts/common-functions.shsource
 
 chmod +x mbscripts/*
 
-logDir=$CJE_ROOT/$TMP_DIR/buildlogs
+logDir=$CJE_ROOT/buildlogs
 mkdir -p $logDir
 
 pushd mbscripts
@@ -31,10 +31,9 @@ popd
 wait
 
 source $CJE_ROOT/buildproperties.shsource
-
-cp -r $logDir/* $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/.
+cp -r $logDir/* $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
+rm -rf $logDir
 cp $CJE_ROOT/buildproperties.txt $CJE_ROOT/$DROP_DIR/$BUILD_ID
 mv $CJE_ROOT/buildproperties.php $CJE_ROOT/$DROP_DIR/$BUILD_ID
 mv $CJE_ROOT/buildproperties.properties $CJE_ROOT/$DROP_DIR/$BUILD_ID
 mv $CJE_ROOT/buildproperties.shsource $CJE_ROOT/$DROP_DIR/$BUILD_ID
-rm -rf $CJE_ROOT/$TMP_DIR
