@@ -119,6 +119,10 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 if (isset ($NEWS_ID)) {
   echo "<a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a><br>\n";
 }
+else {
+// Show N&N link on the I-Build download page
+  echo "<a href=\"https://www.eclipse.org/eclipse/news/${STREAMMajor}.${STREAMMinor}/\">New and Noteworthy</a><br>\n";
+}
 // Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
 // And, are added by the promotion scripts, as long as we keep same conventions.
 if (isset ($ACK_ID)) {
