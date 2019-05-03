@@ -38,7 +38,8 @@ fn-addToPropFiles ()
   echo "$1 = $2" >> $BUILD_ENV_FILE_PROP
 }
 
-echo "#!/bin/bash" >> $BUILD_ENV_FILE
+echo "#!/bin/bash" > $BUILD_ENV_FILE
+echo "<?php " > $BUILD_ENV_FILE_PHP
 
 # We set RAWDATE first thing here to make the "start of build" timestamp more accurate.
 # Note that a roundup is added to compensate the occasional delay.
@@ -47,6 +48,7 @@ REMAINDER=$((RAWDATE % 600))
 RAWDATE_TRUNC=$((RAWDATE - REMAINDER))
 export RAWDATE
 fn-addToPropFiles TIMESTAMP "\"$(date +%Y%m%d-%H%M --date='@'$RAWDATE_TRUNC)\""
+fn-addToPropFiles BUILD_PRETTY_DATE "\"$(date --date='@'$RAWDATE_TRUNC)\""
 
 while read propLine
 do
@@ -69,5 +71,8 @@ fn-addToPropFiles BUILD_ENV_FILE_PHP "\"$BUILD_ENV_FILE_PHP\""
 fn-addToPropFiles BUILD_ENV_FILE_PROP "\"$BUILD_ENV_FILE_PROP\""
 # variables in buildproperties.txt are now defined, add other commonly used variables to prop files
 fn-addToPropFiles BUILD_ID "\"$BUILD_TYPE$TIMESTAMP\""
+fn-addToPropFiles BUILD_DIR_SEG "\"$BUILD_TYPE$TIMESTAMP\""
+fn-addToPropFiles EQ_BUILD_DIR_SEG "\"$BUILD_TYPE$TIMESTAMP\""
+fn-addToPropFiles EBUILDER_HASH "\"$(git show-ref --hash --verify refs/remotes/origin/${BRANCH})\""
 fn-addToPropFiles ECLIPSE_BUILDER_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder\""
 fn-addToPropFiles PLATFORM_REPO_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository\""
