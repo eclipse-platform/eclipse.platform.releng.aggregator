@@ -21,102 +21,102 @@ import java.util.Calendar;
 
 public abstract class CopyrightComment {
 
-    public static final int UNKNOWN_COMMENT = -1;
-    public static final int JAVA_COMMENT = 1;
-    public static final int PROPERTIES_COMMENT = 2;
-    public static final int C_COMMENT = 3;
-    public static final int SHELL_MAKE_COMMENT = 4;
-    public static final int BAT_COMMENT = 5;
+	public static final int UNKNOWN_COMMENT = -1;
+	public static final int JAVA_COMMENT = 1;
+	public static final int PROPERTIES_COMMENT = 2;
+	public static final int C_COMMENT = 3;
+	public static final int SHELL_MAKE_COMMENT = 4;
+	public static final int BAT_COMMENT = 5;
 	public static final int JAVASCRIPT_COMMENT = 6;
 	public static final int XML_COMMENT = 7;
-    
-	private int commentStyle;
-    private int creationYear = -1;
-    private int revisionYear = -1;
-	private String lineDelimiter;
-    
-    protected CopyrightComment(int commentStyle, int creationYear, int revisionYear) {
-        this.commentStyle = commentStyle;
-        this.creationYear = creationYear == -1 ? (Calendar.getInstance().get(Calendar.YEAR)) : creationYear;
-        this.revisionYear = revisionYear;
-    }
 
-    public static String getLinePrefix(int commentStyle) {
-        switch(commentStyle) {
-	        case JAVA_COMMENT:
-	        case C_COMMENT:
-		    case JAVASCRIPT_COMMENT:
-	            return " *";  //$NON-NLS-1$
-	        case PROPERTIES_COMMENT:
-	            return "#"; //$NON-NLS-1$
-	        case SHELL_MAKE_COMMENT:
-	            return "#"; //$NON-NLS-1$
-	        case BAT_COMMENT:
-	            return "@rem"; //$NON-NLS-1$
-	        case XML_COMMENT:
-	            return "   "; //$NON-NLS-1$
-		    default:
-	            return null;
-        }
+	private int commentStyle;
+	private int creationYear = -1;
+	private int revisionYear = -1;
+	private String lineDelimiter;
+
+	protected CopyrightComment(int commentStyle, int creationYear, int revisionYear) {
+		this.commentStyle = commentStyle;
+		this.creationYear = creationYear == -1 ? (Calendar.getInstance().get(Calendar.YEAR)) : creationYear;
+		this.revisionYear = revisionYear;
 	}
-    
+
+	public static String getLinePrefix(int commentStyle) {
+		switch(commentStyle) {
+			case JAVA_COMMENT:
+			case C_COMMENT:
+			case JAVASCRIPT_COMMENT:
+				return " *";  //$NON-NLS-1$
+			case PROPERTIES_COMMENT:
+				return "#"; //$NON-NLS-1$
+			case SHELL_MAKE_COMMENT:
+				return "#"; //$NON-NLS-1$
+			case BAT_COMMENT:
+				return "@rem"; //$NON-NLS-1$
+			case XML_COMMENT:
+				return "   "; //$NON-NLS-1$
+			default:
+				return null;
+		}
+	}
+
 	protected void writeCommentStart(PrintWriter writer) {
-	    switch(commentStyle) {
-	    case JAVA_COMMENT:
-	    case C_COMMENT:
-	    case JAVASCRIPT_COMMENT:
+		switch(commentStyle) {
+		case JAVA_COMMENT:
+		case C_COMMENT:
+		case JAVASCRIPT_COMMENT:
 			println(writer, "/*******************************************************************************"); //$NON-NLS-1$
 			break;
-	    case PROPERTIES_COMMENT:
-		    println(writer, "###############################################################################"); //$NON-NLS-1$
-		    break;
-	    case SHELL_MAKE_COMMENT:
+		case PROPERTIES_COMMENT:
+			println(writer, "###############################################################################"); //$NON-NLS-1$
+			break;
+		case SHELL_MAKE_COMMENT:
 			println(writer, "#*******************************************************************************"); //$NON-NLS-1$
 			break;
-	    case BAT_COMMENT:
+		case BAT_COMMENT:
 			println(writer, "@rem ***************************************************************************"); //$NON-NLS-1$
 			break;
-	    case XML_COMMENT:
+		case XML_COMMENT:
 			println(writer, "<!--"); //$NON-NLS-1$
 			break;
-	    }
+		}
 	}
 	
 	protected void writeCommentEnd(PrintWriter writer) {
-	    switch(commentStyle) {
-	    case JAVA_COMMENT:
-	    case C_COMMENT:
-	    case JAVASCRIPT_COMMENT:
+		switch(commentStyle) {
+		case JAVA_COMMENT:
+		case C_COMMENT:
+		case JAVASCRIPT_COMMENT:
 			println(writer, " *******************************************************************************/"); //$NON-NLS-1$
 			break;
-	    case PROPERTIES_COMMENT:
-		    println(writer, "###############################################################################"); //$NON-NLS-1$
-		    break;
-	    case SHELL_MAKE_COMMENT:
+		case PROPERTIES_COMMENT:
+			println(writer, "###############################################################################"); //$NON-NLS-1$
+			break;
+		case SHELL_MAKE_COMMENT:
 			println(writer, "#*******************************************************************************"); //$NON-NLS-1$
 			break;
-	    case BAT_COMMENT:
+		case BAT_COMMENT:
 			println(writer, "@rem ***************************************************************************"); //$NON-NLS-1$
 			break;
-	    case XML_COMMENT:
+		case XML_COMMENT:
 			println(writer, " -->"); //$NON-NLS-1$
 			break;
-	    }
+		}
+	}
+
+
+	public int getRevisionYear() {
+		return revisionYear == -1 ? creationYear : revisionYear;
 	}
 	
-    
-    public int getRevisionYear() {
-        return revisionYear == -1 ? creationYear : revisionYear;
-    }
-    
-    public boolean hasRevisionYear() {
-    	return revisionYear != -1;
-    }
-    
-    public void setRevisionYear(int year) {
-        if (revisionYear != -1 || creationYear != year)
-            revisionYear = year;
-    }
+	public boolean hasRevisionYear() {
+		return revisionYear != -1;
+	}
+	
+	public void setRevisionYear(int year) {
+		if (revisionYear != -1 || creationYear != year)
+			revisionYear = year;
+	}
 
 	/**
 	 * @param lineDelimiter

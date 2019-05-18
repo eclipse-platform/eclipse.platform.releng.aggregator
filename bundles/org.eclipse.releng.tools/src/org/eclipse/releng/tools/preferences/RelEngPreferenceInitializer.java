@@ -29,19 +29,19 @@ public class RelEngPreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	@Override
 	public void initializeDefaultPreferences() {
-        IPreferenceStore store = RelEngPlugin.getDefault().getPreferenceStore();
-        int year = Calendar.getInstance().get(Calendar.YEAR);
-        store.setDefault(RelEngCopyrightConstants.COPYRIGHT_TEMPLATE_KEY, LEGAL_LINE);
-        store.setDefault(RelEngCopyrightConstants.CREATION_YEAR_KEY, year);
+		IPreferenceStore store = RelEngPlugin.getDefault().getPreferenceStore();
+		int year = Calendar.getInstance().get(Calendar.YEAR);
+		store.setDefault(RelEngCopyrightConstants.COPYRIGHT_TEMPLATE_KEY, LEGAL_LINE);
+		store.setDefault(RelEngCopyrightConstants.CREATION_YEAR_KEY, year);
 		store.setDefault(RelEngCopyrightConstants.REVISION_YEAR_KEY, year);
-        store.setDefault(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY, false);
-    	// disable fix up existing copyright till it works better
+		store.setDefault(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY, false);
+		// disable fix up existing copyright till it works better
 //        store.setDefault(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY, false);
-        store.setDefault(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY, false);
-        store.setDefault(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, false);
-        store.setDefault(RelEngCopyrightConstants.IGNORE_XML_KEY, false);
+		store.setDefault(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY, false);
+		store.setDefault(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, false);
+		store.setDefault(RelEngCopyrightConstants.IGNORE_XML_KEY, false);
 
-        store.setDefault(IPomVersionConstants.POM_VERSION_ERROR_LEVEL, IPomVersionConstants.VALUE_ERROR);
+		store.setDefault(IPomVersionConstants.POM_VERSION_ERROR_LEVEL, IPomVersionConstants.VALUE_ERROR);
 	}
 
 }

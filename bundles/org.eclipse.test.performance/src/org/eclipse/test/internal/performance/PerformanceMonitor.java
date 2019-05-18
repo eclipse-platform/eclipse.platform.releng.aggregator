@@ -18,32 +18,32 @@ import org.eclipse.test.internal.performance.data.Scalar;
 
 class PerformanceMonitor {
 
-  private static PerformanceMonitor fgPerformanceMonitor;
+    private static PerformanceMonitor fgPerformanceMonitor;
 
-  public static PerformanceMonitor getPerformanceMonitor() {
-    if (fgPerformanceMonitor == null) {
-      String os = System.getProperty("os.name"); //$NON-NLS-1$
-      if (os.startsWith("Windows")) //$NON-NLS-1$
-        fgPerformanceMonitor = new PerformanceMonitorWindows();
-      else if (os.startsWith("Mac OS X")) //$NON-NLS-1$
-        fgPerformanceMonitor = new PerformanceMonitorMac();
-      else
-        fgPerformanceMonitor = new PerformanceMonitorLinux();
+    public static PerformanceMonitor getPerformanceMonitor() {
+        if (fgPerformanceMonitor == null) {
+            String os = System.getProperty("os.name"); //$NON-NLS-1$
+            if (os.startsWith("Windows")) //$NON-NLS-1$
+                fgPerformanceMonitor = new PerformanceMonitorWindows();
+            else if (os.startsWith("Mac OS X")) //$NON-NLS-1$
+                fgPerformanceMonitor = new PerformanceMonitorMac();
+            else
+                fgPerformanceMonitor = new PerformanceMonitorLinux();
+        }
+        return fgPerformanceMonitor;
     }
-    return fgPerformanceMonitor;
-  }
 
-  protected void collectOperatingSystemCounters(Map scalars) {
-    Runtime runtime = Runtime.getRuntime();
-    // runtime.gc();
-    addScalar(scalars, InternalDimensions.USED_JAVA_HEAP, runtime.totalMemory() - runtime.freeMemory());
-  }
+    protected void collectOperatingSystemCounters(Map scalars) {
+        Runtime runtime = Runtime.getRuntime();
+        // runtime.gc();
+        addScalar(scalars, InternalDimensions.USED_JAVA_HEAP, runtime.totalMemory() - runtime.freeMemory());
+    }
 
-  protected void collectGlobalPerformanceInfo(Map scalars) {
-    // no default implementation
-  }
+    protected void collectGlobalPerformanceInfo(Map scalars) {
+        // no default implementation
+    }
 
-  void addScalar(Map scalars, Dim dimension, long value) {
-    scalars.put(dimension, new Scalar(dimension, value));
-  }
+    void addScalar(Map scalars, Dim dimension, long value) {
+        scalars.put(dimension, new Scalar(dimension, value));
+    }
 }

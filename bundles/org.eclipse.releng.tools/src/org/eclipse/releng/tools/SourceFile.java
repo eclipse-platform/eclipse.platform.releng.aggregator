@@ -49,26 +49,26 @@ public abstract class SourceFile {
 	private String lineDelimiter;
 
 	public static SourceFile createFor(IFile file) {
-        String extension = file.getFileExtension();
-        if (extension != null) {
-	        extension = extension.toLowerCase();
+		String extension = file.getFileExtension();
+		if (extension != null) {
+			extension = extension.toLowerCase();
 			if (extension.equals("java")) { //$NON-NLS-1$
 				return new JavaFile(file);
-	        } else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-	            return new CFile(file);
+			} else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				return new CFile(file);
 			} else if (extension.equals("properties")) { //$NON-NLS-1$
 				return new PropertiesFile(file);
-	        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak") || extension.equals("pl") || extension.equals("tcl")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-	            return new ShellMakeFile(file);
-	        } else if (extension.equals("bat")) { //$NON-NLS-1$
-	            return new BatFile(file);
+			} else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak") || extension.equals("pl") || extension.equals("tcl")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				return new ShellMakeFile(file);
+			} else if (extension.equals("bat")) { //$NON-NLS-1$
+				return new BatFile(file);
 			} else if (extension.equals("js")) { //$NON-NLS-1$
-	            return new JavaScriptFile(file);
+				return new JavaScriptFile(file);
 			} else if (extension.equals("xml")) { //$NON-NLS-1$
-		    //[276257] re-enable xml support.
-		    return new XmlFile(file);
+			//[276257] re-enable xml support.
+			return new XmlFile(file);
 			}
-        }
+		}
 		return null;
 	}
 	
@@ -109,15 +109,15 @@ public abstract class SourceFile {
 			
 			IDocument document;
 			try {
-			        //connect file buffer. 
-		                ITextFileBuffer fileBuffer = openFileBuffer();
-		                        if (fileBuffer == null)
-		                                return;
-			    
+				//connect file buffer. 
+				ITextFileBuffer fileBuffer = openFileBuffer();
+				if (fileBuffer == null)
+					return;
+
 				document = fileBuffer.getDocument();
 			} finally {
 				//Close file buffer. 
-                                closeFileBuffer();
+				closeFileBuffer();
 			}
 			
 			lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
@@ -209,11 +209,11 @@ public abstract class SourceFile {
 	 * Companion function to getFileBuffer();
 	 */
 	private void closeFileBuffer() {
-            try {
-                textFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, null);
-            } catch (CoreException e) {
-                    e.printStackTrace();
-            }
+			try {
+				textFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, null);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	
@@ -224,10 +224,10 @@ public abstract class SourceFile {
 	 */
 	public void insert(String copyRightComment) {
 		try {
-		        ITextFileBuffer fileBuffer= openFileBuffer();
-		        if (fileBuffer == null)
-		                 return;
-		    
+			ITextFileBuffer fileBuffer= openFileBuffer();
+			if (fileBuffer == null)
+				return;
+
 			IDocument document= fileBuffer.getDocument();
 			doInsert(copyRightComment, document);
 			fileBuffer.commit(null, false);
@@ -238,7 +238,7 @@ public abstract class SourceFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-		    closeFileBuffer();
+			closeFileBuffer();
 		}
 	}
 
@@ -286,9 +286,9 @@ public abstract class SourceFile {
 		} catch (CoreException e) {
 			e.printStackTrace();
 		} finally  {
-		    closeFileBuffer();
+			closeFileBuffer();
 			try {
-			        FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE, null);
+				FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE, null);
 			} catch (CoreException e) {
 				e.printStackTrace();
 				return;

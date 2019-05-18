@@ -65,7 +65,7 @@ public class PomVersionMarkerResolution extends WorkbenchMarkerResolution {
 
 	@Override
 	public void run(IMarker marker) {
-		 try {
+		try {
 			correctedVersion = (String) marker.getAttribute(IPomVersionConstants.POM_CORRECT_VERSION);
 		} catch (CoreException e1) {
 			RelEngPlugin.log(e1);

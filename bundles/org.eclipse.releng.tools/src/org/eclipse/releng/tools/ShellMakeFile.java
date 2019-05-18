@@ -59,49 +59,49 @@ public class ShellMakeFile extends SourceFile {
 		return CopyrightComment.SHELL_MAKE_COMMENT;
 	}
 
-        @Override
-		protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
-                // find insert offset (we must skip instructions)
-                int insertOffset = findInsertOffset(document);
+	@Override
+	protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
+		// find insert offset (we must skip instructions)
+		int insertOffset = findInsertOffset(document);
 
-                // insert comment
-                document.replace(insertOffset, 0, comment);
-        }
+		// insert comment
+		document.replace(insertOffset, 0, comment);
+	}
 
-        private int findInsertOffset(IDocument document) throws BadLocationException {
-                boolean inInstruction = false;
-                int insertOffset = 0;
+	private int findInsertOffset(IDocument document) throws BadLocationException {
+		boolean inInstruction = false;
+		int insertOffset = 0;
 
-                for (int offset = 0; offset < document.getLength(); offset++) {
-                        char c = document.getChar(offset);
+		for (int offset = 0; offset < document.getLength(); offset++) {
+			char c = document.getChar(offset);
 
-                        // also look at next char
-                        char c2 = ((offset + 1) < document.getLength()) ? document.getChar(offset + 1) : 0;
+			// also look at next char
+			char c2 = ((offset + 1) < document.getLength()) ? document.getChar(offset + 1) : 0;
 
-                        // look for line ending
-                        if (inInstruction) {
-                                if (c == '\n' && c2 == '\r' || c == '\r' && c2 == '\n') {
-                                        insertOffset = offset + 2;
-                                        break; // done
-                                } else if (c == '\n') {
-                                        insertOffset = offset + 1;
-                                        break; // done
-                                } else {
-                                        // continue looking for ending
-                                        continue;
-                                }
-                        }
+			// look for line ending
+			if (inInstruction) {
+				if (c == '\n' && c2 == '\r' || c == '\r' && c2 == '\n') {
+					insertOffset = offset + 2;
+					break; // done
+				} else if (c == '\n') {
+					insertOffset = offset + 1;
+					break; // done
+				} else {
+					// continue looking for ending
+					continue;
+				}
+			}
 
-                        // next chars must start an instruction
-                        if (c == '#' && c2 == '!') {
-                                inInstruction = true;
-                                offset++; // don't need to analyse c2 again
-                                continue;
-                        } else {
-                                // if it's something else, we can stop seeking
-                                break;
-                        }
-                }
-                return insertOffset;
-        }
+			// next chars must start an instruction
+			if (c == '#' && c2 == '!') {
+				inInstruction = true;
+				offset++; // don't need to analyse c2 again
+				continue;
+			} else {
+				// if it's something else, we can stop seeking
+				break;
+			}
+		}
+		return insertOffset;
+	}
 }

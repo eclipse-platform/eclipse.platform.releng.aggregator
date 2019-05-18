@@ -47,7 +47,7 @@ public class BlockComment {
 	}
 
 	public String getContents() {
-	    return contents;
+		return contents;
 	}
 
 	/**
