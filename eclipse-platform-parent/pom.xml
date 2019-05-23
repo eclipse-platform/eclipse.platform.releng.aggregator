@@ -157,6 +157,7 @@
     <qualifier.format>'v'yyyyMMdd-HHmm</qualifier.format>
 
     <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
+    <previous-release.baseline>https://download.eclipse.org/eclipse/updates/4.12-I-builds/</previous-release.baseline>
 
     <!--
       Declaration of properties that contribute to the arg line for the tycho-surefire-plugin.
@@ -376,7 +377,7 @@
            <configuration>
              <skip>${compare-version-with-baselines.skip}</skip>
              <baselines>
-               <baseline>https://download.eclipse.org/eclipse/updates/4.12-I-builds/</baseline> <!-- Previous release) -->
+               <baseline>${previous-release.baseline}</baseline>
              </baselines>
              <comparator>zip</comparator>
            </configuration>
@@ -577,23 +578,6 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.3.0.603</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>list-dependencies</id>
-              <goals>
-                <goal>list</goal>
-              </goals>
-              <phase>verify</phase>
-              <configuration>
-                <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
-                <outputScope>false</outputScope>
-                <outputFile>${project.build.directory}/dependencies.txt</outputFile>
-              </configuration>
-            </execution>
-          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -942,6 +926,116 @@
             </executions>
           </plugin>
         </plugins>
+      </build>
+    </profile>
+    <profile>
+       <id>api-check</id>
+       <activation>
+         <activeByDefault>false</activeByDefault>
+       </activation>
+       <build>
+         <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-skip-api-analysis</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <skip>${skipAPIAnalysis}</skip>
+                  <exportAntProperties>true</exportAntProperties>
+                  <target>
+                    <condition property="skipAPIAnalysis" value="true">
+                      <not>
+                        <available file="${basedir}/META-INF/MANIFEST.MF" property="isBundle"/>
+                      </not>
+                    </condition>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>list-dependencies</id>
+                <goals>
+                  <goal>list</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <skip>${skipAPIAnalysis}</skip>
+                  <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
+                  <outputScope>false</outputScope>
+                  <outputFile>${project.build.directory}/dependencies.txt</outputFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <version>1.4.0</version>
+            <executions>
+              <execution>
+                <id>api-analysis</id>
+                <goals>
+                  <goal>eclipse-run</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <skip>${skipAPIAnalysis}</skip>
+                  <applicationsArgs>
+                    <!-- need to set workspace to a dir that's not a child of the project --> 
+                    <arg>-data</arg>
+                    <args>${project.basedir}/../target/${project.artifactId}-apiAnalyzer-workspace</args>
+                    <args>-application</args>
+                    <args>org.eclipse.pde.api.tools.apiAnalyzer</args>
+                    <args>-project</args>
+                    <args>${project.basedir}</args>
+                    <args>-baseline</args>
+                    <args>default</args>
+                    <args>-dependencyList</args>
+                    <args>${project.build.directory}/dependencies.txt</args>
+                    <args>-failOnError</args>
+                  </applicationsArgs>
+                  <jvmArgs>
+                  	<jvmArg>-Xmx2048M</jvmArg>
+                  </jvmArgs>
+                  <repositories>
+                    <repository>
+                      <layout>p2</layout>
+                      <url>${previous-release.baseline}</url>
+                    </repository>
+                  </repositories>
+                  <dependencies>
+                    <dependency>
+                      <artifactId>org.eclipse.pde.api.tools</artifactId>
+                      <type>p2-installable-unit</type>
+                    </dependency>
+                    <dependency>
+                      <artifactId>javax.annotation</artifactId>
+                      <type>p2-installable-unit</type>
+                    </dependency>
+                    <dependency>
+                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
+                      <type>p2-installable-unit</type>
+                    </dependency>
+                    <!-- This will constitute the default baseline -->
+                    <dependency>
+                      <artifactId>${project.artifactId}</artifactId>
+                      <type>p2-installable-unit</type>
+                    </dependency>
+                  </dependencies>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+         </plugins>
       </build>
     </profile>
 
