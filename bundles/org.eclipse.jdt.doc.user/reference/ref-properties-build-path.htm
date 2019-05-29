@@ -23,9 +23,18 @@
      Entries on the Modulepath are interpreted as <strong>modules</strong> according to the 
      <a href="http://openjdk.java.net/projects/jigsaw/spec">Java Platform Module System</a>.
      For these, further details can be edited via <a href="propertypages/ref-properties-buildpath-modularity.htm">Modularity Details</a>.
-    </p> 
+    </p>
+    
+    <p>This property page consists of the following tabs:</p>
+    <ul>
+    <li><a href="#source">Source tab</a></li>
+    <li><a href="#projects">Projects tab</a></li>
+    <li><a href="#libraries">Libraries tab</a></li>
+    <li><a href="#order-and-export">Order and Export tab</a></li>
+    <li><a href="#module-dependencies">Module Dependencies tab</a></li>
+    </ul>
 
-    <h2>Source tab</h2>
+    <h2 id="source">Source tab</h2>
 
     <p>Source folders are top-level folders in the project hierarchy. They are the root of packages containing .java files. 
     The compiler will translate the contained files to .class files that will be written to the output folder.</p>
@@ -343,19 +352,101 @@ resources inside the folder should not be visible to the compiler.</p>
 	</tbody>
 </table>
 
-<h2>Order and Export tab</h2>
+<h2 id="order-and-export">Order and Export tab</h2>
 
     <p>In the <b>Build class path order</b> list, you can click the <b>Up</b> and <b>Down</b> buttons to move the selected path entry up or down in the build path order for this new project.</p>
 
     <p>Checked list entries are marked as exported. Exported entries are visible to projects that require the project. Use the <b>Select
     All</b> and <b>Deselect All</b> to change the checked state of all entries. Source folders are always exported,
     and can not be deselected.</p>
+    
+<h2 id="module-dependencies">Module Dependencies tab</h2>
+	<p>For projects targeting Java 9 or greater this page visualizes module-related aspects of all dependencies of the current project.
+	At the left the <b>All Modules</b> list shows all modules that are considered when building the current projects.
+	At the right <b>Details</b> of a selected module are shown, along with buttons to modify these details.</p>
+	
+	<p>The <b>All Modules</b> list uses the following icon decorations to distinguish different kinds of modules:</p>
+	<table border="1" cellspacing="0" cellpadding="5" summary="Module decorations">
+	<tbody>
+	<tr><th>Decorated Icon</th><th>Meaning</th></tr>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/focus_module_2x.png" alt="focus module"></td>
+		<td>The <b>focus</b> module, i.e., the module implemented by the current project.
+		This module will always be shown at the top of the list, followed by other modules
+		in alphabetical order.</td>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/system_module_2x.png" alt="system module"></td>
+		<td>A <b>system</b> module, i.e., a module provided by the Java System Library.</td>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/auto_module_2x.png" alt="automatic module"></td>
+		<td>An <b>automatic</b> module, i.e., a module that is not declared using <code>module-info.java</code>,
+		but inferred from information like the file name of a jar archive, or an attribute in <code>MANIFEST.MF</code>
+		and the list of contained, non-empty packages.</td>
+	</tbody>
+	</table>
+	<p>Operations offered for the All Modules list:</p>
+	<ul>
+	<li>You may remove one or more System modules by selecting the respective modules and clicking the <b>Remove</b>
+		button at the right. Note, that other modules need to be removed from the build path on the respective
+		Projects or Libraries tab.</li>
+	<li>If the current project lacks file <code>module-info.java</code>, i.e., types in the project are associated
+		with the "unnamed module", then by default only a subset of System modules is considered. In this case
+		you can pull in more System modules by clicking the <b>Add System Module...</b> button.</li>
+	</ul>
+	<p><em>Modules that have just been added to the Modulepath on the corresponding tab of this page,
+		will not be visible in this list immediately.
+		In this case you need to click <b>Apply</b> to update the All Modules list.</em></p>
+	
+	<p>The <b>Details</b> tree has two root nodes:</p>
+	<ul>
+	<li>under the top node <b>Declared details of <i>modulename</i></b>
+	you can find those details that are declared in the select module's description, namely representations
+	of all <b>requires</b>, <b>exports</b> and <b>opens</b> declarations.</li>
+	<li>under <b>Configured details</b> additional properties of the selected module can be configured.</li>
+	</ul>
+		
+	<p>The elements in this part of the page are marked with one of the following decorated icons:</p>
+	<table border="1" cellspacing="0" cellpadding="5" summary="Detail icons and decorations">
+	<tbody>
+	<tr><th>Decorated Icon</th><th>Meaning</th></tr>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/reads_module_2x.png" alt="reads module"></td>
+		<td>A module which the selected module <b>reads</b>. This corresponds to a <b>requires</b> declaration.</td>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/exports_package_2x.png" alt="exports package"></td>
+		<td>A package which the selected module <b>exports</b> to other modules, possibly qualified with a list
+		of modules to which the package is <i>exclusively</i> exported.
+		This corresponds to an <b>exports</b> or <b>exports _ to</b> declaration.</td>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/opens_package_2x.png" alt="opens package"></td>
+		<td>A package which the selected module <b>opens</b> to other modules (for reflection),
+		possibly qualified with a list of modules to which the package is <i>exclusively</i> opened.
+		This corresponds to an <b>opens</b> or <b>opens _ to</b> declaration.</td>
+	<tr><td><img src="../images/org.eclipse.jdt.ui/combined/patch_project_2x.png" alt="patches module"></td>
+		<td>A project (or source folder) that <b>patches</b> the selected module, i.e.,
+		all types in that project (or source folder) will be <i>associated with</i>,
+		and compiled as part of	the selected module.</td>
+	</tbody>
+	</table>
+	
+	<p>Operations offered for the Details tree, provided that a module has been selected in the All Modules list:</p>
+	<ul>
+	<li>By clicking <b>Read Module...</b> you can create a new dependency from the select module to one or more other modules.</li>
+	<li>By clicking <b>Expose Package...</b> you can define that the selected module <b>exports</b> or 
+		<b>opens</b> one of its packages. The dialog that opens when you click this button supports code completion
+		for selecting a package and also has a field where a list of target modules can be specified.</li>
+	<li>By double clicking an existing <b>exports</b> or <b>opens</b> node you can edit its details.
+		The same can also be done by clicking the <b>Edit...</b> button.</li>
+	<li>By clicking <b>Patch with...</b> you can select a project or source folder for patching the selected module.</li>
+	<li>Any node under the <b>Configured details</b> node can be removed by clicking <b>Remove</b></li>
+	<li>Everything that has been configured in this tab can be translated into a set of command line options
+		as specified by the Java Platform Module System (JPMS).
+		To do so click the <b>Show JPMS Options...</b> button.<br> 
+		These options could be used for invoking a compiler from the command line,
+		or as runtime options when launching the program, to ensure that the JVM
+		will see the same module graph that has been configured here.</li>
+	</ul>
+	
     <h3 class="related">Related concepts</h3>
      <a href="../concepts/concept-build-classpath.htm">Build classpath</a><br>
      <a href="../concepts/concept-classpath-variables.htm">Classpath variables</a><br>
      <a href="../concepts/concept-inclusion-exclusion-patterns.htm">Inclusion and exclusion patterns</a>
     <h3 class="related">Related references</h3>
-     <a href="../reference/propertypages/ref-properties-buildpath-modularity.htm">Modularity details</a><br>
+     <a href="../reference/propertypages/ref-properties-buildpath-modularity.htm">Modularity details <i>(deprecated)</i></a><br>
      <a href="../reference/ref-jdt-faq.htm">Frequently asked questions on JDT</a><br>
      <a href="../reference/preferences/java/buildpath/ref-preferences-classpath-variables.htm">Classpath variables preferences</a><br>
      <a href="../reference/preferences/java/ref-preferences-build-path.htm">Build path preferences</a><br>
