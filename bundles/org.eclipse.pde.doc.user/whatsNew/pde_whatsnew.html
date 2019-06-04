@@ -17,18 +17,17 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in 4.11 (PDE)</title>
+<title>What's New in 4.12 (PDE)</title>
 </head>
 
 <body>
-<h2>What's New in 4.11 (PDE)</h2>
+<h2>What's New in 4.12 (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Plug-in Development Environment (PDE)
-for the 4.11 release of Eclipse. They are grouped into:</p>
+for the 4.12 release of Eclipse. They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
 	<li><a href="#dialogs-wizards-views">Dialogs, Wizards and Views</a></li>
 	<li><a href="#editors">Editors</a></li>
-	<!-- <li><a href="#APITools">API Tools</a></li> -->
-	<li><a href="#pde-compiler">PDE Compiler</a></li>
+	<li><a href="#APITools">API Tools</a></li>
 </ul>
 <p>See also the
 <b><a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New</a></b>
@@ -45,67 +44,179 @@ documents.</p>
   <col />
 </colgroup>
 <tbody>
-  <!-- ******************** Dialogs, Editors and Views ********************** -->
+  <!-- ******************** Dialogs, Wizards and Views ********************** -->
   <tr>
     <td id="dialogs-wizards-views" class="section" colspan="2"><h2>Dialogs, Wizards and Views</h2></td>
   </tr>
-
-  <tr id="remove-error-log"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=50517 -->
-   <td class="title">Removal of Error Log view</td>
+  <tr id="pde-target-platform-preferences"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=546400 -->
+    <td class="title">Target Platform preferences</td>
     <td class="content">
-      The <b>Error Log</b> view has been moved to the Platform project.
-      See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=50517" target="_blank">bug 50517</a> for details. 
+	The <b>Preferences &gt; Plug-in Development &gt; Target Platform</b> preference page now allows to change the height balance between 'Target definitions' and 'Locations' areas.
     </td>
   </tr>
-  <!-- ******************** End of Dialogs, Editors and Views ********************** -->
+  <!--
+  -->
+  <!-- ******************** End ofDialogs, Wizards and Views ********************** -->
   
   <!-- ******************** Editors ********************** -->
+  <!--
+  -->
   <tr>
     <td id="editors" class="section" colspan="2"><h2>Editors</h2></td>
   </tr>
-  
-    <tr id="root-mode-install"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539802 -->
-   <td class="title">Root mode support in product editor</td>
+  <tr id="pde-category-editor-source"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=546803 https://bugs.eclipse.org/bugs/show_bug.cgi?id=547322 -->
+    <td class="title">'Source' tab for Product and Category Editor</td>
     <td class="content">
-      Root mode support enables you to maintain the root mode installation of a product feature in 
-      the <b>Product configuration editor</b>. 
-      Once installed, root features can be updated and removed separately.
-     <p>
-        <img src="images/product-editor-installmode.png" alt="" />
-        <img src="images/product-editor-installmode-props.png" alt="" />
-     </p>
+	The <b>Product Editor</b> and <b>Category Editor</b> now have a 'Source' tab to enable direct access to their manifests.
+    <p>
+        <img src="images/pde-category-editor-source.png" alt="" />
+    </p>
     </td>
   </tr>
-  
-  <tr id="manifest-editor-marker"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=511127 -->
-    <td class="title">Error markers for dependencies in Manifest Editor</td>
+  <!-- ******************** End of Editors ********************** -->
+
+  <!-- ******************** APITools ********************** -->
+  <tr>
+    <td id="APITools" class="section" colspan="2"><h2>API Tools</h2></td>
+  </tr>
+  <tr id="pde-restriction-removal-reported"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=327452 -->
+    <td class="title">Removing API restriction results in API error</td>
     <td class="content">
-      The <b>Manifest editor</b>'s dependency tab now displays error markers for all unsatisfied dependencies.
+      Removing PDE API tools restriction such as <code>@noextend</code>, <code>@noimplement</code> and <code>@noinstantiate</code> now results in an incompatible bundle version API tool error, since clients of this code can 
+      access more APIs after the removal.
       <p>
-        <img src="images/manifest-editor-marker-plugin.png" alt="" />
-        <img src="images/manifest-editor-marker-package.png" alt="" />
+        A quick fix for this error is available, and it increases the minor version to reflect the code changes.
+      </p>
+      <p>
+        <img src="images/pde-remove-restriction.png" alt="" />
       </p>
     </td>
   </tr>
-  
-  <!-- ******************** End of Editors ********************** -->
 
-  <!-- ******************** PDE Compiler ********************** -->
+  <tr id="api-analysis-report-application"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=547206 -->
+    <td class="title">Run API analysis as application</td>
+    <td class="content">
+      To ease automation without Ant, the API Tools analysis can be performed using a regular Eclipse application
+      named <code>org.eclipse.pde.api.tools.apiAnalysis</code>.
+      <p>
+        It can receive the following parameters:
+      </p>
+       <ul>
+       <li><code>-project &lt;/path/to/project></code> configures which project should be analyzed. It has to be a valid Plug-in project containing a .project file.</li>
+       <li><code>-dependencyList &lt;/path/to/a/dependencyList.txt></code> configures the target platform for the analysis. This file will be parsed, using new lines and
+          colon (:) as separator and all tokens that match a path on the filesystem will be added to the Target Platform.</li>
+       <li><code>-baseline &lt;default|/path/to/baseline.target></code> specifies the baseline to use for comparison. If omitted or <code>default</code>, it is the current
+          running platform. If a path to a <code>.target</code> file is specified, it will resolve the target definition and use the included bundles as baseline.</li>
+       <li><code>-failOnError</code> If present, the application will return an error (non-<code>0</code>) in case of API errors.</li>
+       </ul>
+      <p>
+        The API analysis uses the project settings, but forces the <em>incompatible api component version report major without breaking change</em> and <em>incompatible api  component version report minor without api change</em>
+        rules breakage to be reported as errors.
+      </p>
+      <p>
+        Example of invocation can look like:
+      </p>
+      <p>
+      <code>./eclipse -project /home/mistria/sandbox/org.eclipse.e4.ui.css.core  -dependencyList /home/mistria/sandbox/org.eclipse.e4.ui.css.core/dependencies.txt -failOnError</code>
+      </p>
+      <p>
+        Additionally to the potential non-<code>0</code> result, example of output can look like:
+      </p>
+      <p>
+      <code>
+1 API ERRORS
+* Marker [on: /org.eclipse.e4.ui.css.core/META-INF/MANIFEST.MF, id: 80, type: org.eclipse.pde.api.tools.version_numbering, attributes: [apiMarkerID: 4, charEnd: 228, charStart: 210, description: , lineNumber: 7, message: The minor version should be the same for version 0.11.400, since no new APIs have been added since version 0.12.700, messagearguments: 0.11.400#0.12.700, problemid: 926941240, severity: 2, sourceId: API Tools, version: 0.12.700.qualifier], created: 5/16/19, 5:36 PM]
+1 API warnings
+* Marker [on: /org.eclipse.e4.ui.css.core, id: 81, type: org.eclipse.pde.api.tools.api_usage, attributes: [apiMarkerID: 3, charEnd: -1, charStart: -1, lineNumber: 0, message: Execution environment references were not checked for 'org.eclipse.e4.ui.css.core' because no environment descriptions are installed. , messagearguments: org.eclipse.e4.ui.css.core, problemid: 665845798, severity: 1, sourceId: API Tools], created: 5/16/19, 5:36 PM]
+      </code>
+      </p>
+      <p>
+        Here is an example of how this could be used in Tycho to trigger API checks in a Tycho build, in <code>pom.xml</code>
+      </p>
+      <pre style="width:778px;">
+&lt;project>
+	[...]	
+	&lt;build>
+	[...]
+		&lt;plugins>
+			[...]
+			&lt;plugin>
+				&lt;artifactId>maven-dependency-plugin&lt;/artifactId>
+				&lt;executions>
+					&lt;execution>
+						&lt;id>list-dependencies&lt;/id>
+						&lt;goals>
+							&lt;goal>list&lt;/goal>
+						&lt;/goals>
+						&lt;phase>verify&lt;/phase>
+						&lt;configuration>
+							&lt;outputAbsoluteArtifactFilename>true&lt;/outputAbsoluteArtifactFilename>
+							&lt;outputScope>false&lt;/outputScope>
+							&lt;outputFile>${project.build.directory}/dependencies.txt&lt;/outputFile>
+						&lt;/configuration>
+					&lt;/execution>
+				&lt;/executions>
+			&lt;/plugin>
+			&lt;plugin>
+				&lt;groupId>org.eclipse.tycho.extras&lt;/groupId>
+				&lt;artifactId>tycho-eclipserun-plugin&lt;/artifactId>
+				&lt;version>1.4.0&lt;/version>
+				&lt;executions>
+					&lt;execution>
+						&lt;id>api-analysis&lt;/id>
+						&lt;goals>
+							&lt;goal>eclipse-run&lt;/goal>
+						&lt;/goals>
+						&lt;phase>verify&lt;/phase>
+						&lt;configuration>
+							&lt;applicationsArgs>
+								&lt;!-- need to set workspace to a dir that's not a child of the project --> 
+								&lt;arg>-data&lt;/arg>
+								&lt;args>${project.basedir}/../target/${project.artifactId}-apiAnalyzer-workspace&lt;/args>
+								&lt;args>-application&lt;/args>
+								&lt;args>org.eclipse.pde.api.tools.apiAnalysis&lt;/args>
+								&lt;args>-project&lt;/args>
+								&lt;args>${project.basedir}&lt;/args>
+								&lt;args>-baseline&lt;/args>
+								&lt;args>default&lt;/args>
+								&lt;args>-dependencyList&lt;/args>
+								&lt;args>${project.build.directory}/dependencies.txt&lt;/args>
+								&lt;args>-failOnError&lt;/args>
+							&lt;/applicationsArgs>
+							&lt;repositories>
+								&lt;repository>
+									&lt;id>eclipse-4.12&lt;/id>
+									&lt;layout>p2&lt;/layout>
+									&lt;url>https://download.eclipse.org/eclipse/updates/4.12-I-builds/&lt;/url>
+								&lt;/repository>
+							&lt;/repositories>
+							&lt;dependencies>
+								&lt;!-- This will constitute the default baseline -->
+								&lt;dependency>
+									&lt;artifactId>org.eclipse.sdk.ide&lt;/artifactId>
+									&lt;type>p2-installable-unit&lt;/type>
+								&lt;/dependency>
+							&lt;/dependencies>
+						&lt;/configuration>
+					&lt;/execution>
+				&lt;/executions>
+			&lt;/plugin>
+		&lt;/plugins>
+	&lt;/build>
+&lt;/project>
+      </pre>
+    </td>
+  </tr>
+  <!-- ******************** End of APITools ********************** -->
+  
+   <!-- ******************** PDE Compiler ********************** -->
+   <!--
   <tr>
     <td id="pde-compiler" class="section" colspan="2"><h2>PDE Compiler</h2></td>
   </tr>
+  -->
+   <!-- ******************** End of PDE Compiler ********************** --> 
   
-  <tr id="eclipse-pde-compiler-multi-quick-fixes"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=541334 -->
-    <td class="title">PDE compiler Quick Fixes are multi-fix</td>
-    <td class="content">
-     All errors or warnings reported by the PDE compiler that belong to the same category can now be fixed in one
-     go by applying a single <b>Quick Fix (Ctrl+1)</b> for the reported problem category.
-       <p>
-         <img src="images/pde-compiler-multifix.png" alt="" />
-       </p>
-    </td>
-  </tr>
-  <!-- ******************** End of PDE Compiler ********************** -->
 </tbody>
 </table>
 </body>

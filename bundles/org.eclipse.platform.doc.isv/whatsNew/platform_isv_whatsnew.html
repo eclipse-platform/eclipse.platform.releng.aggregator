@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.11</title>
+<title>Eclipse Platform What's New in 4.12</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.11</h2>
+<h2>What's New in Eclipse 4.12</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.11 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.12 release of Eclipse.
 </p>
 <ul>
 	<li><a href="#Platform">Platform Changes</a></li>
@@ -49,47 +49,200 @@ section of the Workbench User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
-  <tr id="move-error-log"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=50517 -->
-   <td class="title">Error Log view moved to Platform</td>
+  <tr id="compare-merge-generic-editor"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=545531 -->
+   <td class="title">Compare/merge files using Generic Editor extensions</td>
     <td class="content">
-      The Error Log view has been moved from the PDE project to the Platform project. 
-      ISVs should examine their build infrastructure for inclusion of the <strong>org.eclipse.ui.views.log</strong> 
-      plug-in. The inclusion in your own features and/or products may be redundant because this 
-      view now ships with the base platform. See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=50517" target="_blank">bug 50517</a> for details. 
+      To leverage the extensions for <b>Generic Editor</b> (syntax highlighting, hover...) when
+      comparing files, you can now simply associate the <code>org.eclipse.ui.genericeditor.compareViewer</code>
+      to the desired file content-types. This will automatically add to the compare view most extensions
+      contributed to the Generic Editor.
+      <pre>
+&lt;extension point="org.eclipse.compare.contentMergeViewers">
+   &lt;contentTypeBinding
+         contentMergeViewerId="org.eclipse.ui.genericeditor.compareViewer"
+         contentTypeId="org.eclipse.wildwebdeveloper.parent"/>
+&lt;/extension></pre>
     </td>
   </tr>
-  
-  
-  <tr id="non-persisted-ui"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=378815 -->
-    <td class="title">Transient UI Elements</td>
-     <td class="content">
-      UI model elements can be marked as transient, which means they do not get persisted when the
-      application is closed. This allows to create views and other UI elements dynamically from code
-      without the need to clean them up properly before the workbench is closed. It also allows to contribute static model fragments which are not persisted and therefore removed once 
-      the plug-in gets uninstalled.
-      <p>To mark an element as transient simply call
-      <code>uiElement.getPersistedState().put(IWorkbench.PERSIST_STATE, "false");</code></p>
-     </td>
-   </tr>  
-  
-  <tr id="css-value-unset"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=544352 -->
-   <td class="title">CSS value 'unset'</td>
+
+  <tr id="quick-access-customization"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=162006 -->
+   <td class="title">Extensible Quick Access content</td>
     <td class="content">
-      The value <code>unset</code> is now supported as CSS value and is mapped to the Java value <code>null</code>. 
-      <p>For example, when used for the <code>background-color</code> property, the
-      widget will revert to the specific native look, if it has one, or inherit the background from the parent widget.
+      The <b>Quick Access</b> search (accessible with <code>Ctrl+3</code> shortcut) now provides
+      a new <code>org.eclipse.ui.quickAccess</code> extension point to contribute additional content.
+      <p>Classes in package <code>org.eclipse.ui.quickaccess</code> have been made API for this use-case.</p>
+      <p>
+      The following example shows how Run and Launch Configurations are made available in Quick Access:
+      </p>
+      <pre>
+&lt;extension point="org.eclipse.ui.quickAccess">
+   &lt;computer class="org.eclipse.debug.internal.ui.quickaccess.RunQuickAccessProvider" name="%Run.name"/>
+   &lt;computer class="org.eclipse.debug.internal.ui.quickaccess.DebugQuickAccessProvider" name="%Debug.name"/>
+&lt;/extension></pre>
+    	 <p>
+      The computers implement the <code>org.eclipse.ui.quickaccess.IQuickAccessComputer</code> class, which
+      is responsible for returning some <code>org.eclipse.ui.quickaccess.QuickAccessElement</code>.
+      </p>
+      <p>
+      Computers are only contributing when their host bundle is started, bundles will not be started automatically
+      when querying Quick Access.
       </p>
     </td>
   </tr>
-  
-  <tr id="widget-factories"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539014 -->
-   <td class="title">Widget factories</td>
+
+  <tr id="type-parameters-beans-jface-databinding"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=531748 -->
+    <td class="title">Type parameters on Beans and JFace databinding classes</td>
     <td class="content">
-      New widget factories have been created for some SWT widgets. They follow the same approach as <code>GridLayoutFactory</code> and <code>GridDataFactory</code> i.e. a fluent, re-usable API.
-      <p>The entry point is <code>WidgetFactory</code>.</p>
-      <p>For example, to create a button:</p>
-      <code>WidgetFactory.button(SWT.PUSH).text("Click me!").onSelect(event -> buttonClicked(event).create(parent);</code>
-      <p>This is a work in progress and more factories will follow soon.</p>
+      Type parameters have been added to relevant classes and methods in the
+      <a href="https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fcore%2Fdatabinding%2Fbeans%2Fpackage-summary.html">
+      <code>org.eclipse.core.databinding.beans</code></a> and
+      <a href="https://help.eclipse.org/2019-06/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjface%2Fdatabinding%2Fswt%2Fpackage-summary.html">
+      <code>org.eclipse.jface.databinding</code></a> bundles. This makes code using
+      these classes more explicit and clear and can help catching bugs in an early stage.
+      These changes complete the effort to use generics to improve the databinding framework,
+      which was started several years ago. If you use these databinding bundles you should be
+      able to get rid of many raw type warnings which have been unavoidable for a long time.
+      <p>
+      Example:
+	  </p>
+<pre>
+// The BeanProperties.value method returns a IBeanValueProperty&lt;Bean, String&gt;
+IObservableValue&lt;String&gt; nameModel =
+    BeanProperties.value(Bean.class, "name", String.class).observe(bean);
+// The WidgetProperties.text method returns a IWidgetValueProperty&lt;Text, String&gt;
+IObservableValue&lt;String&gt; nameTarget = WidgetProperties.text().observe(textControl);
+
+dataBindingContext.bindValue(nameTarget, nameModel);
+</pre>
+      <p>
+      The changes are fully binary compatible and no behaviour is changed.
+      </p><p><b>Tips for using the typed databinding API</b>
+      </p>
+	  <ul>
+	  <li>
+      Using the <code>UpdateValueStrategy.create</code> method to create update strategies with a converter
+	  avoids the need to specify type arguments:
+<pre>
+dataBindingContext.bindValue(ageTarget, ageModel,
+    UpdateValueStrategy.create(converter), null);
+</pre>
+      </li><li>
+      It is often easier to work out the types when sub-expressions are assigned to variables:
+<pre>
+UpdateValueStrategy&lt;String, Integer&gt; toModel = new UpdateValueStrategy&gt;&lt;();
+toModel.setConverter(converter);
+toModel.setAfterConvertValidator(validator);
+dataBindingContext.bindValue(target, model, toModel, null);
+</pre>
+      </li><li>
+      New methods for creating typed versions of property objects have been added in some places:
+<pre>
+// Returns a IViewerValuePropert&lt;Viewer, ModelObject&gt;
+ViewerProperties.singleSelection(ModelObject.class)
+</pre>
+      </li><li>Upgrading to Java 10 lets you use the <code>var</code> keyword, which avoids much
+	  of the verbosity of using property objects with type parameters:
+<pre>
+var text = WidgetProperties.text();
+</pre>
+      </li>
+	  </ul>
+      <p>
+      <b>Note about typed property factory classes:</b> To avoid causing compile errors for clients new versions of
+	  property factory classes that return typed property objects have been created. This applies for the
+	  following classes: <code>WidgetProperties</code>, <code>ViewerProperties</code>,
+	  <code>BeanProperties</code> and <code>PojoProperties</code>.
+      </p><p>
+	  To start using these classes simply replace the import of the untyped factory classes by an import of the
+	  typed version.
+      </p><p>
+	  <b>Note about EMF Databinding:</b> EMF Databinding has not been updated with type parameters. That can make it
+      awkward to use EMF Databinding together with the generified databinding APIs. A good strategy for working
+      around that is to create factory methods for EMF properties with generic types as their return values:
+	  </p>
+<pre>
+@SuppressWarnings("unchecked")
+public static IValueProperty&lt;ModelEObject, String&gt; name(EditingDomain editingDomain) {
+    return EMFEditProperties.value(editingDomain, ModelPackage.Literals.MODEL_EOBJECT__NAME);
+}
+</pre>
+
+    </td>
+  </tr>
+
+  <tr id="cnf-tooltip-support"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=178017 -->
+    <td class="title">Tooltip support for CommonViewers</td>
+    <td class="content">
+      It is now possible to provide tooltips to <code>CommonViewer</code> via <code>ILabelProvider</code>.
+      <p>To do this, two steps are necessary:</p>
+      <ol>
+        <li>Enable tooltip support for the respective viewer by setting the option <code>org.eclipse.ui.navigator.enableTooltipSupport</code> to 
+          <code>true</code> in the extension declaration, as in
+<pre>
+&lt;extension point=&quot;org.eclipse.ui.navigator.viewer&quot;&gt;
+  &lt;viewer id=&quot;org.eclipse.ui.example.cnf.viewer&quot;&gt;
+    &lt;!-- ... --&gt;
+    &lt;options&gt;
+      <b>&lt;property
+        name=&quot;org.eclipse.ui.navigator.enableTooltipSupport&quot;
+        value=&quot;true&quot; /&gt;</b>
+    &lt;/options&gt;
+  &lt;/viewer&gt;
+&lt;/extension&gt;
+</pre></li>
+        <li>Contribute an <code>ILabelProvider</code> which also implements <code>org.eclipse.jface.viewers.IToolTipProvider</code>.
+        The tooltip text can be provided by the method <code>getToolTipText(Object element)</code>
+        following the same rules as <code>getText(Object element)</code>. I.e., the non-null, non-empty string
+        obtained from the highest-ranked label provider is used as the tooltip.
+        </li>
+      </ol>
+    </td>
+  </tr>
+  
+  <tr id="wizard-dialog-nonmodal"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=147762 -->
+   <td class="title">Wizards can now be non-modal</td>
+    <td class="content">
+    New APIs have been added to <code>WizardDialog</code> to enable a wizard to be non-modal.
+	<p>
+		When a dialog is modal it means that the underlying window can not be used. Eclipse Wizard Dialogs are modal by default. 
+		There are cases where it is desired that the dialog is not modal but that the underlying window can be reached <b>while</b> the user is finishing the wizard.
+		The following API methods are added to the JFace <code>WizardDialog</code> class.
+	</p>
+	<ul>
+		<li><code>public WizardDialog setModal(boolean modal)</code></li>
+		<li><code>public boolean isModal()</code></li>
+	</ul>
+	<p>
+		In addition, the following methods have been made public to allow full control over the shell style of the <code>WizardDialog</code>.
+	</p>
+	<ul>
+		<li><code>public void setShellStyle(int newShellStyle)</code></li>
+		<li><code>public int getShellStyle()</code></li>
+	</ul>
+	<p>
+		You can now use the following code:
+		<code><br/>
+			<br/>WizardDialog d = new WizardDialog(shell, wizard);
+			<br/>d.setModal(false);
+			<br/>d.open();
+		</code>
+	</p>
+	<p>
+		or fluent
+		<code><br/><br/>
+			new WizardDialog(shell, wizard).setModal(false).open();
+		</code>
+	</p>
+   </td>
+  </tr>
+  
+  <tr id="swt-lines-visible"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=544360 -->
+   <td class="title">CSS attribute swt-lines-visible</td>
+    <td class="content">
+      A new css attribute <code>'swt-lines-visible'</code> is supported on <code>Table</code> and <code>Tree</code> widgets and is mapped to <code>getLinesVisible()</code>.
+      <p>
+      	For example: The value of this property is true if <code>Tree.getLinesVisible()</code> returns true, else the value is false.
+      </p>
     </td>
   </tr>
   
@@ -99,20 +252,34 @@ section of the Workbench User Guide.
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
+ 
+ <tr id="dark-theme-mac"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=540357 -->
+  	<td class="title">Dark mode support on Mac</td>
+  	<td class="content">
+  		An SWT application on macOS 10.14 can now be launched in dark theme and all the controls are rendered with the native dark appearance.
+  		The application will automatically launch in the light or dark theme based on the System appearance (set in System preferences). 
+  		<p>
+  			You need to launch the application with <code>org.eclipse.swt.display.useSystemTheme=true</code> system property to enable this behavior.
+  			The default value of this property is false.
+  		</p>
+  		Screenshot of an SWT application in dark theme:
+  		<p>
+  			<img src="images/dark-theme-swt-app.png" alt="swt application in dark theme"/>
+  		</p>
+  	</td>
+  </tr>
+
+  <tr id="display-dispose-gtk"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=531634 -->
+  	<td class="title">Display.Close and Display.Dispose events sent on GTK on logoff/shutdown</td>
+  	<td class="content">
+		<code>Display.Close</code> and <code>Display.Dispose</code> events are now supported on GTK on logoff/shutdown. This works on GNOME and XFCE (> 4.13) sessions. This brings Linux/GTK in line with the Windows and Mac implementations:
+		<ul>
+		<li><code>Display.Close</code> can set the <code>Event.doit</code> to <code>false</code> to send a "not ready" hint to the session manager. However, the session manager will usually ignore this hint and continue logoff/shutdown anyway. The time limit imposed by the session manager is 1 second, so it is not suitable for showing the user any UI.</li>
+		<li><code>Display.Dispose</code> lets you run any final cleanup, such as saving settings on exit. Also, any code you have after a <code>while (!xxx.isDisposed())</code> loop will run now. The time limit imposed by the session manager is 10 seconds.</li>
+		</ul>
+  	</td>
+  </tr>
   
-  <tr id="mouse-navigation-styledtext"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=542777 -->
-    <td class="title">Mouse navigation support for StyledText</td>
-     <td class="content">
-      The <code>StyledText</code> widget now supports mouse navigation scrolling similar to most web browsers.
-      When enabled, a <code>StyledText</code> widget can be scrolled by clicking the mouse's scroll wheel,
-      and then moving the mouse. Clicking the scroll wheel again cancels the scrolling, and returns
-      the widget to its default state.
-      <p>To enable mouse navigation, simply call:
-      <code>StyledText.setMouseNavigatorEnabled(true);</code></p>
-      <p><img src="images/StyledText-mouse-navigation.png" alt=""/></p>
-     </td>
-   </tr>
-   
   <!-- *********************** End of SWT *********************** -->
 </tbody>
 </table>
