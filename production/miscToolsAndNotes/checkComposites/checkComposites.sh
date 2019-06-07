@@ -22,8 +22,8 @@
 # and then executed in "bash script" build step.
 
 baseEclipseAccessDir=/home/data/httpd/download.eclipse.org
-baseEclipseDirSegment=eclipse/downloads/drops4/R-4.11-201903070500
-baseEclipse=eclipse-platform-4.11-linux-gtk-x86_64.tar.gz
+baseEclipseDirSegment=eclipse/downloads/drops4/S-4.12RC2-201906051800
+baseEclipse=eclipse-platform-4.12RC2-linux-gtk-x86_64.tar.gz
 repoFileAccess=file:///home/data/httpd/download.eclipse.org/
 repoHttpAccess=http://download.eclipse.org
 repoAccess=${repoFileAccess}
