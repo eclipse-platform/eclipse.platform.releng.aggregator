@@ -80,9 +80,9 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) "
 
 echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
-export BRANCH=R4_12_maintenance
+export BRANCH=master
 export BUILD_TYPE=I
-export STREAM=4.12.0
+export STREAM=4.13.0
 
 eclipseStreamMajor=${STREAM:0:1}
 
