@@ -62,8 +62,8 @@ BUILDFILESTR="-f ${BUILDFILE}"
 currentStream=$1
 if [[ -z "${currentStream}" ]]
 then
-  printf "\n\t%s\t%s\n" "WARNING:" "Current stream version not specified on command line, assuming 4.12"
-  currentStream="4.12"
+  printf "\n\t%s\t%s\n" "WARNING:" "Current stream version not specified on command line, assuming 4.13"
+  currentStream="4.13"
 fi
 
 maintenanceStream=$2

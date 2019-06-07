@@ -29,16 +29,16 @@ repoHttpAccess=http://download.eclipse.org
 repoAccess=${repoFileAccess}
 # TODO: reduce this list soon
 repoList="\
-/eclipse/updates/4.11/ \
 /eclipse/updates/4.12/ \
+/eclipse/updates/4.13/ \
+/eclipse/updates/4.13-I-builds/ \
+/eclipse/updates/4.13milestones/ \
+/eclipse/updates/4.13-Y-builds/ \
+/eclipse/updates/4.13-P-builds/ \
 /eclipse/updates/4.12-I-builds/ \
 /eclipse/updates/4.12milestones/ \
 /eclipse/updates/4.12-Y-builds/ \
 /eclipse/updates/4.12-P-builds/ \
-/eclipse/updates/4.11-I-builds/ \
-/eclipse/updates/4.11milestones/ \
-/eclipse/updates/4.11-Y-builds/ \
-/eclipse/updates/4.11-P-builds/ \
 "
 
 
