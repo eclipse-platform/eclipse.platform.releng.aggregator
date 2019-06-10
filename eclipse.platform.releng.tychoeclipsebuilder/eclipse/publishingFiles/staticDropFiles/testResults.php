@@ -107,7 +107,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
     echo "This report describes API changes since ${API_FREEZE_REF_LABEL}.  Exclusions are listed in <a href=\"http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/tree/eclipse.platform.releng.tychoeclipsebuilder/eclipse/apiexclude/exclude_list.txt?h=$BRANCH\">.../apiexclude/exclude_list.txt</a>.</li>";
   }
   else {
-    echo "  <li>No freeze report. Only generated in main stream after M6.</li>";
+    echo "  <li>No freeze report. Only generated in main stream after RC1.</li>";
   }
 ?>
 
