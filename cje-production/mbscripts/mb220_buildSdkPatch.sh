@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 #*******************************************************************************
 # Copyright (c) 2019 IBM Corporation and others.
@@ -22,8 +22,15 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
+if [[ -z "${WORKSPACE}" ]]
+then
+	MVN_ARGS=""
+else
+	MVN_ARGS="-Pbree-libs -Psign"
+fi
+
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
-mvn clean verify -DskipTests=true -Pbree-libs \
+mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Dtycho.debug.artifactcomparator \
   -Dtycho.localArtifacts=ignore \
   -Dcbi.jarsigner.continueOnFail=true \
