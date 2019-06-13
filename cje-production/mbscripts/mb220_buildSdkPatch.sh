@@ -26,7 +26,7 @@ if [[ -z "${WORKSPACE}" ]]
 then
 	MVN_ARGS=""
 else
-	MVN_ARGS="-Pbree-libs -Psign"
+	MVN_ARGS="-Pbree-libs -Peclipse-sign"
 fi
 
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator

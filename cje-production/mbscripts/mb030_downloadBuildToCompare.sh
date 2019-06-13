@@ -22,6 +22,10 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-pushd $CJE_ROOT/$TMP_DIR
-wget --recursive --no-parent --no-verbose http://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID &
-popd
+if [[ -z "${WORKSPACE}" ]]
+then
+	pushd $CJE_ROOT/$TMP_DIR
+	wget --recursive --no-parent --no-verbose http://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID &
+	popd
+fi
+
