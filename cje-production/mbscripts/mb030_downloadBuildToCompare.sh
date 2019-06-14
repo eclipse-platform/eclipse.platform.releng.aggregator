@@ -27,6 +27,7 @@ if [[ -z "${WORKSPACE}" ]]
 then
 	wget --recursive --no-parent --no-verbose http://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID &
 else
-	cp -r /home/data/httpd/download.eclipse.org/eclipse/updates/4.12milestones/$PREVIOUS_RELEASE_ID .
+	mkdir -p $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER
+	cp -r /home/data/httpd/download.eclipse.org/eclipse/updates/4.12milestones/$PREVIOUS_RELEASE_ID $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/.
 fi
 popd
