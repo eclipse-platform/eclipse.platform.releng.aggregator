@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2016, 2018 GK Software SE and others.
+# Copyright (c) 2016, 2019 GK Software SE and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,12 @@
 # ECLIPSE:
 APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
-SDK_BUILD_DIR=R-4.11-201903070500
-SDK_VERSION=4.11
+SDK_BUILD_DIR=R-4.12-201906051800
+SDK_VERSION=4.12
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
 # JDT / ECJ:
-ECJ_VERSION=3.17.0
+ECJ_VERSION=3.18.0
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
