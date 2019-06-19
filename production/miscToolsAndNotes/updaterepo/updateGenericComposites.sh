@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #*******************************************************************************
-# Copyright (c) 2015 IBM Corporation and others.
+# Copyright (c) 2015, 2019 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -69,8 +69,8 @@ fi
 maintenanceStream=$2
 if [[ -z "${maintenanceStream}" ]]
 then
-  printf "\n\t%s\t%s\n" "WARNING:" "Maintenance stream version not specified on command line, assuming 4.11"
-  maintenanceStream="4.11"
+  printf "\n\t%s\t%s\n" "WARNING:" "Maintenance stream version not specified on command line, assuming 4.12"
+  maintenanceStream="4.12"
 fi
 
 
