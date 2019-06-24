@@ -235,7 +235,7 @@ then
 
   echo " = = Now run performance.ui app = ="
   devworkspace="${fromDir}/workspace-updatePerfResults"
-  eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//172.25.25.57:1527}
+  eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//build.eclipse.org:1527}
   vmargs="-Xmx1G -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
