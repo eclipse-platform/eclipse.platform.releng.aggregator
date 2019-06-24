@@ -42,7 +42,7 @@ export JAVACMD=${JAVA_HOME}/bin/java
 export NSC="-Dderby.system.home=${DBROOT} -jar $DERBY_INSTALL/lib/derbyrun.jar"
 
 export CLASSPATH="${CSLIB}/derby.jar:${CSLIB}/derbytools.jar:${CSLIB}/derbynet.jar:${CSLIB}/derbyrun.jar:${CSLIB}/derbyclient.jar"
-export eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-"//172.25.25.57:1527"}
+export eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-"//build.eclipse.org:1527"}
 
 # Port and HOST also need to be defined in /shared/eclipse/databases/derby.properties, for example:
 #derby.drda.host=192.168.1.10
