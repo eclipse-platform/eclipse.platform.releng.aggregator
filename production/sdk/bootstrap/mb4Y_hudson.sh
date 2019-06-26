@@ -83,10 +83,10 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 #export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
 #export CBI_JDT_VERSION="3.9.2.v20140309-1413"
 
-export BRANCH=R4_11_maintenance
+export BRANCH=master
 export BUILD_TYPE=Y
-export STREAM=4.11.0
-export PATCH_OR_BRANCH_LABEL=java12
+export STREAM=4.13.0
+export PATCH_OR_BRANCH_LABEL=java13
 eclipseStreamMajor=${STREAM:0:1}
 
 # unique short name for stream and build type
