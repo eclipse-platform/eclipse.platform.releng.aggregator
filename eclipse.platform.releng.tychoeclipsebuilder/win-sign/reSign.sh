@@ -22,7 +22,7 @@ reSign ()
   cp ../${fileName} ${zipfile}.zip
   unzip ${zipfile}.zip
   #sign files
-  copy ../../win-sign/winSignPom.xml pom.xml
+  cp ../../win-sign/winSignPom.xml pom.xml
   mvn clean verify
 
   zip ${zipfile}new.zip *.exe
