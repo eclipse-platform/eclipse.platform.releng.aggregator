@@ -337,7 +337,7 @@ then
   echo "   siteDir:      $siteDir" #>>${PERF_OUTFILE}
   echo "   fromDir:      $fromDir" #>>${PERF_OUTFILE}
   echo "   devworkspace: $devworkspace" #>>${PERF_OUTFILE}
-  echo "   vmArgs:       $vmArgs" #>>${PERF_OUTFILE}
+  echo "   vmargs:       $vmargs" #>>${PERF_OUTFILE}
   echo "   devJRE:       $devJRE" #>>${PERF_OUTFILE}
   echo "   BUILDFILESTR: $BUILDFILESTR" #>> ${PERF_OUTFILE}
   echo "   JOB_NAME:     $JOB_NAME" #>> ${PERF_OUTFILE}
