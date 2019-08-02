@@ -14,13 +14,16 @@
 
 package org.eclipse.test.internal.performance.data;
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 
 /**
  * @since 3.1
  */
-public class Unit {
+public class Unit implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     public static final Unit SECOND     = new Unit("s", "second", false);         //$NON-NLS-1$ //$NON-NLS-2$
     public static final Unit BYTE       = new Unit("byte", "byte", true);         //$NON-NLS-1$ //$NON-NLS-2$
     public static final Unit CARDINAL   = new Unit("", "", false);                //$NON-NLS-1$ //$NON-NLS-2$

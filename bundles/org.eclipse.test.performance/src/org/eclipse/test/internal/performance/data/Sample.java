@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 
 package org.eclipse.test.internal.performance.data;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,7 +22,9 @@ import org.junit.Assert;
 /**
  * @since 3.1
  */
-public class Sample {
+public class Sample implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     String      fScenarioID;
     long        fStartTime;

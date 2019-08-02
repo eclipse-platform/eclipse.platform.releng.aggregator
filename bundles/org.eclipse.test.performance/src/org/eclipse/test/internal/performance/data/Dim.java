@@ -23,6 +23,8 @@ import org.eclipse.test.performance.Dimension;
  */
 public class Dim implements Dimension {
 
+    private static final long serialVersionUID = 1L;
+
     private static Dim[] fgRegisteredDimensions = new Dim[100];
 
     private final int    fId;

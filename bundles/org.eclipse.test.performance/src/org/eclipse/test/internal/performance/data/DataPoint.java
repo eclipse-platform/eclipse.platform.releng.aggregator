@@ -12,6 +12,7 @@
 
 package org.eclipse.test.internal.performance.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,9 @@ import java.util.Set;
 /**
  * @since 3.1
  */
-public class DataPoint {
+public class DataPoint implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int fStep;
     private Map<Dim, Scalar> fScalars;

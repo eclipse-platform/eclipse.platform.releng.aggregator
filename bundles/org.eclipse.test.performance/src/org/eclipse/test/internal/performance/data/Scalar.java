@@ -14,10 +14,14 @@
 
 package org.eclipse.test.internal.performance.data;
 
+import java.io.Serializable;
+
 /**
  * @since 3.1
  */
-public class Scalar {
+public class Scalar implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Dim  fDimension;
     private long fMagnitude;

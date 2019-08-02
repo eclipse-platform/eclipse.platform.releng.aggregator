@@ -16,6 +16,7 @@ package org.eclipse.test.internal.performance;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -56,6 +57,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
     protected static final String VERBOSE_PERFORMANCE_METER_PROPERTY = "InternalPrintPerformanceResults"; //$NON-NLS-1$
     protected static final String CSV_PERFORMANCE_METER_PROPERTY = "InternalPrintCsvPerformanceResults"; //$NON-NLS-1$
+    private   static final String DUMP_PERFORMANCE_DATA_PROPERTY = "InternalWriteRawPerformanceData"; //$NON-NLS-1$
 
     private String                fScenarioId;
 
@@ -106,6 +108,18 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
                 File output = new File(property);
                 try (PrintStream ps = new PrintStream(new FileOutputStream(output))) {
                     printSampleCSV(ps, sample);
+                } catch (IOException e) {
+                    // It turns out you cannot write.
+                    e.printStackTrace();
+                }
+            }
+            property = System.getProperty(DUMP_PERFORMANCE_DATA_PROPERTY);
+            if (property != null) {
+                File output = new File(property);
+                try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(output, true))) {
+                    oos.writeObject(fScenarioId);
+                    oos.writeObject(variations);
+                    oos.writeObject(sample);
                 } catch (IOException e) {
                     // It turns out you cannot write.
                     e.printStackTrace();

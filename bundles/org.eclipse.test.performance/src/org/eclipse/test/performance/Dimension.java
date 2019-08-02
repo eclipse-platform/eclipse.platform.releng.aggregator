@@ -14,6 +14,8 @@
 
 package org.eclipse.test.performance;
 
+import java.io.Serializable;
+
 import org.eclipse.test.internal.performance.InternalDimensions;
 
 /**
@@ -23,7 +25,7 @@ import org.eclipse.test.internal.performance.InternalDimensions;
  * 
  * @since 3.1
  */
-public interface Dimension {
+public interface Dimension extends Serializable {
 
     // Dimensions available on all platforms:
 
