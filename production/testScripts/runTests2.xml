@@ -50,9 +50,6 @@
       else="${buildURL}">
       <istrue value="${baselinePerf}" />
     </condition>
-    <property
-      name="eclipse.perf.dbloc"
-      value="${eclipse.perf.dbloc.value}" />
     <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to
       match with? Or, else will take large number of "baselines" averaged? -->
 
@@ -80,8 +77,8 @@
     <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
     <condition
       property="frameworkperfargs"
-      value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
-      else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+      value="-DInternalWriteRawPerformanceData=${eclipse.perf.samples.out} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
+      else="-DInternalWriteRawPerformanceData=${eclipse.perf.samples.out} -Declipse.perf.config=${eclipse.perf.config}">
       <isset property="eclipse.perf.assertAgainst" />
     </condition>
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
@@ -579,6 +576,7 @@
     <printProperty property="javaMajorVersion" />
     <printProperty property="testedPlatform" />
     <printProperty property="testedPlatformConfig" />
+    <printProperty property="eclipse.perf.samples.out" />
     <printProperty property="eclipse.perf.dbloc" />
     <printProperty property="eclipse.perf.config" />
     <printProperty property="eclipse.perf.assertAgainst" />
@@ -927,6 +925,12 @@
       value="${results}/${testedPlatform}/directorLogs" />
     <mkdir dir="${directorLogs}" />
     <echo message="directorLogs: ${directorLogs}" />
+    
+    <property
+      name="eclipse.perf.samples.out"
+      value="${results}/${testedPlatform}-perf-samples.dat" />
+    <echo message="eclipse.perf.samples.out: ${eclipse.perf.samples.out}" />
+    
 
     <!-- this directory, with some sort files are created during unit tests
       ... need to find where to disable/enable JaCoCo -->
@@ -1113,6 +1117,9 @@
     <printPHPProperty
       phpvar="TEST_TARGET"
       value="test.target" />
+    <printPHPProperty
+      phpvar="ECLIPSE_PERF_SAMPLES_OUT"
+      value="eclipse.perf.samples.out" />
     <printPHPProperty
       phpvar="ECLIPSE_PERF_DBLOC"
       value="eclipse.perf.dbloc" />

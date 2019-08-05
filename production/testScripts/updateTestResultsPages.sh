@@ -235,7 +235,7 @@ then
 
   echo " = = Now run performance.ui app = ="
   devworkspace="${fromDir}/workspace-updatePerfResults"
-  eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//build.eclipse.org:1527}
+  eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-/shared/eclipse}
   vmargs="-Xmx1G -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
@@ -345,6 +345,14 @@ then
   echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS" #>> ${PERF_OUTFILE}
   echo "   current_prefix ${current_prefix}" #>> ${PERF_OUTFILE}
   echo #>> ${PERF_OUTFILE}
+  
+  ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.ImportDataMain -jvm 8.0 -vm ${devJRE} -vmargs ${vmargs} $perfOutput/*-perf-samples.dat
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: eclipse returned non-zero return code from invoking performance data import, exiting with RC: $RC."
+    exit $RC
+  fi
 
   ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline ${baselineForCurrent} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 12 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  #>> ${PERF_OUTFILE}
   RC=$?
