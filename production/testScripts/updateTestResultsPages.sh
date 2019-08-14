@@ -346,7 +346,7 @@ then
   echo "   current_prefix ${current_prefix}" #>> ${PERF_OUTFILE}
   echo #>> ${PERF_OUTFILE}
 
-  ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.importPerformanceData -jvm 8.0 $perfOutput/*-perf-samples.dat -vm ${devJRE} -vmargs ${vmargs}
+  ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.importPerformanceData $perfOutput/*-perf-samples.dat -vm ${devJRE} -vmargs ${vmargs}
   RC=$?
   if [[ $RC != 0 ]]
   then
