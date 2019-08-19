@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others. 
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which accompanies this distribution, and is available at
@@ -264,7 +264,7 @@ public class DBHelpers {
     void dumpSizes(PrintStream ps) throws SQLException {
         if (fConnection == null)
             return;
-        
+
         try (Statement stmt = fConnection.createStatement(); ResultSet rs = stmt.executeQuery("SELECT sys.systables.tablename FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' ")) { //$NON-NLS-1$
             // $NON-NLS-1$
             while (rs.next())
@@ -285,7 +285,7 @@ public class DBHelpers {
             return;
         if (maxRow < 0)
             maxRow = 1000000;
-        
+
         try (Statement stmt = fConnection.createStatement(); ResultSet rs = stmt.executeQuery("select SYS.SYSTABLES.TABLENAME from SYS.SYSTABLES where SYS.SYSTABLES.TABLENAME not like 'SYS%' ")) { //$NON-NLS-1$
             while (rs.next()) {
                 dumpTable(ps, rs.getString(1), maxRow);

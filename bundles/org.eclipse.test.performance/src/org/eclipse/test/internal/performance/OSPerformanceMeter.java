@@ -80,7 +80,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 
     /**
      * Write out the run element if it hasn't been written out yet.
-     * 
+     *
      * @param runProperties
      */
     private void collectRunInfo(HashMap runProperties) {

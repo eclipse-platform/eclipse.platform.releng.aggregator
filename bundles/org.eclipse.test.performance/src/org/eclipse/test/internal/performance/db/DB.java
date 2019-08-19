@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others. 
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which accompanies this distribution, and is available at
@@ -522,7 +522,7 @@ public class DB {
         if (DEBUG) {
             System.out.print("	- query data points from DB for scenario " + scenarioName + "..."); //$NON-NLS-1$ //$NON-NLS-2$
         }
-        
+
         final ArrayList<DataPoint> dataPoints = new ArrayList<>();
         try (ResultSet rs = fSQL.queryDataPoints(variations, scenarioName)){
             if (DEBUG) {

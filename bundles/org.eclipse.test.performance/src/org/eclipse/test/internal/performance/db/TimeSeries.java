@@ -30,7 +30,7 @@ public class TimeSeries {
 
     /**
      * Returns length of series.
-     * 
+     *
      * @return length of series
      */
     public int getLength() {
@@ -39,7 +39,7 @@ public class TimeSeries {
 
     /**
      * Returns value at given index.
-     * 
+     *
      * @param ix
      * @return value at given index
      */
@@ -49,7 +49,7 @@ public class TimeSeries {
 
     /**
      * Returns std dev at given index.
-     * 
+     *
      * @param ix
      * @return std dev at given index
      */
@@ -59,7 +59,7 @@ public class TimeSeries {
 
     /**
      * Returns label at given index.
-     * 
+     *
      * @param ix
      * @return label at given index
      */
@@ -69,7 +69,7 @@ public class TimeSeries {
 
     /**
      * Returns the sample size at the given index.
-     * 
+     *
      * @param ix
      * @return the sample size at the given index
      */

@@ -48,7 +48,7 @@ public abstract class AssertChecker {
 
     /**
      * Evaluates the predicate.
-     * 
+     *
      * @param reference
      *            statistics of dimensions of the reference metering session
      * @param measured

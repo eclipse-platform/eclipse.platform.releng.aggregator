@@ -22,7 +22,7 @@ import org.eclipse.test.internal.performance.InternalDimensions;
  * Some predefined dimensions most likely supported on all platforms.
  *
  * This interface is not intended to be implemented by clients.
- * 
+ *
  * @since 3.1
  */
 public interface Dimension extends Serializable {

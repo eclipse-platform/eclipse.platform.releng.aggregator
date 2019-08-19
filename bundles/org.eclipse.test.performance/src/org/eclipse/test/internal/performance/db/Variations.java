@@ -36,7 +36,7 @@ public class Variations extends Properties {
 
     /**
      * Creates a Variations object that is populated with a "config" and a "build" key/value pair.
-     * 
+     *
      * @param configValue
      *            a value to store under the config key
      * @param buildValue
@@ -53,11 +53,11 @@ public class Variations extends Properties {
 
     /**
      * Creates a set of key/value pairs by parsing the given string. The format of the string must be:
-     * 
+     *
      * <pre>
      *   key1=value1;key2=value2; .... ; keyn=valuen
      * </pre>
-     * 
+     *
      * @param keyValuePairs
      */
     public Variations(String keyValuePairs) {
@@ -83,7 +83,7 @@ public class Variations extends Properties {
     /**
      * parsing the given string as key/value pairs and stores them in Variations. The string's format is an implementation detail of
      * the database.
-     * 
+     *
      * @param keyvaluepairs
      * @param separator
      */

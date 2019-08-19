@@ -73,7 +73,7 @@ public class StatisticsSession {
 
     /**
      * Returns the confidence interval for the given dimension and the percentile.
-     * 
+     *
      * @param dimension
      *            the dimension
      * @param percentile

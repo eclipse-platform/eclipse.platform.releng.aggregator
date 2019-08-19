@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others. 
+ * Copyright (c) 2004, 2016 IBM Corporation and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.junit.Assert;
  * A Scenario contains a series of data points for a single scenario. The axis of the data points can be specified when creating a
  * scenario. Typical examples are: - datapoints corresponding to different builds - datapoints corresponding to different OSes -
  * datapoints corresponding to different JVMs
- * 
+ *
  * @since 3.1
  */
 public class Scenario {

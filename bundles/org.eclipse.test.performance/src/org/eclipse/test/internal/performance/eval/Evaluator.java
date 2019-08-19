@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others. 
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0 which accompanies this distribution, and is available at
@@ -26,7 +26,7 @@ import org.junit.Assert;
 
 /**
  * The default implementation of an evaluator backed by a database.
- * 
+ *
  * @since 3.1
  */
 public class Evaluator extends EmptyEvaluator {
@@ -51,10 +51,10 @@ public class Evaluator extends EmptyEvaluator {
             PerformanceTestPlugin.logWarning("refkeys was null. " + PerformanceTestPlugin.ECLIPSE_PERF_ASSERTAGAINST + " was " + assertKey); //$NON-NLS-1$ //$NON-NLS-2$
             return; // nothing to do
         }
-        // else 
+        // else
         PerformanceTestPlugin.logInfo("refkeys was: " + refKeys.toString() + " \n\t based on " + PerformanceTestPlugin.ECLIPSE_PERF_ASSERTAGAINST + " being set to " + assertKey); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-            
-        
+
+
         if (!(performanceMeter instanceof InternalPerformanceMeter))
             return; // we cannot handle this.
 
@@ -95,7 +95,7 @@ public class Evaluator extends EmptyEvaluator {
         StatisticsSession referenceStats = new StatisticsSession(datapoints);
         StatisticsSession measuredStats = new StatisticsSession(sessionDatapoints);
 
-        StringBuffer failMesg = new StringBuffer("Performance criteria not met when compared to '" + refKeys + "':"); //$NON-NLS-1$ //$NON-NLS-2$ 
+        StringBuffer failMesg = new StringBuffer("Performance criteria not met when compared to '" + refKeys + "':"); //$NON-NLS-1$ //$NON-NLS-2$
         boolean pass = true;
         for (int i = 0; i < fCheckers.length; i++) {
             AssertChecker chk = fCheckers[i];

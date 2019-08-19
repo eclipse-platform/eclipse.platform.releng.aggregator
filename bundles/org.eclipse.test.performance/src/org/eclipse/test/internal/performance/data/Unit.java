@@ -23,7 +23,7 @@ import java.text.NumberFormat;
 public class Unit implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     public static final Unit SECOND     = new Unit("s", "second", false);         //$NON-NLS-1$ //$NON-NLS-2$
     public static final Unit BYTE       = new Unit("byte", "byte", true);         //$NON-NLS-1$ //$NON-NLS-2$
     public static final Unit CARDINAL   = new Unit("", "", false);                //$NON-NLS-1$ //$NON-NLS-2$
@@ -78,9 +78,9 @@ public class Unit implements Serializable {
          * int div= fIsBinary ? T_BINARY : T_DECIMAL; boolean negative= magnitude < 0; double mag= Math.abs(magnitude), ratio= mag /
          * div; int divs= PREFIXES.length / 2; while (ratio >= 1) { mag= ratio; divs++; ratio= mag / div; } ratio= mag * div; while
          * (ratio > 0.0 && ratio < div) { mag= ratio; divs--; ratio= mag * div; }
-         * 
+         *
          * if (negative) mag= -mag;
-         * 
+         *
          * String[] prefixes= fIsBinary ? BINARY_PREFIXES : PREFIXES; NumberFormat format= NumberFormat.getInstance();
          * format.setMaximumFractionDigits(fPrecision); if (divs > 0 && divs <= prefixes.length) return prefixes[divs] +
          * getShortName() + format.format(mag); else return getShortName() + magnitude;
@@ -94,10 +94,10 @@ public class Unit implements Serializable {
 
     /**
      * Answer a formatted string for the elapsed time (minutes, hours or days) that is appropriate for the scale of the time.
-     * 
+     *
      * @param diff
      *            time in milliseconds
-     * 
+     *
      *            I copied this from karasiuk.utility.TimeIt
      * @return the formatted time
      */
@@ -128,9 +128,9 @@ public class Unit implements Serializable {
 
     /**
      * Answer a number formatted using engineering conventions, K thousands, M millions, G billions and T trillions.
-     * 
+     *
      * I copied this method from karasiuk.utility.Misc.
-     * 
+     *
      * @param n
      *            the number to format
      * @return the formatted number

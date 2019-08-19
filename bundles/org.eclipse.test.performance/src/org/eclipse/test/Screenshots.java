@@ -20,7 +20,7 @@ import org.eclipse.test.internal.AwtScreenshot;
 
 /**
  * Helper class to take screenshots from running tests.
- * 
+ *
  * @since 3.13
  */
 public final class Screenshots {
@@ -30,12 +30,12 @@ public final class Screenshots {
      * <p>
      * Workaround for missing {@link junit.framework.TestCase#getName()} in JUnit 4:
      * </p>
-     * 
+     *
      * <pre>
      * &#64;Rule
      * public TestName testName = new TestName();
      * </pre>
-     * 
+     *
      * @param testClass
      *            test class that takes the screenshot
      * @param name

@@ -24,7 +24,7 @@ public interface IEvaluator {
     /**
      * Evaluates the given performance meter by comparing its measurements against the reference data selected with
      * <code>setReferenceFilterProperties</code>.
-     * 
+     *
      * @param performanceMeter
      *            the performance meter
      * @throws RuntimeException
@@ -34,7 +34,7 @@ public interface IEvaluator {
 
     /**
      * Sets the asserts that should be evaluated by the evaluator.
-     * 
+     *
      * @param asserts
      *            the assert checkers that should be evaluated by the evaluator
      */
@@ -42,7 +42,7 @@ public interface IEvaluator {
 
     /**
      * Selects the reference build against which the current session will be compared in <code>evaluate</code>.
-     * 
+     *
      * @param driver
      * @param timestamp
      *            the timestamp of the reference, may be null to use any

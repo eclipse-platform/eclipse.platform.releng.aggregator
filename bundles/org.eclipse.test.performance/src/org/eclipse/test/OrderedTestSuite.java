@@ -32,20 +32,20 @@ import junit.framework.TestSuite;
 
 /**
  * Test suite with user-specified test order (fails if not all test methods are listed) or bytecode declaration order.
- * 
+ *
  * <p>
  * <b>Background:</b> {@link java.lang.Class#getDeclaredMethods()} does not specify the order of the methods. Up to Java SE 6, the
  * methods were usually sorted in declaration order, but in Java SE 7 and later, the order is random. This class guarantees reliable
  * test execution order even for questionable VM implementations.
  * </p>
- * 
+ *
  * @since 3.8
  */
 public class OrderedTestSuite extends TestSuite {
 
     /**
      * Creates a new ordered test suite that runs tests in the specified execution order.
-     * 
+     *
      * @param testClass
      *            the JUnit-3-style test class
      * @param testMethods
@@ -81,7 +81,7 @@ public class OrderedTestSuite extends TestSuite {
 
     /**
      * Creates a new test suite that runs tests in bytecode declaration order.
-     * 
+     *
      * @param testClass
      *            the JUnit-3-style test class
      * @since 3.9
@@ -92,7 +92,7 @@ public class OrderedTestSuite extends TestSuite {
 
     /**
      * Creates a new test suite that runs tests in bytecode declaration order.
-     * 
+     *
      * @param testClass
      *            the JUnit-3-style test class
      * @param name
@@ -146,13 +146,13 @@ public class OrderedTestSuite extends TestSuite {
     /**
      * Returns the names of JUnit-3-style test cases declared in the given <code>testClass</code> and its superclasses, in bytecode
      * declaration order, listing test cases from a class before the non-overridden test cases from its superclass.
-     * 
+     *
      * @param testClass
      *            the JUnit-3-style test class
      * @return a modifiable <code>List&lt;String&gt;</code> of test names in bytecode declaration order
      * @throws IOException
      *             if an I/O error occurs.
-     * 
+     *
      * @since 3.10
      */
     public static List<String> getBytecodeOrderedTestNames(Class<? extends TestCase> testClass) throws IOException {
@@ -169,7 +169,7 @@ public class OrderedTestSuite extends TestSuite {
         /*
          * XXX: This method needs to be updated if new constant pool tags are specified. Current supported major class file version:
          * 52 (Java SE 8).
-         * 
+         *
          * See JVMS 8, 4.4 The Constant Pool.
          */
         String className = c.getName();

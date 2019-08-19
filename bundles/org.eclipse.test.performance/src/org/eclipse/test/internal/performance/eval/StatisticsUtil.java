@@ -18,14 +18,14 @@ import org.eclipse.test.internal.performance.db.TimeSeries;
 
 /**
  * Utility methods for statistics.
- * 
+ *
  * @since 3.2
  */
 public final class StatisticsUtil {
 
     /**
      * Percentile constants class.
-     * 
+     *
      * @since 3.2
      */
     public static final class Percentile {
@@ -40,7 +40,7 @@ public final class StatisticsUtil {
 
         /**
          * Returns how much is within the percentile, [0, 1]
-         * 
+         *
          * @return the inside quotient
          */
         public double inside() {
@@ -56,7 +56,7 @@ public final class StatisticsUtil {
     /**
      * Returns the student's t value from the two-tailed t-table. For a degree-of-freedom larger than 100, the value for 100 is
      * returned.
-     * 
+     *
      * @param df
      *            the degrees of freedom (usually sample size - 1)
      * @param percentile
@@ -87,7 +87,7 @@ public final class StatisticsUtil {
      * <p>
      * XXX the current implementation assumes that the standard deviations are sufficiently similar.
      * </p>
-     * 
+     *
      * @param refSeries
      *            the time series containing the first data set
      * @param index1

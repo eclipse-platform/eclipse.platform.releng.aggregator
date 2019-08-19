@@ -35,9 +35,9 @@ import junit.framework.TestCase;
 
 /**
  * Helper for performance measurements. Currently provides performance meter creation and checking of measurements.
- * 
+ *
  * This class is not intended to be subclassed by clients.
- * 
+ *
  * @since 3.1
  */
 public class Performance {
@@ -67,7 +67,7 @@ public class Performance {
 
     /**
      * Returns the singleton of <code>Performance</code>
-     * 
+     *
      * @return the singleton of <code>Performance</code>
      */
     public static Performance getDefault() {
@@ -78,7 +78,7 @@ public class Performance {
 
     /**
      * Asserts default properties of the measurements captured by the given performance meter.
-     * 
+     *
      * @param performanceMeter
      *            the performance meter
      * @throws RuntimeException
@@ -102,7 +102,7 @@ public class Performance {
      * Asserts that the measurement specified by the dimension captured in the given performance meter is within a certain range
      * with respect to some reference value. If the performance meter doesn't provide the specified dimension, the call has no
      * effect.
-     * 
+     *
      * @param performanceMeter
      *            the performance meter
      * @param dim
@@ -126,7 +126,7 @@ public class Performance {
      * Asserts that the measurement specified by the dimension captured in the given performance meter is within a certain range
      * with respect to some reference value. If the performance meter doesn't provide the specified dimension, the call has no
      * effect.
-     * 
+     *
      * @param performanceMeter
      *            the performance meter
      * @param dim
@@ -148,7 +148,7 @@ public class Performance {
 
     /**
      * Creates a performance meter for the given scenario id.
-     * 
+     *
      * @param scenarioId
      *            the scenario id
      * @return a performance meter for the given scenario id
@@ -161,7 +161,7 @@ public class Performance {
 
     /**
      * Returns the null performance meter singleton.
-     * 
+     *
      * @return the null performance meter singleton
      */
     public PerformanceMeter getNullPerformanceMeter() {
@@ -173,7 +173,7 @@ public class Performance {
     /**
      * Returns a default scenario id for the given test. The test's name must have been set, such that <code>test.getName()</code>
      * is not <code>null</code>.
-     * 
+     *
      * @param test
      *            the test
      * @return the default scenario id for the test
@@ -185,7 +185,7 @@ public class Performance {
     /**
      * Returns a default scenario id for the given test and id. The test's name must have been set, such that
      * <code>test.getName()</code> is not <code>null</code>. The id distinguishes multiple scenarios in the same test.
-     * 
+     *
      * @param test
      *            the test
      * @param id
@@ -257,7 +257,7 @@ public class Performance {
     /**
      * Mark the scenario represented by the given PerformanceMeter to be included into the global and the component performance
      * summary. The summary shows the given dimension of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param pm
      *            the PerformanceMeter
      * @param shortName
@@ -272,7 +272,7 @@ public class Performance {
     /**
      * Mark the scenario represented by the given PerformanceMeter to be included into the global and the component performance
      * summary. The summary shows the given dimensions of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param pm
      *            the PerformanceMeter
      * @param shortName
@@ -290,7 +290,7 @@ public class Performance {
     /**
      * Mark the scenario represented by the given PerformanceMeter to be included into the component performance summary. The
      * summary shows the given dimension of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param pm
      *            the PerformanceMeter
      * @param shortName
@@ -305,7 +305,7 @@ public class Performance {
     /**
      * Mark the scenario represented by the given PerformanceMeter to be included into the component performance summary. The
      * summary shows the given dimensions of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param pm
      *            the PerformanceMeter
      * @param shortName
@@ -324,7 +324,7 @@ public class Performance {
      * Set a comment for the scenario represented by the given PerformanceMeter. Currently only comments with a commentKind of
      * EXPLAINS_DEGRADATION_COMMENT are used. Their commentText is shown in a hover of the performance summaries graph if a
      * performance degradation exists.
-     * 
+     *
      * @param pm
      *            the PerformanceMeter
      * @param commentKind

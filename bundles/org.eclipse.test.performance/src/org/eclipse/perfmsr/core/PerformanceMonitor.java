@@ -33,7 +33,7 @@ public class PerformanceMonitor {
     /**
      * Answer true if the native library for this class has been successfully loaded. If the load has not been attempted yet, try to
      * load it.
-     * 
+     *
      * @return true if native library has been successfully loaded
      */
     public static boolean isLoaded() {
@@ -52,7 +52,7 @@ public class PerformanceMonitor {
 
     /**
      * Calls the Windows GetPerformanceInfo function
-     * 
+     *
      * @param counters
      *            any array of counters that corresponds to the Windows PERFORMANCE_INFORMATION structure.
      */

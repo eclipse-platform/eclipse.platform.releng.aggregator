@@ -20,10 +20,10 @@ import junit.framework.TestCase;
  * A PerformanceTestCase is a convenience class that takes care of managing a <code>PerformanceMeter</code>.
  * <p>
  * Here is an example:
- * 
+ *
  * <pre>
  * public class MyPerformanceTestCase extends PeformanceTestCase {
- * 		
+ *
  *   public void testMyOperation() {
  *     for (int i= 0; i < 10; i++) {
  *       // preparation
@@ -50,7 +50,7 @@ public class PerformanceTestCase extends TestCase {
 
     /**
      * Constructs a performance test case with the given name.
-     * 
+     *
      * @param name
      *            the name of the performance test case
      */
@@ -60,7 +60,7 @@ public class PerformanceTestCase extends TestCase {
 
     /**
      * Overridden to create a default performance meter for this test case.
-     * 
+     *
      * @throws Exception
      */
     @Override
@@ -71,7 +71,7 @@ public class PerformanceTestCase extends TestCase {
 
     /**
      * Overridden to dispose of the performance meter.
-     * 
+     *
      * @throws Exception
      */
     @Override
@@ -82,7 +82,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Mark the scenario of this test case to be included into the global and the component performance summary. The summary shows
      * the given dimension of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param shortName
      *            a short (shorter than 40 characters) descritive name of the scenario
      * @param dimension
@@ -96,7 +96,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Mark the scenario represented by the given PerformanceMeter to be included into the global and the component performance
      * summary. The summary shows the given dimensions of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param shortName
      *            a short (shorter than 40 characters) descritive name of the scenario
      * @param dimensions
@@ -110,7 +110,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Mark the scenario of this test case to be included into the component performance summary. The summary shows the given
      * dimension of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param shortName
      *            a short (shorter than 40 characters) descritive name of the scenario
      * @param dimension
@@ -124,7 +124,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Mark the scenario represented by the given PerformanceMeter to be included into the component performance summary. The
      * summary shows the given dimensions of the scenario and labels the scenario with the short name.
-     * 
+     *
      * @param shortName
      *            a short (shorter than 40 characters) descritive name of the scenario
      * @param dimensions
@@ -139,7 +139,7 @@ public class PerformanceTestCase extends TestCase {
      * Set a comment for the scenario represented by this TestCase. Currently only comments with a commentKind of
      * EXPLAINS_DEGRADATION_COMMENT are used. Their commentText is shown in a hover of the performance summaries graph if a
      * performance degradation exists.
-     * 
+     *
      * @param commentKind
      *            kind of comment. Must be EXPLAINS_DEGRADATION_COMMENT to have an effect.
      * @param commentText
@@ -154,7 +154,7 @@ public class PerformanceTestCase extends TestCase {
      * Called from within a test case immediately before the code to measure is run. It starts capturing of performance data. Must
      * be followed by a call to {@link PerformanceTestCase#stopMeasuring()} before subsequent calls to this method or
      * {@link PerformanceTestCase#commitMeasurements()}.
-     * 
+     *
      * @see PerformanceMeter#start()
      */
     protected void startMeasuring() {
@@ -164,7 +164,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Called from within a test case immediately after the operation to measure. Must be preceded by a call to
      * {@link PerformanceTestCase#startMeasuring()}, that follows any previous call to this method.
-     * 
+     *
      * @see PerformanceMeter#stop()
      */
     protected void stopMeasuring() {
@@ -174,7 +174,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Called exactly once after repeated measurements are done and before their analysis. Afterwards
      * {@link PerformanceTestCase#startMeasuring()} and {@link PerformanceTestCase#stopMeasuring()} must not be called.
-     * 
+     *
      * @see PerformanceMeter#commit()
      */
     protected void commitMeasurements() {
@@ -183,7 +183,7 @@ public class PerformanceTestCase extends TestCase {
 
     /**
      * Asserts default properties of the measurements captured for this test case.
-     * 
+     *
      * @throws RuntimeException
      *             if the properties do not hold
      */
@@ -194,7 +194,7 @@ public class PerformanceTestCase extends TestCase {
     /**
      * Asserts that the measurement specified by the given dimension is within a certain range with respect to some reference value.
      * If the specified dimension isn't available, the call has no effect.
-     * 
+     *
      * @param dim
      *            the Dimension to check
      * @param lowerPercentage
