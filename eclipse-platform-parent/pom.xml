@@ -950,9 +950,23 @@
                   <target>
                     <condition property="skipAPIAnalysis" value="true">
                       <not>
-                        <available file="${basedir}/META-INF/MANIFEST.MF" property="isBundle"/>
+                        <available file="${basedir}/META-INF/MANIFEST.MF"/>
                       </not>
                     </condition>
+                    <echo file="${project.build.directory}/${project.artifactId}-apiBaseline.target">
+                      <![CDATA[
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?>
+<target name="${project.artifactId}-apiBaseline" sequenceNumber="1">
+	<locations>
+		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
+			<repository location="${previous-release.baseline}"/>
+			<unit id="${project.artifactId}" version="0.0.0"/>
+		</location>
+	</locations>
+</target>
+                      ]]>
+                    </echo>
                   </target>
                 </configuration>
               </execution>
@@ -997,7 +1011,7 @@
                     <args>-project</args>
                     <args>${project.basedir}</args>
                     <args>-baseline</args>
-                    <args>default</args>
+                    <args>${project.build.directory}/${project.artifactId}-apiBaseline.target</args>
                     <args>-dependencyList</args>
                     <args>${project.build.directory}/dependencies-list.txt</args>
                     <args>-failOnError</args>
@@ -1008,7 +1022,7 @@
                   <repositories>
                     <repository>
                       <layout>p2</layout>
-                      <url>${previous-release.baseline}</url>
+                      <url>${comparator.repo}</url>
                     </repository>
                   </repositories>
                   <dependencies>
@@ -1021,12 +1035,19 @@
                       <type>p2-installable-unit</type>
                     </dependency>
                     <dependency>
-                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
+                      <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
                       <type>p2-installable-unit</type>
                     </dependency>
-                    <!-- This will constitute the default baseline -->
                     <dependency>
-                      <artifactId>${project.artifactId}</artifactId>
+                      <artifactId>org.eclipse.ecf.provider.filetransfer.ssl</artifactId>
+                      <type>p2-installable-unit</type>
+                    </dependency>
+                    <dependency>
+                      <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
+                      <type>p2-installable-unit</type>
+                    </dependency>
+                    <dependency>
+                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
                       <type>p2-installable-unit</type>
                     </dependency>
                   </dependencies>
