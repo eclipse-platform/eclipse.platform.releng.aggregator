@@ -78,13 +78,13 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) "
 
 echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
-# use BETA_JAVA_12 to do a "complete build" that includes Java 12 beta code
+# use BETA_JAVA13 to do a "complete build" that includes Java 12 beta code
 # use master to literally build "just the four" bundles that are required.
-#export BRANCH=BETA_JAVA12
-export BRANCH=R4_11_maintenance
+#export BRANCH=BETA_JAVA13
+export BRANCH=master
 export BUILD_TYPE=P
-export STREAM=4.11.0
-export PATCH_BUILD=java12patch411
+export STREAM=4.13.0
+export PATCH_BUILD=java13patch413
 
 eclipseStreamMajor=${STREAM:0:1}
 
