@@ -35,7 +35,7 @@ echo $PATCH_BUILD
 if [ -z $PATCH_BUILD ]; then
   REPO_DIR=$PLATFORM_REPO_DIR
 else
-  PATCH_BUILD_GENERIC=java12patch
+  PATCH_BUILD_GENERIC=java13patch
   REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/repository
 fi
   
