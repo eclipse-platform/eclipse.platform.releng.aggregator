@@ -81,7 +81,7 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 # use BETA_JAVA13 to do a "complete build" that includes Java 12 beta code
 # use master to literally build "just the four" bundles that are required.
 #export BRANCH=BETA_JAVA13
-export BRANCH=master
+export BRANCH=R4_13_maintenance
 export BUILD_TYPE=P
 export STREAM=4.13.0
 export PATCH_BUILD=java13patch413
