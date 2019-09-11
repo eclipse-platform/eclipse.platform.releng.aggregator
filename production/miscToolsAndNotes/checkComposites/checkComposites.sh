@@ -33,8 +33,6 @@ repoList="\
 /eclipse/updates/4.14/ \
 /eclipse/updates/4.14-I-builds/ \
 /eclipse/updates/4.14milestones/ \
-/eclipse/updates/4.14-Y-builds/ \
-/eclipse/updates/4.14-P-builds/ \
 /eclipse/updates/4.13-I-builds/ \
 /eclipse/updates/4.13milestones/ \
 /eclipse/updates/4.13-Y-builds/ \
