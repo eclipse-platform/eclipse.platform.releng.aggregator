@@ -45,11 +45,7 @@ public class AwtScreenshot {
             ImageIO.write(image, "png", file);
 
             System.out.println("AWT screenshot saved to: " + file.getAbsolutePath());
-        } catch (HeadlessException e) {
-            e.printStackTrace();
-        } catch (AWTException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (HeadlessException | AWTException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -123,9 +119,7 @@ public class AwtScreenshot {
                 process.destroy();
                 System.out.println("Killed AwtScreenshot VM after " + TIMEOUT_SECONDS + " seconds.");
             }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
         }
     }

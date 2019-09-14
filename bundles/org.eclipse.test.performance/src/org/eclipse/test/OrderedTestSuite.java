@@ -131,9 +131,7 @@ public class OrderedTestSuite extends TestSuite {
                     throw new SortingException("suite failed to detect test order: " + o1 + ", " + o2); //$NON-NLS-1$ //$NON-NLS-2$
                 }
             });
-        } catch (SortingException e) {
-            addTest(error(testClass, "suite failed to detect test order", e)); //$NON-NLS-1$
-        } catch (IOException e) {
+        } catch (SortingException | IOException e) {
             addTest(error(testClass, "suite failed to detect test order", e)); //$NON-NLS-1$
         }
 
