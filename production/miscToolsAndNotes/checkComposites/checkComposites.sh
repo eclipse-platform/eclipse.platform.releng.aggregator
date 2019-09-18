@@ -22,8 +22,8 @@
 # and then executed in "bash script" build step.
 
 baseEclipseAccessDir=/home/data/httpd/download.eclipse.org
-baseEclipseDirSegment=eclipse/downloads/drops4/S-4.13RC2-201909071130
-baseEclipse=eclipse-platform-4.13RC2-linux-gtk-x86_64.tar.gz
+baseEclipseDirSegment=eclipse/downloads/drops4/R-4.13-201909161045
+baseEclipse=eclipse-platform-4.13-linux-gtk-x86_64.tar.gz
 repoFileAccess=file:///home/data/httpd/download.eclipse.org/
 repoHttpAccess=http://download.eclipse.org
 repoAccess=${repoFileAccess}
@@ -33,8 +33,6 @@ repoList="\
 /eclipse/updates/4.14/ \
 /eclipse/updates/4.14-I-builds/ \
 /eclipse/updates/4.14milestones/ \
-/eclipse/updates/4.13-I-builds/ \
-/eclipse/updates/4.13milestones/ \
 /eclipse/updates/4.13-Y-builds/ \
 /eclipse/updates/4.13-P-builds/ \
 "
