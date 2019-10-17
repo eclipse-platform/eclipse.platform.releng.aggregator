@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #*******************************************************************************
-# Copyright (c) 2016 IBM Corporation and others.
+# Copyright (c) 2019 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -411,9 +411,19 @@ else
       fi
     fi
 
-    pushd "$aggDir"
-    mvn clean verify -DbuildId=$BUILD_ID -f eclipse-platform-sources/pom.xml
-    popd
+    CURL_EXE=$(which curl)
+    RC=$?
+    if [[ ! $RC == 0 ]]
+    then
+	    echo "curl not available please try again with curl installed"
+    fi
+    
+    parameterString="buildId=${BUILD_ID}"
+    ${CURL_EXE} "https://ci.eclipse.org/releng/view/Builds/job/create_source_bundle/buildWithParameters?token=SourceTar&$parameterString"
+
+    #pushd "$aggDir"
+    #mvn clean verify -DbuildId=$BUILD_ID -f eclipse-platform-sources/pom.xml
+    #popd
   
     #if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
     #then
