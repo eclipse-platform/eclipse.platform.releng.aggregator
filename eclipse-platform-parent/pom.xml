@@ -850,6 +850,8 @@
     <profile>
       <id>api-generation</id>
       <activation>
+        <!-- Does it have to be a profile if we can evaluate condition reliably in antrun? -->
+        <file><exists>META-INF/MANIFEST.MF</exists></file>
         <property>
           <name>!longnotexistingproperty</name>
         </property>
@@ -857,18 +859,30 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>org.eclipse.cbi.maven.plugins</groupId>
-            <artifactId>eclipse-cbi-plugin</artifactId>
-            <version>${cbi-plugins.version}</version>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
             <executions>
               <execution>
-                <!--
-                    Default lifecycle phase: 'GENERATE_SOURCES'
-                    See https://maven.apache.org/ref/3.5.4/maven-core/lifecycles.html
-                -->
+                <id>check-has-apiTools-nature</id>
+                <phase>validate</phase>
                 <goals>
-                  <goal>generate-api-build-xml</goal>
+                  <goal>run</goal>
                 </goals>
+                <configuration>
+                  <exportAntProperties>true</exportAntProperties>
+                  <target>
+                    <loadfile srcfile=".project" property="natureIn.project">
+                      <filterchain>
+                        <linecontains>
+                          <contains value="org.eclipse.pde.api.tools.apiAnalysisNature"/>
+                        </linecontains>
+                      </filterchain>
+                    </loadfile>
+                    <condition property="skipAPIDescription" value="false" else="true">
+                        <isset property="natureIn.project" />
+                    </condition>
+                  </target>
+                </configuration>
               </execution>
             </executions>
           </plugin>
@@ -880,21 +894,19 @@
                 <goals>
                   <goal>eclipse-run</goal>
                 </goals>
-                <phase>compile</phase>
+                <phase>process-classes</phase>
+                <id>build-.api_description</id>
                 <configuration>
-                  <!-- actual indexer call -->
-                  <appArgLine>-data target/apibuild-workspace -application org.eclipse.ant.core.antRunner -buildfile
-                    target/.apibuild.xml</appArgLine>
+                  <skip>${skipAPIDescription}</skip>
+                  <work>${project.build.directory}/apigeneration-workspace</work>
+                  <appArgLine>-application org.eclipse.pde.api.tools.apiGeneration
+                  -projectName ${project.artifactId}_${qualifiedVersion}
+                  -project ${project.basedir}
+                  -binary ${tychoProject.build.outputDirectories}
+                  -target ${project.build.directory}
+                  </appArgLine>
                   <dependencies>
                     <!-- list of bundles that we need -->
-                    <dependency>
-                      <artifactId>org.eclipse.ant.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.apache.ant</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
                     <dependency>
                       <artifactId>org.eclipse.pde.api.tools</artifactId>
                       <type>eclipse-plugin</type>
