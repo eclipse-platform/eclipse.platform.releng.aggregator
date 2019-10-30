@@ -65,7 +65,7 @@ fi
 echo
 
 
-devworkspace="${BUILD_HOME}"/workspace-antRunner
+devworkspace=${WORKSPACE}/workspace-antRunner
 devArgs=-Xmx512m
 
 echo
