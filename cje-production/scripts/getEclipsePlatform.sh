@@ -21,6 +21,6 @@ downloadPath=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 epRelDir=$(ls -d --format=single-column ${downloadPath}/R-*|sort|tail -1)
 
 #get eclipse platform product
-cp $epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz .
+cp ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz .
 
 tar xzf eclipse-platform-*-linux-gtk-x86_64.tar.gz
