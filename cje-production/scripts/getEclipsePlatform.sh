@@ -18,9 +18,9 @@
 downloadPath=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 
 #get latest release folder
-epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${downloadPath}/R-*|sort|tail -1)
+epRelDir=$(ls -d --format=single-column ${downloadPath}/R-*|sort|tail -1)
 
 #get eclipse platform product
-scp genie.releng@projects-storage.eclipse.org:${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz .
+cp $epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz .
 
 tar xzf eclipse-platform-*-linux-gtk-x86_64.tar.gz
