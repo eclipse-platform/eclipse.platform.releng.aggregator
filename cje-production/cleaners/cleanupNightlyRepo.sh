@@ -123,7 +123,7 @@ function cleanRepo ()
   nRetain=$3
   dryRun=$4
   # Changed to "hard coded" location of where to expect on Hudson.
-  eclipseexe=${workspace}/eclipse
+  eclipseexe=${workspace}/eclipse/eclipse
   if [[ ! -x ${eclipseexe} ]]
   then
     echo -e "\n\tERROR: expected eclipse location not found, or not executable"
