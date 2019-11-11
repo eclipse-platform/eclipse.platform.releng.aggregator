@@ -20,7 +20,8 @@ echo -e "\n\n${0##*/} starting"
 source localBuildProperties.shsource 2>/dev/null
 
 JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-export JAVA_HOME=${JAVA_8_HOME}
+JAVA_11_HOME=/shared/common/java/openjdk/jdk-11_x64-latest
+export JAVA_HOME=${JAVA_11_HOME}
 
 # BUILD_ID is normally provided as an environment variable, but
 # can provide a default here (especially useful for local testing).
