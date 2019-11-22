@@ -678,7 +678,43 @@ fn-gather-repo ()
   fi
 }
 
-
+fn-notarize-macbuild ()
+{
+	
+	BUILD_DIR="$1"; shift
+	DMG="$1"; shift
+	PATH=/shared/common/jq/1.6/:${PATH}
+	
+	pushd $BUILD_DIR
+		
+	PRIMARY_BUNDLE_ID="$(echo ${DMG} | sed  's/-macosx-cocoa-x86_64.dmg//g')"
+	
+	RESPONSE=\
+	$(curl -s -X POST \
+	  -F file=@${DMG} \
+	  -F 'options={"primaryBundleId": "'${PRIMARY_BUNDLE_ID}'", "staple": true};type=application/json' \
+	  http://172.30.206.146:8383/macos-notarization-service/notarize)
+	  
+	UUID=$(echo ${RESPONSE} | jq -r '.uuid')
+	
+	STATUS=$(echo ${RESPONSE} | jq -r '.notarizationStatus.status')
+	
+	while [[ ${STATUS} == 'IN_PROGRESS' ]]; do
+	  sleep 1m
+	  RESPONSE=$(curl -s http://172.30.206.146:8383/macos-notarization-service/${UUID}/status)
+	  STATUS=$(echo ${RESPONSE} | jq -r '.notarizationStatus.status')
+	done
+	
+	if [[ ${STATUS} != 'COMPLETE' ]]; then
+	  echo "Notarization failed: ${RESPONSE}"
+	  exit 1
+	fi
+	
+	rm "${DMG}"
+	
+	curl -JO http://172.30.206.146:8383/macos-notarization-service/${UUID}/download
+	popd
+}
 
 # USAGE: fn-gather-sdk BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
@@ -702,6 +738,7 @@ fn-gather-sdk ()
     cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.dmg "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg
     cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
     popd
+    fn-notarize-macbuild "$BUILD_DIR" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg
   else
     echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
   fi
@@ -738,6 +775,7 @@ fn-gather-platform ()
     cp org.eclipse.platform.ide-macosx.cocoa.x86_64.dmg "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg
     cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
     popd
+    fn-notarize-macbuild "$BUILD_DIR" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg
   else
     echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-platform"
   fi
