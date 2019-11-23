@@ -91,7 +91,7 @@ fn-eq-gather-starterkit ()
     cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip
 
     popd
-#    fn-notarize-macbuild "$DROP_DIR" EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.dmg
+    fn-notarize-macbuild "$DROP_DIR" EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.dmg
   else
     echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-eq-gather-starterkit"
     return 1
