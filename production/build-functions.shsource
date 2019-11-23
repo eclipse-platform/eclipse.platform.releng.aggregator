@@ -680,10 +680,9 @@ fn-gather-repo ()
 
 fn-notarize-macbuild ()
 {
-	
+	set -x
 	BUILD_DIR="$1"; shift
 	DMG="$1"; shift
-	PATH=/shared/common/jq/1.6/:${PATH}
 	
 	pushd $BUILD_DIR
 		
@@ -695,14 +694,14 @@ fn-notarize-macbuild ()
 	  -F 'options={"primaryBundleId": "'${PRIMARY_BUNDLE_ID}'", "staple": true};type=application/json' \
 	  http://172.30.206.146:8383/macos-notarization-service/notarize)
 	  
-	UUID=$(echo ${RESPONSE} | jq -r '.uuid')
+	UUID=$(echo ${RESPONSE} | /shared/common/jq/1.6/jq -r '.uuid')
 	
-	STATUS=$(echo ${RESPONSE} | jq -r '.notarizationStatus.status')
+	STATUS=$(echo ${RESPONSE} | /shared/common/jq/1.6/jq -r '.notarizationStatus.status')
 	
 	while [[ ${STATUS} == 'IN_PROGRESS' ]]; do
 	  sleep 1m
 	  RESPONSE=$(curl -s http://172.30.206.146:8383/macos-notarization-service/${UUID}/status)
-	  STATUS=$(echo ${RESPONSE} | jq -r '.notarizationStatus.status')
+	  STATUS=$(echo ${RESPONSE} | /shared/common/jq/1.6/jq -r '.notarizationStatus.status')
 	done
 	
 	if [[ ${STATUS} != 'COMPLETE' ]]; then
@@ -714,6 +713,7 @@ fn-notarize-macbuild ()
 	
 	curl -JO http://172.30.206.146:8383/macos-notarization-service/${UUID}/download
 	popd
+	set +x
 }
 
 # USAGE: fn-gather-sdk BUILD_ID REPO_DIR BUILD_DIR
