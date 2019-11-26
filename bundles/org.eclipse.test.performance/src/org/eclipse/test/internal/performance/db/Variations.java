@@ -108,7 +108,7 @@ public class Variations extends Properties {
         Set<String> set = keyValues.stringPropertyNames();
         String[] keys = set.toArray(new String[set.size()]);
         Arrays.sort(keys);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < keys.length; i++) {
             if (asQuery)

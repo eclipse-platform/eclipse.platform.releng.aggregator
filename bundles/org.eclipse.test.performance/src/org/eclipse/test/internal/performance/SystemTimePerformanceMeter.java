@@ -77,7 +77,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
     }
 
     private String replicate(String s, int n) {
-        StringBuffer buf = new StringBuffer(n * s.length());
+        StringBuilder buf = new StringBuilder(n * s.length());
         for (int i = 0; i < n; i++)
             buf.append(s);
         return buf.toString();

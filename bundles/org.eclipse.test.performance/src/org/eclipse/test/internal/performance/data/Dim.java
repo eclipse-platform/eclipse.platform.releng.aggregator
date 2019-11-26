@@ -85,7 +85,7 @@ public class Dim implements Dimension {
     public String getLabel() {
         if (this.shortName == null) {
             String name = getName();
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             int length = name.length();
             for (int i = 0; i < length; i++) {
                 if (Character.isUpperCase(name.charAt(i))) {
