@@ -313,6 +313,7 @@ then
   RAW_DATE_START=$( date -u +%s )
 
   # TODO: avoid this hard coding of baseline value
+  # NOTE: value must start with a letter match baselinePerfVersion in testScripts/configuration/streamSpecific.properties
   baselineCode="R-4.13-201909161045"
   # to get time stamp, first remove initial IMN:
   baselineForBuildSuffix=${buildId/[IMN]/}
