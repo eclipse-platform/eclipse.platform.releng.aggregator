@@ -17,20 +17,22 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.13 (JDT)</title>
+<title>What's New in Eclipse 4.14 (JDT)</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.13 (JDT)</h2>
+<h2>What's New in Eclipse 4.14 (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.12 release of Eclipse.
+for the 4.14 release of Eclipse.
 They are grouped into:</p>
 <ul>
-	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
+	<li><a href="#Java13">Java&trade; 13 Support</a></li>
 	<li><a href="#JavaEditor">Java Editor</a></li>
+	<!-- <li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li> -->
 	<li><a href="#JavaFormatter">Java Formatter</a></li>
 	<li><a href="#JUnit">JUnit</a></li>
 	<li><a href="#Debug">Debug</a></li>
+	<li><a href="#JDTDev">JDT Developers</a></li>
 </ul>
 
 <p>See also the <b><a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New</a></b>
@@ -46,86 +48,155 @@ document for changes in the Platform.</p>
 </colgroup>
 <tbody>
 
+   <!-- ******************* Java 13 Support ************************************* -->
+  <tr>
+    <td id="Java13" class="section" colspan="2">
+    <h2>Java 13 Support </h2></td>
+  </tr>
+
+  <tr id="Java_13"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539066 -->
+      <td class="title">Java 13</td>
+      <td class="content">
+          <a href="http://jdk.java.net/13/">Java 13</a> is available and Eclipse JDT supports Java 13 for the Eclipse 4.14 release. 
+          <p>
+          The release notably includes the following Java 13 features:
+           <br/>
+           <a href="http://openjdk.java.net/jeps/354"> JEP 354: Switch Expressions (Preview)</a>.
+           <br/>
+           <a href="http://openjdk.java.net/jeps/355"> JEP 355: Text Blocks (Preview)</a>.
+           </p>
+           <p>
+           Please note that these are <a href="http://openjdk.java.net/jeps/13"> preview language features</a>
+           and hence enable preview option should be on.
+           For an informal introduction of the support, 
+           please refer to <a href="https://wiki.eclipse.org/Java13/Examples"> Java 13 Examples wiki</a>. 
+           </p>
+      </td>
+  </tr>
+
+  <tr id="Text_Block_Creation_Keyboard_ShortCut"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550113 -->
+      <td class="title">Keyboard shortcut for Text Block creation</td>
+      <td class="content">
+           A keyboard shortcut <b>Ctrl + Shift + ' </b>is added in the Java Editor for <b>text blocks</b>, which is a preview feature 
+           added in Java 13.
+           <p>
+           Conditions under which this keyboard shortcut works are: 
+           </p>
+           <ul>
+           <li>The Java Project should have a compliance of 13 or above and the preview features should be enabled.</li>
+           <li>The selection in the editor should not be part of a string or a comment or a text block.</li>
+           </ul>
+           <p> Examples: </p>
+           <p><img src="images/textblock-pre-creation1.png" alt=""/></p>
+           Pressing the shortcut gives:
+           <p><img src="images/textblock-post-creation1.png" alt=""/></p>
+           <p> You can also encompass a selected text in text block as below:</p>
+           <p><img src="images/textblock-pre-creation2.png" alt=""/></p>
+           On pressing the shortcut, you get this:
+           <p><img src="images/textblock-post-creation2.png" alt=""/></p>
+      </td>
+  </tr>
+  <!-- ******************* End of Java 13 Support ************************************* -->
+
+  <!-- ******************* Java Editor ************************************* -->
+  <tr>
+    <td id="JavaEditor" class="section" colspan="2">
+    <h2>Java Editor </h2>
+    </td>
+  </tr>
+
+  <tr id="unnecessary-array-creation"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550129 -->
+    <td class="title">Remove unnecessary array creation</td>
+    <td class="content">
+      A new cleanup action <b>Remove unnecessary array creation</b> has been added. It will remove explicit array creation for <code>varargs</code> parameters.
+      <p><img src="images/unnecessary-array-creation-option.png" alt=""/></p>
+      For the given code:
+      <p><img src="images/unnecessary-array-creation-before.png" alt=""/></p>
+      After cleanup, you get this:
+      <p><img src="images/unnecessary-array-creation-after.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <tr id="push-down-negation"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550913 -->
+    <td class="title">Push negation down in expression</td>
+    <td class="content">
+      A new Java cleanup/save action <b>Push down negation</b> has been added. It reduces the double negation by reverting the arithmetic expressions.
+      <p>
+      For instance:
+      </p>
+      <p><code>!!isValid;</code> becomes <code>isValid;</code></p>
+      <p><code>!(a != b);</code> becomes <code>(a == b);</code></p>
+      <p><img src="images/push-down-negation.png" alt="Push negation down cleanup"/></p>
+    </td>
+  </tr>
+
+  <tr id="templates-empty-java-file"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=505610 -->
+    <td class="title">Provide templates for empty Java source files</td>
+    <td class="content">
+      When dealing with empty Java source files, some basic templates (class, interface, enum) will now be available from the content assist popup.
+      <p><img src="images/templates-empty-java-file.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <tr id="postfix-completion"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=458804 -->
+    <td class="title">Postfix completion proposal category</td>
+    <td class="content">
+      Postfix completion allows certain kinds of language constructs to be applied to the previously entered text.
+      <p>For example: Entering <code>"input text".var</code> and selecting the <b>var - Creates a new variable</b> proposal, will result in <code>String name = "input text"</code>.</p>
+      <p><img src="images/postfix-completion.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <tr id="try-with-resources"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=473276 -->
+    <td class="title">try-with-resources quickfix</td>
+    <td class="content">
+      A <b>quickfix</b> has been added to create a <code>try-with-resources</code> statement based on the selected lines. Lines that are selected
+      must start with declarations of objects that implement <code>AutoCloseable</code>. These declarations are added as
+      the resources of the <code>try-with-resources</code> statement. 
+      <p>
+       If there are selected statements that are not eligible resources (such as Objects that don't implement <code>AutoCloseable</code>), 
+       then the first such statement and all the following selected statements will be placed in the <code>try-with-resources</code> body.
+      </p> 
+      Method before applying try-with-resources:
+      <p><img src="images/tryWithResource1.png" alt=""/></p>
+      Select all the lines inside the method, then use the short-cut <b>Ctrl+1</b> and click on <b>Surround with try-with-resources</b> from the list:
+      <p><img src="images/tryWithResource2.png" alt=""/></p>
+      This results in:
+      <p><img src="images/tryWithResource3.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <tr id="module-javadoc-checking"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549855 -->
+    <td class="title">Javadoc tag checking for modules</td>
+    <td class="content">
+      Support has been added to check the Javadoc of a module-info.java file to report
+      missing and duplicate <code>@uses</code> and <code>@provides</code> tags depending on
+      the compiler settings (<b>Preferences &gt; Java &gt; Compiler &gt; Javadoc</b>).
+      <p><img src="images/checkModuleJavadoc.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <!-- ******************* End of Java Editor ************************************* -->
 
   <!-- ******************* Java Views and Dialogs ************************************* -->
+  <!--
   <tr>
     <td id="JavaViewsAndDialogs" class="section" colspan="2">
     <h2>Java Views and Dialogs</h2>
     </td>
   </tr>
-  
-  <tr id="console-output-synchronization"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=32205 -->
-    <td class="title">Synchronize standard and error output in console</td>
-    <td class="content">
-      The Eclipse <b>Console view</b> currently can not ensure that mixed standard and error output is shown in the same order
-      as it is produced by the running process. For Java applications the launch configuration <b>Common Tab</b> now
-      provides an option to merge standard and error output. This ensures that standard and error output is shown in the
-      same order it was produced but at the same time disables the individual coloring of error output.
-      <p><img src="images/merge-process-output.png" alt="Differences between merging enabled and disabled"/></p>
-    </td>
-  </tr>
+  -->
   <!-- ******************* End of Java Views and Dialogs ************************************* -->
-  
-  <!-- ******************* Java Editor ************************************* -->
+
+  <!-- ******************* Java Compiler ************************************* -->
+  <!--
   <tr>
-    <td id="JavaEditor" class="section" colspan="2">
-    <h2>Java Editor</h2>
+    <td id="JavaCompiler" class="section" colspan="2">
+    <h2>Java Compiler</h2>
     </td>
   </tr>
-
-  <tr id="foreach-loop-collections"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548002 -->
-    <td class="title">Convert to enhanced 'for' loop using Collections</td>
-    <td class="content">
-      The Java quickfix/cleanup <b>Convert to enhanced 'for' loop</b> is now offered on <code>for</code> loops that are iterating through Collections.  The
-      loop must reference the <code>size</code> method as part of the condition and if accessing elements in the body, must use the <code>get</code>
-      method.  All other Collection methods other than <code>isEmpty</code> invalidate the quickfix being offered.
-      <p><img src="images/foreachcollectionbefore.png" alt="for loop using Collections before"/></p>
-      <p><img src="images/foreachcollectionquickfix.png" alt="for loop using Collections quickfix"/></p>
-      <p><img src="images/foreachcollectionafter.png" alt="for loop using Collections after"/></p>
-    </td>
-  </tr>
-
-  <tr id="final-fields-quickfix"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=83544 -->
-    <td class="title">Initialize 'final' fields</td>
-    <td class="content">
-      A Java quickfix is now offered to initialize an uninitialized <code>final</code> field in the class constructor.  The fix will initialize a <code>String</code> to the empty string, a numeric base type to 0, and for class fields it initializes them using their default constructor if available or <code>null</code> if no default constructor exists.
-      <p><img src="images/finalquickfix1.png" alt="unitialized final field before"/></p>
-      <p><img src="images/finalquickfix2.png" alt="final field initialized in constructor"/></p>
-    </td>
-  </tr>
-
-  <tr id="autoboxing-unboxing"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549242 -->
-    <td class="title">Autoboxing and Unboxing</td>
-    <td class="content">
-      Use Autoboxing and Unboxing when possible. These features are enabled only for Java 5 and higher.
-      <p><img src="images/autoboxing-unboxing-feature.png" alt=""/></p>
-    </td>
-  </tr>
-
-  <tr id="enhanced-redundant-modifier-removal"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549242 -->
-    <td class="title">Improved redundant modifier removal</td>
-    <td class="content">
-      <b>Remove redundant modifier</b> now also removes useless <code>abstract</code> modifier on the interfaces.
-      <p><img src="images/abstract-removal-feature.png" alt=""/></p>
-      For the given code:
-      <p><img src="images/abstract-removal-before.png" alt=""/></p>
-      You get this:
-      <p><img src="images/abstract-removal-after.png" alt=""/></p>
-    </td>
-  </tr>
-
-  <tr id="javadoc-for-module-info"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=546350 -->
-    <td class="title">Javadoc comment generation for module</td>
-    <td class="content">
-      Adding a Javadoc comment to a Java module (module-info.java) will result in automatic annotations being added per the new module comment preferences.
-      <p><img src="images/modulejavadocprefs.png" alt="Javadoc module comment preferences"/></p>
-      <p>
-       The <code>$(tags)</code> directive will add <code>@uses</code> and <code>@provides</code> tags for all <b>uses</b> and <b>provides</b> module statements.
-      </p>
-      <p><img src="images/modulejavadoc.png" alt="Javadoc module comment example"/></p>
-    </td>
-  </tr>
-  <!-- ******************* End of Java Editor ************************************* -->
+  -->
+  <!-- ******************* End of Java Compiler ************************************* -->
 
   <!-- ******************* Java Formatter ************************************* -->
   <tr>
@@ -133,65 +204,53 @@ document for changes in the Platform.</p>
     <h2>Java Formatter </h2>
     </td>
   </tr>
-  <tr id="remove-excess-blank-lines"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549255 -->
-    <td class="title">Remove excess blank lines</td>
-    <td class="content">
-      All the settings in the <b>Blank lines</b> section can now be configured to <b>remove excess blank lines</b>, effectively taking precedence over the <i>Number of empty lines to preserve</i> setting.
-      Each setting has its own button to turn the feature on, right next to its number control.
-      The button is enabled only if the selected number of lines is smaller than the <i>Number of empty lines to preserve</i>, because otherwise any excess lines are removed anyway.
-      <p>
-        <img src="images/formatter-remove-excess-blank-lines.png" alt="" />
-      </p>
-    </td>
-  </tr>
-  <tr id="blank-lines-changes"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550083 -->
-    <td class="title">Changes in blank lines settings</td>
-    <td class="content">
-      There's quite a lot of changes in the <b>Blank lines</b> section of the formatter profile.
-      <p>
-        Some of the existing subsections and settings are now phrased differently to better express their function:
-      </p>
-      <ul>
-        <li>The <i>Blank lines within class declarations</i> subsection is now <i>Blank lines within type declaration</i></li>
-        <li><i>Before first declaration</i> is now <i>Before first member declaration</i></li>
-        <li><i>Before declarations of the same kind</i> is now <i>Between member declarations of different kind</i></li>
-        <li><i>Before member class declarations</i> is now <i>Between member type declarations</i></li>
-        <li><i>Before field declarations</i> is now <i>Between field declarations</i></li>
-        <li><i>Before method declarations</i> is now <i>Between method/constructor declarations</i></li>
-      </ul>
-      <p>
-        More importantly, a few new settings have been added to support more places where the number of empty lines can be controlled:
-      </p>
-      <ul>
-        <li><i>After last member declaration</i> in a type (to complement previously existing <i>Before first member declaration</i> setting)</li>
-        <li><i>Between abstract method declarations</i> in a type (these cases were previously handled by <i>Between method/constructor declarations</i>)</li>
-        <li><i>At end of method/constructor body</i> (to complement previously existing <i>At beginning of method/constructor body</i> setting)</li>
-        <li><i>At beginning of code block</i> and <i>At end of code block</i></li>
-        <li><i>Before statement with code block</i> and <i>After statement with code block</i></li>
-        <li><i>Between statement groups in 'switch'</i></li>
-      </ul>
-      <p>
-        Most of the new settings have been put in a new subsection <b>Blank lines within method/constructor declarations</b>.
-      </p>
-      <p>
-        <img src="images/formatter-new-blank-lines-settings.png" alt="" />
-      </p>
-    </td>
-  </tr>
-  <!-- ******************* End of Java Formatter ************************************* -->
 
-<!-- ******************* JUnit ************************************* -->
+  <tr id="formatter-text-block"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551984 -->
+    <td class="title">Formatting of text blocks</td>
+    <td class="content">
+      The code formatter can now handle <b>text blocks</b>, which is a preview feature added in Java 13.
+      It's controlled by the <b>Text block indentation</b> setting, found right in the <b>Indentation</b> section of the <b>Profile Editor</b> (<b>Preferences &gt; Java &gt; Code Style &gt; Formatter &gt; Edit...</b>).
+      <p>By default, text block lines are indented the same way as wrapped code lines, that is with two extra tabs relative
+      to the starting indentation (or whatever is set as <b>Default indentation for wrapped lines</b> in the <b>Line Wrapping</b> section).
+      You can also set it to use only one tab for indentation (<b>Indent by one</b>), align all lines to the position of the opening quotes
+      (<b>Indent on column</b>), or preserve the original formatting (<b>Do not touch</b>).
+      </p>
+      <p><img src="images/formatter-text-block.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <tr id="formatter-javadoc-tags-blank-lines"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=54627 -->
+    <td class="title">Blank lines between Javadoc tags</td>
+    <td class="content">
+      The code formatter can now divide Javadoc tags into groups (by type, for example <code>@param</code>, <code>@throws</code>, <code>@returns</code>) and separate these groups with blank lines.
+      This feature can be turned on in the <b>Comments &gt; Javadocs</b> section by checking the <b>Blank lines between tags of different type</b> box.
+      <p><img src="images/formatter-javadoc-tags-blank-lines.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <tr id="formatter-space-before-not"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=552919 -->
+    <td class="title">Space after not operator</td>
+    <td class="content">
+      A new setting has been added to control whether a space should be added <b>after not (<code>!</code>) operator</b>, independently from other unary operators.
+      To find it, expand sections <b>Whitespace &gt; Expressions &gt; Unary operators</b> and go to the last checkbox.
+      <p><img src="images/formatter-space-after-not.png" alt=""/></p>
+    </td>
+  </tr>
+
+  <!-- ******************* End of Java Formatter ************************************* -->
+  
+   <!-- ******************* JUnit ************************************* -->
   <tr>
     <td id="JUnit" class="section" colspan="2">
     <h2>JUnit</h2>
     </td>
   </tr>
-  <tr id="junit-5.5.1"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548964 -->
-      <td class="title">JUnit 5.5.1</td>
+	<tr id="junit-runtime-bree"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551728 -->
+      <td class="title">BREE update for org.eclipse.jdt.junit.runtime</td>
       <td class="content">
-          <a href="https://junit.org/junit5/docs/5.5.1/release-notes/" target="_blank">JUnit 5.5.1</a> is here and Eclipse JDT has been updated to use this version.
+        The Bundle Required Execution Environment (BREE) for the <code>org.eclipse.jdt.junit.runtime</code> bundle is now J2SE-1.5.
       </td>
-  </tr>
+    </tr>
   <!-- ******************* End of JUnit ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
@@ -200,37 +259,64 @@ document for changes in the Platform.</p>
     <h2>Debug</h2>
     </td>
   </tr>
-  <tr id="enhanced-patch-module-support"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=546738 -->
-    <td class="title">Enhanced support for --patch-module during launch</td>
+
+  <tr id="exception-instance-recurrence"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=284158 -->
+    <td class="title">No suspending on exception recurrence</td>
     <td class="content">
-      The <b>Java Launch Configuration</b> now supports patching of different modules by different sources during the launch. This can be verified in the <b>Override Dependencies...</b> dialog
-      in the <b>Dependencies</b> tab in a Java Launch Configuration.
-      <p><img src="images/launch-dependencies.png" alt=""/></p>
-      <p><img src="images/enhanced-patch-module.png" alt=""/></p>
+      A new workspace preference has been added for exception breakpoints: <b>Suspend policy for recurring exception instances</b> controls 
+      whether the same exception <em>instance</em> may cause the debugger to suspend more than once.
+      <p><img src="images/preference-exception-recurrence.png" alt="Preferences: Java > Debug"/></p>
+      <p>This option is relevant when debugging an application that has <code>try</code> blocks at several levels of the architecture.
+        In this situation an exception breakpoint may fire multiple times for the same actual exception <em>instance</em>: 
+        A <code>throw</code> statement inside a <code>catch</code> block may re-throw the same exception.
+        The same holds for each <code>finally</code> block or <code>try-with-resources</code> block.  
+      </p>
+      <p>When the debugger stops due to an exception breakpoint, you may want to continue your debug session by pressing
+       <b>Resume</b> (<b>F8</b>), but all that catching and re-throwing will force you to observe
+       all locations where the same exception will surface again and again. Suspending at all <code>try</code> blocks
+       on the call stack may also spoil your context of open Java editors, by opening more editors of classes that are
+       likely irrelevant for the debugging task at hand.</p>
+      <p>The <b>JDT Debugger</b> will now detect this situation, and the first time it notices the same exception instance
+       recurring at the surface, a new question dialog is shown:
+      </p>
+      <p><img src="images/dialog-exception-recurrence.png" alt="Dialog: Repeated exception occurrence"/></p>
+      <p>If you select <b>Skip</b> in this dialog, the current exception instance will be dismissed for good.
+       Still, new instances of the same exception type will cause suspending when they are thrown.
+      </p>
+      <p>If you check <b>Remember my decision</b> your choice will be stored in the mentioned workspace preference
+       to be effective for all exception breakpoints.
+      </p>
+      <p>Even after choosing <b>Skip</b> &mdash; resp. <b>Only once</b> in the preferences &mdash; you can have the old behavior
+       simply by pressing <b>Step Return</b> (<b>F7</b>) instead of <b>Resume</b>.</p>
     </td>
   </tr>
+
   <!--************************ End of Debug ******************************** -->
 
-  <!-- ******************* Java Build ************************************* -->
+  <!-- *********************** JDT Developers ******************************** -->
   <tr>
-    <td id="JavaBuild" class="section" colspan="2">
-    <h2>Java Build</h2>
+    <td id="JDTDev" class="section" colspan="2">
+    <h2>JDT Developers</h2>
     </td>
   </tr>
 
   <tr id="full-build-on-jdt-core-settings-change"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549457 -->
     <td class="title">Full build on JDT core preferences change</td>
     <td class="content">
-      Manually changing the settings file <b>.settings/org.eclipse.jdt.core.prefs</b> of a project
-      will result in a full project build, if the workspace auto-build is on. For example, pulling
-      different settings from a git repository or generating the settings with a tool will now trigger a build.
-      Note that this includes timestamp changes, even if actual settings file contents were not changed.
-      <p>For the 4.13 release, it is possible to disable this new behavior with the VM property:
-      <b><span style="white-space: nowrap;">-Dorg.eclipse.disableAutoBuildOnSettingsChange=true</span></b>.
-      It is planned to remove this VM property in a future release.</p>
+      The existing <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code>, <code>org.eclipse.jdt.ui.javadocCompletionProposalComputer</code>
+      and <code>org.eclipse.jdt.ui.javaCompletionProposalSorters</code> extension points now allow a new attribute <b>requiresUIThread</b> that allows
+      a developer to declare whether running in the UI thread is required or not.
+      <p>
+        This information will be used by the <b>Content Assist</b> operation to allow some optimizations and prevent UI freezes by reducing the amount of
+        work happening in the UI thread.
+      </p>
+      <p>
+        To preserve backward compatibility, the default value for this attribute (if unset) is <code>true</code>, meaning the extension is expected to
+        run in the UI thread.
+      </p>
     </td>
   </tr>
-  <!-- ******************* End of Java Build ************************************* -->
+  <!-- *********************** End of JDT Developers ******************************** -->
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->

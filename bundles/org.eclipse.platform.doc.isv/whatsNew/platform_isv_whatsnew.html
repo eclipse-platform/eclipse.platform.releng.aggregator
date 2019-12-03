@@ -17,18 +17,17 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.13</title>
+<title>Eclipse Platform What's New in 4.14</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.13</h2>
+<h2>What's New in Eclipse 4.14</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.13 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.14 release of Eclipse.
 </p>
 <ul>
 	<li><a href="#Platform">Platform Changes</a></li>
 	<li><a href="#SWT">SWT Changes</a></li>
-	<li><a href="#JFace">JFace Changes</a></li>
 </ul>
 
 <p>
@@ -49,77 +48,93 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
- 
-  <tr id="generic-editor-icon"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=513034 -->
-    <td class="title">Content-type-specific icons in generic editor</td>
+
+  <tr id="text-selection-no-ui-thread"> <!-- https://bugs.eclipse.org/547683 -->
+    <td class="title">Get TextViewer selection out of UI thread</td>
     <td class="content">
-      An extension was added to the generic editor so that it now can provide icons for content-type. See extension point <b>org.eclipse.ui.genericeditor.icons</b> for more details.
-      <p>
-        <img src="images/generic-editor-icon.png" alt="" />
-      </p>
+      A new extension interface <b><code>ITextViewerExtension9</code></b> was added to <code>ITextViewer</code>. This extension interface
+      adds a new method <code>getLastKnownSelection</code> to get the text selection for the viewer, with constraint (by API contract) that this method
+      can be called <em>outside of the UI thread</em>.
+      <p>This method allows to build extensions (like completion proposal computers, hovers and others) that can
+      work outside of the UI thread, as a separate job, without blocking the UI but that still require access to the
+      text selection.</p>
+      <p>The <code>TextViewer</code> concrete implementation (used by most textual editors) has been
+      enriched to implement this interface and provide associated method.</p>
+      <p><b>NOTE:</b> Since selection can change in the UI thread while this method may be running in the non-UI thread, it can
+      happen that the <code>getLastKnownSelection</code> method returns a selection that's no more up-to-date. Special care should be
+      taken if having the very current selection is important in your code; but experience with adoption of this method
+      in typical cases has shown that this is rarely the case, and that if your code needs to react to selection changes,
+      using an <code>ISelectionListener</code> should be preferred.</p>
     </td>
   </tr>
- 
-  <tr id="multiline-sfe"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548650 -->
-  <td class="title">Multiline Support for StringFieldEditor</td>
-  <td class="content">
-    The implementation of <code>StringFieldEditor</code> now provides the option to use a multi-line Text widget, suitable
-    for editing larger String values in a preference page.
-  </td>
-  </tr>
 
-  <tr id="request-specific-quickaccess"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548058 -->
-  <td class="title">API to compute Quick Access proposals according to user input</td>
-  <td class="content">
-    An extension interface <b><code>org.eclipse.ui.quickaccess.IQuickAccessComputerExtension</code></b> to use as extension to
-    <code>org.eclipse.ui.quickaccess.IQuickAccessComputer</code> when using extension point <code>org.eclipse.ui.quickaccess/computer</code>
-    was added. This provides the ability to compute a new extra set of proposals whenever filter change.
-  </td>
-  </tr>
-
-  <tr id="javax-injext">
-  <td class="title">Bundle org.eclipse.core.runtime no longer reexports javax.inject</td>
-  <td class="content">
-    The org.eclipse.core.runtime bundle had <code>javax.inject</code> as an <b>optional</b> dependency, which it
-    previously reexported, but not anymore.
+  <tr id="quick-assist-extension-point"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=544448 -->
+    <td class="title">Quick assist extension point for Generic Editor</td>
+    <td class="content">
+    A new extension point <b><code>org.eclipse.ui.genericeditor.quickAssistProcessors</code></b> has been added to allow contributing to the quick assist in the generic editor.
     <p>
-     Technically, it's not a breaking change as <code>javax.inject</code> was never
-     guaranteed to be there thus whether it is reexported or not was not certain. Eclipse Platform can not guarantee the API stability of this package so it makes no 
-     sense to make such a promise.
+     The following example shows how to contribute to the Generic Editor's quick assist:
     </p>
-    <p>
-     Clients have to <code>Import-Package: javax.inject</code> explicitly if they need it.
-    </p>
-  </td>
+    <pre>&lt;extension point=&quot;org.eclipse.ui.genericeditor.quickAssistProcessors&quot;&gt;
+    &lt;quickAssistProcessor
+        class=&quot;org.eclipse.ui.genericeditor.tests.contributions.MockQuickAssistProcessor&quot;
+        contentType=&quot;org.eclipse.ui.genericeditor.tests.content-type&quot;&gt;
+    &lt;/quickAssistProcessor&gt;
+&lt;/extension&gt;</pre>
+    The contributing extension must provide a class which implements <code>org.eclipse.jface.text.quickassist.IQuickAssistProcessor</code>.
+    </td>
   </tr>
 
-  <tr id="non-persisted-ui"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=544871 -->
-  <td class="title">E4XMIResource optionally filters Transient UI Elements</td>
-  <td class="content">
-      When using the E4XMIResource directly, transient UI elements are no longer filtered by default.
-      Note that transient UI elements are filtered by default when saved from the application.
-      
-      <p>To filter transient UI elements, call the save method with the new option
-      <code>options.put(E4XMIResource.OPTION_FILTER_PERSIST_STATE, Boolean.TRUE); resource.save(options);</code></p>
-  </td>
+  <tr id="display-helper-lambda"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551211 -->
+    <td class="title">Easier usage of DisplayHelper</td>
+    <td class="content">
+      The <b><code>org.eclipse.ui.tests.harness.util.DisplayHelper</code></b> that's often conveniently
+      used in tests to automate wait on asynchronous UI results now offers a more concise
+      syntax, relying on the new static <code>waitForCondition(display, timeout, condition)</code>
+      method.
+      <p>Former constructs like:</p>
+<pre>
+assertTrue(new DisplayHelper() {
+    @Override
+    public void condition() {
+        return some.boolean() &amp;&amp; expression;
+    }
+}.waitForCondition(display, 1000));
+</pre>
+can now be replaced by:
+<pre>
+assertTrue(DisplayHelper.waitForCondition(display, 1000, () -> some.boolean() &amp;&amp; expression))
+</pre>
+     </td>
   </tr>
-   <tr id="logging-api"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550347  -->
-  <td class="title">Simplified Platform logging API</td>
-  <td class="content">
-      Platform provides convenient logging API, <code>Platform.getLog(Class)</code>  which can be used to access the log for the bundle to which the class belongs.
-  </td>
+
+  <tr id="selection_listener_factory"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550329 -->
+    <td class="title">Selection Listener Factory</td>
+    <td class="content">
+       A new API was introduced to make participants of the Selection framework more efficient.
+       <p>
+         Selection listeners are notified of all selections in the Workbench. This
+         means that the listener is always required to filter unwanted selections. In
+         addition, the listener has to make sure not to waste cycles in the UI
+         thread, for instance, not update the UI while it is invisible.
+       </p><p>
+         This filtering generally requires <i>a lot</i> of boilerplate code while,
+         ideally, you only want to receive selections that are of interest.
+       </p><p>
+         This factory takes care of many practical filtering scenarios by allowing the
+         creation of an intermediate selection service that only calls you back with
+         selections you can work with.
+       </p><p>
+         See usage examples in the <a href="https://git.eclipse.org/r/plugins/gitiles/platform/eclipse.platform.ui/+/master/bundles/org.eclipse.ui.workbench/Eclipse%20UI/org/eclipse/ui/SelectionListenerFactory.java#30">SelectionListenerFactory</a> documentation.
+       </p>
+    </td>
   </tr>
-  <tr id="monitor-logging"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=482062 -->
-  <td class="title">Tracing option for correct progress reporting usage</td>
-  <td class="content">
-      Earlier releases added support for tracing the correct usage of progress monitors. Unfortunately, this was missed while documenting in previous noteworthy documents.
-      
-      <p>To enable this tracing, add <code>org.eclipse.equinox.common/progress_monitors=true</code> in your ".options" file and start Eclipse via the -debug flag, or use the tracing option in the launch configuration.
-      </p>
-        <p>
-        <img src="images/progress-monitor.png" alt="" />
-      </p>
-  </td>
+  
+  <tr id="update-part-icon"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=475357 -->
+   <td class="title">Update the Icon of a Part at Runtime</td>
+    <td class="content">
+      You can now update the icon of a Part in a Part Stack by setting its icon URI at any time. There is no need to modify the part's transient data anymore.
+   </td>
   </tr>
   <!-- ******************** End of Platform ********************** -->
 
@@ -127,123 +142,39 @@ section of the Workbench User Guide.
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-
-  <tr id="gdkpixbuf-imageloader"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=545032 -->
-    <td class="title">New native implementation of ImageLoader on GTK</td>
+  <tr id="toolitem-disabled-image"> <!-- https://bugs.eclipse.org/302918 -->
+    <td class="title">Disabled Toolbar items on GTK</td>
     <td class="content">
-      The implementation of <code>ImageLoader</code> on GTK now uses the native <code>GdkPixbuf</code> API for image loading and saving.
+      <b><code>ToolItem.setDisabledImage()</code></b> is now fully implemented for ToolItems on Linux/GTK, and greatly improves the ability
+      to distinguish a disabled ToolItem from an enabled one.
+      <p>Below is a screenshot with disabled toolbar buttons;
+      the left toolbar shows the current implementation, the right one the shows the old implementation.</p>
+      <p><img src="images/toolitem-disabled-comparison.png" alt="ToolBar comparison"/></p>
       <p>
-       Key highlights of the new ImageLoader on GTK:
+       This API is already works on Windows and macOS.
       </p>
-      <ul>
-       <li>Loading and saving images has native performance, with a significant speedup especially in loading JPEG files</li>
-       <li>Better GIF animation support</li>
-       <li>Support for more image formats</li>
-      </ul>
     </td>
   </tr>
 
-  <tr id="gtk-toolitem-padding"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=395296 -->
-    <td class="title">Reduced ToolItem padding on GTK</td>
+  <tr id="image-svg-gtk"> <!-- https://bugs.eclipse.org/545804 -->
+    <td class="title">SVG Image API added, implemented on GTK</td>
     <td class="content">
-      A fix in <code>ToolItem</code> has greatly reduced the size of some toolbars on GTK.
-      <p>
-       Previously, all <code>ToolItem</code>s were the same size as the largest of them in a given toolbar. With this fix, items are
-      now independently sized, which reduces the total size of toolbars that contain large items.
-      </p>
-     <p>
-      EGit's Rebase Interactive view is a good example of this fix. In the following screenshot, the toolbar shown on top has
-      the fix applied, compared to the larger, unpatched toolbar on the bottom.
-     </p>
-     <p><img src="images/gtk-toolitem-padding.png" alt="ToolItems with reduced padding compared to before"/></p>
+      SWT now has an API to support SVG images, <b><code>SWT.IMAGE_SVG</code></b>, which allows <code>ImageLoader</code> to load them.
+      <p>Currently this functionality is only implemented on Linux/GTK, on all other platforms the API is a HINT.</p>
     </td>
   </tr>
 
-  <tr id="win32-text-search-cancel"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=293230 -->
-    <td class="title">Search/Cancel icons supported in Text widget on Windows</td>
+  <tr id="ccombo-alignment"> <!-- https://bugs.eclipse.org/349112 -->
+    <td class="title">Set alignment for CCombo</td>
     <td class="content">
-      The Text widget on Windows now supports displaying the search and cancel icons for <code>SWT.ICON_SEARCH</code> and <code>SWT.ICON_CANCEL</code> styles respectively.
-      With the Windows support added, these style APIs are now supported on all the three platforms and are no longer marked as a <code>HINT</code>.
-      <p><img src="images/win32-text-search-cancel.png" alt="Text widget with search and clear buttons"/></p>
+     The <code>CCombo</code> widget can now align the text field content, the alignment is not applied to the drop-down list.
+     <p>The alignment for <code>CCombo</code> can be specified as a style bit in the constructor or using the <code>CCombo.setAlignment()</code> method.
+     You can also get the value of the <code>CCombo</code>'s alignment using <code>getAlignment()</code> method.</p>
+     <p>The below screen-shot shows possible <code>CCombo</code> alignments:</p>
+     <p><img src="images/ccombo-alignment.png" alt="Aligned CCombo widgets"/></p>
     </td>
   </tr>
-
-  <tr id="swt-is-dark-theme"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549451 -->
-    <td class="title">API to query if current OS theme is dark</td>
-    <td class="content">
-      A new method <code>public static boolean Display.isSystemDarkTheme()</code> is now available to query if the current OS theme has a dark appearance.
-      The method returns <code>true</code> if the current OS theme is dark, else it returns <code>false</code>.
-    </td>
-  </tr>
-
-  <tr id="swt-styled-text-disabled"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=4745 -->
-    <td class="title">StyledText now supports a disabled look</td>
-    <td class="content">
-      The StyledText widget now supports a disabled look on all platforms when <code>StyledText.setEnabled(false)</code> is called.
-			<p><img src="images/styled-text-disabled-gtk.png" alt=""/></p>
-			<p><img src="images/styled-text-disabled-win.png" alt=""/></p>
-			<p><img src="images/styled-text-disabled-mac.png" alt=""/></p>
-    </td>
-  </tr>
-  
-  <tr id="swt-disabled-colors"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548190 -->
-    <td class="title">New color constants for disabled widgets</td>
-    <td class="content">
-      Two new color constants are available in SWT, to match the colors used in disabled widgets. <code>SWT.COLOR_TEXT_DISABLED_BACKGROUND</code> matches the background color of a disabled text widget, and
-			<code>SWT.COLOR_WIDGET_DISABLED_FOREGROUND</code> matches the foreground color of a disabled widget.
-    </td>
-  </tr>
-  
-  <tr id="swt-snippet-explorer"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=547934 -->
-    <td class="title">SWT Snippet Explorer</td>
-    <td class="content">
-      The <a href="https://www.eclipse.org/swt/snippets/" target="_blank">SWT Snippets</a> project in the <a href="https://git.eclipse.org/c/platform/eclipse.platform.swt.git/" target="_blank">SWT repository</a> now includes a simple application called SnippetExplorer which can list, search and launch single or 
-      multiple snippets at once. It also shows the snippets description, source code and a preview image where applicable.
-      <p><img src="images/swt-snippet-explorer.png" alt=""/></p>
-    </td>
-  </tr>
-  
-  <tr id="swt-gtk-input-methods"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548628 -->
-    <td class="title">Input method switching on GTK</td>
-    <td class="content">
-      Early versions of GTK3 allowed the input method to be changed at the application level. This
-      functionality has been deprecated for quite some time, and has now been removed from SWT.
-      <p>To change the input method, please use the global input method settings available in the desktop environment.</p>
-    </td>
-  </tr>
-  
   <!-- *********************** End of SWT *********************** -->
-
-  <!-- *********************** JFace *********************** -->
-  <tr>
-    <td id="JFace" class="section" colspan="2"><h2>JFace Changes</h2></td>
-  </tr>
-
-  <tr id="columnViewEditor-cycleTabTraversal">  <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549194 -->
-    <td class="title">New ColumnViewerEditor tab traversal added</td>
-    <td class="content">
-      Tabbing to the start or end of a viewer (during an inline edit) is
-      now possible by passing
-      <b><code>ColumnViewerEditor.TABBING_CYCLE_IN_VIEWER</code></b> as a feature when calling
-      <code>TableViewerEditor.create(viewer,
-        editorActivationStrategy, feature)</code> or <code>TreeViewerEditor.create(viewer, editorActivationStrategy,
-        feature)</code>.
-      <p>
-        With this new feature flag enabled:
-      </p>
-      <ul>
-        <li>
-          Pressing <b>Tab</b> while editing the <b>last item</b> in a
-          viewer starts an inline edit on the <b>first item</b>.
-        </li>
-        <li>
-          Pressing <b>Shift+Tab</b> while editing the first item starts an
-          inline edit on the last item.
-        </li>
-      </ul>
-    </td>
-  </tr>
-  <!-- *********************** End of JFace *********************** -->
 
 </tbody>
 </table>

@@ -17,18 +17,18 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in 4.13 (PDE)</title>
+<title>What's New in 4.14 (PDE)</title>
 </head>
 
 <body>
-<h2>What's New in 4.13 (PDE)</h2>
+<h2>What's New in 4.14 (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Plug-in Development Environment (PDE)
-for the 4.13 release of Eclipse. They are grouped into:</p>
+for the 4.14 release of Eclipse. They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
 	<li><a href="#dialogs-wizards-views">Dialogs, Wizards and Views</a></li>
-	<!-- <li><a href="#editors">Editors</a></li> -->
+	<li><a href="#editors">Editors</a></li>
 	<li><a href="#APITools">API Tools</a></li>
-	<li><a href="#pde-compiler">PDE Compiler</a></li>
+	<!-- <li><a href="#pde-compiler">PDE Compiler</a></li> -->
 </ul>
 
 <!-- ****************** START OF N&N TABLE****************** -->
@@ -42,51 +42,58 @@ for the 4.13 release of Eclipse. They are grouped into:</p>
   <tr>
     <td id="dialogs-wizards-views" class="section" colspan="2"><h2>Dialogs, Wizards and Views</h2></td>
   </tr>
-  <tr id="feature-launch-startlevels"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=331595 -->
-    <td class="title">Configure start levels for feature based launch</td>
+
+  <tr id="features-view-update"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550316 -->
+    <td class="title">Target Platform in Features view</td>
     <td class="content">
-      <b>Feature-based Launch Configuration</b> now supports custom start levels and auto-start properties for individual plugins.
+      Using the <b>Features</b> view you can now view the structure of features in the target platform in addition to the ones in your workspace projects.
       <p>
-       To configure them, you need to add the plugins via <b>Add Plug-ins...</b> first.
+        Features from workspace projects are shown first, followed by the ones from the target platform.
       </p>
       <p>
-       When launching a feature-based product, defined start levels and selected features are automatically
-       filled out in the created launch configuration. You can then select <b>features selected below</b> to
-       convert it to feature-based without any further configuration. 
-      </p>
-      <p>
-       <img src="images/feature-launch-startlevels.png" alt="" />
+        <img src="images/features-view-with-target-platform-support.png" alt="" />
       </p>
     </td>
   </tr>
-  
-  <tr id="features-view"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=543217 -->
-    <td class="title">New Features view</td>
+  <tr id="features-view-products"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550317 -->
+    <td class="title">Products in Features view</td>
     <td class="content">
-      You can now view the structure of features in your workspace projects using the new <b>Features</b> view.
+      You can now view the structure of product configurations using the <b>Features</b> view.
       <p>
-       To open the view, go to the <b>Show View</b> dialog (<b>Window &gt; Show View &gt; Other...</b>) and choose it from
-			 the <b>Plug-in Development</b> category.
+        <img src="images/features-view-products.png" alt="" />
       </p>
-			<p>
-       <img src="images/show-view-dialog.png" alt="" />
-      </p>
-      <p>
-       By default the view shows only features, with child features listed under their parents rather than at the top level.
-			 The buttons on the view's toolbar allow plugins/fragments included within a feature to be shown, child features to be
-			 shown at the top level, and for the hierarchy to be inverted (to show the features including each feature).
-      </p>
-      <p>
-       <img src="images/features-view.png" alt="" />
-      </p>
+    </td>
+  </tr>
+  <tr id="launch-sorted"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=231099 -->
+    <td class="title">Improved launch configuration persistence</td>
+    <td class="content">
+      The file format of Eclipse Application, JUnit Plug-in Test and OSGi Framework launch configurations was updated to make them more SCM friendly.
     </td>
   </tr>
   <!-- ******************** End ofDialogs, Wizard and Views ********************** -->
-  
+
   <!-- ******************** Editors ********************** -->
-  <!-- <tr> -->
-    <!-- <td id="editors" class="section" colspan="2"><h2>Editors</h2></td> -->
-  <!-- </tr> -->
+  <tr>
+    <td id="editors" class="section" colspan="2"><h2>Editors</h2></td>
+  </tr>
+  <tr id="BREE-dependencies-warning"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=552194 -->
+    <td class="title">Detect bundle's BREE lower than its dependencies</td>
+    <td class="content">
+     A warning will now appear in the <b>Plug-in manifest editor</b> when a bundle's dependency requires a higher execution environment than what is currently set.
+     <p>
+      The provided quick fix can automatically set the appropriate execution environment.
+     </p>
+     <p>
+      <img src="images/BREE-dependencies-warning.png" alt="" />
+     </p>
+     <p>
+      A new PDE compiler preference <b>Bundle BREE lower than its dependencies</b> has been added to configure the severity of the problem. By default, it is set to warning.
+     </p>
+     <p>
+      <img src="images/pde-compilers-versioning.png" alt="" />
+     </p>
+    </td>
+  </tr>
   <!-- ******************** End of Editors ********************** -->
 
   <!-- ******************** APITools ********************** -->
@@ -94,67 +101,70 @@ for the 4.13 release of Eclipse. They are grouped into:</p>
     <td id="APITools" class="section" colspan="2"><h2>API Tools</h2></td>
   </tr>
 
-  <tr id="quickfix-for-first-api-addition"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=243878 -->
-    <td class="title">Quickfix to add missing since tag after version update</td>
+  <tr id="apiDescription-generator-app"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551417 -->
+    <td class="title">Application to generate API descriptor manifest</td>
     <td class="content">
-      On any API addition that also results in a version change, a quickfix is now available that first
-      updates the version appropriately and then adds the <code>@since</code> tag based on the updated version.
+      In addition to the legacy Ant tasks, PDE now provides a direct Eclipse application to generate API manifest
+      (typically <code>.api_description</code> files).
       <p>
-       <img src="images/pde-api-addition.png" alt="" />
+        The Application id is <code>org.eclipse.pde.api.tools.apiGeneration</code> and it's arguments are the same as
+        for Ant tasks. The application can typically be invoked with command line as shown below:
+        <code>./eclipse -application org.eclipse.pde.api.tools.apiGeneration
+        -projectName org.eclipse.pde.ui
+        -project /home/git/eclipse.pde.ui/ui/org.eclipse.pde.ui
+        -binary /home/git/eclipse.pde.ui/ui/org.eclipse.pde.ui/target/org.eclipse.pde.ui-3.11.200-SNAPSHOT.jar
+        -target /home/git/eclipse.pde.ui/ui/org.eclipse.pde.ui/target/
+        </code>.
+      </p>
+      <p>
+      This application can also be run using the Eclipse launch configuration UI and selecting 
+      <b>org.eclipse.pde.api.tools.apiGeneration </b> application as shown below. The required arguments should  
+      be specified in the program arguments.
+      </p>
+       <p>
+       <img src="images/pde-api-generation-application-ui.png" alt="" />
       </p>
     </td>
   </tr>
-  
-   <tr id="optimization-pde-api-tools-build"> 
-     <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=344110 -->
-	 <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=344163 -->
-	 <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=549630 -->
-    <td class="title">Optimization in  API tools builder </td>
+
+  <tr id="report-error-on-unnecessary-change"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551197 -->
+    <td class="title">Report unnecessary change in minor and micro version</td>
     <td class="content">
-      There are various optimizations that are done for API analysis builder which has
-      improved the performance in some scenarios tremendously. 
+      In addition to reporting minor version change without API changes, API tools now also reports the following unnecessary
+      minor and micro version change. 
       <ul>
-	   <li>Changing <b>Missing API baseline</b> option in <b>Preferences &gt; Plug-in Development &gt; API Baselines</b> preference page 
-	   updates the marker appropriately instead of doing a full build.</li>
-	   <li>Removing or unchecking baseline in  <b>Preferences &gt; Plug-in Development &gt; API Baselines</b> preference page  removes all markers 
-	   which requires a baseline instead of a full build.</li>
-	   <li>Removing or unchecking all API Use Scan locations  in <b>Preferences &gt; Plug-in Development &gt; API Use Scans</b> preference page  removes the relevant markers instead of doing a full build.</li>
+      <li>Minor version increased when major version was already increased in the release </li>
+      <li>Micro version increased when minor version or major version was already increased in the release.</li> 
       </ul>
+
       <p>
-      For example, changing <b>Missing API baseline</b> option in <code>org.eclipse.jdt.core</code> finishes instantaneously instead of 3 to 4 seconds earlier.
+       <img src="images/pde-unnecessary-ver-increase-new.png" alt="" />
       </p>
+      
+      The preference option <b>Report minor version change without API changes</b> has been renamed to 
+      <b>Report unnecessary minor or micro version change</b>. 
     </td>
   </tr>
-  
-    <tr id="full-build-on-pde-api-tools-settings-change"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549838 -->
-    <td class="title">Full build on API tools preferences change</td>
+
+  <tr id="expanded-reduced-superinterface-error-detail"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551146 -->
+    <td class="title">Expanded or reduced super interface API tool error has details</td>
     <td class="content">
-      Manually changing the settings file <b>.settings/org.eclipse.pde.api.tools.prefs</b> of a project
-      will result in a full project build, if the workspace auto-build is on. 
-      <p>For the 4.13 release, it is possible to disable this new behavior with the VM property:
-      <b><span style="white-space: nowrap;">-Dorg.eclipse.disableAutoBuildOnSettingsChange=true</span></b>.
-      It is planned to remove this VM property in a future release.</p>
+      The API tool error <b>Expanded or reduced super interface</b> now mentions which interface was added or removed
+      from the super interfaces hierarchy.
+      <p>
+       <img src="images/pde-expanded-reduced-interface.png" alt="" />
+      </p>
     </td>
   </tr>
   
   <!-- ******************** End of APITools ********************** -->
   
    <!-- ******************** PDE Compiler ********************** -->
-   <tr> 
-     <td id="pde-compiler" class="section" colspan="2"><h2>PDE Compiler</h2></td> 
-   </tr> 
-   
-    <tr id="full-build-on-pde-compiler-settings-change"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549839 -->
-    <td class="title">Full build on PDE compiler preferences change</td>
-    <td class="content">
-      Manually changing the settings file <b>.settings/org.eclipse.pde.prefs</b> of a project
-      will result in a full project build, if the workspace auto-build is on. 
-      <p>For the 4.13 release, it is possible to disable this new behavior with the VM property:
-      <b><span style="white-space: nowrap;">-Dorg.eclipse.disableAutoBuildOnSettingsChange=true</span></b>.
-      It is planned to remove this VM property in a future release.</p>
-    </td>
+   <!--
+  <tr>
+    <td id="pde-compiler" class="section" colspan="2"><h2>PDE Compiler</h2></td>
   </tr>
-   
+   -->
    <!-- ******************** End of PDE Compiler ********************** --> 
   
 </tbody>
