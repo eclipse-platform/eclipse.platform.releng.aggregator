@@ -22,6 +22,10 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
+if [ ! -z BUILD_FAILED ]; then
+	exit 0
+fi
+
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml
 
 # Change to appropriate versions and uncomment when entering API freeze
