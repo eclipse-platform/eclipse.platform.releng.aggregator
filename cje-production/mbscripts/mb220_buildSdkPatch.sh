@@ -41,4 +41,5 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -DbuildTimestamp=$TIMESTAMP \
   -DbuildType=$BUILD_TYPE \
   -DbuildId=$BUILD_ID \
-  -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE
+  -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
+  ${JAVA_DOC_TOOL}
