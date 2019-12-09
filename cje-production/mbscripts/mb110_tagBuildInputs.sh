@@ -33,12 +33,11 @@ lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
 pushd $CJE_ROOT/$AGG_DIR
 
 # git tagging
-# disable git push for now
-#git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; git push --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
-git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; else echo Skipping \$name; fi || :"
+git commit -m "Build input for build $BUILD_ID"
+
+git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; git push --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
 git tag $BUILD_ID
-# disable git push for now
-#git push --verbose origin $BUILD_ID
+git push --verbose origin $BUILD_ID
 
 # git logging
 if [[ -n "$lastTag" ]]; then
