@@ -22,13 +22,6 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-if [ ! -z BUILD_FAILED ]; then
-	exit 0
-fi
-if [[ -z "${WORKSPACE}" ]]; then
-	exit 0
-fi
-
 pushd $CJE_ROOT/$EQUINOX_DROP_DIR
 epDownloadDir=/home/data/httpd/download.eclipse.org/equinox
 dropsPath=${epDownloadDir}/drops

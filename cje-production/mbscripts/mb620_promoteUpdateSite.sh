@@ -22,13 +22,6 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-if [ ! -z BUILD_FAILED ]; then
-	exit 0
-fi
-if [[ -z "${WORKSPACE}" ]]; then
-	exit 0
-fi
-
 epUpdateDir=/home/data/httpd/download.eclipse.org/updates
 dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 pushd $CJE_ROOT/$UPDATES_DIR

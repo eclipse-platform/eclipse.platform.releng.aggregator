@@ -24,10 +24,6 @@ wait
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-if [ ! -z BUILD_FAILED ]; then
-	exit 0
-fi
-
 buildToTest=$CJE_ROOT/$UPDATES_DIR/$BUILD_ID
 output_dir=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
 tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
