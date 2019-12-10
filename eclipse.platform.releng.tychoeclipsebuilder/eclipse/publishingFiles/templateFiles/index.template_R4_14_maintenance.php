@@ -119,6 +119,10 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 if (isset ($NEWS_ID)) {
   echo "<a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a><br>\n";
 }
+else {
+// Show N&N link on the I-Build download page
+  echo "<a href=\"https://www.eclipse.org/eclipse/news/${STREAMMajor}.${STREAMMinor}/\">New and Noteworthy</a><br>\n";
+}
 // Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
 // And, are added by the promotion scripts, as long as we keep same conventions.
 if (isset ($ACK_ID)) {
@@ -127,6 +131,7 @@ if (isset ($ACK_ID)) {
 if (isset ($README_ID)) {
   echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${README_ID}.php\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
 }
+echo "<a href=\"https://www.eclipse.org/projects/project-plan.php?planurl=http://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_${STREAMMajor}_${STREAMMinor}.xml\">Eclipse Project Plan</a><br>\n";
 
 if (isset ($BUILD_FAILED) ) {
   echo "<h2>Build Failed</h2><p>See <a href=\"buildlogs.php\">logs</a>.</p>\n";
@@ -138,7 +143,8 @@ if (isset ($BUILD_FAILED) ) {
     $SPECIFIC_LOG=$MATCHES[3];
     echo "<p>Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>, \n";
     echo "or a <a href=\"$summaryFile[0]\">summary</a>. <br /> \n";
-    echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any).</p>\n";
+    echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any).\n";
+    echo "See recent changes in the <a href=\"gitLog.php\">git log</a>.</p>\n";
   }
 
 }
@@ -316,9 +322,9 @@ else {
 
   <h3>Related Links</h3>
   <ul class="midlist">
-    <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments</a></li>
+    <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments.</a></li>
     <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
-    <li><a href="gitLog.txt">Git log.</a></li>
+    <li><a href="gitLog.php">Git log.</a></li>
     <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
   </ul>
 <?php
