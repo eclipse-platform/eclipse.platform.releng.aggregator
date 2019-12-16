@@ -26,4 +26,5 @@ pushd $CJE_ROOT/$DROP_DIR/
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 dropsPath=${epDownloadDir}/downloads/drops4
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
+ssh genie.releng@projects-storage.eclipse.org touch ${dropsPath}/${BUILD_ID}/buildHidden
 popd
