@@ -17,7 +17,7 @@
 # atomic composite repositories are valid. 
 
 # can be retrieved, on Hudson, with 
-# wget --no-verbose --no-cache  -O checkComposites.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/checkComposites/checkComposites.sh;
+# wget --no-verbose --no-cache  -O checkComposites.sh https://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/checkComposites/checkComposites.sh;
 # and typically set chmod +x checkComposites.sh
 # and then executed in "bash script" build step.
 

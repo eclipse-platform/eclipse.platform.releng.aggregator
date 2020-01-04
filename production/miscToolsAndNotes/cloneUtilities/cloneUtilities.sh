@@ -22,7 +22,7 @@
 # main build or making use of its submodules.
 
 # This one file can be retrieved with
-#   wget http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/cloneUtilities/cloneUtilities.sh
+#   wget https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/miscToolsAndNotes/cloneUtilities/cloneUtilities.sh
 # and then chmod +x cloneUtilities.sh
 # and then executed with ./cloneUtilities.sh
 # It is best to remove 'cloneUtilities.sh' and wget it each

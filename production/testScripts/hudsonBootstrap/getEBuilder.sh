@@ -33,7 +33,7 @@ rm -fr tempebuilder 2>/dev/null
   ESCRIPT_LOC=${EBUILDER}/production/testScripts
 
 # TODO: make host variable, so can be sourced, for local test build
-wget -O ebuilder.zip --no-verbose http://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
+wget -O ebuilder.zip --no-verbose https://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
 unzip -q ebuilder.zip -d tempebuilder
 mkdir -p ${WORKSPACE}/$TARGETNAME
 rsync --recursive "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${WORKSPACE}/${TARGETNAME}/"

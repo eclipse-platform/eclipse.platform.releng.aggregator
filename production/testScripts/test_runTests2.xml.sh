@@ -74,7 +74,7 @@ ant -diagnostics
 java -XshowSettings -version
 
 # Note: currently this file always comes from master, no matter what branch is being built/tested.
-wget -O ${WORKSPACE}/getEBuilder.xml --no-verbose   http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+wget -O ${WORKSPACE}/getEBuilder.xml --no-verbose   https://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 
 # or test the local version, checked-out version from tree location,
 # not necessarily checked in, yet, though many other

@@ -13,18 +13,18 @@ initScriptTag="h=master"
 
 # to use a tag instead of branch, would be tag=X, such as
 # tag=vI20120417-0700, or in full form
-# http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
+# https://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
 
 source checkForErrorExit.sh
 
 gitfile=makeBranch.sh
-wget --no-verbose -O ${gitfile} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
+wget --no-verbose -O ${gitfile} https://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
 checkForErrorExit $? "could not wget file: ${gitfile}"
 gitfile=renameBuild.sh
-wget --no-verbose -O ${gitfile} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
+wget --no-verbose -O ${gitfile} https://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
 checkForErrorExit $? "could not wget file: ${gitfile}"
 gitfile=checkForErrorExit.sh
-wget --no-verbose -O ${gitfile} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
+wget --no-verbose -O ${gitfile} https://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
 checkForErrorExit $? "could not wget file: ${gitfile}"
 
 # get this script itself (would have to run twice to make use changes, naturally)
@@ -32,7 +32,7 @@ checkForErrorExit $? "could not wget file: ${gitfile}"
 # but will remove it if no differences found.
 # and a command line like the following works well
 
-wget --no-verbose -O wgetFresh.NEW.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/wgetFresh.sh?$initScriptTag 2>&1;
+wget --no-verbose -O wgetFresh.NEW.sh https://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/wgetFresh.sh?$initScriptTag 2>&1;
 
 differs=`diff wgetFresh.NEW.sh wgetFresh.sh`
 
