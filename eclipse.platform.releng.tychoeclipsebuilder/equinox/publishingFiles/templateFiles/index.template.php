@@ -28,7 +28,7 @@
   $html = <<<EOHTML
 
 
-<script type="text/javascript" src="http://eclipse.org/equinox/expand.js"></script>
+<script type="text/javascript" src="https://eclipse.org/equinox/expand.js"></script>
 
 <div id="midcolumn">
   <h3>Equinox $BUILD_TYPE_NAME Build: $BUILD_ID</h3>
@@ -45,7 +45,7 @@
 
   <div class="homeitem3col">
     <h3>Framework Only</h3>
-    <p>The Equinox OSGi R4 <a href="http://eclipse.org/equinox/framework">framework</a> implementation in a standalone package.
+    <p>The Equinox OSGi R4 <a href="https://eclipse.org/equinox/framework">framework</a> implementation in a standalone package.
     </p>
     <table border="0" cellspacing="0" cellpadding="0" width="100%">
       <tr><td width="78%"/><td width="9%"/><td width="8%"/></tr>
@@ -54,8 +54,8 @@
   </div>
 
   <div class="homeitem3col">
-    <h3><a onclick="expandCollapse('addon.bundles');"><img id="addon.bundles.button" src="http://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;Add-on Bundles</h3>
-    <p>Individual <a href="http://eclipse.org/equinox/bundles">bundles</a> that provide
+    <h3><a onclick="expandCollapse('addon.bundles');"><img id="addon.bundles.button" src="https://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;Add-on Bundles</h3>
+    <p>Individual <a href="https://eclipse.org/equinox/bundles">bundles</a> that provide
     standalone OSGi specified services or add-on mechanisms (e.g., the Eclipse extension registry) of interest to OSGi programmers.</p>
     <div id="addon.bundles" class="collapsable">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
@@ -67,7 +67,7 @@
 
 
   <div class="homeitem3col">
-    <h3><a onclick="expandCollapse('other.bundles');"><img id="other.bundles.button" src="http://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;Other Required Bundles</h3>
+    <h3><a onclick="expandCollapse('other.bundles');"><img id="other.bundles.button" src="https://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;Other Required Bundles</h3>
     <p>A convenient set of bundles that are required by some of the Equinox bundles.</p>
     <div id="other.bundles" class="collapsable">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
@@ -79,7 +79,7 @@
 
 <!-- provisioning removed per bug 368488
   <div class="homeitem3col">
-    <h3 name="provisioning"><a onclick="expandCollapse('provisioning.bundles');"><img  id="provisioning.bundles.button" src="http://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;p2 Provisioning Tools</h3>
+    <h3 name="provisioning"><a onclick="expandCollapse('provisioning.bundles');"><img  id="provisioning.bundles.button" src="https://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;p2 Provisioning Tools</h3>
     <p>The following downloads are produced by the Provisioning team. For more about provisoning, see
     the <a href="http://wiki.eclipse.org/Category:Provisioning">provisioning articles</a> on the eclipse.org wiki.</p>
     <div id="provisioning.bundles" class="collapsable">
@@ -91,9 +91,9 @@
   </div>
 -->
   <div class="homeitem3col">
-    <h3 name="launchers"><a onclick="expandCollapse('launcher.bundles');"><img  id="launcher.bundles.button" src="http://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;Native Launchers</h3>
+    <h3 name="launchers"><a onclick="expandCollapse('launcher.bundles');"><img  id="launcher.bundles.button" src="https://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;Native Launchers</h3>
     <p>Platform-specific native launchers (e.g., eclipse.exe) for the Equinox framework. See the list
-    of <a href="http://www.eclipse.org/projects/project-plan.php?projectid=eclipse#target_environments">supported OS configurations</a>.</>
+    of <a href="https://www.eclipse.org/projects/project-plan.php?projectid=eclipse#target_environments">supported OS configurations</a>.</>
     <div id="launcher.bundles" class="collapsable">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr><td width="78%"/><td width="9%"/><td width="8%"/></tr>
@@ -103,7 +103,7 @@
   </div>
 
   <div class="homeitem3col">
-    <h3><a onclick="expandCollapse('osgistarterkits.bundles');"><img  id="osgistarterkits.bundles.button" src="http://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;OSGi starter kits</h3>
+    <h3><a onclick="expandCollapse('osgistarterkits.bundles');"><img  id="osgistarterkits.bundles.button" src="https://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;OSGi starter kits</h3>
     <p>A useful collection of Equinox bundles packaged as a ready to run system.  This include the framework, p2 and other frequently used service implementations. </p>
     <div id="osgistarterkits.bundles" class="collapsable">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
