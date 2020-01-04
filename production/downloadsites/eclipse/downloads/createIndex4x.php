@@ -36,13 +36,13 @@ page you can find the latest builds produced by
 the <a href="https://www.eclipse.org/eclipse/">Eclipse
 Project</a>. To get started, run the program and go through the user and developer
 documentation provided in the help system or
-see the <a href="http://help.eclipse.org/">web-based help system</a>.
+see the <a href="https://help.eclipse.org/">web-based help system</a>.
 If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
 out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forum</a>.
 </p>
 
 <p>See the <a href="https://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
-The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
+The <a href="https://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="https://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
 For reference, see also
 <a href="https://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>,
 <a href="build_types.html">meaning of kinds of builds</a> (P,M,I,S, and R), and the

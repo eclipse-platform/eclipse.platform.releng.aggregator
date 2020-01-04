@@ -3,7 +3,7 @@
 # the branches of submodules should match what is in ../streams/repositories.txt
 # This script assumes aggregator project has been cloned,
 # and submodules initially 'updated', as per
-# http://wiki.eclipse.org/Platform-releng/Platform_Build#cloning_platform_source_tree
+# https://wiki.eclipse.org/Platform-releng/Platform_Build#cloning_platform_source_tree
 #
 # intended to be (temporarily) 'moved up' several directories to get to correct location
 branch=master

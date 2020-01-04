@@ -95,7 +95,7 @@ while ($anEntry = $aDirectory->read()) {
 $html = <<<EOHTML
 <div id="midcolumn">
         <h3>$pageTitle</h3>
-        <p>Older releases are available in the <a href="http://archive.eclipse.org/equinox/">Equinox archived builds site</a>.</p>
+        <p>Older releases are available in the <a href="https://archive.eclipse.org/equinox/">Equinox archived builds site</a>.</p>
 
         <div class="homeitem3col">
                 <h3>Latest Builds</h3>

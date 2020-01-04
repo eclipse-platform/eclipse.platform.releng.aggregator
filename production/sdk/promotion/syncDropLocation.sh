@@ -51,7 +51,7 @@ function sendPromoteMail ()
   # common part of URL and file path
   # varies by build stream
   # examples of end result:
-  # http://download.eclipse.org/eclipse/downloads/drops4/N20120415-2015/
+  # https://download.eclipse.org/eclipse/downloads/drops4/N20120415-2015/
   # /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/N20120415-2015
 
   comparatorLogRelPath="buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"

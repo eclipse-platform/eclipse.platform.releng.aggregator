@@ -81,7 +81,7 @@
   <div class="homeitem3col">
     <h3 name="provisioning"><a onclick="expandCollapse('provisioning.bundles');"><img  id="provisioning.bundles.button" src="https://eclipse.org/equinox/images/arrow.png"/></a>&nbsp;p2 Provisioning Tools</h3>
     <p>The following downloads are produced by the Provisioning team. For more about provisoning, see
-    the <a href="http://wiki.eclipse.org/Category:Provisioning">provisioning articles</a> on the eclipse.org wiki.</p>
+    the <a href="https://wiki.eclipse.org/Category:Provisioning">provisioning articles</a> on the eclipse.org wiki.</p>
     <div id="provisioning.bundles" class="collapsable">
       <table border="0" cellspacing="0" cellpadding="0" width="100%">
         <tr><td width="78%"/><td width="9%"/><td width="8%"/></tr>
@@ -115,7 +115,7 @@
 
   <div class="homeitem3col">
     <h3>Other Information</h3>
-       <p><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></p>
+       <p><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></p>
        $gpgchecksumline
   </div>
 

@@ -32,11 +32,11 @@ $Nav->addCustomNav("Development", "https://eclipse.org/eclipse/development", "_s
 $Menu->setMenuItemList( array() );
 $Menu->addMenuItem( "Home", "https://eclipse.org/equinox/", "_self" );
 $Menu->addMenuItem( "Get Started", "https://eclipse.org/equinox/documents/quickstart.php", "_self" );
-$Menu->addMenuItem( "Downloads", "http://download.eclipse.org/equinox", "_self" );
+$Menu->addMenuItem( "Downloads", "https://download.eclipse.org/equinox", "_self" );
 $Menu->addMenuItem( "Documents", "https://eclipse.org/equinox/documents/", "_self" );
 $Menu->addMenuItem( "Resources", "https://eclipse.org/equinox/resources.php", "_self" );
 $Menu->addMenuItem( "FAQ", "https://eclipse.org/equinox/faq.php", "_self" );
-$Menu->addMenuItem( "Wiki", "http://wiki.eclipse.org/Equinox", "_self" );
+$Menu->addMenuItem( "Wiki", "https://wiki.eclipse.org/Equinox", "_self" );
 
 $App->AddExtraHtmlHeader( '<link rel="stylesheet" type="text/css" href="https://eclipse.org/equinox/equinox.css"/>' );
 $App->AddExtraHtmlHeader( '<link rel="stylesheet" type="text/css" href="https://eclipse.org/equinox/rap-layout-fixes.css"/>' );

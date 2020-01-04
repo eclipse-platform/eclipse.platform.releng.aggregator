@@ -103,7 +103,7 @@ listLogs("buildlogs");
 
 <?php
 echo "<h3>Comparator Logs for $BUILD_ID</h3>\n";
-echo "<p>For explaination, see <a href=\"http://wiki.eclipse.org/Platform-releng/Platform_Build_Comparator_Logs\">Platform Build Comparator Logs</a> wiki.</p>\n";
+echo "<p>For explaination, see <a href=\"https://wiki.eclipse.org/Platform-releng/Platform_Build_Comparator_Logs\">Platform Build Comparator Logs</a> wiki.</p>\n";
 listLogs("buildlogs/comparatorlogs");
 if (file_exists("buildlogs/comparatorlogs/artifactcomparisons.zip")) {
   echo "<p>For an archive of all relevant baseline-versus-current build artifact byte codes" . PHP_EOL;

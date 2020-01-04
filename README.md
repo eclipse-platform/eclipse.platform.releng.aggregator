@@ -40,19 +40,19 @@ Build requirements
 ------------------
 
 The build commands require the installation and setup of Java 1.8 or higher and Maven version 3.5.4 or higher.
-See also the complete instructions on the [Platform Build wiki](http://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build"). 
+See also the complete instructions on the [Platform Build wiki](https://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build"). 
 Note, it is highly recommended to use toolchains.xml and -Pbree-libs as decribed in [Using BREE Libs](https://wiki.eclipse.org/Platform-releng/Platform_Build#Using_BREE_Libs "Using BREE Libs").
 
 Additional informations
 -----------------------
 
-Eclipse Platform Project committers should also read [Automated Platform Builds](http://wiki.eclipse.org/Platform-releng/Automated_Platform_Build "Automated Platform Builds").
+Eclipse Platform Project committers should also read [Automated Platform Builds](https://wiki.eclipse.org/Platform-releng/Automated_Platform_Build "Automated Platform Builds").
 
-Release Engineers should also be familiar with other documents on the [Releng Wiki](http://wiki.eclipse.org/Category:Eclipse_Platform_Releng "Releng Wiki").
+Release Engineers should also be familiar with other documents on the [Releng Wiki](https://wiki.eclipse.org/Category:Eclipse_Platform_Releng "Releng Wiki").
 
 License
 -------
 
 [Eclipse Public License (EPL) v1.0][2]
 
-[2]: http://wiki.eclipse.org/EPL
+[2]: https://wiki.eclipse.org/EPL
