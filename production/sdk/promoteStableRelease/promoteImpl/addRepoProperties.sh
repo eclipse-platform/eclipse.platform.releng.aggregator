@@ -58,7 +58,7 @@ fi
 if [[ ! -z "${MIRRORURL}" ]]
 then
   # remember, the '&' should NOT be XML escaped here ... the p2 api (or underlying xml) will escape it.
-  MIRRORURL_ARG="http://www.eclipse.org/downloads/download.php?format=xml&file=${MIRRORURL}"
+  MIRRORURL_ARG="https://www.eclipse.org/downloads/download.php?format=xml&file=${MIRRORURL}"
 else
   MIRRORURL_ARG=""
 fi
@@ -80,7 +80,7 @@ then
   STATS_TAG_FEATURE_LIST_ARG="-DstatsTrackedArtifacts=\"${STATS_TAG_FEATURE_LIST}\""
   # no sense setting these others, if features not set
   # TODO: more error checking could be done, to warn, such if features list set, but other values not
-  STATS_TAG_VERSIONINDICATOR_ARG="-Dp2StatsURI=\"http://download.eclipse.org/stats${MIRRORURL}\""
+  STATS_TAG_VERSIONINDICATOR_ARG="-Dp2StatsURI=\"https://download.eclipse.org/stats${MIRRORURL}\""
   if [[ -n ${STATS_TAG_SUFFIX} ]]
   then
     STATS_TAG_SUFFIX_ARG="-DstatsArtifactsSuffix=\"${STATS_TAG_SUFFIX}\""

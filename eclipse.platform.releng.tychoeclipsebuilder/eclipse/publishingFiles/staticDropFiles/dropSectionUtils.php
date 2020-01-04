@@ -59,6 +59,6 @@ function genLinks($zipfile) {
   // Also handy/needed when doing "local test builds".
   // Remember, md5 and sha1 are still in "checksum" directory, for at least initial Luna release, just not linked to. See bug
   // https://bugs.eclipse.org/bugs/show_bug.cgi?id=423714
-  // echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops4/$BUILD_DIR_SEG/checksum/$zipfile.sha512\">[SHA512]</a></td>";
+  // echo "<td><a href=\"https://download.eclipse.org/eclipse/downloads/drops4/$BUILD_DIR_SEG/checksum/$zipfile.sha512\">[SHA512]</a></td>";
 }
 

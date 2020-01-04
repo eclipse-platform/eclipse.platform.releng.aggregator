@@ -2,7 +2,7 @@
 <head>
 <title>Eclipse Download Click Through</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link rel="stylesheet" href="http://download.eclipse/eclipse/default_style.css" type="text/css">
+<link rel="stylesheet" href="https://download.eclipse/eclipse/default_style.css" type="text/css">
 <?php
 
 include("buildproperties.php");
@@ -89,9 +89,9 @@ if (array_key_exists("QUERY_STRING", $_SERVER)) {
 $mirror=true;
 if (strstr($servername,"eclipse.org")) {
   $mirror=false;
-  $eclipselink="http://www.eclipse.org/downloads/download.php?file="."$dlprefix/$buildLabel/$dropFile";
+  $eclipselink="https://www.eclipse.org/downloads/download.php?file="."$dlprefix/$buildLabel/$dropFile";
 } else {
-  $mirrorlink  = "http://$servername$path/$dropFile";
+  $mirrorlink  = "https://$servername$path/$dropFile";
 }
 
 $clickFile = "clickThroughs/";

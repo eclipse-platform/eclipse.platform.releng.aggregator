@@ -227,7 +227,7 @@ function sendTestResultsMail ()
     return 1
   fi
 
-  downloadURL="http://${SITE_HOST}/${mainPath}/${buildId}/"
+  downloadURL="https://${SITE_HOST}/${mainPath}/${buildId}/"
   fsDownloadSitePath="${fsDocRoot}/${mainPath}/${buildId}"
 
   export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}

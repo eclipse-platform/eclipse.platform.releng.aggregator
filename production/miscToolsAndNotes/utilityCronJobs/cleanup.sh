@@ -104,7 +104,7 @@ clean() {
 
     #update website index and rsync the repo
     if [[ $project != "orion" ]]; then
-      wget -O index.txt http://download.eclipse.org/$urlFragment/$createIndex
+      wget -O index.txt https://download.eclipse.org/$urlFragment/$createIndex
       scp index.txt $user@build.eclipse.org:$remoteBase/$urlFragment/index.html
       rm index.txt
     fi

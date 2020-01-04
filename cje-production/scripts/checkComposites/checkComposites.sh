@@ -22,7 +22,7 @@
 # and then executed in "bash script" build step.
 
 dropsPath=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
-repoHttpAccess=http://download.eclipse.org
+repoHttpAccess=https://download.eclipse.org
 repoAccess=${repoHttpAccess}
 # TODO: reduce this list soon
 repoList="\

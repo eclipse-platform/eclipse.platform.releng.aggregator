@@ -39,7 +39,7 @@ java -jar $LAUNCHER_JAR \
   -DbuildId=$BUILD_ID \
   -DbuildLabel=$BUILD_ID \
   -DbuildWorkingArea=$CJE_ROOT/$AGG_DIR \
-  -DpreviousBaseURL=http://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
+  -DpreviousBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
   -DpreviousBaselineName=Eclipse-SDK-$PREVIOUS_RELEASE_VER \
   -DpreviousBaselineFilename=eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \

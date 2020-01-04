@@ -23,7 +23,7 @@
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link rel="stylesheet" title="default" href="http://download.eclipse/eclipse/default_style.css" type="text/css">
+<link rel="stylesheet" title="default" href="https://download.eclipse/eclipse/default_style.css" type="text/css">
 </head>
 <body>
 <table width="77%" border="1">

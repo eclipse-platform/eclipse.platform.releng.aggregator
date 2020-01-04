@@ -62,7 +62,7 @@ function sendPromoteMail ()
   #    Comparator differences from current build
   #    /shared/eclipse/builds/4N/siteDir/eclipse/downloads/drops4/N20140705-1700
   #       compared to reference repo at
-  #     http://download.eclipse.org/eclipse/updates/4.5-I-builds
+  #     https://download.eclipse.org/eclipse/updates/4.5-I-builds
   # = = = =
   # So we'll set "250 bytes" as minimum which should both ignore all "minimum's",
   # and catch anything of substance.
@@ -77,7 +77,7 @@ function sendPromoteMail ()
     return 1
   fi
 
-  downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
+  downloadURL=https://${SITE_HOST}/${mainPath}/${buildId}/
   fsDownloadSitePath=${fsDocRoot}/${mainPath}/${buildId}
   comparatorLogPath=${fsDownloadSitePath}/${comparatorLogRelPath}
   logSize=0
@@ -147,14 +147,14 @@ function sendPromoteMail ()
     # custom message if doing patch build
     if [[ "${buildType}" == "P" || "${buildType}" == "U" ]]
     then 
-      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
+      link=$(linkURL https://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
       message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
-      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
+      link=$(linkURL https://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
       message1="${message1}<p>Remember: The patch must be confirmed before is it added to the composite: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
     else
-      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
+      link=$(linkURL https://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
       message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
-      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
+      link=$(linkURL https://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
       message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
     fi
   fi
@@ -162,7 +162,7 @@ function sendPromoteMail ()
   # Do not include Equinox, if build failed, or if patch or experimental build
   if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYXU]  ]]
   then
-    link=$(linkURL http://${SITE_HOST}/equinox/drops/${buildId})
+    link=$(linkURL https://${SITE_HOST}/equinox/drops/${buildId})
     message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
   fi
 
@@ -335,7 +335,7 @@ function syncRepoSite ()
     dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
     mkdir -p ${dlSite}/${buildId}
     touch ${dlSite}/${buildId}/buildUnstable
-    echo "<p>This build has been marked unstable due to <a href='http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>">> ${dlSite}/${buildId}/buildUnstable
+    echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>">> ${dlSite}/${buildId}/buildUnstable
     RC=0
   fi
   set +x

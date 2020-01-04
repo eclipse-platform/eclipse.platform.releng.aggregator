@@ -2,7 +2,7 @@
 <head>
 <title>Eclipse Download Click Through</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link rel="stylesheet" href="http://download.eclipse/eclipse/default_style.css" type="text/css">
+<link rel="stylesheet" href="https://download.eclipse/eclipse/default_style.css" type="text/css">
 <?php
 
 $servername=$_SERVER['SERVER_NAME'];
@@ -15,9 +15,9 @@ $qstring = $_SERVER['QUERY_STRING'];
 $dropFile=array_pop(split("=",$qstring,-1));
 
 if ($qstring) {
-  $url = "http://$servername$script?$qstring";
+  $url = "https://$servername$script?$qstring";
 } else {
-  $url = "http://$servername$path$script";
+  $url = "https://$servername$path$script";
 }
 
 $dropdir = explode("/", getcwd());
@@ -32,9 +32,9 @@ $mirror=true;
 if (strstr($_SERVER['SERVER_NAME'],"eclipse.org")) {
   #       if (strstr($_SERVER['SERVER_NAME'],"ibm.com")) {
   $mirror=false;
-  $eclipselink="http://www.eclipse.org/downloads/download.php?file=/equinox/drops/$buildDir/$dropFile";
+  $eclipselink="https://www.eclipse.org/downloads/download.php?file=/equinox/drops/$buildDir/$dropFile";
 } else {
-  $mirrorlink  = "http://$servername$path/$dropFile";
+  $mirrorlink  = "https://$servername$path/$dropFile";
 }
 
 $clickFile = "clickThroughs/";

@@ -22,8 +22,8 @@ function getDropSize($zipfile) {
 // TODO: change build index tool not to generate these "calls" at all. 
 // In the mean time, we will just return empty string.
 function generateChecksumLinks($zipfile, $buildDir) {
-  //return "<td><a href=\"http://download.eclipse.org/equinox/drops/$buildDir/checksum/$zipfile.md5\"><img src=\"/equinox/images/md5.png\" alt=\"md5\"/></a><a href=\"http://download.eclipse.org/equinox/drops/$buildDir/checksum/$zipfile.sha1\"><img src=\"/equinox/images/sha1.png\" alt=\"sha1\"/></a></td>";
-  //return "<td><a href=\"http://download.eclipse.org/equinox/drops/$buildDir/checksum/$zipfile.sha512\"><img src=\"/equinox/images/sha1.png\" alt=\"sha512\"/></a></td>";
+  //return "<td><a href=\"https://download.eclipse.org/equinox/drops/$buildDir/checksum/$zipfile.md5\"><img src=\"/equinox/images/md5.png\" alt=\"md5\"/></a><a href=\"https://download.eclipse.org/equinox/drops/$buildDir/checksum/$zipfile.sha1\"><img src=\"/equinox/images/sha1.png\" alt=\"sha1\"/></a></td>";
+  //return "<td><a href=\"https://download.eclipse.org/equinox/drops/$buildDir/checksum/$zipfile.sha512\"><img src=\"/equinox/images/sha1.png\" alt=\"sha512\"/></a></td>";
   return "";
 }
 ?>

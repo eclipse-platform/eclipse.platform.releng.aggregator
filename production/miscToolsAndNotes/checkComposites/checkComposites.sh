@@ -25,7 +25,7 @@ baseEclipseAccessDir=/home/data/httpd/download.eclipse.org
 baseEclipseDirSegment=eclipse/downloads/drops4/R-4.14-201912100610
 baseEclipse=eclipse-platform-4.14-linux-gtk-x86_64.tar.gz
 repoFileAccess=file:///home/data/httpd/download.eclipse.org/
-repoHttpAccess=http://download.eclipse.org
+repoHttpAccess=https://download.eclipse.org
 repoAccess=${repoFileAccess}
 # TODO: reduce this list soon
 repoList="\

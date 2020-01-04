@@ -71,7 +71,7 @@ function computeSTREAM_REPO_NAME () {
 }
 
 function computeSTREAM_REPO_URL () {
-    $STREAM_REPO_URL="http://download.eclipse.org/eclipse/updates/".computeSTREAM_REPO_NAME ()."/";
+    $STREAM_REPO_URL="https://download.eclipse.org/eclipse/updates/".computeSTREAM_REPO_NAME ()."/";
     return $STREAM_REPO_URL;
 }
 
@@ -93,7 +93,7 @@ function computeBUILD_REPO_NAME () {
     return $BUILD_REPO_NAME;
 }
 function computeBUILD_REPO_URL () {
-    $BUILD_REPO_URL="http://download.eclipse.org/eclipse/updates/".computeBUILD_REPO_NAME()."/";
+    $BUILD_REPO_URL="https://download.eclipse.org/eclipse/updates/".computeBUILD_REPO_NAME()."/";
     return $BUILD_REPO_URL;
 }
 
