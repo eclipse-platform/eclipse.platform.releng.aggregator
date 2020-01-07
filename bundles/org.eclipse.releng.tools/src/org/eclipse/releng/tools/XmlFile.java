@@ -127,7 +127,7 @@ public class XmlFile extends SourceFile {
 		String tidyComment = comment.trim();
 
 		//Append new-line at the end for cleaner look.
-		tidyComment += "\n";
+		tidyComment += '\n';
 
 		// check for existance of an xml header (<?xml)
 		// If so, put the comment 'below' it.
@@ -137,7 +137,7 @@ public class XmlFile extends SourceFile {
 		//    comment start....
 		if (containsXmlEncoding(document)) {
 			// If encoding is present, pre-append a new line.
-			tidyComment = "\n" + tidyComment; //$NON-NLS-1$
+			tidyComment = '\n' + tidyComment;
 		}
 
 		//------------------ COMMENT INSERT
