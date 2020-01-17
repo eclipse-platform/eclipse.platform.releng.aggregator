@@ -16,6 +16,9 @@
 export CJE_ROOT=${CJE_ROOT:-`pwd`}
 source $CJE_ROOT/scripts/common-functions.shsource
 
+unset JAVA_TOOL_OPTIONS 
+unset _JAVA_OPTIONS
+
 chmod +x mbscripts/*
 
 logDir=$CJE_ROOT/buildlogs
