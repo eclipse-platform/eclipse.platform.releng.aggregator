@@ -25,7 +25,7 @@ source $1
 mkdir $CJE_ROOT/tmp
 
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
-mvn --update-snapshots org.eclipse.tycho:tycho-versions-plugin:1.5.1:update-pom \
+mvn --update-snapshots org.eclipse.tycho:tycho-versions-plugin:1.6.0:update-pom \
   -Dmaven.repo.local=$LOCAL_REPO \
   -Djava.io.tmpdir=$CJE_ROOT/tmp \
   -DaggregatorBuild=true \
