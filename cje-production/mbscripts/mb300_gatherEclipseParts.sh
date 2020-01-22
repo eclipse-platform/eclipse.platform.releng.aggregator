@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019 IBM Corporation and others.
+# Copyright (c) 2019, 2020 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,7 @@ echo $PATCH_BUILD
 if [ -z $PATCH_BUILD ]; then
   REPO_DIR=$PLATFORM_REPO_DIR
 else
-  PATCH_BUILD_GENERIC=java13patch
+  PATCH_BUILD_GENERIC=java14patch
   REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/repository
 fi
   
