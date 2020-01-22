@@ -74,12 +74,11 @@ require("DL.thin.header.php.html");
 <div>
 <h1>Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?> </h1>
 <p style="padding-bottom: 1em">This page provides access to the various deliverables of Eclipse Platform Project.</p>
-<p>This page has a patch feature that provides an implementation of JDT that supports Java 10. This is an implementation
+<p>This page has a patch feature that provides an implementation of JDT that supports Java 14. This is an implementation
 of an early-draft specification developed under the Java
 Community Process (JCP) and is made available for testing and evaluation purposes
-only. The code is not compatible with any specification of the JCP. For more information on our early Java 10 work,
-see the <a href="https://wiki.eclipse.org/Java9">Eclipse wiki page on that topic</a>.</p>
-<p>This patch is for the Photon (4.9) stream of Eclipse.</p>
+only. The code is not compatible with any specification of the JCP.</p>
+<p>This patch is for the 4.15 stream of Eclipse.</p>
 <?php
 if (file_exists("pom_updates/index.html")) {
   echo "<h2><a href=\"pom_updates/\">POM updates made</a></h2>";
