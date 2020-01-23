@@ -13,6 +13,7 @@
 # Contributors:
 #     Kit Lo - initial API and implementation
 #*******************************************************************************
+set -e
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
