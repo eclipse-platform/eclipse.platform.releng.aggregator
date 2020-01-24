@@ -24,4 +24,13 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
-mvn clean verify -f eclipse-platform-sources/pom.xml -DbuildId=$BUILD_ID
+(mvn clean verify -f eclipse-platform-sources/pom.xml -DbuildId=$BUILD_ID)&
+
+#creating ebuilder zip for tests use
+EBUILDER=eclipse.platform.releng.aggregator
+BUILD_DIR=$CJE_ROOT/$DROP_DIR/$BUILD_ID
+pushd ${BUILD_DIR}
+zip -r "${BUILD_DIR}/${EBUILDER}-${EBUILDER_HASH}.zip"  "${CJE_ROOT}/${AGG_DIR}/production/testScripts"
+popd
+
+wait
