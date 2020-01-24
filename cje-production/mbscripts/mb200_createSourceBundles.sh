@@ -29,8 +29,8 @@ cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
 #creating ebuilder zip for tests use
 EBUILDER=eclipse.platform.releng.aggregator
 BUILD_DIR=$CJE_ROOT/$DROP_DIR/$BUILD_ID
-pushd ${BUILD_DIR}
-zip -r "${BUILD_DIR}/${EBUILDER}-${EBUILDER_HASH}.zip"  "${CJE_ROOT}/${AGG_DIR}/production/testScripts"
+pushd ${CJE_ROOT}/gitCache
+zip -r "${BUILD_DIR}/${EBUILDER}-${EBUILDER_HASH}.zip"  "eclipse.platform.releng.aggregator/production/testScripts"
 popd
 
 wait
