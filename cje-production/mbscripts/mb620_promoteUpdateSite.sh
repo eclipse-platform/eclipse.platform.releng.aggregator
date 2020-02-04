@@ -29,6 +29,8 @@ pushd $CJE_ROOT/$UPDATES_DIR
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
 popd
 
+exit 0
+
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 workingDir=${epDownloadDir}/workingDir
 workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
