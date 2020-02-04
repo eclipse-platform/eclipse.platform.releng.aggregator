@@ -1,0 +1,142 @@
+<project
+  name="Helper targets"
+  default="generateEclipseIndex"
+  basedir=".">
+
+  <target
+    name="init"
+    depends="initStreamVariables"
+    unless="genTestIndexesInitialized">
+    <fail unless="buildId" />
+    <fail unless="eclipseStream" />
+    <fail unless="job" />
+
+    <property
+      name="isBuildTested"
+      value="true" />
+
+    <script language="javascript">
+      <![CDATA[
+        var buildId = project.getProperty("buildId");
+        var pattern = new RegExp(/^([IMXYPNSRU])(\d{8})-(\d{4})$/);
+
+        var sArray = pattern.exec(buildId);
+        // sArray 0 is "whole match"
+        project.setProperty("buildType", sArray[1]);
+      ]]>
+    </script>
+    <property
+    	name="dropsDirSegment"
+    	value="drops4"/>
+    <!-- publish.xml expects buildLabel in places, instead of buildId,
+      though we use them interchangebly -->
+    <property
+      name="buildLabel"
+      value="${buildId}" />
+
+    <property
+      name="buildRoot"
+      value="/home/data/httpd/download.eclipse.org/eclipse/downloads" />
+
+    <property
+      name="postingDirectory"
+      value="${buildRoot}/${dropsDirSegment}" />
+
+    <property
+      name="publishingContent"
+      value="${workspace}/publishingFiles" />
+
+    <echo message="= = Properties in genTestIndexes.xml, init = = " />
+    <echo message="    job: ${job}" />
+    <echo message="    postingDirectory: ${postingDirectory}" />
+    <echo message="    isBuildTested: ${isBuildTested}" />
+
+    <!-- This is our new, "safe for every test" location -->
+    <property
+      name="base.builder"
+      value="${basebuilder}" />
+
+    <property
+      name="buildDirectory"
+      value="${postingDirectory}/${buildId}" />
+
+    <property
+      name="genTestIndexesInitialized"
+      value="true" />
+
+  </target>
+
+  <target
+    name="generateEclipseIndex"
+    depends="init">
+
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.TestResultsGenerator" />
+
+    <echo message="   DEBUG: generatorClass: ${generatorClass}" />
+    <available
+      classname="${generatorClass}"
+      property="class"
+      value="${generatorClass}" />
+
+    <!-- These variables used to be defined here, but now are defined in 
+         publish.xml generateIndex target based on $job
+      indexFileName
+      dropTemplateFileName
+      testManifestFileName
+    -->
+    
+    <antcall target="publishEclipseIndex" />
+
+  </target>
+
+  <target
+    name="publishEclipseIndex"
+    depends="init">
+
+
+    <fail
+      unless="buildType"
+      message="buildType should have been defined by now" />
+
+    <!--regenerate the index page with links to test results -->
+    <ant
+      antfile="${workspace}/publish.xml"
+      dir="${publishingContent}"
+      target="generateIndex">
+
+    </ant>
+
+  </target>
+
+  <target name="initStreamVariables">
+
+    <fail
+      unless="eclipseStream"
+      message="eclipseStream must be provided by caller" />
+    <condition property="streamOK">
+      <matches
+        pattern="\d+\.\d+\.\d+"
+        string="${eclipseStream}" />
+    </condition>
+    <fail
+      message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
+      unless="streamOK" />
+    <script language="javascript">
+      <![CDATA[
+            var eclipseStream = project.getProperty("eclipseStream");
+            var pattern = new
+            RegExp(/(\d+)\.(\d+)\.(\d+)/);
+
+            var sArray = pattern.exec(eclipseStream);
+            // sArray[0] is "whole match"
+            project.setProperty("eclipseStreamMajor", sArray[1]);
+            project.setProperty("eclipseStreamMinor", sArray[2]);
+            project.setProperty("eclipseStreamService", sArray[3]);
+          ]]>
+    </script>
+
+  </target>
+
+</project>
