@@ -206,8 +206,8 @@ cleanRepo $eclipseIRepo I 4 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseSRepo S 2 $doDryrun
 declare -a reposToRemove=()
-cleanRepo $eclipseYRepo I 2 $doDryrun
+cleanRepo $eclipseYRepo Y 2 $doDryrun
 declare -a reposToRemove=()
-cleanRepo $eclipsePRepo S 1 $doDryrun
+cleanRepo $eclipsePRepo P 1 $doDryrun
 
 unset reposToRemove
