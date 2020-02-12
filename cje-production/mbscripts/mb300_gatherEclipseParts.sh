@@ -244,3 +244,24 @@ java -jar $LAUNCHER_JAR \
   -v \
   publish
 popd
+
+comparatorLogMinimumSize=250
+comparatorLog=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
+
+logSize=0
+if [[ -e ${comparatorLogPath} ]]
+then
+  logSize=$(stat -c '%s' ${comparatorLogPath} )
+  echo -e "DEBUG: comparatorLog found at\n\t${comparatorLogPath}\n\tWith size of $logSize bytes"
+else
+  echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
+fi
+
+if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
+then
+  echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
+  fn-write-property COMPARATOR_ERRORS "true"
+else
+  echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
+fi
+
