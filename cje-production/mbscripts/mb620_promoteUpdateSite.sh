@@ -25,6 +25,7 @@ source $1
 
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
 dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
+latestRelDir=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 pushd $CJE_ROOT/$UPDATES_DIR
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
 popd
@@ -45,7 +46,7 @@ ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
 scp -r /opt/tools/java/oracle/jdk-8/latest genie.releng@projects-storage.eclipse.org:${workspace}/jdk8
 
 #get latest Eclipse platform product
-epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
+epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${latestRelDir}/R-*|sort|tail -1)
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
 #get requisite tools

@@ -249,12 +249,12 @@ comparatorLogMinimumSize=250
 comparatorLog=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
 
 logSize=0
-if [[ -e ${comparatorLogPath} ]]
+if [[ -e ${comparatorLog} ]]
 then
-  logSize=$(stat -c '%s' ${comparatorLogPath} )
-  echo -e "DEBUG: comparatorLog found at\n\t${comparatorLogPath}\n\tWith size of $logSize bytes"
+  logSize=$(stat -c '%s' ${comparatorLog} )
+  echo -e "DEBUG: comparatorLog found at\n\t${comparatorLog}\n\tWith size of $logSize bytes"
 else
-  echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
+  echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLog}"
 fi
 
 if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
