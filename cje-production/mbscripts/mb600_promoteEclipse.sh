@@ -24,12 +24,12 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 pushd $CJE_ROOT/$DROP_DIR/
+if [[ $COMPARATOR_ERRORS == "true" ]]
+then
+	touch ${BUILD_ID}/buildUnstable
+	echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>">> ${BUILD_ID}/buildUnstable
+fi
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 dropsPath=${epDownloadDir}/downloads/drops4
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
-if [[ $COMPARATOR_ERRORS == "true" ]]
-then
-	ssh genie.releng@projects-storage.eclipse.org touch ${dropsPath}/${BUILD_ID}/buildUnstable
-	ssh genie.releng@projects-storage.eclipse.org echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>">> ${dropsPath}/${BUILD_ID}/buildUnstable
-fi
 popd
