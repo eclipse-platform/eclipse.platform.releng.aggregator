@@ -245,7 +245,7 @@ java -jar $LAUNCHER_JAR \
   publish
 popd
 
-comparatorLogMinimumSize=250
+comparatorLogMinimumSize=350
 comparatorLog=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
 
 logSize=0
