@@ -35,12 +35,12 @@ pushd $CJE_ROOT/$AGG_DIR
 
 # git tagging
 git commit -m "Build input for build $BUILD_ID"
-git push origin HEAD
+#git push origin HEAD
 
-git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; git push --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
-#git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID;  else echo Skipping \$name; fi || :"
+#git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; git push --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
+git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID;  else echo Skipping \$name; fi || :"
 git tag $BUILD_ID
-git push --verbose origin $BUILD_ID
+#git push --verbose origin $BUILD_ID
 
 # git logging
 if [[ -n "$lastTag" ]]; then
