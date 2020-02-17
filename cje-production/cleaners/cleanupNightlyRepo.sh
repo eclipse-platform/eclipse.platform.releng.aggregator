@@ -144,7 +144,7 @@ function cleanRepo ()
   # To allow this cron job to work from hudson, or traditional crontab
   devWorkspace=${workspace}/workspace-cleanup
 
-  echo -e "\tDEBUG: Cleaning repository ${eclipseRepo} on $HOSTNAME on $(date ) " >&2
+  echo -e "\tDEBUG: Cleaning repository ${eclipseRepo} on $HOSTNAME on $(TZ="America/New_York" date ) " >&2
   getReposToRemove "${eclipseRepo}" $buildType $nRetain
   RC=$?
   if [[ $RC == 0 ]]

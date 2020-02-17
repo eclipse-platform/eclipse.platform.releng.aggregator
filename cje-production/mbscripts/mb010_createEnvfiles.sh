@@ -44,12 +44,12 @@ echo "<?php " > $BUILD_ENV_FILE_PHP
 
 # We set RAWDATE first thing here to make the "start of build" timestamp more accurate.
 # Note that a roundup is added to compensate the occasional delay.
-RAWDATE=$(date +%s)
+RAWDATE=$(TZ="America/New_York" date +%s)
 REMAINDER=$((RAWDATE % 600))
 RAWDATE_TRUNC=$((RAWDATE - REMAINDER))
 export RAWDATE
-fn-addToPropFiles TIMESTAMP "\"$(date +%Y%m%d-%H%M --date='@'$RAWDATE_TRUNC)\""
-fn-addToPropFiles BUILD_PRETTY_DATE "\"$(date --date='@'$RAWDATE_TRUNC)\""
+fn-addToPropFiles TIMESTAMP "\"$(TZ="America/New_York" date +%Y%m%d-%H%M --date='@'$RAWDATE_TRUNC)\""
+fn-addToPropFiles BUILD_PRETTY_DATE "\"$(TZ="America/New_York" date --date='@'$RAWDATE_TRUNC)\""
 
 while read propLine
 do

@@ -34,6 +34,6 @@ clean() {
 }
 
 
-echo -e "\n\tCurrent date: $(date +%Y\ %m%d\ %H:%M)"
+echo -e "\n\tCurrent date: $(TZ="America/New_York" date +%Y\ %m%d\ %H:%M)"
 echo -e "\tRemoving drops from downloads server at ${equinoxBuilds}\n"
 clean $equinoxBuilds I

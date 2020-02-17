@@ -14,7 +14,7 @@
 #*******************************************************************************
 
 # Utility to clean build machine
-echo -e "\n\tDaily clean of ${HOSTNAME} download server on $(date )\n"
+echo -e "\n\tDaily clean of ${HOSTNAME} download server on $(TZ="America/New_York" date )\n"
 
 #
 # Checks whether a build can be retained or not.
@@ -88,8 +88,8 @@ for buildname in ${allOldBuilds}; do
     mm=$(echo $buildId|cut -b6-7)  #extract month
     dd=$(echo $buildId|cut -b8-9)  #extract day
     day=${mm}/${dd}/${yy}          #construct build date
-    dayOfWeek=$(date -d $day +%u)  #get the day of the week like monday, tue, etc
-    weekNum=$(date -d $day +%U)    #get the week number from start of the year
+    dayOfWeek=$(TZ="America/New_York" date -d $day +%u)  #get the day of the week like monday, tue, etc
+    weekNum=$(TZ="America/New_York" date -d $day +%U)    #get the week number from start of the year
 
     #special case for Sunday. unix considers sunday as the start of the week. but for us we need to consider
     #monday as start of the week. For this purpose we subtract 1 to place the build in previous week

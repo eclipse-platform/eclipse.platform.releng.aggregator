@@ -23,8 +23,8 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-reportDate=$(date +%s)
-reportTimestamp=$(date +%Y%m%d-%H%M --date='@'$reportDate)
+reportDate=$(TZ="America/New_York" date +%s)
+reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M --date='@'$reportDate)
 gitLogFile=$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
 
