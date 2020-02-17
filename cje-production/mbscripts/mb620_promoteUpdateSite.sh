@@ -24,7 +24,7 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
-dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-newbuilds
+dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 latestRelDir=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 pushd $CJE_ROOT/$UPDATES_DIR
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
