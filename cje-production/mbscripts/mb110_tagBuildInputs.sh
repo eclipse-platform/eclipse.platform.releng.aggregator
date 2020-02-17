@@ -29,7 +29,7 @@ gitLogFile=$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
 
 # set lastTag
-lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
+lastTag=I20200217-0600
 
 pushd $CJE_ROOT/$AGG_DIR
 
