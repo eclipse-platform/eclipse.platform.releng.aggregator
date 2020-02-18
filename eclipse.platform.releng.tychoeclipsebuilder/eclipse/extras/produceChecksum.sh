@@ -46,20 +46,12 @@ else
   exit 1
 fi
 
-allCheckSumsSHA256=checksum/${client}-${BUILD_ID}-SUMSSHA256
 allCheckSumsSHA512=checksum/${client}-${BUILD_ID}-SUMSSHA512
 
 #  Remove the "all" files, here at beginning if they all ready exist,
 #  so that subsequent calls can all use append (i.e. ">>")
 
-if [[ -e ${allCheckSumsSHA256} ]]
-then
-  rm ${allCheckSumsSHA256}
-fi
-if [[ -e ${allCheckSumsSHA512} ]]
-then
-  rm ${allCheckSumsSHA512}
-fi
+rm ${allCheckSumsSHA512}
 
 #array of zipfiles
 zipfiles=`ls *.zip`
@@ -71,8 +63,6 @@ do
   aggrPattern="^eclipse.platform.releng.aggregator.*.zip$"
   if [[ ! "${zipfile}" =~ $aggrPattern ]]
   then
-    echo [sha256] ${zipfile}
-    sha256sum -b ${zipfile} | tee checksum/${zipfile}.sha256 >>${allCheckSumsSHA256}
     echo [sha512] ${zipfile}
     sha512sum -b ${zipfile} | tee checksum/${zipfile}.sha512  >>${allCheckSumsSHA512}
   fi
@@ -83,8 +73,6 @@ dmgfiles=`ls *.dmg`
 
 for dmgfile in ${dmgfiles}
 do
-  echo [sha256] ${dmgfile}
-  sha256sum -b ${dmgfile} | tee checksum/${dmgfile}.sha256  >>${allCheckSumsSHA256}
   echo [sha512] ${dmgfile}
   sha512sum -b ${dmgfile} | tee checksum/${dmgfile}.sha512  >>${allCheckSumsSHA512}
 done
@@ -94,8 +82,6 @@ gzipfiles=`ls *.gz`
 
 for gzipfile in ${gzipfiles}
 do
-  echo [sha256] ${gzipfile}
-  sha256sum -b ${gzipfile} | tee checksum/${gzipfile}.sha256 >>${allCheckSumsSHA256}
   echo [sha512] ${gzipfile}
   sha512sum -b ${gzipfile} | tee checksum/${gzipfile}.sha512 >>${allCheckSumsSHA512}
 done
@@ -105,8 +91,6 @@ xzfiles=`ls *.tar.xz`
 
 for xzfile in ${xzfiles}
 do
-  echo [sha256] ${xzfile}
-  sha256sum -b ${xzfile} | tee checksum/${xzfile}.sha256 >>${allCheckSumsSHA256}
   echo [sha512] ${xzfile}
   sha512sum -b ${xzfile} | tee checksum/${xzfile}.sha512 >>${allCheckSumsSHA512}
 done
@@ -117,8 +101,6 @@ jarfiles=`ls *.jar`
 
 for jarfile in ${jarfiles}
 do
-  echo [sha256] ${jarfile}
-  sha256sum -b ${jarfile} | tee checksum/${jarfile}.sha256 >>${allCheckSumsSHA256}
   echo [sha512] ${jarfile}
   sha512sum -b ${jarfile} | tee checksum/${jarfile}.sha512 >>${allCheckSumsSHA512}
 done
@@ -131,12 +113,9 @@ key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
 if [[ -r $key_passphrase_file ]]
 then
   signer=${signer:-${client}-dev@eclipse.org}
-  signature_file256=${allCheckSumsSHA256}.asc
   signature_file512=${allCheckSumsSHA512}.asc
-  fileToSign256=${allCheckSumsSHA256}
   fileToSign512=${allCheckSumsSHA512}
 
-  cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file256} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign256}
   cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file512} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign512}
 else
   # We don't treat as ERROR since would be normal in a "local build".
