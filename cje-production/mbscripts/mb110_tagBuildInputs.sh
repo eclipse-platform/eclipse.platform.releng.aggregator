@@ -13,7 +13,6 @@
 # Contributors:
 #     Kit Lo - initial API and implementation
 #*******************************************************************************
-set -e
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
@@ -35,7 +34,10 @@ pushd $CJE_ROOT/$AGG_DIR
 
 # git tagging
 git commit -m "Build input for build $BUILD_ID"
-git push origin HEAD
+if [[ $? -eq 0 ]]
+then
+	git push origin HEAD
+fi
 
 git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; git push --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
 #git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID;  else echo Skipping \$name; fi || :"
