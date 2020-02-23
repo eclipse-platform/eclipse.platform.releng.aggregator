@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019 IBM Corporation and others.
+# Copyright (c) 2020 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -34,7 +34,6 @@ pushd "../$AGG_DIR"
 adds=$( git submodule | grep "^+" | cut -f2 -d" " )
 if [ -z "$adds" ]; then
 	echo No updates for the submodules
-	return
 else
 	echo git add $adds
 	git add $adds
