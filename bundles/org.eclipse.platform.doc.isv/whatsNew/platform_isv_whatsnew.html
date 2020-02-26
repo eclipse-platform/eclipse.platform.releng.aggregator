@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2018, 2019. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2020. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" type="text/css"/>
@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.14</title>
+<title>Eclipse Platform What's New in 4.15</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.14</h2>
+<h2>What's New in Eclipse 4.15</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.14 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.15 release of Eclipse.
 </p>
 <ul>
 	<li><a href="#Platform">Platform Changes</a></li>
@@ -49,131 +49,116 @@ section of the Workbench User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
-  <tr id="text-selection-no-ui-thread"> <!-- https://bugs.eclipse.org/547683 -->
-    <td class="title">Get TextViewer selection out of UI thread</td>
+ <tr id="labelProvider-lambda"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=558205 -->
+    <td class="title">Easier usage of LabelProvider and ColumnLabelProvider</td>
     <td class="content">
-      A new extension interface <b><code>ITextViewerExtension9</code></b> was added to <code>ITextViewer</code>. This extension interface
-      adds a new method <code>getLastKnownSelection</code> to get the text selection for the viewer, with constraint (by API contract) that this method
-      can be called <em>outside of the UI thread</em>.
-      <p>This method allows to build extensions (like completion proposal computers, hovers and others) that can
-      work outside of the UI thread, as a separate job, without blocking the UI but that still require access to the
-      text selection.</p>
-      <p>The <code>TextViewer</code> concrete implementation (used by most textual editors) has been
-      enriched to implement this interface and provide associated method.</p>
-      <p><b>NOTE:</b> Since selection can change in the UI thread while this method may be running in the non-UI thread, it can
-      happen that the <code>getLastKnownSelection</code> method returns a selection that's no more up-to-date. Special care should be
-      taken if having the very current selection is important in your code; but experience with adoption of this method
-      in typical cases has shown that this is rarely the case, and that if your code needs to react to selection changes,
-      using an <code>ISelectionListener</code> should be preferred.</p>
-    </td>
-  </tr>
-
-  <tr id="quick-assist-extension-point"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=544448 -->
-    <td class="title">Quick assist extension point for Generic Editor</td>
-    <td class="content">
-    A new extension point <b><code>org.eclipse.ui.genericeditor.quickAssistProcessors</code></b> has been added to allow contributing to the quick assist in the generic editor.
-    <p>
-     The following example shows how to contribute to the Generic Editor's quick assist:
-    </p>
-    <pre>&lt;extension point=&quot;org.eclipse.ui.genericeditor.quickAssistProcessors&quot;&gt;
-    &lt;quickAssistProcessor
-        class=&quot;org.eclipse.ui.genericeditor.tests.contributions.MockQuickAssistProcessor&quot;
-        contentType=&quot;org.eclipse.ui.genericeditor.tests.content-type&quot;&gt;
-    &lt;/quickAssistProcessor&gt;
-&lt;/extension&gt;</pre>
-    The contributing extension must provide a class which implements <code>org.eclipse.jface.text.quickassist.IQuickAssistProcessor</code>.
-    </td>
-  </tr>
-
-  <tr id="display-helper-lambda"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551211 -->
-    <td class="title">Easier usage of DisplayHelper</td>
-    <td class="content">
-      The <b><code>org.eclipse.ui.tests.harness.util.DisplayHelper</code></b> that's often conveniently
-      used in tests to automate wait on asynchronous UI results now offers a more concise
-      syntax, relying on the new static <code>waitForCondition(display, timeout, condition)</code>
-      method.
+      The <code>org.eclipse.jface.viewers.LabelProvider</code> and <code>org.eclipse.jface.viewers.ColumnLabelProvider</code> classes now 
+      support lambda functions for their <code>getText()</code> and <code>getImage()</code> methods. 
+      This is provided through the new static methods <code>createImageProvider()</code> and <code>createTextProvider()</code> respectively.
+      <p>
+        For use cases where the LabelProvider should implement both the <code>getText()</code> and <code>getImage()</code> methods, the static method <code>createTextImageProvider()</code> can be used.
+      </p>
       <p>Former constructs like:</p>
 <pre>
-assertTrue(new DisplayHelper() {
+viewer.setLabelProvider(new LabelProvider() {
     @Override
-    public void condition() {
-        return some.boolean() &amp;&amp; expression;
+    public String getText(Object element) {
+        return element.toString();
     }
-}.waitForCondition(display, 1000));
+    @Override
+    public Image getImage(Object element) {
+        return defaultImage;
+    }
+});
 </pre>
-can now be replaced by:
+    can now be replaced by:
 <pre>
-assertTrue(DisplayHelper.waitForCondition(display, 1000, () -> some.boolean() &amp;&amp; expression))
+viewer.setLabelProvider(LabelProvider.createTextImageProvider(element -> element.toString(),
+    element -> defaultImage));
 </pre>
      </td>
   </tr>
 
-  <tr id="selection_listener_factory"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=550329 -->
-    <td class="title">Selection Listener Factory</td>
+  <tr id="project-explorer-initial-layout-preference"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=491185 -->
+    <td class="title">Preference to change default layout to flat in Project Explorer</td>
     <td class="content">
-       A new API was introduced to make participants of the Selection framework more efficient.
-       <p>
-         Selection listeners are notified of all selections in the Workbench. This
-         means that the listener is always required to filter unwanted selections. In
-         addition, the listener has to make sure not to waste cycles in the UI
-         thread, for instance, not update the UI while it is invisible.
-       </p><p>
-         This filtering generally requires <i>a lot</i> of boilerplate code while,
-         ideally, you only want to receive selections that are of interest.
-       </p><p>
-         This factory takes care of many practical filtering scenarios by allowing the
-         creation of an intermediate selection service that only calls you back with
-         selections you can work with.
-       </p><p>
-         See usage examples in the <a href="https://git.eclipse.org/r/plugins/gitiles/platform/eclipse.platform.ui/+/master/bundles/org.eclipse.ui.workbench/Eclipse%20UI/org/eclipse/ui/SelectionListenerFactory.java#30" target="_blank">SelectionListenerFactory</a> documentation.
-       </p>
+      In Eclipse 4.15, the default project layout in the <b>Project Explorer</b> has been switched to <b>hierarchical layout</b>, and a new preference
+      is available for RCP providers who want to force <b>flat layout</b> by default instead.
+      <p>
+        The preference is <code>org.eclipse.ui.navigator.resources/defaultToFlatLayout</code> and can be set to <code>true</code>
+        in <code>plugin_customization.ini</code> or programatically <i>before</i> Project Explorer opens for
+        the first time, in order to force a flat project layout. Subsequent change to this preference after
+        first initialization of Project Explorer will have no effect.
+      </p>
     </td>
   </tr>
-  
-  <tr id="update-part-icon"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=475357 -->
-   <td class="title">Update the Icon of a Part at Runtime</td>
+
+  <tr id="disable-swt-addons"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=394231 -->
+    <td class="title">Allow configuration of enabled SWT add-ons in application model</td>
     <td class="content">
-      You can now update the icon of a Part in a Part Stack by setting its icon URI at any time. There is no need to modify the part's transient data anymore.
-   </td>
+      Loading the add-ons for SWT, automatically enables all the add-ons (Drag'n'Drop, MinMax, Split, Cleanup).
+      You can now disable unwanted add-ons using tags (DisableDnDAddon, DisableMinMaxAddon, ...) on the application model.
+    </td>
   </tr>
+
+  <tr id="cheatsheet-hyperlinks"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=559885 -->
+    <td class="title">Hyperlink support in cheatsheet item description</td>
+    <td class="content">
+      You can now add hyperlinks in a cheat sheet item description.
+      <p><img src="images/hyperlinks.png" alt=""/></p>
+      <p>Hyperlinks are expressed using <code>&lt;a href="URL"&gt;display link&lt;/a&gt;</code>, where URL
+        is a valid URL to an external web site or a CheatSheet URL that represents a CheatSheat action.</p>
+      <p>All cheat sheet URLs have the following
+        form: <code>http://org.eclipse.ui.cheatsheet/&lt;action_name&gt;?param1=value1&amp;param2=value2</code>
+        and will be processed by the cheat sheet framework.</p>
+      <p>The following predefined actions are included in the cheat sheet framework:</p>
+      <ul>
+        <li>showView - activates view with given view id</li>
+        <li>execute - executes the specified command</li>
+      </ul>
+      <p>Examples:</p>
+      <ul>
+        <li>Execute command: <code>&lt;a href="http://org.eclipse.ui.cheatsheet/execute?command=org.eclipse.search.ui.openSearchDialog"&gt;Open Search Dialog&lt;/a&gt;</code><br/></li>
+        <li>Show view: <code>&lt;a href="http://org.eclipse.ui.cheatsheet/showView?id=org.eclipse.pde.runtime.LogView"&gt;Show Error Log&lt;/a&gt;</code></li>
+        <li>External: <code>&lt;a href="https://eclipse.org"&gt;eclipse.org&lt;/a&gt;</code></li>
+      </ul>
+    </td>
+  </tr>
+
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  <tr id="toolitem-disabled-image"> <!-- https://bugs.eclipse.org/302918 -->
-    <td class="title">Disabled Toolbar items on GTK</td>
+
+  <tr id="CTabItem"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=559986 -->
+    <td class="title">New APIs to style CTabItem</td>
     <td class="content">
-      <b><code>ToolItem.setDisabledImage()</code></b> is now fully implemented for ToolItems on Linux/GTK, and greatly improves the ability
-      to distinguish a disabled ToolItem from an enabled one.
-      <p>Below is a screenshot with disabled toolbar buttons;
-      the left toolbar shows the current implementation, the right one the shows the old implementation.</p>
-      <p><img src="images/toolitem-disabled-comparison.png" alt="ToolBar comparison"/></p>
+      New APIs have been added to <code>CTabItem</code> to set the foreground color and selection foreground color of the individual <code>CTabItem</code>.
       <p>
-       This API is already works on Windows and macOS.
+        <code>
+          public void CTabItem.setForeground(Color color)<br/>
+          public Color CTabItem.getForeground()<br/>
+        </code>
+      </p>
+      <p>
+        <code>
+          public void CTabItem.setSelectionForeground(Color color)<br/>
+          public Color CTabItem.getSelectionForeground()
+        </code>
       </p>
     </td>
   </tr>
 
-  <tr id="image-svg-gtk"> <!-- https://bugs.eclipse.org/545804 -->
-    <td class="title">SVG Image API added, implemented on GTK</td>
+  <tr id="webkit1-removal"> <!-- https://bugs.eclipse.org/558070 -->
+    <td class="title">WebKit1 support dropped</td>
     <td class="content">
-      SWT now has an API to support SVG images, <b><code>SWT.IMAGE_SVG</code></b>, which allows <code>ImageLoader</code> to load them.
-      <p>Currently this functionality is only implemented on Linux/GTK, on all other platforms the API is a HINT.</p>
+      Starting from Eclipse 4.15, SWT/GTK no longer supports WebKit1 as a browser backend. Only WebKit2 is supported, and
+      all WebKit1 code has been removed.
     </td>
   </tr>
 
-  <tr id="ccombo-alignment"> <!-- https://bugs.eclipse.org/349112 -->
-    <td class="title">Set alignment for CCombo</td>
-    <td class="content">
-     The <code>CCombo</code> widget can now align the text field content, the alignment is not applied to the drop-down list.
-     <p>The alignment for <code>CCombo</code> can be specified as a style bit in the constructor or using the <code>CCombo.setAlignment()</code> method.
-     You can also get the value of the <code>CCombo</code>'s alignment using <code>getAlignment()</code> method.</p>
-     <p>The below screen-shot shows possible <code>CCombo</code> alignments:</p>
-     <p><img src="images/ccombo-alignment.png" alt="Aligned CCombo widgets"/></p>
-    </td>
-  </tr>
   <!-- *********************** End of SWT *********************** -->
 
 </tbody>
