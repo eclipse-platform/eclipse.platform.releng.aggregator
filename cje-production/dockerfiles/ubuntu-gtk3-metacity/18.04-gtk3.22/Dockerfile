@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       fonts-dejavu-extra \
       wget \
       curl \
+      unzip \
     && rm -rf /var/lib/apt/lists/*
 
 ENV HOME=/home/vnc
