@@ -67,22 +67,22 @@ function latestSimpleRepo
 
 if [[ ${build_type} == "I" ]]
 then
-  update_dir_segment="4.15-I-builds"
+  update_dir_segment="4.16-I-builds"
   buildIdToCompare="4.14/R-4.14-201912100610"
   echo -e "\tlatest_R_build: R-4.14-201912100610"
 elif [[ ${build_type} == "Y" ]]
 then
-  update_dir_segment="4.15-Y-builds"
+  update_dir_segment="4.16-Y-builds"
   # Note: we use same value for Y-builds as for I-builds, since conceptually
   # they are the same, except that Y-builds use some code from BETA_JAVA12 branch.
-  latest_I_build=$(latestSimpleRepo "${repo_root}/4.15-I-builds" "I20*")
+  latest_I_build=$(latestSimpleRepo "${repo_root}/4.16-I-builds" "I20*")
   RC=$?
   if [[ $RC != 0 ]]
   then
     exit $RC
   fi
   echo -e "\tlatest_I_build: $latest_I_build"
-  buildIdToCompare="4.15-I-builds/${latest_I_build}"
+  buildIdToCompare="4.16-I-builds/${latest_I_build}"
 else
   echo -e "\nERROR: Unhandled build type: ${build_type} so update_dir_segment undefined: $update_dir_segment"
   echo -e "\n\tand repo reports not produced."
