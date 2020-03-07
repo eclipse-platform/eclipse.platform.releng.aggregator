@@ -314,7 +314,7 @@ then
 
   # TODO: avoid this hard coding of baseline value
   # NOTE: value must start with a letter match baselinePerfVersion in testScripts/configuration/streamSpecific.properties
-  baselineCode="R-4.14-201912100610"
+  baselineCode="S-4.15RC2-202003050155"
   # to get time stamp, first remove initial IMN:
   baselineForBuildSuffix=${buildId/[IMN]/}
   #Then remove final '-' in build id
