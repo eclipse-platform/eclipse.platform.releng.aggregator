@@ -38,6 +38,7 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Platform;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BuildTests {
@@ -600,7 +601,9 @@ public class BuildTests {
 		message = message.concat("See the javadoc logs linked from the test results page for details");
 		assertTrue(message, !problemLogsExist);
 	}
+
 	@Test
+	@Ignore("see bug 561174")
 	public void testDirtyLogSize() throws Exception {
 		final boolean DEBUG_DIRTY_TEST = true;
 		// MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
@@ -653,8 +656,9 @@ public class BuildTests {
 
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testJarSign test", buildId);
-		String downloadHost = "build.eclipse.org/eclipse/builds/4" + buildId.charAt(0) + "/siteDir";
-		String urlOfFile = "http://" + downloadHost + "/eclipse/downloads/drops4/" + buildId + "/buildlogs/reporeports/reports/unsigned8.txt";
+		String downloadHost = "download.eclipse.org";
+		String urlOfFile = "https://" + downloadHost + "/eclipse/downloads/drops4/" + buildId
+				+ "/buildlogs/reporeports/reports/unsigned8.txt";
 		URL logURL = new URL(urlOfFile);
 
 		URLConnection urlConnection = logURL.openConnection();
@@ -691,14 +695,15 @@ public class BuildTests {
 		// "hard code" nominal values, to make sure
 		// there is no regressions, which would be implied by a report larger
 		// than that nominal value.
-		long MAX_ALLOWED_BYTES = 210;
+		long MAX_ALLOWED_BYTES = 306;
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testComparatorLogSize test", buildId);
 		String buildType = buildId.substring(0, 1);
 		// Comparator logs are not generated for N builds
 		if (!buildType.equals("N")) {
 			String downloadHost = getDownloadHost();
-			String urlOfFile = "http://" + downloadHost + "/eclipse/downloads/drops4/" + buildId
+			String urlOfFile = "https://" + downloadHost + "/eclipse/downloads/drops4/"
+					+ buildId
 					+ "/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt";
 			URL logURL = new URL(urlOfFile);
 
