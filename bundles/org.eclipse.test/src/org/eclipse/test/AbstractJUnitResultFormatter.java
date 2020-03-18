@@ -184,7 +184,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 
 	protected void handleException(final Throwable t) {
 		// we currently just log it and move on.
-		this.context.getProject().ifPresent((p) -> p.log("Exception in listener "
+		this.context.getProject().ifPresent(p -> p.log("Exception in listener "
 				+ AbstractJUnitResultFormatter.this.getClass().getName(), t, Project.MSG_DEBUG));
 	}
 

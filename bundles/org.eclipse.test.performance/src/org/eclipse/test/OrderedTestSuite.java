@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -116,20 +115,16 @@ public class OrderedTestSuite extends TestSuite {
 
         try {
             final List<String> orderedMethodNames = getBytecodeOrderedTestNames(testClass);
-            Collections.sort(tests, new Comparator<Test>() {
-
-                @Override
-                public int compare(Test o1, Test o2) {
-                    if (o1 instanceof TestCase && o2 instanceof TestCase) {
-                        TestCase t1 = (TestCase) o1;
-                        TestCase t2 = (TestCase) o2;
-                        int i1 = orderedMethodNames.indexOf(t1.getName());
-                        int i2 = orderedMethodNames.indexOf(t2.getName());
-                        if (i1 != -1 && i2 != -1)
-                            return i1 - i2;
-                    }
-                    throw new SortingException("suite failed to detect test order: " + o1 + ", " + o2); //$NON-NLS-1$ //$NON-NLS-2$
+            Collections.sort(tests, (o1, o2) -> {
+                if (o1 instanceof TestCase && o2 instanceof TestCase) {
+                    TestCase t1 = (TestCase) o1;
+                    TestCase t2 = (TestCase) o2;
+                    int i1 = orderedMethodNames.indexOf(t1.getName());
+                    int i2 = orderedMethodNames.indexOf(t2.getName());
+                    if (i1 != -1 && i2 != -1)
+                        return i1 - i2;
                 }
+                throw new SortingException("suite failed to detect test order: " + o1 + ", " + o2); //$NON-NLS-1$ //$NON-NLS-2$
             });
         } catch (SortingException | IOException e) {
             addTest(error(testClass, "suite failed to detect test order", e)); //$NON-NLS-1$
