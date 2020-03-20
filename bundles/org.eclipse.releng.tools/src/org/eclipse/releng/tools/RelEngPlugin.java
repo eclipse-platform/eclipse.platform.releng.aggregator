@@ -43,7 +43,7 @@ import org.osgi.framework.BundleContext;
  *    <li>Fix Copyright action
  */
 public class RelEngPlugin extends AbstractUIPlugin {
-	
+
 	public static final String ID = "org.eclipse.releng.tools"; //$NON-NLS-1$
 	public static final String MAP_PROJECT_NAME = Messages.getString("RelEngPlugin.1"); //$NON-NLS-1$
 	public static final String MAP_FOLDER = Messages.getString("RelEngPlugin.2"); //$NON-NLS-1$
@@ -56,7 +56,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	private static RelEngPlugin plugin;
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
-	
+
 	/**
 	 * The constructor.
 	 */
@@ -134,7 +134,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	public static void log(CoreException e) {
 		log(e.getStatus().getSeverity(), e.getMessage(), e);
 	}
-	
+
 	/**
 	 * Log the given exception along with the provided message and severity indicator
 	 */
@@ -144,7 +144,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Log the given exception as an error.
-	 * 
+	 *
 	 * @param e exception to log
 	 */
 	public static void log(Throwable e){
@@ -160,7 +160,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	}
 	/**
 	 * Returns the singleton plug-in instance.
-	 * 
+	 *
 	 * @return the plugin instance
 	 */
 	public static RelEngPlugin getPlugin() {
@@ -179,7 +179,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Tells whether the given project is shared.
-	 * 
+	 *
 	 * @param project the project
 	 * @return <code>true</code> if the project is shared
 	 * @since 3.7

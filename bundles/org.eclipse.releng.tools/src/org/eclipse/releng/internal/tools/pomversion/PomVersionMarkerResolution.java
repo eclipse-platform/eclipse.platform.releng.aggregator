@@ -7,7 +7,7 @@
  *  https://www.eclipse.org/legal/epl-2.0/
  *
  *  SPDX-License-Identifier: EPL-2.0
- * 
+ *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -34,7 +34,7 @@ import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
 
 /**
- * Marker resolution for when version in pom.xml does not match the plug-in version. 
+ * Marker resolution for when version in pom.xml does not match the plug-in version.
  * Replaces the version string to one based on the version in the manifest.  The corrected
  * version must have been stored on the marker at creation time.
  */
@@ -134,7 +134,7 @@ public class PomVersionMarkerResolution extends WorkbenchMarkerResolution {
 				if (iMarker.getType().equals(IPomVersionConstants.PROBLEM_MARKER_TYPE))
 					mset.add(iMarker);
 			} catch (CoreException e) {
-			
+
 			}
 		}
 		int size = mset.size();

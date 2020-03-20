@@ -26,7 +26,7 @@ import org.eclipse.releng.tools.RelEngPlugin;
  */
 public class RelEngPreferenceInitializer extends AbstractPreferenceInitializer {
 	private final String LEGAL_LINE = Messages.getString("RelEngPreferenceInitializer.0"); //$NON-NLS-1$
-	
+
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = RelEngPlugin.getDefault().getPreferenceStore();

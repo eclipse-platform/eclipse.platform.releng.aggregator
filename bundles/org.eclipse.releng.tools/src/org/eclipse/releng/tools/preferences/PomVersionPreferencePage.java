@@ -31,9 +31,9 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
  */
 public class PomVersionPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage {
-	
+
 	public static final String ID = RelEngPlugin.ID + "PomVersionPreferencePage"; //$NON-NLS-1$
-	
+
 	/**
 	 * The main configuration block for the page
 	 */
@@ -47,14 +47,14 @@ public class PomVersionPreferencePage extends PreferencePage implements
 		gl.marginWidth = 0;
 		comp.setLayout(gl);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		Label label = new Label(comp, SWT.WRAP);
 		GridData gd = new GridData(SWT.FILL, SWT.BEGINNING, true, false);
 		gd.widthHint = 400;
 		label.setLayoutData(gd);
 		label.setText(Messages.PomVersionPreferencePage_pom_pref_message);
 		label.setFont(comp.getFont());
-		
+
 		block = new PomErrorLevelBlock((IWorkbenchPreferenceContainer)getContainer());
 		block.createControl(comp);
 		Dialog.applyDialogFont(comp);

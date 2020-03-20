@@ -126,7 +126,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 	/**
 	 * Returns the selected resources.
-	 * 
+	 *
 	 * @return the selected resources
 	 */
 	protected IResource[] getSelectedResources() {
@@ -191,7 +191,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					stream.println(NLS.bind(Messages.getString("AdvancedFixCopyrightAction.3"), //$NON-NLS-1$
 							Integer.toString(results.length)));
 
-					int totalFileCount = countFiles(results); 
+					int totalFileCount = countFiles(results);
 					SubMonitor subMonitor = SubMonitor.convert(monitor, totalFileCount);
 					subMonitor.beginTask(Messages.getString("AdvancedFixCopyrightAction.4"), totalFileCount); //$NON-NLS-1$
 
@@ -297,7 +297,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	}
 
 	/**
-	 *  
+	 *
 	 */
 	private void writeLogs() {
 
@@ -357,7 +357,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	 * <li>identify if multiple comments inserted.</li>
 	 * <li>update existing comment or insert a new one</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param file
 	 *            - file to be proccessed (.java, .bat, .xml etc...)
 	 * @param adapter
@@ -517,7 +517,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 	/**
 	 * Check if user chose to skip files of this kind.
-	 * 
+	 *
 	 * @param prefStore
 	 *            Copyright preference store
 	 * @param aSourceFile
@@ -542,7 +542,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 	/**
 	 * Check if the file has multiple copyright notices. Skip such files.
-	 * 
+	 *
 	 * @param file
 	 * @param aSourceFile
 	 * @return true if it has a single notice.

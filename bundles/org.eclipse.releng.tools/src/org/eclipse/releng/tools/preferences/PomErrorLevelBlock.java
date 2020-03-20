@@ -42,7 +42,7 @@ import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * This block is used to add error/warning combos to the {@link PomVersionPreferencePage}
- * 
+ *
  */
 public class PomErrorLevelBlock extends ConfigurationBlock {
 	/**
@@ -51,7 +51,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	protected static class ControlData {
 		Key key;
 		private String[] values;
-		
+
 		/**
 		 * Constructor
 		 * @param key
@@ -61,20 +61,20 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			this.key = key;
 			this.values = values;
 		}
-		
+
 		public Key getKey() {
 			return key;
 		}
-		
+
 		public String getValue(boolean selection) {
 			int index= selection ? 0 : 1;
 			return values[index];
 		}
-		
+
 		public String getValue(int index) {
 			return values[index];
-		}		
-		
+		}
+
 		public int getSelection(String value) {
 			if (value != null) {
 				for (int i= 0; i < values.length; i++) {
@@ -86,15 +86,15 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			return values.length -1; // assume the last option is the least severe
 		}
 	}
-	
+
 	/**
 	 * Provides management for changed/stored values for a given preference key
 	 */
 	protected static class Key {
-		
+
 		private String qualifier;
 		private String key;
-		
+
 		/**
 		 * Constructor
 		 * @param qualifier
@@ -104,7 +104,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			this.qualifier= qualifier;
 			this.key= key;
 		}
-		
+
 		/**
 		 * Returns the {@link IEclipsePreferences} node for the given context and {@link IWorkingCopyManager}
 		 * @param context
@@ -118,7 +118,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			}
 			return node;
 		}
-		
+
 		/**
 		 * Returns the value stored in the {@link IEclipsePreferences} node from the given context and working copy manager
 		 * @param context
@@ -132,7 +132,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			}
 			return null;
 		}
-		
+
 		/**
 		 * Returns the stored value of this {@link IEclipsePreferences} node using a given lookup order, and allowing the
 		 * top scope to be ignored
@@ -150,7 +150,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			}
 			return null;
 		}
-		
+
 		/**
 		 * Sets the value of this key
 		 * @param context
@@ -165,7 +165,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 				node.remove(key);
 			}
 		}
-			
+
 		@Override
 		public String toString() {
 			return qualifier + '/' + key;
@@ -189,7 +189,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 		"Warning", //$NON-NLS-1$
 		"Ignore" //$NON-NLS-1$
 	};
-	
+
 	/**
 	 * Constant representing the severity values presented in the combo boxes for each option
 	 */
@@ -198,7 +198,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 		IPomVersionConstants.VALUE_WARNING,
 		IPomVersionConstants.VALUE_IGNORE,
 	};
-	
+
 	/**
 	 * Default selection listener for controls on the page
 	 */
@@ -218,28 +218,28 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	 * Listing of all of the {@link Combo}s added to the block
 	 */
 	private Combo fCombo = null;
-	
+
 	/**
 	 * The context of settings locations to search for values in
 	 */
 	IScopeContext[] fLookupOrder = null;
-	
+
 	/**
 	 * the working copy manager to work with settings
 	 */
 	IWorkingCopyManager fManager = null;
-	
+
 	/**
-	 * The main composite for the configuration block, used for enabling/disabling the block 
+	 * The main composite for the configuration block, used for enabling/disabling the block
 	 */
 	private Composite fMainComp = null;
-	
-	
+
+
 	/**
 	 * Flag used to know if the page needs saving or not
 	 */
 	boolean fDirty = false;
-	
+
 	/**
 	 * Constructor
 	 * @param project
@@ -256,10 +256,10 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			fManager = container.getWorkingCopyManager();
 		}
 	}
-	
+
 	/**
 	 * Creates the control in the parent control
-	 * 
+	 *
 	 * @param parent the parent control
 	 */
 	public Control createControl(Composite parent) {
@@ -281,14 +281,14 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	public void performOK()  {
 		save();
 	}
-	
+
 	/**
 	 * Directly applies all of the changes on the page
 	 */
 	public void performApply() {
 		save();
 	}
-	
+
 	/**
 	 * Performs the save operation on the working copy manager
 	 */
@@ -307,12 +307,12 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			}
 		}
 	}
-	
+
 	/**
 	 * Cancels all of the changes on the page
 	 */
 	public void performCancel() {}
-	
+
 	/**
 	 * Reverts all of the settings back to their defaults
 	 */
@@ -325,10 +325,10 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 		updateCombos();
 		fDirty = true;
 	}
-	
+
 	/**
 	 * Updates all of the registered {@link Combo}s on the page.
-	 * Registration implies that the {@link Combo} control was added to the listing 
+	 * Registration implies that the {@link Combo} control was added to the listing
 	 * of fCombos
 	 */
 	private void updateCombos() {
@@ -344,7 +344,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	public void dispose() {
 		fMainComp.getParent().dispose();
 	}
-	
+
 	/**
 	 * Creates a {@link Label} | {@link Combo} control. The combo is initialised from the given {@link Key}
 	 * @param parent
@@ -359,7 +359,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 		Combo combo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		gd = new GridData(GridData.END, GridData.CENTER, false, false);
 		combo.setLayoutData(gd);
-		ControlData data = new ControlData(key, SEVERITIES); 
+		ControlData data = new ControlData(key, SEVERITIES);
 		combo.setData(data);
 		combo.setItems(SEVERITIES_LABELS);
 		combo.addSelectionListener(selectionlistener);
@@ -390,7 +390,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			}
 		}
 	}
-	
+
 	public static Key[] getAllKeys() {
 		return fgAllKeys;
 	}

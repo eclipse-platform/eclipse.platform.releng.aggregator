@@ -40,7 +40,7 @@ import org.eclipse.releng.tools.RepositoryProviderCopyrightAdapter;
 public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 
 	private static String filterString = "copyright"; // lowercase //$NON-NLS-1$
-	
+
 	/**
 	 * Bugs to be filtered because they modified a lot of files in a trivial way
 	 * and should not change the copyright year.
@@ -49,7 +49,7 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 	 * strings the year will not be modified for this file.
 	 * </p>
 	 */
-	private static final String[] FILTER_BUGS = new String[] { 
+	private static final String[] FILTER_BUGS = new String[] {
 			"Bug 535802", // license version update //$NON-NLS-1$
 			"Bug 543933", // build javadocs with Java 11  //$NON-NLS-1$
 	};
@@ -81,7 +81,7 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 								// ignore
 								return 0;
 							}
-							
+
 							for (String bugId : FILTER_BUGS) {
 								if (commit.getShortMessage().startsWith(bugId)) {
 									return 0;

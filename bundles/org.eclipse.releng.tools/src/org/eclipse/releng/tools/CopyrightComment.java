@@ -81,7 +81,7 @@ public abstract class CopyrightComment {
 			break;
 		}
 	}
-	
+
 	protected void writeCommentEnd(PrintWriter writer) {
 		switch(commentStyle) {
 		case JAVA_COMMENT:
@@ -108,11 +108,11 @@ public abstract class CopyrightComment {
 	public int getRevisionYear() {
 		return revisionYear == -1 ? creationYear : revisionYear;
 	}
-	
+
 	public boolean hasRevisionYear() {
 		return revisionYear != -1;
 	}
-	
+
 	public void setRevisionYear(int year) {
 		if (revisionYear != -1 || creationYear != year)
 			revisionYear = year;
@@ -129,13 +129,13 @@ public abstract class CopyrightComment {
 	public int getCreationYear() {
 		return creationYear;
 	}
-	
+
 	public String getCommentPrefix() {
 		return getLinePrefix(commentStyle);
 	}
 
 	public abstract String getCopyrightComment();
-	
+
 	/**
 	 * @since 3.7
 	 */

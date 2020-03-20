@@ -36,7 +36,7 @@ public abstract class RepositoryProviderCopyrightAdapter {
 	 * @param monitor a progress monitor
 	 */
 	public abstract void initialize(IProgressMonitor monitor) throws CoreException;
-	
+
 	/**
 	 * Return the last modified year for the given file or -1 if the
 	 * last modified year could not be determined.

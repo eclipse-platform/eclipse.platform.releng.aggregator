@@ -31,7 +31,7 @@ public class CFile extends SourceFile {
 	public String getCommentEnd() {
 		return "*/"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public int getFileType() {
 		return CopyrightComment.C_COMMENT;

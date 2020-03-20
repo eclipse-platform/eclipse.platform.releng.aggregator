@@ -7,7 +7,7 @@
  *  https://www.eclipse.org/legal/epl-2.0/
  *
  *  SPDX-License-Identifier: EPL-2.0
- * 
+ *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 489985
@@ -99,7 +99,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 					switch(delta.getKind()) {
 					case IResourceDelta.REMOVED: {
 						//if manifest or feature removed, clean up markers
-						if(resource.getProjectRelativePath().equals(FEATURE_PATH) || 
+						if(resource.getProjectRelativePath().equals(FEATURE_PATH) ||
 								resource.getProjectRelativePath().equals(MANIFEST_PATH)) {
 							IProject p = resource.getProject();
 							if(p.isAccessible()) {
@@ -120,7 +120,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 					case IResourceDelta.CHANGED: {
 						//if the content has changed clean + scan
 						if((delta.getFlags() & IResourceDelta.CONTENT) > 0) {
-							if(resource.getProjectRelativePath().equals(FEATURE_PATH) || 
+							if(resource.getProjectRelativePath().equals(FEATURE_PATH) ||
 									resource.getProjectRelativePath().equals(MANIFEST_PATH) ||
 									resource.getProjectRelativePath().equals(POM_PATH)) {
 								validate(resource.getProject());
@@ -135,7 +135,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 					return false;
 				}
 				}
-			}				
+			}
 			return false;
 		}
 	}
@@ -155,7 +155,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		public PomVersionHandler(IFile file, Version bundleVersion, String pref) {
 			this(file, bundleVersion, pref, false);
 		}
-		
+
 		public PomVersionHandler(IFile file, Version version, String pref, boolean isFeatureProject) {
 			pom = file;
 			severity = pref;
@@ -217,12 +217,12 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 						index = str.indexOf(origVer);
 						int charStart = lineOffset + index;
 						int charEnd = charStart + origVer.length();
-						
+
 						String message = isFeatureProject ? Messages.PomVersionErrorReporter_pom_version_error_marker_message_feature : Messages.PomVersionErrorReporter_pom_version_error_marker_message;
-						reportMarker(NLS.bind(message, versionString, bundleVersion2.toString()), 
-								locator.getLineNumber(), 
-								charStart, 
-								charEnd, 
+						reportMarker(NLS.bind(message, versionString, bundleVersion2.toString()),
+								locator.getLineNumber(),
+								charStart,
+								charEnd,
 								correctedVersion,
 								pom,
 								severity);
@@ -244,10 +244,10 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 						int charStart = lineOffset + index;
 						int charEnd = charStart + origVer.length();
 						String message = isFeatureProject ? Messages.PomVersionErrorReporter_pom_version_error_marker_message_feature : Messages.PomVersionErrorReporter_pom_version_error_marker_message;
-						reportMarker(NLS.bind(message, pomVersion2.toString(), bundleVersion2.toString()), 
-								locator.getLineNumber(), 
-								charStart, 
-								charEnd, 
+						reportMarker(NLS.bind(message, pomVersion2.toString(), bundleVersion2.toString()),
+								locator.getLineNumber(),
+								charStart,
+								charEnd,
 								correctedVersion,
 								pom,
 								severity);
@@ -260,7 +260,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			}
 		}
 	}
-	
+
 	/**
 	 * XML parsing handler to check the feature.xml version
 	 */
@@ -279,7 +279,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 
 		/**
 		 * Returns the string version value found in the feature.xml or <code>null</code>
-		 * 
+		 *
 		 * @return string version from feature.xml or <code>null</code>
 		 */
 		public String getVersion() {
@@ -316,7 +316,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 
 	/**
 	 * Clean up all markers
-	 * 
+	 *
 	 * @param project
 	 */
 	void cleanMarkers(IResource resource) {
@@ -330,7 +330,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 
 	/**
 	 * Validates the manifest or feature version against the version in the <code>pom.xml</code> file
-	 * 
+	 *
 	 * @param project
 	 * @param severity
 	 */
@@ -400,14 +400,14 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 					} catch (OperationCanceledException e){
 						// Do nothing, used to avoid parsing the entire file
 					}
-					
+
 					String version = handler.getVersion();
 					if (version == null){
 						// Ignored, if there is a problem with the feature, don't create a marker
 						return;
 					}
 					featureVersion = Version.parseVersion(version);
-					
+
 					// Compare it to the POM file version
 					PomVersionHandler pomHandler = new PomVersionHandler(pom, featureVersion, severity, true);
 					parser.parse(pom.getContents(), pomHandler);
@@ -455,7 +455,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	 * Creates a new {@link IDocument} for the given {@link IFile}. <code>null</code>
 	 * is returned if the {@link IFile} does not exist or the {@link ITextFileBufferManager}
 	 * cannot be acquired or there was an exception trying to create the {@link IDocument}.
-	 * 
+	 *
 	 * @param file
 	 * @return a new {@link IDocument} or <code>null</code>
 	 */

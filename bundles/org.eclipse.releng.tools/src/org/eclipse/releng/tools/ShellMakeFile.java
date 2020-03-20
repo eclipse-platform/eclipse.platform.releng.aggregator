@@ -29,9 +29,9 @@ public class ShellMakeFile extends SourceFile {
 		super(file);
 	}
 
-	//Optional Whitespace, #, optional whitespace, then at least 2 non-word chars repeated till EOL 
+	//Optional Whitespace, #, optional whitespace, then at least 2 non-word chars repeated till EOL
 	private static Pattern p = Pattern.compile("\\s*#\\s*\\W{2,}\\s*"); //$NON-NLS-1$
-	
+
 	@Override
 	public boolean isCommentStart(String aLine) {
 		return p.matcher(aLine).matches();

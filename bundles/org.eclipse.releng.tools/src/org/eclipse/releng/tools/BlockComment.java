@@ -33,7 +33,7 @@ public class BlockComment {
 	private List<String> nonIBMContributors = new ArrayList<>();
 	private String commentEnd;
 
-	
+
 	/**
 	 * @param commentStart
 	 * @param commentEnd
@@ -68,31 +68,31 @@ public class BlockComment {
 	 * @return boolean
 	 */
 	public boolean notIBM() {
-		
+
 		String lowerCaseContents = contents.toLowerCase();
 		if (copyrightHolder == null) {
 			int start = lowerCaseContents.indexOf("copyright");
 			if (start == -1) {
 				return false;
 			}
-			
+
 			int end = lowerCaseContents.indexOf(newLine, start);
-			
+
 			copyrightHolder = contents.substring(start + "copyright".length(), end);
 		}
-		
+
 		String lowercaseCopyrightHolder = copyrightHolder.toLowerCase();
-		
+
 		int result = lowercaseCopyrightHolder.indexOf("ibm");
 		if (result != -1) {
 			return false;
 		}
-		
+
 		result = lowercaseCopyrightHolder.indexOf("international business machine");
 		if (result != -1) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -104,7 +104,7 @@ public class BlockComment {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public List<String> nonIBMContributors() {
 
@@ -113,7 +113,7 @@ public class BlockComment {
 		if (start == -1) {
 			return nonIBMContributors;
 		}
-		
+
 		start = lowerCaseContents.indexOf(newLine, start);
 		if (start == -1) {
 			return nonIBMContributors;
@@ -121,7 +121,7 @@ public class BlockComment {
 
 		start = start + newLine.length();
 		BufferedReader aReader = new BufferedReader(new StringReader(lowerCaseContents.substring(start)));
-		
+
 		String aLine;
 		try {
 			aLine = aReader.readLine();

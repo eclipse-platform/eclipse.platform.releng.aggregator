@@ -50,7 +50,7 @@ public class IBMCopyrightComment extends CopyrightComment {
 	public static IBMCopyrightComment parse(BlockComment comment, int commentStyle) {
 		if (comment == null)
 			return defaultComment(commentStyle);
-		
+
 		String body = comment.getContents();
 
 		final String copyrightLabel = "Copyright (c) "; //$NON-NLS-1$
@@ -127,7 +127,7 @@ public class IBMCopyrightComment extends CopyrightComment {
 			return null;
 
 		StringWriter out = new StringWriter();
-		
+
 		try (PrintWriter writer = new PrintWriter(out)) {
 			writeCommentStart(writer);
 			writeLegal(writer, linePrefix);
@@ -142,7 +142,7 @@ public class IBMCopyrightComment extends CopyrightComment {
 	 */
 	public String getOriginalCopyrightComment() {
 		StringWriter out = new StringWriter();
-		
+
 		try (PrintWriter writer = new PrintWriter(out)) {
 			writer.print(originalText.substring(0, yearRangeStart));
 			writer.print(getCreationYear());

@@ -41,7 +41,7 @@ import org.eclipse.osgi.util.NLS;
  * @author droberts
  */
 public abstract class SourceFile {
-	
+
 	IFile file;
 	List<BlockComment> comments = new ArrayList<>();
 	StringWriter contents = new StringWriter();
@@ -71,7 +71,7 @@ public abstract class SourceFile {
 		}
 		return null;
 	}
-	
+
 	public SourceFile(IFile file) {
 		super();
 		this.file = file;
@@ -101,25 +101,25 @@ public abstract class SourceFile {
 	}
 	public abstract String getCommentStart();
 	public abstract String getCommentEnd();
-	
+
 
 	private void initialize() {
 		textFileBufferManager= FileBuffers.createTextFileBufferManager();
 		try {
-			
+
 			IDocument document;
 			try {
-				//connect file buffer. 
+				//connect file buffer.
 				ITextFileBuffer fileBuffer = openFileBuffer();
 				if (fileBuffer == null)
 					return;
 
 				document = fileBuffer.getDocument();
 			} finally {
-				//Close file buffer. 
+				//Close file buffer.
 				closeFileBuffer();
 			}
-			
+
 			lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 			try (BufferedReader aReader = new BufferedReader(new StringReader(document.get()))) {
 				String aLine = aReader.readLine();
@@ -203,7 +203,7 @@ public abstract class SourceFile {
 		System.err.println(NLS.bind(Messages.getString("SourceFile.0"), file.getFullPath())); //$NON-NLS-1$
 			return null;
 	}
-	
+
 	/**
 	 * This should be called before ending a file operation. <br>
 	 * Companion function to getFileBuffer();
@@ -215,8 +215,8 @@ public abstract class SourceFile {
 				e.printStackTrace();
 			}
 	}
-	
-	
+
+
 	/**
 	 * Given the copyright comment, this method inserts it into the right place in the file.
 	 *
@@ -257,7 +257,7 @@ public abstract class SourceFile {
 				return aComment;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -266,21 +266,21 @@ public abstract class SourceFile {
 	 * @param newCopyrightComment          Comment to be inserted.
 	 */
 	public void replace(BlockComment aComment, String newCopyrightComment) {
-		
-	
+
+
 		try {
 			ITextFileBuffer fileBuffer = openFileBuffer();
 			if (fileBuffer == null)
 				return;
-			
+
 			IDocument document= fileBuffer.getDocument();
 
 			IRegion startLine= document.getLineInformation(aComment.start);
 			IRegion endLine= document.getLineInformation(aComment.end + 1);
 			document.replace(startLine.getOffset(), endLine.getOffset() - startLine.getOffset(), newCopyrightComment);
-			
+
 			fileBuffer.commit(null, false);
-		
+
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		} catch (CoreException e) {
@@ -315,10 +315,10 @@ public abstract class SourceFile {
 	}
 
 	public abstract int getFileType();
-	
+
 	/**
 	 * Returns the line delimiter.
-	 * 
+	 *
 	 * @return the line delimiter
 	 * @since 3.7
 	 */

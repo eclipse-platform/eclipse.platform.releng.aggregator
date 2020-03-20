@@ -25,7 +25,7 @@ import org.eclipse.equinox.app.IApplicationContext;
 public class CoreTestApplication implements IApplication {
 	/** true if workspace tests should log their deltas */
 	private static boolean deltas= false;
-	
+
 	/**
 	 * Runs a set of tests as defined by the given command line args.
 	 * This is the platform application entry point.
@@ -35,7 +35,7 @@ public class CoreTestApplication implements IApplication {
 		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
 		return Integer.valueOf(runTests(args));
 	}
-	
+
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		String[] args = (String[]) context.getArguments().get("application.args");
@@ -43,7 +43,7 @@ public class CoreTestApplication implements IApplication {
 			args = new String[0];
 		return run(args);
 	}
-	
+
 	@Override
 	public void stop() {
 
@@ -56,7 +56,7 @@ public class CoreTestApplication implements IApplication {
 	public static boolean deltasEnabled() {
 		return deltas;
 	}
-		
+
 	protected String[] processCommandLine(String[] args) {
 		int[] configArgs = new int[100];
 		configArgs[0] = -1; // need to initialize the first element to something that could not be an index.
@@ -73,20 +73,20 @@ public class CoreTestApplication implements IApplication {
 				configArgs[configArgIndex++] = i;
 				continue;
 			}
-	
+
 			// check for args with parameters
 			if (i == args.length - 1 || args[i + 1].startsWith("-")) {
 				continue;
 			}
 			++i;
 
-			// done checking for args.  Remember where an arg was found 
+			// done checking for args.  Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
 				configArgs[configArgIndex++] = i;
 			}
 		}
-	
+
 		//remove all the arguments consumed by this argument parsing
 		if (configArgIndex == 0)
 			return args;

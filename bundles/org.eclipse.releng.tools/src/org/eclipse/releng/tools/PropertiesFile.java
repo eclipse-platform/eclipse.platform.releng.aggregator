@@ -34,7 +34,7 @@ public class PropertiesFile extends SourceFile {
 	public String getCommentEnd() {
 		return "##"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public int getFileType() {
 		return CopyrightComment.PROPERTIES_COMMENT;

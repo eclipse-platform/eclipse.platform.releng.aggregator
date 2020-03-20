@@ -96,7 +96,7 @@ public class XmlFile extends SourceFile {
 		return aLine.trim().contains(getCommentEnd());
 		//Similarly, uses 'contains' instead of 'starts with'
 	}
-	
+
 	@Override
 	public String getCommentStart() {
 		return "<!--"; //$NON-NLS-1$
@@ -106,12 +106,12 @@ public class XmlFile extends SourceFile {
 	public String getCommentEnd() {
 		return "-->"; //$NON-NLS-1$
 	}
-	
+
 	@Override
 	public int getFileType() {
 		return CopyrightComment.XML_COMMENT;
 	}
-	
+
 	/**
 	 * Given the new constructed copyright comment, it inserts it into the the document.
 	 *
@@ -157,10 +157,10 @@ public class XmlFile extends SourceFile {
 	private int findInsertOffset(IDocument document) throws BadLocationException {
 		boolean inInstruction = false;
 		int insertOffset = 0;
-		
+
 		for (int offset = 0; offset < document.getLength(); offset++) {
 			char c = document.getChar(offset);
-			
+
 			// ignore whitespace and new lines
 			if(Character.isWhitespace(c)) {
 				// we update the offset to ignore whitespaces
@@ -171,7 +171,7 @@ public class XmlFile extends SourceFile {
 
 			// look at next char
 			char c2 = ((offset+1) < document.getLength()) ? document.getChar(offset+1) : 0;
-			
+
 			// look for instruction ending
 			if(inInstruction) {
 				if(c == '?' && c2 == '>') {
@@ -187,7 +187,7 @@ public class XmlFile extends SourceFile {
 					continue;
 				}
 			}
-			
+
 			// next chars must start an instruction
 			if(c == '<' && c2 =='?') {
 				inInstruction = true;

@@ -103,7 +103,7 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 			return null;
 
 		StringWriter out = new StringWriter();
-		
+
 		try (PrintWriter writer = new PrintWriter(out)) {
 			writeCommentStart(writer);
 			writeLegal(writer, linePrefix);

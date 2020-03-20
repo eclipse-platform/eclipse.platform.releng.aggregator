@@ -30,7 +30,7 @@ public class RegressionTest {
 	PrintStream output;
 	String oldFilename, newFilename, outFilename;
 	public static final String NOTHING_CHANGED_MSG
-		= "All tests unchanged.";	
+		= "All tests unchanged.";
 	/**
 	 * Constructor for RegressionTest
 	 */
@@ -137,14 +137,14 @@ public class RegressionTest {
 	static String testNotRun(String[] test) {
 		return "Not run: " + test[0];
 	}
-	
+
 	/**
 	 * Get the message for when a test's status changes.
 	 */
 	static String testChanged(String[] test) {
 		return "Changed: " + test[0] + ", " + test[1];
 	}
-	
+
 	/**
 	 * Get the message for when a test is added.
 	 */
@@ -166,8 +166,8 @@ public class RegressionTest {
 		}
 		return aStream.toString();
 	}
-	
-	
+
+
 	/**
 	 * Returns the next 2 tokens in st, if they exist.
 	 * Returns null if they do not.

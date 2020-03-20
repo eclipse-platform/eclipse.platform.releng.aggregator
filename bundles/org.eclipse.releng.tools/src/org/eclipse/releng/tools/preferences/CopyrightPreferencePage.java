@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -59,7 +59,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 //	private Button fFixExisting;
 	private Button fIgnoreProperties;
 	private Button fIgnoreXml;
-	
+
 	@Override
 	public void init(IWorkbench workbench) {
 		// TODO Auto-generated method stub
@@ -80,40 +80,40 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 
 		// copyright template editor
 		fEditor = createEditor(fComposite);
-		
+
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		data.horizontalIndent = 0;
 		fInstructions = new Text(fComposite, SWT.READ_ONLY);
 		fInstructions.setText(Messages.getString("CopyrightPreferencePage.0")); //$NON-NLS-1$
 		fInstructions.setLayoutData(data);
-		
+
 		// default creation year
 		fCreationYearLabel = new Label(fComposite, SWT.NONE);
 		fCreationYearLabel.setText(Messages.getString("CopyrightPreferencePage.1")); //$NON-NLS-1$
 		fCreationYear = new Text(fComposite, SWT.BORDER);
 		fCreationYear.setTextLimit(4);
-		
+
 		// default revision year
 		fRevisionYearLabel = new Label(fComposite, SWT.NONE);
 		fRevisionYearLabel.setText(Messages.getString("CopyrightPreferencePage.7")); //$NON-NLS-1$
 		fRevisionYear = new Text(fComposite, SWT.BORDER);
 		fRevisionYear.setTextLimit(4);
-		
+
 		// always use default revision year instead of cvs lookup
 		fUseDefaultRevisionYear = new Button(fComposite, SWT.CHECK);
 		fUseDefaultRevisionYear.setText(Messages.getString("CopyrightPreferencePage.8")); //$NON-NLS-1$
 		data = new GridData();
 		data.horizontalSpan = 2;
 		fUseDefaultRevisionYear.setLayoutData(data);
-		
+
 		// replace all existing copyright statement
 		fReplaceAllExisting = new Button(fComposite, SWT.CHECK);
 		fReplaceAllExisting.setText(Messages.getString("CopyrightPreferencePage.2")); //$NON-NLS-1$
 		data = new GridData();
 		data.horizontalSpan = 2;
 		fReplaceAllExisting.setLayoutData(data);
-		
+
 		// disable fix up existing copyright till it works better
 //		// fix up existing copyright statement
 //		fFixExisting = new Button(fComposite, SWT.CHECK);
@@ -121,7 +121,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 //		data = new GridData();
 //		data.horizontalSpan = 2;
 //		fFixExisting.setLayoutData(data);
-		
+
 		// ignore properties files
 		fIgnoreProperties = new Button(fComposite, SWT.CHECK);
 		fIgnoreProperties.setText(Messages.getString("CopyrightPreferencePage.4")); //$NON-NLS-1$
@@ -129,7 +129,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		data.horizontalSpan = 2;
 		fIgnoreProperties.setLayoutData(data);
 
-		
+
 		//[276257] re-enabling xml files
 		fIgnoreXml = new Button(fComposite, SWT.CHECK);
 		fIgnoreXml.setText(Messages.getString("CopyrightPreferencePage.9")); //$NON-NLS-1$
@@ -146,7 +146,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		};
 		fCreationYear.addKeyListener(listener1);
 		fRevisionYear.addKeyListener(listener1);
-		
+
 		initializeValues();
 		applyDialogFont(fComposite);
 		return fComposite;
@@ -161,35 +161,35 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		GridData data= new GridData();
 		data.horizontalSpan= 2;
 		fCopyrightLabel.setLayoutData(data);
-		
+
 		SourceViewer viewer= createViewer(parent);
 
 		IDocument document= new Document();
 		viewer.setEditable(true);
 		viewer.setDocument(document);
-		
+
 		// just use a default 10 lines
 		int nLines = 10;
 //		int nLines= document.getNumberOfLines();
 //		if (nLines < 5) {
 //			nLines= 5;
 //		} else if (nLines > 12) {
-//			nLines= 12;	
+//			nLines= 12;
 //		}
-				
+
 		Control control= viewer.getControl();
 		data= new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint= convertWidthInCharsToPixels(80);
 		data.heightHint= convertHeightInCharsToPixels(nLines);
 		data.horizontalSpan = 2;
 		control.setLayoutData(data);
-		
+
 		return viewer;
 	}
-	
+
 	/**
 	 * Creates the viewer to be used to display the copyright.
-	 * 
+	 *
 	 * @param parent the parent composite of the viewer
 	 * @return a configured <code>SourceViewer</code>
 	 */
@@ -199,7 +199,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		viewer.configure(configuration);
 		return viewer;
 	}
-	
+
 	/**
 	 * Initialize the control values in this preference page
 	 */
@@ -214,7 +214,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		// disable fix up existing copyright till it works better
 //		handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), store.getBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY));
 		fIgnoreProperties.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));
-		
+
 		//[276257] re-enabling xml files
 		fIgnoreXml.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
 	}
@@ -224,9 +224,9 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 	 */
 	private void validateValues() {
 		String ERROR_MESSAGE = Messages.getString("CopyrightPreferencePage.6"); //$NON-NLS-1$
-		
+
 		String errorMsg = null;
-		
+
 		// creation & revision year must be an integer
 		String creationYear = fCreationYear.getText();
 		String revisionYear = fRevisionYear.getText();
@@ -245,7 +245,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		setErrorMessage(errorMsg);
 		setValid(errorMsg == null);
 	}
-	
+
 	@Override
 	protected IPreferenceStore doGetPreferenceStore() {
 		return RelEngPlugin.getDefault().getPreferenceStore();
@@ -254,7 +254,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 	@Override
 	protected void performDefaults() {
 		IPreferenceStore store = getPreferenceStore();
-		
+
 		fEditor.getDocument().set(store.getDefaultString(RelEngCopyrightConstants.COPYRIGHT_TEMPLATE_KEY));
 		fCreationYear.setText(store.getDefaultString(RelEngCopyrightConstants.CREATION_YEAR_KEY));
 		fRevisionYear.setText(store.getDefaultString(RelEngCopyrightConstants.REVISION_YEAR_KEY));
@@ -263,13 +263,13 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		// disable fix up existing copyright till it works better
 //		handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY));
 		fIgnoreProperties.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));
-		
+
 		//[276257] re-enabling xml files
 		fIgnoreXml.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
-		
+
 		super.performDefaults();
 	}
-	
+
 	@Override
 	public boolean performOk() {
 		IPreferenceStore store = getPreferenceStore();
@@ -282,19 +282,19 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		// disable fix up existing copyright till it works better
 //		store.setValue(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY, fFixExisting.getSelection());
 		store.setValue(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, fIgnoreProperties.getSelection());
-		
+
 		//[276257] re-enabling xml files
 		store.setValue(RelEngCopyrightConstants.IGNORE_XML_KEY, fIgnoreXml.getSelection());
-		
+
 		try {
 			InstanceScope.INSTANCE.getNode(RelEngPlugin.ID).flush();
 		} catch (BackingStoreException e) {
 			RelEngPlugin.log(IStatus.ERROR, "could not save preferences", e); //$NON-NLS-1$
 		}
-		
+
 		return super.performOk();
 	}
-	
+
 	/**
 	 * Fix up line delimiters in doc to use only \n
 	 * @param doc

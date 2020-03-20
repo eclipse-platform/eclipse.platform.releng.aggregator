@@ -20,15 +20,15 @@ import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 
 public class RemoveConsoleAction extends Action {
-	
+
 	private final IConsole console;
-	
+
 	public RemoveConsoleAction(IConsole console) {
 		super(Messages.getString("RemoveConsoleAction.Text")); //$NON-NLS-1$
 		ResourceLocator.imageDescriptorFromBundle(RelEngPlugin.ID, "icons/full/elcl16/console_rem.png").ifPresent(d-> setImageDescriptor(d)); //$NON-NLS-1$
 		this.console = console;
 	}
-	
+
 	@Override
 	public void run() {
 		ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[]{console});
