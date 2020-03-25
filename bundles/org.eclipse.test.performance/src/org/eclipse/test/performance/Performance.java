@@ -183,6 +183,18 @@ public class Performance {
     }
 
     /**
+     * Returns a default scenario id for the given test class.
+     *
+     * @param test
+     *            the test class
+     * @return the default scenario id for the test
+     * @since 3.15
+     */
+    public String getDefaultScenarioId(Class<?> test) {
+        return test.getName() + '#' + test.getName() + "()"; //$NON-NLS-1$
+    }
+
+    /**
      * Returns a default scenario id for the given test and id. The test's name must have been set, such that
      * <code>test.getName()</code> is not <code>null</code>. The id distinguishes multiple scenarios in the same test.
      *
