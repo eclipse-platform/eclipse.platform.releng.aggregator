@@ -13,12 +13,15 @@
 #     Stephan Herrmann - initial API and implementation
 #********************************************************************************
 
-REPO_BASE=${WORKSPACE}/../../CBIaggregator/workspace
+REPO_BASE=${WORKSPACE}/archive
 REPO=${REPO_BASE}/repo-${REPO_ID}
 PLATFORM=org/eclipse/platform
 
 # load versions from the baseline (to avoid illegal double-upload):
 source ${WORKSPACE}/baseline.txt
+
+wget https://ci-staging.eclipse.org/releng/job/CBIaggregator/${REPO_ID}/artifact/*zip*/archive.zip
+unzip archive.zip
 
 if [ ! -d ${REPO} ]
 then
@@ -42,8 +45,8 @@ echo "==== UPLOAD ===="
 
 URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
 REPO=ossrh
-SETTINGS=/opt/public/hipp/homes/genie.releng/.m2/settings-deploy-ossrh-platform.xml
-MVN=/shared/common/apache-maven-latest/bin/mvn
+SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-platform.xml
+MVN=/opt/tools/apache-maven/latest/bin/mvn
 
 /bin/mkdir .log
 
