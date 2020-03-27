@@ -1,6 +1,6 @@
 #!/bin/sh
 #*******************************************************************************
-# Copyright (c) 2016, 2018 GK Software SE and others.
+# Copyright (c) 2016, 2020 GK Software SE and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -45,7 +45,7 @@ echo "==== UPLOAD ===="
 
 URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
 REPO=ossrh
-SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-platform.xml
+SETTINGS=(/home/jenkins/.m2/settings-deploy-ossrh-releng.xml
 MVN=/opt/tools/apache-maven/latest/bin/mvn
 
 /bin/mkdir .log
