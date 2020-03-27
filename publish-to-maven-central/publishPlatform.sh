@@ -45,7 +45,7 @@ echo "==== UPLOAD ===="
 
 URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
 REPO=ossrh
-SETTINGS=(/home/jenkins/.m2/settings-deploy-ossrh-releng.xml
+SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-releng.xml
 MVN=/opt/tools/apache-maven/latest/bin/mvn
 
 /bin/mkdir .log
