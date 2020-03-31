@@ -108,8 +108,8 @@ done
 # We'll always try to sign checksum files, if passphrase file exists
 echo "[DEBUG] Producing GPG signatures starting."
 # We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
-# remember, this "HOME" is for genie.releng for production builds.
-key_passphrase_file=${key_passphrase_file:-${HOME}/${client}-dev.passphrase}
+# remember, this "WORKSPACE" is for genie.releng for production builds.
+key_passphrase_file=${key_passphrase_file:-${WORKSPACE}/${client}-dev.passphrase}
 if [[ -r $key_passphrase_file ]]
 then
   signer=${signer:-${client}-dev@eclipse.org}
