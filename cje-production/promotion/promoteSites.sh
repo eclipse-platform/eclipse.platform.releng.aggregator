@@ -194,10 +194,11 @@ function createBaseBuilder ()
   BASEBUILDER_DIR=${WORKSPACE}/basebuilder
   export BASEBUILDER_DIR
   mkdir -p ${BASEBUILDER_DIR}
-  pushd ${WORKSPACE}
+  mkdir -p ${WORKSPACE}/tempEclipse
+  pushd ${WORKSPACE}/tempEclipse
     scp genie.releng@projects-storage.eclipse.org:${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz eclipse-platform.tar.gz
     tar xvzf eclipse-platform.tar.gz
-    ${WORKSPACE}/eclipse/eclipse -nosplash \
+    ${WORKSPACE}/tempEclipse/eclipse/eclipse -nosplash \
         -debug -consolelog -data ${WORKSPACE}/workspace-toolsinstall \
         -application org.eclipse.equinox.p2.director \
         -repository "https://download.eclipse.org/eclipse/updates/4.15/","https://download.eclipse.org/eclipse/updates/buildtools/","https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repositoryunittests" \
@@ -206,6 +207,7 @@ function createBaseBuilder ()
         -profile SDKProfile
   popd
   export ECLIPSE_EXE=${BASEBUILDER_DIR}/eclipse
+  rm -rf ${WORKSPACE}/tempEclipse
 }
 
 function addRepoProperties ()
@@ -473,7 +475,7 @@ esac
 export HIDE_SITE=true
 # Build machine locations (would very seldom change)
 export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
-export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/updates/${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
+export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/equinox/drops
