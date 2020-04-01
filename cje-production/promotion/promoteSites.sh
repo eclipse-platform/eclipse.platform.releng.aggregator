@@ -627,7 +627,7 @@ popd
 #Promote Repository
 pushd ${LOCAL_REPO}
   BUILDMACHINE_SITE=${LOCAL_REPO}/${DROP_ID}
-  ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
+  addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
   createXZ ${BUILDMACHINE_SITE}
   mv ${DROP_ID} ${DL_DROP_ID}
 #  scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
