@@ -197,7 +197,7 @@ function createBaseBuilder ()
   pushd ${WORKSPACE}
     scp genie.releng@projects-storage.eclipse.org:${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz eclipse-platform.tar.gz
     tar xvzf eclipse-platform.tar.gz
-    ${workspace}/eclipse/eclipse -nosplash \
+    ${WORKSPACE}/eclipse/eclipse -nosplash \
         -debug -consolelog -data ${WORKSPACE}/workspace-toolsinstall \
         -application org.eclipse.equinox.p2.director \
         -repository "https://download.eclipse.org/eclipse/updates/4.15/","https://download.eclipse.org/eclipse/updates/buildtools/","https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repositoryunittests" \
