@@ -134,8 +134,6 @@ ECLIPSE_EXE="${basebuilderDir}/eclipse"
 # somehow, seems like this is often not executable ... I guess launcher jar usually used.
 chmod -c +x $ECLIPSE_EXE
 
-export SWT_GTK3=2
-
 if [ ! -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
   echo "ERROR: ECLIPSE_EXE is not defined or not executable: ${ECLIPSE_EXE}"
