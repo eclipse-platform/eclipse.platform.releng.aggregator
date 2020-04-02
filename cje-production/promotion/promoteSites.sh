@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 #*******************************************************************************
 # Copyright (c) 2020 IBM Corporation and others.
 #
@@ -595,12 +595,12 @@ pushd ${LOCAL_EQ_DIR}
   fi
 
   printf "\n\t%s\n" "Promoting Equinox"
-#  scp -r ${LOCAL_EQ_DIR}/${DL_DROP_ID_EQ} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/equinox/drops/
+  scp -r ${LOCAL_EQ_DIR}/${DL_DROP_ID_EQ} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/equinox/drops/
 
   if [[ "${DL_TYPE}" == "R" ]]
   then
     printf "\n\t%s\n" "Creating archive"
-#    scp -r ${LOCAL_EQ_DIR}/${DL_DROP_ID_EQ} genie.releng@projects-storage.eclipse.org:/home/data/httpd/archive.eclipse.org/equinox/drops/
+    scp -r ${LOCAL_EQ_DIR}/${DL_DROP_ID_EQ} genie.releng@projects-storage.eclipse.org:/home/data/httpd/archive.eclipse.org/equinox/drops/
   fi
 
 popd
@@ -615,12 +615,12 @@ pushd ${LOCAL_EP_DIR}
   fi
 
   printf "\n\t%s\n" "Promoting Platform"
-#  scp -r ${LOCAL_EP_DIR}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/
+  scp -r ${LOCAL_EP_DIR}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/
 
   if [[ "${DL_TYPE}" == "R" ]]
   then
     printf "\n\t%s\n" "Creating archive"
-#    scp -r ${LOCAL_EP_DIR}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/archive.eclipse.org/eclipse/downloads/drops4/
+    scp -r ${LOCAL_EP_DIR}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/archive.eclipse.org/eclipse/downloads/drops4/
   fi
 
 popd
@@ -632,5 +632,5 @@ pushd ${LOCAL_REPO}
   addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
   createXZ ${BUILDMACHINE_SITE}
   mv ${DROP_ID} ${DL_DROP_ID}
-#  scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
+  scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
 popd
