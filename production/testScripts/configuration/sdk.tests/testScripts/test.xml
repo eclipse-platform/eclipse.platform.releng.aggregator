@@ -53,14 +53,6 @@
       value="org.eclipse.cvs.feature.group">
       <equals
         arg1="${testPlugin}"
-        arg2="org.eclipse.team.tests.cvs.core" />
-    </condition>
-
-    <condition
-      property="extraIU"
-      value="org.eclipse.cvs.feature.group">
-      <equals
-        arg1="${testPlugin}"
         arg2="org.eclipse.team.tests.core" />
     </condition>
 
@@ -1410,50 +1402,6 @@
     <echo message="J2SE-6.0:  ${J2SE-6.0}" />
     <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
-  <target
-    name="checkCVSPropExists"
-    if="teamcvs">
-    <condition property="cvsPropertiesAvailable">
-      <available file="${cvstest.properties}" />
-    </condition>
-  </target>
-  <target
-    name="getcvstestProperties"
-    if="cvsPropertiesAvailable"
-    depends="checkCVSPropExists">
-    <!--
-      TODO: cvstest.properties (file location) is currently
-      hard coded in 'runTest2.xml' and passed along this 'test.xml'
-      via production.properties. Would be better to have the file location
-      be part of the platform specific properties files, as we do with "jvm"
-    -->
-    <echo message="cvstest.properties file: ${cvstest.properties}" />
-    <property file="${cvstest.properties}" />
-
-  </target>
-  <target
-    name="configureTeamTest"
-    depends="getcvstestProperties"
-    if="teamcvs">
-    <!-- Fill in cvs repository information -->
-    <replace
-      file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties"
-      token="@user@"
-      value="${cvs_user}" />
-    <replace
-      file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties"
-      token="@password@"
-      value="${cvs_password}" />
-    <replace
-      file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties"
-      token="@host@"
-      value="${cvs_host}" />
-    <replace
-      file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties"
-      token="@root@"
-      value="${cvs_root}" />
-  </target>
-
 
   <macrodef name="runTests">
     <attribute name="testPlugin" />
@@ -2090,15 +2038,6 @@
   </target>
 
   <target
-    name="teamcvs"
-    depends="init">
-    <property
-      name="teamcvs"
-      value="true" />
-    <runTests testPlugin="org.eclipse.team.tests.cvs.core" />
-  </target>
-
-  <target
     name="ui"
     depends="init">
     <runTests testPlugin="org.eclipse.ui.tests" />
@@ -2566,7 +2505,6 @@
     <antcall target="osgi" />
     <antcall target="coreresources" />
     <antcall target="equinoxp2" />
-    <antcall target="teamcvs" />
     <antcall target="jface" />
     <antcall target="jfacetext" />
     <antcall target="ui" />
