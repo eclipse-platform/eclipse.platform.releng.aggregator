@@ -5,7 +5,7 @@
 
   <target
     name="init"
-    depends="initWorkspace, initDownloadHosts, initBuildId, initBuildType, initBasicDirectories, initStreamSpecificVariables, initTargetPlatform, initPlatformSpecificProperties, initCurrentUpdateSite, initconfigure.team.cvs.test,setJavaMajorVersion"
+    depends="initWorkspace, initDownloadHosts, initBuildId, initBuildType, initBasicDirectories, initStreamSpecificVariables, initTargetPlatform, initPlatformSpecificProperties, initCurrentUpdateSite,setJavaMajorVersion"
     unless="runTest2Initialized">
 
     <property
@@ -187,10 +187,6 @@
       dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz" />
   </target>
 
-  <target
-    name="initconfigure.team.cvs.test"
-    depends="computeExpectedLocation,getcvstestProperties" />
-
   <target name="computeExpectedLocation">
     <condition
       property="cvstest.properties"
@@ -212,35 +208,6 @@
       value="/Users/hudsonbuild/cvstest.properties">
       <os family="mac" />
     </condition>
-  </target>
-
-  <target
-    name="getcvstestProperties"
-    if="cvsPropertiesAvailable"
-    depends="computeExpectedLocation,checkCVSPropExists,logNoExistence"
-    unless="cvstestPropertiesInitialized">
-
-    <echo message="cvstest.properties file: ${cvstest.properties}" />
-    <property file="${cvstest.properties}" />
-    <property
-      name="cvstestPropertiesInitialized"
-      value="true" />
-
-  </target>
-
-  <target
-    name="checkCVSPropExists"
-    depends="computeExpectedLocation">
-    <condition property="cvsPropertiesAvailable">
-      <available file="${cvstest.properties}" />
-    </condition>
-  </target>
-  <target
-    name="logNoExistence"
-    depends="checkCVSPropExists"
-    unless="cvsPropertiesAvailable">
-    <echo message="cvs properties file was not found in this environment. " />
-    <echo message="   expected file: ${cvstest.properties} " />
   </target>
 
   <target
