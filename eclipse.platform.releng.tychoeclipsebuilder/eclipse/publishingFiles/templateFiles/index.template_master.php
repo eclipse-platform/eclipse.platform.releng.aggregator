@@ -176,17 +176,6 @@ else {
   //  echo "<ul class='midlist'>";
   echo "<ul>";
 
-  // build notes are put at the top of the list under the assumption if there is something
-  // there, then it it pretty important for everyone to read. Such as "this build does not export" or
-  // something like that.
-  if (file_exists("buildnotes/")) {
-      $fileArray=glob("buildnotes/buildnotes_*.html");
-      if (count($fileArray) > 0) {
-          echo "<li><a href=\"buildNotes.php\">View build notes for the current build.</a></li>";
-      }
-  }
-
-
   //  We will always display link to logs (as normal link, not using color:inherit;)
   echo "<li>View the <a title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
 
@@ -323,7 +312,6 @@ else {
   <h3>Related Links</h3>
   <ul class="midlist">
     <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments.</a></li>
-    <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
     <li><a href="gitLog.php">Git log.</a></li>
     <li><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
   </ul>
