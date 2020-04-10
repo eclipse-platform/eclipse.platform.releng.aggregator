@@ -124,6 +124,7 @@ buildId=${ECLIPSE_DL_DROP_DIR_SEGMENT}
 case ${DL_TYPE} in
   "S" )
     export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}milestones
+    ;;
   "R" )
     export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
     ;;
