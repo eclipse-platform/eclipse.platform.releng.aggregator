@@ -42,9 +42,6 @@ workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
 ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
 
-#get java 8
-scp -r /opt/tools/java/oracle/jdk-8/latest genie.releng@projects-storage.eclipse.org:${workspace}/jdk8
-
 #get latest Eclipse platform product
 epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${latestRelDir}/R-*|sort|tail -1)
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
@@ -54,7 +51,7 @@ ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposit
 
 #triggering ant runner
 baseBuilderDir=${workspace}/eclipse
-javaCMD=${workspace}/jdk8/bin/java
+javaCMD=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
 
 launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
 
