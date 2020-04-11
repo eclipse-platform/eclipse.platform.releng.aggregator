@@ -33,7 +33,7 @@ $CJE_ROOT/$TMP_DIR/eclipse/eclipse -nosplash \
   -debug -consolelog -data $CJE_ROOT/$TMP_DIR/workspace-toolsinstall \
   -application org.eclipse.equinox.p2.director \
   -repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO},${WEBTOOLS_REPO} \
-  -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group/${BUILDTOOLS_VER},org.eclipse.wtp.releng.tools.feature.feature.group/${WEBTOOLS_VER} \
+  -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group/${WEBTOOLS_VER} \
   -destination $CJE_ROOT/$BASEBUILDER_DIR \
   -profile SDKProfile
 
