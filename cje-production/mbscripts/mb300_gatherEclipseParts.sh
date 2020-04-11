@@ -28,7 +28,7 @@ mkdir -p $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/testresults/consolelogs
 
-JavaCMD=${JAVA_HOME}bin/java
+JavaCMD=${JAVA_HOME}/bin/java
 
 # gather maven properties
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
