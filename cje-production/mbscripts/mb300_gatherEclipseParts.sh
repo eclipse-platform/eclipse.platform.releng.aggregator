@@ -28,6 +28,8 @@ mkdir -p $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/testresults/consolelogs
 
+JavaCMD=${JAVA_HOME}bin/java
+
 # gather maven properties
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
@@ -161,7 +163,7 @@ cp $CJE_ROOT/buildlogs/mb220_buildSdkPatch.sh.log $CJE_ROOT/$DROP_DIR/$BUILD_ID/
 #
 pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/buildScripts/eclipse_compare.xml
-java -jar $LAUNCHER_JAR \
+$JavaCMD -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-comparatorLogs \
@@ -204,7 +206,7 @@ fi
 # verify compilelog
 pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/helper.xml
-java -jar $LAUNCHER_JAR \
+$JavaCMD -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-verifyCompile \
@@ -221,7 +223,7 @@ popd
 # publish Eclipse
 pushd $CJE_ROOT
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/helper.xml
-java -jar $LAUNCHER_JAR \
+$JavaCMD -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-publish \

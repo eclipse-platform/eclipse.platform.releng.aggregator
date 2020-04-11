@@ -33,7 +33,7 @@ ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml
 FREEZE_PARAMS=" "
 
 pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
-java -jar $LAUNCHER_JAR \
+${JAVA_HOME/bin/java -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
