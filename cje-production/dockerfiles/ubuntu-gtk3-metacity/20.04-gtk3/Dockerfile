@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ### user name recognition at runtime w/ an arbitrary uid - for OpenShift deployments
 COPY scripts/uid_entrypoint /usr/local/bin/uid_entrypoint
@@ -8,8 +8,8 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 ENTRYPOINT [ "uid_entrypoint" ]
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      libgtk-3-0=3.22.* \
+RUN apt-get update && apt upgrade -y && apt dist-upgrade -y && apt-get install -y --no-install-recommends \
+      libgtk-3-0 \
       tigervnc-standalone-server \
       tigervnc-common \
       metacity \
@@ -28,7 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       wget \
       curl \
       unzip \
-    && rm -rf /var/lib/apt/lists/*
+      vim \
+    && rm -rf /var/lib/apt/lists/* && apt autoremove -y
 
 ENV HOME=/home/vnc
 ENV DISPLAY :0

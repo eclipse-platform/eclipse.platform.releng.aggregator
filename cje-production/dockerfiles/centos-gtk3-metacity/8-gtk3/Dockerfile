@@ -1,4 +1,4 @@
-ARG FROM_TAG="7"
+ARG FROM_TAG="8"
 FROM centos:${FROM_TAG}
 
 RUN yum -y update && yum -y install \
