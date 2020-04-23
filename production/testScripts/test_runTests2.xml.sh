@@ -44,8 +44,8 @@ export ANT_HOME=/shared/common/apache-ant-1.9.6
 #export JAVA_HOME=/shared/common/jdk1.5.0-latest
 #export JAVA_HOME=/shared/common/jdk1.6.0-latest
 #export JAVA_HOME=/shared/common/jdk1.7.0-latest
-JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}} 
+JAVA_11_HOME=/opt/public/common/java/openjdk/jdk-11_x64-latest
+export JAVA_HOME=${JAVA_HOME:-${JAVA_11_HOME}} 
 
 # added /opt/local/bin for 'port' version of wget, on Mac
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin:/opt/local/bin

@@ -4,9 +4,9 @@
 # First argument must be the absolute directory path to the
 # (simple) artifact repository.
 
-JAVA_8_HOME=${JAVA_8_HOME:-/shared/common/jdk1.8.0_x64-latest}
+JAVA_11_HOME=${JAVA_11_HOME:-/opt/public/common/java/openjdk/jdk-11_x64-latest}
 
-export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}}
+export JAVA_HOME=${JAVA_HOME:-${JAVA_11_HOME}}
 
 devJRE="${JAVA_HOME}/bin/java"
 

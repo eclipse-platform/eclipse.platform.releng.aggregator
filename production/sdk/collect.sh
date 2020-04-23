@@ -36,8 +36,8 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
-JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}}
+JAVA_11_HOME=/opt/public/common/java/openjdk/jdk-11_x64-latest
+export JAVA_HOME=${JAVA_HOME:-${JAVA_11_HOME}}
 export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH

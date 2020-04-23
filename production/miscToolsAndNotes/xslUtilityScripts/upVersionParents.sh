@@ -8,8 +8,8 @@ exec >>$LOG 2>&1
 
 LREPO=$(pwd)/../localMavenRepo
 
-JAVA_8_HOME=${JAVA_8_HOME:-/shared/common/jdk1.8.0_x64-latest}
-export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}}
+JAVA_11_HOME=${JAVA_11_HOME:-/opt/public/common/java/openjdk/jdk-11_x64-latest}
+export JAVA_HOME=${JAVA_HOME:-${JAVA_11_HOME}}
 
 TMP_DIR=${TMP_DIR:-$(pwd)/../tmp}
 mkdir -p $TMP_DIR

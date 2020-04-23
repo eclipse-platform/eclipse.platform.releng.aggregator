@@ -19,8 +19,7 @@
 echo -e "\n\n${0##*/} starting"
 source localBuildProperties.shsource 2>/dev/null
 
-JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-JAVA_11_HOME=/shared/common/java/openjdk/jdk-11_x64-latest
+JAVA_11_HOME=/opt/public/common/java/openjdk/jdk-11_x64-latest
 export JAVA_HOME=${JAVA_11_HOME}
 
 # BUILD_ID is normally provided as an environment variable, but
@@ -144,7 +143,7 @@ then
   tar -xf "${TMP_DIR}/${tar_name}" -C ${report_app_area}
 
   # first do the "old" (normal) case
-  ${report_app_area}/p2analyze/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
+  ${report_app_area}/p2analyze/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_11_HOME}/bin -vmargs -Xmx1g \
     -DreportRepoDir=${buildToTest} \
     -DreportOutputDir=${output_dir} \
     -DreferenceRepo=${buildToCompare}
