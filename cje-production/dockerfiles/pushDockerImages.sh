@@ -15,22 +15,7 @@
 
 set -e
 
-pushd centos-gtk3-metacity/7-gtk3
-echo "Building Centos 7 docker image"
-docker build -t sravankumarl/centos-gtk3-metacity:7 .
-popd
-
-pushd centos-gtk3-metacity/8-gtk3
-echo "Building Centos 8 docker image"
-docker build -t sravankumarl/centos-gtk3-metacity:8 .
-popd
-
-pushd ubuntu-gtk3-metacity/18.04-gtk3
-echo "Building Ubuntu 18.04 docker image"
-docker build -t sravankumarl/ubuntu-gtk3-metacity:18.04 .
-popd
-
-pushd ubuntu-gtk3-metacity/20.04-gtk3
-echo "Building Ubuntu 20.04 docker image"
-docker build -t sravankumarl/ubuntu-gtk3-metacity:20.04 .
-popd
+docker push sravankumarl/centos-gtk3-metacity:8
+docker push sravankumarl/centos-gtk3-metacity:7
+docker push sravankumarl/ubuntu-gtk3-metacity:18.04
+docker push sravankumarl/ubuntu-gtk3-metacity:20.04
