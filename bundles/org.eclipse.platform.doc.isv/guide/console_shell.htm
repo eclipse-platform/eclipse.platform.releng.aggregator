@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
 <HEAD>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2020. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -12,282 +12,382 @@
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H1>Console Shell</H1>
+  <h1>Console Shell</h1>
 
-<h2>General features</h2>
+  <h2>General features</h2>
 
-  The Equinox OSGi console is based on Apache Felix Gogo shell. The console provides:
+  <p>The Equinox OSGi console is based on Apache Felix Gogo, which provides a Unix-like shell
+  for OSGi frameworks. The OSGi console is useful for runtime configuration and management of the
+  framework and bundles deployed within it. It can also be useful for debugging and troubleshooting
+  of OSGi-based applications.</p>
+
+  <p>The Equinox console provides:</p>
   <ul>
-      <li>support for the ssh protocol (in addition to the telnet connectivity)</li>
-      <li>JAAS-based user authentication</li>
-      <li>improved tab completion</li>
+      <li>support for console sessions over Telnet and SSH protocols</li>
+      <li><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html">JAAS</a> based user authentication</li>
+      <li>public key based authentication</li>
+      <li>tab completion and command history</li>
   </ul>
-  The default authentication is password-based, but key-based authentication is also supported.
-            
-  <h2>Installation and configuration of the console</h2>
-  
-  <h3>Running without SSH</h3>
-  <ol>
-    <li>Place the necessary bundles in a folder. The bundles are:
-      <ul>
-        <li>org.apache.felix.gogo.command_&lt;version&gt;.jar</li>
-        <li>org.apache.felix.gogo.runtime_&lt;version&gt;.jar</li>
-        <li>org.apache.felix.gogo.shell_&lt;version&gt;.jar</li>
-        <li>org.eclipse.equinox.console_&lt;version&gt;.jar</li>
-        <li>org.eclipse.osgi.jar</li>
-      </ul>
-    </li>
+  <p>This guide shows how to configure and use the console in a minimal OSGi runtime.</p>
+
+  <h2>Starting a Command Line Session</h2>
+
+  <p>The minimal bundle set needed to start Equinox with the console on the command line is as follows:</p>
+
+  <ul>
+    <li>org.apache.felix.gogo.command_&lt;version&gt;.jar</li>
+    <li>org.apache.felix.gogo.runtime_&lt;version&gt;.jar</li>
+    <li>org.apache.felix.gogo.shell_&lt;version&gt;.jar</li>
+    <li>org.eclipse.equinox.console_&lt;version&gt;.jar</li>
+    <li>org.eclipse.osgi_&lt;version&gt;.jar</li>
+  </ul>
+
+  <p>All of these bundles are available in the <b>Equinox SDK</b> zip file available from the
+  <a href="https://download.eclipse.org/equinox/">Equinox Downloads</a> site.</p>
+
+  <p>Extract these bundles into a directory, then inside that directory create a
+  <b>configuration/config.ini</b> file with the following content:</p>
+
+  <pre>
+    osgi.bundles=\
+        org.apache.felix.gogo.runtime,\
+        org.apache.felix.gogo.command,\
+        org.apache.felix.gogo.shell,\
+        org.eclipse.equinox.console</pre>
+
+  <p>Now this minimal Equinox configuration can be started with a console available on the command
+  line, by passing the <code>-console</code> option, for example:</p>
+
+  <pre>
+    $ java -jar org.eclipse.osgi_*.jar -console
+    osgi> ss
+    "Framework is launched."
     
-    <li>Create a <b>configuration</b> subfolder and a <b>config.ini</b> file in it.</li>
-    
-    <li>Add the following entries in the <b>config.ini</b> file: <br>
-      <code>
-        osgi.bundles=org.apache.felix.gogo.runtime,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.apache.felix.gogo.command,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.apache.felix.gogo.shell,\ <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.equinox.console <br>
-        osgi.console=&lt;port&gt; <br>
-      </code> <br>
-    </li>
-    
-    <li>Start the Equinox framework with the following command line:
-      <code>
-        java -jar org.eclipse.osgi.jar <br>
-      </code>
-    </li>
-  </ol>    
+    id      State       Bundle
+    0       ACTIVE      org.eclipse.osgi_3.15.200.v20200214-1600
+    1       ACTIVE      org.apache.felix.gogo.runtime_1.1.0.v20180713-1646
+    2       ACTIVE      org.apache.felix.gogo.command_1.0.2.v20170914-1324
+    3       ACTIVE      org.apache.felix.gogo.shell_1.1.0.v20180713-1646
+    4       ACTIVE      org.eclipse.equinox.console_1.4.0.v20190819-1430
+    osgi> exit
+    Really want to stop Equinox? (y/n; default=y)</pre>
 
-  The property <code>osgi.console</code> specifies the port on which the console should listen for telnet connections. Instead of specifying this property,
-  you can start the framework with the <code>-console &lt;port&gt;</code> option. If you do not specify the port in either of these ways, the console will
-  not listen for telnet connections.
-  If you start with the option <code>-console</code> and do not specify the port, you will be able to interact with the console through the standard input.
+  <h2>Starting a Telnet Session</h2>
 
+  <p>Starting the console in a Telnet session is enabled by passing a port number with the
+  <code>-console</code> option, for example:</p>
+
+  <pre>
+    $ java -jar org.eclipse.osgi_*.jar -console 1234</pre>
+
+  <p>Once Equinox is started, connect to the Telnet session from another terminal using the
+  port number that was specified above:</p>
+
+  <pre>
+    $ telnet localhost 1234
+    Trying ::1...
+    Connected to localhost.
+    Escape character is '^]'.
+    osgi> ss
+    "Framework is launched."
+    
+    id      State       Bundle
+    0       ACTIVE      org.eclipse.osgi_3.15.200.v20200214-1600
+    1       ACTIVE      org.apache.felix.gogo.runtime_1.1.0.v20180713-1646
+    2       ACTIVE      org.apache.felix.gogo.command_1.0.2.v20170914-1324
+    3       ACTIVE      org.apache.felix.gogo.shell_1.1.0.v20180713-1646
+    4       ACTIVE      org.eclipse.equinox.console_1.4.0.v20190819-1430
+    osgi> disconnect
+    Disconnect from console? (y/n; default=y) 
+    Connection closed by foreign host.</pre>
+
+  <p>It is possible to set the port in the <b>configuration/config.ini</b> file with the
+  addition of this line:</p>
+
+  <pre>
+    osgi.console=1234
+    # ... or ...
+    osgi.console=localhost:1234</pre>
+
+  <p>The <code>osgi.console</code> property specifies the port (and optionally the hostname) on
+  which the console should listen for Telnet connections without needing to pass the <code>-console</code>
+  option at all, but if <code>-console</code> is passed it will override any setting present in the
+  <b>configuration/config.ini</b> file.</p>
+
+  <h2>Starting an SSH Session with JAAS Authentication</h2>
   
-  <h3>Running with SSH</h3>          
-  
-  If you want to access the console through SSH, you need more bundles and configurations.
-  <ol>
-    <li>Place the necessary bundles in a folder. The bundles are:
-      <ul>
-        <li>org.apache.felix.gogo.command_&lt;version&gt;.jar</li>
-        <li>org.apache.felix.gogo.runtime_&lt;version&gt;.jar</li>
-        <li>org.apache.felix.gogo.shell_&lt;version&gt;.jar</li>
-        <li>org.eclipse.equinox.console_&lt;version&gt;.jar</li>
-        <li>org.eclipse.equinox.console.ssh_&lt;version&gt;.jar</li>
-        <li>org.eclipse.equinox.console.jaas.fragment_&lt;version&gt;.jar</li>
-        <li>org.eclipse.osgi.jar</li>
-        <li>org.apache.mina.core_&lt;version&gt;.jar</li>
-        <li>org.apache.sshd.core_&lt;version&gt;.jar</li>
-        <li>slf4j-api</li>
-        <li>some slf4j-api implementation</li>
-      </ul>
-    </li>
-                
-    <li>Create a <b>configuration</b> subfolder and a <b>config.ini</b> file in it.</li>
-                
-    <li>Add the following entries in the <b>config.ini</b> file: <br>
-      <code>
-        osgi.bundles=org.apache.felix.gogo.runtime,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.apache.felix.gogo.command,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.apache.felix.gogo.shell,\ <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.equinox.console,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;slf4j-api,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&lt;slf4j-api_impl&gt;,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.apache.mina.core,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.apache.sshd.core,\ <br> 
-        &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.equinox.console.ssh@start,\ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.equinox.console.jaas.fragment<br>
-        osgi.console.ssh=&lt;port&gt; <br>
-        osgi.console.ssh.useDefaultSecureStorage=true <br>
-      </code> <br>
-    </li>
-                
-    <li>Create a file with name <b>org.eclipse.equinox.console.authentication.config</b> in the <b>configuration</b> subfolder.</li>
-                
-    <li>Add the following entry to <b>org.eclipse.equinox.console.authentication.config</b> file: <br>
-      <code>
-        equinox_console { <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.equinox.console.jaas.SecureStorageLoginModule REQUIRED; <br>
-        }; <br>
-      </code>
-    </li>
-                
-    <li>Create logging configuration file. This depends on the particular implementation of slf4j-api, which you have chosen.</li>
-                
-    <li>Start the Equinox framework with the following command line:
-      <code>
-        java -Djava.util.logging.config.file=configuration/logging.properties \ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;-Dssh.server.keystore=configuration/hostkey.ser \ <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;-Dorg.eclipse.equinox.console.jaas.file=configuration/store \<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;-Djava.security.auth.login.config=configuration/org.eclipse.equinox.console.authentication.config \<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;-jar org.eclipse.osgi.jar <br>
-      </code>
-    </li>
-  </ol>
-  <b>Notes:</b>
+  <p>To start a console session in an SSH session, a few more bundles are needed:</p>
+
   <ul>
-    <li>For both properties, specifying the telnet and ssh ports, you can also specify the host: <br>
-      <code>
-        osgi.console=&lt;host&gt;:&lt;port&gt; <br>
-        osgi.console.ssh=&lt;host&gt;:&lt;port&gt; <br>
-      </code>
-      where &lt;host&gt; is either <b>localhost</b> or <b>127.0.0.1</b>, so that the console listens for telnet connections only from the localhost. <br>
-      You can use both telnet and ssh. For this you have to specify both properties. <br>
-    </li>
-    <li>The version of slf4j-api must be in the range [1.5,2]</li>
-    <li>The property <code>osgi.console.ssh.useDefaultSecureStorage</code> is necessary only if ssh is used and the default login mechanism is used (i. e., a custom login module is not provided)</li>
-    <li>The configuration file <b>org.eclipse.equinox.console.authentication.config</b> may have a different name, but its name must be given as a value of the property <code>-Djava.security.auth.login.config</code> accordingly.</li>
-    <li>The bundles org.eclipse.equinox.console_&lt;version&gt;.jar, org.eclipse.equinox.console.ssh_&lt;version&gt;.jar and org.eclipse.equinox.console.jaas.fragment_&lt;version&gt;.jar, 
-        as well as the three Gogo bundles are available in Equinox SDK, which can be downloaded from the <a href="http://download.eclipse.org/equinox/">Equinox download page</a></li>
-    <li>You can download the bundles org.apache.mina.core_&lt;version&gt;.jar and org.apache.sshd.core_&lt;version&gt;.jar <a href="http://download.eclipse.org/tools/orbit/downloads/">Eclipse Orbit repository</a>.</li>
-    <li>You can download slf4j-api and an slf4j implementation from <a href="http://www.slf4j.org/download.html">here</a>.</li>
-    <li>For logging you can use instead org.slf4j.api from <a href="http://download.eclipse.org/tools/orbit/downloads/">Eclipse Orbit repository</a>. In this case you should take from this repository the logback slf4j implementation. It consists of
-        three bundles - ch.qos.logback.classic, ch.qos.logback.core and ch.qos.logback.slf4j.</li>
-    <li>All configuration files, excluding <b>config.ini</b>, may be placed in a folder, different from the configuration subfolder. In this case the VM properties must be changed respectively to point to the correct folder.</li>
+    <li>org.apache.felix.gogo.command_&lt;version&gt;.jar</li>
+    <li>org.apache.felix.gogo.runtime_&lt;version&gt;.jar</li>
+    <li>org.apache.felix.gogo.shell_&lt;version&gt;.jar</li>
+    <li>org.apache.sshd.osgi_&lt;version&gt;.jar</li>
+    <li>org.eclipse.equinox.console_&lt;version&gt;.jar</li>
+    <li>org.eclipse.equinox.console.jaas.fragment_&lt;version&gt;.jar</li>
+    <li>org.eclipse.equinox.console.ssh_&lt;version&gt;.jar</li>
+    <li>org.eclipse.osgi_&lt;version&gt;.jar</li>
+    <li>org.slf4j.api_&lt;version&gt;.jar</li>
   </ul>
-                       
-  <h2>JAAS Authentication</h2>
-   
-  The Equinox console uses JAAS authentication when the SSH is used. The default JAAS login module, implemented in the console, uses custom store file,
-  where it stores users and passwords. The passwords are one-way encrypted. The console also provides shell commands for administering users:
+
+  <p>All of these bundles are available in the <b>Equinox SDK</b> zip file available from the
+  <a href="https://download.eclipse.org/equinox/">Equinox Downloads</a> site.</p>
+
+  <p>Extract these bundles into a directory, then inside that directory create a
+  <b>configuration/config.ini</b> file with the following content:</p>
+
+  <pre>
+    osgi.bundles=\
+        org.apache.felix.gogo.runtime,\
+        org.apache.felix.gogo.command,\
+        org.apache.felix.gogo.shell,\
+        org.apache.sshd.osgi,\
+        org.eclipse.equinox.console,\
+        org.eclipse.equinox.console.jaas.fragment,\
+        org.eclipse.equinox.console.ssh@start,\
+        org.slf4j.api
+    osgi.console.ssh=127.0.0.1:1234
+    osgi.console.ssh.useDefaultSecureStorage=true</pre>
+
+  <p>Equinox uses JAAS to authenticate SSH sessions, the default login provider of which must be
+  configured by creating a JAAS configuration file, for example by creating a file
+  <b>configuration/console.auth.config</b> with the following content:</p>
+
+  <pre>
+    equinox_console {
+        org.eclipse.equinox.console.jaas.SecureStorageLoginModule REQUIRED;
+    };</pre>
+
+  <p>Then when starting Equinox, it must be told where the JAAS configuration is by setting the
+  <code>java.security.auth.login.config</code> system property. The default JAAS login provider stores
+  its credentials in a one-way encrypted store file that must be specified with the
+  <code>org.eclipse.equinox.console.jaas.file</code> system property:</p>
+
+  <pre>
+    $ java -Dssh.server.keystore=configuration/hostkey.ser \
+           -Dorg.eclipse.equinox.console.jaas.file=configuration/store \
+           -Djava.security.auth.login.config=configuration/console.auth.config \
+           -jar org.eclipse.osgi_*.jar</pre>
+
+  <p>The default JAAS login provider dynamically creates one default user <b>equinox</b> with password
+  <b>equinox</b>. After logging in with these credentials for the first time, the user will be prompted
+  to create a new account and the default account will be removed.</p>
+
+  <p>Once Equinox is started, connect to the SSH session from another terminal using the hostname and
+  port specified in the <b>configuration/config.ini</b> file:</p>
+
+  <pre>
+    $ ssh -p 1234 equinox@127.0.0.1
+    The authenticity of host '[127.0.0.1]:1234 ([127.0.0.1]:1234)' can't be established.
+    RSA key fingerprint is SHA256:7x3eOsDRM5lyL5vRsVREy8hIawIfqRiZ7CBnk6GkfRA.
+    Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+    Warning: Permanently added '[127.0.0.1]:1234' (RSA) to the list of known hosts.
+    Password authentication
+    Password: 
+    Currently the default user is the only one; since it will be deleted after first login, create a new user:
+    username: mbooth
+    password: 
+    Confirm password: 
+    roles: admin
+    osgi> disconnect
+    Disconnect from console? (y/n; default=y) 
+    Connection to 127.0.0.1 closed.</pre>
+
+  <p>The password must be at least 8 symbols long and the username may contain alphanumerical
+  characters, underscores and dots. On subsequent connections the user will be required to supply the
+  newly created credentials:</p>
+
+  <pre>
+    $ ssh -p 1234 mbooth@127.0.0.1
+    Password authentication
+    Password: 
+    osgi> disconnect
+    Disconnect from console? (y/n; default=y) 
+    Connection to 127.0.0.1 closed.</pre>
+
+  <p>Once logged in there are various commands for administering users. Type <b>help</b> at the OSGi
+  console prompt to explore commands to perform the following functions:</p>
   <ul>
-    <li>add user</li>
-    <li>delete user</li>
-    <li>list users</li>
-    <li>reset user password</li>
-    <li>change user password</li>
-    <li>add user roles</li>
-    <li>remove user roles</li>
+    <li>adding, deleting, listing users</li>
+    <li>reseting and changing passwords</li>
+    <li>adding and removing user roles</li>
   </ul>
-  There is a default user <b>equinox</b> with password <b>equinox</b>, which is dynamically created when the ssh starts if no other user exists
-  in the user store. Upon first login, the console prompts the user to create a new user, and automatically deletes the default user. The password 
-  must be at least 8 symbols long. The username may contain alphanumerical characters, plus underscore and dot. 
-  Currently only authentication is implemented in the console. All authenticated users have similar rights. Implementing authorization may
-  be a future enhancement. That is why roles are introduced, although they are not currently used.
-  If the default JAAS login module is be used, then the property <code>osgi.console.ssh.useDefaultSecureStorage</code> must be set to
-  <code>true</code>. The file, where the users are stored, is specified through the property <code>org.eclipse.equinox.console.jaas.file</code>
-            
-  <h2>Using Custom JAAS Authentication Login Module</h2>
-            
-  Custom JAAS authentication login modules could be used with the ssh instead of the default one. If a custom login module is used,
-  then the property <code>osgi.console.ssh.useDefaultSecureStorage</code> must not be set at all. The custom module must be specified 
-  in the file <code>org.eclipse.equinox.console.authentication.config</code> instead of the default entry there, or in a different file.
-  If a different file is used, then its name must be specified as the value of the property <code>-Djava.security.auth.login.config</code>
-  instead of <code>org.eclipse.equinox.console.authentication.config</code>.
-  Also, it will be necessary to create a fragment to sshd-core bundle, with which to import the package of the custom login module. This is necessary
-  for the sshd to be able to load the module class.
-            
-  <h2>Key-based Authentication</h2>
-            
-  Instead of using JAAS authentication, the console can use key-based user authentication with ssh. It is possible to provide a file containing a list 
-  of keys that are allowed to connect to the SSH console. The file will be read every time a connection is made so that it can be modified dynamically 
-  at runtime. The file is specified with the property <code>ssh.server.authorized_keys</code>. If you use key-based authentication you do not need 
-  to specify the JAAS-related properties <code>java.security.auth.login.config</code> and 
-  <code>osgi.console.ssh.useDefaultSecureStorage</code>.
-  
-  <p>The console supports also custom public keys authentication. If no specific authorized_keys file is configured (via system property) the OSGi service 
-  registry will be searched for available authenticators. To enable this feature you have to set the property
-  <code>ssh.custom.publickeys.auth</code> to <code>true</code>.  
-                     
-  <h2>Configuring of telnet and ssh host and port through Configuration Admin service</h2>
-            
-  The console provides the option to configure the telnet and ssh host and port through Configuration Admin instead of
-  through the properties <code>osgi.console=&lt;host&gt;:&lt;port&gt;</code> and <code>osgi.console.ssh=&lt;host&gt;:&lt;port&gt;</code>.
-  This could be helpful in more complex scenarios, for example when you want to run different instances of the console in different subsystems of the 
-  framework. In this case if the port is configured through a system property, it is one and the same for all console instances and only one 
-  will be able to bind to the socket. 
-  If this feature is used, then you should:
+
+  <h3>Custom JAAS Authentication Login Providers</h3>
+
+  <p>Only authentication is implemented in the default JAAS login provider so by default all
+  authenticated users have similar rights. Roles exist to allow authorization to be added in
+  custom JAAS login providers.</p>
+
+  <p>A custom JAAS login provider can be used by creating a bundle fragment that extends the
+  <b>org.apache.sshd.osgi</b> bundle. This fragment is used to provide or import the package
+  of the custom login provider. This is necessary for the SSH system to be able to load the
+  provider class.</p>
+
+  <p>If a custom JAAS login provider is used, then the <code>osgi.console.ssh.useDefaultSecureStorage</code>
+  property must not be set in the <b>configuration/config.ini</b> at all and the custom login provider
+  must be specified in the <b>configuration/console.auth.config</b> file instead of the default
+  entry there.</p>
+
+  <h2>Starting an SSH Session with Public Key Authentication</h2>
+
+  <p>It's common to want to use public key authentication with SSH and it is possible to configure
+  Equinox to do that instead of using JAAS authentication. First an SSH key-pair should be created
+  as normal and then a file created that contains the list of authorized keys that Equinox should
+  consult when users attempt to connect:</p>
+
+  <pre>
+    $ ssh-keygen -f ~/.ssh/equinox
+    Generating public/private rsa key pair.
+    Enter passphrase (empty for no passphrase): 
+    Enter same passphrase again: 
+    Your identification has been saved in /home/mbooth/.ssh/equinox
+    Your public key has been saved in /home/mbooth/.ssh/equinox.pub
+    The key fingerprint is:
+    SHA256:0k7MSbLLzhhzI7Gw6oSYEx8Fv5UpNHMPTdOUDj8rplQ mbooth@thinkpad-p50
+    The key's randomart image is:
+    +---[RSA 3072]----+
+    |  . + oooo..     |
+    |   + + =o.o      |
+    |    + = o+       |
+    |   . + BE.+      |
+    |. o o o.S  o     |
+    |o+ + +.=o .      |
+    |=.o =.=o..       |
+    |.o   O..         |
+    |o.  . o          |
+    +----[SHA256]-----+
+    
+    $ cat ~/.ssh/equinox.pub > configuration/equinox_authorized_keys</pre>
+
+  <p>Next the following line must be removed from the <b>configuration/config.ini</b> file:</p>
+
+  <pre>
+    # Remove this line to use public key authentication
+    # Must only be present when using the default JAAS login provider
+    osgi.console.ssh.useDefaultSecureStorage=true</pre>
+
+  <p>Now when starting Equinox, instead of telling it about the JAAS configuration, it must be
+  told about the authorized keys file by setting the <code>ssh.server.authorized_keys</code>
+  system property:</p>
+
+  <pre>
+    $ java -Dssh.server.keystore=configuration/hostkey.ser \
+           -Dssh.server.authorized_keys=configuration/equinox_authorized_keys \
+           -jar org.eclipse.osgi_*.jar</pre>
+
+  <p>And that allows users to use their SSH keys instead of a username/password pair when
+  connecting to the SSH console session:</p>
+
+  <pre>
+    $ ssh -i ~/.ssh/equinox -p 1234 localhost
+    The authenticity of host '[localhost]:1234 ([127.0.0.1]:1234)' can't be established.
+    RSA key fingerprint is SHA256:m2JKy2fRZA1aqvxHBBe+Awsgk98ryI29fH03Rg7jeHw.
+    Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+    Warning: Permanently added '[localhost]:1234' (RSA) to the list of known hosts.
+    osgi> disconnect
+    Disconnect from console? (y/n; default=y) 
+    Connection to localhost closed.</pre>
+
+  <p>The authorized keys file given to Equinox will be read every time a connection is made,
+  which allows adding and removing of keys dynamically at runtime.</p>
+
+  <h3>Custom Public Key Authentication</h3>
+
+  <p>Equinox also supports customizing the public key authentication mechanism. If no
+  specific authorized keys file is configured via system property then the OSGi service
+  registry will be searched for available authenticators. To enable this feature set the
+  <code>ssh.custom.publickeys.auth</code> system property to <code>true</code>.</p>
+
+  <h2>Starting Telnet and SSH Sessions Together</h2>
+
+  <p>It is possible to start Equinox console sessions over both Telnet and SSH simultaneously.
+  For this, both the <code>osgi.console</code> and <code>osgi.console.ssh</code> properties must
+  be specified in the <b>configuration/config.ini</b> file:</p>
+
+  <pre>
+    # Telnet session
+    osgi.console=&lt;hostname&gt;:&lt;port&gt;
+    # SSH session
+    osgi.console.ssh=&lt;hostname&gt;:&lt;port&gt;</pre>
+
+  <p>These properties specify the port on which to listen and the hostname (or IP address) to
+  which it binds for incoming connections.</p>
+
+  <p>For both properties, the hostname (or IP address) is optional and may be omitted. If the
+  hostname is omitted, then localhost is assumed. If the hostname is the same for both properties,
+  or both hostnames are omitted then the SSH session must have a different port number to the
+  Telnet session.</p>
+
+  <h2>Using the Configuration Admin Service</h2>
+
+  <p>It is possible to configure Telnet and SSH console sessions through the Configuration Admin
+  Service instead of using the <code>osgi.console</code> and <code>osgi.console.ssh</code>
+  properties. This is helpful in more complex scenarios, for example when you want to run different
+  instances of the console in different subsystems of the framework. In this case if the port is
+  configured through a system property, the same value is used for all console instances and only one 
+  will be able to bind to the socket.</p>
+
+  <p>To enable this feature, the Configuration Admin bundle and it's dependencies must be added
+  to the Equinox instance:</p>
+
   <ul>
-    <li>set the property <code>osgi.console.useConfigAdmin</code> to <code>true</code></li> 
-    <li>install and start, along with the console bundles, the org.eclipse.equinox.cm bundle and its dependencies</li>
-    <li>write a bundle to provide the configuration with the telnet and ssh properties</li>
+    <li>org.eclipse.equinox.cm_&lt;version&gt;.jar</li>
+    <li>org.eclipse.osgi.services_&lt;version&gt;.jar</li>
+    <li>org.eclipse.osgi.util_&lt;version&gt;.jar</li>
   </ul>
-            
-  The configuration PID for the telnet configuration is <code>osgi.console.telnet</code> and for the ssh configuration is <code>osgi.console.ssh</code>. 
-  Both configurations have the following properties:
+
+  <p>All of these bundles are available in the <b>Equinox SDK</b> zip file available from the
+  <a href="https://download.eclipse.org/equinox/">Equinox Downloads</a> site.</p>
+
+  <p>And then in the <b>configuration/config.ini</b> file, the <code>osgi.console.useConfigAdmin</code>
+  property must be used in place of the usual configuration properties:</p>
+
+  <pre>
+    # Remove these properties:
+    #osgi.console=&lt;hostname&gt;:&lt;port&gt;
+    #osgi.console.ssh=&lt;hostname&gt;:&lt;port&gt;
+
+    # Use the Config Admin Service instead:
+    osgi.console.useConfigAdmin=true</pre>
+
+  <p>Now a custom bundle must be written that uses the Configuration Admin Service to configure
+  Telnet and SSH console sessions. The Persistent Identity (PID) for the Telnet configuration is
+  <code>osgi.console.telnet</code> and for the SSH configuration is <code>osgi.console.ssh</code>.
+  Both configurations have the following properties, all expecting values of type String:</p>
+
   <ul>
     <li><code>host</code></li>
     <li><code>port</code></li>
     <li><code>enabled</code></li>
   </ul>
-  All must have values of type String.
-  The <code>enabled</code> property determines if telnet/ssh is to be started at all. If the value is <code>true</code>, telnet/ssh is started.
-  If the value is <code>false</code>, or the property <code>enabled</code> is absent, the telnet/ssh is not started.
-            
-  <h2>Using Commands</h2>
-            
-  The Gogo shell, on which the Equinox console is based, supports different type of commands from these currently supported in Equinox. Currently in Equinox,
-  commands are provided by a class implementing the <code>CommandProvider</code> interface. The Equinox console provides an adapter from this type of commands
-  to the new type of commands, used in Gogo. They commands are arbitrary classes, registered as services, with two special properties:
-  <ul>
-    <li><code>osgi.command.scope</code> - specifies the scope of the command</li>
-    <li><code>osgi.command.function</code> - specifies the commands provided by this service; this is a list of the names of public methods in the service class, which must be available for execution as commands</li>
-  </ul>
-  The commands in the Equinox console use the notion of command scope. The scope can be used, for example,
-  to differentiate between commands with one and the same name, but provided by different providers. Then they should have different scopes. <br>
-  The scope is a prefix of the command name, separated from it with a column. When writing the command in the console, the scope may or may not be specified.
-  If the scope is not specified, then the command with this name from the default scope is used. If in the default scope there is no command with such name,
-  all commands are searched. <br>
-  If there is more than one command with the specified name in different scopes, it is not guaranteed which one will be actually
-  executed. Therefore, if you know that there are commands with the same name but different scopes, you must explicitly prefix the command name with the 
-  scope to ensure that you will get executed exactly the command you want. <br>
-  The legacy commands, adapted by the Equinox console, have scope <code>equinox</code>. 
-            
-  <h2>Getting Help for Commands</h2>
-            
-  The default help command in Gogo lists the names of the registered commands, and if it is called with a command name as an argument, it displays help message for the 
-  specified command. The default help command does not provide help for the legacy Equinox commands, which are adapted by the Equinox console. For this reason the 
-  Equinox console provides its own help command, which calls the default help, but could also provide help for the legacy commands. <br>
-  If no argument is specified the names of all new commands are displayed. <br>
-  If a command name is specified, the help message for this command is displayed. If the command is legacy and the <code>CommandProvider</code>, which provides this command, 
-  does not provide separate help for each command (this is a new feature, introduced in Equinox 3.7), then the help messages for all commands in this <code>CommandProvider</code> are displayed. <br>            
-  The help command supports <code>-scope</code> argument, which should be used as follows: <code>help -scope &lt;command_scope&gt;</code>. Thus the help command will display help only for the
-  commands with the specified scope. <br>
-  There is also a <code>man</code> command. It accepts the same arguments as the help command and has the same semantics. <br>
-            
-  <h2>Writing Gogo Commands</h2>
-            
-  Writing Gogo commands is easy. You have to do the following:
-  <ul>
-    <li>Write your class with all commands you want implemented as public methods. Methods may have arbitrary arguments. Also, unlike Equinox command providers, in RFC 147 there is no interface that the class of the command provider should implement.</li>
-    <li>Register the command provider as a service with the two properties, described above.</li>
-  </ul>
-  Something new for Gogo commands are the converters and formatters. <br>
-  The converter is a class which converts the arguments, passed on the command line, to the actual arguments, 
-  which the command accepts. For example, the command may have one argument of type <code>Bundle</code>. There may be a converter, which from a long finds the bundle with this id. 
-  Then the command may be called with the ID of the bundle as an argument, the converter will convert it to the corresponding <code>Bundle</code> object and the command method will
-  be called with this object as an argument.  <br>
-  The formatter is a class which displays the result, returned by the command method. <br>
-  For more information on Gogo commands, you can check the <a href="http://felix.apache.org/documentation/subprojects/apache-felix-gogo.html">Gogo documentation</a>.
-            
-  <h2>Tab Completion</h2>
-            
-  The console provides tab completion. This feature is available only when connecting through telnet or ssh. <br>
-  Completion is available for:
-  <ul>
-    <li>command names</li>
-    <li>variable names - these must be previously defined in the session; variable names may be passed as command arguments</li>
-    <li>file names - passed as command arguments</li>
-  </ul>
-  When the <code>tab</code> key is typed, all possible candidates for completion for the current word are searched. If there is only one possible completion, 
-  the current word is automatically completed. If there are more than one options, all are displayed in a column. The possible options can be iterated by hitting
-  <code>tab</code> multiple times, until the desired completion candidate is reached. <br>
-  If longest common prefix of all available completion candidates is longer than the current word, then the current word is completed automatically to this prefix, before choosing
-  the final completion. For example, if we have the following available completions for the word <code>bun</code>:
-  <ul>
-    <li>bundles</li>
-    <li>bundle</li>
-    <li>bundlelevel</li>
-  </ul>
-  the current word is completed automatically to <code>bundle</code>, and then by hitting <code>tab</code> you can choose which completion you like, or may type it for yourself. <br>
-  The console allows custom command completers to be provided. A custom completer should implement the interface <code>org.eclipse.equinox.console.common.Completer</code>, provided by 
-  the bundle of the Equinox console. It has the single method <code>getCandidates</code>, which get as a parameter the whole command line and the current cursor position in it, and returns
-  a map with all completion candidates, and the position in the command line, on which the completion begins. The keys in the map are the candidates, and the values - the start position
-  for the completion.
-  
-  <h2>Command Line Editing</h2>
-  
-  Both with telnet and ssh command line editing is available in addition to tab completion. The following functions are supported:
+
+  <p>The <code>enabled</code> property determines if the Telnet or SSH session is to be started
+  at all. If the value is <code>true</code>, it is started. If the value is <code>false</code>,
+  or the property <code>enabled</code> is absent, the Telnet or SSH session is not started.</p>
+
+  <h2>Console Command Usage</h2>
+
+  <p>The Equinox console works similarly to Unix-style shells. Multiple commands can be sent when
+  separated by a semi-colon and the output of commands may be piped to the input of other commands.
+  For example:</p>
+
+  <pre>
+    osgi> ss | grep slf4j
+    8       ACTIVE      org.slf4j.api_1.7.2.v20121108-1250
+    true
+    osgi> stop 8 ; start 8</pre>
+
+  <p>IO redirection can be simulated with the <b>cat</b> and <b>tac</b> commands. For example:</p>
+
+  <pre>
+    osgi> ss | tac out.txt
+    osgi> cat out.txt | grep slf4j
+    8       ACTIVE      org.slf4j.api_1.7.2.v20121108-1250
+    true</pre>
+
+  <p>The console also has standard command line editing features such as:</p>
+
   <ul>
     <li>backspace - deletes the character to the left of the cursor</li>
     <li>delete - deletes the character on the cursor position</li>
@@ -295,18 +395,153 @@
     <li>left/right arrow - moves the cursor one character left/right</li>
     <li>up/down arrow - moves backward/forward one entry in the command history</li>
     <li>pageup/pagedown - moves to the first/last entry of the command history</li>
+    <li>tab - command completion (described in more detail below)</li>
   </ul>
+
+  <p>However some of these editing features are only supported when using the console via a
+  Telnet or SSH session.</p>
+
+  <h3>Command Scopes</h3>
+
+  <p>Equinox console commands have the notion of command scope. The scope is a kind of namespace
+  that can be used, for example, to differentiate between commands with the same name, but provided
+  by different providers.</p>
+
+  <p>The scope is a prefix of the command name, separated from it by a colon. When writing the
+  command in the console, specifying the scope is optional: A command may be written as
+  <code>command_name</code> or <code>scope:command_name</code>. If the scope is not specified,
+  then the command with this name from the default scope is used. If there is no such command in
+  the default scope, all scopes are searched.</p>
+
+  <p>If there is more than one command with the specified name in different, non-default scopes,
+  it is not guaranteed which one will be actually executed. Therefore, if there are commands
+  with the same name but in different scopes, the scope prefix must be specified explicitly
+  with the command name to ensure that exactly the desired command is executed.</p>
+
+  <p>The Equinox console is now based on Apache Felix Gogo, which has a different way of
+  implementing console commands than the traditional Equinox way. Equinox adapts these legacy
+  commands for the Gogo-based shell and makes them available in the <b>equinox</b> scope.
+  For compatibility, the default scope is the <b>equinox</b> scope.</p>
+
+  <h3>Getting Help for Commands</h3>
+
+  <p>Typing <b>help</b> (or <b>man</b>) at the OSGi console prompt with no arguments, the help for
+  all available commands is displayed. To limit the output to commands from a specific scope, the
+  <code>-scope &lt;scope_name&gt;</code> parameter can be passed to the <b>help</b> command:</p>
   
-  These functions are supported also when the the console is run standalone with Equinox. In PDE these features are not supported.
-            
-  <h2>Closing Telnet or Ssh Session</h2>
-            
-  Both telnet and ssh sessions are closed with the disconnect command. 
-                        
-  <h2>Running Non-interactive Shell</h2>
-            
-  In some cases you may wish to run the console without an interactive session. In this case, the console can be connected from telnet and ssh, but is not available
-  on standard in and out. For this the following property should be specified: <code>-Dgosh.args=--nointeractive</code>          
+  <pre>
+    osgi> help -scope equinox
+
+    close - shutdown and exit
+       scope: equinox
+
+    diag - Displays unsatisfied constraints for the specified bundle(s)
+       scope: equinox
+       parameters:
+          Bundle[]   IDs of bundle(s), for which to display unsatisfied constraints
+
+    ...etc...</pre>
+  
+  <p>The help text for a specific command can be shown by passing a
+  <code>command_name</code> or <code>scope:command_name</code> to the <b>help</b> command. If
+  the scope is not specified, then the help text is shown for the command from the default scope
+  if it exists:</p>
+
+  <pre>
+    osgi> help headers
+
+    headers - print bundle headers
+       scope: equinox
+       parameters:
+          Bundle[]   bundles to print headers for
+
+    osgi> help felix:headers
+
+    headers - display bundle headers
+       scope: felix
+       parameters:
+          Bundle[]   target bundles</pre>
+
+  <p>The default help command provided by the Apache Felix Gogo shell does not provide help
+  for the legacy Equinox commands, which are adapted by the Equinox console for the Gogo shell.
+  For this reason the Equinox console provides its own <b>help</b> command in the <b>equinox</b> scope
+  that delegates to the default help command whilst also providing help for legacy commands.</p>
+
+  <h3>Closing Console Sessions</h3>
+
+  <p>When using the Equinox console standalone on the command line, the <b>exit</b> command can be
+  used to terminate Equinox and return to the system command prompt.</p>
+
+  </p>For both Telnet and SSH sessions, the session can be closed without terminating Equinox with
+  the <b>disconnect</b> command.</p>
+
+  <h2>Implementing Custom Console Commands</h2>
+
+  <p>Traditionally in Equinox commands are provided by a class implementing the
+  <code>org.eclipse.osgi.framework.console.CommandProvider</code> interface. The Equinox console
+  provides an adapter from this legacy type of command to the new type of command used in Gogo but it is
+  preferred that new commands are implemented as Gogo commands directly.</p>
+
+  <p>Commands for Apache Felix Gogo are plain old Java object (POJO) classes with all the commands
+  implemented as public methods. The methods may have arbitrary arguments. These classes are
+  registered as services, with two special properties:</p>
+
+  <ul>
+    <li><code>osgi.command.scope</code> - specifies the scope of the command</li>
+    <li><code>osgi.command.function</code> - specifies the commands provided by this service;
+    this is a string array containing the names of public methods in the implementing class
+    that can be executed as commands</li>
+  </ul>
+
+  <p>Gogo commands also have the notion of converters and formatters.</p>
+
+  <p>A converter is a class which converts the arguments passed at the OSGi console prompt,
+  to the actual arguments that the command accepts. For example, the command may have one
+  argument of type <code>Bundle</code>. A converter might accept a long integer and finds the
+  bundle with this ID. Then the command may be called with the ID of the bundle as an argument,
+  the converter will convert it to the corresponding <code>Bundle</code> object and the command
+  method will be called with this object as an argument.</p>
+
+  <p>A formatter is a class which displays a result returned by a command method.</p>
+
+  <p>For more information on Gogo commands, see the <a href="http://felix.apache.org/documentation/subprojects/apache-felix-gogo.html">Gogo documentation</a>.</p>
+
+  <h2>Implementing Custom Tab Completion</h2>
+
+  <p>The Equinox console provides tab completion and allows implementors to provide their own
+  custom completion providers. This feature is available only when connecting through a Telnet
+  or SSH session. Completion is available for:</p>
+
+  <ul>
+    <li>command names</li>
+    <li>variable names passed as command arguments - these must be previously defined in the session</li>
+    <li>file names passed as command arguments</li>
+  </ul>
+
+  <p>When the <code>tab</code> key is typed, all possible candidates for completion for the current
+  word are searched. If there is only one possible completion, the current word is automatically
+  completed. If there is more than one option, all are displayed. The user can then cycle through the
+  possible completions by hitting <code>tab</code> multiple times, until the desired completion
+  candidate is selected.</p>
+
+  <p>If longest common prefix of all available completion candidates is longer than the current word,
+  then the current word is completed automatically to this prefix before choosing the final completion.
+  For example, if the following completions are available for the word <b>bun</b>:</p>
+
+  <ul>
+    <li>bundles</li>
+    <li>bundle</li>
+    <li>bundlelevel</li>
+  </ul>
+
+  <p>Then the current word is completed automatically to <b>bundle</b> and the user can continue
+  typing normally or, by hitting <code>tab</code> again, they can cycle through the possible
+  completions.</p>
+
+  <p>A custom completer should implement the <code>org.eclipse.equinox.console.common.Completer</code>
+  interface provided by the Equinox console bundle. It has the single method <code>getCandidates</code>,
+  which take as parameters the whole command line and the current cursor position within it, and returns
+  a map of completion candidates to positions in the command line at which the completion begins.</p>
 
 </BODY>
 </HTML>
