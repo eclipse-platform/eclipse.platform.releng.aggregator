@@ -97,7 +97,7 @@
       testManifestFileName: name of xml file containing descriptions of zip types and log files
 
     -->
-    
+
     <!-- This list is for Eclipse. Equinox overrides and provides their own list -->
     <property
       name="dropTokenList"
@@ -165,12 +165,22 @@
 
     <condition
       property="expectedConfigFilename"
-      value="perfTestConfigs.php"
-      else="testConfigs.php">
+      value="perfLRTestConfigs.php">
+      <contains
+        string="${job}"
+        substring="LR-perf-" />
+    </condition>
+    <condition
+      property="expectedConfigFilename"
+      value="perfTestConfigs.php">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
+    <property 
+      name="expectedConfigFilename" 
+      value="testConfigs.php"/>
+
     <condition
       property="foundConfigFilename"
       value="perfTestConfigsFound.php"
@@ -180,6 +190,13 @@
         substring="-perf-" />
     </condition>
 
+    <condition
+      property="testResultsHtmlFileName"
+      value="performanceLRResultsTable.html">
+      <contains
+        string="${job}"
+        substring="LR-perf-" />
+    </condition>
     <condition
       property="testResultsHtmlFileName"
       value="performanceResultsTable.html">
@@ -218,6 +235,12 @@
     <property
       name="testManifestFileName"
       value="${manifestFile}" />
+    <property
+      name="perfManifestFileName"
+      value="performanceTestManifest.xml" />
+    <property
+      name="perfLRManifestFileName"
+      value="performanceLRTestManifest.xml" />
 
     <!-- test configs: follows pattern of [job]_[OSGiTriplet]_[VM]
       the underscores are significant. When we "select files" to group,
@@ -232,14 +255,14 @@
     <fail unless="eclipseStreamMajor" message="This publish.xml script needs eclipseStreamMajor and eclipseStreamMinor" />
     <fail unless="eclipseStreamMinor" message="This publish.xml script needs eclipseStreamMajor and eclipseStreamMinor"/>
     <condition
-      property="perfLRtestsConfigExpected"
+      property="perfLRConfigExpected"
       value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}LR-perf-lin64_linux.gtk.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}LR-perf-lin64-baseline_linux.gtk.x86_64_8.0">
       <contains
         string="${job}"
         substring="LR-perf-" />
     </condition>
     <condition
-      property="testsConfigExpected"
+      property="perfConfigExpected"
       value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64_linux.gtk.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64-baseline_linux.gtk.x86_64_8.0">
       <contains
         string="${job}"
@@ -248,12 +271,10 @@
     <!-- else normal unit tests configs -->
     <property
       name="testsConfigExpected"
-      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64-java8_macosx.cocoa.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32-java8_win32.win32.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java8_linux.gtk.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java11_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java14_linux.gtk.x86_64_14" />
+      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64-java8_macosx.cocoa.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32-java8_win32.win32.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java8_linux.gtk.x86_64_8.0,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java11_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java14_linux.gtk.x86_64_14,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java15_linux.gtk.x86_64_15" />
 
     <echo message=" = = properties in publish.xml == " />
     <echo message="     job: ${job}" />
-    <echo message="     indexFileName: ${indexFileName}" />
-    <echo message="     dropTokenList: ${dropTokenList}" />
     <echo message="     buildDirectory: ${buildDirectory}" />
     <echo message="     xmlDirectoryName: ${xmlDirectoryName}" />
     <echo message="     dropDirectoryName ${dropDirectoryName}" />
@@ -263,11 +284,15 @@
     <echo message="     hrefCompileLogsTargetPath: ${hrefCompileLogsTargetPath}" />
     <echo message="     compileLogsDirectoryName: ${compileLogsDirectoryName}" />
     <echo message="     testManifestFileName: ${testManifestFileName}" />
+    <echo message="     perfManifestFileName: ${perfManifestFileName}" />
+    <echo message="     perfLRManifestFileName: ${perfLRManifestFileName}" />
     <echo message="     testsConfigExpected: ${testsConfigExpected}" />
     <echo message="     isBuildTested: ${isBuildTested}" />
     <echo message="     buildType:  ${buildType}" />
     <echo message="     doMissingListValue:  ${doMissingListValue}" />
     <echo message="     testsConfigExpected: ${testsConfigExpected}" />
+    <echo message="     perfConfigExpected: ${perfConfigExpected}" />
+    <echo message="     perfLRConfigExpected: ${perfLRConfigExpected}" />
     <echo message="     expectedConfigFilename: ${expectedConfigFilename}" />
     <echo message="     foundConfigFilename: ${foundConfigFilename}" />
     <indexResults
@@ -283,7 +308,11 @@
       hrefCompileLogsTargetPath="${hrefCompileLogsTargetPath}"
       compileLogsDirectoryName="${compileLogsDirectoryName}"
       testManifestFileName="${testManifestFileName}"
+      perfManifestFileName="${perfManifestFileName}"
+      perfLRManifestFileName="${perfLRManifestFileName}"
       testsConfigExpected="${testsConfigExpected}"
+      perfConfigExpected="${perfConfigExpected}"
+      perfLRConfigExpected="${perfLRConfigExpected}"
       expectedConfigFilename="${expectedConfigFilename}"
       foundConfigFilename="${foundConfigFilename}"
       doMissingList="${doMissingListValue}" />
