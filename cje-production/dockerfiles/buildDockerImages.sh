@@ -20,6 +20,11 @@ echo "Building Centos 7 docker image"
 docker build -t sravankumarl/centos-gtk3-metacity:7 .
 popd
 
+pushd centos-gtk3-metacity/7-swtBuild
+echo "Building Centos 7 docker image"
+docker build -t sravankumarl/centos-swt-build:7 .
+popd
+
 pushd centos-gtk3-metacity/8-gtk3
 echo "Building Centos 8 docker image"
 docker build -t sravankumarl/centos-gtk3-metacity:8 .
