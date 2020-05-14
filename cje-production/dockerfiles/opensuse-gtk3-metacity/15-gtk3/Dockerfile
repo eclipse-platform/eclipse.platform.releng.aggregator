@@ -1,0 +1,38 @@
+FROM opensuse/leap:15
+
+### user name recognition at runtime w/ an arbitrary uid - for OpenShift deployments
+COPY scripts/uid_entrypoint /usr/local/bin/uid_entrypoint
+RUN chmod u+x /usr/local/bin/uid_entrypoint && \
+    chgrp 0 /usr/local/bin/uid_entrypoint && \
+    chmod g=u /usr/local/bin/uid_entrypoint /etc/passwd
+ENTRYPOINT [ "uid_entrypoint" ]
+
+RUN zypper --non-interactive update && zypper --non-interactive install \
+      libgtk-3-0 \
+      xorg-x11-Xvnc \
+      tigervnc \
+      metacity \
+      xorg-x11-fonts \
+      dejavu-fonts \
+      liberation-fonts \
+      Mesa-libGL1 \
+      Mesa-libEGL1 \
+      Mesa-dri \
+      wget \
+      curl \
+      unzip \
+      vim \
+      webkit2gtk3
+
+ENV HOME=/home/vnc
+ENV DISPLAY :0
+
+RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
+  && echo "123456" | vncpasswd -f > ${HOME}/.vnc/passwd \
+  && chmod 600 ${HOME}/.vnc/passwd
+
+# Create a custom vnc xstartup file
+COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
+RUN chmod 755 ${HOME}/.vnc/xstartup.sh
+
+USER 10001
