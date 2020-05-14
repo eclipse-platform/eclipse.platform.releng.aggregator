@@ -22,7 +22,8 @@ RUN zypper --non-interactive update && zypper --non-interactive install \
       curl \
       unzip \
       vim \
-      webkit2gtk3
+      tar \
+      gzip
 
 ENV HOME=/home/vnc
 ENV DISPLAY :0
