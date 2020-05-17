@@ -66,9 +66,8 @@ public class DBHelpers {
     }
 
     void dumpSummaries(Variations variations, String scenarioPattern) {
-        SummaryEntry[] summries = DB.querySummaries(variations, scenarioPattern);
-        for (int i = 0; i < summries.length; i++)
-            System.out.println(summries[i]);
+        for (SummaryEntry summary : DB.querySummaries(variations, scenarioPattern))
+            System.out.println(summary);
     }
 
     void count(PrintStream ps) throws SQLException {
@@ -318,7 +317,7 @@ public class DBHelpers {
         Scenario[] scenarios = DB.queryScenarios(v, scenarioPattern, PerformanceTestPlugin.BUILD, null);
         ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         ps.println();
-        for (int s = 0; s < scenarios.length; s++)
-            scenarios[s].dump(ps, PerformanceTestPlugin.BUILD);
+        for (Scenario scenario : scenarios)
+            scenario.dump(ps, PerformanceTestPlugin.BUILD);
     }
 }

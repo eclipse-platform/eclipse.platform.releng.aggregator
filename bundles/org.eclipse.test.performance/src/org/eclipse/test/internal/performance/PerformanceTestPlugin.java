@@ -228,8 +228,8 @@ public class PerformanceTestPlugin extends Plugin {
      */
     public static List<String> getDimensions() {
         List<String> dimensions = new ArrayList<>();
-        for (int i = 0; i < SUPPORTED_DIMENSIONS.length; i++) {
-            dimensions.add(SUPPORTED_DIMENSIONS[i].getName());
+        for (Dim element : SUPPORTED_DIMENSIONS) {
+            dimensions.add(element.getName());
         }
         return dimensions;
     }

@@ -105,8 +105,7 @@ public class StatisticsSession {
         Statistics stats;
 
         Set<Integer> steps = new HashSet<>();
-        for (int j = 0; j < fDataPoints.length; j++) {
-            DataPoint dp = fDataPoints[j];
+        for (DataPoint dp : fDataPoints) {
             steps.add(Integer.valueOf(dp.getStep()));
         }
 
@@ -132,8 +131,7 @@ public class StatisticsSession {
         double stdevSum = 0;
 
         // Set acquiredAggregates= new HashSet();
-        for (int i = 0; i < fDataPoints.length; i++) {
-            DataPoint point = fDataPoints[i];
+        for (DataPoint point : fDataPoints) {
             Scalar scalar = point.getScalar(dimension);
             if (scalar == null)
                 continue;
@@ -202,8 +200,8 @@ public class StatisticsSession {
                 return null; // dummy
         }
 
-        for (int i = 0; i < mags.length; i++) {
-            stats.sum += mags[i];
+        for (long mag : mags) {
+            stats.sum += mag;
             stats.count++;
         }
 
@@ -213,8 +211,8 @@ public class StatisticsSession {
                 stats.stddev = 0;
             } else {
                 double squaredDeviations = 0;
-                for (int i = 0; i < mags.length; i++) {
-                    double deviation = stats.average - mags[i];
+                for (long mag : mags) {
+                    double deviation = stats.average - mag;
                     squaredDeviations += deviation * deviation;
                 }
                 stats.stddev = Math.sqrt(squaredDeviations / (stats.count - 1)); // unbiased sample stdev

@@ -65,11 +65,9 @@ public class Evaluator extends EmptyEvaluator {
 
         // determine all dimensions we need
         HashSet<Dim> allDimensions = new HashSet<>();
-        for (int i = 0; i < fCheckers.length; i++) {
-            AssertChecker chk = fCheckers[i];
-            Dim[] dims = chk.getDimensions();
-            for (int j = 0; j < dims.length; j++)
-                allDimensions.add(dims[j]);
+        for (AssertChecker chk : fCheckers) {
+            for (Dim dim : chk.getDimensions())
+                allDimensions.add(dim);
         }
 
         // get data for this session
@@ -97,8 +95,7 @@ public class Evaluator extends EmptyEvaluator {
 
         StringBuffer failMesg = new StringBuffer("Performance criteria not met when compared to '" + refKeys + "':"); //$NON-NLS-1$ //$NON-NLS-2$
         boolean pass = true;
-        for (int i = 0; i < fCheckers.length; i++) {
-            AssertChecker chk = fCheckers[i];
+        for (AssertChecker chk : fCheckers) {
             pass &= chk.test(referenceStats, measuredStats, failMesg);
         }
 

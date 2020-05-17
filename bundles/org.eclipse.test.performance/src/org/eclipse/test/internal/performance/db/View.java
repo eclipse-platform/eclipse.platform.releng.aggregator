@@ -36,7 +36,7 @@ public class View {
         System.out.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         System.out.println();
 
-        for (int s = 0; s < scenarios.length; s++)
-            scenarios[s].dump(System.out, PerformanceTestPlugin.BUILD);
+        for (Scenario scenario : scenarios)
+            scenario.dump(System.out, PerformanceTestPlugin.BUILD);
     }
 }

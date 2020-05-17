@@ -110,10 +110,9 @@ public class Variations extends Properties {
         Arrays.sort(keys);
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < keys.length; i++) {
+        for (String key : keys) {
             if (asQuery)
                 sb.append('%');
-            String key = keys[i];
             String value = keyValues.getProperty(key);
             sb.append('|');
             sb.append(key);
