@@ -117,7 +117,6 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 <?php
 
   echo"<li>eclipse.platform.releng.aggregator: $BRANCH (branch or hash: $EBUILDER_HASH)</li> ";
-  echo"<li>base platform used to start unit tests: $BASEBUILDER_TAG</li> ";
 
 ?>
 <?php
