@@ -40,15 +40,6 @@
         dest="${tmpzipdir}/archive.zip" />
     </retry>
 
-    <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
-    <retry
-      retrycount="3"
-      retrydelay="1000">
-      <get
-        src="${hudsonTestResultsURL}"
-        dest="${resultsDir}/${job}-${buildNumber}.xml" />
-    </retry>
-
     <!-- not sure if mkdir needed? -->
     <mkdir dir="${resultsDir}/directorLogs" />
 
@@ -60,6 +51,15 @@
         from="archive/workarea/${buildId}/eclipse-testing/results/*"
         to="*" />
     </unzip>
+
+    <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
+    <retry
+      retrycount="3"
+      retrydelay="1000">
+      <get
+        src="${hudsonTestResultsURL}"
+        dest="${resultsDir}/${job}-${buildNumber}.xml" />
+    </retry>
 
     <delete failonerror="false">
       <fileset dir="${resultsDir}">
