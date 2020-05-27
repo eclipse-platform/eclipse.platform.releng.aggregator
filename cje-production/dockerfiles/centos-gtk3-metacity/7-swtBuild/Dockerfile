@@ -16,6 +16,7 @@ RUN yum -y update && yum -y install \
       gnu-free-fonts-common \
       dejavu-fonts-common \
       unzip \
+      zip \
       lsof \
       wget \
       curl \
