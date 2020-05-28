@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -329,8 +329,6 @@ public class BuildTests {
 
 	public static final List<String> REQUIRED_FEATURE_FILES_EPL2 = Arrays
 			.asList(new String[] { "epl-2.0.html", "feature.properties", "feature.xml", "license.html" });
-	public static final List<String> REQUIRED_FEATURE_FILES_EPL1 = Arrays
-			.asList(new String[] { "epl-v10.html", "feature.properties", "feature.xml", "license.html" });
 	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
 	public static final List<String> REQUIRED_PLUGIN_FILES = Arrays
@@ -386,10 +384,6 @@ public class BuildTests {
 		File featureDir = new File(installDir, "features");
 		for (File aFeature : featureDir.listFiles()) {
 			List<String> testFiles = REQUIRED_FEATURE_FILES_EPL2;
-			// EMF and ECF features are still EPL 1.0
-			if (aFeature.getName().startsWith("org.eclipse.ecf")) {
-				testFiles = REQUIRED_FEATURE_FILES_EPL1;
-			}
 			if (!testDirectory(aFeature, testFiles, REQUIRED_FEATURE_SUFFIX)) {
 				result.add(aFeature.getPath());
 			}
