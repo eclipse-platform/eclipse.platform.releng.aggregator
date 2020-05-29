@@ -25,13 +25,6 @@ source $1
 
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml
 
-# Change to appropriate versions and uncomment when entering API freeze
-#FREEZE_PARAMS="-DfreezeBaseURL=https://${DOWNLOAD_HOST}/eclipse/downloads/drops4/S-4.15RC1-202002261800/eclipse-SDK-4.15RC1-win32-x86_64.zip \
-#    -DfreezeName=Eclipse-SDK-4.15RC1 \
-#    -DfreezeFilename=eclipse-SDK-4.15RC1-win32-x86_64.zip "
-# Otherwise set to a blank space
-FREEZE_PARAMS=" "
-
 pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
 ${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
