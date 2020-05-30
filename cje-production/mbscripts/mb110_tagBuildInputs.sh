@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019, 2020 IBM Corporation and others.
+# Copyright (c) 2019 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -27,22 +27,8 @@ reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M --date='@'$reportDate)
 gitLogFile=$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
 
-epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
-updateSiteRootPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
-
-# try to find the last tag of the current build type that is available as a promoted build
-# by checking the most recent 5 tags and seeing if an update site for it exists
-lastTagList=$(git tag --list "${BUILD_TYPE}*" | tail -n5)
-lastTag=
-for lt in $lastTagList ; do
-  if ssh genie.releng@projects-storage.eclipse.org test -d ${updateSiteRootPath}/${lt} ; then
-    lastTag=$lt
-  fi
-done
-# if no build is promoted yet, then just fallback to the last tag of the current build type
-if [[ -z "$lastTag" ]] ; then
-  lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
-fi
+# set lastTag
+lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
 
 pushd $CJE_ROOT/$AGG_DIR
 
@@ -54,6 +40,7 @@ then
 fi
 
 git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; git push --verbose origin $BUILD_ID; else echo Skipping \$name; fi || :"
+#git submodule foreach "if grep \"^\${name}:\" ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID;  else echo Skipping \$name; fi || :"
 git tag $BUILD_ID
 git push --verbose origin $BUILD_ID
 
