@@ -24,13 +24,8 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 pushd $CJE_ROOT/$TMP_DIR
-if [[ -z "${WORKSPACE}" ]]
-then
-	wget --recursive --no-parent --no-verbose https://$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID &
-else
-	mkdir -p $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER
-	epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
-	p2RepoPath=${epDownloadDir}/updates
-	scp -r genie.releng@projects-storage.eclipse.org:$p2RepoPath/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/.
-fi
+mkdir -p $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER
+epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
+p2RepoPath=${epDownloadDir}/updates
+scp -r genie.releng@projects-storage.eclipse.org:$p2RepoPath/$PREVIOUS_RELEASE_REPO_ID/$PREVIOUS_RELEASE_ID $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/.
 popd
