@@ -109,15 +109,25 @@ export DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 # Build machine locations (would very seldom change)
 export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
+export ARCHIVE_ROOT=${BUILD_ROOT:-/home/data/httpd/archive.eclipse.org}
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/equinox/drops
+
+export ARCHIVE_BASE_DL=${ARCHIVE_ROOT}/eclipse/downloads/drops4
+export ARCHIVE_BASE_EQ=${ARCHIVE_ROOT}/equinox/drops
 
 # Eclipse Drop Site (final segment)
 export ECLIPSE_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 ${SSH_PREFIX} rm ${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildHidden
 ${SSH_PREFIX} rm ${BUILDMACHINE_BASE_EQ}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildHidden
+
+if [[ "${DL_TYPE}" == "R" ]]
+then
+	${SSH_PREFIX} rm ${ARCHIVE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildHidden
+	${SSH_PREFIX} rm ${ARCHIVE_BASE_EQ}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildHidden
+fi
 
 #Add to composite
 buildId=${ECLIPSE_DL_DROP_DIR_SEGMENT}
