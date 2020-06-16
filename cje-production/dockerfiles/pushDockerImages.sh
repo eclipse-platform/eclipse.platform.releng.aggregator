@@ -15,8 +15,8 @@
 
 set -e
 
-docker push sravankumarl/centos-gtk3-metacity:8
-docker push sravankumarl/centos-gtk3-metacity:7
-docker push sravankumarl/centos-swt-build:7
-docker push sravankumarl/ubuntu-gtk3-metacity:18.04
-docker push sravankumarl/ubuntu-gtk3-metacity:20.04
+docker push eclipse/platformreleng-centos-gtk3-metacity:8
+docker push eclipse/platformreleng-centos-gtk3-metacity:7
+docker push eclipse/platformreleng-centos-swt-build:7
+docker push eclipse/platformreleng-ubuntu-gtk3-metacity:18.04
+docker push eclipse/platformreleng-ubuntu-gtk3-metacity:20.04
