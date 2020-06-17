@@ -109,7 +109,7 @@ export DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 # Build machine locations (would very seldom change)
 export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
-export ARCHIVE_ROOT=${BUILD_ROOT:-/home/data/httpd/archive.eclipse.org}
+export ARCHIVE_ROOT=${ARCHIVE_ROOT:-/home/data/httpd/archive.eclipse.org}
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/equinox/drops
