@@ -130,7 +130,7 @@ function cleanRepo ()
     echo -e "\t${eclipseexe}"
     exit 1
   fi
-  javaexe=${workspace}/jdk8/jre/bin/java
+  javaexe=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
   if [[ ! -x ${javaexe} ]]
   then
     echo -e "\n\tERROR: expected java location not found, or not executable"
@@ -192,20 +192,6 @@ function cleanRepo ()
 
 workspace=$1
 remoteBase="/home/data/httpd/download.eclipse.org"
-
-eclipseIRepo="${remoteBase}/eclipse/updates/4.16-I-builds"
-eclipseSRepo="${remoteBase}/eclipse/updates/4.16milestones"
-eclipseYRepo="${remoteBase}/eclipse/updates/4.16-Y-builds"
-
-#doDryrun=dryrun
-doDryrun=
-# global
-declare -a reposToRemove=()
-cleanRepo $eclipseIRepo I 4 $doDryrun
-declare -a reposToRemove=()
-cleanRepo $eclipseSRepo S 2 $doDryrun
-declare -a reposToRemove=()
-cleanRepo $eclipseYRepo Y 2 $doDryrun
 
 eclipseIRepo="${remoteBase}/eclipse/updates/4.17-I-builds"
 eclipseSRepo="${remoteBase}/eclipse/updates/4.17milestones"
