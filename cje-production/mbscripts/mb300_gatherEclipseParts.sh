@@ -262,11 +262,11 @@ fi
 if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
 then
   echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
-  fn-write-property COMPARATOR_ERRORS "- Comparator Errors Found"
-  fn-write-property COMPARATOR_ERRORS_BODY "Check unanticipated comparator messages:<br>    http://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt<br><br>"
+  fn-write-property COMPARATOR_ERRORS "\"- Comparator Errors Found\""
+  fn-write-property COMPARATOR_ERRORS_BODY "\"Check unanticipated comparator messages:<br>    http://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt<br><br>\""
 else
   echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
-  fn-write-property COMPARATOR_ERRORS " "
-  fn-write-property COMPARATOR_ERRORS_BODY " "
+  fn-write-property COMPARATOR_ERRORS "\" \""
+  fn-write-property COMPARATOR_ERRORS_BODY "\" \""
 fi
 
