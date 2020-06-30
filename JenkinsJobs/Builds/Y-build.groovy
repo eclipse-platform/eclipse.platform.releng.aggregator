@@ -223,7 +223,7 @@ spec:
 	  stage('Tag Build Inputs'){
           steps {
               container('jnlp') {
-                  sshagent(['git.eclipse.org-bot-ssh']) {
+                  sshagent (['git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh '''
                         git config --global user.email "releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
@@ -277,17 +277,19 @@ spec:
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-                    sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                        unset JAVA_TOOL_OPTIONS 
-                        unset _JAVA_OPTIONS
-                        ./mb210_updatePom.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb210_updatePom.sh.log
-                        if [[ ${PIPESTATUS[0]} -ne 0 ]]
-                        then
-                            echo "Failed in Update Pom files in the source stage"
-                            exit 1
-                        fi
-                    '''
+                  	sshagent(['git.eclipse.org-bot-ssh']) {
+	                    sh '''
+	                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
+	                        unset JAVA_TOOL_OPTIONS 
+	                        unset _JAVA_OPTIONS
+	                        ./mb210_updatePom.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb210_updatePom.sh.log
+	                        if [[ ${PIPESTATUS[0]} -ne 0 ]]
+	                        then
+	                            echo "Failed in Update Pom files in the source stage"
+	                            exit 1
+	                        fi
+	                    '''
+	              	}
                   }
                 }
             }
@@ -396,6 +398,8 @@ spec:
                     env.STREAM = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $STREAM)', returnStdout: true)
                     env.COMPARATOR_ERRORS_SUBJECT = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $COMPARATOR_ERRORS_SUBJECT)', returnStdout: true)
                     env.COMPARATOR_ERRORS_BODY = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $COMPARATOR_ERRORS_BODY)', returnStdout: true)
+                    env.POM_UPDATES_SUBJECT = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $POM_UPDATES_SUBJECT)', returnStdout: true)
+                    env.POM_UPDATES_BODY = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $POM_UPDATES_BODY)', returnStdout: true)
                     env.EBUILDER_HASH = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $EBUILDER_HASH)', returnStdout: true)
                     env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
                   }

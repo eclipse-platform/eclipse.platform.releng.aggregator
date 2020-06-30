@@ -22,9 +22,11 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
+REPO_DIR=$CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
+BUILD_DIR=$CJE_ROOT/$DROP_DIR/$BUILD_ID
 mkdir $CJE_ROOT/tmp
 
-cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
+cd $REPO_DIR
 mvn --update-snapshots org.eclipse.tycho:tycho-versions-plugin:1.7.0:update-pom \
   -Dmaven.repo.local=$LOCAL_REPO \
   -Djava.io.tmpdir=$CJE_ROOT/tmp \
@@ -48,3 +50,40 @@ else
     RC=0
   fi
 fi
+
+pushd "$REPO_DIR"
+POM_UPDATES_SUBJECT=" "
+POM_UPDATES=" "
+mkdir -p "$BUILD_DIR"/pom_updates
+git submodule foreach "if (git status -s -uno | grep pom.xml >/dev/null ); then git diff >$BUILD_DIR/pom_updates/\$name.diff; fi "
+pushd "$BUILD_DIR"/pom_updates
+nDiffs=$( ls -1 $BUILD_DIR/pom_updates/*.diff | wc -l )
+# do not create index.html if no diffs to display, as our PHP DL page knows
+# not to display link if index.html is not present.
+if (( $nDiffs > 0 ))
+then
+    POM_UPDATES=""
+    echo "<html>"  >index.html
+    echo "<head>"  >>index.html
+    echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
+    echo "</head>"  >>index.html
+    echo "<body>"  >>index.html
+    echo "<h1>POM version report for $BUILD_ID</h1>"  >>index.html
+    echo "<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>"  >>index.html
+    echo "<ul>"  >>index.html
+
+    for f in *.diff; do
+        FNAME=$( basename $f .diff )
+        echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
+        POM_UPDATES="${POM_UPDATES}<li><a href='$f'>$FNAME</a></li>"
+    done
+    echo "</ul>" >> index.html
+    echo "</html>" >> index.html
+    POM_UPDATES_SUBJECT=" - POM Updates Required"
+fi
+popd
+popd
+# we write to property files, for later use in email message
+fn-write-property POM_UPDATES_BODY "\"${POM_UPDATES}\""
+fn-write-property POM_UPDATES_SUBJECT "\"${POM_UPDATES_SUBJECT}\""
+
