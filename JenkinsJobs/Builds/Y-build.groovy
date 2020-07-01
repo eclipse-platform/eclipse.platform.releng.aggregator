@@ -482,8 +482,8 @@ spec:
             from:"genie.releng@eclipse.org"
         }
         success {
-            emailext body: "Eclipse downloads:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}<br><br> Build logs and/or test results (eventually):<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php<br><br>${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    https://download.eclipse.org/eclipse/updates/4.17-Y-builds<br><br>Specific (simple) site repository:<br>    https://download.eclipse.org/eclipse/updates/4.17-Y-builds/${env.BUILD_IID.trim()}<br><br>Equinox downloads:<br>     https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}<br><br>", 
-            subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
+            emailext body: "Eclipse downloads:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}<br><br> Build logs and/or test results (eventually):<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php<br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    https://download.eclipse.org/eclipse/updates/4.17-Y-builds<br><br>Specific (simple) site repository:<br>    https://download.eclipse.org/eclipse/updates/4.17-Y-builds/${env.BUILD_IID.trim()}<br><br>Equinox downloads:<br>     https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}<br><br>", 
+            subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
             to: "jarthana@in.ibm.com  sravankumarl@in.ibm.com",
             from:"genie.releng@eclipse.org"
         }

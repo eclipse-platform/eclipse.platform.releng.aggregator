@@ -75,10 +75,10 @@ then
     for f in *.diff; do
         FNAME=$( basename $f .diff )
         echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
-        POM_UPDATES="${POM_UPDATES}<li><a href='$f'>$FNAME</a></li>"
     done
     echo "</ul>" >> index.html
     echo "</html>" >> index.html
+    POM_UPDATES="Check POM Updates made by tycho's pom-updater plugin:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/pom_updates/<br><br>"
     POM_UPDATES_SUBJECT=" - POM Updates Required"
 fi
 popd
