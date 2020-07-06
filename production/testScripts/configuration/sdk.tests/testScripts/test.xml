@@ -521,7 +521,29 @@
     <fail
       message="buildId variable had unexpected format. Should be of the form  [IMXYNPSRU] 8 digits '-' 4 digits, but was ${buildId}"
       unless="buildIdOK" />
+  	
+    <loadresource property="buildType">
+      <string value="${buildId}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="buildType: ${buildType}"/>
 
+   <loadresource property="buildIdTimestamp">
+      <string value="${buildId}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\2\3"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
+
+
+  	<!--
     <script language="javascript"><![CDATA[
       var buildId = project.getProperty("buildId");
       var pattern = new RegExp(/^([IMXYNPSRU])(\d{8})-(\d{4})$/);
@@ -532,6 +554,7 @@
       project.setProperty("buildIdTimestamp",sArray[2]+sArray[3]);
       ]]>
     </script>
+    -->
     <fail unless="buildType" />
   </target>
   <target
@@ -587,7 +610,27 @@
     <fail
       message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
       unless="streamOK" />
+  	
+    <loadresource property="eclipseStreamMajor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
 
+    <loadresource property="eclipseStreamMinor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+<!--
     <script language="javascript"><![CDATA[
       var eclipseStream = project.getProperty("eclipseStream");
       var pattern = new RegExp(/^\s*(\d+)\.(\d+)(\.(\d+))?\s*$/);
@@ -604,7 +647,7 @@
       // project.setProperty("eclipseStreamService", sArray[3]);
       ]]>
     </script>
-
+-->
     <fail
       unless="eclipseStreamMajor"
       message="eclipseStreamMajor not defined or computable" />
@@ -2631,17 +2674,26 @@
 
   <target name="getJavaMajorVersion">
     <!--
-      TODO: this assumes we are running ant, with same VM as we'll eventually use
-      during test. Valid assumption most the time, but ... not necessarily always.
+      Since we don't support below java 11 we can safely ignore version numbers for java 8 and below
     -->
 
+  	<loadresource property="javaMajorVersion">
+      <string value="${java.version}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)([\.-](.*))" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="javaMajorVersion: ${javaMajorVersion}"/>
+
+  	<!--
     <script language="javascript">
 
-      <!--
         technically does not have to be wrapped in "CDATA" (Ant and BSD define
         it that way, but if not done, other tools (such as XML Editor) can
         break the code by changing the formatting.
-      -->
+
     <![CDATA[
       var javaVersion = project.getProperty("java.version");
       var pattern = new
@@ -2662,6 +2714,7 @@
       }
       ]]>
     </script>
+      -->
   </target>
 
   <macrodef name="printProperty">

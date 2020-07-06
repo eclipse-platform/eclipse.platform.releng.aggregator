@@ -687,7 +687,27 @@
       message="buildId variable had unexpected format. Should be of the form  [IMXYNPSRU] 8 digits '-' 4 digits, but was ${buildId}"
       unless="buildIdOK" />
 
-    <script language="javascript">
+    <loadresource property="buildType">
+      <string value="${buildId}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="buildType: ${buildType}"/>
+
+   <loadresource property="buildIdTimestamp">
+      <string value="${buildId}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\2\3"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
+  	<!--
+  	<script language="javascript">
       <![CDATA[
       var buildId = project.getProperty("buildId");
       var pattern = new RegExp(/^([IMXYNPSRU])(\d{8})-(\d{4})$/);
@@ -698,6 +718,7 @@
       project.setProperty("buildIdTimestamp",sArray[2]+sArray[3]);
       ]]>
     </script>
+    -->
 
 
     <fail unless="buildType" />
@@ -722,7 +743,28 @@
       message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
       unless="streamOK" />
 
-    <script language="javascript">
+    <loadresource property="eclipseStreamMajor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+
+    <loadresource property="eclipseStreamMinor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+  	
+  	<!--
+  	<script language="javascript">
       <![CDATA[
       var eclipseStream = project.getProperty("eclipseStream");
       var pattern = new
@@ -738,6 +780,7 @@
       project.setProperty("updateSiteSegment", sArray[1] + "." + sArray[2]);
       ]]>
     </script>
+    -->
 
     <fail
       unless="eclipseStreamMajor"
@@ -1162,11 +1205,22 @@
     unless="javaMajorVersion">
 
     <echo message="javaversion in setJavaMajorVersion: ${javaversionEscaped}" />
-    <script language="javascript">
+  	
+  	<loadresource property="javaMajorVersion">
+      <string value="${javaversionExcaped}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern='^.* "(\d+)[\.-].*' replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="javaMajorVersion: ${javaMajorVersion}"/>
+  	<!--
+  	<script language="javascript">
 
-      <!-- technically does not have to be wrapped in "CDATA" (Ant and BSD define
+       technically does not have to be wrapped in "CDATA" (Ant and BSD define
         it that way, but if not done, other tools (such as XML Editor) can break
-        the code by changing the formatting. -->
+        the code by changing the formatting.
     <![CDATA[
       var javaVer = project.getProperty("javaversionEscaped");
       var pattern = new RegExp(/^.*1\.([456789]\.\d)/);
@@ -1197,6 +1251,7 @@
     }
       ]]>
     </script>
+    -->
   </target>
 
   <macrodef name="printPHPProperty">
