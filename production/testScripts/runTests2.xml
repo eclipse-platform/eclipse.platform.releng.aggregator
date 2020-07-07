@@ -95,7 +95,6 @@
     <echo message="eclipseStream: ${eclipseStream}" />
     <echo message="eclipseStreamMajor: ${eclipseStreamMajor}" />
     <echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
-    <echo message="eclipseStreamService: ${eclipseStreamService}" />
     <echo message="buildType: ${buildType}" />
     <echo message="testSuite: ${testSuite}" />
 
@@ -762,7 +761,17 @@
       </filterchain>
     </loadresource>
     <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
-  	
+
+    <loadresource property="updateSiteSegment">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1\.\2"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="updateSiteSegment: ${updateSiteSegment}"/>
+
   	<!--
   	<script language="javascript">
       <![CDATA[
@@ -788,9 +797,6 @@
     <fail
       unless="eclipseStreamMinor"
       message="eclipseStreamMinor not defined or computable" />
-    <!-- eclipseStreamService may not always be defined? And we do not currently
-      use it. <fail unless="eclipseStreamService" message="eclipseStreamService
-      not defined or computable" /> -->
     <fail
       unless="updateSiteSegment"
       message="updateSiteSegment not defined or computable" />
@@ -1207,7 +1213,7 @@
     <echo message="javaversion in setJavaMajorVersion: ${javaversionEscaped}" />
   	
   	<loadresource property="javaMajorVersion">
-      <string value="${javaversionExcaped}"/>
+      <string value="${javaversionEscaped}"/>
       <filterchain>
         <tokenfilter>
           <replaceregex pattern='^.* "(\d+)[\.-].*' replace="\1"/>
