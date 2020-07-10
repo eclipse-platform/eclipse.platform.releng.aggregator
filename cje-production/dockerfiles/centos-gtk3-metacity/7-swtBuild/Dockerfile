@@ -17,6 +17,7 @@ RUN yum -y update && yum -y install \
       dejavu-fonts-common \
       unzip \
       zip \
+      bzip2 \
       lsof \
       wget \
       curl \
@@ -41,6 +42,12 @@ ENV DISPLAY :0
 RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
   && echo "123456" | vncpasswd -f > ${HOME}/.vnc/passwd \
   && chmod 600 ${HOME}/.vnc/passwd
+
+RUN cd ${HOME} && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ${HOME}/setup-rust.sh \
+  && chmod 755 ${HOME}/setup-rust.sh \
+  && ${HOME}/setup-rust.sh -y && export PATH=${HOME}/.cargo/bin:${PATH}
+
+RUN chmod -R 755 ${HOME}
 
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
