@@ -47,6 +47,8 @@ RUN cd ${HOME} && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ${
   && chmod 755 ${HOME}/setup-rust.sh \
   && ${HOME}/setup-rust.sh -y && export PATH=${HOME}/.cargo/bin:${PATH}
 
+RUN mkdir -p ${HOME}/cef-libs && wget -O ${HOME}/cef-libs/cef.tar.bz2 --no-verbose http://opensource.spotify.com/cefbuilds/cef_binary_3.3071.1649.g98725e6_linux64_minimal.tar.bz2
+
 RUN chmod -R 755 ${HOME}
 
 # Create a custom vnc xstartup file
