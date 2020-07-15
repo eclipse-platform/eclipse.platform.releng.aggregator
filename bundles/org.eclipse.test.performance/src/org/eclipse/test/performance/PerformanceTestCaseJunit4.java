@@ -17,6 +17,8 @@ package org.eclipse.test.performance;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 
 /**
  * A PerformanceTestCaseJunit4 is a convenience class that takes care of managing a <code>PerformanceMeter</code>.
@@ -49,6 +51,9 @@ import org.junit.Before;
  */
 public class PerformanceTestCaseJunit4 extends AbstractPerformanceTestCase {
 
+    @Rule
+    public TestName tn = new TestName();
+
     /**
      * Create a default performance meter for this test case.
      *
@@ -57,7 +62,7 @@ public class PerformanceTestCaseJunit4 extends AbstractPerformanceTestCase {
     @Before
     public void setUp() throws Exception {
         Performance performance = Performance.getDefault();
-        fPerformanceMeter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this.getClass()));
+        fPerformanceMeter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this.getClass(), tn.getMethodName()));
     }
 
     /**

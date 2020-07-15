@@ -17,6 +17,7 @@ package org.eclipse.test.performance;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 
 /**
  * A PerformanceTestCaseJunit5 is a convenience class that takes care of managing a <code>PerformanceMeter</code>.
@@ -52,12 +53,14 @@ public class PerformanceTestCaseJunit5 extends AbstractPerformanceTestCase {
     /**
      * Create a default performance meter for this test case.
      *
+     * @param testInfo
+     *
      * @throws Exception
      */
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp(TestInfo testInfo) throws Exception {
         Performance performance = Performance.getDefault();
-        fPerformanceMeter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this.getClass()));
+        fPerformanceMeter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this.getClass(), testInfo.getDisplayName()));
     }
 
     /**
