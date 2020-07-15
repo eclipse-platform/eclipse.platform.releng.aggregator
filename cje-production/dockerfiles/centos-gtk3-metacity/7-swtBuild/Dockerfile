@@ -34,6 +34,10 @@ RUN yum -y update && yum -y install \
       mesa-libGLU-devel \
       mesa-libGL-devel \
       libXt-devel \
+      libXScrnSaver \
+      GConf2 \
+      cmake \
+      freetype \
     && yum clean all
 
 ENV HOME=/home/vnc
