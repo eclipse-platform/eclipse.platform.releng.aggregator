@@ -50,6 +50,7 @@ RUN cd ${HOME} && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ${
 RUN mkdir -p ${HOME}/cef-libs && wget -O ${HOME}/cef-libs/cef.tar.bz2 --no-verbose http://opensource.spotify.com/cefbuilds/cef_binary_3.3071.1649.g98725e6_linux64_minimal.tar.bz2
 
 RUN chmod -R 755 ${HOME}
+RUN chmod -R 777 ${HOME}/.cargo
 
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
