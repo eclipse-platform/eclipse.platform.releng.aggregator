@@ -27,7 +27,6 @@ RUN yum -y update && yum -y install \
       gtk2 \
       gtk2-devel \
       java-openjdk \
-      maven \
       webkit2gtk3-devel \
       make \
       gcc \
