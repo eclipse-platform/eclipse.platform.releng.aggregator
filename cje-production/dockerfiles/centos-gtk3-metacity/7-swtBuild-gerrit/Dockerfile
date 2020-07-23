@@ -50,7 +50,8 @@ RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
 
 RUN cd ${HOME} && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ${HOME}/setup-rust.sh \
   && chmod 755 ${HOME}/setup-rust.sh \
-  && ${HOME}/setup-rust.sh -y && export PATH=${HOME}/.cargo/bin:${PATH}
+  && ${HOME}/setup-rust.sh -y
+ENV PATH=$HOME/.cargo/bin:$PATH
 
 RUN mkdir -p ${HOME}/cef-libs && wget -O ${HOME}/cef-libs/cef.tar.bz2 --no-verbose http://opensource.spotify.com/cefbuilds/cef_binary_3.3071.1649.g98725e6_linux64_minimal.tar.bz2
 
@@ -59,8 +60,8 @@ RUN mkdir -p ${HOME}/maven && wget -O ${HOME}/maven/maven.tar.gz --no-verbose ht
   && tar xzf maven.tar.gz
 
 RUN chmod -R 755 ${HOME}
-RUN export JAVA_HOME=/usr/lib/jvm/java-11
-RUN export PATH=${JAVA_HOME}/bin:${HOME}/maven/apache-maven-3.6.3/bin:${PATH}
+ENV JAVA_HOME=/usr/lib/jvm/java-11
+ENV PATH=$JAVA_HOME/bin:$HOME/maven/apache-maven-3.6.3/bin:$PATH
 
 RUN chmod -R 777 ${HOME}/.cargo
 
