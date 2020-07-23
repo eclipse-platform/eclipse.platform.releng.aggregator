@@ -21,8 +21,13 @@ docker build --pull -t eclipse/platformreleng-centos-gtk3-metacity:7 .
 popd
 
 pushd centos-gtk3-metacity/7-swtBuild
-echo "Building Centos 7 docker image"
+echo "Building Centos 7 swt build image"
 docker build --pull -t eclipse/platformreleng-centos-swt-build:7 .
+popd
+
+pushd centos-gtk3-metacity/7-swtBuild-gerrit
+echo "Building Centos 7 swt build for gerrit image"
+docker build --pull -t eclipse/platformreleng-centos-swt-build:gerrit .
 popd
 
 pushd centos-gtk3-metacity/8-gtk3
