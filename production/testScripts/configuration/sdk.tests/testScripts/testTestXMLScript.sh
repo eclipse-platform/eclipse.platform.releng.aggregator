@@ -43,10 +43,6 @@ export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 #   JAVA_HOME is, at least, what runs the ant instance. If no 'jvm' option is specified,
 #   it also becomes the instance that runs the tests.
-#export JAVA_HOME=/shared/common/jdk1.5.0-latest
-#export JAVA_HOME=/shared/common/jdk1.6.0-latest
-#export JAVA_HOME=/shared/common/jdk1.7.0-latest
-
 JAVA_11_HOME=/opt/public/common/java/openjdk/jdk-11_x64-latest
 export JAVA_HOME=${JAVA_HOME:-${JAVA_11_HOME}}
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin
