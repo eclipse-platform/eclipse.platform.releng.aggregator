@@ -53,6 +53,7 @@ if [ -z $PATCH_BUILD ]; then
   TARGET_PRODUCTS_DIR=$ECLIPSE_BUILDER_DIR/sdk/target/products
   if [ -d $TARGET_PRODUCTS_DIR ]; then
     pushd $TARGET_PRODUCTS_DIR
+    cp org.eclipse.sdk.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-ppc64le.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-x86_64.tar.gz
     cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-x86_64.tar.gz
@@ -66,6 +67,7 @@ if [ -z $PATCH_BUILD ]; then
   TARGET_PRODUCTS_DIR=$ECLIPSE_BUILDER_DIR/platform/target/products
   if [ -d $TARGET_PRODUCTS_DIR ]; then
     pushd $TARGET_PRODUCTS_DIR
+    cp org.eclipse.platform.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-ppc64le.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-x86_64.tar.gz
     cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-x86_64.tar.gz
