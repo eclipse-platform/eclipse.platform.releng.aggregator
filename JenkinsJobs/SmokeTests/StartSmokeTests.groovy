@@ -79,6 +79,16 @@ pipeline {
                         build job: 'ep-smoke-test-ppcle-java14', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
+              stage('Raspberry Pi OS arm64 Java11'){
+                  steps {
+                        build job: 'ep-smoke-test-arm64-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
+              stage('Raspberry Pi OS arm64 Java14'){
+                  steps {
+                        build job: 'ep-smoke-test-arm64-java14', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
           }
 		}
 	}
