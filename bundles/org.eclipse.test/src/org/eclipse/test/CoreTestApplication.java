@@ -29,7 +29,6 @@ public class CoreTestApplication implements IApplication {
 	/**
 	 * Runs a set of tests as defined by the given command line args.
 	 * This is the platform application entry point.
-	 * @see IPlatformRunnable
 	 */
 	public Object run(Object arguments) throws Exception {
 		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
