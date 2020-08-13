@@ -30,7 +30,7 @@ pushd $CJE_ROOT/$UPDATES_DIR
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
 popd
 
-if [[ $COMPARATOR_ERRORS == "true" ]]
+if [ $COMPARATOR_ERRORS == "true" ] && [ "$BUILD_TYPE" == "I" ]
 then
 	exit 0
 fi
