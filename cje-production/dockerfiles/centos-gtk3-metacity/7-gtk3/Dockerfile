@@ -20,10 +20,12 @@ RUN yum -y update && yum -y install \
       wget \
       curl \
       webkitgtk4 \
+      dbus \
     && yum clean all
 
 ENV HOME=/home/vnc
 ENV DISPLAY :0
+RUN dbus-uuidgen --ensure
 
 RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
   && echo "123456" | vncpasswd -f > ${HOME}/.vnc/passwd \
