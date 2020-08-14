@@ -57,9 +57,9 @@ fn-notarize-macbuild ()
   retryCount=3
   while [ ${retryCount} -gt 0 ]; do
 
-    RAW_RESPONSE=$(curl -s --write-out "\n%{http_code}" -X POST -F file=@"${DMG}" -F 'options={"primaryBundleId": "'"${PRIMARY_BUNDLE_ID}"'", "staple": true};type=application/json' http://172.30.206.146:8383/macos-notarization-service/notarize || : )
+    RAW_RESPONSE=$(curl -sS --write-out "\n%{http_code}" -X POST -F file=@"${DMG}" -F 'options={"primaryBundleId": "'"${PRIMARY_BUNDLE_ID}"'", "staple": true};type=application/json' http://172.30.206.146:8383/macos-notarization-service/notarize || : )
 
-    RESPONSE=$(head -n1 <<<"${RAW_RESPONSE}")
+    RESPONSE=$(head -n-1 <<<"${RAW_RESPONSE}")
     STATUS_CODE=$(tail -n1 <<<"${RAW_RESPONSE}")
 
     if [[ "${STATUS_CODE}" != "200" ]]; then
@@ -71,6 +71,7 @@ fn-notarize-macbuild ()
         exit 1
       else
         echo "Retrying..."
+        sleep 2
       fi
     fi
 
@@ -79,7 +80,7 @@ fn-notarize-macbuild ()
 
     while [[ ${STATUS} == 'IN_PROGRESS' ]]; do
       sleep 1m
-      RESPONSE=$(curl -s "http://172.30.206.146:8383/macos-notarization-service/${UUID}/status")
+      RESPONSE=$(curl -sS "http://172.30.206.146:8383/macos-notarization-service/${UUID}/status")
       STATUS=$(echo "$RESPONSE" | grep -Po '"status"\s*:\s*"\K[^"]+' || : )
     done
 
@@ -91,6 +92,7 @@ fn-notarize-macbuild ()
         exit 1
       else
         echo "Retrying..."
+        sleep 2
       fi
     else
       break
@@ -100,7 +102,7 @@ fn-notarize-macbuild ()
 
   rm "${DMG}"
 
-  curl -JO "http://172.30.206.146:8383/macos-notarization-service/${UUID}/download"
+  curl -sSJO "http://172.30.206.146:8383/macos-notarization-service/${UUID}/download"
   popd || exit 5
   set +x
 }
