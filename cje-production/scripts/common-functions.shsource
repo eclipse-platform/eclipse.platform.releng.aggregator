@@ -50,26 +50,42 @@ fn-notarize-macbuild ()
   BUILD_DIR="$1"; shift
   DMG="$1"; shift
 
-  pushd $BUILD_DIR
+  pushd "$BUILD_DIR" || exit 5
 
-  PRIMARY_BUNDLE_ID="$(echo ${DMG} | sed  's/-macosx-cocoa-x86_64.dmg//g')"
+  PRIMARY_BUNDLE_ID="${DMG//-macosx-cocoa-x86_64.dmg/}"
 
   retryCount=3
   while [ ${retryCount} -gt 0 ]; do
 
-    RESPONSE=$(curl -s -X POST -F file=@${DMG} -F 'options={"primaryBundleId": "'${PRIMARY_BUNDLE_ID}'", "staple": true};type=application/json' http://172.30.206.146:8383/macos-notarization-service/notarize)
-    UUID=$(echo $RESPONSE | grep -Po '"uuid"\s*:\s*"\K[^"]+')
-    STATUS=$(echo $RESPONSE | grep -Po '"status"\s*:\s*"\K[^"]+')
+    RAW_RESPONSE=$(curl -s --write-out "\n%{http_code}" -X POST -F file=@"${DMG}" -F 'options={"primaryBundleId": "'"${PRIMARY_BUNDLE_ID}"'", "staple": true};type=application/json' http://172.30.206.146:8383/macos-notarization-service/notarize || : )
+
+    RESPONSE=$(head -n1 <<<"${RAW_RESPONSE}")
+    STATUS_CODE=$(tail -n1 <<<"${RAW_RESPONSE}")
+
+    if [[ "${STATUS_CODE}" != "200" ]]; then
+      echo "Bad response from the server (status=${STATUS_CODE})"
+      echo "${RESPONSE}"
+      retryCount=$((retryCount - 1))
+      if [ $retryCount -eq 0 ]; then
+        echo "Notarization failed 3 times. Exiting"
+        exit 1
+      else
+        echo "Retrying..."
+      fi
+    fi
+
+    UUID=$(echo "$RESPONSE" | grep -Po '"uuid"\s*:\s*"\K[^"]+' || : )
+    STATUS=$(echo "$RESPONSE" | grep -Po '"status"\s*:\s*"\K[^"]+' || : )
 
     while [[ ${STATUS} == 'IN_PROGRESS' ]]; do
       sleep 1m
-      RESPONSE=$(curl -s http://172.30.206.146:8383/macos-notarization-service/${UUID}/status)
-      STATUS=$(echo $RESPONSE | grep -Po '"status"\s*:\s*"\K[^"]+')
+      RESPONSE=$(curl -s "http://172.30.206.146:8383/macos-notarization-service/${UUID}/status")
+      STATUS=$(echo "$RESPONSE" | grep -Po '"status"\s*:\s*"\K[^"]+' || : )
     done
 
     if [[ ${STATUS} != 'COMPLETE' ]]; then
       echo "Notarization failed: ${RESPONSE}"
-      retryCount=$(expr $retryCount - 1)
+      retryCount=$((retryCount - 1))
       if [ $retryCount -eq 0 ]; then
         echo "Notarization failed 3 times. Exiting"
         exit 1
@@ -84,7 +100,7 @@ fn-notarize-macbuild ()
 
   rm "${DMG}"
 
-  curl -JO http://172.30.206.146:8383/macos-notarization-service/${UUID}/download
-  popd
+  curl -JO "http://172.30.206.146:8383/macos-notarization-service/${UUID}/download"
+  popd || exit 5
   set +x
 }
