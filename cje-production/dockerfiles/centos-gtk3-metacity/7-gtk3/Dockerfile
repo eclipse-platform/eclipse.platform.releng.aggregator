@@ -21,6 +21,7 @@ RUN yum -y update && yum -y install \
       curl \
       webkitgtk4 \
       dbus \
+      glibc-locale-source \
     && yum clean all
 
 ENV HOME=/home/vnc
@@ -34,5 +35,7 @@ RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
 RUN chmod 755 ${HOME}/.vnc/xstartup.sh
+RUN localedef -i en_US -f UTF-8 en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 USER 10001
