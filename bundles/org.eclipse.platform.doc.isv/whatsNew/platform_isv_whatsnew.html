@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.16</title>
+<title>Eclipse Platform What's New in 4.17</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.16</h2>
+<h2>What's New in Eclipse 4.17</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.16 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.17 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
@@ -48,226 +48,123 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  <tr id="browserviewer-invokes-urihandler"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=561974 -->
-    <td class="title">BrowserViewer uses URISchemeHandler extensions</td>
+  <tr id="deferred-image-descriptor"><!-- https://bugs.eclipse.org/477391 -->
+    <td class="title"><a href="#deferred-image-descriptor">DeferredImageDescriptor API</a></td>
     <td class="content">
-      The <code>BrowserViewer</code> now uses the extensions to <code>org.eclipse.urischeme.uriSchemeHandlers</code>.
-      When clicking a hyperlink with a non-default supported web browser URI scheme, the extensions are checked and if one can
-      handle the URI scheme, it will be triggered.
-      <p>One example is Marketplace Client providing support for <code>eclipse+mpc://...</code> URIs. Using the BrowserViewer and
-      clicking an <code>eclipse+mpc://...</code> link target will open the Marketplace Client wizard.</p>
-    </td>
-  </tr>
-  
-  <tr id="eclipse-command-url-handler"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562049 -->
-    <td class="title">Handle eclipse+command:// URLs</td>
-    <td class="content">
-      <b>eclipse+command://</b> Link handler makes the Eclipse application start a command.
-      <p>Such URLs have the form <code>eclipse+command://commandId?param1Id=value&amp;param2Id=value</code>.
-      <br/>For example, to open a preference page: <code>eclipse+command://org.eclipse.ui.window.preferences?preferencePageId=org.eclipse.ui.browser.preferencePage</code></p>
-      <p>This link handler must be activated from the <i>Link handlers</i> preference page to bind the Eclipse application with this URL scheme in the OS.</p>
-    </td>
-  </tr>
-  
-  <tr id="e4-core-di-extensions"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=539149 -->
-    <td class="title">org.eclipse.e4.core.di.extensions APIs made public</td>
-    <td class="content">
-      The dependency injection annotation APIs in <code>org.eclipse.e4.core.di.extensions</code> such as <code>@EventTopic</code> have been made an official API.
-      <p>These APIs have already been commonly used by dependency injection in E4 RCP applications, but have only been marked as provisional APIs thus far. The provisional flag has now been removed.</p>
-    </td>
-  </tr>
-  
-  <tr id="saferunner-with-results"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=558642 -->
-    <td class="title">Saferunner can return results</td>
-     <td class="content">
-      SafeRunner now supports runnables that return a result.<br/>
-      <code>T run(ISafeRunnableWithResult&lt;T&gt; code);</code>
-      <p>Example:</p>
-      <pre><code>int result = SafeRunner.run(new ISafeRunnableWithResult &lt;Integer &gt;() {
-     @Override
-     public Integer runWithResult() throws Exception {
-          return 42;
-     }
-     })</code></pre>
-      <p>Using lambda:</p>
-      <pre><code>int result = SafeRunner.run(() -> 42);</code></pre>
-    </td>
-  </tr>
-  
-  <tr id="active-tab-highlight-css"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=497586 -->
-   <td class="title">Active tab highlight CSS option</td>
-   <td class="content">
-    The active tab can now be highlighted by using the <code>swt-selected-tab-highlight</code> CSS property. 
-    By default, the highlight is placed at the top of the tab, but it can be changed by using the boolean CSS property <code>swt-selected-highlight-top</code>.
-    
-    <p>
-     Here's how it looks when enabled with the dark theme:
-     <img src="images/active-tab-highlight-css-pref.png" alt="" />
-    </p>
-    
-    Example usage in CSS:
-    <pre>
-     <code># Set the selected tab highlight color </code>
-     <code>swt-selected-tab-highlight: white;</code>
-     <code># Set whether the highlight should be on top or bottom of the tab (default is true)</code>
-     <code>swt-selected-highlight-top: false;</code>
-    </pre>
-   </td>
-  </tr>
-  
-  <tr id="square-ctabs"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=538740 -->
-    <td class="title">Added support for square CTabs</td>
-    <td class="content">
-        Square tabs can be enabled in CSS by specifying an swt-corner-radius of 0.
-      <p>
-        <img src="images/dark-theme-square-tabs.png" alt="" />
-      </p>
-      <p>
-        <img src="images/light-theme-square-tabs.png" alt="" />
-      </p>
-    </td>
+	  The <code>DeferredImageDescriptor</code> API has been added to JFace
+	  allowing the creation of <code>ImageDescriptor</code> instances from
+	  a URL, where the calculation of the URL is potentially costly
+	  (because it might involve searching through multiple directories or
+	  bundles/fragments on disk).
+	  <p>The new API can be called using
+	  <code>ImageDescriptor.createFromSupplier</code> along with a
+	  <code>Supplier&lt;URL&gt;</code> which will calculate on demand the
+	  URL when the image is acessed for the first time. This allows images
+	  registered at startup in an <code>ImageRegistry</code> to be deferred
+	  until the first time the image is shown on screen.</p>
+	  <p>Old way:</p>
+<pre><code>URL url = FileLocator.find(bundle, path);
+descriptor = ImageDescriptor.createFromURL(url);
+</code></pre>
+	  <p>New way:</p>
+<pre><code>descriptor = ImageDescriptor.createFromURLSupplier(
+  () -&gt; FileLocator.find(bundle, path)
+);
+</code></pre>
+	</td>
   </tr>
 
-  <tr id="date-time-properties"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=468293 -->
-    <td class="title">Added JFace databinding support for java.time classes</td>
+	<tr id="system-color-in-workbench-css"><!-- https://bugs.eclipse.org/565775 -->
+		<td class="title"><a href="#system-color-in-workbench-css">Use System colors in workbench CSS theme files</a></td>
+		<td class="content">
+			In workbench theme CSS files, you can now reference the system colors defined by SWT. To do so, use the
+			SWT field name replacing uderscores <code>_</code> by dashes <code>-</code> and prefixing with hash <code>#</code>.
+			<p>
+			For example, to reference the system color <code>SWT.COLOR_LIST_SELECTION_BACKGROUND</code>, you can use
+			<code>#COLOR-LIST-SELECTION-BACKGROUND</code> in your .css files.
+			</p>
+		</td>
+	</tr>
+		
+	
+  <tr id="widget-factories"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551589 -->
+   <td class="title"><a href="#widget-factories">Additional widget factories</a></td>
     <td class="content">
-        Methods have been added to <code>WidgetProperties</code> to make it easy to bind to an SWT
-        <code>DateTime</code> widget and have the result as a <code>LocalDate</code> or <code>LocalTime</code>.
-      <p>
-        Example:
-      </p>
-      <pre><code>
-DateTime time = new DateTime(shell, SWT.TIME | SWT.BORDER);
-IObservableValue&lt;LocalTime&gt; timeValue = WidgetProperties.localTimeSelection().observe(time);</code></pre>
-      <p>
-        A class that combines a date and a time to a <code>LocalDateTime</code> has also been added:
-      </p>
-      <pre><code>
-IObservableValue&lt;LocalDateTime&gt; dateTimeValue = new LocalDateTimeObservableValue(dateValue, timeValue);</code></pre>
+      Factories for additional SWT widgets have been created: SashFactory, ShellFactory and SectionFactory.
     </td>
-  </tr>
-
+  </tr>	
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  <tr id="win-ligatures-support"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562165 -->
-    <td class="title">Support for Ligatures on Windows</td>
+  <tr id="swt-chromium"> <!-- https://bugs.eclipse.org/549585 -->
+    <td class="title"><a href="#swt-chromium">Support for Chromium browser renderer</a></td>
     <td class="content">
-      Ligatures are now supported by the <code>StyledText</code> widget on Windows. It was already supported on Linux and macOS.
-      <p> Screenshot of ligatures drawn in <code>StyledText</code> and <code>Text</code> widgets on Windows 10: </p>
-      <p>
-       <img src="images/win_ligatures_support_with_StyledText.png" alt="Support for ligatures on Windows" />
-      </p>
+      SWT now supports Chromium as a browser renderer on all platforms using a new <code>SWT.CHROMIUM</code> constant. Please see this 
+      <a href="https://www.eclipse.org/swt/faq.php#howusechromium">FAQ</a> entry for details on using the Chromium style browser.
     </td>
   </tr>
-  
-  <tr id="swt-no-disposal-needed"> <!-- https://bugs.eclipse.org/563018 -->
-    <td class="title">Colors don't need to be disposed</td>
+
+  <tr id="swt-device-free-constructors"> <!-- https://bugs.eclipse.org/563560 -->
+    <td class="title"><a href="#swt-device-free-constructors">Colors have new Device free constructors</a></td>
     <td class="content">
-      Starting from Eclipse 4.16, SWT no longer requires <code>Color</code>s to be disposed as they are not allocated
-      any OS resources.
+      Starting from Eclipse 4.16, SWT no longer required Colors to be disposed, with Eclipse 4.17
+      new constructors are available which don't require a Device when creating Colors.
     </td>
+
   </tr>
-  
-  <tr id="gtk-min-version"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=561047 -->
-    <td class="title">Minimum GTK version update</td>
+
+  <tr id="dark-win32-menu"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562454 -->
+    <td class="title"><a href="#dark-win32-menu">Support for dark theme Menu under Windows10</a></td>
     <td class="content">
-      Starting from Eclipse 4.16, SWT/GTK no longer supports versions of GTK older than 3.20.
-     </td>
-  </tr>
-  
-  <tr id="win-dark-tweaks">
-    <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=444560 -->
-    <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=560284 -->
-    <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=560316 -->
-    <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=560358 -->
-    <td class="title">Dark theme tweaks Windows</td>
-    <td class="content">
-      Various tweaks were implemented to improve dark theme experience on Windows, where OS supported dark theme is not quite there yet:
-      <ul>
-        <li><a href="platform_isv_whatsnew.html#win-dark-scrollbars">Dark scrollbars (only on Win10)</a></li>
-        <li>Custom colors for <code>Menu</code> bar:
-          <p> For Example: dark menu can be enabled via setting below key/value pairs on the <code>Display</code> instance as shown below:
-             <code>display.setData("org.eclipse.swt.internal.win32.menuBarForegroundColor", new Color(display, 0xD0, 0xD0, 0xD0));</code><br/>
-             <code>display.setData("org.eclipse.swt.internal.win32.menuBarBackgroundColor", new Color(display, 0x30, 0x30, 0x30));</code><br/>
-             <code>display.setData("org.eclipse.swt.internal.win32.menuBarBorderColor", new Color(display, 0x50, 0x50, 0x50));</code><br/>
-          </p>
-        </li>
-        <li>Custom color for <code>Table</code> header lines:
-         <p> For Example: table header line color for dark theme can be enabled via setting below key/value pair on the <code>Display</code> instance as shown below:
-          <code>display.setData("org.eclipse.swt.internal.win32.Table.headerLineColor", new Color(display, 0x50, 0x50, 0x50));</code>
-         </p>
-        </li>
-        <li>Dark theme compatible Control borders:
-         <p> For Example: dark border for below supported controls can be enabled via setting below key/value pair on the <code>Display</code> instance as shown below:
-          <code>display.setData("org.eclipse.swt.internal.win32.Canvas.use_WS_BORDER", true);</code><br/>
-          <code>display.setData("org.eclipse.swt.internal.win32.List.use_WS_BORDER", true);</code><br/>
-          <code>display.setData("org.eclipse.swt.internal.win32.Table.use_WS_BORDER", true);</code><br/>
-          <code>display.setData("org.eclipse.swt.internal.win32.Text.use_WS_BORDER", true);</code><br/>
-          <code>display.setData("org.eclipse.swt.internal.win32.Tree.use_WS_BORDER", true);</code><br/>
-         </p>
-         Here's how dark <code>Menu</code>, <code>Table</code> header and <code>Text</code> border looks like in Eclipse:<br/>
-         <img src="images/dark_menu_textBroder_table.png" alt="Support for dark menu, table header and text border on Windows"/>
-        </li>
-        <li>Custom color for disabled <code>Label</code> foreground color:
-         <p> For Example: disabled <code>Label</code> foreground color for dark theme can be enabled via setting below key/value pair on the <code>display</code> 
-          instance as shown below:
-          <code>display.setData("org.eclipse.swt.internal.win32.Label.disabledForegroundColor", new Color(display, 0x80, 0x80, 0x80));</code>
-         </p>
-         Here's how dark disabled <code>Label</code> looks like in Eclipse:<br/>
-         <img src="images/dark_disabled_label.png" alt="Support for dark disabled label on Windows" />
-        </li>
-      </ul>
+      SWT supports dark theme <code>Menu</code> under Windows10 as below:
       <p>
-       On <b>Windows 10</b> all the <a href="platform_isv_whatsnew.html#win-dark-tweaks">dark theme tweaks</a> including the <a href="platform_isv_whatsnew.html#win-dark-scrollbars">dark scrollbars</a> can be disabled using the 
-       <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
-       For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
+        Old:
       </p>
-      <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
-      Note: Once this Java property is set, all above <code>display.setData()</code> calls won't come into effect.
-    </td>
-  </tr>
-  
-  <tr id="win-dark-scrollbars"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=444560 -->
-    <td class="title">Support for dark scrollbars on Windows</td>
-    <td class="content">
-      SWT now supports having dark scrollbars on Windows. 
       <p>
-        Dark scrollbars can be enabled via <code>Display.setData()</code> with the following key/value pair:
-        <code>display.setData("org.eclipse.swt.internal.win32.useDarkModeExplorerTheme", true);</code>
+        <img src="images/menu-background-old.png" alt="" />
       </p>
-      Screenshot of dark-themed scrollbars on Windows 10:
-      <p> 
-       <img src="images/win_dark_Scrollbars.png" alt="Support for dark scrollbars on Windows" /></p>
       <p>
-        On <b>Windows 10</b>, all the <a href="platform_isv_whatsnew.html#win-dark-tweaks">dark theme tweaks</a> including the <a href="platform_isv_whatsnew.html#win-dark-scrollbars">dark scrollbars</a> can be disabled using the 
+        New:
+      </p>
+      <p>
+        <img src="images/menu-background-dark.png" alt="" />
+      </p>
+      <p>
+        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#dark-win32-menu">dark menu</a> can be disabled using the 
         <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
         For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
       </p>
       <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
-      Note: Once this Java property is set, the above <code>display.setData()</code> call won't come into effect.
     </td>
   </tr>
-  
-  <tr id="sleak-save"> <!-- https://bugs.eclipse.org/563451 -->
-   <td class="title">S-Leak SWT Tool has save options</td>
-   <td class="content">
-     Add a save to file option for <a href="https://www.eclipse.org/swt/tools.php" target="_blank">S-Leak</a>. Two new buttons are added,
-     save and save as.
-     <p>
-      When saving, there are some options to control saving:
-     </p>
-     <ul>
-       <li>save to incrementing file numbers to make it easier to capture multiple files without prompts</li>
-       <li>save the preview to png files cross referenced to the main text file</li>
-       <li>include stack traces if "Stack" is checked</li>
-     </ul>
+
+  <tr id="dark-win32-combo"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562454 -->
+    <td class="title"><a href="#dark-win32-combo">Improved dark theme Combo under Windows</a></td>
+    <td class="content">
+      SWT supports improved dark theme <code>Combo</code> under Windows10 as below:
+      <p>
+        Old:
+      </p>
+      <p>
+        <img src="images/combo-win32-dark-old.png" alt="" />
+      </p>
+      <p>
+        New:
+      </p>
+      <p>
+        <img src="images/combo-win32-dark-new.png" alt="" />
+      </p>
+      <p>
+        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#dark-win32-combo">dark combo</a> can be disabled using the 
+        <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
+        For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
+      </p>
+      <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
     </td>
   </tr>
-  
   <!-- *********************** End of SWT *********************** -->
 
 </tbody>
