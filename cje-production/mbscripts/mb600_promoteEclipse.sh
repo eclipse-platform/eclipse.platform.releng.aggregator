@@ -24,6 +24,7 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 pushd $CJE_ROOT/$DROP_DIR/
+rm -rf ${BUILD_ID}/buildnotes
 if [[ $COMPARATOR_ERRORS == "true" ]]
 then
 	touch ${BUILD_ID}/buildUnstable
