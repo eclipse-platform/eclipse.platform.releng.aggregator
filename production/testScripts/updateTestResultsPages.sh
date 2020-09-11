@@ -194,13 +194,11 @@ if [[ $JOB_NAME =~ $perfJobPattern && ! $JOB_NAME =~ $perfBaselineJobPattern ]]
 then
   # We run the "performance analysis" tools only on "current" build, for jobs that contain -perf- (and do not contain -baseline)
 
-  devworkspace="${fromDir}/workspace-installDerbyCore"
   devArgs="-Xmx512m"
 
 
   echo "Collected a performance run result. Doing performance analysis for $JOB_NAME"
   echo
-  echo " = = Properties in updateTestResultsPages.sh: update derby section  = = "
   echo "   dev script:   $0"
   echo "   buildRoot:    $buildRoot"
   echo "   BUILD_HOME:   ${BUILD_HOME}"
@@ -213,20 +211,7 @@ then
   echo "   JOB_NAME:     $JOB_NAME"
   echo "   JOB_NUMBER:   $JOB_NUMBER"
   echo
-  echo " = = First, installing derby"
-  # make sure derby.core is installed in basebuilder
-  perfrepoLocation=https://download.eclipse.org/eclipse/updates/buildtools/
-  derby=org.apache.derby.core.feature.feature.group
   echo "   perfrepoLocation:   $perfrepoLocation"
-  echo "   derby:              $derby"
-
-  ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.equinox.p2.director -repository ${perfrepoLocation} -installIUs ${derby} -vm $devJRE -vmargs $devArgs
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo "ERROR: eclipse returned non-zero return code while installing derby, exiting with RC: $RC."
-    exit $RC
-  fi
 
   echo " = = Now run performance.ui app = ="
   devworkspace="${fromDir}/workspace-updatePerfResults"

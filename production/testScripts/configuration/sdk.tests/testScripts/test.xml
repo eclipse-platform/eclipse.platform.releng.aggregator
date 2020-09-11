@@ -427,54 +427,6 @@
       <arg value="file:${repoLocation}" />
     </java>
 
-    <antcall target="installderby" />
-  </target>
-
-  <target
-    name="installderby"
-    if="derby"
-    unless="skipDerby">
-    <!-- use p2director, not dropins -->
-    <property
-      name="perfrepoLocation"
-      value="https://download.eclipse.org/eclipse/updates/buildtools/" />
-
-    <java
-      jar="${launcherPath}"
-      failonerror="true"
-      dir="${eclipse-home}"
-      timeout="900000"
-      fork="true"
-      output="${directorLogs}/director-${derby}.log"
-      append="true"
-      resultproperty="directorcode">
-      <arg value="-vm" />
-      <arg path="${java.home}/bin/java" />
-      <arg value="-application" />
-      <arg value="org.eclipse.equinox.p2.director" />
-      <arg value="-consoleLog" />
-      <arg value="-debug" />
-      <arg value="-flavor" />
-      <arg value="tooling" />
-      <arg value="-installIUs" />
-      <arg value="${derby}" />
-      <arg value="-p2.os" />
-      <arg value="${os}" />
-      <arg value="-p2.ws" />
-      <arg value="${ws}" />
-      <arg value="-p2.arch" />
-      <arg value="${arch}" />
-      <arg value="-roaming" />
-      <arg value="-profile" />
-      <arg value="SDKProfile" />
-      <arg value="-repository" />
-      <arg value="${perfrepoLocation}" />
-      <arg value="-destination" />
-      <arg path="${eclipse-home}" />
-      <arg value="-bundlepool" />
-      <arg path="${eclipse-home}" />
-    </java>
-
   </target>
 
   <target
@@ -1507,15 +1459,6 @@
 
       <echo message="test.target in 'runTests': ${test.target}" />
 
-      <!--install db plug-ins if running performance tests -->
-      <condition
-        property="derby"
-        value="org.apache.derby.core.feature.feature.group">
-        <equals
-          arg1="${test.target}"
-          arg2="performance" />
-      </condition>
-      <!-- <property name="derby" value="" /> -->
       <!-- <param name="testPlugin" value="${@{testPlugin}}" /> -->
       <antcall target="${test.target}">
         <param

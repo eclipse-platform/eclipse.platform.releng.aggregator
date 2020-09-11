@@ -202,7 +202,7 @@ function createBaseBuilder ()
         -debug -consolelog -data ${WORKSPACE}/workspace-toolsinstall \
         -application org.eclipse.equinox.p2.director \
         -repository "https://download.eclipse.org/eclipse/updates/4.16/","https://download.eclipse.org/eclipse/updates/buildtools/","https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repositoryunittests" \
-        -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group,org.apache.derby.core.feature.feature.group \
+        -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \
         -destination ${BASEBUILDER_DIR} \
         -profile SDKProfile
   popd
