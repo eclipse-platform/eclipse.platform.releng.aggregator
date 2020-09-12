@@ -24,6 +24,7 @@ public class AllTests {
 
         // suite.addTestSuite(SimplePerformanceMeterTest.class);
         suite.addTestSuite(VariationsTests.class);
+        suite.addTestSuite(DBTests.class);
         suite.addTestSuite(PerformanceMeterFactoryTest.class);
 
         return suite;

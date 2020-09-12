@@ -19,6 +19,7 @@ import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.performance.PerformanceMeter;
 import org.junit.Assert;
@@ -60,6 +61,7 @@ public class Evaluator extends EmptyEvaluator {
         InternalPerformanceMeter ipm = (InternalPerformanceMeter) performanceMeter;
         Sample session = ipm.getSample();
         Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
+        String scenarioName = session.getScenarioID();
 
         // determine all dimensions we need
         HashSet<Dim> allDimensions = new HashSet<>();
@@ -69,11 +71,39 @@ public class Evaluator extends EmptyEvaluator {
         }
 
         // get data for this session
-        DataPoint[] sessionDatapoints = session.getDataPoints();
+        DataPoint[] sessionDatapoints;
         Variations config = PerformanceTestPlugin.getVariations();
+        if (config != null)
+            sessionDatapoints = DB.queryDataPoints(config, scenarioName, allDimensions);
+        else
+            sessionDatapoints = session.getDataPoints();
         if (sessionDatapoints == null || sessionDatapoints.length == 0) {
             PerformanceTestPlugin.logWarning("no session data named '" + config + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
             return;
+        }
+
+        // get reference data
+        DataPoint[] datapoints = DB.queryDataPoints(refKeys, scenarioName, allDimensions);
+        if (datapoints == null || datapoints.length == 0) {
+            PerformanceTestPlugin.logWarning("no reference data named '" + refKeys + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
+            return;
+        }
+
+        // calculate the average
+        StatisticsSession referenceStats = new StatisticsSession(datapoints);
+        StatisticsSession measuredStats = new StatisticsSession(sessionDatapoints);
+
+        StringBuffer failMesg = new StringBuffer("Performance criteria not met when compared to '" + refKeys + "':"); //$NON-NLS-1$ //$NON-NLS-2$
+        boolean pass = true;
+        for (AssertChecker chk : fCheckers) {
+            pass &= chk.test(referenceStats, measuredStats, failMesg);
+        }
+
+        if (!pass) {
+            if (config != null)
+                DB.markAsFailed(config, session, failMesg.toString());
+            // else
+            // Assert.assertTrue(failMesg.toString(), false);
         }
     }
 }
