@@ -15,16 +15,16 @@
 # ECLIPSE:
 APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
-SDK_BUILD_DIR=R-4.16-202006040540
-SDK_VERSION=4.16
+SDK_BUILD_DIR=R-4.17-20200902180
+SDK_VERSION=4.17
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
 # JDT / ECJ:
-ECJ_VERSION=3.22.0
+ECJ_VERSION=3.23.0
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
-URL_AGG_UPDATES=http://download.eclipse.org/cbi/updates/aggregator/headless/4.8/I20180518-0759
+URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/aggregator/headless/4.13/I20200825-1209/
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools
