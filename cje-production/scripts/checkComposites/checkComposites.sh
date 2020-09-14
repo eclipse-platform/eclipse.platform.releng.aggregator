@@ -50,7 +50,7 @@ fi
 for repo in ${repoList}
 do
   echo -e "\n\n\tChecking repo:\n\t\t ${repoAccess}${repo}\n\n"
-  nice -n 10 ${WORKSPACE}/eclipse/eclipse -nosplash -consolelog --launcher.suppressErrors -application org.eclipse.equinox.p2.director -repository ${repoAccess}${repo} -list -vm /opt/tools/java/oracle/jdk-8/latest/bin/java
+  nice -n 10 ${WORKSPACE}/eclipse/eclipse -nosplash -consolelog --launcher.suppressErrors -application org.eclipse.equinox.p2.director -repository ${repoAccess}${repo} -list -vm ${JAVA_HOME}/bin/java
   RC=$?
   if [[ $RC != 0 ]]
   then
