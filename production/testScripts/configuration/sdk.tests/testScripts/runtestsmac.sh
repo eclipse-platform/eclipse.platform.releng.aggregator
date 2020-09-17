@@ -104,7 +104,12 @@ ECLIPSE_HOME=Eclipse.app/Contents/Eclipse
 
 if [[ ! -r "${ECLIPSE_HOME}" ]]
 then
-  tar -xzf eclipse-SDK-*.tar.gz
+  hdiutil attach eclipse-SDK-*.dmg
+  cp -r /Volumes/Eclipse/Eclipse.app .
+  hdiutil detach /Volumes/Eclipse
+  xattr -rc Eclipse.app
+  
+  #tar -xzf eclipse-SDK-*.tar.gz
   # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
   unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d "${ECLIPSE_HOME}/dropins"
 fi
