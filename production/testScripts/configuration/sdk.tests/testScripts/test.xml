@@ -23,6 +23,13 @@
         string="${runtimeArchive}"
         substring=".tar.gz" />
     </condition>
+    <condition
+      property="setupTarget"
+      value="setup-dmg">
+      <contains
+        string="${runtimeArchive}"
+        substring=".dmg" />
+    </condition>
 
     <condition
       property="extraIU"
@@ -171,6 +178,50 @@
 
   </target>
 
+  <!--setup for dmg archives -->
+  <target
+    name="setup-dmg"
+    depends="init"
+    description="Reinstall the test Eclipse installation if specified by user">
+    <condition property="runtimeArchiveExists">
+      <available file="${executionDir}/${runtimeArchive}" />
+    </condition>
+    <fail
+      unless="runtimeArchiveExists"
+      message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
+    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <delete
+      dir="${eclipse-home}"
+      verbose="false" />
+
+    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
+    <exec
+      dir="${install}"
+      executable="hdiutil">
+      <arg value="attach" />
+      <arg path="${executionDir}/${runtimeArchive}" />
+    </exec>
+    <exec
+      dir="${install}"
+      executable="cp">
+      <arg value="-r" />
+      <arg path="/Volumes/Eclipse/Eclipse.app" />
+      <arg path="${install}/" />
+    </exec>
+    <exec
+      dir="${install}"
+      executable="hdiutil">
+      <arg value="detach" />
+      <arg path="/Volumes/Eclipse" />
+    </exec>
+    <exec
+      dir="${install}"
+      executable="xattr">
+      <arg value="-rc Eclipse.app" />
+    </exec>
+
+  </target>
+
   <!--use an stable version of the director so that instability in the current build doesn't cause all the tests to fail -->
   <target
     name="initPlatformArhiveName"
@@ -259,6 +310,13 @@
         string="${platformArchive}"
         substring=".tar.gz" />
     </condition>
+    <condition
+      property="platformTarget"
+      value="platform-dmg">
+      <contains
+        string="${platformArchive}"
+        substring=".dmg" />
+    </condition>
     <fail
       unless="platformTarget"
       message="platformTarget is not defined. Check that platformArchive variable and value is defined correctly, such as in equinoxp2tests.properties in the appropriate testConfig" />
@@ -338,6 +396,49 @@
       <arg path="${platformLocation}" />
     </exec>
   </target>
+
+  <!--setup for dmg archives -->
+  <target
+    name="platform-dmg"
+    unless="basePlatformInstalled"
+    depends="init"
+    description="Install the base binary platform installation">
+    <condition property="platformArchiveExists">
+      <available file="${platformLocation}/${platformArchive}" />
+    </condition>
+    <fail
+      unless="platformArchiveExists"
+      message="plaform archive did not exist where expected. platformArchive: ${platformLocation}/${platformArchive}" />
+    <delete
+      verbose="false"
+      dir="${platformLocation}/eclipse" />
+	    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
+    <exec
+      dir="${platformLocation}"
+      executable="hdiutil">
+      <arg value="attach" />
+      <arg path="${platformLocation}/${platformArchive}" />
+    </exec>
+    <exec
+      dir="${platformLocation}"
+      executable="cp">
+      <arg value="-r" />
+      <arg path="/Volumes/Eclipse/Eclipse.app" />
+      <arg path="${platformLocation}/" />
+    </exec>
+    <exec
+      dir="${platformLocation}"
+      executable="hdiutil">
+      <arg value="detach" />
+      <arg path="/Volumes/Eclipse" />
+    </exec>
+    <exec
+      dir="${platformLocation}"
+      executable="xattr">
+      <arg value="-rc Eclipse.app" />
+    </exec>
+  </target>
+
 
   <target
     name="installExtraPlugins"
