@@ -163,6 +163,7 @@
     <surefire.moduleProperties></surefire.moduleProperties>
     <!-- system specific JVM args; if needed provided by system properties to the build command -->
     <surefire.systemProperties></surefire.systemProperties>
+    <java.version>11</java.version>
   </properties>
 
   <organization>
@@ -1137,13 +1138,46 @@
             <artifactId>spotbugs-maven-plugin</artifactId>
             <version>4.0.4</version>
             <configuration>
-              <targetJDK>11</targetJDK>
+              <targetJDK>${java.version}</targetJDK>
               <xmlOutput>true</xmlOutput>
               <effort>Max</effort>
               <maxHeap>2000</maxHeap>
               <threshold>medium</threshold>
               <failOnError>false</failOnError>
               <excludeFilterFile>spotbugs/spotbugs-exclude.xml</excludeFilterFile>
+            </configuration>
+            <executions>
+              <execution>
+                <id>analyze-compile</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>pmd</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <version>3.13.0</version>
+            <configuration>
+            <!-- PMD options -->
+              <targetJDK>${java.version}</targetJDK>
+              <aggregate>true</aggregate>
+              <failOnViolation>false</failOnViolation>
+              <format>xml</format>
+              <rulesets><ruleset>pmd/eclipse_ruleset.xml</ruleset></rulesets>
+            <!-- CPD options -->
+              <minimumTokens>100</minimumTokens>
+              <ignoreIdentifiers>true</ignoreIdentifiers>
             </configuration>
             <executions>
               <execution>
