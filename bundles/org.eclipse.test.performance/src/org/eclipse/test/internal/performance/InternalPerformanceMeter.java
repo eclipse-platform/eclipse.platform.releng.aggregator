@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
-import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
 import org.eclipse.test.internal.performance.eval.StatisticsUtil;
@@ -97,9 +96,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
                 sample.setComment(this.fCommentType, this.fComment);
             }
             Variations variations = PerformanceTestPlugin.getVariations();
-            if (variations != null)
-                DB.store(variations, sample);
-            if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
+            if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
                 printSample(System.out, sample);
                 // printSampleCSV(System.out, sample);
             }

@@ -23,10 +23,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.test.internal.performance.data.Dim;
-import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.performance.Dimension;
-import org.osgi.framework.BundleContext;
 
 /**
  * @since 3.1
@@ -117,12 +115,6 @@ public class PerformanceTestPlugin extends Plugin {
     public PerformanceTestPlugin() {
         super();
         fgPlugin = this;
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        DB.shutdown();
-        super.stop(context);
     }
 
     /*
