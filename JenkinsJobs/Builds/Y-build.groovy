@@ -1,8 +1,8 @@
 pipeline {
 	options {
-		timeout(time: 390, unit: 'MINUTES')
+		timeout(time: 360, unit: 'MINUTES')
 		timestamps()
-		buildDiscarder(logRotator(numToKeepStr:'5'))
+		buildDiscarder(logRotator(numToKeepStr:'25'))
 	}
   agent {
     kubernetes {
@@ -15,14 +15,14 @@ spec:
   containers:
   - name: "jnlp"
     image: "eclipsecbijenkins/jipp-migration-agent:4.3"
-    imagePullPolicy: "IfNotPresent"
+    imagePullPolicy: "Always"
     resources:
       limits:
         memory: "8192Mi"
-        cpu: "2000m"
+        cpu: "4000m"
       requests:
         memory: "6144Mi"
-        cpu: "1000m"
+        cpu: "2000m"
     securityContext:
       privileged: false
     tty: true
@@ -169,7 +169,7 @@ spec:
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest') {
+                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
                         sh '''
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb020_createBaseBuilder.sh.log
@@ -298,7 +298,7 @@ spec:
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest') {
+                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
                           sh '''
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
@@ -317,7 +317,7 @@ spec:
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest') {
+                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
                           sh '''
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             ./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb310_gatherEquinoxParts.sh.log

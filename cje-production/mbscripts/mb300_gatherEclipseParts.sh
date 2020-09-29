@@ -109,6 +109,7 @@ if [ -z $PATCH_BUILD ]; then
     popd
   fi
 
+  set -x
   # slice repos
   ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/buildAll.xml
   if [ -d $PLATFORM_REPO_DIR ]; then
@@ -128,6 +129,7 @@ if [ -z $PATCH_BUILD ]; then
       -v
     popd
   fi
+  set +x
 fi
 
 # gather ecj jars
