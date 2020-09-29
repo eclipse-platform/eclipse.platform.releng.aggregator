@@ -254,6 +254,25 @@ spec:
                 }
             }
 		}
+	  stage('Create Source Bundles'){
+          steps {
+              container('jnlp') {
+                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
+                    sh '''
+                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
+                        unset JAVA_TOOL_OPTIONS 
+                        unset _JAVA_OPTIONS
+                        ./mb200_createSourceBundles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb200_createSourceBundles.sh.log
+                        if [[ ${PIPESTATUS[0]} -ne 0 ]]
+                        then
+                            echo "Failed in Create Source Bundles stage"
+                            exit 1
+                        fi
+                    '''
+                  }
+                }
+            }
+		}
 	  stage('Update Pom files in the source'){
           steps {
               container('jnlp') {
