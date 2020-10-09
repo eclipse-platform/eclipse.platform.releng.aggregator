@@ -20,7 +20,7 @@ SDK_VERSION=4.17
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
 # JDT / ECJ:
-ECJ_VERSION=3.23.0
+ECJ_VERSION=3.24.0
 
 # AGGREGATOR:
 IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
