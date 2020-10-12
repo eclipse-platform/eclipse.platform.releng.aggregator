@@ -27,7 +27,7 @@ git clone -b $BRANCH --recursive $GIT_ROOT$AGG_REPO ../$AGG_DIR
 git checkout $BRANCH
 git pull
 pushd ../$AGG_DIR
-git submodule foreach 'git fetch; SUBMODULE_BRANCH=$(grep $name: ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt | cut -f2 -d\ ); SUBMODULE_BRANCH=${SUBMODULE_BRANCH:-$BRANCH}; echo Checking out $SUBMODULE_BRANCH; git checkout $SUBMODULE_BRANCH'
+git submodule foreach 'git fetch; SUBMODULE_BRANCH=$(grep $name: ../../../streams/repositories_$PATCH_OR_BRANCH_LABEL.txt | cut -f2 -d\ ); SUBMODULE_BRANCH=${SUBMODULE_BRANCH:-$BRANCH}; echo Checking out $SUBMODULE_BRANCH; git checkout $SUBMODULE_BRANCH; git pull'
 popd
 
 pushd "../$AGG_DIR"
