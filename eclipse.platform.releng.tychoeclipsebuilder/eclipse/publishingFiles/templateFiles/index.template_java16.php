@@ -82,7 +82,6 @@ require("DL.thin.header.php.html");
     <li><a href="#CVSSDK">CVS SDK</a></li>
     <li><a href="#SWT">SWT binary and Source</a></li>
     <li><a href="#SWTChromium">SWT Chromium</a></li>
-    <li><a href="#org.eclipse.releng">Releng Tools</a></li>
 </ul>
 </aside>
 
@@ -515,15 +514,6 @@ else {
   <?php columnHeads(); ?>
 </tr>
 %swtchromium%
-</table>
-
-<h3 id="org.eclipse.releng">org.eclipse.releng.tools plug-in&nbsp;<a href="details.html#org.eclipse.releng"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%relengtools%
 </table>
 
 <?php } ?>
