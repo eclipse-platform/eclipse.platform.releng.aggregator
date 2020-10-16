@@ -109,14 +109,18 @@ done
 echo "[DEBUG] Producing GPG signatures starting."
 # We make double use of the "client". One to simplify signing script. Second to identify times in timefile.
 # remember, this "WORKSPACE" is for genie.releng for production builds.
-if [ ! -z "${KEYRING_PASSPHRASE}" ]
+key_passphrase_file=${key_passphrase_file:-${WORKSPACE}/${client}-dev.passphrase}
+if [[ -r $key_passphrase_file ]]
 then
-    signature_file512=${allCheckSumsSHA512}.asc
-    gpg --detach-sign --armor --output ${signature_file512} --batch --yes --pinentry-mode loopback --passphrase-fd 0 ${allCheckSumsSHA512} <<< "${KEYRING_PASSPHRASE}"
+  signer=${signer:-${client}-dev@eclipse.org}
+  signature_file512=${allCheckSumsSHA512}.asc
+  fileToSign512=${allCheckSumsSHA512}
+
+  cat ${key_passphrase_file} | gpg --local-user ${signer} --sign --armor --output ${signature_file512} --batch --yes --passphrase-fd 0 --detach-sig ${fileToSign512}
 else
-    # We don't treat as ERROR since would be normal in a "local build".
-    # But, would be an ERROR in production build so could be improved.
-    echo -e "\n\t[WARNING] The key_passphrase_file did not exist or was not readable.\n"
+  # We don't treat as ERROR since would be normal in a "local build".
+  # But, would be an ERROR in production build so could be improved.
+  echo -e "\n\t[WARNING] The key_passphrase_file did not exist or was not readable.\n"
 fi
 # if SCRIPT_PATH not defined, we can not call elapsed time
 if [[ -n "${SCRIPT_PATH}" ]]

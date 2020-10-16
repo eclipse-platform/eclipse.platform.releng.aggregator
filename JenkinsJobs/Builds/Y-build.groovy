@@ -314,10 +314,6 @@ spec:
             }
 		}
 	  stage('Gather Eclipse Parts'){
-	  environment {
-                KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
-          }
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
@@ -337,10 +333,6 @@ spec:
             }
 		}
 	  stage('Gather Equinox Parts'){
-	  environment {
-                KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
-          }
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
