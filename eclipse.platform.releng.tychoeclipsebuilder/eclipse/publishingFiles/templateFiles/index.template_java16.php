@@ -68,7 +68,6 @@ require("DL.thin.header.php.html");
     <li><a href="#Repository">Eclipse p2 Repository</a></li>
     <li><a href="#EclipseSDK">Eclipse SDK</a></li>
     <li><a href="#JUnitPlugin">Tests and Testing Framework</a></li>
-    <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
     <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
     <li><a href="#RCPSDK">RCP SDK</a></li>
  <!--   <li><a href="#DeltaPack">Delta Pack</a></li> -->
@@ -386,15 +385,6 @@ else {
   <?php columnHeads(); ?>
 </tr>
 %tests%
-</table>
-
-<h3 id="ExamplePlugins">Example Plug-ins&nbsp;<a href="details.html#ExamplePlugins"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%example%
 </table>
 
 <h3 id="RCPRuntime">RCP Runtime Binary&nbsp;<a href="details.html#RCPRuntime"><i class="fa fa-info-circle">&nbsp;</i></a>
