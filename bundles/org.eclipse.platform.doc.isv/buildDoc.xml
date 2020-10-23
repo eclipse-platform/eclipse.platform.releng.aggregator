@@ -77,7 +77,7 @@
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.ui.intro/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<!--copy extra HTML file linked to by generated extension point doc-->
 		<copy file="${eclipse.platform.ua}/org.eclipse.ui.intro/schema/introContentFileSpec.html" todir="${dest}"/>
-		
+
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.ui.intro.quicklinks/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.monitoring/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.navigator/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
@@ -126,7 +126,7 @@
 		<available file="${java.home}/bin/javadoc.exe" property="javadocExecutable" value="${java.home}/bin/javadoc.exe"/>
 		<available file="${java.home}/bin/javadoc" property="javadocExecutable" value="${java.home}/bin/javadoc" />
 	</target>
-	
+
 	<target name="getEclipseJavadocPath" unless="javadocExecutable">
 		<!-- Use custom javadoc executable if ${eclipse.javadoc} is set -->
 		<condition property="javadocExecutable" value="${eclipse.javadoc}">
@@ -145,17 +145,17 @@
 				<expandproperties/>
 			</filterchain>
 		</copy>
-		
+
 		<condition property="argsListDelimiter" value=":">
 			<os family="unix" />
 		</condition>
 		<condition property="argsListDelimiter" value=";">
 			<os family="windows" />
 		</condition>
-		
+
 		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
-		
+
 		<!-- expand _* to actual version -->
 			<!-- prepare ${replaceFile} with all files and folders from workspace -->
 		<fileset dir="${basedir}/${dependency.dir}" id="fileSet">
@@ -182,15 +182,15 @@
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*[-_]\d+\.\d+\.\d+.*)|(.*)$$" replace="\1" />
 			<!-- create "<aa>_*[.jar]=<aa><version>[.jar]" property for lines with a version -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*)[-_]\d+\.\d+\.\d+.*?(.jar)?$$" replace="\1_*\2=\0" />
-		
+
 <!--
 <echo>${basedir}/${replaceFile} after _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
 -->
-		
+
 		<!-- workaround for bug 402392, which can make the ${replaceFile} end up empty: -->
 		<echo file="${basedir}/${replaceFile}" append="true">dummyForBug402392=dummyForBug402392&#xA;</echo>
-		
+
 		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
 
 <!--
@@ -208,8 +208,8 @@
 		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M ${env.JAVA_DOC_PROXIES}"  />
 		</exec>
-		
-<!-- Debugging: Add a snapshot of the workspace contents: 
+
+<!-- Debugging: Add a snapshot of the workspace contents:
 		<fileset dir="${basedir}/.." id="fileSet">
 			<include name="*"/>
 			<include name="*/*"/>
@@ -228,7 +228,7 @@ Directories:
 ${dirList}
 </echo>
 -->
-		
+
 		<!--workaround for bug 409511, bug 101048-->
 		<replace dir="reference/api" token="='/../misc/api-usage-rules.html" value="='./../misc/api-usage-rules.html">
 			<include name="*.htm*" />

@@ -11,9 +11,9 @@
 <h1>Incompatibilities between Eclipse 3.5 and 3.6</h1>
 
 <p>
-  Eclipse changed in incompatible ways between 3.5 and 3.6 in ways that affect 
-  plug-ins. The following entries describe the areas that changed and provide 
-  instructions for migrating 3.5 plug-ins to 3.6. Note that you only need to look 
+  Eclipse changed in incompatible ways between 3.5 and 3.6 in ways that affect
+  plug-ins. The following entries describe the areas that changed and provide
+  instructions for migrating 3.5 plug-ins to 3.6. Note that you only need to look
   here if you are experiencing problems compiling or running your 3.5 plug-in on 3.6.
 </p>
 
@@ -35,7 +35,7 @@
 <p><strong>What is affected:</strong> Clients that call DialogSettings.save(Writer writer) in code that is compiled against release 3.5</p>
 <p><strong>Description:</strong> In release 3.4 and earlier, DialogSettings.save(Writer writer) was specified
 to throw an <code>IOException</code>.  In release 3.5, the method signature was changed to not throw the
-exception.  In release 3.6, the method is specified to throw the exception (restoring it to the release 3.4 
+exception.  In release 3.6, the method is specified to throw the exception (restoring it to the release 3.4
 and earlier specification).  Clients that do not catch the IOException when calling DialogSettings.save(Writer writer)
 should update the code to catch the exception.  Note that this source incompatibility only applies to clients who
 directly use <code>DialogSettings</code>, the default implementation class.  The interface type, <code>IDialogSettings</code>,
@@ -69,15 +69,15 @@ but results in a source incompatibility for clients originally implemented again
 <h2>4. <a name="exemplarySetup">The bundle org.eclipse.equinox.p2.exemplarysetup has been removed</a></h2>
 <p><strong>What is affected:</strong> Applications or features including p2 or manually
 starting p2.</p>
-<p><strong>Description:</strong> The bundle <tt>org.eclipse.equinox.p2.exemplarysetup</tt> 
-has been removed from the Eclipse platform in the 3.6 release. This bundle never contained any API, 
-either real or provisional, and just contained some classes used to initialize p2 that are no longer needed. 
-There are some client applications that may be affected:</p> 
+<p><strong>Description:</strong> The bundle <tt>org.eclipse.equinox.p2.exemplarysetup</tt>
+has been removed from the Eclipse platform in the 3.6 release. This bundle never contained any API,
+either real or provisional, and just contained some classes used to initialize p2 that are no longer needed.
+There are some client applications that may be affected:</p>
 <ol>
-	<li>If you have a custom product or feature that incorporates p2 bundles directly rather 
-	than through the <tt>org.eclipse.equinox.p2.user.ui</tt> feature provided by the platform, 
+	<li>If you have a custom product or feature that incorporates p2 bundles directly rather
+	than through the <tt>org.eclipse.equinox.p2.user.ui</tt> feature provided by the platform,
 	you will need to remove this extra bundle from your .product file or feature.xml.</li>
-	<li>Some advanced client applications were manually starting this bundle in order to ensure p2 
+	<li>Some advanced client applications were manually starting this bundle in order to ensure p2
 	was started. Manual initialization of p2 is no longer needed and any such code can be removed.</li>
 </ol>
 
@@ -85,7 +85,7 @@ There are some client applications that may be affected:</p>
 
 <h2>5. <a name="objectContribution">Object Contributions will not execute from a key binding</a></h2>
 <p><strong>What is affected:</strong> Key bindings assigned to a command backed by an object contribution action.</p>
-<p><strong>Description:</strong> A fundamental flaw in the legacy action/command bridge was fixed 
+<p><strong>Description:</strong> A fundamental flaw in the legacy action/command bridge was fixed
 in the 3.6 release.  While command definitionIds have been allowed on objectContributions
 so they can display key bindings while the context
 menu is up, objectContributions do not support execution using key bindings and objectContributions
@@ -93,7 +93,7 @@ cannot be handlers for commands.  In 3.4 a leak was
 introduced that allowed some IResource based objectContributions to execute from a key binding.
 With this leak now fixed, plug-ins that wish to provide default behaviour for a key binding for
 their command must provide a handler.  This does not affect ActionSets, which will continue to
-work with key bindings when active within a perspective. 
+work with key bindings when active within a perspective.
 </p>
 An example of writing a core expression that's similar to an objectContribution can be found at
 <a href="http://wiki.eclipse.org/Menu_Contributions/IFile_objectContribution">IFile objectContribution
@@ -106,7 +106,7 @@ Example</a>.
 <p><strong>Description:</strong> Prior to Eclipse 3.6, attempts to set a Spinner's value range to a
 single value were not allowed.  This was done in order to be consistent with
 other range-based controls in SWT.  However the case of specifying a single
-integer value as a Spinner's value range is valid, so this is now allowed. 
+integer value as a Spinner's value range is valid, so this is now allowed.
 Clients that were dependent on this case being disallowed must now check for
 this condition before setting a Spinner's maximum to a value that would match
 its minimum value (or vice versa), and not set the value in such cases.
