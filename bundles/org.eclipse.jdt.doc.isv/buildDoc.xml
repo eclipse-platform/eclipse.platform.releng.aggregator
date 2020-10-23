@@ -24,7 +24,7 @@
 	<target name="convertSchemaToHtml" if="eclipse.running">
 		<property name="dest" value="reference/extension-points" />
 		<record name="${basedir}/target/jdtconvert.txt" action="start"/>
-		
+
 		<property name="jdtSearchPath" value="${eclipse.jdt.core},${eclipse.jdt.debug},${eclipse.jdt.ui}" />
 		<property name="platformSearchPath" value="${eclipse.platform.ant},${eclipse.platform.debug},${eclipse.platform.platform},${eclipse.platform.resources.bundles},${eclipse.platform.runtime.bundles},${eclipse.platform.swt.bundles},${eclipse.platform.team.bundles},${eclipse.platform.text},${eclipse.platform.ua},${eclipse.platform.ui.bundles}" />
 		<property name="runtimeSearchPath" value="${rt.equinox.bundles.bundles},${rt.equinox.framework.bundles},${rt.equinox.p2.bundles}" />
@@ -51,7 +51,7 @@
 		<available file="${java.home}/bin/javadoc.exe" property="javadocExecutable" value="${java.home}/bin/javadoc.exe"/>
 		<available file="${java.home}/bin/javadoc" property="javadocExecutable" value="${java.home}/bin/javadoc" />
 	</target>
-	
+
 	<target name="getEclipseJavadocPath" unless="javadocExecutable">
 		<!-- Use custom javadoc executable if ${eclipse.javadoc} is set -->
 		<condition property="javadocExecutable" value="${eclipse.javadoc}">
@@ -77,19 +77,19 @@
 				<expandproperties/>
 			</filterchain>
 		</copy>
-		
+
 		<condition property="argsListDelimiter" value=":">
 			<os family="unix" />
 		</condition>
 		<condition property="argsListDelimiter" value=";">
 			<os family="windows" />
 		</condition>
-		
+
 		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 		<replace file="${basedir}/${optionsFile}" token="@baseLocation@" value="${baseLocation}" />
 
-		
+
 		<!-- expand _* to actual version -->
 			<!-- prepare ${replaceFile} with all files and folders from workspace -->
 		<fileset dir="${basedir}/${dependency.dir}" id="fileSet">
@@ -115,15 +115,15 @@
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*[-_]\d+\.\d+\.\d+.*)|(.*)$$" replace="\1" />
 			<!-- create "<aa>_*[.jar]=<aa><version>[.jar]" property for lines with a version -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*)[-_]\d+\.\d+\.\d+.*?(.jar)?$$" replace="\1_*\2=\0" />
-		
+
 <!--
 <echo>${basedir}/${replaceFile} after _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
 -->
-		
+
 		<!-- workaround for bug 402392, which can make the ${replaceFile} end up empty: -->
 		<echo file="${basedir}/${replaceFile}" append="true">dummyForBug402392=dummyForBug402392&#xA;</echo>
-		
+
 		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
 
 <!--
@@ -134,21 +134,21 @@
 		<!--scrub isv plugin directories of any preexisting api doc content-->
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
-	  
+
 	  <!-- if not pass in from environment, set this value to empty -->
 	  <property name="env.JAVA_DOC_PROXIES" value=""/>
 
 		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx500M ${env.JAVA_DOC_PROXIES}"  />
 		</exec>
-		
+
 		<!--workaround for bug 409511, bug 101048-->
 		<replace dir="reference/api" token="='/../misc/api-usage-rules.html" value="='./../misc/api-usage-rules.html">
 			<include name="*.htm*" />
 		</replace>
-		
+
 	</target>
-	
+
 	<target name="buildPlatformDoc" unless="platform.index.present">
 		<ant antfile="buildDoc.xml" dir="../org.eclipse.platform.doc.isv" />
 	</target>

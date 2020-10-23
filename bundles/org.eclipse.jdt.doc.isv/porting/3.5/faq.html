@@ -13,27 +13,27 @@
 <h1>Eclipse 3.5 Plug-in Migration FAQ</h1>
 
 <ol>
-	<li><a href="#wildcarddeprecation">How can I remove the deprecation warning I get on 
+	<li><a href="#wildcarddeprecation">How can I remove the deprecation warning I get on
 	<code>createWilcardTypeBindingKey(String, char)</code> method ?</a></li>
 	<li><a href="#deprecatedSuggestVariableNames">How can I remove the deprecation warning I get on
 	<code>NamingConventions.suggest*Names(...)</code> methods and keep same behavior?</a></li>
 	<li><a href="#deprecatedRemovePrefixAndSuffix">How can I remove the deprecation warning I get on
 	<code>NamingConventions.removePrefixAndSuffixFor*Name(...)</code> methods and keep same behavior?</a></li>
 </ol>
-<h2><a name="wildcarddeprecation">How can I remove the deprecation warning I get on 
+<h2><a name="wildcarddeprecation">How can I remove the deprecation warning I get on
 <code>createWilcardTypeBindingKey(String, char)</code> method ?</a></h2>
 <p>
 While implementing the fix for bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=234609" target="_blank">234609</a>,
 the method <code>org.eclipse.jdt.core.BindingKey.createWilcardTypeBindingKey(String, char)</code>
-has been deprecated. 
+has been deprecated.
 
 In order to create a wildcard binding the following pieces of information are needed:</p>
 <ol>
 <li> a generic type (a wildcard is always the wildcard of a generic type)</li>
 <li>a kind</li>
 <li>a bound type (optional)</li>
-<li>a rank (the relative position of the wildcard in the type argument list, e.g. in 
-<code>HashMap&lt;? extends Integer,? super String&gt;</code>, the wildcard type 
+<li>a rank (the relative position of the wildcard in the type argument list, e.g. in
+<code>HashMap&lt;? extends Integer,? super String&gt;</code>, the wildcard type
 <code>? extends Integer</code> has a rank of 0 while the following wildcard has a rank of 1)</li>
 </ol>
 <p>
@@ -41,7 +41,7 @@ All this information should be encoded in the binding key.</p>
 
 <p>
 However, <code>BindingKey.createWilcardTypeBindingKey(String, char)</code> allows to pass in only partial information.
-Thus this API is not enough to create a proper binding key from which a wildcard type could be recreated. 
+Thus this API is not enough to create a proper binding key from which a wildcard type could be recreated.
 Hence this method has been deprecated and it is recommended that uses of this method be replaced with the
 new API <code>org.eclipse.jdt.core.BindingKey.createWildcardTypeBindingKey(String genericTypeKey, char boundKind, String boundTypeKey, int rank)</code> introduced as of version 3.5.
 </p>
