@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019 IBM Corporation and others.
+# Copyright (c) 2020 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,7 @@ output_dir=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
 tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
 report_app_dir=$CJE_ROOT/$TMP_DIR/reportApplication
 
-wget --no-proxy --no-verbose --no-cache -O $CJE_ROOT/$TMP_DIR/$tar_name https://ci.eclipse.org/cbi/job/cbi.p2repo.analyzers_cleanAndDeploy/lastSuccessfulBuild/artifact/output/products/$tar_name
+wget --no-proxy --no-verbose --no-cache -O $CJE_ROOT/$TMP_DIR/$tar_name https://download.eclipse.org/cbi/updates/analyzers/4.7/I20191111-1833/org.eclipse.cbi.p2repo.analyzers.product_I20191111-1833_linux.gtk.x86_64.tar.gz
 
 mkdir -p $report_app_dir
 tar -xf $CJE_ROOT/$TMP_DIR/$tar_name -C $report_app_dir
