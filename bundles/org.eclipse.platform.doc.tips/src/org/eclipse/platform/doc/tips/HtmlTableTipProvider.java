@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 vogella GmbH
+ * Copyright (c) 2018, 2020 vogella GmbH and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -12,12 +12,14 @@
  *******************************************************************************/
 package org.eclipse.platform.doc.tips;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -63,8 +65,9 @@ public class HtmlTableTipProvider extends TipProvider {
 		Bundle bundle = Platform.getBundle("org.eclipse.platform.doc.user"); //$NON-NLS-1$
 		URL platformTipsURL = bundle.getEntry("tips/platform_tips.html"); //$NON-NLS-1$
 		try {
-			String platformTipsHtmlContents = IOUtils.toString(platformTipsURL.openStream(),
-					StandardCharsets.UTF_8.name());
+			String platformTipsHtmlContents = new BufferedReader(
+					new InputStreamReader(platformTipsURL.openStream(), StandardCharsets.UTF_8)).lines()
+							.collect(Collectors.joining("\n"));
 			List<Tip> browserTips = HtmlExtractor.getTips(getID(), platformTipsHtmlContents, subMonitor);
 			setTips(browserTips);
 		} catch (IOException ex) {
