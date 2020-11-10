@@ -475,24 +475,6 @@ else {
 %pdesdk%
 </table>
 
-<h3 id="CVSRuntime">CVS Client Runtime Binary&nbsp;<a href="details.html#CVSRuntime"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%cvs%
-</table>
-
-<h3 id="CVSSDK">CVS Client SDK&nbsp;<a href="details.html#CVSSDK"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%cvssdk%
-</table>
-
 <h3 id="SWT">SWT Binary and Source&nbsp;<a href="details.html#SWT"><i class="fa fa-info-circle">&nbsp;</i></a>
 </h3>
 <?php startTable(); ?>
