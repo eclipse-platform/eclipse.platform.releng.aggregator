@@ -77,8 +77,6 @@ require("DL.thin.header.php.html");
     <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
     <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
     <li><a href="#PDESDK">PDE SDK</a></li>
-    <li><a href="#CVSRuntime">CVS Runtime</a></li>
-    <li><a href="#CVSSDK">CVS SDK</a></li>
     <li><a href="#SWT">SWT binary and Source</a></li>
     <li><a href="#SWTChromium">SWT Chromium</a></li>
 </ul>
