@@ -367,7 +367,7 @@ foreach($dropType as $value) {
       $buildName=$parts[1];
     }
     if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
-      echo "<tr style=\"line-hieght:0.8;\">\n";
+      echo "<tr style=\"line-height:0.8;\">\n";
       if ($fileName == "") {
         echo "<td class=\"name\">&nbsp;</td>\n";
       } else {
