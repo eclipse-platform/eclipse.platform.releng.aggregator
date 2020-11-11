@@ -89,25 +89,25 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
 <div id="midcolumn">
 <div class="homeitem3col">
-<?php
-echo "<title>Release Engineering logs for $BUILD_ID</title>\n";
-echo "<h3>Build Properties for $BUILD_ID</h3>\n";
-echo "<p><a href=\"mavenproperties.properties\">Key Maven Properties</a></p>\n";
-echo "<p><a href=\"buildproperties.properties\">Other Build Properties</a></p>\n";
-echo "<h3>Release Engineering Logs for $BUILD_ID</h3>\n";
-?>
+<title>Release Engineering logs for <?= $BUILD_ID ?></title>
+<h3>Build Properties for <?= $BUILD_ID ?></h3>
+<p><a href="mavenproperties.properties">Key Maven Properties</a></p>
+<p><a href="buildproperties.properties">Other Build Properties</a></p>
+<h3>Release Engineering Logs for <?= $BUILD_ID ?></h3>
 
 <?php
 listLogs("buildlogs");
 ?>
 
+<h3>Comparator Logs for <?= $BUILD_ID ?></h3>
+<p>For explaination, see <a href="https://wiki.eclipse.org/Platform-releng/Platform_Build_Comparator_Logs">Platform Build Comparator Logs</a> wiki.</p>
 <?php
-echo "<h3>Comparator Logs for $BUILD_ID</h3>\n";
-echo "<p>For explaination, see <a href=\"https://wiki.eclipse.org/Platform-releng/Platform_Build_Comparator_Logs\">Platform Build Comparator Logs</a> wiki.</p>\n";
 listLogs("buildlogs/comparatorlogs");
 if (file_exists("buildlogs/comparatorlogs/artifactcomparisons.zip")) {
-  echo "<p>For an archive of all relevant baseline-versus-current build artifact byte codes" . PHP_EOL;
-  echo " download and 'diff' matching files of <a href=\"buildlogs/comparatorlogs/artifactcomparisons.zip\">artifact comparisons</a>.</p>".PHP_EOL;
+?>
+  <p>For an archive of all relevant baseline-versus-current build artifact byte codes download and 'diff' matching files of 
+  <a href="buildlogs/comparatorlogs/artifactcomparisons.zip">artifact comparisons</a>.</p>
+<?php
 }
 ?>
 
