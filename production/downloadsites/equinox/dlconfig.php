@@ -3,16 +3,12 @@ $dropPrefix = array();
 $dropPrefix[]="R";
 $dropPrefix[]="S";
 $dropPrefix[]="I";
-$dropPrefix[]="M";
-$dropPrefix[]="N";
 // patch builds not expected in equinox
 // $dropPrefix[]="P";
 $dropType = array();
 $dropType[]="Latest Release";
-$dropType[]="Neon Stable Builds";
-$dropType[]="Neon Integration Builds";
-$dropType[]="Mars Maintenance Builds";
-$dropType[]="Neon Nightly Builds";
+$dropType[]="Stable Builds";
+$dropType[]="Integration Builds";
 // patch builds not expected in equinox
 // $dropType[]="Patch Builds";
 

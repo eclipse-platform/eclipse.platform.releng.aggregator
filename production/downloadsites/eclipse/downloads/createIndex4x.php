@@ -27,7 +27,7 @@ See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 */
 
 require("DL.thin.header.php.html");
-
+header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
 ?>
 
 <h1>The Eclipse Project Downloads</h1>
@@ -36,13 +36,13 @@ page you can find the latest builds produced by
 the <a href="https://www.eclipse.org/eclipse/">Eclipse
 Project</a>. To get started, run the program and go through the user and developer
 documentation provided in the help system or
-see the <a href="https://help.eclipse.org/">web-based help system</a>.
+see the <a href="http://help.eclipse.org/">web-based help system</a>.
 If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
 out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forum</a>.
 </p>
 
 <p>See the <a href="https://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
-The <a href="https://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="https://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
+The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
 For reference, see also
 <a href="https://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>,
 <a href="build_types.html">meaning of kinds of builds</a> (P,M,I,S, and R), and the
@@ -279,6 +279,9 @@ while ($anEntry = $aDirectory->read()) {
     // do not count hidden directories in computation
     // allows non-hidden ones to still show up as "most recent" else will be blank.
     if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")) {
+      if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
+        include "$subdirDrops/$buildName/buildproperties.php";
+      }
       if (count($parts) == 3) {
         $timePart = $parts[2];
         $year = substr($timePart, 0, 4);
@@ -328,9 +331,11 @@ while ($anEntry = $aDirectory->read()) {
         }
         $buckets[$buildType[0]][$timeStamp] = $anEntry;
         $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
-        if (!isset($latestTimeStamp) || !array_key_exists($buildType,$latestTimeStamp) || $timeStamp > $latestTimeStamp[$buildType]) {
-          $latestTimeStamp[$buildType] = $timeStamp;
-          $latestFile[$buildType] = $anEntry;
+        if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")&&!file_exists($subdirDrops."/".$anEntry."/buildUnstable")) {
+            if (!isset($latestTimeStamp) || !array_key_exists($buildType,$latestTimeStamp) || $timeStamp > $latestTimeStamp[$buildType]) {
+              $latestTimeStamp[$buildType] = $timeStamp;
+              $latestFile[$buildType] = $anEntry;
+            }
         }
       }
     }
@@ -383,6 +388,7 @@ foreach($dropType as $value) {
           echo "<img style=\"border:0px\" src=\"../images/$buildimage\" title=\"$buildalt\" alt=\"$buildalt\" />\n";
         }
         echo "<a href=\"$subdirDrops/$fileName/\" title=\"$value\">$buildName\n";
+        
         if (file_exists($subdirDrops."/".$fileName."/buildUnstable")) {
           echo "</a><a href=\"https://wiki.eclipse.org/Platform-releng/Unstable_build\" title=\"Unstable Build\"><sup style='color:red;'> Unstable!</sup>\n";
         }
@@ -450,6 +456,7 @@ foreach($dropType as $value) {
               echo "<img style=\"border:0px\" src=\"../images/$buildimage\" title=\"$buildalt\" alt=\"$buildalt\" />\n";
             }
             echo "<a href=\"$subdirDrops/$innerValue/\">$innerValue\n";
+            
             if (file_exists($subdirDrops."/".$innerValue."/buildUnstable")) {
               echo "</a><a href=\"https://wiki.eclipse.org/Platform-releng/Unstable_build\" title=\"Unstable Build\"><sup style='color:red;'> Unstable!</sup>\n";
             }
