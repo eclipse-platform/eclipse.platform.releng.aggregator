@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc. and others.
+ * Copyright (c) 2018, 2020 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,7 +44,7 @@ import org.junit.platform.launcher.TestPlan;
 abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 
 
-	protected static String NEW_LINE = System.getProperty("line.separator");
+	protected static String NEW_LINE = System.lineSeparator();
 	protected TestExecutionContext context;
 
 	private SysOutErrContentStore sysOutStore;

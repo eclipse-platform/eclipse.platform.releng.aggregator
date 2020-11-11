@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2016 IBM Corporation and others.
+ * Copyright (c) 2004, 2020 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -115,7 +115,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		}
 	}
 
-	private String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
+	private String newLine = System.lineSeparator();
 	private Map<String, List<String>> log = new HashMap<>();
 	private MessageConsole console;
 
