@@ -75,8 +75,6 @@ require("DL.thin.header.php.html");
     <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
     <li><a href="#JDTSDK">JDT SDK</a></li>
     <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
-    <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
-    <li><a href="#PDESDK">PDE SDK</a></li>
     <li><a href="#SWT">SWT binary and Source</a></li>
     <li><a href="#SWTChromium">SWT Chromium</a></li>
 </ul>
@@ -448,24 +446,6 @@ else {
   <?php columnHeads(); ?>
 </tr>
 %jdtc%
-</table>
-
-<h3 id="PDERuntime">PDE Runtime Binary&nbsp;<a href="details.html#PDERuntime"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%pde%
-</table>
-
-<h3 id="PDESDK">PDE SDK&nbsp;<a href="details.html#PDESDK"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%pdesdk%
 </table>
 
 <h3 id="SWT">SWT Binary and Source&nbsp;<a href="details.html#SWT"><i class="fa fa-info-circle">&nbsp;</i></a>
