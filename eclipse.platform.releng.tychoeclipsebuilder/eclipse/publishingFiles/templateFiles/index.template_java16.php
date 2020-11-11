@@ -70,7 +70,6 @@ require("DL.thin.header.php.html");
     <li><a href="#JUnitPlugin">Tests and Testing Framework</a></li>
     <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
     <li><a href="#RCPSDK">RCP SDK</a></li>
- <!--   <li><a href="#DeltaPack">Delta Pack</a></li> -->
     <li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
     <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
     <li><a href="#JDTSDK">JDT SDK</a></li>
