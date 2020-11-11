@@ -45,9 +45,9 @@ function genLinks($zipfile) {
   $filetarget = "$clickthroughstr$zipfile";
   if (file_exists("./buildUnstable"))
   {
-    $filelink =  "<img style=\"border:0px\" src=\"../../../images/caution.gif\" title=\"Build is unstable\" alt=\"Build is unstable\"><a style=\"align:left\" href=\"$filetarget\">$zipfile</a>";
+    $filelink =  "<img style=\"border:0px\" src=\"../../../images/caution.gif\" title=\"Build is unstable\" alt=\"Build is unstable\"><a href=\"$filetarget\">$zipfile</a>";
   } else {
-    $filelink =  "<a style=\"align:left\" href=\"$filetarget\">$zipfile</a>";
+    $filelink =  "<a href=\"$filetarget\">$zipfile</a>";
   }
   $filesize = getDropSize($zipfile);
 
