@@ -64,7 +64,7 @@ require("DL.thin.header.php.html");
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
 <aside class="col-md-6" id="leftcol" style="margin-top:20px;" >
-<ul class="ul-left-nav fa-ul hidden-print" style="font-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px">
+<ul class="ul-left-nav fa-ul hidden-print" style="font-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; margin:20px 3px 20px 3px">
     <li><a href="#Repository">Eclipse p2 Repository</a></li>
     <li><a href="#EclipseSDK">Eclipse SDK</a></li>
     <li><a href="#JUnitPlugin">Tests and Testing Framework</a></li>
