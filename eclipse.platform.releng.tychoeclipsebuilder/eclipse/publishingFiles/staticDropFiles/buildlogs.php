@@ -88,8 +88,8 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
 
 <div id="midcolumn">
+<h1>Release Engineering logs for <?= $BUILD_ID ?></h1>
 <div class="homeitem3col">
-<title>Release Engineering logs for <?= $BUILD_ID ?></title>
 <h3>Build Properties for <?= $BUILD_ID ?></h3>
 <p><a href="mavenproperties.properties">Key Maven Properties</a></p>
 <p><a href="buildproperties.properties">Other Build Properties</a></p>
