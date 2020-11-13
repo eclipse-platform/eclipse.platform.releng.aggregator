@@ -16,12 +16,11 @@ include ('logPhpUtils.php');
 <link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/print.css" media="print" />
 
 <title>Test Logs for <?= $BUILD_ID ?></title>
-<style type="text/css">
+<style>
   p {text-indent: 30pt;}
 </style>
 
-<script type="text/javascript">
-<![CDATA[
+<script>
 sfHover = function() {
   var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
   for (var i=0; i<sfEls.length; i++) {
@@ -34,7 +33,6 @@ sfHover = function() {
   }
 }
 if (window.attachEvent) window.attachEvent("onload", sfHover);
-]]>
 </script>
 </head>
 <body>
@@ -48,9 +46,8 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 </div>
 
 <div id="midcolumn">
-<div class="homeitem3col">
 <h1>Unit Test Logs for <?= $BUILD_ID ?></h1>
-
+<div class="homeitem3col">
 
 <!-- 
      javaDoc logs are "at the top" of the compile logs directory, having been 
@@ -59,14 +56,12 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
      changing their location in the test.xml, or, changing to whole test to it would know
      where to find their special directory, and then loop through the whole directory. 
 -->
-<h2><a name="javadoc" id="javadoc"></a>Javadoc Logs</h2>
-<ul>
+<h2 id="javadoc">Javadoc Logs</h2>
 <?php
 listLogs("compilelogs");
 ?>
-</ul>
 
-<h2><a name="console" id="console"></a>Console Logs</h2>
+<h2 id="console">Console Logs</h2>
 <p>These logs contain the console output captured while running the JUnit automated tests.</p>
 
 <?php
