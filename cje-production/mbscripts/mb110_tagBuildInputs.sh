@@ -65,7 +65,7 @@ if [[ -n "$lastTag" ]]; then
   git log $lastTag..$BUILD_ID --date=short --format=format:"<tr><td class=\"datecell\">%cd</td><td class=\"commitcell\"><a href=\"https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=%H\">%s</a></td><td class=\"authorcell\">%aN</td></tr>" > $tmpGitLog
   tmpFileSize=$(stat -c%s $tmpGitLog)
   if [ $tmpFileSize -ne 0 ]; then
-    echo "<table width=\"80%\"><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: eclipse.platform.releng.aggregator</th></tr>" >> $gitLogFile
+    echo "<table><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: eclipse.platform.releng.aggregator</th></tr>" >> $gitLogFile
     echo "<tr> <th class=\"datecell\">Date</th> <th class=\"commitcell\">Commit message</th> <th class=\"authorcell\">Author</th> </tr>" >> $gitLogFile
     cat $tmpGitLog >> $gitLogFile
     echo "</tbody></table><br><br>" >> $gitLogFile
