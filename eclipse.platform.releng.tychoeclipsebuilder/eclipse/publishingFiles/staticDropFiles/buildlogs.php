@@ -28,19 +28,19 @@ function listLogs($myDir) {
     echo "<br>There are no logs for this build.";
     return;
   }
+  echo "<ul>";
   for ($i = 0; $i < $index; $i++) {
     $anEntry = $entries[$i];
-    $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a>" . fileSizeForDisplay("$myDir/$anEntry") . "</td>";
+    $line = "<a href=\"$myDir/$anEntry\">$anEntry</a>" . fileSizeForDisplay("$myDir/$anEntry");
     echo "<li>$line</li>";
   }
+  echo "</ul>";
 }
 
 
 ?>
-<STYLE TYPE="text/css">
-<!--
+<STYLE>
 P {text-indent: 30pt;}
--->
 </STYLE>
 
 
@@ -51,7 +51,7 @@ P {text-indent: 30pt;}
 <link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/visual.css" media="screen" />
 <link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/layout.css" media="screen" />
 <link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/print.css" media="print" />
-<script type="text/javascript">
+<script>
 
 sfHover = function() {
   var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
@@ -68,12 +68,6 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 </script>
 </head>
 <body>
-
-
-</div>
-
-
-</div>
 
 <div id="leftcol">
 <ul id="leftnav">
