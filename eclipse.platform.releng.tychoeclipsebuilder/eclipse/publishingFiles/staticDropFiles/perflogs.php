@@ -16,12 +16,11 @@ include ('logPhpUtils.php');
 <link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/print.css" media="print" />
 
 <title>Performance Test Logs for <?= $BUILD_ID ?></title>
-<style type="text/css">
+<style>
   p {text-indent: 30pt;}
 </style>
 
-<script type="text/javascript">
-<![CDATA[
+<script>
 sfHover = function() {
   var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
   for (var i=0; i<sfEls.length; i++) {
@@ -34,7 +33,6 @@ sfHover = function() {
   }
 }
 if (window.attachEvent) window.attachEvent("onload", sfHover);
-]]>
 </script>
 </head>
 <body>
