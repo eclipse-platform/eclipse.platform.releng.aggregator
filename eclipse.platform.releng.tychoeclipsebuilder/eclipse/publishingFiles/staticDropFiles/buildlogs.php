@@ -105,8 +105,6 @@ if (file_exists("buildlogs/comparatorlogs/artifactcomparisons.zip")) {
 }
 ?>
 
-</li>
-</ul>
 </div>
 </div>
 
