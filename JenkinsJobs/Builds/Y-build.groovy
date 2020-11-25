@@ -488,13 +488,13 @@ spec:
         failure {
             emailext body: "Please go to ${BUILD_URL}/console and check the build failure.<br><br>",
             subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
-            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com daniel_megert@ch.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
+            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
             from:"genie.releng@eclipse.org"
         }
         success {
             emailext body: "Eclipse downloads:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}<br><br> Build logs and/or test results (eventually):<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php<br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    https://download.eclipse.org/eclipse/updates/4.18-Y-builds<br><br>Specific (simple) site repository:<br>    https://download.eclipse.org/eclipse/updates/4.18-Y-builds/${env.BUILD_IID.trim()}<br><br>Equinox downloads:<br>     https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}<br><br>", 
             subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
-            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com daniel_megert@ch.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
+            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
             from:"genie.releng@eclipse.org"
         }
 	}
