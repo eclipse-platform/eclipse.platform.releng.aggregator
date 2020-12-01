@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.17</title>
+<title>Eclipse Platform What's New in 4.18</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.17</h2>
+<h2>What's New in Eclipse 4.18</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.17 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.18 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
@@ -48,122 +48,161 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  <tr id="deferred-image-descriptor"><!-- https://bugs.eclipse.org/477391 -->
-    <td class="title"><a href="#deferred-image-descriptor">DeferredImageDescriptor API</a></td>
+  <tr id="high-dpi-sceme"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567898 -->
+   <td class="title"><a href="#high-dpi-sceme">JFace ImageDescriptor supports alternative naming scheme for high dpi</a></td>
     <td class="content">
-	  The <code>DeferredImageDescriptor</code> API has been added to JFace
-	  allowing the creation of <code>ImageDescriptor</code> instances from
-	  a URL, where the calculation of the URL is potentially costly
-	  (because it might involve searching through multiple directories or
-	  bundles/fragments on disk).
-	  <p>The new API can be called using
-	  <code>ImageDescriptor.createFromSupplier</code> along with a
-	  <code>Supplier&lt;URL&gt;</code> which will calculate on demand the
-	  URL when the image is acessed for the first time. This allows images
-	  registered at startup in an <code>ImageRegistry</code> to be deferred
-	  until the first time the image is shown on screen.</p>
-	  <p>Old way:</p>
-<pre><code>URL url = FileLocator.find(bundle, path);
-descriptor = ImageDescriptor.createFromURL(url);
-</code></pre>
-	  <p>New way:</p>
-<pre><code>descriptor = ImageDescriptor.createFromURLSupplier(
-  () -&gt; FileLocator.find(bundle, path)
-);
-</code></pre>
-	</td>
-  </tr>
-
-	<tr id="system-color-in-workbench-css"><!-- https://bugs.eclipse.org/565775 -->
-		<td class="title"><a href="#system-color-in-workbench-css">Use System colors in workbench CSS theme files</a></td>
-		<td class="content">
-			In workbench theme CSS files, you can now reference the system colors defined by SWT. To do so, use the
-			SWT field name replacing uderscores <code>_</code> by dashes <code>-</code> and prefixing with hash <code>#</code>.
-			<p>
-			For example, to reference the system color <code>SWT.COLOR_LIST_SELECTION_BACKGROUND</code>, you can use
-			<code>#COLOR-LIST-SELECTION-BACKGROUND</code> in your .css files.
-			</p>
-		</td>
-	</tr>
-
-
-  <tr id="widget-factories"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=551589 -->
-   <td class="title"><a href="#widget-factories">Additional widget factories</a></td>
-    <td class="content">
-      Factories for additional SWT widgets have been created: SashFactory, ShellFactory and SectionFactory.
+    	<p>Currently <code>ImageDescriptor</code> automatically provides higher DPI images if a
+		resource exits that ends with <b>@x2</b> or <b>@1.5</b>.</p>
+		<p>
+		This can rapidly blows the number of images required if multiple resolutions
+		are used as there are duplications (e.g. 16x16@2x is the same as 32x32 icon). The second limitation is that only
+		two fixed zoom levels are supported at the moment.
+		</p>
+		<p>It is now possible to use an alternative naming scheme
+		where icon resources are organized in folders holding the resolution in
+		folder-name (e.g. icons/16x16/icon1.png, icons/32x32/icon1.png and so
+		on). This also has the advantage that it is possible to use other
+		scaling factors beside the 150/200% that are currently supported.</p>
     </td>
   </tr>
+  <tr id="slice-monitor"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567808 -->
+   <td class="title"><a href="#slice-monitor">Slicing Support for IProgressMonitor</a></td>
+    <td class="content">
+    	<p>Previously it was possible to split a <code>IProgressMonitor</code> using <code>SubMonitor</code> class, while this works good in a linear workflow, it does not work well in distributed flows where each item wants to report progress independently.
+			Another drawback was, as the original progress monitor has no way to know about the split, it's not possible to handle this in a user-friendly fashion. For e.g. it was not possible for a User-Control to show the progress independently.
+		</p>
+		<p>
+		 To overcome this limitations a new way of slicing a monitor was added <code>IProgressMonitor#slice(int work)</code> with the following properties:
+		</p>
+		<ul>
+			<li>slice is default implemented with a very basic slicing facility that can be overriden by implementations if required</li>
+			<li>the returned monitor behaves as if one has created a fresh instance with the given amount of work (that implies that the caller of slice(...) is responsible to call "done" on the returned monitor if no longer needed)</li>
+			<li>whenever a full work unit is reported on the slice it is propagated to the parent</li>
+			<li>it is safe to use slices in another thread</li>
+			<li>it is possible to create more than one slice without influence on the others</li>
+		</ul>
+		<p>
+		 For further details on usage, check the javadoc of the new method.
+		</p>
+    </td>
+  </tr>	
+  <tr id="dialog-adapterfactory-as-service"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567344 -->
+   <td class="title"><a href="#dialog-adapterfactory-as-service">IAdapterFactory as Service</a></td>
+    <td class="content">
+    	<p>Previously <code>IAdapterFactory</code> has to be registered via plugin.xml, this has the disadvantage that one has to keep code with xml in sync (e.g. the adapter classes has to be provided in xml and in the IAdapterFactory.getAdapterList()). Also the code is bound to the static Extension Point Model that means that it has to gather all necessary dependencies from external (static) sources as there is no injection mechanism available.</p>
+    	<p>From now on it is possible to also register an OSGi Service for this purpose and thus can take advantage of Declarative Services for example or even specialized construction and registration with plain OSGi mechanism.
+    	The service must only supply a string property (or even multiple ones) with <code>IAdapterFactory.SERVICE_PROPERTY_ADAPTABLE_CLASS</code> that promotes the types that can be adapted.
+    	The code then activates the service upon first request of the adaptation of adaptable class and calls IAdapterFactory.getAdapterList() to find out the adapter classes.<br/>
+    	If even more laziness is required a list of adapter classes can be declared via the <code>IAdapterFactory.SERVICE_PROPERTY_ADAPTER_NAMES</code> service-property and the activation of the service will even be further delayed to the point where an actual adaptation of adaptable class for one of the static available types is requested.</p>
+    </td>
+  </tr>	
+  <tr id="dialog-settings-provider"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549929 -->
+   <td class="title"><a href="#dialog-settings-provider">IDialogSettingsProvider</a></td>
+    <td class="content">
+    	The <code>org.eclipse.jface.dialogs.IDialogSettingsProvider</code> is a new interface 
+    	to describe classes that are responsible for loading and saving IDialogSettings. 
+    	Clients can now provide a central place to manage dialog settings.
+    </td>
+  </tr>	
+
+  <tr id="dialog-settings-platform"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549929 -->
+   <td class="title"><a href="#dialog-settings-platform">PlatformUI dialog settings</a></td>
+    <td class="content">
+    	<code>PlatformUI.getDialogSettingsProvider(Bundle)</code> has become the central place 
+    	for getting bundle based dialog settings.
+    	All methods in AbstractUIPlugin dealing with dialog settings have been deprecated.
+    </td>
+  </tr>	
+  
+  <tr id="composite-layout-factory"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=566261 -->
+   <td class="title"><a href="#composite-layout-factory"> CompositeFactory support layout supplier</a></td>
+    <td class="content">
+    	<code>CompositeFactory</code> now supports the usage of a layout supplier for each new composite.
+      
+      	<code>CompositeFactory.newComposite(SWT.NONE).supplyLayout(GridLayoutFactory.fillDefaults()::create).create(parentComposite);</code>
+      
+    </td>
+  </tr>	
+  
+     <tr id="datetime-factory"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567110 -->
+   <td class="title"><a href="#datetime-factory"> New DateTimeFactory</a></td>
+    <td class="content">
+    	<code>DateTimeFactory</code> is available to create DateTime widgets.
+    </td>
+  </tr>	
+  
+  
+   <tr id="disposal-null-check"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=566317 -->
+   <td class="title"><a href="#disposal-null-check"> JFace Util method to check if widget can be used</a></td>
+    <td class="content">
+    	The new static utility  <code>org.eclipse.jface.util.Util.isValid</code> method allows to check if a widget is <code>null</code> or disposed.
+      
+    </td>
+  </tr>	
+
+	<tr id="unit-test-view"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=507626 -->
+		<td class="title"><a href="#unit-test-view">Generic Unit Test View and extension point</a></td>
+		<td class="content">
+			A generic <strong>Unit Test</strong> view was added in a new <code>org.eclipse.unittest.ui</code> plugin.
+			It allows extenders to add support for reports and management of test executions in any test engine through
+			a common view, by adding an extension to
+			<code>org.eclipse.unittest.ui.unittestViewSupport</code> extension point for the specific test engine.
+			<p>Extensions typically deal with receiving input from an <code>ILaunch</code>
+			(eg parse output or receive notifications through some protocol specific to the test engine) and to
+			populate the Test Session model with information about execution of the tests. Extensions also provide
+			some implementation of the typical UI actions available for a given test session: re-run a specific set
+			of tests, open file for a given stack element...).</p>
+			<p>The <code>org.eclipse.unittest.ui</code> plugin is currently not included in Eclipse Platform, SDK or
+			other products; it's available for installation from the Eclipse project p2 repository. Consumers would
+			typically need to include this bundle in there target-platform explicitly to provide an extension for
+			the Unit Test view.</p>
+			<p>Examples of consumers are:</p>
+			<ul>
+			 <li><code>org.eclipse.jdt.unittest.ui.jdt</code> bundle which provides alternative launchers for JUnit,
+			  using the new Unit Test view for report</li>
+			 <li>Corrosion plugin uses this Unit Test view to build support for Rust/Cargo test execution reporting, and</li>
+			 <li>CDT also has some experimental code to use this view for C/C++ test report instead of a specific view.</li>
+			</ul>
+		</td>
+	</tr>
+  <tr id="lines-visible-css"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567821 -->
+   <td class="title"><a href="#lines-visible-css">Lines visible CSS option</a></td>
+   <td class="content">
+    Visibility of lines in trees and tables can now be configured using the <code>swt-lines-visible</code> CSS property. 
+    <p>
+     Here's how it looks when lines are disabled in the dark theme on Windows: <br/>
+     <img src="images/lines-visible-false.png" alt="" />
+    </p>
+    
+    Example usage in CSS:
+    <pre>
+     <code>Tree, Table {</code>
+     <code>  swt-lines-visible: false;</code>
+     <code>}</code>
+    </pre>
+   </td>
+  </tr>
+ 
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  <tr id="swt-chromium"> <!-- https://bugs.eclipse.org/549585 -->
-    <td class="title"><a href="#swt-chromium">Support for Chromium browser renderer</a></td>
-    <td class="content">
-      SWT now supports Chromium as a browser renderer on all platforms using a new <code>SWT.CHROMIUM</code> constant. Please see this
-      <a href="https://www.eclipse.org/swt/faq.php#howusechromium" target="_blank">FAQ</a> entry for details on using the Chromium style browser.
-    </td>
-  </tr>
-
-  <tr id="swt-device-free-constructors"> <!-- https://bugs.eclipse.org/563560 -->
-    <td class="title"><a href="#swt-device-free-constructors">Colors have new Device free constructors</a></td>
-    <td class="content">
-      Starting from Eclipse 4.16, SWT no longer required Colors to be disposed, with Eclipse 4.17
-      new constructors are available which don't require a Device when creating Colors.
-    </td>
-
-  </tr>
-
-  <tr id="dark-win32-menu"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562454 -->
-    <td class="title"><a href="#dark-win32-menu">Support for dark theme Menu under Windows10</a></td>
-    <td class="content">
-      SWT supports dark theme <code>Menu</code> under Windows10 as below:
-      <p>
-        Old:
-      </p>
-      <p>
-        <img src="images/menu-background-old.png" alt="" />
-      </p>
-      <p>
-        New:
-      </p>
-      <p>
-        <img src="images/menu-background-dark.png" alt="" />
-      </p>
-      <p>
-        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#dark-win32-menu">dark menu</a> can be disabled using the
+  <tr id="win32-dark-progressbar"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=563572 -->
+	<td class="title"><a href="#win32-dark-progressbar">Windows dark theme styles progress bars</a></td>
+	<td class="content">
+		The progress bar in the dark theme on Windows OS is now styled:
+		<p>
+		<img src="images/progressbar-dark-win32.png" alt=""/>
+		</p>
+		<p>
+        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#win32-dark-progressbar">dark progressbar</a> can be disabled using the 
         <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
         For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
       </p>
       <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
-    </td>
-  </tr>
-
-  <tr id="dark-win32-combo"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562454 -->
-    <td class="title"><a href="#dark-win32-combo">Improved dark theme Combo under Windows</a></td>
-    <td class="content">
-      SWT supports improved dark theme <code>Combo</code> under Windows10 as below:
-      <p>
-        Old:
-      </p>
-      <p>
-        <img src="images/combo-win32-dark-old.png" alt="" />
-      </p>
-      <p>
-        New:
-      </p>
-      <p>
-        <img src="images/combo-win32-dark-new.png" alt="" />
-      </p>
-      <p>
-        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#dark-win32-combo">dark combo</a> can be disabled using the
-        <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
-        For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
-      </p>
-      <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
-    </td>
+	</td>
   </tr>
   <!-- *********************** End of SWT *********************** -->
 
