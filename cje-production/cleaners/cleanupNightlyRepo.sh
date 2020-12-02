@@ -193,20 +193,26 @@ function cleanRepo ()
 workspace=$1
 remoteBase="/home/data/httpd/download.eclipse.org"
 
-eclipseYRepo="${remoteBase}/eclipse/updates/4.17-Y-builds"
-eclipsePRepo="${remoteBase}/eclipse/updates/4.17-P-builds"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.18-I-builds"
+eclipseSRepo="${remoteBase}/eclipse/updates/4.18milestones"
+eclipseYRepo="${remoteBase}/eclipse/updates/4.18-Y-builds"
+eclipsePRepo="${remoteBase}/eclipse/updates/4.18-P-builds"
 
 doDryrun=
 # global
+declare -a reposToRemove=()
+cleanRepo $eclipseIRepo I 4 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipseSRepo S 2 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseYRepo Y 2 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseYRepo P 2 $doDryrun
 
-eclipseIRepo="${remoteBase}/eclipse/updates/4.18-I-builds"
-eclipseSRepo="${remoteBase}/eclipse/updates/4.18milestones"
-eclipseYRepo="${remoteBase}/eclipse/updates/4.18-Y-builds"
-eclipsePRepo="${remoteBase}/eclipse/updates/4.18-P-builds"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.19-I-builds"
+eclipseSRepo="${remoteBase}/eclipse/updates/4.19milestones"
+eclipseYRepo="${remoteBase}/eclipse/updates/4.19-Y-builds"
+eclipsePRepo="${remoteBase}/eclipse/updates/4.19-P-builds"
 
 doDryrun=
 # global
