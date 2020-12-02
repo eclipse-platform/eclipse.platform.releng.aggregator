@@ -473,11 +473,11 @@ spec:
 	  stage('Trigger tests'){
           steps {
               container('jnlp') {
-                build job: 'ep418Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep418Y-unit-cen64-gtk3-java15', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep418Y-unit-cen64-gtk3-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep418Y-unit-mac64-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep418Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep419Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep419Y-unit-cen64-gtk3-java15', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep419Y-unit-cen64-gtk3-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep419Y-unit-mac64-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep419Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Smoke-tests-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
@@ -492,7 +492,7 @@ spec:
             from:"genie.releng@eclipse.org"
         }
         success {
-            emailext body: "Eclipse downloads:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}<br><br> Build logs and/or test results (eventually):<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php<br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    https://download.eclipse.org/eclipse/updates/4.18-Y-builds<br><br>Specific (simple) site repository:<br>    https://download.eclipse.org/eclipse/updates/4.18-Y-builds/${env.BUILD_IID.trim()}<br><br>Equinox downloads:<br>     https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}<br><br>", 
+            emailext body: "Eclipse downloads:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}<br><br> Build logs and/or test results (eventually):<br>    https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php<br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    https://download.eclipse.org/eclipse/updates/{env.RELEASE_VER.trim()}-Y-builds<br><br>Specific (simple) site repository:<br>    https://download.eclipse.org/eclipse/updates/{env.RELEASE_VER.trim()}-Y-builds/${env.BUILD_IID.trim()}<br><br>Equinox downloads:<br>     https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}<br><br>", 
             subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
             to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
             from:"genie.releng@eclipse.org"
