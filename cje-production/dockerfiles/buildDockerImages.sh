@@ -44,3 +44,8 @@ pushd ubuntu-gtk3-metacity/20.04-gtk3
 echo "Building Ubuntu 20.04 docker image"
 docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:20.04 .
 popd
+
+pushd ubuntu-gtk3-metacity/20.10-gtk3
+echo "Building Ubuntu 20.10 docker image"
+docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:20.10 .
+popd
