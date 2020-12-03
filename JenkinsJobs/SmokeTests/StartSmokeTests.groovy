@@ -29,6 +29,16 @@ pipeline {
                         build job: 'ep-pipeline-ubuntu20-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
+              stage('Ubuntu 20.10 Java11'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu20.10-x86_64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
+              stage('Ubuntu 20.10 Java15'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu20.10-x86_64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
               stage('Centos 7.x Java11'){
                   steps {
                         build job: 'ep-pipeline-cen7x-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
