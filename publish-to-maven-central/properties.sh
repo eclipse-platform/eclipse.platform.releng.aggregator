@@ -15,8 +15,8 @@
 # ECLIPSE:
 APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
-SDK_BUILD_DIR=R-4.17-202009021800
-SDK_VERSION=4.17
+SDK_BUILD_DIR=R-4.18-202012021800
+SDK_VERSION=4.18
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
 # JDT / ECJ:
