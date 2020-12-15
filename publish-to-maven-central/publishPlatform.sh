@@ -87,19 +87,19 @@ do
 	
 	echo "${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
 	
-	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	${MVN} -e -X -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	   -Durl=${URL} -DrepositoryId=${REPO} \
 	   -Dfile=${file} -DpomFile=${pomFile} \
 	   >> .log/artifact-upload.txt
 	   
 	echo -e "\t${sourcesFile}"
-	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	${MVN} -e -X -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	   -Durl=${URL} -DrepositoryId=${REPO} \
 	   -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
 	   >> .log/sources-upload.txt
 	
 	echo -e "\t${javadocFile}"
-	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	${MVN} -e -X -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	   -Durl=${URL} -DrepositoryId=${REPO} \
 	   -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
 	   >> .log/javadoc-upload.txt
