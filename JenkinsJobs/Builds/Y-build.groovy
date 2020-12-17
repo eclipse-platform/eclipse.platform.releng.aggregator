@@ -168,18 +168,20 @@ spec:
 	  stage('Create Base builder'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
-                        sh '''
-                            cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                            ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb020_createBaseBuilder.sh.log
-                            if [[ ${PIPESTATUS[0]} -ne 0 ]]
-                            then
-                                echo "Failed in Create Base builder stage"
-                                exit 1
-                            fi
-                        '''
-                      }
+                  sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+		          withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
+		              withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
+		                sh '''
+		                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
+		                    ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb020_createBaseBuilder.sh.log
+		                    if [[ ${PIPESTATUS[0]} -ne 0 ]]
+		                    then
+		                        echo "Failed in Create Base builder stage"
+		                        exit 1
+		                    fi
+		                '''
+		              }
+		          }
                   }
                 }
             }

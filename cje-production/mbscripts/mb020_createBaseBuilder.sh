@@ -25,7 +25,13 @@ source $1
 
 mkdir -p $CJE_ROOT/$TMP_DIR
 pushd $CJE_ROOT/$TMP_DIR
-wget -O eclipsePlatform.tar.gz https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz
+epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
+dropsPath=${epDownloadDir}/downloads/drops4
+#get latest Eclipse platform product
+epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
+scp genie.releng@projects-storage.eclipse.org:${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz eclipsePlatform.tar.gz
+
+#wget -O eclipsePlatform.tar.gz https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz
 tar zxf eclipsePlatform.tar.gz
 popd
 
