@@ -482,6 +482,7 @@ spec:
                 build job: 'ep419Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Smoke-tests-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'Smoke-tests-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
             }
 		}
