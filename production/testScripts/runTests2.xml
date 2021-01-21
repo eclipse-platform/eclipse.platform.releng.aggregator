@@ -174,16 +174,16 @@
     unless="skipInstall">
     <get
       verbose="${selectiveVerbose}"
-      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.dmg"
-      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.dmg" />
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg" />
     <get
       verbose="${selectiveVerbose}"
-      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-macosx-cocoa-x86_64.dmg"
-      dest="${executionDir}/eclipse-platform-${buildIdToUse}-macosx-cocoa-x86_64.dmg" />
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg" />
     <get
       verbose="${selectiveVerbose}"
-      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.dmg"
-      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.dmg" />
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-${osgi.arch}.dmg"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-${osgi.arch}.dmg" />
   </target>
 
   <target
@@ -279,9 +279,14 @@
         <equals
           arg1="${osgi.ws}"
           arg2="cocoa" />
-        <equals
-          arg1="${osgi.arch}"
-          arg2="x86_64" />
+        <or>
+	        <equals
+	          arg1="${osgi.arch}"
+	          arg2="x86_64" />
+	        <equals
+	          arg1="${osgi.arch}"
+	          arg2="arm64" />
+       	</or>
       </and>
     </condition>
     <echo message="[DEBUG] in runTest2.xml: os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />

@@ -57,6 +57,11 @@
               <ws>cocoa</ws>
               <arch>x86_64</arch>
             </environment>
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>arm64</arch>
+            </environment>
           </environments>
         </configuration>
       </plugin>
@@ -226,12 +231,27 @@
             <version>${cbi-plugins.version}</version>
             <executions>
               <execution>
+                <id>dmg-x86_64</id>
                 <goals>
                   <goal>package-dmg</goal>
                 </goals>
                 <phase>verify</phase>
                 <configuration>
                   <source>${project.build.directory}/products/org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz</source>
+                  <continueOnFail>true</continueOnFail>
+                  <timeoutMillis>600000</timeoutMillis> <!-- 10 min -->
+                  <continueOnFail>${macSigner.forceContinue}</continueOnFail> 
+                  <sign>true</sign>
+                </configuration>
+              </execution>
+              <execution>
+                <id>dmg-arm64</id>
+                <goals>
+                  <goal>package-dmg</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <source>${project.build.directory}/products/org.eclipse.rt.osgistarterkit.product-macosx.cocoa.arm64.tar.gz</source>
                   <continueOnFail>true</continueOnFail>
                   <timeoutMillis>600000</timeoutMillis> <!-- 10 min -->
                   <continueOnFail>${macSigner.forceContinue}</continueOnFail> 
