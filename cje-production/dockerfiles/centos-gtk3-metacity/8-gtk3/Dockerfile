@@ -22,15 +22,19 @@ RUN yum -y update && yum -y install \
       dbus \
       webkitgtk4 \
       glibc-locale-source \
-      libsecret \
     && yum clean all
 
 ENV HOME=/home/vnc
 ENV DISPLAY :0
 
+RUN useradd -u 10001 -d ${HOME} testuser
+
 RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
   && echo "123456" | vncpasswd -f > ${HOME}/.vnc/passwd \
   && chmod 600 ${HOME}/.vnc/passwd
+
+RUN mkdir -p var/lib/dbus && dbus-uuidgen > /var/lib/dbus/machine-id \
+  && mkdir -p /var/run/dbus
 
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
