@@ -24,10 +24,7 @@ RUN yum -y update && yum -y install \
       webkitgtk4 \
       webkitgtk4-devel \
       gtk3-devel \
-      gtk2 \
-      gtk2-devel \
-      java-openjdk \
-      java-openjdk-devel \
+      java-1.8.0-openjdk-devel \
       webkit2gtk3-devel \
       make \
       gcc \

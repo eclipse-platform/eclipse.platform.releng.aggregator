@@ -25,8 +25,6 @@ RUN yum -y update && yum -y install \
       webkitgtk4 \
       webkitgtk4-devel \
       gtk3-devel \
-      gtk2 \
-      gtk2-devel \
       java-11-openjdk \
       java-11-openjdk-devel \
       webkit2gtk3-devel \
