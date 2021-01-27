@@ -15,7 +15,7 @@
 
 set -e
 
-pushd centos-gtk3-metacity/7-swtBuild-gerrit
-echo "Building Centos 7 swt build for gerrit image"
+pushd centos-gtk3-metacity/8-swtBuild-gerrit
+echo "Building Centos 8 swt build for gerrit image"
 docker build --pull -t eclipse/platformreleng-centos-swt-build:gerrit .
 popd

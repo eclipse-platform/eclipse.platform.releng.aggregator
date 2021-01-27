@@ -15,7 +15,7 @@
 
 set -e
 
-pushd centos-gtk3-metacity/7-swtBuild
-echo "Building Centos 7 swt build image"
-docker build --pull -t eclipse/platformreleng-centos-swt-build:7 .
+pushd centos-gtk3-metacity/8-swtBuild
+echo "Building Centos 8 swt build image"
+docker build --pull -t eclipse/platformreleng-centos-swt-build:8 .
 popd
