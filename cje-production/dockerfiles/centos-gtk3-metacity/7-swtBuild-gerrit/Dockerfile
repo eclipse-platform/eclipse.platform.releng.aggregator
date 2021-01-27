@@ -53,7 +53,7 @@ RUN cd ${HOME} && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ${
   && ${HOME}/setup-rust.sh -y
 ENV PATH=$HOME/.cargo/bin:$PATH
 
-RUN mkdir -p ${HOME}/cef-libs && wget -O ${HOME}/cef-libs/cef.tar.bz2 --no-verbose http://opensource.spotify.com/cefbuilds/cef_binary_3.3071.1649.g98725e6_linux64_minimal.tar.bz2
+RUN mkdir -p ${HOME}/cef-libs && wget -O ${HOME}/cef-libs/cef.tar.bz2 --no-verbose https://cef-builds.spotifycdn.com/cef_binary_3.3071.1649.g98725e6_linux64_minimal.tar.bz2
 
 RUN mkdir -p ${HOME}/maven && wget -O ${HOME}/maven/maven.tar.gz --no-verbose https://downloads.apache.org/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz \
   && cd ${HOME}/maven \
