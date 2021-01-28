@@ -6,7 +6,7 @@ RUN yum -y update && yum -y install \
       gtk3 \
       tigervnc-server \
       tigervnc \
-      metacity \
+      mutter \
       xorg-x11-server-utils \
       mesa-libGL \
       xorg-x11-fonts-misc \
@@ -64,7 +64,7 @@ ENV PATH=$JAVA_HOME/bin:$HOME/maven/apache-maven-3.6.3/bin:$PATH
 RUN chmod -R 777 ${HOME}/.cargo
 
 # Create a custom vnc xstartup file
-COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
+COPY scripts/xstartup_mutter.sh ${HOME}/.vnc/xstartup.sh
 RUN chmod 755 ${HOME}/.vnc/xstartup.sh
 
 USER 10001
