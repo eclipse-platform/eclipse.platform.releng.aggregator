@@ -45,6 +45,10 @@ RUN yum -y update && yum -y install \
       freetype \
     && yum clean all
 
+# -i: specify the locale definition file
+# -f: specify the character set
+RUN localedef -i en_US -f UTF-8 en_US.UTF-8
+
 ENV HOME=/home/vnc
 ENV DISPLAY :0
 
