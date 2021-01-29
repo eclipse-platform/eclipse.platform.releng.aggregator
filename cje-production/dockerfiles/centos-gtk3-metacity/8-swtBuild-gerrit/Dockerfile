@@ -1,12 +1,21 @@
 ARG FROM_TAG="8"
 FROM centos:${FROM_TAG}
 
+### user name recognition at runtime w/ an arbitrary uid - for OpenShift deployments
+COPY scripts/uid_entrypoint /usr/local/bin/uid_entrypoint
+RUN chmod u+x /usr/local/bin/uid_entrypoint && \
+    chgrp 0 /usr/local/bin/uid_entrypoint && \
+    chmod g=u /usr/local/bin/uid_entrypoint /etc/passwd
+### end
+
+ENTRYPOINT [ "uid_entrypoint" ]
+
 RUN yum -y update && yum -y install \
       git \
       gtk3 \
       tigervnc-server \
       tigervnc \
-      mutter \
+      metacity \
       xorg-x11-server-utils \
       mesa-libGL \
       xorg-x11-fonts-misc \
@@ -64,7 +73,7 @@ ENV PATH=$JAVA_HOME/bin:$HOME/maven/apache-maven-3.6.3/bin:$PATH
 RUN chmod -R 777 ${HOME}/.cargo
 
 # Create a custom vnc xstartup file
-COPY scripts/xstartup_mutter.sh ${HOME}/.vnc/xstartup.sh
+COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
 RUN chmod 755 ${HOME}/.vnc/xstartup.sh
 
 USER 10001
