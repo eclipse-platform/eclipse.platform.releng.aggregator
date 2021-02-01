@@ -25,11 +25,6 @@ echo "Building Centos 8 swt build image"
 docker build --pull -t eclipse/platformreleng-centos-swt-build:8 .
 popd
 
-pushd centos-gtk3-metacity/8-swtBuild-gerrit
-echo "Building Centos 8 swt build for gerrit image"
-docker build --pull -t eclipse/platformreleng-centos-swt-build:gerrit .
-popd
-
 pushd centos-gtk3-metacity/8-gtk3
 echo "Building Centos 8 docker image"
 docker build --pull -t eclipse/platformreleng-centos-gtk3-metacity:8 .
