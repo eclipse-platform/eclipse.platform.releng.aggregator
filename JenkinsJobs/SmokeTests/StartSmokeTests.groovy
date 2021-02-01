@@ -39,6 +39,16 @@ pipeline {
                         build job: 'ep-smoke-test-ubuntu20.10-x86_64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
+              stage('Opensuse Leap Java11'){
+                  steps {
+                        build job: 'ep-smoke-test-opensuse-leap-x64-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
+              stage('Opensuse Leap Java15'){
+                  steps {
+                        build job: 'ep-smoke-test-opensuse-leap-x64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
               stage('Centos 7.x Java11'){
                   steps {
                         build job: 'ep-pipeline-cen7x-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
