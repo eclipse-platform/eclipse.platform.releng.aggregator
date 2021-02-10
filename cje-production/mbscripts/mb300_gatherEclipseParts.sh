@@ -276,7 +276,7 @@ then
 
   fn-write-property COMPARATOR_ERRORS "true"
   fn-write-property COMPARATOR_ERRORS_SUBJECT "\"- Comparator Errors Found\""
-  fn-write-property COMPARATOR_ERRORS_BODY "\"Check unanticipated comparator messages:<br>    https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt<br><br>\""
+  fn-write-property COMPARATOR_ERRORS_BODY "\"Check unanticipated comparator messages:<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt</a><br><br>\""
 else
   echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fn-write-property COMPARATOR_ERRORS_SUBJECT "\" \""
