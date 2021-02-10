@@ -45,6 +45,9 @@ RUN yum -y update && yum -y install \
       freetype \
       glibc-locale-source \
       glibc-langpack-en \
+      nss \
+      nspr \
+      nss-util \
     && yum clean all
 
 # -i: specify the locale definition file
@@ -73,4 +76,4 @@ RUN chmod -R 777 ${HOME}/.cargo
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
 RUN chmod 755 ${HOME}/.vnc/xstartup.sh
 
-USER 10001
+USER 1000
