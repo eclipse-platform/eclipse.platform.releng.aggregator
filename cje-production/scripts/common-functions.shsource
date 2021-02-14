@@ -57,7 +57,7 @@ fn-notarize-macbuild ()
   retryCount=3
   while [ ${retryCount} -gt 0 ]; do
 
-    RAW_RESPONSE=$(curl -sS --write-out "\n%{http_code}" -X POST -F file=@"${DMG}" -F 'options={"primaryBundleId": "'"${PRIMARY_BUNDLE_ID}"'", "staple": true};type=application/json' http://172.30.206.146:8383/macos-notarization-service/notarize || : )
+    RAW_RESPONSE=$(curl -sS --write-out "\n%{http_code}" -X POST -F file=@"${DMG}" -F 'options={"primaryBundleId": "'"${PRIMARY_BUNDLE_ID}"'", "staple": true};type=application/json' https://cbi.eclipse.org/macos/xcrun/notarize || : )
 
     RESPONSE=$(head -n-1 <<<"${RAW_RESPONSE}")
     STATUS_CODE=$(tail -n1 <<<"${RAW_RESPONSE}")
@@ -80,7 +80,7 @@ fn-notarize-macbuild ()
 
     while [[ ${STATUS} == 'IN_PROGRESS' ]]; do
       sleep 1m
-      RESPONSE=$(curl -sS "http://172.30.206.146:8383/macos-notarization-service/${UUID}/status")
+      RESPONSE=$(curl -sS "https://cbi.eclipse.org/macos/xcrun/${UUID}/status")
       STATUS=$(echo "$RESPONSE" | grep -Po '"status"\s*:\s*"\K[^"]+' || : )
     done
 
@@ -102,7 +102,7 @@ fn-notarize-macbuild ()
 
   rm "${DMG}"
 
-  curl -sSJO "http://172.30.206.146:8383/macos-notarization-service/${UUID}/download"
+  curl -sSJO "https://cbi.eclipse.org/macos/xcrun/${UUID}/download"
   popd || exit 5
   set +x
 }
