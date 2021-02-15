@@ -475,7 +475,8 @@ esac
 export HIDE_SITE=true
 # Build machine locations (would very seldom change)
 export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
-export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
+export BUILD_REPO_ORIGINAL=${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
+export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/eclipse/updates/${BUILD_REPO_ORIGINAL}
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/equinox/drops
@@ -508,11 +509,20 @@ printf "\n\t%20s%25s\n" "HIDE_SITE" "${HIDE_SITE}" >> "${CL_SITE}/checklist.txt"
 printf "\t%s\n" "Eclipse downloads:" >> "${CL_SITE}/checklist.txt"
 printf "\t%s\n\n" "https://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
 
-printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
+if [[ "${DL_TYPE}" == "R" ]]
+then
+  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/checklist.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
 
-printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
+  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/checklist.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
+else
+  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/checklist.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/" >> "${CL_SITE}/checklist.txt"
+
+  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/checklist.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/${DROP_ID}/" >> "${CL_SITE}/checklist.txt"
+fi
 
 printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/checklist.txt"
 printf "\t%s\n\n" "https://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
@@ -530,11 +540,20 @@ printf "\t%s\n\n" "https://download.eclipse.org/eclipse/downloads/drops4/${ECLIP
 printf "\t%s\n" "New and Noteworthy:" >> "${CL_SITE}/mailtemplate.txt"
 printf "\t%s\n\n" "https://www.eclipse.org/eclipse/news/${NEWS_ID}/" >> "${CL_SITE}/mailtemplate.txt"
 
-printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/mailtemplate.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+if [[ "${DL_TYPE}" == "R" ]]
+then
+  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
 
-printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/mailtemplate.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
+else
+  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/" >> "${CL_SITE}/mailtemplate.txt"
+
+  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/mailtemplate.txt"
+  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/${DROP_ID}/" >> "${CL_SITE}/mailtemplate.txt"
+fi
 
 printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/mailtemplate.txt"
 printf "\t%s\n\n" "https://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
@@ -627,10 +646,13 @@ popd
 
 
 #Promote Repository
-pushd ${LOCAL_REPO}
-  BUILDMACHINE_SITE=${LOCAL_REPO}/${DROP_ID}
-  addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
-  createXZ ${BUILDMACHINE_SITE}
-  mv ${DROP_ID} ${DL_DROP_ID}
-  scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
-popd
+if [[ "${DL_TYPE}" == "R" ]]
+then
+  pushd ${LOCAL_REPO}
+    BUILDMACHINE_SITE=${LOCAL_REPO}/${DROP_ID}
+    addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
+    createXZ ${BUILDMACHINE_SITE}
+    mv ${DROP_ID} ${DL_DROP_ID}
+    scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
+  popd
+fi

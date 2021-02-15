@@ -53,7 +53,7 @@ function computeSTREAM_REPO_NAME () {
                 $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
             } else {
                 if ($BUILD_TYPE === "S") {
-                    $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."milestones";
+                    $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-"."I"."-"."builds";
                 } else {
                     if ($BUILD_TYPE === "R") {
                         $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR;
@@ -81,14 +81,18 @@ function computeBUILD_REPO_NAME () {
     if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || $BUILD_TYPE === "P" || $BUILD_TYPE === "U" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y" || $BUILD_TYPE === "M" && ! ((isSRRC($BUILD_ID)) || isRRC($BUILD_ID))) {
         $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/".$BUILD_ID;
     } else {
-        $timestamp = str_replace('-', '', $TIMESTAMP);
-        if ($BUILD_TYPE === "S" || $BUILD_TYPE === "R" || ($BUILD_TYPE === "M" && (isSRRC($BUILD_ID) || isRRC($BUILD_ID)))) {
-            $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/".$BUILD_TYPE."-".$BUILD_ID."-"."$timestamp";
-        } else {
-            echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />\n";
-            // We will make an assumption that might work.
-            $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/".$BUILD_ID;
-        }
+    	if ($BUILD_TYPE === "S") {
+            $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/"."I"."$TIMESTAMP";
+    	} else {
+	        $timestamp = str_replace('-', '', $TIMESTAMP);
+	        if ($BUILD_TYPE === "R" || ($BUILD_TYPE === "M" && (isSRRC($BUILD_ID) || isRRC($BUILD_ID)))) {
+	            $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/".$BUILD_TYPE."-".$BUILD_ID."-"."$timestamp";
+	        } else {
+	            echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />\n";
+	            // We will make an assumption that might work.
+	            $BUILD_REPO_NAME=computeSTREAM_REPO_NAME ()."/".$BUILD_ID;
+	        }
+	    }
     }
     return $BUILD_REPO_NAME;
 }

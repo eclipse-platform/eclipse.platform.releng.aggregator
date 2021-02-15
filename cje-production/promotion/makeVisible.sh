@@ -144,47 +144,9 @@ case ${DL_TYPE} in
     exit 1
 esac
 
-epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
-dropsPath=${epDownloadDir}/downloads/drops4
-p2RepoPath=${epDownloadDir}/updates
-buildDir=${dropsPath}/${buildId}
-
-workingDir=${epDownloadDir}/workingDir
-
-workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
-
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
-
-ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
-ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
-
-#get latest Eclipse platform product
-epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
-ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
-
-#get requisite tools
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/cje-production/scripts/addToComposite.xml
-
-#triggering ant runner
-baseBuilderDir=${workspace}/eclipse
-javaCMD=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
-
-launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
-
-scp genie.releng@projects-storage.eclipse.org:${buildDir}/buildproperties.shsource .
-source ./buildproperties.shsource
-repoDir=/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
-
-devworkspace=${workspace}/workspace-antRunner
-devArgs=-Xmx512m
-extraArgs="addToComposite -Drepodir=${repoDir} -Dcomplocation=${buildId}"
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/addToComposite.xml ${extraArgs} -vmargs $devArgs
-
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
-
-#Tag Source
 if [[ "${DL_TYPE}" != "R" ]]
 then 
+  #Tag Source
   TAG=${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}_${BUILD_SERVICE}_${CHECKPOINT}
 
   cd ${WORKSPACE}
@@ -223,4 +185,43 @@ then
     exit $RC
   fi
   popd
+else
+  #Repository will be available only for R builds. add it to composite
+  epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
+  dropsPath=${epDownloadDir}/downloads/drops4
+  p2RepoPath=${epDownloadDir}/updates
+  buildDir=${dropsPath}/${buildId}
+
+  workingDir=${epDownloadDir}/workingDir
+
+  workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
+
+  ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+
+  ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
+  ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
+
+  #get latest Eclipse platform product
+  epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
+  ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
+
+  #get requisite tools
+  ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/cje-production/scripts/addToComposite.xml
+
+  #triggering ant runner
+  baseBuilderDir=${workspace}/eclipse
+  javaCMD=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
+
+  launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
+
+  scp genie.releng@projects-storage.eclipse.org:${buildDir}/buildproperties.shsource .
+  source ./buildproperties.shsource
+  repoDir=/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
+
+  devworkspace=${workspace}/workspace-antRunner
+  devArgs=-Xmx512m
+  extraArgs="addToComposite -Drepodir=${repoDir} -Dcomplocation=${buildId}"
+  ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/addToComposite.xml ${extraArgs} -vmargs $devArgs
+
+  ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
 fi
