@@ -66,18 +66,26 @@ The <b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html
 URL or filename where the image can be obtained.
 <b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptors</a></b> do not allocate an actual platform image unless specifically requested using the
 <b> createImage()</b> method. </P>
-<P >
-Image descriptors are the best strategy when your code is structured such that it defines all the icons in one place and allocates them as they are needed. Image descriptors can be created at any time without concern for OS resources, making it convenient to create them all in initialization code. </P>
-
+<p>Image descriptors are the best strategy when your code is structured such that it defines all the icons in one place and allocates them as they are needed. Image descriptors can be created at any time without concern for OS resources, making it convenient to create them all in initialization code.</p>
+<p>When designing APIs prefer image descriptors over images whenever possible. Clients of your API only hand image descriptors to your API. Your implementation handles the creation and disposal of the images and clients of your API don't need to care about disposing of images. An good example for this approach is the <a href="../reference/api/org/eclipse/jface/wizard/Wizard.html">Wizard</a> class.</p>
+<p>The following code shows an example for this.</p>
+<pre>
+public abstract class MyWizard extends Wizard {
+	...
+	@Override
+	public void init(IWorkbench workbench, IStructuredSelection selection) {
+		ImageDescriptor imageDesc = MyImageRegistry.getImageRegistry().get(“MyKey”);
+		setDefaultPageImageDescriptor(imageDesc);
+	}
+	...
+}
+</pre>
 
 <H4>
 Image registry</H4>
-<P >
-The <a href="../reference/api/org/eclipse/jface/resource/ImageRegistry.html"><b> ImageRegistry</b></a> class is used to keep a list of named images. Clients can add image descriptors or SWT images directly to the list. When an image is requested by name from the registry, the registry will return the image if it has been created, or create one from the descriptor. This allows clients of the registry to share images.</P>
-<P >
-Images that are added to or retrieved from the registry must not be disposed by any client. The registry is responsible for disposing of the image since the images are shared by multiple clients. The registry will dispose of the images when the platform GUI system shuts down.</P>
-
-
+<p>The <a href="../reference/api/org/eclipse/jface/resource/ImageRegistry.html"><b> ImageRegistry</b></a> class is used to keep a list of named images. Clients can add image descriptors or SWT images directly to the list. When an image is requested by name from the registry, the registry will return the image if it has been created, or create one from the descriptor. This allows clients of the registry to share images.</p>
+<p>You should prefer adding image descriptors to the list instead of images whenever possible. This has the advantage that the creation of the images is deferred to the point in time when it's needed.</p>
+<p>Images that are added to or retrieved from the registry must not be disposed by any client. The registry is responsible for disposing of the image since the images are shared by multiple clients. The registry will dispose of the images when the platform GUI system shuts down. Disposing images that late in the lifetime of an application may be a disadvantage.</p>
 
 <H3>
 <a name="jface_resources_patterns">
@@ -93,14 +101,26 @@ The other patterns should only be considered when you can't specify the icon as 
 
 <H4>
 Explicit creation</H4>
-<P >
-Explicitly creating an image is the best strategy when the image is infrequently used and not shared. The image can be created directly in SWT and disposed after it is used.</P>
-<P >
-Images can also be created explicitly using an <b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptor</a></b> and invoking the
+<p>Explicitly creating an image is the best strategy when the image is infrequently used and not shared. The image can be created directly in SWT and disposed after it is used.</p>
+<p>Images can also be created explicitly using an <b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptor</a></b> and invoking the
 <b> createImage()</b> method. As in the first case, the dispose() method for the image must be invoked after the image is
 no longer needed.&nbsp; For example, if a dialog creates an image when it is
-opened, it should dispose the image when it is closed.</P>
-
+opened, it should dispose the image when it is closed.</p>
+<p>The following example shows how to tie the image lifecycle to the lifecycle of a related control using a <b><a href="../reference/api/org/eclipse/swt/events/DisposeListener">DisposeListener</a></b>.</p>
+<pre>
+public class MyDialog extends TitleAreaDialog
+	...
+	@Override
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		...
+		Image image = imageRegistry.get(“MyKey”).createImage();
+		setTitleImage(image);
+		newShell.addDisposeListener(e -> image.dispose());
+	}
+	...
+}
+</pre>
 
 <H4>
 Image registry</H4>
@@ -116,17 +136,37 @@ The class <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.ht
 
 <H4>
 Label providers</H4>
-<P >
-When an icon is used frequently to display items in a particular viewer, it can be shared among similar items in the viewer using a label provider. Since a label provider is responsible for returning an image for any
-object in a viewer, it can control the creation of the image and any sharing of images across objects in the viewer. </P>
-<P >
+<p>
+When an icon is used frequently to display items in a particular viewer, it can be shared among similar items in the viewer using a label provider. Since a label provider is responsible for returning an image for any object in a viewer, it can control the creation of the image and any sharing of images across objects in the viewer.</p>
+<p>
 The label provider can use any of the previously discussed techniques to produce an image. If you browse the various implementations of
 <b> getImage()</b> in the <b><a href="../reference/api/org/eclipse/jface/viewers/LabelProvider.html"> LabelProvider</a></b> subclasses, you will see a variety of approaches including caching a single icon for objects and maintaining a table of images by type.&nbsp;
-Images created by a label provider must be disposed in the provider's <b>dispose()
-</b>method, which is called when the viewer is disposed.</P>
-<P >
-Using a label provider is a good compromise between explicit creation and the image registry. It promotes sharing of icons like the image registry, yet still maintains control over the creation and disposal of the actual image.</P>
+Images created by a label provider must be disposed in the provider's <b>dispose()</b> method, which is called when the viewer is disposed.</p>
+<p>The following code shows an example for this.</p>
+<pre>
+public abstract class MyLabelProvider extends LabelProvider {
+	private final Image myImage = null;
+	...
+	@Override
+	public void dispose() {
+		if (this.myImage != null) {
+			this.myImage.dispose();
+			this.myImage = null;
+		}
+		super.dispose();
+	}
 
+	@Override
+	public Image getImage(Object element) {
+		if (this.myImage == null)}
+			this.myImage = imageRegistry.get(“MyKey”).createImage();
+		}
+		setTitleImage(this.myImage);
+	}
+	...
+}
+</pre>
+<p>Using a label provider is a good compromise between explicit creation and the image registry. It promotes sharing of icons like the image registry, yet still maintains control over the creation and disposal of the actual image.</p>
 
 <H4>
 Plug-in wide image class</H4>
