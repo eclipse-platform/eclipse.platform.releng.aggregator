@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.18</title>
+<title>Eclipse Platform What's New in 4.19</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.18</h2>
+<h2>What's New in Eclipse 4.19</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.18 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.19 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
@@ -48,161 +48,108 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  <tr id="high-dpi-sceme"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567898 -->
-   <td class="title"><a href="#high-dpi-sceme">JFace ImageDescriptor supports alternative naming scheme for high dpi</a></td>
+
+  <tr id="improved-contentassist"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=508821 -->
+    <td class="title"><a href="#improved-contentassist">Content-assist contributor allows more flexible control of completion triggers</a></td>
     <td class="content">
-    	<p>Currently <code>ImageDescriptor</code> automatically provides higher DPI images if a
-		resource exits that ends with <b>@x2</b> or <b>@1.5</b>.</p>
-		<p>
-		This can rapidly increase the number of images required if multiple resolutions
-		are used as there are duplications (e.g. 16x16@2x is the same as 32x32 icon). The second limitation is that only
-		two fixed zoom levels are supported at the moment.
-		</p>
-		<p>It is now possible to use an alternative naming scheme
-		where icon resources are organized in folders holding the resolution in
-		folder-name (e.g. icons/16x16/icon1.png, icons/32x32/icon1.png and so
-		on). This also has the advantage that it is possible to use other
-		scaling factors beside the 150/200% that are currently supported.</p>
+      <code>IContentAssistProcessor</code> has a new extension interface <code>IContentAssistProcessorExtension</code> that allows to get context information for activation computation: 
+      <ul>
+      <li><code>IContentAssistProcessorExtension.isCompletionProposalAutoActivation(char, ITextViewer, int)</code></li>
+      <li><code>IContentAssistProcessorExtension.isContextInformationAutoActivation(char, ITextViewer, int)</code></li>
+      </ul>
+      <p>
+       This allows for example to compute the activation chars based on the location or properties/content of the document.
+      </p>
     </td>
   </tr>
-  <tr id="slice-monitor"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567808 -->
-   <td class="title"><a href="#slice-monitor">Slicing Support for IProgressMonitor</a></td>
-    <td class="content">
-    	<p>Previously it was possible to split a <code>IProgressMonitor</code> using <code>SubMonitor</code> class, while this works good in a linear workflow, it does not work well in distributed flows where each item wants to report progress independently.
-			Another drawback was, as the original progress monitor has no way to know about the split, it's not possible to handle this in a user-friendly fashion. For e.g. it was not possible for a User-Control to show the progress independently.
-		</p>
-		<p>
-		 To overcome this limitations a new way of slicing a monitor was added <code>IProgressMonitor#slice(int work)</code> with the following properties:
-		</p>
-		<ul>
-			<li>slice is default implemented with a very basic slicing facility that can be overriden by implementations if required</li>
-			<li>the returned monitor behaves as if one has created a fresh instance with the given amount of work (that implies that the caller of slice(...) is responsible to call "done" on the returned monitor if no longer needed)</li>
-			<li>whenever a full work unit is reported on the slice it is propagated to the parent</li>
-			<li>it is safe to use slices in another thread</li>
-			<li>it is possible to create more than one slice without influence on the others</li>
-		</ul>
-		<p>
-		 For further details on usage, check the javadoc of the new method.
-		</p>
-    </td>
-  </tr>	
-  <tr id="dialog-adapterfactory-as-service"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567344 -->
-   <td class="title"><a href="#dialog-adapterfactory-as-service">IAdapterFactory as Service</a></td>
-    <td class="content">
-    	<p>Previously <code>IAdapterFactory</code> has to be registered via plugin.xml, this has the disadvantage that one has to keep code with xml in sync (e.g. the adapter classes has to be provided in xml and in the IAdapterFactory.getAdapterList()). Also the code is bound to the static Extension Point Model that means that it has to gather all necessary dependencies from external (static) sources as there is no injection mechanism available.</p>
-    	<p>From now on it is possible to also register an OSGi Service for this purpose and thus can take advantage of Declarative Services for example or even specialized construction and registration with plain OSGi mechanism.
-    	The service must only supply a string property (or even multiple ones) with <code>IAdapterFactory.SERVICE_PROPERTY_ADAPTABLE_CLASS</code> that promotes the types that can be adapted.
-    	The code then activates the service upon first request of the adaptation of adaptable class and calls IAdapterFactory.getAdapterList() to find out the adapter classes.<br/>
-    	If even more laziness is required a list of adapter classes can be declared via the <code>IAdapterFactory.SERVICE_PROPERTY_ADAPTER_NAMES</code> service-property and the activation of the service will even be further delayed to the point where an actual adaptation of adaptable class for one of the static available types is requested.</p>
-    </td>
-  </tr>	
-  <tr id="dialog-settings-provider"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549929 -->
-   <td class="title"><a href="#dialog-settings-provider">IDialogSettingsProvider</a></td>
-    <td class="content">
-    	The <code>org.eclipse.jface.dialogs.IDialogSettingsProvider</code> is a new interface 
-    	to describe classes that are responsible for loading and saving IDialogSettings. 
-    	Clients can now provide a central place to manage dialog settings.
-    </td>
-  </tr>	
-
-  <tr id="dialog-settings-platform"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=549929 -->
-   <td class="title"><a href="#dialog-settings-platform">PlatformUI dialog settings</a></td>
-    <td class="content">
-    	<code>PlatformUI.getDialogSettingsProvider(Bundle)</code> has become the central place 
-    	for getting bundle based dialog settings.
-    	All methods in AbstractUIPlugin dealing with dialog settings have been deprecated.
-    </td>
-  </tr>	
   
-  <tr id="composite-layout-factory"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=566261 -->
-   <td class="title"><a href="#composite-layout-factory"> CompositeFactory support layout supplier</a></td>
+  <tr id="marker-create-api"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570914 -->
+    <td class="title"><a href="#marker-create-api">API for Atomic IMarker creation with attributes</a></td>
     <td class="content">
-    	<code>CompositeFactory</code> now supports the usage of a layout supplier for each new composite.
-      
-      	<code>CompositeFactory.newComposite(SWT.NONE).supplyLayout(GridLayoutFactory.fillDefaults()::create).create(parentComposite);</code>
-      
+     The <code>IResource.createMarker(type, attribute)</code> API has been created to allow atomic creation of markers.
+     Using this new API should be preferred, as this reduces the resource change notifications and is in general 2x faster as two separate calls to create marker and set attributes on it.
     </td>
-  </tr>	
-  
-     <tr id="datetime-factory"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567110 -->
-   <td class="title"><a href="#datetime-factory"> New DateTimeFactory</a></td>
-    <td class="content">
-    	<code>DateTimeFactory</code> is available to create DateTime widgets.
-    </td>
-  </tr>	
-  
-  
-   <tr id="disposal-null-check"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=566317 -->
-   <td class="title"><a href="#disposal-null-check"> JFace Util method to check if widget can be used</a></td>
-    <td class="content">
-    	The new static utility  <code>org.eclipse.jface.util.Util.isValid</code> method allows to check if a widget is <code>null</code> or disposed.
-      
-    </td>
-  </tr>	
-
-	<tr id="unit-test-view"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=507626 -->
-		<td class="title"><a href="#unit-test-view">Generic Unit Test View and extension point</a></td>
-		<td class="content">
-			A generic <strong>Unit Test</strong> view was added in a new <code>org.eclipse.unittest.ui</code> plugin.
-			It allows extenders to add support for reports and management of test executions in any test engine through
-			a common view, by adding an extension to
-			<code>org.eclipse.unittest.ui.unittestViewSupport</code> extension point for the specific test engine.
-			<p>Extensions typically deal with receiving input from an <code>ILaunch</code>
-			(eg parse output or receive notifications through some protocol specific to the test engine) and to
-			populate the Test Session model with information about execution of the tests. Extensions also provide
-			some implementation of the typical UI actions available for a given test session: re-run a specific set
-			of tests, open file for a given stack element...).</p>
-			<p>The <code>org.eclipse.unittest.ui</code> plugin is currently not included in Eclipse Platform, SDK or
-			other products; it's available for installation from the Eclipse project p2 repository. Consumers would
-			typically need to include this bundle in there target-platform explicitly to provide an extension for
-			the Unit Test view.</p>
-			<p>Examples of consumers are:</p>
-			<ul>
-			 <li><code>org.eclipse.jdt.unittest.ui.jdt</code> bundle which provides alternative launchers for JUnit,
-			  using the new Unit Test view for report</li>
-			 <li>Corrosion plugin uses this Unit Test view to build support for Rust/Cargo test execution reporting, and</li>
-			 <li>CDT also has some experimental code to use this view for C/C++ test report instead of a specific view.</li>
-			</ul>
-		</td>
-	</tr>
-  <tr id="lines-visible-css"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567821 -->
-   <td class="title"><a href="#lines-visible-css">Lines visible CSS option</a></td>
-   <td class="content">
-    Visibility of lines in trees and tables can now be configured using the <code>swt-lines-visible</code> CSS property. 
-    <p>
-     Here's how it looks when lines are disabled in the dark theme on Windows: <br/>
-     <img src="images/lines-visible-false.png" alt="" />
-    </p>
-    
-    Example usage in CSS:
-    <pre>
-     <code>Tree, Table {</code>
-     <code>  swt-lines-visible: false;</code>
-     <code>}</code>
-    </pre>
-   </td>
   </tr>
- 
+  
+  <tr id="clean-with-args"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=552606 -->
+    <td class="title"><a href="#clean-with-args">IncrementalProjectBuilder can optionally implement new clean with arguments method</a></td>
+    <td class="content">
+      The <code>IncrementalProjectBuilder</code> API can optionally be extended by clients implementing the new <code>IIncrementalProjectBuilder2</code> interface. It provides
+      a new <code>clean(Map&lt;String, String&gt;, IProgressMonitor)</code> method that will be called instead of the existing <code>clean(IProgressMonitor)</code>.
+      The new <code>clean</code> method passes the map of arguments from <code>IWorkspace.build()</code> or <code>IProject.build()</code> to the client for <code>clean</code> in the same way that it is done for the
+      <code>build</code> method.
+    </td>
+  </tr>
+  
+  <tr id="icu-e4-feature"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569421 -->
+   <td class="title"><a href="#icu-e4-feature">Moved com.ibm.icu from org.eclipse.e4.rcp to org.eclipse.rcp feature</a></td>
+    <td class="content">
+      As the usage of the <b>com.ibm.icu</b> plug-in is planned to be removed from the platform, it has been removed from the <b>org.eclipse.e4.rcp</b> feature as e4 RCP applications do not require it since the 4.18 release.
+      It has been added to the <b>org.eclipse.rcp</b> features for now to ensure e3 applications which may use it and the Eclipse IDE to work correctly.
+      If your e4 RCP application uses it, you can include it in your custom feature.
+    </td>
+  </tr>
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  <tr id="win32-dark-progressbar"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=563572 -->
-	<td class="title"><a href="#win32-dark-progressbar">Windows dark theme styles progress bars</a></td>
-	<td class="content">
-		The progress bar in the dark theme on Windows OS is now styled:
-		<p>
-		<img src="images/progressbar-dark-win32.png" alt=""/>
-		</p>
-		<p>
-        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#win32-dark-progressbar">dark progressbar</a> can be disabled using the 
-        <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
-        For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
+  <tr id="resource-disposal-tracking"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569752 -->
+   <td class="title"><a href="#resource-disposal-tracking">API for Resource disposal tracking</a></td>
+    <td class="content">
+      New <code>org.eclipse.swt.graphics.Resource.setNonDisposeHandler</code> API
+      is added which allows to track SWT resources that were not properly disposed.
+      The API accepts a custom <code>Consumer&lt;Error></code> callback to
+      receive detected errors.
+      <p>
+        Alternatively, <code>org.eclipse.swt.graphics.Resource.reportNonDisposed</code>
+        system property can be set to <code>true</code>. In this case, SWT will report
+        these errors to <code>stderr</code> without the need to modify application's
+        code.
       </p>
-      <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
-	</td>
+    </td>
+  </tr>
+  <tr id="shell-set-maximum-size"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=74001 -->
+    <td class="title"><a href="#shell-set-maximum-size">API for Shell maximum size</a></td>
+    <td class="content">
+      You can now specify the maximum size of the SWT <code>Shell</code>. The Shell will not be resizable to a larger width or height than that specified.
+      <ul>
+      <li>Use <code>setMaximumSize(width, height)</code> or <code>setMaximumSize(point)</code> to specify a maximum size for your shell. 
+       The shell will be resized if it's currently larger than the specified size.</li>
+      <li>Use <code>getMaximumSize()</code> to query the currently set maximum size.</li>
+      </ul>
+      <p>
+       Note that the result of combining maximum size with full screen mode is platform specific and in general not recommended.
+      </p>
+    </td>
+  </tr>
+  <tr id="browser-edge"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=538991 -->
+    <td class="title"><a href="#browser-edge">Edge back-end support for Browser</a></td>
+    <td class="content">
+      On Windows, the <code>Browser</code> widget supports a new back-end based on the WebView2 component (Microsoft Edge).
+      Use the <code>SWT.EDGE</code> style constant to enable it.
+      <p>
+        Note that this integration is experimental and not a drop-in replacement for the older Internet Explorer back-end.
+        There are missing features and significant differences in behavior.
+        There are some known issues when running Eclipse IDE with Edge as the default browser.
+      </p>
+      <p>
+        For additional information, see SWT FAQ entries
+        <a href="https://www.eclipse.org/swt/faq.php#howuseedge" target="_blank">How do I explicitly use Edge as the Browser's underlying renderer</a> and
+        <a href="https://www.eclipse.org/swt/faq.php#edgelimitations" target="_blank">What are the limitations of Edge Browser renderer</a>.
+      </p>
+    </td>
+  </tr>
+  <tr id="mac-arm64"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=565690 -->
+    <td class="title"><a href="#mac-arm64">SWT support for Mac Arm64</a></td>
+    <td class="content">
+      The SWT libraries for Mac Arm64 (AArch64) architecture are available for testing. It's marked as Early access due to limited testing.
+      Please note that a Arm64 JVM is required to run it.
+      <p>
+       Eclipse and SWT for Mac x86_64 architecture can already run on Apple Silicon hardware under Rosetta translation mode using a x86_64 JVM.
+      </p>
+    </td>
   </tr>
   <!-- *********************** End of SWT *********************** -->
 
