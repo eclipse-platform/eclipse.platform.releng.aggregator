@@ -27,5 +27,5 @@ pushd $CJE_ROOT/$TMP_DIR
 mkdir -p $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 p2RepoPath=${epDownloadDir}/updates
-scp -r genie.releng@projects-storage.eclipse.org:$p2RepoPath/$PREVIOUS_RELEASE_REPO_ID/$PREVIOUS_RELEASE_ID $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/.
+scp -r genie.releng@projects-storage.eclipse.org:$p2RepoPath/$PREVIOUS_RELEASE_REPO_ID/$BASEBUILD_ID $CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/.
 popd

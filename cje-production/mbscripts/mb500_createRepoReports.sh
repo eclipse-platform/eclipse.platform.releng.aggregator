@@ -36,6 +36,6 @@ mkdir -p $report_app_dir
 tar -xf $CJE_ROOT/$TMP_DIR/$tar_name -C $report_app_dir
 
 $report_app_dir/p2analyze/p2analyze -data $CJE_ROOT/$TMP_DIR/workspace-report -vm $JAVA_HOME/bin -vmargs -Xmx1g \
-  -DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$PREVIOUS_RELEASE_ID \
+  -DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$BASEBUILD_ID \
   -DreportRepoDir=$buildToTest \
   -DreportOutputDir=$output_dir
