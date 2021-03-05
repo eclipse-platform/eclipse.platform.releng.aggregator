@@ -119,7 +119,7 @@ spec:
                   sshagent(['git.eclipse.org-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh '''
-                            git clone -b master ssh://genie.releng@git.eclipse.org:29418/platform/eclipse.platform.releng.aggregator.git
+                            git clone -b R4_19_maintenance ssh://genie.releng@git.eclipse.org:29418/platform/eclipse.platform.releng.aggregator.git
                         '''
                       }
                     }
@@ -161,7 +161,7 @@ spec:
         }
 	  stage('Swt build input') {
 	      steps {
-	          build '1-SWT-Increment_if_needed_chromium'
+	          build job: 'SWT-Increment_chromium-maintenance', parameters: [booleanParam(name: 'forceTagging', value: false), booleanParam(name: 'forceNativeBuilds', value: false), booleanParam(name: 'skipCommit', value: false), string(name: 'branchName', value: 'R4_19_maintenance')]
 	      }
 	    }
 	  stage('Create Base builder'){
