@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019, 2020 IBM Corporation and others.
+# Copyright (c) 2019, 2021 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -48,7 +48,7 @@ pushd $CJE_ROOT/$AGG_DIR
 
 # git tagging
 git commit -m "Build input for build $BUILD_ID"
-if [[ $? -eq 0 ]]
+if [ $? -eq 0 -a "${BUILD_TYPE}" == "I" ]
 then
 	git push origin HEAD
 fi
