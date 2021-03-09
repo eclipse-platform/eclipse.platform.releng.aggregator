@@ -89,7 +89,76 @@ pipeline {
                         build job: 'ep-smoke-test-arm64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
-
+              stage('Ubuntu 18.04 Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu18-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16x64}")]
+                  }
+              }
+              stage('Ubuntu 20.04 Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu20-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16x64}")]
+                  }
+              }
+              stage('Ubuntu 20.10 Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu20.10-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16x64}")]
+                  }
+              }
+              stage('Opensuse Leap Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-opensuse-leap-x64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16x64}")]
+                  }
+              }
+              stage('Centos 7.x Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-centos7-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16x64}")]
+                  }
+              }
+              stage('Centos 8.x Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-centos8-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16x64}")]
+                  }
+              }
+              stage('Raspberry Pi Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-arm64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16arm64}")]
+                  }
+              }
+              stage('Ubuntu 18.04 Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu18-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Ubuntu 20.04 Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu20-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Ubuntu 20.10 Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-ubuntu20.10-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Opensuse Leap Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-opensuse-leap-x64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Centos 7.x Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-centos7-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Centos 8.x Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-centos8-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Raspberry Pi Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-arm64-java17', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17arm64}")]
+                  }
+              }
           }
 		}
 	}
