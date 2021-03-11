@@ -403,7 +403,8 @@ public class BuildTests {
 		String installDir = Platform.getInstallLocation().getURL().getPath();
 		File pluginDir = new File(installDir, "plugins");
 		for (File aPlugin : pluginDir.listFiles()) {
-			if (aPlugin.getName().indexOf("test") == -1) {
+			if (!aPlugin.getName().contains("test") && !aPlugin.getName().contains("org.eclipse.jetty")
+					&& !aPlugin.getName().contains("jakarta") && !aPlugin.getName().contains("slf4j.api")) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
 				}
