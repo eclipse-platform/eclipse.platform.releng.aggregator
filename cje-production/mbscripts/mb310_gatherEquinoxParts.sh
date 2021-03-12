@@ -32,11 +32,9 @@ if [ -d $REPO_DIR ]; then
   cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-linux-gtk-x86_64.tar.gz
   cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.tar.gz
   cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.dmg $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg
-  cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.arm64.dmg $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-arm64.dmg
   cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-win32-win32-x86_64.zip
   popd
   fn-notarize-macbuild "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg
-  fn-notarize-macbuild "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-arm_64.dmg
 fi
 
 # gather Equinox SDK
