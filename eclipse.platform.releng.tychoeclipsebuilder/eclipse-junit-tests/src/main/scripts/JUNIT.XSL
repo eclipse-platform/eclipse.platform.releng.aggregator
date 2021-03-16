@@ -13,7 +13,7 @@
    (the "License"); you may not use this file except in compliance with
    the License.  You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+       https://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -255,6 +255,7 @@
                 <xsl:variable name="testCount" select="sum($testsuites-in-package/@tests)"/>
                 <xsl:variable name="errorCount" select="sum($testsuites-in-package/@errors)"/>
                 <xsl:variable name="failureCount" select="sum($testsuites-in-package/@failures)"/>
+                <xsl:variable name="skippedCount" select="sum($testsuites-in-package/@skipped)" />
                 <xsl:variable name="timeCount" select="sum($testsuites-in-package/@time)"/>
 
                 <!-- write a summary for the package -->
@@ -270,6 +271,7 @@
                     <td><xsl:value-of select="$testCount"/></td>
                     <td><xsl:value-of select="$errorCount"/></td>
                     <td><xsl:value-of select="$failureCount"/></td>
+                    <td><xsl:value-of select="$skippedCount" /></td>
                     <td>
                     <xsl:call-template name="display-time">
                         <xsl:with-param name="value" select="$timeCount"/>
@@ -344,6 +346,7 @@
         <xsl:variable name="testCount" select="sum(testsuite/@tests)"/>
         <xsl:variable name="errorCount" select="sum(testsuite/@errors)"/>
         <xsl:variable name="failureCount" select="sum(testsuite/@failures)"/>
+        <xsl:variable name="skippedCount" select="sum(testsuite/@skipped)" />
         <xsl:variable name="timeCount" select="sum(testsuite/@time)"/>
         <xsl:variable name="successRate" select="($testCount - $failureCount - $errorCount) div $testCount"/>
         <table class="details" border="0" cellpadding="5" cellspacing="2" width="95%">
@@ -351,6 +354,7 @@
             <th>Tests</th>
             <th>Failures</th>
             <th>Errors</th>
+            <th>Skipped</th>
             <th>Success rate</th>
             <th>Time</th>
         </tr>
@@ -364,6 +368,7 @@
             <td><xsl:value-of select="$testCount"/></td>
             <td><xsl:value-of select="$failureCount"/></td>
             <td><xsl:value-of select="$errorCount"/></td>
+            <td><xsl:value-of select="$skippedCount" /></td>
             <td>
                 <xsl:call-template name="display-percent">
                     <xsl:with-param name="value" select="$successRate"/>
@@ -425,6 +430,7 @@
         <th>Tests</th>
         <th>Errors</th>
         <th>Failures</th>
+        <th>Skipped</th>
         <th nowrap="nowrap">Time(s)</th>
     </tr>
 </xsl:template>
@@ -436,6 +442,7 @@
         <th>Tests</th>
         <th>Errors</th>
         <th>Failures</th>
+        <th>Skipped</th>
         <th nowrap="nowrap">Time(s)</th>
         <th nowrap="nowrap">Time Stamp</th>
         <th>Host</th>
@@ -469,6 +476,7 @@
         <td><xsl:value-of select="@tests"/></td>
         <td><xsl:value-of select="@errors"/></td>
         <td><xsl:value-of select="@failures"/></td>
+        <td><xsl:value-of select="@skipped" /></td>
         <td>
             <xsl:call-template name="display-time">
                 <xsl:with-param name="value" select="@time"/>
@@ -499,6 +507,10 @@
                 <td>Error</td>
                 <td><xsl:apply-templates select="error"/></td>
             </xsl:when>
+            <xsl:when test="skipped">
+            	<td>Skipped</td>
+            	<td><xsl:apply-templates select="skipped"/></td>
+            </xsl:when>
             <xsl:otherwise>
                 <td>Success</td>
                 <td></td>
@@ -521,7 +533,11 @@
     <xsl:call-template name="display-failures"/>
 </xsl:template>
 
-<!-- Style for the error and failure in the tescase template -->
+<xsl:template match="skipped">
+    <xsl:call-template name="display-failures"/>
+</xsl:template>
+
+<!-- Style for the error, failure and skipped in the testcase template -->
 <xsl:template name="display-failures">
     <xsl:choose>
         <xsl:when test="not(@message)">N/A</xsl:when>
@@ -556,7 +572,24 @@
 -->
 <xsl:template name="br-replace">
     <xsl:param name="word"/>
+    <xsl:param name="splitlimit">32</xsl:param>
+    <xsl:variable name="secondhalfstartindex" select="(string-length($word)+(string-length($word) mod 2)) div 2"/>
+    <xsl:variable name="secondhalfword" select="substring($word, $secondhalfstartindex)"/>
+    <!-- When word is very big, a recursive replace is very heap/stack expensive, so subdivide on line break after middle of string -->
     <xsl:choose>
+      <xsl:when test="(string-length($word) > $splitlimit) and (contains($secondhalfword, '&#xa;'))">
+        <xsl:variable name="secondhalfend" select="substring-after($secondhalfword, '&#xa;')"/>
+        <xsl:variable name="firsthalflen" select="string-length($word) - string-length($secondhalfword)"/>
+        <xsl:variable name="firsthalfword" select="substring($word, 1, $firsthalflen)"/>
+        <xsl:variable name="firsthalfend" select="substring-before($secondhalfword, '&#xa;')"/>
+        <xsl:call-template name="br-replace">
+          <xsl:with-param name="word" select="concat($firsthalfword,$firsthalfend)"/>
+        </xsl:call-template>
+        <br/>
+        <xsl:call-template name="br-replace">
+          <xsl:with-param name="word" select="$secondhalfend"/>
+        </xsl:call-template>
+      </xsl:when>
       <xsl:when test="contains($word, '&#xa;')">
         <xsl:value-of select="substring-before($word, '&#xa;')"/>
         <br/>
@@ -565,7 +598,7 @@
         </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-  <xsl:value-of select="$word"/>
+        <xsl:value-of select="$word"/>
       </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
