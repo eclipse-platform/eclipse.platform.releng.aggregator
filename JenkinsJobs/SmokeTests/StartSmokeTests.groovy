@@ -14,19 +14,9 @@ pipeline {
                         build job: 'ep-pipeline-ubuntu18-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
-              stage('Ubuntu 18.04 Java15'){
-                  steps {
-                        build job: 'ep-pipeline-ubuntu18-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
               stage('Ubuntu 20.04 Java11'){
                   steps {
                         build job: 'ep-pipeline-ubuntu20-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
-              stage('Ubuntu 20.04 Java15'){
-                  steps {
-                        build job: 'ep-pipeline-ubuntu20-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
               stage('Ubuntu 20.10 Java11'){
@@ -34,19 +24,9 @@ pipeline {
                         build job: 'ep-smoke-test-ubuntu20.10-x86_64-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
-              stage('Ubuntu 20.10 Java15'){
-                  steps {
-                        build job: 'ep-smoke-test-ubuntu20.10-x86_64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
               stage('Opensuse Leap Java11'){
                   steps {
                         build job: 'ep-smoke-test-opensuse-leap-x64-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
-              stage('Opensuse Leap Java15'){
-                  steps {
-                        build job: 'ep-smoke-test-opensuse-leap-x64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
               stage('Centos 7.x Java11'){
@@ -54,19 +34,9 @@ pipeline {
                         build job: 'ep-pipeline-cen7x-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
-              stage('Centos 7.x Java15'){
-                  steps {
-                        build job: 'ep-pipeline-cen7x-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
               stage('Centos 8.x Java11'){
                   steps {
                         build job: 'ep-pipeline-cen8x-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
-              stage('Centos 8.x Java15'){
-                  steps {
-                        build job: 'ep-pipeline-cen8x-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
               stage('Centos 8.x ppc64le Java11'){
@@ -74,19 +44,9 @@ pipeline {
                         build job: 'ep-smoke-test-ppcle-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
-              stage('Centos 8.x ppc64le Java15'){
-                  steps {
-                        build job: 'ep-smoke-test-ppcle-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
-              stage('Raspberry Pi OS arm64 Java11'){
+              stage('Raspberry Pi Java11'){
                   steps {
                         build job: 'ep-smoke-test-arm64-java11', parameters: [string(name: 'buildId', value: "${params.buildId}")]
-                  }
-              }
-              stage('Raspberry Pi Java15'){
-                  steps {
-                        build job: 'ep-smoke-test-arm64-java15', parameters: [string(name: 'buildId', value: "${params.buildId}")]
                   }
               }
               stage('Ubuntu 18.04 Java16'){
