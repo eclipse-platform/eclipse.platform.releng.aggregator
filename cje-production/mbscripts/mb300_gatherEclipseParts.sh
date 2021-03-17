@@ -50,9 +50,9 @@ fi
 
 if [ -z $PATCH_BUILD ]; then
   # gather sdk
-  TARGET_PRODUCTS_DIR=$ECLIPSE_BUILDER_DIR/sdk/target/products
-  if [ -d $TARGET_PRODUCTS_DIR ]; then
-    pushd $TARGET_PRODUCTS_DIR
+  if [ -d $PLATFORM_PRODUCTS_DIR ]; then
+    pushd $PLATFORM_PRODUCTS_DIR
+    # sdk
     cp org.eclipse.sdk.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-ppc64le.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-x86_64.tar.gz
@@ -61,15 +61,7 @@ if [ -z $PATCH_BUILD ]; then
     cp org.eclipse.sdk.ide-macosx.cocoa.arm64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-arm64.tar.gz
     cp org.eclipse.sdk.ide-macosx.cocoa.arm64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-arm64.dmg
     cp org.eclipse.sdk.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-win32-x86_64.zip
-    popd
-    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg
-    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg
-  fi
-
-  # gather platform
-  TARGET_PRODUCTS_DIR=$ECLIPSE_BUILDER_DIR/platform/target/products
-  if [ -d $TARGET_PRODUCTS_DIR ]; then
-    pushd $TARGET_PRODUCTS_DIR
+    # platform
     cp org.eclipse.platform.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-ppc64le.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-x86_64.tar.gz
@@ -79,9 +71,12 @@ if [ -z $PATCH_BUILD ]; then
     cp org.eclipse.platform.ide-macosx.cocoa.arm64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-arm64.dmg
     cp org.eclipse.platform.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-win32-x86_64.zip
     popd
+    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg
+    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg
     fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg
     fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-arm64.dmg
   fi
+
 
   # gather platform sources
   TARBALL_DIR=$CJE_ROOT/$AGG_DIR/eclipse-platform-sources/target/
