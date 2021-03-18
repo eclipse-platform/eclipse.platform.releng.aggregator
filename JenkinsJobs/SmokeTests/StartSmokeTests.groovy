@@ -84,6 +84,11 @@ pipeline {
                         build job: 'ep-smoke-test-arm64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java16arm64}")]
                   }
               }
+              stage('Centos 8.x ppc64le Java16'){
+                  steps {
+                        build job: 'ep-smoke-test-ppcle-java16', parameters: [string(name: 'buildId', value: "${params.buildId}")]
+                  }
+              }
               stage('Ubuntu 18.04 Java17'){
                   steps {
                         build job: 'ep-smoke-test-ubuntu18-x86_64-java16', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
