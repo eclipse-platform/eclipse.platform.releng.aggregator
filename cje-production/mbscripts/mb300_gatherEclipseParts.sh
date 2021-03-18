@@ -71,10 +71,15 @@ if [ -z $PATCH_BUILD ]; then
     cp org.eclipse.platform.ide-macosx.cocoa.arm64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-arm64.dmg
     cp org.eclipse.platform.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-win32-x86_64.zip
     popd
-    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg
-    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg
-    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg
-    fn-notarize-macbuild "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-arm64.dmg
+    chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
+    mkdir $CJE_ROOT/notarizeLog
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $CJE_ROOT/notarizeMacApp/sdkX64.log 2>&1)&
+    sleep 1m
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg > $CJE_ROOT/notarizeMacApp/sdkArm64.log 2>&1)&
+    sleep 1m
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $CJE_ROOT/notarizeMacApp/platformX64.log 2>&1)&
+    sleep 1m
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-arm64.dmg > $CJE_ROOT/notarizeMacApp/platformArm64.log 2>&1)&
   fi
 
 
@@ -284,3 +289,12 @@ else
   fn-write-property COMPARATOR_ERRORS_BODY "\" \""
 fi
 
+wait
+if [ -d $CJE_ROOT/notarizeLog ]; then
+  pushd $CJE_ROOT/notarizeLog
+  for i in ls *.log
+  do
+    echo $i
+    cat $i
+  done
+fi
