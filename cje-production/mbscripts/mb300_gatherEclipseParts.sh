@@ -72,14 +72,15 @@ if [ -z $PATCH_BUILD ]; then
     cp org.eclipse.platform.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-win32-x86_64.zip
     popd
     chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
-    mkdir $CJE_ROOT/notarizeLog
-    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $CJE_ROOT/notarizeMacApp/sdkX64.log 2>&1)&
+    NOTARIZE_LOG_DIR=$CJE_ROOT/notarizeLog
+    mkdir -p $NOTARIZE_LOG_DIR
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/sdkX64.log 2>&1)&
     sleep 1m
-    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg > $CJE_ROOT/notarizeMacApp/sdkArm64.log 2>&1)&
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg > $NOTARIZE_LOG_DIR/sdkArm64.log 2>&1)&
     sleep 1m
-    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $CJE_ROOT/notarizeMacApp/platformX64.log 2>&1)&
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/platformX64.log 2>&1)&
     sleep 1m
-    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-arm64.dmg > $CJE_ROOT/notarizeMacApp/platformArm64.log 2>&1)&
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-arm64.dmg > $NOTARIZE_LOG_DIR/platformArm64.log 2>&1)&
   fi
 
 
@@ -290,9 +291,9 @@ else
 fi
 
 wait
-if [ -d $CJE_ROOT/notarizeLog ]; then
-  pushd $CJE_ROOT/notarizeLog
-  for i in ls *.log
+if [ -d $NOTARIZE_LOG_DIR ]; then
+  pushd $NOTARIZE_LOG_DIR
+  for i in $(ls *.log)
   do
     echo $i
     cat $i
