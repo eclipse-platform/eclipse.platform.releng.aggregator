@@ -35,7 +35,11 @@ if [ -d $REPO_DIR ]; then
   cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.arm64.dmg $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-arm64.dmg
   cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID/EclipseRT-OSGi-StarterKit-$BUILD_ID-win32-win32-x86_64.zip
   popd
+  chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
+  NOTARIZE_LOG_DIR=$CJE_ROOT/notarizeEqLog
+  mkdir -p $NOTARIZE_LOG_DIR
   fn-notarize-macbuild "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg
+  (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/equinoxX64.log 2>&1)&
 fi
 
 # gather Equinox SDK
@@ -78,3 +82,14 @@ ${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
   -v \
   publish
 popd
+
+wait
+if [ -d $NOTARIZE_LOG_DIR ]; then
+  pushd $NOTARIZE_LOG_DIR
+  for i in $(ls *.log)
+  do
+    echo $i
+    cat $i
+  done
+fi
+

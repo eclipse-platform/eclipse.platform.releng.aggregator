@@ -74,13 +74,13 @@ if [ -z $PATCH_BUILD ]; then
     chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
     NOTARIZE_LOG_DIR=$CJE_ROOT/notarizeLog
     mkdir -p $NOTARIZE_LOG_DIR
-    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/sdkX64.log 2>&1)&
-    sleep 1m
     (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-arm64.dmg > $NOTARIZE_LOG_DIR/sdkArm64.log 2>&1)&
-    sleep 1m
-    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/platformX64.log 2>&1)&
-    sleep 1m
+    sleep 18s
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/sdkX64.log 2>&1)&
+    sleep 18s
     (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-arm64.dmg > $NOTARIZE_LOG_DIR/platformArm64.log 2>&1)&
+    sleep 18s
+    (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$DROP_DIR/$BUILD_ID" eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/platformX64.log 2>&1)&
   fi
 
 
