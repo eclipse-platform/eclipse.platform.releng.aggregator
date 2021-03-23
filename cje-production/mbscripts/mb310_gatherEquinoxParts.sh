@@ -38,7 +38,6 @@ if [ -d $REPO_DIR ]; then
   chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
   NOTARIZE_LOG_DIR=$CJE_ROOT/notarizeEqLog
   mkdir -p $NOTARIZE_LOG_DIR
-  fn-notarize-macbuild "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg
   (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/equinoxX64.log 2>&1)&
 fi
 
