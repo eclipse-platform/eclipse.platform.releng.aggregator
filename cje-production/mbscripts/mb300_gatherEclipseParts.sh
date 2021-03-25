@@ -231,6 +231,17 @@ $JavaCMD -jar $LAUNCHER_JAR \
   verifyCompile
 popd
 
+#wait for notarization before checksums and pages got generated.
+wait
+if [ -d $NOTARIZE_LOG_DIR ]; then
+  pushd $NOTARIZE_LOG_DIR
+  for i in $(ls *.log)
+  do
+    echo $i
+    cat $i
+  done
+fi
+
 #import gpg keys
 gpg --batch --import "${KEYRING}"
 for fpr in $(gpg --list-keys --with-colons  | awk -F: '/fpr:/ {print $10}' | sort -u);
@@ -290,12 +301,3 @@ else
   fn-write-property COMPARATOR_ERRORS_BODY "\" \""
 fi
 
-wait
-if [ -d $NOTARIZE_LOG_DIR ]; then
-  pushd $NOTARIZE_LOG_DIR
-  for i in $(ls *.log)
-  do
-    echo $i
-    cat $i
-  done
-fi

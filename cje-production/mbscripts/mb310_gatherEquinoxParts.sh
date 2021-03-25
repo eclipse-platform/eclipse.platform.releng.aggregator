@@ -55,6 +55,17 @@ if [ -d $REPO_DIR ]; then
   popd
 fi
 
+#wait for notarization to complete
+wait
+if [ -d $NOTARIZE_LOG_DIR ]; then
+  pushd $NOTARIZE_LOG_DIR
+  for i in $(ls *.log)
+  do
+    echo $i
+    cat $i
+  done
+fi
+
 # publish Equinox
 pushd $CJE_ROOT
 mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
@@ -81,14 +92,4 @@ ${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
   -v \
   publish
 popd
-
-wait
-if [ -d $NOTARIZE_LOG_DIR ]; then
-  pushd $NOTARIZE_LOG_DIR
-  for i in $(ls *.log)
-  do
-    echo $i
-    cat $i
-  done
-fi
 
