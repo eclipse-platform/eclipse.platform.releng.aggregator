@@ -73,7 +73,6 @@ require("DL.thin.header.php.html");
     <li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
     <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
     <li><a href="#SWT">SWT binary and Source</a></li>
-    <li><a href="#SWTChromium">SWT Chromium</a></li>
 </ul>
 </aside>
 
@@ -439,15 +438,6 @@ else {
   <?php columnHeads(); ?>
 </tr>
 %swt%
-</table>
-
-<h3 id="SWTChromium">SWT Chromium support libraries&nbsp;<a href="details.html#SWT"><i class="fa fa-info-circle">&nbsp;</i></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%swtchromium%
 </table>
 
 <?php } ?>
