@@ -184,7 +184,7 @@
             var elt = errs[i];
             var tds = elt.getElementsByTagName("td");
             if (tds.length >= 2) {
-                var status = tds[1].firstChild.nodeValue;
+                var status = tds[2].firstChild.nodeValue;
                 if (status != "Error" && status != "Failure")
                     continue; // only stop in test results, not in summary header
             }
