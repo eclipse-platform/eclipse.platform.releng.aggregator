@@ -91,6 +91,9 @@
       .Failure {
         font-weight:bold; color:purple;
       }
+      .Skipped {
+        font-weight:bold; color:darkgrey;
+      }
       .Properties {
         text-align:right;
       }
@@ -329,7 +332,11 @@
                         <td colspan="4"><xsl:apply-templates select="./error"/></td>
                     </tr>
                 </xsl:if>
-                <xsl:apply-templates select="./testcase" mode="print.test"/>
+                <!--
+              as alternative we could sort against the time like this - maybe this is more useful?
+              <xsl:apply-templates select="./testcase" mode="print.test"><xsl:sort select="@time" data-type="number" /></xsl:apply-templates>
+              -->
+                <xsl:apply-templates select="./testcase" mode="print.test"><xsl:sort select="@classname" /><xsl:sort select="@name" /></xsl:apply-templates>
             </table>
             <div class="Properties">
                 <a>
@@ -501,6 +508,9 @@
         <xsl:attribute name="class">
             <xsl:choose>
                 <xsl:when test="failure | error">Error</xsl:when>
+            </xsl:choose>
+            <xsl:choose>
+                <xsl:when test="skipped | aborted">Skipped</xsl:when>
             </xsl:choose>
         </xsl:attribute>
          <td>
