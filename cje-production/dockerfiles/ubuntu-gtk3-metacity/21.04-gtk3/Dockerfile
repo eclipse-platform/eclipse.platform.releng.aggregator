@@ -8,6 +8,7 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 ENTRYPOINT [ "uid_entrypoint" ]
 
 ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get install -y --no-install-recommends gpgv
 RUN apt-get update && apt upgrade -y && apt dist-upgrade -y && apt-get install -y --no-install-recommends \
       libgtk-3-0 \
       tigervnc-standalone-server \
