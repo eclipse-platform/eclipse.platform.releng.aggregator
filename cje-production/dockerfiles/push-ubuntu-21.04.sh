@@ -15,4 +15,4 @@
 
 set -e
 
-docker push eclipse/platformreleng-ubuntu-gtk3-metacity:20.10
+docker push eclipse/platformreleng-ubuntu-gtk3-metacity:21.04
