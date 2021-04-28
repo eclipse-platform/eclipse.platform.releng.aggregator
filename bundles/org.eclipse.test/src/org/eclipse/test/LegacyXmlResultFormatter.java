@@ -64,9 +64,6 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 	final AtomicLong numTestsSkipped = new AtomicLong(0);
 	final AtomicLong numTestsAborted = new AtomicLong(0);
 
-	private boolean useLegacyReportingName = false;
-
-
 	@Override
 	public void testPlanExecutionStarted(final TestPlan plan) {
 		this.testPlan = plan;
@@ -160,7 +157,7 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 	}
 	@Override
 	public void setUseLegacyReportingName(final boolean useLegacyReportingName) {
-		this.useLegacyReportingName  = useLegacyReportingName;
+		//do nothing
 	}
 
 
