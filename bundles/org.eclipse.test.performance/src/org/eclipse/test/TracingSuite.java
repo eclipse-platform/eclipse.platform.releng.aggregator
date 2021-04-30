@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.lang.reflect.InaccessibleObjectException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -219,6 +220,7 @@ public class TracingSuite extends Suite {
                         SecurityException |
                         IllegalAccessException |
                         IllegalArgumentException |
+                        InaccessibleObjectException |
                         InvocationTargetException e1) {
                     e1.printStackTrace();
                 }
@@ -226,7 +228,8 @@ public class TracingSuite extends Suite {
         }
 
         private Thread dumpStackTraces(PrintStream stream) {
-            String message = format(new Date(), fDescription) + " ran for more than " + (long) (10 * 60) + " seconds";
+            long seconds = fTracingOptions.stackDumpTimeoutSeconds();
+            String message = format(new Date(), fDescription) + " ran for more than " + seconds + " seconds";
             stream.println(message);
 
             stream.format("totalMemory:           %11d\n", Runtime.getRuntime().totalMemory());
