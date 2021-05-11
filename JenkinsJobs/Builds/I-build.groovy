@@ -14,7 +14,7 @@ kind: Pod
 spec:
   containers:
   - name: "jnlp"
-    image: "eclipsecbijenkins/jipp-migration-agent:4.3"
+    image: "eclipsecbijenkins/jipp-migration-agent:latest"
     imagePullPolicy: "Always"
     resources:
       limits:
