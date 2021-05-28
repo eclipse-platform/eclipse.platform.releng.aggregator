@@ -864,7 +864,7 @@ will force eclipse to reinitialize these caches.</dd>
       location is based on the value of the Java <code>user.home</code> system
       property but this can be overridden. Information such as user scoped preferences
       and login information may be found in the user location.</dd>
-    <dt>Install (-install) {osgi.install.area} [@user.home, @user.dir, filepath,
+    <dt>Install (-install) {osgi.install.area} [@launcher.dir, @user.home, @user.dir, filepath,
       url]</dt>
     <dd>An install location is where Eclipse itself is installed. In practice
       this location is the directory (typically &quot;eclipse&quot;) which is
@@ -915,6 +915,18 @@ will force eclipse to reinitialize these caches.</dd>
       want to allow for data in the corresponding location but the Eclipse default
       value is not appropriate. @noDefault must not be followed by any
       additional path segments.</dd>
+    <dt>@launcher.dir</dt>
+    <dd>Directs Eclipse to compute a location value relative to the directory
+      containing the Eclipse launcher binary. @launcher.dir can be followed
+      by additional path segments. In all cases, the string &quot;@location.dir&quot; is
+      simply replaced with the parent directory of the path pointed to by the Java
+      &quot;eclipse.launcher&quot; System property. For example, setting<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;osgi.install.area=@launcher.dir/../../../pool<br>
+      results in a value of
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;file:/home/bob/eclipse-product/linux/gtk/x86_64/../../../pool<br>
+      if the &quot;eclipse.launcher&quot; property is set to
+      &quot;/home/bob/eclipse-product/linux/gtk/x86_64/eclipse&quot;.</dd>
     <dt>@user.home</dt>
     <dd>Directs Eclipse to compute a location value relative to the user's home
       directory. @user.home can be followed
@@ -937,17 +949,19 @@ results in a value of <br>
 </dl>
 <table width="100%" border="0" bgcolor="#FFFFFF">
   <tr bgcolor="#CCCCCC">
-    <td width="10%">location/value</td>
-    <td width="17%"><div align="center">supports default</div></td>
-    <td width="17%"><div align="center">file/URL</div>
+    <td width="9%">location/value</td>
+    <td width="13%"><div align="center">supports default</div></td>
+    <td width="13%"><div align="center">file/URL</div>
     </td>
-    <td width="17%"><div align="center">@none</div>
+    <td width="13%"><div align="center">@none</div>
     </td>
-    <td width="17%"><div align="center">@noDefault</div>
+    <td width="13%"><div align="center">@noDefault</div>
     </td>
-    <td width="17%"><div align="center">@user.home</div>
+    <td width="13%"><div align="center">@launcher.dir</div>
     </td>
-    <td width="17%"><div align="center">@user.dir</div>
+    <td width="13%"><div align="center">@user.home</div>
+    </td>
+    <td width="13%"><div align="center">@user.dir</div>
     </td>
   </tr>
   <tr>
@@ -959,6 +973,8 @@ results in a value of <br>
     <td><div align="center">yes</div>
     </td>
     <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">no</div>
     </td>
     <td><div align="center">yes</div>
     </td>
@@ -975,6 +991,8 @@ results in a value of <br>
     <td><div align="center">yes*</div>
     </td>
     <td><div align="center">yes*</div>
+    </td>
+    <td><div align="center">no</div>
     </td>
     <td><div align="center">yes</div>
     </td>
@@ -996,6 +1014,8 @@ results in a value of <br>
     </td>
     <td><div align="center">yes</div>
     </td>
+    <td><div align="center">yes</div>
+    </td>
   </tr>
   <tr>
     <td bgcolor="#CCCCCC"><div align="center">user</div>
@@ -1007,6 +1027,8 @@ results in a value of <br>
     <td><div align="center">yes</div>
     </td>
     <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">no</div>
     </td>
     <td><div align="center">yes</div>
     </td>
