@@ -17,17 +17,18 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.19</title>
+<title>Eclipse Platform What's New in 4.20</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.19</h2>
+<h2>What's New in Eclipse 4.20</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.19 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.20 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
   <li><a href="#SWT">SWT Changes</a></li>
+  <li><a href="#Equinox">Equinox Changes</a></li>
 </ul>
 
 <p>
@@ -49,110 +50,201 @@ section of the Workbench User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
-  <tr id="improved-contentassist"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=508821 -->
-    <td class="title"><a href="#improved-contentassist">Content-assist contributor allows more flexible control of completion triggers</a></td>
+  <tr id="e4-api"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570454 -->
+    <td class="title">ECommandService and EHandlerService released as API</td>
     <td class="content">
-      <code>IContentAssistProcessor</code> has a new extension interface <code>IContentAssistProcessorExtension</code> that allows to get context information for activation computation: 
+      The following API have been made official. 
       <ul>
-      <li><code>IContentAssistProcessorExtension.isCompletionProposalAutoActivation(char, ITextViewer, int)</code></li>
-      <li><code>IContentAssistProcessorExtension.isContextInformationAutoActivation(char, ITextViewer, int)</code></li>
-      </ul>
+        <li><a href="https://git.eclipse.org/c/platform/eclipse.platform.ui.git/tree/bundles/org.eclipse.e4.core.commands/src/org/eclipse/e4/core/commands/ECommandService.java" target="_blank">org.eclipse.e4.core.commands.ECommandService</a></li>
+        <li><a href="https://git.eclipse.org/c/platform/eclipse.platform.ui.git/tree/bundles/org.eclipse.e4.core.commands/src/org/eclipse/e4/core/commands/EHandlerService.java" target="_blank">org.eclipse.e4.core.commands.EHandlerService</a></li>
+     </ul>
+	 <br/>
+     The bundle org.eclipse.e4.core.commands was updated to version 1.0.0.
+    </td>
+  </tr>
+
+  <tr id="jetty-10-update"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569804 -->
+    <td class="title">Embedded Jetty server updated to version 10.x</td>
+    <td class="content">
+      <b>Jetty Server</b> used by the help system is updated to version 10.x. As this version requires Servlet API 4.x the opportunity is used to move to the new Jakarta Servlet name of the library.
+      Bundle symbolic name becomes <b>jakarta.servlet</b>-api from the old javax.servlet one. One of the Jetty bundles <b>org.eclipse.jetty.continuation</b> has been removed from Jetty 10 releases
+      thus it's no longer part of Eclipse Platform content too.
+    </td>
+  </tr>
+
+  <tr id="register-model-fragment"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571866 -->
+    <td class="title">Register Model fragments via Manifest header</td>
+    <td class="content">
+      It is now possible to register model fragments via the newly introduced Manifest Header <code>Model-Fragment</code>. This way it is not necessary to create a <i>plugin.xml</i> that contains
+      an extension to the extension point <code>org.eclipse.e4.workbench.model</code>.
       <p>
-       This allows for example to compute the activation chars based on the location or properties/content of the document.
+        To register a fragment via Manifest header, you can now simply add an entry similar to the following snippet to the MANIFEST.MF of the contributing bundle:
       </p>
+      <p>
+        <code>Model-Fragment: fragment.e4xmi;apply=always</code>
+      </p>
+      The <code>apply</code> attribute is optional and defaults to <code>always</code>. It can have the same values as specified in the extension point:
+      <ul>
+        <li>always: each time the application started potentially replacing existing model elements and loosing information stored</li>
+        <li>initial: only when coming from a none persistent state</li>
+        <li>notexists: only if the given element does not exist already in the model</li>
+      </ul>
     </td>
   </tr>
-  
-  <tr id="marker-create-api"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570914 -->
-    <td class="title"><a href="#marker-create-api">API for Atomic IMarker creation with attributes</a></td>
+
+  <tr id="register-model-processor"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571866 -->
+    <td class="title">Register Model processor via DS</td>
     <td class="content">
-     The <code>IResource.createMarker(type, attribute)</code> API has been created to allow atomic creation of markers.
-     Using this new API should be preferred, as this reduces the resource change notifications and is in general 2x faster as two separate calls to create marker and set attributes on it.
+      It is now possible to register model processors as declarative service. The model processor needs to implement the service interface <code>IModelProcessorContribution</code> to get
+      registered. This way it is not necessary to create a <i>plugin.xml</i> that contains an extension to the extension point <code>org.eclipse.e4.workbench.model</code>.
+
+      <p>
+        The model processor is registered via DS, the execution is triggered via the Eclipse injection mechanism. The processor execution at registration time needs to be placed in a method
+        annotated with <code>@Execute</code>. Additionally it is possible to add a method annotated with <code>@PreDestroy</code> which gives the opportunity to cleanup in case the bundle
+        that provides the model processor contribution is stopped.
+      </p>
+      <pre>
+@Component
+public class ExampleProcessorContribution implements IModelProcessorContribution {
+
+    @Execute
+    public void execute() {
+        System.out.println("Processor executed");
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        System.out.println("Processor killed");
+    }
+}
+      </pre>
+      <p>
+        It is also possible to re-use existing model processor POJO implementations and register them via an <code>IModelProcessorContribution</code>. For this the method <code>getProcessorClass()</code>
+        needs to be overridden to return the class of the model processor POJO. In this case there is no support for handling the stopping of the contributing bundle.
+      </p>
+      <pre>
+@Component
+public class ExampleProcessorContribution implements IModelProcessorContribution {
+
+    @Override
+    public Class&lt;?&gt; getProcessorClass() {
+        return ExampleProcessor.class;
+    }
+}
+      </pre>
+      The <code>IModelProcessorContribution</code> supports two service properties for configuration:
+      <ul>
+        <li>beforefragment: specifies if the processor has to be invoked before model fragments are added. If not specified it defaults to <code>true</code>.</li>
+        <li>apply: defines in which case a processor is run. If not specified it defaults to <i>always</i>.<br/>
+          Possible values are:
+          <ul>
+            <li>always: each time the application started</li>
+            <li>initial: only when coming from a none persistent state</li>
+          </ul>
+        </li>
+      </ul>
+      <pre>
+@Component(property = {
+    IModelProcessorContribution.BEFORE_FRAGMENT_PROPERTY_PREFIX + "false",
+    IModelProcessorContribution.APPLY_PROPERTY_PREFIX + "initial"
+})
+public class ExampleProcessorContribution implements IModelProcessorContribution { ... }
+      </pre>
+      <p>
+        You can also specify model elements that should be added to the context that is used to invoke the processor. This is necessary as the processor is invoked on application context level.
+        To specify such model elements you need to override the method <code>getModelElements()</code>
+      </p>
+      <pre>
+@Component(property = {
+		IModelProcessorContribution.BEFORE_FRAGMENT_PROPERTY_PREFIX + "false"
+})
+public class ExampleProcessorContribution implements IModelProcessorContribution {
+
+    @Execute
+    public void execute(@Named("org.eclipse.example.partstack") MPartStack myTest) {
+        System.out.println("Processor executed: " + myTest.getElementId());
+    }
+
+    @Override
+    public List&lt;ModelElement&gt; getModelElements() {
+        return Arrays.asList(new ModelElement("org.eclipse.example.partstack"));
+    }
+}
+      </pre>
     </td>
   </tr>
-  
-  <tr id="clean-with-args"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=552606 -->
-    <td class="title"><a href="#clean-with-args">IncrementalProjectBuilder can optionally implement new clean with arguments method</a></td>
+
+  <tr id="simpler-status-creation"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573093 -->
+    <td class="title">New static methods to ease Status creation</td>
     <td class="content">
-      The <code>IncrementalProjectBuilder</code> API can optionally be extended by clients implementing the new <code>IIncrementalProjectBuilder2</code> interface. It provides
-      a new <code>clean(Map&lt;String, String&gt;, IProgressMonitor)</code> method that will be called instead of the existing <code>clean(IProgressMonitor)</code>.
-      The new <code>clean</code> method passes the map of arguments from <code>IWorkspace.build()</code> or <code>IProject.build()</code> to the client for <code>clean</code> in the same way that it is done for the
-      <code>build</code> method.
+      <p>
+        New API methods in <code>Status</code>
+        (<a href="https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/runtime/Status.html" target="_blank"><code>org.eclipse.core.runtime.Status</code></a>)
+        makes it easier and less verbose
+        to make <code>Status</code> object for error handling. There are methods called <code>info</code>, <code>warning</code>
+        and <code>error</code> for creating status objects of those severities. These methods simplify the API
+        by using StackWalker API (introdcued in Java 9) to automatically determine the Plug-in ID. The existing constructors
+        for more fine grained control still continue to exist and may be the most suitable when using Status objects in
+        non-error handling cases as explicitly passing the plug-in id in by String can be faster than automatically
+        determining it.
+      </p>
+      A couple of examples of before and after with the new API:
+      <ul>
+        <li>
+          <p>Creating a warning Status</p>
+          Existing API: <pre>IStatus status = new Status(IStatus.WARNING, UIPlugin.PLUGIN_ID, IStatus.OK, message, null);</pre>
+          New static helper methods: <pre>IStatus status = Status.warning(message);</pre>
+        </li>
+        <li>
+          <p>Throwing a CoreException:</p>
+          Existing API: <pre>throw new CoreException(new Status(IStatus.ERROR, UIPlugin.PLUGIN_ID, message, e));</pre>
+          New static helper methods: <pre>throw new CoreException(Status.error(message, e));</pre>
+        </li>
+      </ul>
     </td>
   </tr>
-  
-  <tr id="icu-e4-feature"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569421 -->
-   <td class="title"><a href="#icu-e4-feature">Moved com.ibm.icu from org.eclipse.e4.rcp to org.eclipse.rcp feature</a></td>
-    <td class="content">
-      As the usage of the <b>com.ibm.icu</b> plug-in is planned to be removed from the platform, it has been removed from the <b>org.eclipse.e4.rcp</b> feature as e4 RCP applications do not require it since the 4.18 release.
-      It has been added to the <b>org.eclipse.rcp</b> features for now to ensure e3 applications which may use it and the Eclipse IDE to work correctly.
-      If your e4 RCP application uses it, you can include it in your custom feature.
-    </td>
-  </tr>
+
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  <tr id="resource-disposal-tracking"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569752 -->
-   <td class="title"><a href="#resource-disposal-tracking">API for Resource disposal tracking</a></td>
+    <tr id="swt-gtk-disable-insert-emoji"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572829 -->
+    <td class="title">Option to disable "Insert Emoji" menu entry on Linux</td>
     <td class="content">
-      New <code>org.eclipse.swt.graphics.Resource.setNonDisposeHandler</code> API
-      is added which allows to track SWT resources that were not properly disposed.
-      The API accepts a custom <code>Consumer&lt;Error></code> callback to
-      receive detected errors.
-      <p>
-        Alternatively, <code>org.eclipse.swt.graphics.Resource.reportNonDisposed</code>
-        system property can be set to <code>true</code>. In this case, SWT will report
-        these errors to <code>stderr</code> without the need to modify application's
-        code.
-      </p>
-    </td>
-  </tr>
-  <tr id="shell-set-maximum-size"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=74001 -->
-    <td class="title"><a href="#shell-set-maximum-size">API for Shell maximum size</a></td>
-    <td class="content">
-      You can now specify the maximum size of the SWT <code>Shell</code>. The Shell will not be resizable to a larger width or height than that specified.
-      <ul>
-      <li>Use <code>setMaximumSize(width, height)</code> or <code>setMaximumSize(point)</code> to specify a maximum size for your shell. 
-       The shell will be resized if it's currently larger than the specified size.</li>
-      <li>Use <code>getMaximumSize()</code> to query the currently set maximum size.</li>
-      </ul>
-      <p>
-       Note that the result of combining maximum size with full screen mode is platform specific and in general not recommended.
-      </p>
-    </td>
-  </tr>
-  <tr id="browser-edge"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=538991 -->
-    <td class="title"><a href="#browser-edge">Edge back-end support for Browser</a></td>
-    <td class="content">
-      On Windows, the <code>Browser</code> widget supports a new back-end based on the WebView2 component (Microsoft Edge).
-      Use the <code>SWT.EDGE</code> style constant to enable it.
-      <p>
-        Note that this integration is experimental and not a drop-in replacement for the older Internet Explorer back-end.
-        There are missing features and significant differences in behavior.
-        There are some known issues when running Eclipse IDE with Edge as the default browser.
-      </p>
-      <p>
-        For additional information, see SWT FAQ entries
-        <a href="https://www.eclipse.org/swt/faq.php#howuseedge" target="_blank">How do I explicitly use Edge as the Browser's underlying renderer</a> and
-        <a href="https://www.eclipse.org/swt/faq.php#edgelimitations" target="_blank">What are the limitations of Edge Browser renderer</a>.
-      </p>
-    </td>
-  </tr>
-  <tr id="mac-arm64"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=565690 -->
-    <td class="title"><a href="#mac-arm64">SWT support for Mac Arm64</a></td>
-    <td class="content">
-      The SWT libraries for Mac Arm64 (AArch64) architecture are available for testing. It's marked as Early access due to limited testing.
-      Please note that a Arm64 JVM is required to run it.
-      <p>
-       Eclipse and SWT for Mac x86_64 architecture can already run on Apple Silicon hardware under Rosetta translation mode using a x86_64 JVM.
-      </p>
+      On Linux it is now possible to disable the <b>Insert Emoji</b> context menu entry of text fields, on GTK 3.22.20 and upward. This can be done with the following command line argument for Eclipse:
+      <p><code>-DSWT_GTK_INPUT_HINT_NO_EMOJI=true</code></p>
     </td>
   </tr>
   <!-- *********************** End of SWT *********************** -->
 
+  <!-- ******************** Equinox ********************** -->
+  <tr>
+    <td id="Equinox" class="section" colspan="2"><h2>Equinox p2 Changes</h2></td>
+  </tr>
+
+  <tr id="pgp-signature-verification"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570907 -->
+    <td class="title">Verify PGP signatures during installation</td>
+    <td class="content">
+      When installing some artifact with p2, and those artifacts have the <code>pgp.signatures</code>
+      property set, the signatures will be verified during installation and installation will fail if a signature
+      couldn't be verified.
+      <p>Reasons of failures would be:</p>
+      <ul>
+        <li>Signature is not well formatted (it must be armoured PGP blocks) or is intrisically wrong (eg the
+        signature has been modified in a way that makes it totally invalid).</li>
+        <li>No public key was found that matches the signature. Public keys are expected to be provided as value of
+        the <code>pgp.publicKeys</code> property either on the artifact metadata or, usually better, on the artifact
+        repository, in armoured form.</li>
+        <li>The signature and a matching public key were found, but the verification process shows that the signature
+        is incorrect. This usually means the signature was meant for another artifact.</li>
+      </ul>
+      Each one of those reasons will make the build fail, as they are security threats. It is assumed that any
+      signed artifact can be successfully verified for all given signatures to continue installation.
+    </td>
+  </tr>
+  <!-- ******************** End of Equinox ********************** -->
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->
