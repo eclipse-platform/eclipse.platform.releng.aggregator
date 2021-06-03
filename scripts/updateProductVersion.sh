@@ -15,7 +15,7 @@
 
 script_location=$( (cd $(dirname $0) && pwd) )
 
-find $script_location/.. -name pom.xml -exec sed -i 's/4.19.0/4.21.0/g' {} \;
+find $script_location/.. -name pom.xml -exec sed -i 's/4.20.0/4.21.0/g' {} \;
 find $script_location/.. -name MANIFEST.MF -exec sed -i 's/4.20.0/4.21.0/g' {} \;
 find $script_location/.. -type f -name *.product -exec sed -i 's/4.20.0/4.21.0/g' {} \;
 find $script_location/.. -name feature.xml -exec sed -i 's/4.20.0/4.21.0/g' {} \;
