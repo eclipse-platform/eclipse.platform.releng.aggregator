@@ -161,7 +161,7 @@ spec:
         }
 	  stage('Swt build input') {
 	      steps {
-	          build 'SWT-Increment_if_needed'
+	          build 'SWT-Increment_if_needed_without_chromium_maintenance'
 	      }
 	    }
 	  stage('Create Base builder'){
