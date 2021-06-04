@@ -119,7 +119,7 @@ spec:
                   sshagent(['git.eclipse.org-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh '''
-                            git clone -b master ssh://genie.releng@git.eclipse.org:29418/platform/eclipse.platform.releng.aggregator.git
+                            git clone -b R4_20_maintenance ssh://genie.releng@git.eclipse.org:29418/platform/eclipse.platform.releng.aggregator.git
                         '''
                       }
                     }
