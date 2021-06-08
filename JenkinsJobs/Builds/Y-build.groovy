@@ -475,10 +475,11 @@ spec:
 	  stage('Trigger tests'){
           steps {
               container('jnlp') {
-                build job: 'ep420Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep420Y-unit-cen64-gtk3-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep420Y-unit-mac64-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep420Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep421Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep421Y-unit-cen64-gtk3-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep421Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep421Y-unit-mac64-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep421Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
             }
@@ -488,13 +489,13 @@ spec:
         failure {
             emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
             subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
-            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
+            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com kitlo@us.ibm.com",
             from:"genie.releng@eclipse.org"
         }
         success {
             emailext body: "Eclipse downloads:<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}</a><br><br> Build logs and/or test results (eventually):<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php</a><br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-Y-builds'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-Y-builds</a><br><br>Specific (simple) site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-Y-builds/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-Y-builds/${env.BUILD_IID.trim()}</a><br><br>Equinox downloads:<br>     <a href='https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}'>https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}</a><br><br>", 
             subject: "${env.BUILD_VERSION} Y-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
-            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
+            to: "jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com kitlo@us.ibm.com",
             from:"genie.releng@eclipse.org"
         }
 	}
