@@ -201,7 +201,7 @@ function createBaseBuilder ()
     ${WORKSPACE}/tempEclipse/eclipse/eclipse -nosplash \
         -debug -consolelog -data ${WORKSPACE}/workspace-toolsinstall \
         -application org.eclipse.equinox.p2.director \
-        -repository "https://download.eclipse.org/eclipse/updates/4.17/","https://download.eclipse.org/eclipse/updates/buildtools/","https://download.eclipse.org/webtools/downloads/drops/R3.17.0/R-3.17.0-20200306035042/repositoryunittests" \
+        -repository "https://download.eclipse.org/eclipse/updates/latest/","https://download.eclipse.org/eclipse/updates/buildtools/",${WEBTOOL_REPO} \
         -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \
         -destination ${BASEBUILDER_DIR} \
         -profile SDKProfile
@@ -326,6 +326,10 @@ else
   export DROP_ID
   echo -e "\n\t[INFO] DROP_ID: $DROP_ID"  
 fi
+
+# Extract WEBTOOLS_REPO and other variables from buildproperties.shsource for the build
+wget -O ${WORKSPACE}/buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.shsource
+source ${WORKSPACE}/buildproperties.shsource
 
 # CHECKPOINT is the code for either milestone (M1, M2, ...) 
 # or release candidate (RC1, RC2, ...). 
