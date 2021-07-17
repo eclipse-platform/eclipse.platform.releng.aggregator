@@ -20,7 +20,7 @@ pipeline {
 			steps {
 				wrap([$class: 'Xvnc', useXauthority: true]) {
 					sh """
-					mvn clean verify --batch-mode --fail-at-end -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+					mvn clean verify -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-Pbree-libs \
 						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
