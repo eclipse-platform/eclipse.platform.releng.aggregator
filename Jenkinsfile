@@ -31,7 +31,6 @@ pipeline {
 			post {
 				always {
 					archiveArtifacts artifacts: '.*log,*/target/work/data/.metadata/.*log,*/tests/target/work/data/.metadata/.*log,apiAnalyzer-workspace/.metadata/.*log', allowEmptyArchive: true
-					junit '**/target/surefire-reports/TEST-*.xml'
 					publishIssues issues:[scanForIssues(tool: java()), scanForIssues(tool: mavenConsole())]
 				}
 				unstable {
