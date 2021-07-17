@@ -24,9 +24,7 @@ pipeline {
 						-Pbree-libs \
 						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
-						-Dcompare-version-with-baselines.skip=false \
-						-Dmaven.test.error.ignore=true -Dmaven.test.failure.ignore=true \
-						-Dmaven.compiler.failOnWarning=true -Dproject.build.sourceEncoding=UTF-8 
+						-Dproject.build.sourceEncoding=UTF-8 
 					"""
 				}
 			}
