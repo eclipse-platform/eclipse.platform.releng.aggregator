@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019, 2020 IBM Corporation and others.
+# Copyright (c) 2019, 2021 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,7 @@ cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties 
 
 # gather repo
 echo $PATCH_BUILD
-PATCH_BUILD_GENERIC=java16patch
+PATCH_BUILD_GENERIC=java17patch
 REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/repository
   
 if [ -d $REPO_DIR ]; then
