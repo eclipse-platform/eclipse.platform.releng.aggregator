@@ -1,10 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2020. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2018, 2019. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<link rel="STYLESHEET" href="../book.css" type="text/css"/>
+<link rel="STYLESHEET" href="news.css" type="text/css"/>
 <style type="text/css">
 body {max-width: 900px;}
 table.news col.title {width: 30%;}
@@ -17,26 +17,15 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.20</title>
+<title>Eclipse Project 4.21 - New and Noteworthy</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.20</h2>
-<p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.20 release of Eclipse.
-</p>
-<ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  <li><a href="#Platform">Platform Changes</a></li>
-  <li><a href="#SWT">SWT Changes</a></li>
-  <li><a href="#Equinox">Equinox Changes</a></li>
-</ul>
-
-<p>
-New features oriented towards end-users of the platform
-can be viewed in the
-<a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">What's New</a>
-section of the Workbench User Guide.
-</p>
+<h2>Platform and Equinox API</h2>
+  <ul>
+    <li><a href="#Platform">Platform Changes</a></li>
+    <li><a href="#SWT">SWT Changes</a></li>
+  </ul>
 
 <!-- ****************** START OF N&N TABLE****************** -->
 <table class="news">
@@ -49,205 +38,52 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-
-  <tr id="e4-api"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570454 -->
-    <td class="title">ECommandService and EHandlerService released as API</td>
-    <td class="content">
-      The following API have been made official. 
-      <ul>
-        <li><a href="https://git.eclipse.org/c/platform/eclipse.platform.ui.git/tree/bundles/org.eclipse.e4.core.commands/src/org/eclipse/e4/core/commands/ECommandService.java" target="_blank">org.eclipse.e4.core.commands.ECommandService</a></li>
-        <li><a href="https://git.eclipse.org/c/platform/eclipse.platform.ui.git/tree/bundles/org.eclipse.e4.core.commands/src/org/eclipse/e4/core/commands/EHandlerService.java" target="_blank">org.eclipse.e4.core.commands.EHandlerService</a></li>
-     </ul>
-	 <br/>
-     The bundle org.eclipse.e4.core.commands was updated to version 1.0.0.
-    </td>
-  </tr>
-
-  <tr id="jetty-10-update"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569804 -->
-    <td class="title">Embedded Jetty server updated to version 10.x</td>
-    <td class="content">
-      <b>Jetty Server</b> used by the help system is updated to version 10.x. As this version requires Servlet API 4.x the opportunity is used to move to the new Jakarta Servlet name of the library.
-      Bundle symbolic name becomes <b>jakarta.servlet</b>-api from the old javax.servlet one. One of the Jetty bundles <b>org.eclipse.jetty.continuation</b> has been removed from Jetty 10 releases
-      thus it's no longer part of Eclipse Platform content too.
-    </td>
-  </tr>
-
-  <tr id="register-model-fragment"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571866 -->
-    <td class="title">Register Model fragments via Manifest header</td>
-    <td class="content">
-      It is now possible to register model fragments via the newly introduced Manifest Header <code>Model-Fragment</code>. This way it is not necessary to create a <i>plugin.xml</i> that contains
-      an extension to the extension point <code>org.eclipse.e4.workbench.model</code>.
-      <p>
-        To register a fragment via Manifest header, you can now simply add an entry similar to the following snippet to the MANIFEST.MF of the contributing bundle:
-      </p>
-      <p>
-        <code>Model-Fragment: fragment.e4xmi;apply=always</code>
-      </p>
-      The <code>apply</code> attribute is optional and defaults to <code>always</code>. It can have the same values as specified in the extension point:
-      <ul>
-        <li>always: each time the application started potentially replacing existing model elements and loosing information stored</li>
-        <li>initial: only when coming from a none persistent state</li>
-        <li>notexists: only if the given element does not exist already in the model</li>
-      </ul>
-    </td>
-  </tr>
-
-  <tr id="register-model-processor"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571866 -->
-    <td class="title">Register Model processor via DS</td>
-    <td class="content">
-      It is now possible to register model processors as declarative service. The model processor needs to implement the service interface <code>IModelProcessorContribution</code> to get
-      registered. This way it is not necessary to create a <i>plugin.xml</i> that contains an extension to the extension point <code>org.eclipse.e4.workbench.model</code>.
-
-      <p>
-        The model processor is registered via DS, the execution is triggered via the Eclipse injection mechanism. The processor execution at registration time needs to be placed in a method
-        annotated with <code>@Execute</code>. Additionally it is possible to add a method annotated with <code>@PreDestroy</code> which gives the opportunity to cleanup in case the bundle
-        that provides the model processor contribution is stopped.
-      </p>
-      <pre>
-@Component
-public class ExampleProcessorContribution implements IModelProcessorContribution {
-
-    @Execute
-    public void execute() {
-        System.out.println("Processor executed");
-    }
-
-    @PreDestroy
-    public void preDestroy() {
-        System.out.println("Processor killed");
-    }
-}
-      </pre>
-      <p>
-        It is also possible to re-use existing model processor POJO implementations and register them via an <code>IModelProcessorContribution</code>. For this the method <code>getProcessorClass()</code>
-        needs to be overridden to return the class of the model processor POJO. In this case there is no support for handling the stopping of the contributing bundle.
-      </p>
-      <pre>
-@Component
-public class ExampleProcessorContribution implements IModelProcessorContribution {
-
-    @Override
-    public Class&lt;?&gt; getProcessorClass() {
-        return ExampleProcessor.class;
-    }
-}
-      </pre>
-      The <code>IModelProcessorContribution</code> supports two service properties for configuration:
-      <ul>
-        <li>beforefragment: specifies if the processor has to be invoked before model fragments are added. If not specified it defaults to <code>true</code>.</li>
-        <li>apply: defines in which case a processor is run. If not specified it defaults to <i>always</i>.<br/>
-          Possible values are:
-          <ul>
-            <li>always: each time the application started</li>
-            <li>initial: only when coming from a none persistent state</li>
-          </ul>
-        </li>
-      </ul>
-      <pre>
-@Component(property = {
-    IModelProcessorContribution.BEFORE_FRAGMENT_PROPERTY_PREFIX + "false",
-    IModelProcessorContribution.APPLY_PROPERTY_PREFIX + "initial"
-})
-public class ExampleProcessorContribution implements IModelProcessorContribution { ... }
-      </pre>
-      <p>
-        You can also specify model elements that should be added to the context that is used to invoke the processor. This is necessary as the processor is invoked on application context level.
-        To specify such model elements you need to override the method <code>getModelElements()</code>
-      </p>
-      <pre>
-@Component(property = {
-		IModelProcessorContribution.BEFORE_FRAGMENT_PROPERTY_PREFIX + "false"
-})
-public class ExampleProcessorContribution implements IModelProcessorContribution {
-
-    @Execute
-    public void execute(@Named("org.eclipse.example.partstack") MPartStack myTest) {
-        System.out.println("Processor executed: " + myTest.getElementId());
-    }
-
-    @Override
-    public List&lt;ModelElement&gt; getModelElements() {
-        return Arrays.asList(new ModelElement("org.eclipse.example.partstack"));
-    }
-}
-      </pre>
-    </td>
-  </tr>
-
-  <tr id="simpler-status-creation"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573093 -->
-    <td class="title">New static methods to ease Status creation</td>
-    <td class="content">
-      <p>
-        New API methods in <code>Status</code>
-        (<a href="https://help.eclipse.org/latest/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/runtime/Status.html" target="_blank"><code>org.eclipse.core.runtime.Status</code></a>)
-        makes it easier and less verbose
-        to make <code>Status</code> object for error handling. There are methods called <code>info</code>, <code>warning</code>
-        and <code>error</code> for creating status objects of those severities. These methods simplify the API
-        by using StackWalker API (introdcued in Java 9) to automatically determine the Plug-in ID. The existing constructors
-        for more fine grained control still continue to exist and may be the most suitable when using Status objects in
-        non-error handling cases as explicitly passing the plug-in id in by String can be faster than automatically
-        determining it.
-      </p>
-      A couple of examples of before and after with the new API:
-      <ul>
-        <li>
-          <p>Creating a warning Status</p>
-          Existing API: <pre>IStatus status = new Status(IStatus.WARNING, UIPlugin.PLUGIN_ID, IStatus.OK, message, null);</pre>
-          New static helper methods: <pre>IStatus status = Status.warning(message);</pre>
-        </li>
-        <li>
-          <p>Throwing a CoreException:</p>
-          Existing API: <pre>throw new CoreException(new Status(IStatus.ERROR, UIPlugin.PLUGIN_ID, message, e));</pre>
-          New static helper methods: <pre>throw new CoreException(Status.error(message, e));</pre>
-        </li>
-      </ul>
-    </td>
-  </tr>
-
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-    <tr id="swt-gtk-disable-insert-emoji"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572829 -->
-    <td class="title">Option to disable "Insert Emoji" menu entry on Linux</td>
+
+  <tr id="styled-text-multi-selection"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562676 -->
+    <td class="title">StyledText API to use multiple carets or selection ranges</td>
     <td class="content">
-      On Linux it is now possible to disable the <b>Insert Emoji</b> context menu entry of text fields, on GTK 3.22.20 and upward. This can be done with the following command line argument for Eclipse:
-      <p><code>-DSWT_GTK_INPUT_HINT_NO_EMOJI=true</code></p>
+      StyledText widget now has a new <code>setSelectionRanges(int[] ranges)</code> API which allows to pass
+      an arbitraty number of selection ranges. When multiple ranges are used, the text widget will display them
+      as distinct carets and selection ranges and will allow simultaneous edits at those locations.
     </td>
   </tr>
   <!-- *********************** End of SWT *********************** -->
 
-  <!-- ******************** Equinox ********************** -->
+  <!-- *********************** p2 *********************** -->
   <tr>
-    <td id="Equinox" class="section" colspan="2"><h2>Equinox p2 Changes</h2></td>
+    <td id="p2" class="section" colspan="2"><h2>p2 Changes</h2></td>
   </tr>
 
-  <tr id="pgp-signature-verification"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570907 -->
-    <td class="title">Verify PGP signatures during installation</td>
+  <tr id="trust-PGP"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572816 -->
+    <td class="title">Trust signers of PGP-signed artifacts</td>
     <td class="content">
-      When installing some artifact with p2, and those artifacts have the <code>pgp.signatures</code>
-      property set, the signatures will be verified during installation and installation will fail if a signature
-      couldn't be verified.
-      <p>Reasons of failures would be:</p>
-      <ul>
-        <li>Signature is not well formatted (it must be armoured PGP blocks) or is intrisically wrong (eg the
-        signature has been modified in a way that makes it totally invalid).</li>
-        <li>No public key was found that matches the signature. Public keys are expected to be provided as value of
-        the <code>pgp.publicKeys</code> property either on the artifact metadata or, usually better, on the artifact
-        repository, in armoured form.</li>
-        <li>The signature and a matching public key were found, but the verification process shows that the signature
-        is incorrect. This usually means the signature was meant for another artifact.</li>
-      </ul>
-      Each one of those reasons will make the build fail, as they are security threats. It is assumed that any
-      signed artifact can be successfully verified for all given signatures to continue installation.
+      When artifacts to be installed have the <code>pgp.signatures</code> property set, additionally to the integrity check that
+      are responsible of verifying the signatures are valid for the given artifact, the public key of the signers will now be
+      prompted to user in the same <b>Trust</b> dialog as unknown certificates, and user will have to declare the signer
+      key as trusted for installation to complete. All PGP-signed artifacts need to have at least 1 trusted signer for installation
+      to complete; an artifact that has no trusted signer will block the installation.
+      <p>The behavior is similar to what's already in place for artifacts signed with jarsigner. However, some convenience
+      behavior such as remembering what was already trusted is not implemented yet.</p>
+      <p>For extenders or users of p2's API, beware that <code>org.eclipse.equinox.p2.core.UIServices</code> now has an
+      extra <code>getTrustInfo(Certificate[][] unTrustedCertificateChains, Collection&lt;PGPPublicKey> untrustedPGPKeys,
+      String[] details)</code> method that should be used and implemented in place of legacy method with same name,
+      but without the <code>PGPPublicKey</code> parameter.</p>
     </td>
   </tr>
-  <!-- ******************** End of Equinox ********************** -->
+
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->
 
+<script type="text/javascript" src="scripts.js"></script>
+  <p style="text-align:center">
+    <a href="jdt.php">Previous</a> <a style="margin:1em" href=".">Up</a> <a href="pde.php">Next</a>
+  </p>
 </body>
 </html>
