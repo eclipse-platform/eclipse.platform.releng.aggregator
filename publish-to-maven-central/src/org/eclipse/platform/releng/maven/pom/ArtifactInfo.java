@@ -15,7 +15,7 @@ package org.eclipse.platform.releng.maven.pom;
 
 public class ArtifactInfo {
 
-	private static final String SCM_GITROOT = "scm:git:git://git.eclipse.org/gitroot/";
+	private static final String SCM_GITROOT = "scm:git:https://git.eclipse.org/r/";
 	private static final String SCM_CGIT = "https://git.eclipse.org/c/";
 
 	private static final String SCM_TAG_START = ";tag=\""; // git tag inside Eclipse-SourceReference
@@ -99,7 +99,7 @@ public class ArtifactInfo {
 		if (this.scmConnection == null) {
 			if (this.bsn.equals("org.eclipse.jdt.core.compiler.batch")) {
 				// not a regular OSGi bundle, scm info missing:
-				this.scmConnection = "scm:git:git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git;path=\"org.eclipse.jdt.core\"";
+				this.scmConnection = "scm:git:https://git.eclipse.org/r/jdt/eclipse.jdt.core.git;path=\"org.eclipse.jdt.core\"";
 				System.out.println("Fixed scmUrl for "+this.bsn);
 			} else if (this.bsn.startsWith("org.eclipse.emf")) {
 				this.scmConnection = "scm:git:https://git.eclipse.org/r/emf/org.eclipse.emf";
