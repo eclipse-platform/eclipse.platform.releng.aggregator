@@ -17,19 +17,20 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.20 (JDT)</title>
+<title>What's New in Eclipse 4.21 (JDT)</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.20 (JDT)</h2>
+<h2>What's New in Eclipse 4.21 (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.20 release of Eclipse.
+for the 4.21 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  	<li><a href="#Java16">Java&trade; 16 Support</a></li>
+  	<!--<li><a href="#Java16">Java&trade; 16 Support</a></li>-->
   	<li><a href="#JUnit">JUnit</a></li>
 	<li><a href="#JavaEditor">Java Editor</a></li>
-	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
+	<li><a href="#JavaCompiler">Java Compiler</a></li>
+	<!--<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>-->
 	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
 	<li><a href="#Debug">Debug</a></li>
 	<!--li><a href="#JDTDev">JDT Developers</a></li-->
@@ -48,33 +49,15 @@ document for changes in the Platform.</p>
 </colgroup>
 <tbody>
 
- <!-- ******************* Java 16 Support ************************************* -->
+  <!-- ******************* Java XX Support ************************************* -->
+  <!--
   <tr>
-    <td id="Java16" class="section" colspan="2">
-    <h2>Java&trade; 16 Support </h2></td>
+    <td id="JavaXX" class="section" colspan="2">
+    <h2>Java&trade; XX Support </h2>
+    </td>
   </tr>
-   <tr id="Java_16"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=565620 -->
-      <td class="title">Java 16</td>
-      <td class="content">
-          <a href="http://jdk.java.net/16/">Java 16</a> is out and Eclipse JDT supports Java 16 in 4.20. 
-          <p></p>
-          <p>
-          The release notably includes the following Java 16 features:
-           <br/>
-           <a href="https://openjdk.java.net/jeps/394"> JEP 394: Pattern Matching for Instanceof (Final)</a>.
-           <br/>
-           <a href="https://openjdk.java.net/jeps/395"> JEP 395: Records (Final)</a>.
-           <br/>
-           <a href="https://openjdk.java.net/jeps/397"> JEP 397: Sealed Classes (Second Preview)</a>.
-           </p>
-           <p>
-           Please note that preview option should be on for <a href="http://openjdk.java.net/projects/jdk/16/"> preview language features</a>.
-           For an informal introduction of the support, 
-           please refer to <a href="https://wiki.eclipse.org/Java16/Examples"> Java 16 Examples wiki</a>. 
-           </p>
-      </td>
-  </tr>
-  <!-- ******************* End of Java 16 Support ************************************* -->
+  -->
+  <!-- ******************* End of Java XX Support ************************************* -->
 
   <!-- ******************* JUnit ************************************* -->
   <tr>
@@ -82,13 +65,15 @@ document for changes in the Platform.</p>
     <h2>JUnit</h2>
     </td>
   </tr>
-
-	<tr id="junit-runtime-bree"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571009 -->
-      <td class="title">BREE update for JDT JUnit runtime bundles</td>
-      <td class="content">
-        The bundle required execution environment (BREE) for the <code>org.eclipse.jdt.junit.runtime</code> and <code>org.eclipse.jdt.junit4.runtime</code> bundles is now JavaSE-1.8.
-      </td>
-    </tr>
+  
+  <tr id="mockitomatchers"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=575246 -->
+    <td class="title"><a href="#mockitomatchers">mockito ArgumentMatchers.* added to favorites in Java tooling</a></td>
+    <td class="content">
+      Mockito based tests frequently use <code>org.mockito.ArgumentMatchers.*</code>.  
+      This has been added to the Java favorites in the preferences under <b>Java &gt; Editor &gt; Content Assist &gt; Favorites</b>.
+	  This way the organize imports action in the IDE will automatically add static imports for these classes if you use them in your tests.
+    </td>
+  </tr>
 
   <!-- ******************* End of JUnit ************************************* -->
 
@@ -98,328 +83,177 @@ document for changes in the Platform.</p>
     <h2>Java Editor </h2>
     </td>
   </tr>
-  
-  <tr id="foreach-expression-type"><!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572932 -->
-    <td class="title"><a href="#foreach-expression-type">Better type for the local variable creation quick fix</a></td>
+
+  <tr id="stringbuffer-to-stringbuilder"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569835 -->
+    <td class="title"><a href="#stringbuffer-to-stringbuilder">Use StringBuilder instead of StringBuffer clean up</a></td>
     <td class="content">
-      The quick fix <b>Create a new local variable</b> has been enhanced. When it creates a variable that is the expression on which a foreach loop iterates, its type is an array of the type of the loop parameter:
+      A new clean up has been added that converts code to use <code>StringBuilder</code> (added in Java 1.5) rather than <code>StringBuffer</code> which has synchronized methods and is slower than using <code>StringBuilder</code>.
+      <p>
+        There is a sub-option where changes will only occur to local variables which is on by default.  When this sub-option is on, changes will only occur to <code>StringBuffer</code> variables that are local to a method.  When a method calls other methods with such variables or assigns to/from fields/parameters, the method contents will not be converted.  It is permitted to append <code>StringBuffer</code> fields or parameters to local <code>StringBuffer</code> variables which can then still be converted to <code>StringBuilder</code>.
+      </p>
+      <p>
+      When the option is selected and the sub-option for local variables is off,all usage of <code>StringBuffer</code> in the selected files are changed to <code>StringBuilder</code> regardless of usage.  It should be noted that in this case, the clean up will not track down non-selected classes and methods that are referenced and might require changes to compile successfully.
+      </p>
+      <p>
+        To apply the clean up, select the <b>Use StringBuilder instead of StringBuffer</b> check box on the <b>Performance</b> tab in your clean up profile.  To specify just for local variables, select the <b>Only for local variables</b> check box found just below.
+      </p>
+      <p><img src="images/stringbuffer-to-stringbuilder-prefs.png" alt="Preferences" width="800"/></p>
       <p>
         For the given code:
       </p>
-      <p><img src="images/foreach-expression-type-before.png" alt="Before"/></p>
+      <p><img src="images/stringbuffer-to-stringbuilder-before.png" alt="Before"/></p>
       <p>
         One gets:
       </p>
-      <p><img src="images/foreach-expression-type-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="use-instanceof"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569835 -->
-    <td class="title"><a href="#use-instanceof">Use instanceof clean up</a></td>
-    <td class="content">
-      A new clean up has been added that uses an <code>instanceof</code> expression to check an object against a hardcoded class.
-      <p>
-        The expression must be a supertype of the targeted class.
-      </p>
-      <p>
-        To apply the clean up, select <b>Use instanceof keyword instead of Class.isInstance()</b> check box on the <b>Code Style</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/use-instanceof-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/use-instanceof-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/use-instanceof-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="operand-factorization"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=569666 -->
-    <td class="title"><a href="#operand-factorization">Operand factorization clean up</a></td>
-    <td class="content">
-      A new clean up has been added that replaces <code>(X &amp;&amp; Y) || (X &amp;&amp; Z)</code> by <code>(X &amp;&amp; (Y || Y))</code>.
-      <p>
-        The operands must be passive and primitive.
-      </p>
-      <p>
-        To apply the clean up, select <b>Replace (X &amp;&amp; Y) || (X &amp;&amp; Z) by (X &amp;&amp; (Y || Z))</b> check box on the <b>Duplicate code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/operand-factorization-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/operand-factorization-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/operand-factorization-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="pull-out-if"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573358 -->
-    <td class="title"><a href="#pull-out-if">Pull out a duplicate 'if' from an if/else clean up</a></td>
-    <td class="content">
-      A new clean up has been added that moves a duplicate inner <code>if</code> condition around an outer <code>if</code> condition.
-      <p>
-        The inner <code>if</code> condition should be common to both <code>if</code>/<code>else</code> clauses of the outer <code>if</code> statement.
-      </p>
-      <p>
-        The <code>if</code> conditions should be passive.
-      </p>
-      <p>
-        To apply the clean up, select <b>Pull out a duplicate 'if' from an if/else</b> check box on the <b>Duplicate code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/pull-out-if-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/pull-out-if-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/pull-out-if-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="one-falling-through-if"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572790 -->
-    <td class="title"><a href="#one-falling-through-if">One if rather than duplicate blocks that fall through clean up</a></td>
-    <td class="content">
-      A new clean up has been added that merges consecutive <code>if</code> statements with same code block that end with a jump statement.
-      <p>
-        To apply the clean up, select <b>Single 'if' statement rather than duplicate blocks that fall through</b> check box on the <b>Duplicate code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/one-falling-through-if-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/one-falling-through-if-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/one-falling-through-if-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="valueof-rather-than-instantiation"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572234 -->
-    <td class="title"><a href="#valueof-rather-than-instantiation">valueOf() rather than instantiation clean up</a></td>
-    <td class="content">
-      A new clean up has been added that replaces unnecessary primitive wrappers instance creations by using static factory methods (<code>valueOf()</code>).
-      <p>
-        It dramatically improves the space performance.
-      </p>
-      <p>
-        To apply the clean up, select <b>valueOf() rather than instantiation</b> check box on the <b>Optimization</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/valueof-rather-than-instantiation-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/valueof-rather-than-instantiation-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/valueof-rather-than-instantiation-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="primitive-rather-than-wrapper"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573325 -->
-    <td class="title"><a href="#primitive-rather-than-wrapper">Primitive rather than wrapper clean up</a></td>
-    <td class="content">
-      A new clean up has been added that replaces a primitive wrapper object by the primitive type when an object is not necessary.
-      <p>
-        The variable must be not <code>null</code>.
-        The result should not make more autoboxing/unboxing than the original code.
-      </p>
-      <p>
-        To apply the clean up, select <b>Primitive type rather than wrapper class</b> check box on the <b>Optimization</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/primitive-rather-than-wrapper-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/primitive-rather-than-wrapper-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/primitive-rather-than-wrapper-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="redundant-truth"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572851 -->
-    <td class="title"><a href="#redundant-truth">Redundant truth clean up</a></td>
-    <td class="content">
-      A new clean up has been added that directly checks boolean values instead of comparing them with <code>true</code>/<code>false</code>.
-      <p>
-        The operator can be equals, not equals or XOR.
-        The constants can be a literal or a <code>java.lang.Boolean</code> constant.
-        One operand should be primitive so no new <code>null</code> pointer exceptions may occur.
-      </p>
-      <p>
-        To apply the clean up, select <b>Boolean value rather than comparison</b> check box on the <b>Unnecessary Code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/redundant-truth-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/redundant-truth-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/redundant-truth-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="implicit-comparator"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572426 -->
-    <td class="title"><a href="#implicit-comparator">Implicit comparator clean up</a></td>
-    <td class="content">
-      A new clean up has been added that removes the comparator declaration if it is the default one.
-      <p>
-        The declared comparator should be an equivalent to the natural order.
-        It removes anonymous class, lambda, <code>Comparator.comparing()</code>, <code>Comparator.naturalOrder()</code> and <code>null</code>.
-        It applies on <code>List.sort(Comparator)</code>, <code>Collections.sort(List, Comparator)</code>, <code>Collections.max(Collection, Comparator)</code> and <code>Collections.min(Collection, Comparator)</code>.
-        If the comparator is used in the method <code>List.sort(Comparator)</code>, the method is converted into <code>Collections.sort(List)</code>.
-      </p>
-      <p>
-        To apply the clean up, select <b>Use implicit comparator when possible</b> check box on the <b>Unnecessary Code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/implicit-comparator-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/implicit-comparator-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/implicit-comparator-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="array-with-curly"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571977 -->
-    <td class="title"><a href="#array-with-curly">Initialize array with curly clean up</a></td>
-    <td class="content">
-      A new clean up has been added that replaces the new instance syntax by curly brackets to create an array.
-      <p>
-        It must be an initialization of a declaration.
-        The declaration must have the same type.
-      </p>
-      <p>
-        To apply the clean up, select <b>Create array with curly when possible</b> check box on the <b>Unnecessary Code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/array-with-curly-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/array-with-curly-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/array-with-curly-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="return-without-assignment"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572537 -->
-    <td class="title"><a href="#return-without-assignment">Remove variable assignment before return clean up</a></td>
-    <td class="content">
-      A new clean up has been added that removes unnecessary local variable declaration or unnecessary variable assignment before a return statement.
-      <p>
-        An explicit type is added for arrays.
-      </p>
-      <p>
-        To apply the clean up, select <b>Remove variable assignment before return</b> check box on the <b>Unnecessary Code</b> tab in your clean up profile.
-      </p>
-      <p><img src="images/return-without-assignment-preferences.png" alt="Preferences" width="800"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/return-without-assignment-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/return-without-assignment-after.png" alt="After"/></p>
-    </td>
-  </tr>
-  
-  <tr id="replace-system-properties"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571823 -->
-    <td class="title"><a href="#replace-system-properties">Replace System.getProperty() calls clean up</a></td>
-    <td class="content">
-      A new clean up has been added that replaces certain <code>System.getProperty()</code> calls with alternative Java method calls or constants instead. 
-      Using these calls/constants may end up using system defaults (e.g. system default file separator) and thus can no longer be overridden at runtime.
-      <p>
-        To apply the clean up, select <b>Replace system property with constant</b> check box on the <b>Java Feature</b> tab in your clean up profile. This
-        enables you to check one or more sub-options: <b>File separator</b>, <b>Path separator</b>, <b>Line separator</b>, <b>File encoding</b>, or <b>Boolean property</b>. 
-        The last option is used for arbitrary boolean options specified by <b>-Dsome-arbitrary-option</b>.
-      </p>
-      <p><img src="images/system-properties-preferences.png" alt="Preferences"/></p>
-      <p>
-        For the given code:
-      </p>
-      <p><img src="images/system-properties-before.png" alt="Before"/></p>
-      <p>
-        One gets:
-      </p>
-      <p><img src="images/system-properties-after.png" alt="After"/></p>
+      <p><img src="images/stringbuffer-to-stringbuilder-after.png" alt="After"/></p>
     </td>
   </tr>
 
-  <!-- ******************* End of Java Editor ************************************* -->
+  <tr id="while-to-do-while"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572574 -->
+    <td class="title"><a href="#while-to-do-while">Convert while to do/while</a></td>
+    <td class="content">
+      A new quick-assist has been added to convert appropriate <b>while</b> loops into <b>do/while</b> loops.  Appropriate <b>while</b> loops require the first evaluation of the while expression is guaranteed to be true and that the evaluation is passive.
+      <p>
+        For the following loop:
+      </p>
+      <p><img src="images/while-to-do-while-before.png" alt="Before"/></p>
+      <p>
+        One is offered:
+      </p>
+      <p><img src="images/while-to-do-while-after.png" alt="After"/></p>
+    </td>
+  </tr>
 
-  <!-- ******************* Java Views and Dialogs ************************************* -->
-  <tr>
+  <tr id="extract-superclass-enhancement"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573884 -->
+    <td class="title"><a href="#extract-superclass-enhancement">Extract Superclass Enhancement</a></td>
+    <td class="content">
+      The <b>Extract Superclass</b> refactoring has been enhanced to support movement of uninitialized non-static final fields.  In the past, a warning was issued for extracting uninitialized non-static final fields as the resultant code would be in error.  The refactoring has been enhanced to add additional parameters to the moved constructors and to pass initialization values from the original class constructors.
+      <p>
+        For the following class:
+      </p>
+      <p><img src="images/extract-superclass-original-before.png" alt="Before"/></p>
+      <p>
+        Extracting to Superclass and choosing all fields, one gets:
+      </p>
+      <p><img src="images/extract-superclass-original-after.png" alt="After"/></p>
+      <p>
+	and
+      </p>
+      <p><img src="images/extract-superclass-superclass-after.png" alt="After"/></p>
+    </td>
+  </tr>
+
+  <tr id="raw-paste"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=5222184 -->
+    <td class="title"><a href="#raw-paste">Raw Paste</a></td>
+    <td class="content">
+      A new menu item has been added for doing a raw paste when editing Java files.  The menu item <b>Raw Paste</b> can be found in the <b>Edit</b> pull-down menu and by right-clicking in the edit window to bring up the context-menu.  The menu item performs a paste action but toggles off the smart insert feature, if required, and restores it, if necessary, after the paste.  For end-users in smart insert mode, this is the same as doing a <b>Shift+Ctrl+Insert</b> followed by <b>Ctrl+V</b>, followed by <b>Shift+Ctrl+Insert</b> to retoggle into smart insert mode again.
+    </td>
+  </tr>
+
+  <tr id="default-type-filters"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571758 -->
+    <td class="title"><a href="#default-type-filters">Default Type Filters</a></td>
+    <td class="content">
+      Default values have been added to the <b>Java &gt; Appearance &gt; Type Filters</b> preferences. Types matching these filters will be excluded 
+      from appearing in the Open Type dialog, content assist, quick fix, and organize imports. These filter patterns do not affect the Package Explorer and Type Hierarchy views.   
+      <p><img src="images/default-type-filters.png" alt=""/></p>
+      <p>
+      </p>
+    </td>
+  </tr> 
+  <tr id="change-compliance-jre-multi-constant-labels"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574707 -->
+    <td class="title"><a href="#change-compliance-jre-multi-constant-labels">Change project compliance and JRE on using multi-constant case labels</a></td>
+    <td class="content">
+      A new quick fix (<b>Ctrl+1</b>) has been added to change the project compliance and JRE when multi-constant case labels 
+      are used in a project below Java 14: 
+      <p><img src="images/change-compliance-jre-multi-constant-labels.png" alt=""/></p>
+      <p>
+      </p>
+    </td>
+  </tr>
+  <tr id="declare-as-super-interface"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573980 -->
+    <td class="title"><a href="#declare-sealed-interface-as-super-interface">Quick fix to declare sealed interface as super interface</a></td>
+    <td class="content">
+      You can use the following quick fix (<b>Ctrl+1</b>) to declare a sealed interface as super interface of its permitted types:
+      <p><img src="images/declare-sealed-interface-as-super-interface.png" alt=""/></p>
+      <p>
+      </p>
+    </td>
+  </tr> 
+  <tr id="declare-as-super-class"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574860 -->
+    <td class="title"><a href="#declare-sealed-class-as-super-class">Quick fix to declare sealed class as super class</a></td>
+    <td class="content">
+      You can use the following quick fix (<b>Ctrl+1</b>) to declare a sealed class as super class of its permitted classes:
+      <p><img src="images/declare-sealed-class-as-super-class.png" alt=""/></p>
+      <p>
+      </p>
+    </td>
+  </tr>  
+
+  <tr id="add-to-permitted-types"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574526 -->
+    <td class="title"><a href="#add-sub -type-as-permitted -type-of-sealed-type">Quick fix to add the sub type to permitted types of sealed super type</a></td>
+    <td class="content">
+      You can use the following quick fix (<b>Ctrl+1</b>) to add a sub type to permitted types of a sealed super type:
+      <p><img src="images/add-subtype-to-permitted-types-of-supertype.png" alt=""/></p>
+      <p>
+      </p>
+    </td>
+  </tr>
+
+  <!--******************* End of Java Editor ************************************* -->
+
+ <!-- ******************* Java Views and Dialogs ************************************* -->
+   <!--  <tr>
     <td id="JavaViewsAndDialogs" class="section" colspan="2">
     <h2>Java Views and Dialogs</h2>
     </td>
-  </tr>
-  <tr id="search-filter-static-imports"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570469 -->
-    <td class="title"><a href="#search-filter-static-imports">Differentiate search filter for normal imports from static imports</a></td>
-    <td class="content">
-        The <b>Search</b> view now supports a new filter dedicated for <b>static imports</b>. Consequently, the existing imports filter is dedicated for non-static imports only. 
-        As a result, you will now by default find statically imported references of a class or an interface.
-        <p>
-          <img src="images/static-import-filter.png" alt="screenshot showing a static import search filter" />
-        </p>
-    </td>
-  </tr>
-  <tr id="create-moduleinfo"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=566862 -->
-    <td class="title"><a href="#create-moduleinfo">Create module-info.java option during New Java Project creation</a></td>
-    <td class="content">
-        <b>Create module-info.java</b> option has been moved to the first page of <b>New Java Project</b> creation wizard. 
-        This option will be enabled only for Java projects with JRE 9 or above.
-        New Java Project creation wizard will also remember the previous choice made by the user and select this option by default accordingly.
-        <p>
-          <img src="images/create-moduleinfo.png" alt="screenshot showing a static import search filter" />
-        </p>
-    </td>
-  </tr>
-   <tr id="cleanup-profile-updated"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=530122 -->
-    <td class="title"><a href="#cleanup-profile-updated">Default Java cleanup profile of Eclipse has been updated</a></td>
-    <td class="content">
-      The default cleanup profile of the Java development tools has been updated to include more cleanups. All included cleanups have been well tested and proven to be stable in the Eclipse code base.
-      Please see the preference under <b>Java &gt; Clean-up</b> for details.
-      <p>
-        <img src="images/cleanup-profile.png" alt="screenshot showing a the new cleanup profile" />
-      </p>
-		
-    </td>
-  </tr>
-  
-  <!-- ******************* End of Java Views and Dialogs ************************************* -->
+  </tr>-->
+  <!-- ******************* End of Java Views and Dialogs ************************************* --> 
 
-  <!-- ******************* Java Compiler ************************************* 
+  <!-- ******************* Java Compiler ************************************* -->
   <tr>
     <td id="JavaCompiler" class="section" colspan="2">
     <h2>Java Compiler</h2>
     </td>
-  </tr>-->
+  </tr>
+    <tr id="external_annotations_all_locations"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574603 -->
+    <td class="title">Find external annotations anywhere</td>
+    <td class="content">
+      External annotations, which are used for annotation based null analysis, can now be associated 
+      to unannotated classes more freely.
+      <p>Previously, all external annotations where declared per build path entry. I.e., whenever a project of yours
+      uses a library for which external annotations exist, you would need to explicitly declare where
+      the corresponding external annotations for this particular library can be found.</p>
+      <p>A new compiler preference has been added by which you can instruct the compiler to search
+      for external annotations in all build path locations of the current project.</p>
+      <p><img src="images/external_annotations_all_locations.png" alt=""/></p>
+      <p>
+      When enabled, this strategy will be applied to all class files encountered during compilation.</p>
+      <p>Some examples, where this option is useful:</p>
+      <ul><li>A project A contains generated sources (in a separate source folder), which are decorated using
+      external annotations in the same project. When project A ships a jar containing also the external annotations,
+      any client of A will immediately see the generated classes with their external annotations applied.</li>
+      <li>When dedicated jars have been created, each containing external annotations for a set of libraries,
+      you only have to add these annotation jars to your build path and enable the new option, without worrying
+      which annotation jar corresponds to which individual dependency (dependencies).
+      The compiler will match external annotations to class files with no further help.
+      </li>
+      </ul>
+      <p>For batch compilation a corresponding option already exists. To match the above strategy in CI-builds,
+      just add the following to the compiler command line (verbatim):
+      <br/>
+      	<code>-annotationpath CLASSPATH</code>
+      </p>
+    </td>
+  </tr> 
+
   <!-- ******************* End of Java Compiler ************************************* -->
 
-  <!-- ******************* Java Formatter ************************************* 
-  <tr>
+<!-- ******************* Java Formatter ************************************* -->
+   <!--  <tr>
     <td id="JavaFormatter" class="section" colspan="2">
     <h2>Java Formatter </h2>
     </td>
-  </tr>-->
+  </tr>  -->
   <!-- ******************* End of Java Formatter ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
@@ -428,40 +262,26 @@ document for changes in the Platform.</p>
     <h2>Debug</h2>
     </td>
   </tr>
-  <tr id="copy-jars"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=571719 -->
-      <td class="title"><a href="#copy-jars">Copy Run Configuration item details</a></td>
-      <td class="content">
-          A new <b>Copy</b> button has been added to the <b>Dependencies/Classpath</b> tab of Run Configuration dialog.
-          This can be used to copy the details of the selected item.
-          <p>
-            <img src="images/configuration-copyjars.png" alt="screenshot showing new menu" />
-          </p>
-      </td>
-
-  </tr>
-  <tr id="debug-hover-chain-fields"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572629 -->
-    <td class="title"><a href="#debug-hover-chain-fields">Debug hover for chain of variables</a></td>
+  <tr id="debug-intrim-eval"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574395 -->
+    <td class="title"><a href="#debug-intrim-eval">Evaluate variables in current execution stack</a></td>
     <td class="content">
-      When hovering over chain of variables, the debug hover will now show the variable value under the cursor.
-      <p>
-        <img src="images/debug_hover_chain_var.png" alt="hover popup on variable" />
-      </p>
-      <p>
-        It even works for array length.
-      </p>
-      <p>
-        <img src="images/debug_hover_array_length.png" alt="hover popup on array length" />
-      </p>
-</td>
+        In debug mode, regardless of the selected stack frame now you can evaluate variables which are
+        in the scope of the current execution stack frame and stack frames below it which are defined in 
+        the current focused java class. 
+        <p>
+          <img src="images/debug_eval_intrim_stack.png" alt="screenshot showing evaluation result" />
+        </p>
+    </td>
   </tr>
+ 
   <!--************************ End of Debug ******************************** -->
 
-  <!-- *********************** JDT Developers ******************************** 
-  <tr>
+ <!-- *********************** JDT Developers ******************************** -->
+<!--   <tr>
     <td id="JDTDev" class="section" colspan="2">
     <h2>JDT Developers</h2>
     </td>
-  </tr>-->
+  </tr> -->
   <!-- *********************** End of JDT Developers ******************************** -->
 </tbody>
 </table>
