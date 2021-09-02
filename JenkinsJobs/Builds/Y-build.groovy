@@ -475,11 +475,10 @@ spec:
 	  stage('Trigger tests'){
           steps {
               container('jnlp') {
-                build job: 'ep421Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep421Y-unit-cen64-gtk3-java16', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep421Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep421Y-unit-mac64-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'ep421Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep422Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep422Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep422Y-unit-mac64-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep422Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
             }
