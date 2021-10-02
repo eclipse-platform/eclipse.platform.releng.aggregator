@@ -27,7 +27,7 @@ BUILD_DIR=$CJE_ROOT/$DROP_DIR/$BUILD_ID
 mkdir $CJE_ROOT/tmp
 
 cd $REPO_DIR
-mvn --update-snapshots org.eclipse.tycho:tycho-versions-plugin:2.4.0:update-pom \
+mvn --update-snapshots org.eclipse.tycho:tycho-versions-plugin:2.5.0:update-pom \
   -Dmaven.repo.local=$LOCAL_REPO \
   -Djava.io.tmpdir=$CJE_ROOT/tmp \
   -DaggregatorBuild=true \
