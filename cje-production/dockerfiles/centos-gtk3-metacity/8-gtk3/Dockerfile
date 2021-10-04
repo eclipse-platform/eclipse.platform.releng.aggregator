@@ -31,6 +31,7 @@ RUN yum -y update && yum -y install \
       dbus \
       webkitgtk4 \
       glibc-locale-source \
+      glibc-langpack-en \
     && yum clean all
 
 ENV HOME=/home/vnc

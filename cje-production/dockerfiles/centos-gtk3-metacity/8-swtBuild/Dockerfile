@@ -62,16 +62,6 @@ RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
   && echo "123456" | vncpasswd -f > ${HOME}/.vnc/passwd \
   && chmod 600 ${HOME}/.vnc/passwd
 
-RUN cd ${HOME} && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > ${HOME}/setup-rust.sh \
-  && chmod 755 ${HOME}/setup-rust.sh \
-  && ${HOME}/setup-rust.sh -y 
-ENV PATH=$HOME/.cargo/bin:$PATH
-
-RUN mkdir -p ${HOME}/cef-libs && wget -O ${HOME}/cef-libs/cef.tar.bz2 --no-verbose https://cef-builds.spotifycdn.com/cef_binary_3.3071.1649.g98725e6_linux64_minimal.tar.bz2
-
-RUN chmod -R 777 ${HOME}
-RUN chmod -R 777 ${HOME}/.cargo
-
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
 RUN chmod 755 ${HOME}/.vnc/xstartup.sh
