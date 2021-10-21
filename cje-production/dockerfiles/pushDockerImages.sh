@@ -20,4 +20,4 @@ docker push eclipse/platformreleng-centos-gtk3-metacity:7
 docker push eclipse/platformreleng-centos-swt-build:8
 docker push eclipse/platformreleng-ubuntu-gtk3-metacity:18.04
 docker push eclipse/platformreleng-ubuntu-gtk3-metacity:20.04
-docker push eclipse/platformreleng-ubuntu-gtk3-metacity:21.04
+docker push eclipse/platformreleng-ubuntu-gtk3-metacity:21.10

@@ -15,7 +15,4 @@
 
 set -e
 
-pushd ubuntu-gtk3-metacity/21.04-gtk3
-echo "Building Ubuntu 21.04 docker image"
-docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:21.04 .
-popd
+docker push eclipse/platformreleng-ubuntu-gtk3-metacity:21.10
