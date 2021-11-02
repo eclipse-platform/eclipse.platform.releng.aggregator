@@ -297,6 +297,9 @@ spec:
             }
 		}
 	  stage('Aggregator maven build'){
+          environment {
+                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
+          }
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {

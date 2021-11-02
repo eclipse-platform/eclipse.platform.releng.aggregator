@@ -22,15 +22,13 @@ pipeline {
 		}
 		stage('Build') {
 			steps {
-				wrap([$class: 'Xvnc', useXauthority: true]) {
-					sh """
-					mvn clean verify -Dmaven.repo.local=$WORKSPACE/.m2/repository \
-						-Pbree-libs \
-						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
-						-DapiBaselineTargetDirectory=${WORKSPACE} \
-						-Dproject.build.sourceEncoding=UTF-8 
-					"""
-				}
+				sh """
+				mvn clean verify -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+					-Pbree-libs -Peclipse-sign \
+					-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
+					-DapiBaselineTargetDirectory=${WORKSPACE} \
+					-Dproject.build.sourceEncoding=UTF-8 
+				"""
 			}
 			post {
 				always {
