@@ -22,18 +22,21 @@ pipeline {
 		}
 		stage('Build') {
 			steps {
-				sh """
-				mvn clean verify -Dmaven.repo.local=$WORKSPACE/.m2/repository \
-					-Pbree-libs -Peclipse-sign \
-					-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
-					-DapiBaselineTargetDirectory=${WORKSPACE} \
-					-Dproject.build.sourceEncoding=UTF-8 
-				"""
+				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
+					sh '''
+					mvn clean verify -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+						-Pbree-libs -Peclipse-sign \
+						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
+						-DapiBaselineTargetDirectory=${WORKSPACE} \
+						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
+						-Dproject.build.sourceEncoding=UTF-8 
+					'''
+				}
+
 			}
 			post {
 				always {
-					archiveArtifacts artifacts: '.*log,*/target/work/data/.metadata/.*log,*/tests/target/work/data/.metadata/.*log,apiAnalyzer-workspace/.metadata/.*log', allowEmptyArchive: true
-					publishIssues issues:[scanForIssues(tool: java()), scanForIssues(tool: mavenConsole())]
+					archiveArtifacts artifacts: '.*log,*/target/work/data/.metadata/.*log,*/tests/target/work/data/.metadata/.*log,apiAnalyzer-workspace/.metadata/.*log,eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*', allowEmptyArchive: true
 				}
 				unstable {
 					gerritReview labels: [Verified: -1], message: "Build UNSTABLE (test failures) $BUILD_URL"
