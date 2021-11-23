@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.21</title>
+<title>Eclipse Platform What's New in 4.22</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.21</h2>
+<h2>What's New in Eclipse 4.22</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.21 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.22 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
@@ -49,14 +49,52 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  <tr id="path-to-bundlepool-launcher-dir"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=573131 -->
-    <td class="title"><a href="#path-to-bundlepool-launcher-dir">Path to bundlepool expressed using @launcher.dir</a></td>
+
+  <tr id="IMultiTextSelection"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=466532 -->
+    <td class="title">New API for JFace TextViewers: IMultiTextSelection</td>
     <td class="content">
-      When creating a bundlepool installation of eclipse, the location of the bundlepool is expressed using the @launcher.dir varliable.
-      The launcher, typically eclipse.exe, will replace the string "@launcher.dir" with the location where the launcher is located on disk at startup.
-      This delayed resolution of the bundlepool location allows the bundled pool and the eclipse installations to be relocated in the file system as
-      long as the internal relationship stays the same. Previously, the path to the bundlepool (expressed using the "-install" launcher option) was
-      always an absolute path and produced when the installation took place.
+      JFace Text now supports a new type of <code>ITextSelection</code> that allows to keep track of multiple simultaneous
+      selections or caret locations. The new interface is <code>IMultiTextSelection</code>.
+      <p>Most text manipulation operations are capable of working with <code>IMultiTextSelection</code>. Some other operations
+      may need to be customized to handle this <code>IMultiTextSelection</code> more specifically.</p>
+    </td>
+  </tr>
+
+  <tr id="IFindReplaceTargetExtension4"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=575382 -->
+    <td class="title">Enable "Select All" with IFindReplaceTargetExtension4</td>
+    <td class="content">
+      The extension interface <code>IFindReplaceTargetExtension4</code> can be added to existing <code>IFindReplaceTarget</code>
+      implementations in order to enable the <i>Select All</i> feature from the Find/Replace dialog. It consists of addition of
+      a single <code>setSelection(IRegion[] regions)</code> method.
+    </td>
+  </tr>
+  <tr id="defaultShowIn"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=575453 -->
+    <td class="title">Double click on Problem without File shows in default view</td>
+    <td class="content">
+	  Double click on Problems executes "Go to Resource". But there are cases where no File (column "Path") is associated with the Problem.
+	  In those cases "Go to Resources" cannot be executed. Instead the new <b>defaultShowIn</b> view is opened. 
+	  It is optional and can be configured per <code>perspective</code> using the <code>defaultShowIn</code> attribute. Example:
+	  <pre><code>
+      &lt;perspective
+            name="MyPerspective"
+            icon="$nl$/icons/eview16/plugins.png"
+            class="org.eclipse.pde.internal.ui.PDEPerspective"
+            <b>defaultShowIn="org.eclipse.ui.navigator.ProjectExplorer"</b>
+            id="org.eclipse.pde.ui.PDEPerspective"&gt;
+         &lt;description&gt;My own Perspective&lt;/description&gt;
+      &lt;/perspective&gt;
+	  </code></pre>
+	  The default is also moved to the top of the "Show In" Context Menu.
+    </td>
+  </tr>
+  <tr id="imageCache"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=576740 -->
+    <td class="title">Resource cache in Jface</td>
+    <td class="content">
+	We added a LRU cache for image resources. It can be disable with system property:
+ 	<code>org.eclipse.jface.resource.cacheSize=0</code><br/>
+	The default cacheSize is 300.<br/> 
+	In the eclipse IDE it is used to automatically cache the icons of the toolbars.<br/>
+	See <code>DeviceResourceDescriptor(boolean shouldBeCached)</code> for details. 
     </td>
   </tr>
   <!-- ******************** End of Platform ********************** -->
@@ -65,60 +103,75 @@ section of the Workbench User Guide.
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-
-  <tr id="styled-text-multi-selection"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562676 -->
-    <td class="title"><a href="#styled-text-multi-selection">StyledText API to use multiple carets or selection ranges</a></td>
+  
+  <tr id="win32-dark-titlebar"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=563329 -->
+	<td class="title"><a href="#win32-dark-titlebar">Windows dark theme styles title bar bars</a></td>
+	<td class="content">
+		The windows title bar in the dark theme on Windows OS is now styled:
+		<p>
+		<img src="images/dark-windows-toolbar.png" alt=""/>
+		</p>
+		<p>
+        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#win32-dark-titlebar">dark title bar</a> can be disabled using the 
+        <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
+        For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
+      </p>
+      <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
+	</td>
+  </tr>
+  
+  
+  
+  
+  <tr id="syncCall"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=575823 -->
+    <td class="title">Display.syncCall() returns a value from SWT thread</td>
     <td class="content">
-      StyledText widget now has a new <code>setSelectionRanges(int[] ranges)</code> API which allows to pass
-      an arbitraty number of selection ranges. When multiple ranges are used, the text widget will display them
-      as distinct carets and selection ranges and will allow simultaneous edits at those locations.
+      Do you need a user feedback (or any value from swt widget) in a background thread from SWT thread? You can get it now even easier then using Display.syncExec():<br/>
+      <pre><code>Object result = Display.getDefault().syncCall(()-> myQuestion())</code></pre>
+      Display.syncCall(...) calls the given function in swt thread and returns the value back to the calling thread.<br/>
+      SyncCall also forwards checked Exceptions. For example:
+      <pre><code>try {
+	int read = Display.getDefault().syncCall(()->System.in.read());
+} catch (IOException e) {
+	/* handle exception in background thread */
+}</code></pre>
     </td>
   </tr>
-  <tr id="swt-win-dark-themed-tooltips"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574685 -->
-    <td class="title"><a href="#swt-win-dark-themed-tooltips">SWT Windows now supports dark-theme tool-tips</a></td>
+    <tr id="emptinessChanged"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=553598 -->
+    <td class="title">Tree fires SWT.EmptinessChanged event</td>
     <td class="content">
-      Table, Tree, CTabFolder, ToolBar and MenuItem widgets now support dark-theme tool-tips.
-      Refer below screen-shots which show combined tool-tips for various widgets.
-      <img src="images/swt-win-darkthemed-tooltips.png" alt=""/>
-    </td>
+      SWT <code>Tree</code> widget now fires <code>SWT.EmptinessChanged</code> event on below two conditions:
+      <ul>
+    	<li>After first tree item addition.</li>
+    	<li>On last tree item removal.</li>
+      </ul>
+    </td> 
   </tr>
+  
+  
+  
+  
   <!-- *********************** End of SWT *********************** -->
 
   <!-- *********************** p2 *********************** -->
-  <tr>
-    <td id="p2" class="section" colspan="2"><h2>p2 Changes</h2></td>
+    <tr>
+    <td id="Equinox" class="section" colspan="2"><h2>Equinox p2 Changes</h2></td>
   </tr>
-
-  <tr id="trust-PGP"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=572816 -->
-    <td class="title"><a href="#trust-PGP">Trust signers of PGP-signed artifacts</a></td>
+  
+  
+  <tr id="logUnsafe"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=576429 https://bugs.eclipse.org/bugs/show_bug.cgi?id=576428 -->
+    <td class="title">Log unsafe transport or verification technologies used at installation</td>
     <td class="content">
-      When artifacts to be installed have the <code>pgp.signatures</code> property set, additionally to the integrity check that
-      are responsible of verifying the signatures are valid for the given artifact, the public key of the signers will now be
-      prompted to user in the same <b>Trust</b> dialog as unknown certificates, and user will have to declare the signer
-      key as trusted for installation to complete. All PGP-signed artifacts need to have at least 1 trusted signer for installation
-      to complete; an artifact that has no trusted signer will block the installation.
-      <p>The behavior is similar to what's already in place for artifacts signed with jarsigner. However, some convenience
-      behavior such as remembering what was already trusted is not implemented yet.</p>
-      <p>For extenders or users of p2's API, beware that <code>org.eclipse.equinox.p2.core.UIServices</code> now has an
-      extra <code>getTrustInfo(Certificate[][] unTrustedCertificateChains, Collection&lt;PGPPublicKey> untrustedPGPKeys,
-      String[] details)</code> method that should be used and implemented in place of legacy method with same name,
-      but without the <code>PGPPublicKey</code> parameter.</p>
+    When installing from a repository, p2 now logs a warning in case some technologies used for the installation are considered unsafe.
+    Here are the cases covered so far and that will trigger a logged warning:
+    <ul>
+    <li><code>http</code> repositories are used (<code>http</code> repositories expose to CVE-2021-41033)</li>
+    <li>Artifact checksums are either missing, or none of the available digest algorithms is considered safe (eg md5).</li>
+    </ul>
     </td>
   </tr>
+  <!-- *********************** End of p2 *********************** -->
 
-   <!-- ******************** Equinox ********************** -->
-   <tr>
-    <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
-  </tr>
-
-  <tr id="splash-screen-image-formats"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=114567 -->
-    <td class="title"><a href="#splash-screen-image-formats">Splash screen image format</a></td>
-    <td class="content">
-      Launcher splash screen image can be in any of the following formats: PNG, JPG, GIF and BMP.
-      Transparency and animation are not supported yet.
-    </td>
-  </tr>
-  <!-- ******************** End of Equinox ********************** -->
 
 </tbody>
 </table>

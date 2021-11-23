@@ -17,20 +17,20 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.21</title>
+<title>Eclipse Platform What's New in 4.22</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.21 (Platform)</h2>
+<h2>What's New in Eclipse 4.22 (Platform)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes
-made to the Eclipse Platform for the 4.21 release of Eclipse. They are grouped into:</p>
+made to the Eclipse Platform for the 4.22 release of Eclipse. They are grouped into:</p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
     <li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li>
-    <!--<li><a href="#TextEditors">Text Editors</a></li>-->
-    <!--<li><a href="#StylingThemes">Themes and Styling</a></li>-->
-    <!--<li><a href="#Debug">Debug</a></li>-->
-    <li><a href="#Preferences">Preferences</a></li>
-    <li><a href="#GeneralUpdates">General Updates</a></li>
+    <li><a href="#TextEditors">Text Editors</a></li>
+    <li><a href="#StylingThemes">Themes and Styling</a></li>
+
+    <!-- <li><a href="#Preferences">Preferences</a></li>-->
+     <li><a href="#GeneralUpdates">General Updates</a></li>
 </ul>
 <p>
 Plug-in developers will also be interested in the corresponding
@@ -52,40 +52,62 @@ document in the plug-in developer's guide.</p>
     <h2>Views, Dialogs and Toolbar </h2>
     </td>
   </tr>
-
-  <tr id="new-message-dialog"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=552909 -->
-    <td class="title"><a href="#new-message-dialog">New clean message dialog api</a></td>
+  
+   <tr id="external-browser-default"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577081 -->
+    <td class="title">External browser used by default</td>
     <td class="content">
-      A new API in the class PlainMessageDialog is introduced. It uses a builder pattern to create an immutable instance of PlainMessageDialog. It has a clean API and consists of methods for e.g. the button labels, the message and the image.
-      <p>Example Usage:<br />
-        <code>int answer = PlainMessageDialog.getBuilder(myShell, "The new dialog").image(SWT.ICON_Question).message("Like it?").buttLabels(Arrays.asList(IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL)).build().open();</code>
-      </p>
-      <p>
-        <img src="images/plain_message_dialog_usage.png" alt=""/>
-      </p>
+		By default the Eclipse IDE will open the default system browser instead of the internal browser. You can change this setting via Windows -> Preferences -> General -> Web Browser.
     </td>
   </tr>
 
-  <tr id="persist-accepted-licences"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574622 -->
-    <td class="title"><a href="#persist-accepted-licences">Accepted licenses remembered permanently</a></td>
+  <tr id="launch-config-view"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=513735 -->
+    <td class="title">Launch Configuration View</td>
     <td class="content">
-      Before accepted licenses were only remembered during runtime and not persisted between restarts.
-      The user selection of accepted licenses is now persisted between restarts.
+      The new Launch Configuration View allows quick access to all your launch configurations without the need to enter the
+      launch dialogs.
+      <p><img src="images/launch-config-view2.png" alt = "" width="600"/></p>
+      <p>You can launch (run, debug, profile, etc.) as well as terminate and/or relaunch running configurations
+      directly from the view.
+      </p>
+      <p>The view also provides API which allows third party contributions to hook into the view and provide "launchables".</p>
     </td>
   </tr>
-
+  <tr id="defaultShowIn"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=575453 -->
+    <td class="title">Double click on Problem without File shows in default view</td>
+    <td class="content">
+	  Double click on Problems executes "Go to Resource". But there are cases where no File (column "Path") is associated with the Problem.
+	  In those cases "Go to Resources" cannot be executed. Instead the default "Show In" action is now executed. 
+      <p><img src="images/Problems_Default.png" alt = ""/></p>
+	  This default depends on the perspective. 
+    </td>
+  </tr>
   <!-- ******************* End of Views, Dialogs and Toolbar ************************************* -->
 
   <!-- ******************* Text Editors ************************************* -->
- <!--  <tr>
+  <tr>
     <td id="TextEditors" class="section" colspan="2">
     <h2>Text Editors </h2>
     </td>
-  </tr>-->
+  </tr>
+
+  <tr id="multi-selection"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=466532 -->
+    <td class="title">Multiple text selection</td>
+    <td class="content">
+      Support for multiple selection has been added to Text Editors. Multi selections allow most edit operations (text replacement or insertion,
+      extend selection to next word or to next line, copy/paste...) to apply simultaneously on all ranges.
+      <p><img src="images/multi-carets.png" alt=""/></p>
+      <p>Multiple strategies are available to enable multi-selections:</p>
+      <ul>
+      <li>Turn a block selection into a multi-selection using the <i>To multi-selection</i> command,</li>
+      <li>Add a caret with <code>Alt+Click</code>,</li>
+      <li>Use the new <i>Select All</i> button on the Find/Replace dialog.</li>
+      </ul>
+    </td>
+  </tr>
   <!-- ******************* End of Text Editors ************************************* -->
 
   <!-- ****************** Preferences ************************************* -->
- <!--  <tr>
+  <!--<tr>
     <td id="Preferences" class="section" colspan="2">
     <h2>Preferences </h2>
     </td>
@@ -97,44 +119,19 @@ document in the plug-in developer's guide.</p>
     <td id="StylingThemes" class="section" colspan="2">
     <h2>Themes and Styling </h2>
     </td>
-     </tr>
-     
-   	<tr id="new-close-icon"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=501491 -->
-    <td class="title"><a href="#new-close-icon">New close icon on tabs</a></td>
-    <td class="content">
-      The drawing of the close icon of tabs has been updated to align better with the operating system.
-      <p>
-      	Old:
-      </p>
-      <p>
-        <img src="images/old-light-x.png" alt=""/>
-      </p>
-      <p>
-        <img src="images/old-dark-x.png" alt=""/>
-      </p>
-      
-      <p>
-      	New:
-      </p>
-      <p>
-        <img src="images/new-light-x.png" alt=""/>
-      </p>
-      <p>
-        <img src="images/new-dark-x.png" alt=""/>
-      </p>
-      
-    </td>
- 
-    
   </tr>
-  <tr id="eclipse-win-dark-themed-tooltips"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574685 -->
-    <td class="title"><a href="#eclipse-win-dark-themed-tooltips">Eclipse Windows now supports dark-theme tool-tips</a></td>
-    <td class="content">
-      Eclipse on Windows now support dark-theme tool-tips.
-      Refer below screens-shot which show various tool-tips@dark-theme:
-      <img src="images/swt-win-darkthemed-tooltips.png" alt=""/>
-    </td>
+  
+  
+   <tr id="win32-dark-titlebar-css"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=563329 -->
+	<td class="title"><a href="#win32-dark-titlebar-css">Windows dark theme styles title bar</a></td>
+	<td class="content">
+		The windows title bar in the dark theme on Windows OS is now styled in the default dark theme.
+		<p>
+		<img src="images/dark-windows-toolbar.png" alt=""/>
+		</p>
+	</td>
   </tr>
+  
   <!-- ******************* End of Themes and Styling ************************************* -->
 
   <!-- ******************* General Updates ************************************* -->
@@ -143,26 +140,12 @@ document in the plug-in developer's guide.</p>
     <h2>General Updates </h2>
     </td>
   </tr>
-  <tr id="new-griddatafactory-method"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=548829 -->
-    <td class="title"><a href="#new-griddatafactory-method">New method <code>create(int style)</code> in GridDataFactory</a></td>
+    <tr id="ant-version-upgrade"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=576370 -->
+    <td class="title"><a href="#ant-version-upgrade">Ant 1.10.12</a></td>
     <td class="content">
-      GridDataFactory contains a new static method <code>create(int style)</code> which returns a new GridDataFactory instance.<br />
-      This method is similar to <code>new GridData(int style)</code>.
+      Eclipse has adopted Ant version 1.10.12.
     </td>
   </tr>
-  <tr id="swt-java11"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574702 -->
-  	<td class="title"><a href="#swt-java11">Minimum Java version for SWT</a></td>
-  	<td class="content">
-  		SWT now requires minimum Java 11 to run SWT. 
-  	</td>
-  </tr>
-  <tr id="ant-version-upgrade"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574832 -->
-    <td class="title"><a href="#ant-version-upgrade">Ant 1.10.11</a></td>
-    <td class="content">
-      Eclipse has adopted Ant version 1.10.11.
-    </td>
-  </tr>
-
   <!-- ******************* End of General Updates ************************************* -->
 </tbody>
 </table>
