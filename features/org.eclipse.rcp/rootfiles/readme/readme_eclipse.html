@@ -61,20 +61,10 @@ after the release.
           </ol></li>
         <li><a href="#mozTocId214943">Known Issues</a>
           <ol>
-            <li><a href="#mozTocId758150">General problems</a></li>
             <li><a href="#mozTocId559320">General - Startup</a>
               <ol>
                 <li><a href="#mozTocId693657">Installation/Configuration issues that can cause Eclipse to fail start</a></li>
                 <li><a href="#mozTocId337416"> Invalid characters in install directory prevents Eclipse from starting </a></li>
-                <li><a href="#mozTocId639565">Hanging during class loading when out of permanent generation memory</a></li>
-              </ol></li>
-            <li><a href="#mozTocId148479">General - GCJ</a>
-              <ol>
-                <li><a href="#mozTocId584602">Problems with classloaders in created threads</a></li>
-                <li><a href="#mozTocId403443">Deadlock creating executable extension in Plugin.startup</a></li>
-                <li><a href="#mozTocId984286">Potential Problems Converting Plug-in Manifests</a></li>
-                <li><a href="#mozTocId993987">Location for Debug Options File on Mac OS</a></li>
-                <li><a href="#mozTocId808188">Issues with JNI that use FindClass</a></li>
               </ol></li>
             <li><a href="#mozTocId324774">Platform - Ant</a>
               <ol>
@@ -124,7 +114,6 @@ after the release.
                 <li><a href="#mozTocId589358">Searching for constant field references</a></li>
                 <li><a href="#mozTocId577868">Cut, copy, paste not working for linked resources in views showing Java elements</a></li>
                 <li><a href="#mozTocId554543">Java working sets not working correctly for elements from JRE system library container</a></li>
-                <li><a href="#mozTocId157019">Breakpoints unreliable running Sun 1.6.0_14</a></li>
                 <li><a href="#mozTocId440090">Suspend on uncaught exception overrides exception breakpoint location filters</a></li>
                 <li><a href="#mozTocId812347">Running Java programs with non-Latin-1 characters in package or class names</a></li>
                 <li><a href="#mozTocId638407">Cannot run or debug class in a project with GB18030 characters in project name</a></li>
@@ -276,11 +265,6 @@ after the release.
       class="mozTocH2"
       name="mozTocId214943"> Note: Bug numbers refer to the Eclipse project bug database at </a><a href="http://dev.eclipse.org/bugs/">http://bugs.eclipse.org/bugs/</a>
   </p>
-  <h3 id="I-General">
-    <a
-      class="mozTocH3"
-      name="mozTocId758150">General problems</a>
-  </h3>
   <h3 id="I-General-Startup">
     <a
       class="mozTocH3"
@@ -297,19 +281,11 @@ after the release.
       name="mozTocId693657">Here are some common problems that can cause Eclipse not to start:</a>
   </p>
   <ul>
-      <li>Running Eclipse with Java SE 9 and above may require additional configuration. Please refer to <a href="https://wiki.eclipse.org/Configure_Eclipse_for_Java_9">this page</a> for more details.</li>
+      <li>Running Eclipse with Java SE 11 and above may require additional configuration. Please refer to <a href="https://wiki.eclipse.org/Configure_Eclipse_for_Java_9">this page</a> for more details.</li>
     <li><a
       class="mozTocH4"
       name="mozTocId693657">As shown </a><a href="#TargetOperatingEnvironments">above</a>, Eclipse 4.22 requires at least a Java SE 11. Perhaps an older version of the VM is being found in your path. To
       explicitly specify which VM to run with, use the Eclipse <code>-vm</code> command-line argument. (See also the <a href="#RunningEclipse">Running Eclipse</a> section below.)</li>
-    <li>Running Eclipse on Gentoo Linux may result in the following error message:
-      <div style="margin-left: 40px;">
-        <code>
-          * run-java-tool is not available for sun-jdk-1.6 on i686<br /> * IMPORTANT: some Java tools are not available on some VMs on some architectures
-        </code>
-      </div> If this occurs, start Eclipse by specifying a -vm argument, either specify the path to a java vm or use: <code>eclipse -vm `java-config</code> --java` (bug <a
-      href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=176021">176021</a>)
-    </li>
     <li>Eclipse must be installed to a clean directory and not installed over top of a previous installation. If you have done this then please re-install to a new directory. If your workspace is
       in a child directory of your old installation directory, then see the instructions below on "<a href="#Upgrading">Upgrading Workspace from a Previous Release"</a>.
     </li>
@@ -338,197 +314,6 @@ after the release.
       class="mozTocH4"
       name="mozTocId639565">Hanging during class loading when out of permanent generation memory</a>
   </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId639565"> The Oracle JVM may hang indefinitely during class loading if it runs out of permanent generation memory. This will cause CPU usage to stay at 100% until the process is
-      ended. See the section </a><a href="#RunningEclipse">Running Eclipse</a> for details on addressing this VM problem.
-  </p>
-  <h3 id="I-General-GCJ">
-    <a
-      class="mozTocH3"
-      name="mozTocId148479">General - GCJ</a>
-  </h3>
-  <p>
-    <a
-      class="mozTocH3"
-      name="mozTocId148479">GCJ is an effort by the GCC team to provide an open source Java compiler and runtime environment to interpret Java bytecode. Unfortunately, the GCJ runtime environment
-      is not an environment that is often tested on by Eclipse developers.</a>
-  </p>
-  <p>
-    <a
-      class="mozTocH3"
-      name="mozTocId148479">The most common problems surrounding GCJ are:</a>
-  </p>
-  <ul>
-    <li><a
-      class="mozTocH3"
-      name="mozTocId148479">Eclipse does not start at all</a></li>
-    <li><a
-      class="mozTocH3"
-      name="mozTocId148479">Eclipse throws a 'java.lang.ClassNotFoundException: org.eclipse.core.runtime.Plugin' that can be found in the logs (located in workspace/.metadata/.log)</a></li>
-  </ul>
-  <p>
-    <a
-      class="mozTocH3"
-      name="mozTocId148479"> The workspace's log file is a good place to check to identify whether GCJ is being used or not. Every Eclipse log session is prepended with information about the
-      runtime environment that was used to run Eclipse. The log may include something like the following: <code>java.fullversion=GNU libgcj 4.2.1 (Debian 4.2.1-5)</code>
-    </a>
-  </p>
-  <p>
-    <a
-      class="mozTocH3"
-      name="mozTocId148479"> If Eclipse does start, one can check which runtime environment is being used to run Eclipse by going to <b>Help &gt; About Eclipse SDK &gt; Installation Details
-        &gt; Configuration</b>. The <b>About</b> dialog itself can also provide other information, the build identifier can be of particular interest as it is tagged by some distributions. This allows the
-      user to identify whether Eclipse was downloaded through the distribution's package management system or directly from the eclipse.org web site. <br /> Such as:<br /> <code>Build id:
-        M20070212-1330 (Ubuntu version: 3.2.2-0ubuntu3)</code>
-    </a>
-  </p>
-  <p>
-    <a
-      class="mozTocH3"
-      name="mozTocId148479">The two most common workarounds are:</a>
-  </p>
-  <ul>
-    <li><a
-      class="mozTocH3"
-      name="mozTocId148479">download the Eclipse binary from eclipse.org directly</a></li>
-    <li><a
-      class="mozTocH3"
-      name="mozTocId148479">run Eclipse using an alternate Java runtime environment</a></li>
-  </ul>
-  <p>
-    <a
-      class="mozTocH3"
-      name="mozTocId148479">To download Eclipse, try one of the links below:</a>
-  </p>
-  <ul>
-    <li><a href="https://www.eclipse.org/downloads/">https://www.eclipse.org/downloads/</a></li>
-    <li><a href="https://download.eclipse.org/eclipse/downloads/">https://download.eclipse.org/eclipse/downloads/</a></li>
-  </ul>
-  <p>
-    It is imperative that 64-bit builds are downloaded and used if a 64-bit Java runtime environment has been installed. Below is a sample tarball names of version 4.22 of the Eclipse SDK packaged
-    for 64-bit processors.<br />
-    <code>eclipse-SDK-4.22-linux-gtk-x86_64.tar.gz (64-bit)</code>
-  </p>
-  <p>
-    To run Eclipse with an alternate Java runtime environment, the path to the Java virtual machine's binary must be identified. With an Eclipse installation from the distribution, altering the $PATH
-    variable to include the path to the alternate Java runtime environment is often not enough as the Eclipse that Linux distributions package often performs a scan internally to pick up GCJ by itself
-    whilst ignoring what's on the $PATH. An example of the terminal's output is shown below:<br />
-    <code>
-      searching for compatible vm...<br /> testing /usr/lib/jvm/java-gcj...found
-    </code>
-  </p>
-  <p>
-    Once the path to the virtual machine's binary has been identified, try running Eclipse with the following command:<br />
-    <code>./eclipse -vm /path/to/jre/bin/java</code>
-  </p>
-  <p>
-    For an actual example, it might look something like the following:<br />
-    <code>
-      ./eclipse -vm /usr/lib/jvm/java-11/bin/java<br /> ./eclipse -vm /opt/jdk-11/bin/java
-    </code>
-  </p>
-  <p>
-    If this seems to solve the problem, it is likely that the problem really was related to the use of GCJ as the Java runtime for running Eclipse. The eclipse.ini file located within Eclipse's folder
-    can be altered to automatically pass this argument to Eclipse at startup. An example of its content is presented below:<br />
-    <code>
-      -showsplash<br /> org.eclipse.platform<br /> -vm<br /> /opt/jdk-11/bin/java<br /> -vmargs<br /> -Xms256m<br /> -Xmx2048m
-    </code>
-  </p>
-  <p>
-    Note that every argument must be on its own line. More information about the eclipse.ini file can be found at <a href="https://wiki.eclipse.org/Eclipse.ini">https://wiki.eclipse.org/Eclipse.ini</a>.
-  </p>
-  <p>
-    If problems persists after downloading an installation of Eclipse from eclipse.org and using a supported Java runtime environment (a list of which may be found <a
-      href="#TargetOperatingEnvironments">above</a>), you can seek further assistance through the <a href="https://www.eclipse.org/forums/">forums</a>, the IRC <a
-      href="irc://irc.freenode.net/#eclipse">channel</a>, and/or <a href="https://bugs.eclipse.org/bugs/">bugzilla</a>.
-  </p>
-  <h4>
-    <a
-      class="mozTocH4"
-      name="mozTocId584602">Problems with classloaders in created threads</a>
-  </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId584602"> There is a known issue with trying to load classes from a newly-created thread using a class loader different from the plug-in class loader. The result will be a <code>ClassNotFoundException</code>
-      . As a workaround, do the following:
-    </a>
-  </p>
-  <ol>
-    <li><a
-      class="mozTocH4"
-      name="mozTocId584602">Create a thread in which to run your code.</a></li>
-    <li><a
-      class="mozTocH4"
-      name="mozTocId584602">Send yourThread.setContextClassLoader(yourClassLoader); // you can find your classloader by grabbing a class it loaded (YourPluginClass.class.getClassLoader())</a></li>
-    <li><a
-      class="mozTocH4"
-      name="mozTocId584602">Run your code in the newly created thread.</a></li>
-  </ol>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId584602"> If you set the context class loader for the current thread, you are competing with other users of the thread (all of Eclipse), so the results will be unpredictable.
-      However, there should be no problem in practice provided you reset the context class loader back to its original value when your use in the current thread is complete. (bug </a><a
-      href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=8907">8907</a>)
-  </p>
-  <h4>
-    <a
-      class="mozTocH4"
-      name="mozTocId403443">Deadlock creating executable extension in Plugin.startup</a>
-  </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId403443"> If <code>Plugin.startup</code> code is too complex and performs tasks such as creating an executable extension, a deadlock situation can be created. Only simple
-      bookkeeping tasks should be performed in <code>Plugin.startup</code> code. (bug
-    </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>)
-  </p>
-  <h4>
-    <a
-      class="mozTocH4"
-      name="mozTocId984286">Potential Problems Converting Plug-in Manifests</a>
-  </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId984286"> If your plug-in ships with a plug-in manifest and not an OSGi bundle manifest, is shipped as a JAR file, and contains a nested JAR file then there may be problems in
-      the automatic generation of the bundle manifest file. The packages defined in the nested JAR may not be exported correctly in the <code>Export-packages</code> bundle manifest header. To work
-      around this you should ship your plug-in with a bundle manifest. (bug
-    </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=97689">97689</a>)
-  </p>
-  <h4>
-    <a
-      class="mozTocH4"
-      name="mozTocId993987">Location for Debug Options File on Mac OS</a>
-  </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId993987"> If you are running in debug mode on Mac OS, the default location for the .options file is inside the application bundle in the Eclipse.app/Contents/MacOS directory
-      (like the eclipse.ini). (bug </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=88782">88782</a>)
-  </p>
-  <h4>
-    <a
-      class="mozTocH4"
-      name="mozTocId808188">Issues with JNI that use FindClass</a>
-  </h4>
-  <p>
-    <a
-      class="mozTocH4"
-      name="mozTocId808188"> There may be issues when using a JNI implementation that uses FindClass in a function where the JNIEnv pointer is not available, such as in a C callback (bug </a><a
-      href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=125250">125250</a>). The reason is that FindClass, in this case, uses the application class loader to find the class. If the desired class is
-    in the classpath used for the application classloader (e.g. defined by the VM argument -cp &lt;classpath&gt;), as it would typically be in a stand-alone application, there is no problem. However,
-    under Eclipse, the application classloader does not have access to classes contained in plug-ins. Eclipse uses its own class loader to find classes contained in plug-ins.
-  </p>
-  <p>The proper plug-in class loader is used by FindClass in JNI functions which are passed the JNIEnv pointer, but not when you have to use AttachCurrentThread to get the JNIEnv pointer. In this
-    case the application classloader is used.</p>
-  <p>For example, the following will fail because AttachCurrentThread is used to get the JNIEnv pointer:</p>
-  <pre>static JavaVM* jvm;  // Global variable<br /><br />void myCallback(void) {<br />    JNIEnv* env;<br />    jvm-&gt;AttachCurrentThread((void**)&amp;env, NULL);<br />    // Fails if some/class is not in the application classloader:<br />    jclass cls = env-&gt;FindClass("some/class");<br />    jmethodID methodID = env-&gt;GetMethodID(cls, "methodName",<br />      "(Ljava/lang/String;)V or whatever signature");<br />    env-&gt;CallVoidMethod(callback, methodID, ...);<br />    jvm-&gt;DetachCurrentThread();<br />  }<br />}</pre>
-  <p>A solution is to cache the method ID, for example:</p>
-  <pre>static jmethodID mid;  // Global variable<br /><br />JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {<br />...<br />  // Store the JavaVM pointer<br />    jvm = vm;<br /><br />  // Find the class and store the method ID<br />  // Will use the class loader that loaded the JNI library<br />    jclass cls = env-&gt;FindClass(className"some/class");<br />    if(!cls) goto ERR;<br /><br />    mid = env-&gt;GetMethodID(cls, "methodName",<br />      "(Ljava/lang/String;)V or whatever signature");<br />    if(!mid) goto ERR;<br />...<br />}<br /><br />void myCallback(void) {<br />    JNIEnv* env;<br />    jvm-&gt;AttachCurrentThread((void**)&amp;env, NULL);<br />    env-&gt;CallVoidMethod(callback, mid, ...);<br />     // Handle error ...<br />    jvm-&gt;DetachCurrentThread();<br />  }<br />}</pre>
   <h3 id="I-Platform-Ant">
     <a
       class="mozTocH3"
@@ -776,8 +561,7 @@ after the release.
   <p>
     <a
       class="mozTocH4"
-      name="mozTocId565691">Eclipse/SWT 4.22 supports macOS 11 (Big Sur). Most of issues that were identified have been addressed in 4.22. The remaining open issues are tracked by a top level bug for the next release.
-      (bugs </a><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=565691">565691</a> and <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=569361">569361</a>)
+      name="mozTocId565691">Eclipse/SWT 4.22 supports macOS 11 (Big Sur). Most of issues that were identified have been addressed in 4.22.
   </p>
   <h4>
     <a
@@ -1655,28 +1439,12 @@ after the release.
       deployed form of the plug-in.)
     </a>
   </p>
-  <h2 id="appendix">
-    <a
-      class="mozTocH2"
-      name="mozTocId317294">Appendix: Execution Environment by Bundle</a>
-  </h2>
-  <!--
-     Remember, the URL to appendix link must be full URL, since some may be
-     viewing this file, from a "file://" URL
--->
-  <p>
-    <a
-      class="mozTocH2"
-      name="mozTocId317294"> See the table in the </a><a
-      href="https://www.eclipse.org/projects/project-plan.php?planurl=https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_4_22.xml#appendix">Eclipse 4.22 Project Plan Appendix</a> for
-    the list of the minimum execution environment (Java class library) requirements of each bundle.
-  </p>
   <hr />
   <p>Sun, Solaris, Java and all Java-based trademarks are trademarks of Oracle Corporation. in the United States, other countries, or both.</p>
   <p>IBM is a trademark of International Business Machines Corporation in the United States, other countries, or both.</p>
   <p>Microsoft, Windows, Windows NT, Vista, and the Windows logo are trademarks of Microsoft Corporation in the United States, other countries, or both.</p>
   <p>Apple and Mac OS are trademarks of Apple Computer, Inc., registered in the U.S. and other countries.</p>
   <p>Other company, product, and service names may be trademarks or service marks of others.</p>
-  <p>(c) Copyright Eclipse Contributors 2009, 2020</p>
+  <p>(c) Copyright Eclipse Contributors 2009, 2021</p>
 </body>
 </html>
