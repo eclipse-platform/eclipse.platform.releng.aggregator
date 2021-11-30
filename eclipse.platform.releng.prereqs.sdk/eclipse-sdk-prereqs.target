@@ -54,10 +54,10 @@
       <unit id="org.objectweb.asm.tree.source" version="9.2.0.v20210813-1119"/>
       <unit id="org.objectweb.asm.util" version="9.2.0.v20210813-1119"/>
       <unit id="org.objectweb.asm.util.source" version="9.2.0.v20210813-1119"/>
-	  <unit id="org.objectweb.asm.analysis" version="9.2.0.v20210813-1119"/>
-	  <unit id="org.objectweb.asm.analysis.source" version="9.2.0.v20210813-1119"/>
-	  <unit id="org.objectweb.asm.commons" version="9.2.0.v20210813-1119"/>
-	  <unit id="org.objectweb.asm.commons.source" version="9.2.0.v20210813-1119"/>
+      <unit id="org.objectweb.asm.analysis" version="9.2.0.v20210813-1119"/>
+      <unit id="org.objectweb.asm.analysis.source" version="9.2.0.v20210813-1119"/>
+      <unit id="org.objectweb.asm.commons" version="9.2.0.v20210813-1119"/>
+      <unit id="org.objectweb.asm.commons.source" version="9.2.0.v20210813-1119"/>
       <unit id="org.sat4j.core" version="2.3.5.v201308161310"/>
       <unit id="org.sat4j.pb" version="2.3.5.v201404071733"/>
       <unit id="org.tukaani.xz" version="1.9.0.v20210624-1259"/>
@@ -80,20 +80,13 @@
       <unit id="org.slf4j.api.source" version="1.7.30.v20200204-2150"/>
 
       <!-- specific (additional) to test framework -->
-
+      <!-- Those ones are currently directly referenced by feature.xml or Require-Bundle
+        so we can't use Maven artifacts yet -->
       <unit id="org.easymock" version="2.4.0.v20090202-0900"/>
-
       <unit id="org.mockito" version="2.23.0.v20200310-1642"/>
       <unit id="net.bytebuddy.byte-buddy" version="1.9.0.v20181107-1410"/>
       <unit id="net.bytebuddy.byte-buddy-agent" version="1.9.0.v20181106-1534"/>
-
-      <unit id="org.hamcrest.core" version="1.3.0.v20180420-1519"/>
-      <unit id="org.hamcrest.core.source" version="1.3.0.v20180420-1519"/>
-      <unit id="org.hamcrest.library" version="1.3.0.v20180524-2246"/>
-      <unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
-
       <unit id="org.objenesis" version="2.6.0.v20180420-1519"/>
-
       <unit id="org.assertj" version="3.20.2.v20210706-1104"/>
 
       <!-- part of e4 ui tools. See bug 422102 -->
@@ -104,8 +97,7 @@
       <unit id="org.apache.commons.fileupload.source" version="1.3.2.v20170320-2229"/>
       <unit id="org.apache.commons.io" version="2.8.0.v20210415-0900"/>
       <unit id="org.apache.commons.io.source" version="2.8.0.v20210415-0900"/>
-	
-      
+
       <unit id="org.apache.lucene.core" version="8.4.1.v20200122-1459"/>
       <unit id="org.apache.lucene.analyzers-smartcn" version="8.4.1.v20200122-1459"/>
       <unit id="org.apache.lucene.analyzers-common" version="8.4.1.v20200122-1459"/>
@@ -156,6 +148,11 @@
       <unit id="org.apiguardian" version="1.1.2.v20211018-1956"/>
       <unit id="org.apiguardian.source" version="1.1.2.v20211018-1956"/>
 
+      <unit id="org.hamcrest.core" version="1.3.0.v20180420-1519"/>
+      <unit id="org.hamcrest.core.source" version="1.3.0.v20180420-1519"/>
+      <unit id="org.hamcrest.library" version="1.3.0.v20180524-2246"/>
+      <unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
+
       <!-- Tip of the Day - See bug 531786 -->
       <unit id="com.google.gson" version="2.8.8.v20211029-0838"/>
       <unit id="com.google.gson.source" version="2.8.8.v20211029-0838"/>
@@ -204,7 +201,7 @@
       <unit id="org.eclipse.jetty.util.source" version="10.0.6"/>
       <unit id="org.eclipse.jetty.util.ajax" version="10.0.6"/>
       <unit id="org.eclipse.jetty.util.ajax.source" version="10.0.6"/>
- 	  <unit id="jakarta.servlet-api" version="4.0.0"/>
+     <unit id="jakarta.servlet-api" version="4.0.0"/>
       <unit id="jakarta.servlet-api.source" version="4.0.0"/>
       <repository location="https://download.eclipse.org/eclipse/jetty/10.0.6/"/>
     </location>
@@ -252,7 +249,47 @@
     <!-- uncomment 'eclipse_home' location, with text editor, for use in Eclipse IDE
     <location path="${eclipse_home}" type="Profile"/>
     -->
-
+    <location includeDependencyScope="compile" includeSource="true" missingManifest="error" type="Maven">
+      <dependencies>
+        <dependency>
+          <groupId>net.bytebuddy</groupId>
+          <artifactId>byte-buddy-agent</artifactId>
+          <version>1.12.2</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>net.bytebuddy</groupId>
+          <artifactId>byte-buddy</artifactId>
+          <version>1.12.2</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.assertj</groupId>
+          <artifactId>assertj-core</artifactId>
+          <version>3.21.0</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.easymock</groupId>
+          <artifactId>easymock</artifactId>
+          <version>4.3</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.mockito</groupId>
+          <artifactId>mockito</artifactId>
+          <version>2.28.2</version>
+          <type>jar</type>
+        </dependency>
+        <dependency>
+          <groupId>org.objenesis</groupId>
+          <artifactId>objenesis</artifactId>
+          <version>2.6</version>
+          <type>jar</type>
+        </dependency>
+      </dependencies>
+      <exclude>org.droidparts.dexmaker:dexmaker:1.5</exclude>
+    </location>
   </locations>
-	<targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
+  <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 </target>
