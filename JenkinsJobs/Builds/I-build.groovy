@@ -139,7 +139,25 @@ spec:
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
-                        echo "Failed in Genrerate environment variables stage"
+                        echo "Failed in Generate environment variables stage"
+                        exit 1
+                    fi
+                '''
+                }
+            }
+		}
+	  stage('Load PGP keys'){
+          environment {
+                KEYRING = credentials('secret-subkeys-releng.asc')
+                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
+          }
+          steps {
+              container('jnlp') {
+                sh '''
+                    ./mb011_loadPGPKeys.sh 2>&1 | tee $logDir/mb011_loadPGPKeys.sh.log
+                    if [[ ${PIPESTATUS[0]} -ne 0 ]]
+                    then
+                        echo "Failed in Load PGP keys"
                         exit 1
                     fi
                 '''
@@ -282,7 +300,8 @@ spec:
             }
 		}
 	  stage('Aggregator maven build'){
-	  	  environment {
+	      environment {
+                KEYRING = credentials('secret-subkeys-releng.asc')
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
@@ -304,7 +323,7 @@ spec:
             }
 		}
 	  stage('Gather Eclipse Parts'){
-	  environment {
+	      environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
