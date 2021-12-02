@@ -154,6 +154,7 @@ spec:
           steps {
               container('jnlp') {
                 sh '''
+                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                     ./mb011_loadPGPKeys.sh 2>&1 | tee $logDir/mb011_loadPGPKeys.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
