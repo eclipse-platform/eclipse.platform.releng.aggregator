@@ -1,6 +1,6 @@
 #!/bin/bash -x
 #*******************************************************************************
-# Copyright (c) 2020 IBM Corporation and others.
+# Copyright (c) 2021 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -201,7 +201,7 @@ function createBaseBuilder ()
     ${WORKSPACE}/tempEclipse/eclipse/eclipse -nosplash \
         -debug -consolelog -data ${WORKSPACE}/workspace-toolsinstall \
         -application org.eclipse.equinox.p2.director \
-        -repository "https://download.eclipse.org/eclipse/updates/latest/","https://download.eclipse.org/eclipse/updates/buildtools/",${WEBTOOL_REPO} \
+        -repository "https://download.eclipse.org/eclipse/updates/latest/","https://download.eclipse.org/eclipse/updates/buildtools/",${WEBTOOLS_REPO} \
         -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \
         -destination ${BASEBUILDER_DIR} \
         -profile SDKProfile
