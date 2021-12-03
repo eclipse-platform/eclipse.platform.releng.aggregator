@@ -20,6 +20,11 @@ pipeline {
 				}
 			}
 		}
+		stage('Use master') {
+			steps {
+				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
+			}
+		}
 		stage('Build') {
 			steps {
 				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
