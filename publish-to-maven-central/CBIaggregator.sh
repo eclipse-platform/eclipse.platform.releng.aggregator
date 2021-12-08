@@ -336,7 +336,7 @@ function buildSourceJar() {
 		/bin/rm -r assemble
 	fi
 	/bin/mkdir assemble
-	giturl=https://git.eclipse.org/r/${1}
+	giturl=ssh://genie.releng@git.eclipse.org:29418/${1}
 	gitpath=${2}
 	gittag=${3}
 	group=${4}
