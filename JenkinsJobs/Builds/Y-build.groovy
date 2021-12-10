@@ -147,6 +147,25 @@ spec:
                 }
             }
 		}
+	  stage('Load PGP keys'){
+          environment {
+                KEYRING = credentials('secret-subkeys-releng.asc')
+                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
+          }
+          steps {
+              container('jnlp') {
+                sh '''
+                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
+                    ./mb011_loadPGPKeys.sh 2>&1 | tee $logDir/mb011_loadPGPKeys.sh.log
+                    if [[ ${PIPESTATUS[0]} -ne 0 ]]
+                    then
+                        echo "Failed in Load PGP keys"
+                        exit 1
+                    fi
+                '''
+                }
+            }
+		}
 	  stage('Export environment variables stage 1'){
           steps {
               container('jnlp') {
