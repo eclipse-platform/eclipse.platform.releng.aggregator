@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -404,7 +404,8 @@ public class BuildTests {
 		File pluginDir = new File(installDir, "plugins");
 		for (File aPlugin : pluginDir.listFiles()) {
 			if (!aPlugin.getName().contains("test") && !aPlugin.getName().contains("org.eclipse.jetty")
-					&& !aPlugin.getName().contains("jakarta") && !aPlugin.getName().contains("slf4j.api")) {
+					&& !aPlugin.getName().contains("jakarta") && !aPlugin.getName().contains("slf4j.api") 
+					&& !aPlugin.getName().contains("org.eclipse.ecf")) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
 				}
