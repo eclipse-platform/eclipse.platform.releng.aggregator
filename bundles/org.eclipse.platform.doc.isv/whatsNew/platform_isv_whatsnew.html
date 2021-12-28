@@ -88,7 +88,7 @@ section of the Workbench User Guide.
     </td>
   </tr>
   <tr id="imageCache"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=576740 -->
-    <td class="title"><a href="#imageCache">Resource cache in Jface</a></td>
+    <td class="title"><a href="#imageCache">Resource cache in JFace</a></td>
     <td class="content">
 	We added a LRU cache for image resources. It can be disable with system property:
  	<code>org.eclipse.jface.resource.cacheSize=0</code><br/>
@@ -124,17 +124,21 @@ section of the Workbench User Guide.
   
   
   <tr id="syncCall"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=575823 -->
-    <td class="title"><a href="#syncCall">Display.syncCall() returns a value from SWT thread</a></td>
+    <td class="title"><a href="#syncCall">Display.syncCall() returns a value from the SWT thread</a></td>
     <td class="content">
-      Do you need a user feedback (or any value from swt widget) in a background thread from SWT thread? You can get it now even easier then using Display.syncExec():<br/>
-      <pre><code>Object result = Display.getDefault().syncCall(()-> myQuestion())</code></pre>
-      Display.syncCall(...) calls the given function in swt thread and returns the value back to the calling thread.<br/>
-      SyncCall also forwards checked Exceptions. For example:
-      <pre><code>try {
-	int read = Display.getDefault().syncCall(()->System.in.read());
-} catch (IOException e) {
-	/* handle exception in background thread */
-}</code></pre>
+      Do you need a user feedback (or any value from an SWT widget) in a background thread from the SWT thread? Now you can get it in an easier way than using <code>Display.syncExec():</code>
+      <pre><code>
+      Object result = Display.getDefault().syncCall(() -> myQuestion())
+      </code></pre>
+      <code>Display.syncCall(...)</code> calls the given function in the SWT thread and returns the value back to the calling thread.<br/>
+      <code>syncCall</code> also forwards exceptions. For example:
+      <pre><code>
+      try {
+          int read = Display.getDefault().syncCall(() -> System.in.read());
+      } catch (IOException e) {
+          /* Handle exception in background thread */
+      }
+      </code></pre>
     </td>
   </tr>
     <tr id="emptinessChanged"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=553598 -->
