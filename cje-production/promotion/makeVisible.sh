@@ -13,6 +13,16 @@
 #     Sravan Kumar Lakkimsetti - initial API and implementation
 #*******************************************************************************
 
+function toPushRepo() {
+	from="$1"
+	if ! [[ "$from" == http* ]]; then
+		echo $from
+	else
+		echo $(sed -e 's,http://git.eclipse.org/gitroot,ssh://genie.releng@git.eclipse.org:29418,' -e 's,https://git.eclipse.org/r,ssh://genie.releng@git.eclipse.org:29418,' <<< $from)
+	fi
+}
+
+export -f toPushRepo
 
 DROP_ID=$(echo $DROP_ID|tr -d ' ')
 
@@ -175,8 +185,9 @@ then
     popd
     exit $RC
   fi
-  git submodule foreach git push --verbose origin tag ${TAG}
-  git push origin tag ${TAG}
+  git submodule foreach git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
+  git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
+
   RC=$?
   if [[ $RC != 0 ]]
   then
