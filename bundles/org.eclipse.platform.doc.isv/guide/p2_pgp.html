@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) Red Hat Inc. and others 2021. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+  <title>Using PGP signatures in p2</title>
+</head>
+<body>
+<h1>Using PGP signatures in p2</h1>
+<p>
+p2 does verify various artifact properties during provisioning and installation, to guarantee artifacts integrity, and also to help
+users in deciding whether to trust some artifacts or not. Up to 4.21, trust used to be only built on signature files placed inside the
+jars by Java's <code>jarsigner</code> utility. This has some limitation when consuming external artifact as we usually don't want to
+alter the jar, so p2 has a solution to get signatures stored externally, relying on industry-standard PGP.
+</p>
+
+<h2>PGP signatures are published as artifact metadata</h2>
+
+<p>PGP signatures are added as properties for artifact entries in artifact metadata. Each artifact can have the <code>pgp.signatures</code>
+set; the value must a PGP armored block representing one or several signatures to verify this artifact.</p>
+<p>Signatures are verified against PGP public keys. For signature verification to complete, the public PGP must be available. It can then be
+convenient to include PGP key directly in p2 repository or artifact metadata. Both the artifact repository and the artifact metadata do
+accept a <code>pgp.publicKeys</code> property that can be set to a PGP armored block representing one or several PGP public keys. Those public
+keys are then made available to further signature verification.</p>
+<p>Signatures can be produced for the artifact file with any PGP capable software, such as the <coed>gpg</code> command-line and then incorporated
+into artifact metadata. Build technologies like Eclipse Tycho have capabilities to include signatures to an artifact or to all artifacts in a p2
+repository at once.</p>
+
+<h2>Unmatched artifact and PGP signatures abort installation</h2>
+
+<p>Each artifact that has one or more PGP signature will have this signatures verified upon download: the public keys will be used to ensure that
+the provided signature match the artifact, and the other way round. For installation to succeed and complete, all signatures are verified; any
+signature that cannot be verified will lead to an installation failure as it means either the file or the signature cannot be further trusted.</p>
+
+<h2>Trust PGP keys to trust artifacts</h2>
+
+<p>If installation is not abored before, p2 will then verify that for each artifact that has PGP signatures, at least one of the signatures is
+configured as trusted. If no signature is trusted, the <em>Trust</em> dialog will pop-up at installation and will show the various PGP keys involved
+in this installation request and request users to mark some of them as trusted for installation to continue. It is assumed that if an artifact has
+any of its signatures that was issued with a matching trusted key, the artifact is trusted for installation.</p>
+<p>Trusting PGP keys is a serious decision and requires careful verification of the key: for example, the <em>name</em> of the key, typically the issuer
+name and email, cannot
+be considered as trustworthy unless the key itself was verified. Depending on your context, there can be several strategies to verify a key is trustworthy:
+you may for example check the key fingerprint against some trusted keyserver that took care of verifying the identity of the issuer, or ask some other trusted
+third-parties.</p>
+<p>Eclipse applications and plugins can define some PGP keys as trusted using the <a href="../reference/extension-points/org_eclipse_equinox_p2_engine_pgp.html">
+org.eclipse.equinox.p2.engine.pgp</a> extension-point. Users can review and manage trusted keys in the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.equinox.internal.p2.ui.sdk.TrustPreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Trust preference page"> <strong>Install/Update &gt; Trust</strong></a> preference page.</p>
+
+</body>
+</html>
