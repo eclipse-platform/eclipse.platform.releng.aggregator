@@ -279,27 +279,6 @@ spec:
                 }
             }
 		}
-	  stage('Update Pom files in the source'){
-          steps {
-              container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-	                  sshagent(['git.eclipse.org-bot-ssh']) {
-	                    sh '''
-	                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-	                        unset JAVA_TOOL_OPTIONS 
-	                        unset _JAVA_OPTIONS
-	                        ./mb210_updatePom.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb210_updatePom.sh.log
-	                        if [[ ${PIPESTATUS[0]} -ne 0 ]]
-	                        then
-	                            echo "Failed in Update Pom files in the source stage"
-	                            exit 1
-	                        fi
-	                    '''
-	                  }
-                  }
-                }
-            }
-		}
 	  stage('Aggregator maven build'){
 	      environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
