@@ -162,7 +162,7 @@ then
   cd ${WORKSPACE}
   git config --global user.email "releng-bot@eclipse.org"
   git config --global user.name "Eclipse Releng Bot"
-  git clone --recursive ssh://genie.releng@git.eclipse.org:29418/platform/eclipse.platform.releng.aggregator.git
+  git clone --recursive git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
 
   pushd eclipse.platform.releng.aggregator
   git checkout master
@@ -217,7 +217,7 @@ else
   ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
   #get requisite tools
-  ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/cje-production/scripts/addToComposite.xml
+  ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/addToComposite.xml
 
   #triggering ant runner
   baseBuilderDir=${workspace}/eclipse
