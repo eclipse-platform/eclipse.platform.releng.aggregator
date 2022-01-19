@@ -4,11 +4,11 @@ pipeline {
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'25'))
 	}
-  agent {
-    kubernetes {
-      label 'aggrbuild-pod'
-      defaultContainer 'container'
-      yaml """
+	agent {
+		kubernetes {
+		label 'aggrbuild-pod'
+		defaultContainer 'container'
+		yaml """
 apiVersion: v1
 kind: Pod
 spec:
@@ -93,17 +93,17 @@ spec:
       medium: ""
     name: "volume-3"
 """
-    }
-  }
-  environment {
-      MAVEN_OPTS = "-Xmx6G"
-      CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
-      PATH = "$PATH:/opt/tools/apache-maven/latest/bin"
-      logDir = "$CJE_ROOT/buildlogs"
-    }
-  
-  stages {
-      stage('Clean Workspace'){
+		}
+	}
+	environment {
+		MAVEN_OPTS = "-Xmx6G"
+		CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
+		PATH = "$PATH:/opt/tools/apache-maven/latest/bin"
+		logDir = "$CJE_ROOT/buildlogs"
+	}
+
+	stages {
+		stage('Clean Workspace'){
           steps {
               container('jnlp') {
                 sh '''
@@ -112,8 +112,8 @@ spec:
                 '''
                 }
             }
-	    }
-	  stage('Setup intial configuration'){
+		}
+		stage('Setup intial configuration'){
           steps {
               container('jnlp') {
                   // TODO GitHub credentials
@@ -132,7 +132,7 @@ spec:
                 }
             }
 		}
-	  stage('Genrerate environment variables'){
+		stage('Genrerate environment variables'){
           steps {
               container('jnlp') {
                 sh '''
@@ -147,7 +147,7 @@ spec:
                 }
             }
 		}
-	  stage('Load PGP keys'){
+		stage('Load PGP keys'){
           environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
@@ -166,7 +166,7 @@ spec:
                 }
             }
 		}
-	  stage('Export environment variables stage 1'){
+		stage('Export environment variables stage 1'){
           steps {
               container('jnlp') {
                 script {
@@ -178,13 +178,13 @@ spec:
                   }
                 }
             }
-        }
-	  stage('Swt build input') {
+		}
+		stage('Swt build input') {
 	      steps {
 	          build 'SWT-Increment_if_needed'
 	      }
-	    }
-	  stage('Create Base builder'){
+		}
+		stage('Create Base builder'){
           steps {
               container('jnlp') {
 		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -203,9 +203,9 @@ spec:
 		          }
 		        }
 		      }
+			}
 		}
-	  }
-	  stage('Download reference repo for repo reports'){
+		stage('Download reference repo for repo reports'){
           steps {
               container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -223,7 +223,7 @@ spec:
                 }
             }
 		}
-	  stage('Clone Repositories'){
+		stage('Clone Repositories'){
           steps {
               container('jnlp') {
                   // TODO GitHub credentials
@@ -243,7 +243,7 @@ spec:
                 }
             }
 		}
-	  stage('Tag Build Inputs'){
+		stage('Tag Build Inputs'){
           steps {
               container('jnlp') {
                   // TODO GitHub credentials
@@ -263,7 +263,7 @@ spec:
                 }
             }
 		}
-	  stage('Create Source Bundles'){
+		stage('Create Source Bundles'){
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
@@ -282,7 +282,7 @@ spec:
                 }
             }
 		}
-	  stage('Aggregator maven build'){
+		stage('Aggregator maven build'){
 	      environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
@@ -305,7 +305,7 @@ spec:
                 }
             }
 		}
-	  stage('Gather Eclipse Parts'){
+		stage('Gather Eclipse Parts'){
 	      environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
@@ -328,11 +328,11 @@ spec:
                 }
             }
 		}
-	  stage('Gather Equinox Parts'){
-	  environment {
-                KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
-          }
+		stage('Gather Equinox Parts'){
+			environment {
+				KEYRING = credentials('secret-subkeys-releng.asc')
+				KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
+			}
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
@@ -351,7 +351,7 @@ spec:
                 }
             }
 		}
-	  stage('Generate Repo reports'){
+		stage('Generate Repo reports'){
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
@@ -370,7 +370,7 @@ spec:
                 }
             }
 		}
-	  stage('Generate API tools reports'){
+		stage('Generate API tools reports'){
           steps {
               container('jnlp') {
                   withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
@@ -389,7 +389,7 @@ spec:
                 }
             }
 		}
-	  stage('Export environment variables stage 2'){
+		stage('Export environment variables stage 2'){
           steps {
               container('jnlp') {
                 script {
@@ -405,8 +405,8 @@ spec:
                   }
                 }
             }
-        }
-	  stage('Archive artifacts'){
+		}
+		stage('Archive artifacts'){
           steps {
               container('jnlp') {
                 sh '''
@@ -425,7 +425,10 @@ spec:
               archiveArtifacts '**/siteDir/**'
             }
 		}
-	  stage('Promote Eclipse platform'){
+
+		/* The following stages are removed as long as work here is experimental. They'll have to be re-enabled all necessary changes are in master and when the GitHub
+		   job becomes the "reference" on in place of the one based on Gerrit.
+		stage('Promote Eclipse platform'){
           steps {
               container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -438,7 +441,7 @@ spec:
                 build job: 'eclipse.releng.updateIndex', wait: false
             }
 		}
-	  stage('Promote Equinox'){
+		stage('Promote Equinox'){
           steps {
               container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -450,7 +453,7 @@ spec:
                 }
             }
 		}
-	  stage('Promote Update Site'){
+		stage('Promote Update Site'){
           steps {
               container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -462,7 +465,7 @@ spec:
                 }
             }
 		}
-	  stage('Trigger tests'){
+		stage('Trigger tests'){
           steps {
               build job: 'ep423I-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'ep423I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
@@ -473,21 +476,21 @@ spec:
               build job: 'ep423I-perf-lin64-baseline', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
+		}*/
+	}
+	/* post {
+		failure {
+			emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
+				subject: "${env.BUILD_VERSION} I-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
+				to: "platform-releng-dev@eclipse.org",
+				from:"genie.releng@eclipse.org"
+				archive '${CJE_ROOT}/siteDir/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/gitLog.html, $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator'
 		}
-	}
-	post {
-        failure {
-            emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
-            subject: "${env.BUILD_VERSION} I-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
-            to: "platform-releng-dev@eclipse.org",
-            from:"genie.releng@eclipse.org"
-            archive '${CJE_ROOT}/siteDir/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/gitLog.html, $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator'
-        }
-        success {
-            emailext body: "Eclipse downloads:<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}</a><br><br> Build logs and/or test results (eventually):<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php</a><br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds</a><br><br>Specific (simple) site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds/${env.BUILD_IID.trim()}</a><br><br>Equinox downloads:<br>     <a href='https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}'>https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}</a><br><br>", 
-            subject: "${env.BUILD_VERSION} I-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
-            to: "platform-releng-dev@eclipse.org",
-            from:"genie.releng@eclipse.org"
-        }
-	}
+		success {
+			emailext body: "Eclipse downloads:<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}</a><br><br> Build logs and/or test results (eventually):<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php</a><br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds</a><br><br>Specific (simple) site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-I-builds/${env.BUILD_IID.trim()}</a><br><br>Equinox downloads:<br>     <a href='https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}'>https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}</a><br><br>", 
+				subject: "${env.BUILD_VERSION} I-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
+				to: "platform-releng-dev@eclipse.org",
+				from:"genie.releng@eclipse.org"
+		}
+	}*/
 }
