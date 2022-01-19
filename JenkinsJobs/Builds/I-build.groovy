@@ -116,8 +116,7 @@ spec:
 		stage('Setup intial configuration'){
           steps {
               container('jnlp') {
-                  // TODO GitHub credentials
-                  sshagent(['git.eclipse.org-bot-ssh']) {
+                  sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh '''
                             git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
@@ -226,8 +225,7 @@ spec:
 		stage('Clone Repositories'){
           steps {
               container('jnlp') {
-                  // TODO GitHub credentials
-                  sshagent(['git.eclipse.org-bot-ssh']) {
+                  sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh '''
                         git config --global user.email "releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
@@ -246,8 +244,7 @@ spec:
 		stage('Tag Build Inputs'){
           steps {
               container('jnlp') {
-                  // TODO GitHub credentials
-                  sshagent (['git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
+                  sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh '''
                         git config --global user.email "releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
