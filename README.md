@@ -53,6 +53,6 @@ Release Engineers should also be familiar with other documents on the [Releng Wi
 License
 -------
 
-[Eclipse Public License (EPL) v1.0][2]
+[Eclipse Public License (EPL) v2.0][2]
 
-[2]: https://wiki.eclipse.org/EPL
+[2]: https://www.eclipse.org/legal/epl-2.0/
