@@ -74,7 +74,7 @@ if [[ -n "$lastTag" ]]; then
   tmpGitLog=$CJE_ROOT/$TMP_DIR/gitLog.txt
   echo -e "<h2>Git log from $lastTag (previous) to $BUILD_ID (current)</h2>" > $gitLogFile
   echo -e "<h2>The tagging, and this report, were done at about $reportTimestamp</h2>" >> $gitLogFile
-  git log $lastTag..$BUILD_ID --date=short --format=format:"<tr><td class=\"datecell\">%cd</td><td class=\"commitcell\"><a href=\"https://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=%H\">%s</a></td><td class=\"authorcell\">%aN</td></tr>" > $tmpGitLog
+  git log $lastTag..$BUILD_ID --date=short --format=format:"<tr><td class=\"datecell\">%cd</td><td class=\"commitcell\"><a href=\"https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/commit/%H\">%s</a></td><td class=\"authorcell\">%aN</td></tr>" > $tmpGitLog
   tmpFileSize=$(stat -c%s $tmpGitLog)
   if [ $tmpFileSize -ne 0 ]; then
     echo "<table><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: eclipse.platform.releng.aggregator</th></tr>" >> $gitLogFile
