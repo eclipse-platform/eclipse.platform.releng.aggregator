@@ -1,74 +1,57 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
-<HEAD>
-
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
-
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
-
-<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<title>Ignoring resources from version control</title>
-
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-<H1 CLASS="Head"> Ignoring resources from version control</H1>
-<P>When synchronizing resources, it is possible that there 
-  are some resources that you do not want to commit to the repository. There 
-  are two ignore facilities provided, allowing you to specify what resources 
-  should be excluded from update and commit operations.</P>
-<P>The first is a global ignore facility, provided by the
-Workbench. The second is the CVS ignore facility, which reads the contents of a
-special file .<i>cvsignore</i> to determine what to ignore.</P>
-<h2>Why ignore files when synchronizing?</h2>
-<P>There are many files that a user may not want to commit to the repository. 
-For example, external editors may create temporary files in your project. Compilation of .java files creates .class files, and
-likewise many build operations result in binary files. These files, when taken together, may
-be quite large. In addition, they may be re-generated whenever a build is performed,
-resulting in many outgoing changes.  Typically these are not files that one wants to share with other members of a team or persist in the repository.</P>
-<DIV CLASS="Subtopic">
-<h2>
-Global ignore facility</h2>
-<p CLASS="Head">A global ignore facility is provided by the Workbench via the
-<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.team.ui.TeamPreferences)")'>
-<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
-<strong>Team</strong></a> preference page.
-There is a list of file patterns against which resources will be matched before they are
-considered as version control candidates. 
-These patterns may contain the wildcard characters "*" and "?". "*"
-represents any sequence of zero or more characters. "?" represents any one
-character. For example, you can specify a pattern of "*~", which would match
-any temporary files that end with "~". Any file or directory that matches any one of the
-patterns will be ignored during update or commit operations. When
-you specify a file pattern to ignore, you can temporarily disable ignoring the
-file pattern by deselecting it from the list; you do not have to remove the
-specified file pattern from the list.<br>
-<br>
-The patterns in the global ignore facility are matched against resource names during a
-synchronize operation. It is important to note that the path leading up to the resource name is not
-included in the matching. For example, for the file &quot;/path/to/file.txt&quot;, only the string
-&quot;file.txt&quot; is matched against the patterns. This facility is not intended for specifying fully-qualified
-path names but for specifying globally-applicable patterns.<br>
-</p>
-<h2>CVS ignore facility</h2>
-  <p CLASS="Head">The Eclipse CVS client recognizes a file named &quot;.cvsignore&quot; 
-    in each directory of a project. This is a standard CVS facility and 
-    many existing CVS projects may contain this file.<br>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright" content=
+  "Copyright (c) IBM Corporation and others 2000, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Ignoring resources from version control</title>
+</head>
+<body bgcolor="#FFFFFF">
+  <h1 class="Head">Ignoring resources from version control</h1>
+  <p>When synchronizing resources, it is possible that there are some resources that you do not want to commit to the
+  repository. There are two ignore facilities provided, allowing you to specify what resources should be excluded from
+  update and commit operations.</p>
+  <p>The first is a global ignore facility, provided by the Workbench. The second is the CVS ignore facility, which
+  reads the contents of a special file .<i>cvsignore</i> to determine what to ignore.</p>
+  <h2>Why ignore files when synchronizing?</h2>
+  <p>There are many files that a user may not want to commit to the repository. For example, external editors may
+  create temporary files in your project. Compilation of .java files creates .class files, and likewise many build
+  operations result in binary files. These files, when taken together, may be quite large. In addition, they may be
+  re-generated whenever a build is performed, resulting in many outgoing changes. Typically these are not files that
+  one wants to share with other members of a team or persist in the repository.</p>
+  <div class="Subtopic">
+    <h2>Global ignore facility</h2>
+    <p class="Head">A global ignore facility is provided by the Workbench via the <a class="command-link" href=
+    'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.team.ui.TeamPreferences)")'>
+    <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link"> <strong>Team</strong></a> preference
+    page. There is a list of file patterns against which resources will be matched before they are considered as
+    version control candidates. These patterns may contain the wildcard characters "*" and "?". "*" represents any
+    sequence of zero or more characters. "?" represents any one character. For example, you can specify a pattern of
+    "*~", which would match any temporary files that end with "~". Any file or directory that matches any one of the
+    patterns will be ignored during update or commit operations. When you specify a file pattern to ignore, you can
+    temporarily disable ignoring the file pattern by deselecting it from the list; you do not have to remove the
+    specified file pattern from the list.<br>
     <br>
-    This text file consists of a list of files, directories, or patterns. 
-    In a similar way to the global ignore facility, the wildcards "*" and "?" 
-    may be present in any entry in the .cvsignore file. Any file or sub-directory 
-    <b> in the current directory</b> that matches any one of the patterns will 
-    be ignored. It is important to note that the semantics of this file 
-    differs from that of the global ignore facility in that it applies only to 
-    files and directories in the same directory as the .cvsignore file itself. 
-    A project may contain one .cvsignore file in each directory. For more 
-    information, please visit <a href="https://directory.fsf.org/wiki/CVS" target="_blank">https://directory.fsf.org/wiki/CVS</a>.</p>
-  <p CLASS="Head">Resources that have not been added to CVS control can be ignored 
-    by selecting <b>Team &gt; Add to .cvsignore</b> from the pop-up menu of the 
-    resource in one of the navigation views. This menu option is also available 
-    in the Synchronize view.</p>
-</DIV>
-
-
-</BODY>
-</HTML>
+    The patterns in the global ignore facility are matched against resource names during a synchronize operation. It is
+    important to note that the path leading up to the resource name is not included in the matching. For example, for
+    the file "/path/to/file.txt", only the string "file.txt" is matched against the patterns. This facility is not
+    intended for specifying fully-qualified path names but for specifying globally-applicable patterns.<br></p>
+    <h2>CVS ignore facility</h2>
+    <p class="Head">The Eclipse CVS client recognizes a file named ".cvsignore" in each directory of a project. This is
+    a standard CVS facility and many existing CVS projects may contain this file.<br>
+    <br>
+    This text file consists of a list of files, directories, or patterns. In a similar way to the global ignore
+    facility, the wildcards "*" and "?" may be present in any entry in the .cvsignore file. Any file or sub-directory
+    <b>in the current directory</b> that matches any one of the patterns will be ignored. It is important to note that
+    the semantics of this file differs from that of the global ignore facility in that it applies only to files and
+    directories in the same directory as the .cvsignore file itself. A project may contain one .cvsignore file in each
+    directory. For more information, please visit <a href="https://directory.fsf.org/wiki/CVS" target=
+    "_blank">https://directory.fsf.org/wiki/CVS</a>.</p>
+    <p class="Head">Resources that have not been added to CVS control can be ignored by selecting <b>Team &gt; Add to
+    .cvsignore</b> from the pop-up menu of the resource in one of the navigation views. This menu option is also
+    available in the Synchronize view.</p>
+  </div>
+</body>
+</html>
