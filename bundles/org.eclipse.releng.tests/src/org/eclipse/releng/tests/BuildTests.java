@@ -687,7 +687,7 @@ public class BuildTests {
 		// "hard code" nominal values, to make sure
 		// there is no regressions, which would be implied by a report larger
 		// than that nominal value.
-		long MAX_ALLOWED_BYTES = 312;
+		long MAX_ALLOWED_BYTES = 319;
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testComparatorLogSize test", buildId);
 		String buildType = buildId.substring(0, 1);
