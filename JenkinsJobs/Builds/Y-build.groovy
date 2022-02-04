@@ -116,10 +116,10 @@ spec:
 	  stage('Setup intial configuration'){
           steps {
               container('jnlp') {
-                  sshagent(['git.eclipse.org-bot-ssh']) {
+                  sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh '''
-                            git clone -b master ssh://genie.releng@git.eclipse.org:29418/platform/eclipse.platform.releng.aggregator.git
+                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
                         '''
                       }
                     }
@@ -140,7 +140,7 @@ spec:
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
-                        echo "Failed in Genrerate environment variables stage"
+                        echo "Failed in Generate environment variables stage"
                         exit 1
                     fi
                 '''
@@ -187,7 +187,7 @@ spec:
 	  stage('Create Base builder'){
           steps {
               container('jnlp') {
-                  sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 		          withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
 		              withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
 		                sh '''
@@ -201,9 +201,8 @@ spec:
 		                '''
 		              }
 		          }
-                  }
-                }
-            }
+		        }
+		      }
 		}
 	  stage('Download reference repo for repo reports'){
           steps {
@@ -225,7 +224,7 @@ spec:
 	  stage('Clone Repositories'){
           steps {
               container('jnlp') {
-                  sshagent(['git.eclipse.org-bot-ssh']) {
+                  sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh '''
                         git config --global user.email "releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
@@ -244,7 +243,7 @@ spec:
 	  stage('Tag Build Inputs'){
           steps {
               container('jnlp') {
-                  sshagent (['git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
+                  sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh '''
                         git config --global user.email "releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
