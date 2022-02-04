@@ -17,6 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -375,6 +376,7 @@ public class BuildTests {
 	}
 	@Test
 	public void testFeatureFiles() {
+		assumeFalse(isMavenRun());
 		List<String> result = new ArrayList<>();
 		String installDir = Platform.getInstallLocation().getURL().getPath();
 
@@ -396,6 +398,8 @@ public class BuildTests {
 	}
 	@Test
 	public void testPluginFiles() {
+		assumeFalse(isMavenRun());
+		System.out.println(System.getenv());
 		List<String> result = new ArrayList<>();
 		String installDir = Platform.getInstallLocation().getURL().getPath();
 		File pluginDir = new File(installDir, "plugins");
@@ -416,6 +420,10 @@ public class BuildTests {
 			}
 		}
 		assertTrue("Plugin directory missing required files: " + aString, result.isEmpty());
+	}
+
+	private boolean isMavenRun() {
+		return System.getenv("MAVEN_CMD_LINE_ARGS") != null;
 	}
 
 	private boolean testPluginFile(File aPlugin) {
@@ -567,6 +575,7 @@ public class BuildTests {
 	}
 	@Test
 	public void testJavadocLogs() throws Exception {
+		assumeFalse(isMavenRun());
 		String javadocUrls = System.getProperty("RELENGTEST.JAVADOC.URLS");
 		// Skip this test if there are no logs to check
 		if (javadocUrls == null) {
@@ -645,7 +654,7 @@ public class BuildTests {
 
 	@Test
 	public void testJarSign() throws Exception {
-
+		assumeFalse(isMavenRun());
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testJarSign test", buildId);
 		String downloadHost = "download.eclipse.org";
@@ -680,6 +689,7 @@ public class BuildTests {
 	}
 	@Test
 	public void testComparatorLogSize() throws Exception {
+		assumeFalse(isMavenRun());
 		final boolean DEBUG_TEST = true;
 		// MAX_ALLOWED_BYTES will never be 'zero', even if no unexpected comparator warnings, because the
 		// report always contains some information, such as identifying which build it was for.
