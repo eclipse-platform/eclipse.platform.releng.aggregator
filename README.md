@@ -8,7 +8,7 @@ https://github.com/eclipse-platform/eclipse.platform.releng.aggregator
 An anonymous clone can be done via the following command:
 
 ```
-https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
+git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
 ```
 
 How to build the Eclipse SDK
