@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -327,34 +327,31 @@ public class BuildTests {
 
 	}
 
-	public static final List<String> REQUIRED_FEATURE_FILES_EPL2 = Arrays
-			.asList(new String[] { "epl-2.0.html", "feature.properties", "feature.xml", "license.html" });
+	public static final List<String> REQUIRED_FEATURE_FILES_EPL2 = List.of("epl-2.0.html", "feature.properties",
+			"feature.xml", "license.html");
 	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
-	public static final List<String> REQUIRED_PLUGIN_FILES = Arrays
-			.asList(new String[] { "about.html", "plugin.properties", "plugin.xml" });
+	public static final List<String> REQUIRED_PLUGIN_FILES = List.of("about.html", "plugin.properties", "plugin.xml");
 	public static final String REQUIRED_PLUGIN_SUFFIX = ".jar";
 
-	public static final List<String> REQUIRED_FEATURE_PLUGIN_FILES = Arrays.asList(new String[] { "about.html",
-			"about.ini", "about.mappings", "about.properties", "plugin.properties", "plugin.xml" });
+	public static final List<String> REQUIRED_FEATURE_PLUGIN_FILES = List.of("about.html", "about.ini",
+			"about.mappings", "about.properties", "plugin.properties", "plugin.xml");
 	public static final String REQUIRED_FEATURE_PLUGIN_SUFFIX = ".gif";
 
-	public static final List<String> REQUIRED_FRAGMENT_FILES = Arrays.asList(new String[] { "fragment.xml" });
+	public static final List<String> REQUIRED_FRAGMENT_FILES = List.of("fragment.xml");
 	public static final String REQUIRED_FRAGMENT_SUFFIX = "";
 
-	public static final List<String> REQUIRED_SWT_FRAGMENT_FILES = Arrays
-			.asList(new String[] { "fragment.properties" });
+	public static final List<String> REQUIRED_SWT_FRAGMENT_FILES = List.of("fragment.properties");
 	public static final String REQUIRED_SWT_FRAGMENT_SUFFIX = "";
 
-	public static final List<String> REQUIRED_SOURCE_FILES = Arrays.asList(new String[] { "about.html" });
+	public static final List<String> REQUIRED_SOURCE_FILES = List.of("about.html");
 	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
 
-	public static final List<String> REQUIRED_BUNDLE_FILES = Arrays.asList(new String[] { "about.html" });
+	public static final List<String> REQUIRED_BUNDLE_FILES = List.of("about.html");
 	public static final String REQUIRED_BUNDLE_MANIFEST = "MANIFEST.MF";
 	public static final String REQUIRED_BUNDLE_SUFFIX = ".jar";
 
-	public static final List<String> SUFFIX_EXEMPT_LIST = Arrays
-			.asList(new String[] { "org.eclipse.swt", "org.apache.ant" });
+	public static final List<String> SUFFIX_EXEMPT_LIST = List.of("org.eclipse.swt", "org.apache.ant");
 
 	public static final int PLUGIN_COUNT  = 84; // - 20; // Note this number
 	// must include non-shipping
@@ -404,7 +401,7 @@ public class BuildTests {
 		File pluginDir = new File(installDir, "plugins");
 		for (File aPlugin : pluginDir.listFiles()) {
 			if (!aPlugin.getName().contains("test") && !aPlugin.getName().contains("org.eclipse.jetty")
-					&& !aPlugin.getName().contains("jakarta") && !aPlugin.getName().contains("slf4j.api") 
+					&& !aPlugin.getName().contains("jakarta") && !aPlugin.getName().contains("slf4j.api")
 					&& !aPlugin.getName().contains("org.eclipse.ecf")) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
@@ -471,7 +468,6 @@ public class BuildTests {
 				list.add(_enum.nextElement().toString());
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (!list.containsAll(requiredFiles)) {
@@ -589,10 +585,10 @@ public class BuildTests {
 
 		JavadocLog javadocLog = new JavadocLog(javadocLogs);
 		String message = "javadoc errors and/or warnings in: \n";
-		boolean problemLogsExist = javadocLog.logs.size() > 0;
+		boolean problemLogsExist = !javadocLog.logs.isEmpty();
 		if (problemLogsExist) {
 			for (int i = 0; i < javadocLog.logs.size(); i++)
-				message = message.concat(javadocLog.logs.get(i).toString() + "\n");
+				message = message.concat(javadocLog.logs.get(i) + "\n");
 		}
 		message = message.concat("See the javadoc logs linked from the test results page for details");
 		assertTrue(message, !problemLogsExist);
@@ -637,7 +633,7 @@ public class BuildTests {
 		assertTrue(
 				"Either file (url) does not exist (build may have been removed?), or HTTP response does not contain content length. urlOfFile: "
 						+ urlOfFile,
-				(!(-1 == nBytes)));
+				(-1 != nBytes));
 		assertFalse("dirtReport file has increased in size, indicating a regression. See " + urlOfFile, nBytes > MAX_ALLOWED_BYTES);
 		assertFalse(
 				"Good news! dirtReport file has decreased in size, compared to standard, so the standardDirtReport.txt file should be replaced with the one at "
@@ -662,7 +658,7 @@ public class BuildTests {
 		// nBytes will be -1 if the file doesn't exist
 		// it will be more than 3 if there are unsigned jars. (atlear jar extention will be listed
 
-		assertTrue("Some bundles are unsigned please refer  " + urlOfFile, ((2 > nBytes)));
+		assertTrue("Some bundles are unsigned please refer  " + urlOfFile, (2 > nBytes));
 	}
 
 	private String getDownloadHost() {
@@ -715,7 +711,7 @@ public class BuildTests {
 			// some servers, will have to read contents.
 			assertTrue(
 					"Either file (url) does not exist, or HTTP response does not contain content length. urlOfFile: " + urlOfFile,
-					(!(-1 == nBytes)));
+					(-1 != nBytes));
 			assertTrue("Unanticipated comparator log file has increased in size, indicating a regression. See " + urlOfFile,
 					nBytes <= MAX_ALLOWED_BYTES);
 			if (MAX_ALLOWED_BYTES > (nBytes + 20)) {
