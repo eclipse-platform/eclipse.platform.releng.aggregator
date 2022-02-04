@@ -3,12 +3,12 @@ Aggregator repo for Eclipse SDK builds
 
 This repo is used to build the Eclipse SDK which provides the framework for Eclipse based applications, the Java development tooling and the Plug-in development tooling.
 To clone it, it is recommented to use one of the URLs found on the following website: 
-https://git.eclipse.org/r/#/admin/projects/platform/eclipse.platform.releng.aggregator
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator
 
 An anonymous clone can be done via the following command:
 
 ```
-git clone https://git.eclipse.org/r/platform/eclipse.platform.releng.aggregator
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
 ```
 
 How to build the Eclipse SDK
@@ -39,7 +39,7 @@ mvn clean verify  -DskipTests=true
 Build requirements
 ------------------
 
-The build commands require the installation and setup of Java 1.8 or higher and Maven version 3.5.4 or higher.
+The build commands require the installation and setup of Java 11 or higher and Maven version 3.5.4 or higher.
 See also the complete instructions on the [Platform Build wiki](https://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build"). 
 Note, it is highly recommended to use toolchains.xml and -Pbree-libs as decribed in [Using BREE Libs](https://wiki.eclipse.org/Platform-releng/Platform_Build#Using_BREE_Libs "Using BREE Libs").
 
