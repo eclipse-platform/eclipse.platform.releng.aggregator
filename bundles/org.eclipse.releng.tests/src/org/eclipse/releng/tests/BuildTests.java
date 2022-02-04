@@ -745,8 +745,8 @@ public class BuildTests {
 					String tmp;
 					while ((tmp = in.readLine()) != null) {
 						tmp = tmp.toLowerCase();
-						if (tmp.indexOf(JAVADOC_ERROR) != -1 || tmp.indexOf(JAVADOC_WARNING) != -1
-								|| tmp.indexOf(JAVADOC_JAVA) != -1) {
+						if (tmp.contains(JAVADOC_ERROR) || tmp.contains(JAVADOC_WARNING)
+								|| tmp.contains(JAVADOC_JAVA)) {
 							String fileName = new File(javadocLog.getFile()).getName();
 							if (!logs.contains(fileName))
 								logs.add(fileName);
