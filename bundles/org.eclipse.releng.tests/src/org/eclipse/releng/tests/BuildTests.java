@@ -700,36 +700,30 @@ public class BuildTests {
 		long MAX_ALLOWED_BYTES = 319;
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testComparatorLogSize test", buildId);
-		String buildType = buildId.substring(0, 1);
 		// Comparator logs are not generated for N builds
-		if (!buildType.equals("N")) {
-			String downloadHost = getDownloadHost();
-			String urlOfFile = "https://" + downloadHost + "/eclipse/downloads/drops4/"
-					+ buildId
-					+ "/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt";
-			URL logURL = new URL(urlOfFile);
+		String downloadHost = getDownloadHost();
+		String urlOfFile = "https://" + downloadHost + "/eclipse/downloads/drops4/" + buildId
+				+ "/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt";
+		URL logURL = new URL(urlOfFile);
 
-			URLConnection urlConnection = logURL.openConnection();
-			// urlConnection.connect();
-			long nBytes = urlConnection.getContentLength();
-			if (DEBUG_TEST) {
-				System.out.println("Debug info for testComparatorLogSize");
-				System.out.println("Debug: nBytes: " + nBytes);
-				printHeaders(urlConnection);
-			}
-			// if find "response does not contain length, on a regular basis, for
-			// some servers, will have to read contents.
-			assertTrue(
-					"Either file (url) does not exist, or HTTP response does not contain content length. urlOfFile: " + urlOfFile,
-					(-1 != nBytes));
-			assertTrue("Unanticipated comparator log file has increased in size, indicating a regression. See " + urlOfFile,
-					nBytes <= MAX_ALLOWED_BYTES);
-			if (MAX_ALLOWED_BYTES > (nBytes + 20)) {
-				System.out.println("WARNING: MAX_ALLOWED_BYTES was larger than bytes found, by " + (MAX_ALLOWED_BYTES - nBytes)
-						+ ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
-			}
-		} else {
-			System.out.println("noComparatorTestsForNBuilds");
+		URLConnection urlConnection = logURL.openConnection();
+		// urlConnection.connect();
+		long nBytes = urlConnection.getContentLength();
+		if (DEBUG_TEST) {
+			System.out.println("Debug info for testComparatorLogSize");
+			System.out.println("Debug: nBytes: " + nBytes);
+			printHeaders(urlConnection);
+		}
+		// if find "response does not contain length, on a regular basis, for
+		// some servers, will have to read contents.
+		assertTrue("Either file (url) does not exist, or HTTP response does not contain content length. urlOfFile: "
+				+ urlOfFile, (-1 != nBytes));
+		assertTrue("Unanticipated comparator log file has increased in size, indicating a regression. See " + urlOfFile,
+				nBytes <= MAX_ALLOWED_BYTES);
+		if (MAX_ALLOWED_BYTES > (nBytes + 20)) {
+			System.out.println(
+					"WARNING: MAX_ALLOWED_BYTES was larger than bytes found, by " + (MAX_ALLOWED_BYTES - nBytes)
+							+ ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
 		}
 	}
 
