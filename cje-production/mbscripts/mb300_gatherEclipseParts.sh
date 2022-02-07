@@ -39,7 +39,7 @@ if [ -z $PATCH_BUILD ]; then
   REPO_DIR=$PLATFORM_REPO_DIR
   REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
 else
-  PATCH_BUILD_GENERIC=java17patch
+  PATCH_BUILD_GENERIC=java18patch
   REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/repository
   REPO_ZIP=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/eclipse.releng.repository.$PATCH_BUILD_GENERIC-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
 fi

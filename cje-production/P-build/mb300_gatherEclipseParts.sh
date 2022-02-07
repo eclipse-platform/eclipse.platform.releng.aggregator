@@ -32,7 +32,7 @@ cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties 
 
 # gather repo
 echo $PATCH_BUILD
-PATCH_BUILD_GENERIC=java17patch
+PATCH_BUILD_GENERIC=java18patch
 REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/repository
   
 if [ -d $REPO_DIR ]; then
