@@ -11,9 +11,8 @@ pipeline {
 		jdk 'openjdk-jdk11-latest'
 	}
 	stages {
-		stage('initialize Gerrit review') {
+		stage('initialize PGP') {
 			steps {
-				gerritReview labels: [Verified: 0], message: "Build started $BUILD_URL"
 				withCredentials([file(credentialsId: 'secret-subkeys.asc', variable: 'KEYRING')]) {
 					sh 'gpg --batch --import "${KEYRING}"'
 					sh 'for fpr in $(gpg --list-keys --with-colons  | awk -F: \'/fpr:/ {print $10}\' | sort -u); do echo -e "5\ny\n" |  gpg --batch --command-fd 0 --expert --edit-key ${fpr} trust; done'
@@ -43,12 +42,6 @@ pipeline {
 				always {
 					archiveArtifacts artifacts: '.*log,*/target/work/data/.metadata/.*log,*/tests/target/work/data/.metadata/.*log,apiAnalyzer-workspace/.metadata/.*log,eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*', allowEmptyArchive: true
 				}
-				unstable {
-					gerritReview labels: [Verified: -1], message: "Build UNSTABLE (test failures) $BUILD_URL"
-				}
-				failure {
-					gerritReview labels: [Verified: -1], message: "Build FAILED $BUILD_URL"
-				}
 			}
 		}
 		stage('Check freeze period') {
@@ -59,16 +52,6 @@ pipeline {
 					sh './verifyFreezePeriod.sh'
 				}
 			}
-			post {
-				failure {
-					gerritReview labels: [Verified: -1], message: "Build and test are OK, but Eclipse project is currently in a code freeze period.\nPlease wait for end of code freeze period before merging.\n $BUILD_URL"
-				}
-			}
-		}
-	}
-	post {
-		success {
-			gerritReview labels: [Verified: 1], message: "Build Succcess $BUILD_URL"
 		}
 	}
 }
