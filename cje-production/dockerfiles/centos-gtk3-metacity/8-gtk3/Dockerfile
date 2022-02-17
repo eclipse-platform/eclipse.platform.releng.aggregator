@@ -1,5 +1,5 @@
-ARG FROM_TAG="8"
-FROM centos:${FROM_TAG}
+ARG FROM_TAG="8.5-226"
+FROM registry.access.redhat.com/ubi8/ubi:${FROM_TAG}
 
 ### user name recognition at runtime w/ an arbitrary uid - for OpenShift deployments
 COPY scripts/uid_entrypoint /usr/local/bin/uid_entrypoint
