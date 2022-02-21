@@ -11,10 +11,11 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 ENTRYPOINT [ "uid_entrypoint" ]
 
 RUN yum -y update && yum -y install \
+      gtk3 \
       gtk4 \
       tigervnc-server \
       tigervnc \
-      metacity \
+      mutter \
       xorg-x11-server-utils \
       mesa-libGL \
       xorg-x11-fonts-misc \
@@ -22,8 +23,6 @@ RUN yum -y update && yum -y install \
       xorg-x11-fonts-Type1 \
       xorg-x11-fonts-100dpi \
       liberation-fonts \
-      gnu-free-fonts-common \
-      dejavu-fonts-common \
       unzip \
       lsof \
       wget \
