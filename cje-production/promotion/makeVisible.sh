@@ -176,8 +176,8 @@ then
   git pull --rebase
   git submodule foreach git pull --rebase
 
-  git submodule foreach git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
   git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
+  git submodule foreach git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
   RC=$?
   if [[ $RC != 0 ]]
   then
