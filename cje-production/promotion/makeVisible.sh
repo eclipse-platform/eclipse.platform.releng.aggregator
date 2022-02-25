@@ -162,7 +162,7 @@ then
   cd ${WORKSPACE}
   git config --global user.email "releng-bot@eclipse.org"
   git config --global user.name "Eclipse Releng Bot"
-  git clone --recursive git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+  git clone --recurse-submodules git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
 
   pushd eclipse.platform.releng.aggregator
   git checkout master
