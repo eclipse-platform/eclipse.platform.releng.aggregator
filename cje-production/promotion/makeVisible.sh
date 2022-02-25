@@ -167,14 +167,14 @@ then
   pushd eclipse.platform.releng.aggregator
   git checkout master
   git submodule foreach git checkout master
-  git submodule foreach git clean -f -d -x
+  git clean -f -d -x
   git submodule foreach git clean -f -d -x
   git reset --hard
   git submodule foreach git reset --hard
   git checkout master
   git submodule foreach git checkout master
-  git pull
-  git submodule foreach git pull
+  git pull --rebase
+  git submodule foreach git pull --rebase
 
   git submodule foreach git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
   git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
