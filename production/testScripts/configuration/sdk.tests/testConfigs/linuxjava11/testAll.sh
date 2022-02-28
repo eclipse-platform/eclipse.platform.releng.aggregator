@@ -44,7 +44,7 @@ export propertyFile=${propertyFile:-platformSpecific.properties}
 
 # in product tests, should be set by runTests2.xml,
 # so we use "vm value",  "x.0" at end, to make obvious if that's not working.
-export testedPlatform=${testedPlatform:-linux.gtk.x86_64_x.0}
+export testedPlatform=${testedPlatform:-linux.gtk3.x86_64_x.0}
 
 echo "=== properties in testAll.sh"
 echo "    DOWNLOAD_HOST: ${DOWNLOAD_HOST}"
