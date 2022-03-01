@@ -15,7 +15,7 @@
 
 set -e
 
-pushd centos-gtk4-metacity/9-gtk4
+pushd centos-gtk4-mutter/9-gtk4
 echo "Building Centos 9 docker image"
-docker build --pull -t eclipse/platformreleng-centos-gtk4-metacity:9 .
+docker build --pull -t eclipse/platformreleng-centos-gtk4-mutter:9 .
 popd
