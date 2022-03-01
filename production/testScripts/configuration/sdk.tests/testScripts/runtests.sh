@@ -28,9 +28,7 @@ then
   exit 1
 fi
 #Extract GTK Version and host name
-
-gtkType=$(echo ${testedPlatform}|cut -d- -f4|cut -d_ -f1)
-gtkVersion=$(rpm -q ${gtkType}|cut -d- -f2)
+gtkVersion=$(rpm -q gtk3|cut -d- -f2)
 
 echo "Jvm        : ${jvm}"
 echo "Host       : $(hostname)"
