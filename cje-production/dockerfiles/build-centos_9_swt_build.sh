@@ -15,7 +15,7 @@
 
 set -e
 
-pushd centos-gtk4-metacity/9-swtBuild
+pushd centos-gtk4-mutter/9-swtBuild
 echo "Building Centos 9 swt build image"
 docker build --pull -t eclipse/platformreleng-centos-swt-build:9 .
 popd
