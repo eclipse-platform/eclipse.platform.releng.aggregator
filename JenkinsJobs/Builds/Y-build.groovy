@@ -119,7 +119,7 @@ spec:
                   sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh '''
-                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+                            git clone -b R4_23_maintenance git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
                         '''
                       }
                     }
@@ -179,11 +179,7 @@ spec:
                 }
             }
         }
-	  stage('Swt build input') {
-	      steps {
-	          build 'SWT-Increment_if_needed'
-	      }
-	    }
+
 	  stage('Create Base builder'){
           steps {
               container('jnlp') {
