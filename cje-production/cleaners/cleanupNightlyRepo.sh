@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2021 IBM Corporation and others.
+# Copyright (c) 2022 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -193,7 +193,7 @@ function cleanRepo ()
 workspace=$1
 remoteBase="/home/data/httpd/download.eclipse.org"
 
-eclipseIRepo="${remoteBase}/eclipse/updates/4.23-I-builds"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.24-I-builds"
 eclipseYRepo="${remoteBase}/eclipse/updates/4.23-Y-builds"
 eclipsePRepo="${remoteBase}/eclipse/updates/4.23-P-builds"
 eclipseBuildTools="${remoteBase}/eclipse/updates/buildtools"
