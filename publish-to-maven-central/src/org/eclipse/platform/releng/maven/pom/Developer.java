@@ -74,7 +74,7 @@ public abstract class Developer {
 			int end = token.endsWith(".git") ? token.length()-".git".length() : token.length();
 			String project = token.substring(0, end);
 			// Special case for e4 projects
-			if ((project.contains("org.eclipse.e4"))||(project.contains("org.eclipse.sdk"))||(project.contains("org.eclipse.rcp"))) {
+			if (project.contains("org.eclipse.e4")) {
 				project  = "eclipse.platform";
 			} else {
 				while (!projects.contains(project)) {
@@ -101,6 +101,7 @@ public abstract class Developer {
 				}
 			}
 			return "https://projects.eclipse.org/projects/"+project+"/who";
+		}
 		return null;
 	}
 
