@@ -85,7 +85,22 @@ public abstract class Developer {
 				}
 			}
 			return "https://projects.eclipse.org/projects/"+project+"/who";
-		}
+		} else if (tokens.length >= 4) {
+			String token = tokens[3]; // https://git.eclipse.org/c/equinox/rt.equinox.framework.git => start with rt.equinox.framework
+			int end = token.endsWith(".git") ? token.length()-".git".length() : token.length();
+			String project = token.substring(0, end);
+			// Special case for e4 projects
+			if (project.contains("org.eclipse.e4")) {
+				project  = "eclipse.platform";
+			} else {
+				while (!projects.contains(project)) {
+					end = project.lastIndexOf('.');
+					if (end == -1)
+						return null;
+					project = project.substring(0, end); // cut off non-matching tail segment
+				}
+			}
+			return "https://projects.eclipse.org/projects/"+project+"/who";
 		return null;
 	}
 
