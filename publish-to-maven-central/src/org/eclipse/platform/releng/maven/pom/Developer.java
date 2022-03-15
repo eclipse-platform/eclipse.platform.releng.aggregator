@@ -68,6 +68,9 @@ public abstract class Developer {
 	}
 
 	private static String gitRepoToWhoSInvolved(String gitUrl) {
+		if ((gitUrl == null) || (gitUrl.trim() == "")) {
+			return "https://projects.eclipse.org/projects/eclipse.platform/who";
+		}
 		String[] tokens = gitUrl.split("/");
 		if (tokens.length >= 6) {
 			String token = tokens[5]; // https://git.eclipse.org/c/equinox/rt.equinox.framework.git => start with rt.equinox.framework
@@ -85,8 +88,8 @@ public abstract class Developer {
 				}
 			}
 			return "https://projects.eclipse.org/projects/"+project+"/who";
-		} else if (tokens.length >= 4) {
-			String token = tokens[3]; // https://git.eclipse.org/c/equinox/rt.equinox.framework.git => start with rt.equinox.framework
+		} else if (tokens.length >= 5) {
+			String token = tokens[4]; // https://github.com/eclipse-platform/eclipse.platform.releng.git => start with eclipse.platform.releng
 			int end = token.endsWith(".git") ? token.length()-".git".length() : token.length();
 			String project = token.substring(0, end);
 			// Special case for e4 projects
