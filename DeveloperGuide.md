@@ -48,7 +48,7 @@ Recommended way of developing code is inside a private branch. Here are the step
 2. If fork already exists, click of fetch upstream to get latest source code.
 3. Clone the forked repository to eclipse workspace. Repository link can be found by clicking code button on the top right in "<> code" tab
 4. Create a local branch
-5. Delvelop fix
+5. Delevelop fix
 6. Commit code changes to local branch. Make multiple commits if necessary as history can be retained.
 7. Once the fix is ready, push the branch to origin(in this case forked repositoy)
 8. Open forked repository page, switch to the branch where the fix is developed, a new option appears just below code button "Contribute" Click on this to open "Pull Request" also called PR.
@@ -58,7 +58,7 @@ Recommended way of developing code is inside a private branch. Here are the step
 12. Reviewer can review PR on the github portal itself or fetch the PR using egit menu "Fetch github PR"
 13. All PRs will get verified for eca and PR validations(same as gerrit validation)
 14. Once the PR is approved there two options to merge. Can select either of these based on the requirement the following are recommendations only. Need to select based on the requirement
-  * Rebase and Merge (retains commit history from PR useful in deloping a feature)
+  * Rebase and Merge (retains commit history from PR useful in developing a feature)
   * Squash and Merge (All commits in PR gets squashed in to a single commit useful in bug fixes)
 15. Once PR gets merged the development branch used for the PR can be deleted. 
 
