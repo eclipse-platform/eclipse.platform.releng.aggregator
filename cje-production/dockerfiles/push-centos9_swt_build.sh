@@ -15,4 +15,4 @@
 
 set -e
 
-docker push eclipse/platformreleng-centos-swt-build:9
+docker push eclipse/platformreleng-centos-gtk4-mutter:swtbuild
