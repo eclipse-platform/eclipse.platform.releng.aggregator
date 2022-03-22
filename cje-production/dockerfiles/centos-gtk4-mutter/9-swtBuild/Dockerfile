@@ -9,8 +9,8 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 ### end
 
 ENTRYPOINT [ "uid_entrypoint" ]
-RUN yum -y update && yum -y install \
-      gtk3
+RUN dnf -y update && dnf -y install \
+      gtk3 \
       gtk4 \
       tigervnc-server \
       tigervnc \
@@ -27,13 +27,13 @@ RUN yum -y update && yum -y install \
       bzip2 \
       lsof \
       wget \
-      curl \
-      webkitgtk4 \
-      webkitgtk4-devel \
+      curl-minimal \
+      webkit2gtk3 \
+      webkit2gtk3-devel \
       gtk3-devel \
       gtk2 \
       gtk2-devel \
-      java-1.8.0-openjdk-devel \
+      java-17-openjdk-devel \
       webkit2gtk3-devel \
       make \
       gcc \
@@ -42,15 +42,13 @@ RUN yum -y update && yum -y install \
       libXt-devel \
       libXtst-devel \
       libXScrnSaver \
-      GConf2 \
-      cmake \
       freetype \
       glibc-locale-source \
       glibc-langpack-en \
       nss \
       nspr \
       nss-util \
-    && yum clean all
+    && dnf clean all
 
 # -i: specify the locale definition file
 # -f: specify the character set
