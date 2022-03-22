@@ -10,7 +10,7 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 
 ENTRYPOINT [ "uid_entrypoint" ]
 
-RUN yum -y update && yum -y install \
+RUN dnf -y update && dnf -y install \
       gtk3 \
       gtk4 \
       tigervnc-server \
@@ -26,12 +26,12 @@ RUN yum -y update && yum -y install \
       unzip \
       lsof \
       wget \
-      curl \
+      curl-minimal \
       dbus \
-      webkitgtk4 \
+      webkit2gtk3 \
       glibc-locale-source \
       glibc-langpack-en \
-    && yum clean all
+    && dnf clean all
 
 ENV HOME=/home/vnc
 ENV DISPLAY :0
