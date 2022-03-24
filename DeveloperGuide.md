@@ -42,9 +42,11 @@ To create commits it is recommended to add ssh public keys to github account. Th
 
 ### Recommended workflow
 
-Recommended way of developing code is inside a private branch. Here are the steps
+Recommended way of developing code is inside a fork of the man repository (see [Fork and pull model](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/about-collaborative-development-models#fork-and-pull-model) in the github documentation).
 
-1. Create a fork using the fork button available on the github repository page. Creates a private repository under github account.
+Here are the steps:
+
+1. Use the fork button available on the github repository page to create a forked repository under your github account.
 2. If fork already exists, click of fetch upstream to get latest source code.
 3. Clone the forked repository to eclipse workspace. Repository link can be found by clicking code button on the top right in "<> code" tab
 4. Create a local branch
