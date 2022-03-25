@@ -47,7 +47,7 @@ epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-c
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
 #get requisite tools
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/addToComposite.xml
+ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://download.eclipse.org/eclipse/relengScripts/cje-production/scripts/addToComposite.xml
 
 #triggering ant runner
 baseBuilderDir=${workspace}/eclipse
