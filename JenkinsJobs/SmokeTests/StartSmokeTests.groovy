@@ -11,42 +11,42 @@ pipeline {
           parallel {
               stage('Ubuntu 18.04 Java11'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu18', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-ubuntu18', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}")]
                   }
               }
               stage('Ubuntu 20.04 Java11'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}")]
                   }
               }
               stage('Ubuntu Latest Java11'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}")]
                   }
               }
               stage('Opensuse Leap Java11'){
                   steps {
-                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}")]
                   }
               }
               stage('Centos 7.x Java11'){
                   steps {
-                        build job: 'ep-smoke-test-centos7', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-centos7', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}")]
                   }
               }
               stage('Centos 8.x Java11'){
                   steps {
-                        build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}")]
                   }
               }
               stage('Centos 8 arm64 Java11'){
                   steps {
-                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11arm64}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11arm64}")]
                   }
               }
               stage('Centos 8.x ppc64le Java11'){
                   steps {
-                        build job: 'ep-smoke-test-ppcle', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11ppcle}"), string(name: 'secMananger', value: '')]
+                        build job: 'ep-smoke-test-ppcle', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11ppcle}")]
                   }
               }
               stage('Ubuntu 18.04 Java17'){
@@ -91,72 +91,72 @@ pipeline {
               }
               stage('Ubuntu 18.04 Java18'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu18', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-ubuntu18', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Ubuntu 20.04 Java18'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Ubuntu Latest Java18'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Opensuse Leap Java18'){
                   steps {
-                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Centos 7.x Java18'){
                   steps {
-                        build job: 'ep-smoke-test-centos7', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-centos7', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Centos 8.x Java18'){
                   steps {
-                        build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Centos 8 arm64 Java18'){
                   steps {
-                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18arm64}")]
+                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18arm64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Ubuntu 18.04 Java19'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu18', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-ubuntu18', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Ubuntu 20.04 Java19'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Ubuntu Latest Java19'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Opensuse Leap Java19'){
                   steps {
-                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Centos 7.x Java19'){
                   steps {
-                        build job: 'ep-smoke-test-centos7', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-centos7', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Centos 8.x Java19'){
                   steps {
-                        build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
               stage('Centos 8 arm64 Java19'){
                   steps {
-                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19arm64}")]
+                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19arm64}"), string(name: 'secMananger', value: "-Djava.security.manager=allow")]
                   }
               }
           }
