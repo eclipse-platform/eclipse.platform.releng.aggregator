@@ -25,7 +25,7 @@ In order to run the performance tests locally:
   * Make sure you have the latest testScripts/hudsonBootstrap/getEBuilder.xml from this folder.  
     If you don't want to pull the whole repo:
     ```
-    wget -O getEBuilder.xml --no-verbose https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+    wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
     ```
   * Make sure you have ant installed so you can run the following command:
     ```
