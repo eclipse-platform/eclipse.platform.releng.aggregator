@@ -43,6 +43,10 @@ The build commands require the installation and setup of Java 11 or higher and M
 See also the complete instructions on the [Platform Build wiki](https://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build"). 
 Note, it is highly recommended to use toolchains.xml and -Pbree-libs as decribed in [Using BREE Libs](https://wiki.eclipse.org/Platform-releng/Platform_Build#Using_BREE_Libs "Using BREE Libs").
 
+Performance Tests
+-----------------
+See [Performance README.md](production/README.md)
+
 Additional informations
 -----------------------
 
