@@ -227,7 +227,7 @@ spec:
               container('jnlp') {
                   sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh '''
-                        git config --global user.email "releng-bot@eclipse.org"
+                        git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
