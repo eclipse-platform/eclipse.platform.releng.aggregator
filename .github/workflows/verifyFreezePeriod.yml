@@ -1,0 +1,23 @@
+# This workflow will check if the project is currently in a Code-Freeze-Period
+
+name: Verify Code Freeze Period
+
+on:
+  workflow_call
+  
+jobs:
+  verify-freeze-period:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking whether Eclipse project is currently in stabilitzation/code-freeze period ...
+        run: |
+          today=$(TZ=UTC date "+%Y%m%d")
+          tomorrow=$(TZ=UTC date -d "+1 days" "+%Y%m%d")
+          calID="cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
+          curl "https://calendar.google.com/calendar/u/0/htmlembed?src=${calID}&mode=AGENDA&ctz=UTC&dates=${today}/${tomorrow}" | grep -i -q -e "stabilization"
+          if [[ $? == 0 ]]; then
+            echo "::error::Today is a freeze day"
+            exit 1 #Exiting with non-0 makes this workflow fail
+          fi
+          echo "No code freeze today"
+        shell: bash {0} # do not fail-fast
