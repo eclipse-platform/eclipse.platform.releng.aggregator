@@ -396,16 +396,20 @@ public class BuildTests {
 		}
 		assertTrue("Feature directory missing required files: " + aString, result.isEmpty());
 	}
+
+	/**
+	 * Verifies all bundles starting with org.eclipse (with listed exceptions) to
+	 * contain e.g. about.html and other recommended files.
+	 */
 	@Test
 	public void testPluginFiles() {
 		assumeFalse(isMavenRun());
-		System.out.println(System.getenv());
 		List<String> result = new ArrayList<>();
 		String installDir = Platform.getInstallLocation().getURL().getPath();
 		File pluginDir = new File(installDir, "plugins");
 		for (File aPlugin : pluginDir.listFiles()) {
-			if (!aPlugin.getName().contains("test") && !aPlugin.getName().contains("org.eclipse.jetty")
-					&& !aPlugin.getName().contains("jakarta") && !aPlugin.getName().contains("slf4j.api")
+			if (!aPlugin.getName().contains("test") && aPlugin.getName().startsWith("org.eclipse")
+					&& !aPlugin.getName().contains("org.eclipse.jetty")
 					&& !aPlugin.getName().contains("org.eclipse.ecf")) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
