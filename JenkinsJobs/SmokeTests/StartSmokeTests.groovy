@@ -39,6 +39,11 @@ pipeline {
                         build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secManager', value: '')]
                   }
               }
+              stage('Centos 9.x Java11'){
+                  steps {
+                        build job: 'ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secManager', value: '')]
+                  }
+              }
               stage('Centos 8 arm64 Java11'){
                   steps {
                         build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11arm64}"), string(name: 'secManager', value: '')]
@@ -77,6 +82,11 @@ pipeline {
               stage('Centos 8.x Java17'){
                   steps {
                         build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                  }
+              }
+              stage('Centos 9.x Java17'){
+                  steps {
+                        build job: 'ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
               stage('Centos 8 arm64 Java17'){
@@ -119,6 +129,11 @@ pipeline {
                         build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
                   }
               }
+              stage('Centos 9.x Java18'){
+                  steps {
+                        build job: 'ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                  }
+              }
               stage('Centos 8 arm64 Java18'){
                   steps {
                         build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18arm64}")]
@@ -157,6 +172,11 @@ pipeline {
               stage('Centos 8.x Java19'){
                   steps {
                         build job: 'ep-smoke-test-centos8', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                  }
+              }
+              stage('Centos 9.x Java19'){
+                  steps {
+                        build job: 'ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
                   }
               }
               stage('Centos 8 arm64 Java19'){
