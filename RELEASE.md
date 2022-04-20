@@ -7,7 +7,7 @@
 ## Milestone Releases
 
 **Friday before release week**:
- * Update [I-builds](https://ci.eclipse.org/releng/view/Builds/) to build one the milestone schedule (daily at 18:00 ET except Thursday).
+ * Update [I-builds](https://ci.eclipse.org/releng/view/Builds/) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
  * Create prerequisite issues for tracking ECF, EMF and Orbit
    * See previous Bugzilla issues for [ECF](https://bugs.eclipse.org/bugs/show_bug.cgi?id=578002), [EMF](https://bugs.eclipse.org/bugs/show_bug.cgi?id=578003) and [Orbit](https://bugs.eclipse.org/bugs/show_bug.cgi?id=578004)
  * Send reminder email for upcoming milestone week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
