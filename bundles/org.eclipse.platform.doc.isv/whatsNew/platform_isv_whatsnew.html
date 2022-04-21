@@ -17,11 +17,11 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.23</title>
+<title>Eclipse Platform What's New in 4.24</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.23</h2>
+<h2>What's New in Eclipse 4.24</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
 made to the Eclipse Platform and SWT for the 4.23 release of Eclipse.
 </p>
@@ -41,153 +41,50 @@ section of the Workbench User Guide.
 <!-- ****************** START OF N&N TABLE****************** -->
 <table class="news">
 <colgroup>
-  <col class="title" />
-  <col />
+	<col class="title" />
+	<col />
 </colgroup>
 <tbody>
 	<!-- ******************** Platform ********************** -->
 	<tr>
 		<td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
 	</tr>
-	
-	<tr id="line-end-code-mining"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=540448 -->
-		<td class="title"><a href="#line-end-code-mining">Code mining on line end</a></td>
+	<tr id="class-file-editor-font"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=540546 -->
+		<td class="title"><a href="#class-file-editor-font">Class File Editor font</a></td>
 		<td class="content">
-			The abstract <code>org.eclipse.jface.text.codemining.LineEndCodeMining</code> class was added to create code-minings
-			that are expected to be displayed as annotations after the line content. Any <code>ICodeMiningProvider</code> can return
-			on of those <code>LineEndCodeMining</code> additionally to existing ones. 
-		</td>
-	</tr>
-	
-	<tr id="fluent-databinding-api"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=552667 -->
-		<td class="title"><a href="#fluent-databinding-api">New fluent databinding API</a></td>
-		<td class="content">
-			A new fluent API for the databinding framework has been added.
+			The Class File Editor uses now the Text font instead of the System font.
+			The monospace font makes the display byte code better readable.
 			<p>
-			This API is a facade for the traditional databinding API that is based
-			on <code>DataBindingContext</code> and <code>UpdateValueStrategy</code>. It provides
-			short-hands, extra type safety and better readability.
+			Old look and feel:
 			</p>
-			The following is an usage example:
-			<pre><code>
-Bind.twoWay()
-	.from(value)
-	.validateAfterConvert(modelValidator)
-	.convertTo(IConverter.create(i -> Objects.toString(i, "")))
-	.convertFrom(IConverter.create(s -> s.isEmpty() ? 0 : Integer.decode(s)))
-	.to(WidgetProperties.text(SWT.Modify).observe(text))
-	.validateBeforeSet(widgetValidator)
-	.bind(bindingContext);
-			</code></pre>
+			<p>
+				<img src="images/class-file-editor-font-old.png" alt="Class File Editor - Old look"/>
+			</p>
+			<p>
+			New look and feel:
+			</p>
+			<p>
+				<img src="images/class-file-editor-font-new.png" alt="Class File Editor - New look"/>
+			</p>
 		</td>
 	</tr>
 	
-	
-	<tr id="notification-api"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=575091 -->
-		<td class="title"><a href="#notification-api">Notification builder</a></td>
-		<td class="content">
-		   In addition to the Notification API released with Eclipse 4.17, the 4.22 release added a <code>Notification builder</code>.
-		   As the release notes of these releases did not mention this new API, this entry was added to allow users to 
-		   discover these new features.
-		   Please see <a href="https://wiki.eclipse.org/JFaceSnippets#Snippet081_-_Notication_API" target="_blank">Snippet</a> for the usage of the Notification API.
-		</td>
-	</tr>
-	
-
-	<tr id="debug-value-code-mining"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=507546 -->
-		<td class="title"><a href="#debug-value-code-mining">Contribute adapter to display debug value code minings</a></td>
-		<td class="content">
-			In order to make debug values visible inline for users who enabled this feature, your debugger support can contribute
-			an adapter from <code>ITextSelection</code> to <code>IVariable</code>. The Debug framework will then lookup available
-			variables for the files being edited and display their value inline.
-		</td>
-	</tr>
 	<!-- ******************** End of Platform ********************** -->
 
-  <!-- *********************** SWT *********************** -->
-  <tr>
-    <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
-  </tr>
-	<tr id="swt-broder-layout"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577922 -->
-		<td class="title"><a href="#swt-broder-layout">SWT BorderLayout support</a></td>
-		<td class="content">
-			SWT now supports a new <code>BorderLayout</code> with below layout design:
-			<p><img src="images/swt-border-layout.png" alt="SWT Border layout."/></p>
-		</td>
-	</tr>  
-  
-   <tr id="win32-dark-buttons"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577042 -->
-	<td class="title"><a href="#win32-dark-buttons">SWT supports native styled dark theme buttons on Windows</a></td>
-	<td class="content">
-		The buttons on Windows OS are now styled:
-		<p>
-		New look and feel:
-		</p>
-		<img src="images/new-dark-buttons.png" alt=""/>
-
-		<p>
-		Old look and feel:
-		</p>
-		<p>
-		<img src="images/old-dark-buttons.png" alt=""/>
-			</p>
-		<p>
-        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#win32-dark-buttons">dark buttons</a> can be disabled using the 
-        <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.
-        </p>
-        <p>
-        For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:<br/>
-        <b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b>
-        </p>
-	</td>
-  </tr>
-
-  <tr id="sleak-view-improvements"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=578696 -->
-    <td class="title"><a href="#sleak-view-improvements">Sleak view improvements</a></td>
-    <td class="content">
-      The <b>Sleak</b> view now also lists non-disposed Widget objects, where previously it listed non-disposed Resource objects only.
-      This can be used to check for widget leaks, e.g. if a view leaks Menu objects or if a view operation results
-      in adding more and more widgets to the view.
-      <p>The improvements made to Sleak view UI are:</p>
-      <ul>
-       <li>Snap and Diff buttons are now merged to one button</li>
-       <li>The non-disposed objects summary is shown on mouse-over in the object table</li>
-       <li>The stack traces area and the object table are now separated by a draggable Sash</li>
-      </ul>
-      <p><img src="images/sleak_view_improvements.png" alt="Sleak view improvements"/></p>
-    </td>
-  </tr>
-
-  <!-- *********************** End of SWT *********************** -->
-
-  <!-- ******************** Equinox ********************** -->
-  <tr>
-    <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
-  </tr>
-  
-	<tr id="trusted-pgp-key-extension"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=577248 -->
-		<td class="title"><a href="#trusted-pgp-key-extension">Define trusted PGP keys in extensions</a></td>
-		<td class="content">
-			The <code>org.eclipse.p2.engine.pgp</code> extension-point was added to p2. It allows plug-ins
-			to define some PGP public keys that are to be considered as trusted by default.
-			<p>Changes to such a contribution when upgrading or removing their contributing plug-ins will directly impact the
-			set of trusted keys without further action.</p>
-		</td>
+	<!-- *********************** SWT *********************** -->
+	<tr>
+		<td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
 	</tr>
 
-	<tr id="improved-bundle-file-location"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=577574 -->
-		<td class="title"><a href="#improved-bundle-file-location">Determining a bundle's file location has been improved</a></td>
-		<td class="content">
-			The location of a bundle in the local file system can now be obtained by adapting the bundle to the <code>File</code> class:
-			<code>org.osgi.framework.Bundle.adapt(java.io.File.class)</code>
-			<br></br>
-			A more conventient way is to call the new method <code>getBundleFileLocation(Bundle)</code> in <code>org.eclipse.core.runtime.FileLocator</code>, 
-			which returns an <code>Optional</code> to reflect the fact that not in all cases the file-system location of a bundle can be determined.
-			This method is intended as a replacement for <code>FileLocator.getBundleFile(Bundle)</code> and does not throw an <code>IOException</code>.
-			Both methods now run significantly faster than <code>FileLocator.getBundleFile(Bundle)</code> did before.
-		</td>
+
+	<!-- *********************** End of SWT *********************** -->
+
+	<!-- ******************** Equinox ********************** -->
+	<tr>
+		<td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
 	</tr>
 
+	<!-- *********************** End of Equinox *********************** -->
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->
