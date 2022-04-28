@@ -1,6 +1,6 @@
 #!/bin/bash -x
 #*******************************************************************************
-# Copyright (c) 2021 IBM Corporation and others.
+# Copyright (c) 2022 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,7 @@ echo "Building Ubuntu 20.04 docker image"
 docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:20.04 .
 popd
 
-pushd ubuntu-gtk3-metacity/21.10-gtk3
-echo "Building Ubuntu 21.10 docker image"
-docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:21.10 .
+pushd ubuntu-gtk3-metacity/22.04-gtk3
+echo "Building Ubuntu 22.04 docker image"
+docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:22.04 .
 popd
