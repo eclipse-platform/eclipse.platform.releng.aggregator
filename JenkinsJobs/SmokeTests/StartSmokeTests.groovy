@@ -19,9 +19,9 @@ pipeline {
                         build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secManager', value: '')]
                   }
               }
-              stage('Ubuntu Latest Java11'){
+              stage('Ubuntu 22.04 Java11'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secManager', value: '')]
+                        build job: 'ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java11x64}"), string(name: 'secManager', value: '')]
                   }
               }
               stage('Opensuse Leap Java11'){
@@ -64,9 +64,9 @@ pipeline {
                         build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
-              stage('Ubuntu Latest Java17'){
+              stage('Ubuntu 22.04 Java17'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                        build job: 'ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
               stage('Opensuse Leap Java17'){
@@ -109,9 +109,9 @@ pipeline {
                         build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
                   }
               }
-              stage('Ubuntu Latest Java18'){
+              stage('Ubuntu 22.04 Java18'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
+                        build job: 'ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java18x64}")]
                   }
               }
               stage('Opensuse Leap Java18'){
@@ -154,9 +154,9 @@ pipeline {
                         build job: 'ep-smoke-test-ubuntu20', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
                   }
               }
-              stage('Ubuntu Latest Java19'){
+              stage('Ubuntu 22.04 Java19'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntuLatest', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
                   }
               }
               stage('Opensuse Leap Java19'){
