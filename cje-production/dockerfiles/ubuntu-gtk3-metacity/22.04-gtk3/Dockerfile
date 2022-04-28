@@ -13,6 +13,7 @@ RUN apt-get update && apt upgrade -y && apt dist-upgrade -y && apt-get install -
       libgtk-3-0 \
       tigervnc-standalone-server \
       tigervnc-common \
+      tigetvnc-tools \
       metacity \
       x11-xserver-utils \
       libgl1-mesa-dri \
