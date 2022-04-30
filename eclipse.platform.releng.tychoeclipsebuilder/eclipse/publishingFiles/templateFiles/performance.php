@@ -92,7 +92,7 @@ require("../DL.thin.header.php.html");
 ?>
 
 <?php
-if (file_exists("../pertestNotes.html")) {
+if (file_exists("../perftestNotes.html")) {
     $my_file = file_get_contents("../perftestNotes.html");
     echo $my_file;
 }
