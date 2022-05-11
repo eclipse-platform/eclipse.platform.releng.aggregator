@@ -68,6 +68,6 @@ RUN mkdir -p ${HOME}/.vnc && chmod -R 775 ${HOME} \
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
 # Make $HOME open to the 'root' group (so Jenkins/OpenShift user can write there)
-RUN chgrp -R 0 ${HOME} && chmod -R g=u ${HOME
+RUN chgrp -R 0 ${HOME} && chmod -R g=u ${HOME}
 
 USER 10001
