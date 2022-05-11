@@ -48,7 +48,7 @@ RUN mkdir -p var/lib/dbus && dbus-uuidgen > /var/lib/dbus/machine-id \
 # Create a custom vnc xstartup file
 COPY scripts/xstartup_metacity.sh ${HOME}/.vnc/xstartup.sh
 # Make $HOME open to the 'root' group (so Jenkins/OpenShift user can write there)
-RUN chgrp -R 0 ${HOME} && chmod -R g=u ${HOME
+RUN chgrp -R 0 ${HOME} && chmod -R g=u ${HOME}
 
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG=en_US.UTF-8
