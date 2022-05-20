@@ -187,7 +187,7 @@ then
     exit $RC
   fi
   git submodule foreach git push --verbose origin tag ${TAG}
-  git push --verbose $(toPushRepo origin tag ${TAG}
+  git push --verbose origin tag ${TAG}
 
   RC=$?
   if [[ $RC != 0 ]]
