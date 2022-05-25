@@ -21,19 +21,20 @@
   ul {padding-left: 13px;}
   /*]]>*/
   </style>
-  <title>Eclipse Platform What's New in 4.23</title>
+  <title>Eclipse Platform What's New in 4.24</title>
 </head>
 <body>
-  <h2>What's New in Eclipse 4.23 (Platform)</h2>
+  <h2>What's New in Eclipse 4.24 (Platform)</h2>
   <p>Here are descriptions of some of the more interesting or significant changes made to the Eclipse Platform for the
-  4.23 release of Eclipse. They are grouped into:</p>
+  4.24 release of Eclipse. They are grouped into:</p>
   <ul>
     <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
     <li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li>
-    <li><a href="#Debug">Debug</a></li>
+    <li><a href="#TextEditors">Text Editors</a></li>
     <li><a href="#Preferences">Preferences</a></li>
-    <li><a href="#StylingThemes">Themes and Styling</a></li>
-    <li><a href="#GeneralUpdates">General Updates</a></li>
+    <li><a href="#Debug">Debug</a></li>
+    <!--li><a href="#StylingThemes">Themes and Styling</a></li-->
+    <!--li><a href="#GeneralUpdates">General Updates</a></li-->
   </ul>
   <p>Plug-in developers will also be interested in the corresponding <a href=
   "../../org.eclipse.platform.doc.isv/whatsNew/platform_isv_whatsnew.html">What's new</a> document in the plug-in
@@ -42,144 +43,163 @@
 <!-- ****************** START OF N&N TABLE ****************** -->
 <table class="news">
 <colgroup>
-	<col class="title" />
-	<col />
+  <col class="title" />
+  <col />
 </colgroup>
 <tbody>
-	<!-- ******************* Views, Dialogs and Toolbar ************************************* -->
-	<tr>
-		<td id="ViewsAndDialogs" class="section" colspan="2">
-		<h2>Views, Dialogs and Toolbar </h2>
-		</td>
-	</tr>
+  <!-- ******************* Views, Dialogs and Toolbar ************************************* -->
+  <tr>
+    <td id="ViewsAndDialogs" class="section" colspan="2">
+    <h2>Views, Dialogs and Toolbar </h2>
+    </td>
+  </tr>
+  
+    <tr id="welcomescreen"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=579463 -->
+    <td class="title"><a href="#welcomescreen">Welcome screen doesn't change toolbar visibility anymore</a></td>
+    <td class="content">
+ 	  The Welcome screen will not hide the toolbars anymore in its maximized state to behave similar like a regular view. 
+    </td>
+  </tr>
+  
+  <tr id="quickaccess-filesystem"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=576341 -->
+    <td class="title"><a href="#codeassist-module">Find Actions can open files from file system</a></td>
+    <td class="content">
+      The <b>Find Actions</b> command, usually accessible with <b>Ctrl+3</b>, now allows to open
+      a file if the query is the path of an existing file on the filesystem.
+    </td>
+  </tr>
+  <!-- ******************* End of Views, Dialogs and Toolbar ************************************* -->
 
-	<tr id="manage-trusted-pgp-keys"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577193 -->
-		<td class="title"><a href="#manage-trusted-pgp-keys">Manage trusted PGP keys</a></td>
-		<td class="content">
-			The <b>Install/Update &gt; Trust</b> preference page supports adding or removing <b>PGP public keys</b> that are
-			trusted by default during the installation process. Artifacts signed with a secret key corresponding to one of 
-			the trusted public PGP keys will install without prompting the <b>Trust</b> dialog.
-		</td>
-	</tr>
-	<tr id="ProgressStableSort"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=578643 -->
-		<td class="title"><a href="#ProgressStableSort">Stable Sort Order in Progress View</a></td>
-		<td class="content">
-			The <b>Progress</b> View will not move jobs down anymore. New jobs are always added at the bottom. That makes it easier to hit the right cancel button.
-			<p>Old behaviour: long running job jumps around.</p>
-			<img width="739" src="images/progress_old.gif" alt="wild moving"/>
-			<p>New behaviour: long running job stays on top.</p>
-			<img width="628" src="images/progress_new.gif" alt="stays on top"/>
-		</td>
-	</tr>
-	<!-- ******************* End of Views, Dialogs and Toolbar ************************************* -->
+  <!-- ******************* Text Editors ************************************* -->
+  <tr>
+    <td id="TextEditors" class="section" colspan="2">
+    <h2>Text Editors </h2>
+    </td>
+  </tr>
 
-	<!-- ******************* Debug ************************************* -->
-	<tr>
-		<td id="Debug" class="section" colspan="2">
-		<h2>Debug </h2>
-		</td>
-	</tr>
+  <tr id="multi-select-commands"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=576377 -->
+    <td class="title"><a href="#multi-select-commands">Action commands for multiple carets/selections</a></td>
+    <td class="content">
+      <b>Text editors</b> now provide various commands to support multiple carets/selections that can be bound to 
+      user-defined keyboard shortcuts for easy selection of text regions in text editors. No default
+      keys have been assigned yet (suggestions below), but can be assigned via <b>Window &gt; Preferences &gt; Keys</b>:
+      <dl>
+        <dt><b>Multi selection down relative to anchor selection</b></dt>
+          <dd>Search next matching region and add it to the current selection, or remove first element from current multi-selection (e.g. <b>Ctrl-Alt-J</b>).</dd>
+        <dt><b>Multi selection up relative to anchor selection</b></dt>
+          <dd>Search next matching region above and add it to the current selection, or remove last element from current multi-selection  (e.g. <b>Alt-J</b>).</dd>
+        <dt><b>End multi-selection</b></dt>
+          <dd>Unselects all multi-selections returning to a single cursor (e.g. <b>Esc</b>)</dd>
+        <dt><b>Add all matches to multi-selection</b></dt>
+          <dd>Looks for all regions matching the current selection or identifier and adds them to a multi-selection (e.g. <b>Ctrl-Shift-Alt-J</b>).</dd>
+        <dt><b>Multi caret up</b></dt>
+          <dd>Add a new caret/multi selection above the current line, or remove the last caret/multi selection (e.g. <b>Ctrl-Alt-Shift-Up</b>).</dd>
+        <dt><b>Multi caret down</b></dt>
+          <dd>Add a new caret/multi selection below the current line, or remove the first caret/multi selection (e.g. <b>Ctrl-Alt-Shift-Down</b>).</dd>  
+      </dl>
+      In addition to the above, the display of multiple carets on the Windows platform has been improved to provide a
+      more stable user experience.<br/><br/>
+      <img width="700" src="images/multi-selection-demo.gif" alt="multi selection demo"/>
+    </td>
+  </tr>
 
-	<tr id="inline-debug-values"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=507546 -->
-		<td class="title"><a href="#inline-debug-values">Debuggers can show values inline</a></td>
-		<td class="content">
-			The <b>Run/Debug</b> preference page now has a new option to allow to <b>show debug
-			values inline on text editors</b>. When enabled, this will print debug values as a code minings annotation on the end
-			of line. The values shown would then react to change in the debug context as you navigate
-			through the execution. 
-			<p>
-			This is an experimental feature and since this requires extra effort for the debuggers to enable it, not all
-			debuggers may support it yet e.g. Java debugger does not support it yet. 
-			</p>
-			<p>
-				<img width="800" src="images/debug-value-inline.png" alt=""/>
-			</p>
-			<p>
-				<img src="images/debug-preference-inline.png" alt="Debug Preference"/>
-			</p>
-		</td>
-	</tr>
-	<!-- ******************* End of Debug ************************************* -->
+  <!-- ******************* End of Text Editors ************************************* -->
 
-	<!-- ****************** Preferences ************************************* -->
-	<tr>
-		<td id="Preferences" class="section" colspan="2">
-		<h2>Preferences </h2>
-		</td>
-	</tr>
+  <!-- ****************** Preferences ************************************* -->
+  <tr>
+    <td id="Preferences" class="section" colspan="2">
+    <h2>Preferences </h2>
+    </td>
+  </tr>
 
-	<tr id="large-file-associations"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577289 -->
-		<td class="title"><a href="#large-file-associations">Large File Associations preferences</a></td>
-		<td class="content">
-			A new set of preferences is added, that can specify which editor is used to open large files of a specific type. This allows users
-			to specify editors that scale better for large project files: e.g. a text editor for large generated sources,
-			or an external editor for very large files that are not handled well by Eclipse editors.
-			<p>The preferences can be set via the respective preference page: <b>General &gt; Editors &gt; Large File Associations</b></p>
-			<p><img src="images/large_file_associations_preference_page.png" alt="Large File Associations preference page"/></p>
-			<p>The preferences can also be via product customization (<code>-productCustomization &lt;path to file&gt;</code>), e.g. contents:</p>
-			<pre>
-# all types with a preference, needed by the preference page UI
-org.eclipse.ui.workbench/largeFileLimits_types=java,xml,txt
-org.eclipse.ui.workbench/largeFileLimits_disabled=cpp
 
-# default, show prompt for all to types that don't have a preference
-org.eclipse.ui.workbench/largeFileLimits_default_enabled=true
-org.eclipse.ui.workbench/largeFileLimits_default_value=100000
+  <tr id="explicit-encoding-workspaces"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=516583 -->
+    <td class="title"><a href="#explicit-encoding-workspaces">Explicit encoding set for new workspaces</a></td>
+    <td class="content">
+	If Eclipse is started without explicit default encoding set, <b>UTF-8</b> will be set as the default encoding
+	for new workspaces.
+	<p>
+	In case some encoding was specified at Eclipse startup either as a JVM
+	system property <code>-Dfile.encoding=XYZ</code>
+	or by product customization preference <code>org.eclipse.core.resources/encoding=XYZ</code>
+	, this custom encoding will be persisted as default encoding for new workspaces.
+	</p>
+	<p>
+		After that all new projects created in new workspaces will also have
+		explicit default encoding set (they will derive that from the workspace encoding
+		and not from some random encoding taken from current OS settings).
+	</p>
+	<p>
+		Existing workspaces or projects with encoding already set will be not
+		affected and will keep their original encoding.
+	</p>
+    </td>
+  </tr>
+  
+  <tr id="explicit-encoding-projects"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=479450 -->
+    <td class="title"><a href="#explicit-encoding-projects">Explicit encoding set for new projects</a></td>
+    <td class="content">
+      <p>All new projects created with 4.24 release will have explicit
+		default project encoding set after creation,
+		based on the workspace default encoding.
+	    </p>
+		<p>
+		As a result, a new project will always have
+		<code>.settings/org.eclipse.core.resources.prefs</code>
+		file generated, containing information about project default encoding.
+	  </p>
+    </td>
+  </tr>
+  
+  <tr id="no-explicit-encoding-project-warning"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=479451 -->
+    <td class="title"><a href="#no-explicit-encoding-project-warning">Warning for projects with no explicit default encoding</a></td>
+    <td class="content">
+      <p>A warning marker is now created for projects with no explicit default encoding. The marker has a quick-fix,
+      that sets the project default encoding to the workspace encoding.</p>
+      <p>Having explicit project encoding eases sharing projects between workspaces with different encodings.</p>
+      <p><img src="images/no-explicit-encoding-project-warning.png" alt="warning marker and quick-fix"/></p>
+    </td>
+  </tr>
+  <!-- ****************** End of Preferences ************************************* -->
 
-# specific editor associations per type and file size
-org.eclipse.ui.workbench/largeFileLimits.java=4096,org.eclipse.ui.DefaultTextEditor,8192,largeFileLimits_prompt
-org.eclipse.ui.workbench/largeFileLimits.xml=1048576,org.eclipse.ui.DefaultTextEditor,77777,Emacs
-org.eclipse.ui.workbench/largeFileLimits.txt=2048,largeFileLimits_prompt
-			</pre>
-		</td>
-	</tr>
-	<!-- ****************** End of Preferences ************************************* -->
+  <!-- ******************* Themes and Styling ************************************* -->
+  <!--
+  <tr>
+    <td id="StylingThemes" class="section" colspan="2">
+    <h2>Themes and Styling </h2>
+    </td>
+  </tr>
+  -->
+  <!-- ******************* End of Themes and Styling ************************************* -->
 
-	<!-- ******************* Themes and Styling ************************************* -->
-	<tr>
-		<td id="StylingThemes" class="section" colspan="2">
-		<h2>Themes and Styling </h2>
-		</td>
-	</tr>
-	
-	<tr id="win32-dark-buttons-css"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577042 -->
-	<td class="title"><a href="#win32-dark-buttons-css">Windows dark theme uses natively styled buttons</a></td>
-	<td class="content">
-		The buttons on Windows OS now use the native support in dark theme.
-		<p>New native look and feel:</p>
-		<img src="images/new-dark-buttons.png" alt=""/>
+<!-- *********************** Debug ******************************** -->
+  <tr>
+    <td id="Debug" class="section" colspan="2">
+    <h2>Debug</h2>
+    </td>
+  </tr>
+  
+  <tr id="debug-monitor-thread-names"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=579064 -->
+    <td class="title"><a href="#debug-monitor-thread-names">Debug thread names</a></td>
+    <td class="content">
+      The daemon threads for monitoring the streams of a debugged programm now have names
+      containing PID and launch config name of the debugged process.<br />
+      Like: <tt>&quot;Output Stream Monitor for PID $PID$ $ILaunchConfiguration.name$&quot;</tt>.<br />
+      There are 4 threads per process: Output Stream Monitor, Input Stream Monitor, Error Stream Monitor, Process monitor.
+    </td>
+  </tr>
+  <!--************************ End of Debug ******************************** -->
 
-		<p>Old look and feel:</p>
-		<img src="images/old-dark-buttons.png" alt=""/>
-	</td>
-	</tr>
-	
-	<!-- ******************* End of Themes and Styling ************************************* -->
-
-	<!-- ******************* General Updates ************************************* -->
-	<tr>
-		<td id="GeneralUpdates" class="section" colspan="2">
-		<h2>General Updates </h2>
-		</td>
-	</tr>
-	
-	<tr id="process-pid"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574403 -->
-		<td class="title"><a href="#process-pid">Process ID in Debugger</a></td>
-		<td class="content">
-			Eclipse Debug framework can now show process ID (pid) of the started processes.
-			The pid is shown (if supported by the concrete debugger implementation) in the <b>Console</b>
-			view description and <b>Properties</b> page for the process. 
-			<p><img src="images/process_properties.png" alt="Process properties page shows process ID"/></p>
-			<p>
-			This should work out of the box for all 
-			processes using or extending <code>org.eclipse.debug.core.model.RuntimeProcess</code>, and can be 
-			easily added to other processes by specifying <code>IProcess.ATTR_PROCESS_ID</code> process attribute.
-			</p>
-			<p>Additionally, the <b>Java debugger</b> now shows process id for the process element in the <b>Debug</b> view.</p>
-			<p><img src="images/show_pid.png" alt="Debugger shows process ID"/></p>
-		</td>
-	</tr>
-	<!-- ******************* End of General Updates ************************************* -->
+  <!-- ******************* General Updates ************************************* -->
+  <!--
+  <tr>
+    <td id="GeneralUpdates" class="section" colspan="2">
+    <h2>General Updates </h2>
+    </td>
+  </tr>
+  -->	
+  <!-- ******************* End of General Updates ************************************* -->
+  <tr><td colspan="2"/></tr>
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->

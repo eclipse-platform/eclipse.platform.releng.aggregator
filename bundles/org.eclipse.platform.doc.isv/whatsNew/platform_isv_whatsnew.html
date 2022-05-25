@@ -23,12 +23,11 @@ ul {padding-left: 13px;}
 <body>
 <h2>What's New in Eclipse 4.24</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.23 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.24 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
   <li><a href="#SWT">SWT Changes</a></li>
-  <li><a href="#Equinox">Equinox Changes</a></li>
 </ul>
 
 <p>
@@ -41,50 +40,63 @@ section of the Workbench User Guide.
 <!-- ****************** START OF N&N TABLE****************** -->
 <table class="news">
 <colgroup>
-	<col class="title" />
-	<col />
+  <col class="title" />
+  <col />
 </colgroup>
 <tbody>
-	<!-- ******************** Platform ********************** -->
-	<tr>
-		<td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
-	</tr>
-	<tr id="class-file-editor-font"> <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=540546 -->
-		<td class="title"><a href="#class-file-editor-font">Class File Editor font</a></td>
-		<td class="content">
-			The Class File Editor uses now the Text font instead of the System font.
-			The monospace font makes the display byte code better readable.
-			<p>
-			Old look and feel:
-			</p>
-			<p>
-				<img src="images/class-file-editor-font-old.png" alt="Class File Editor - Old look"/>
-			</p>
-			<p>
-			New look and feel:
-			</p>
-			<p>
-				<img src="images/class-file-editor-font-new.png" alt="Class File Editor - New look"/>
-			</p>
-		</td>
-	</tr>
-	
-	<!-- ******************** End of Platform ********************** -->
+  <!-- ******************** Platform ********************** -->
+  <tr>
+    <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
+  </tr>
+  <tr id="ilog-service"> <!-- https://github.com/eclipse-platform/eclipse.platform.runtime/issues/33 -->
+	<td class="title"><a href="#ilog-service">ILog can now be acquired as a service</a></td>
+	<td class="content">
+		The <code>ILog</code> can now be acquired as service, so no need to have a <code>Plugin activator</code> or call <code>Platform.getLog(...)</code> anymore if you are in a Dependency Injection Context:
+		<p>
+		<b>Example with E4:</b>
+		</p>
+		<pre>@Inject ILog log;</pre>
+		<p>
+		<b>Example with Declarative Services:</b><br/>
+      	</p>
+		<pre>@Reference ILog log;</pre>
+      	<p>
+      	Of course any other way to acquire a Service (<code>ServiceTracker</code>, <code>ServiceCaller</code>, ...) will also work.
+      	</p>
+	</td>
+  </tr>
+  <tr id="EclipseContextFactory"> <!-- https://github.com/eclipse-platform/eclipse.platform.runtime/issues/43 -->
+	<td class="title"><a href="#EclipseContextFactory">New EclipseContextFactory<br/>.getServiceContext(Class&lt;?&gt;) method</a></td>
+	<td class="content">
+		<p>
+		There is now a new <code>EclipseContextFactory.getServiceContext(Class&lt;?&gt;)</code> method that could be used to acquire an E4 Service Context containing all OSGi services using a context class.
+		This becomes handy in situations where you neither have an E4 context nor an OSGi context at hand (e.g. E3 legacy code) but still want to inject some fields or create injected objects.
+		</p>
+	</td>
+  </tr>
+  <!-- ******************** End of Platform ********************** -->
 
-	<!-- *********************** SWT *********************** -->
-	<tr>
-		<td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
-	</tr>
-
-
-	<!-- *********************** End of SWT *********************** -->
-
-	<!-- ******************** Equinox ********************** -->
-	<tr>
-		<td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
-	</tr>
-
-	<!-- *********************** End of Equinox *********************** -->
+  <!-- *********************** SWT *********************** -->
+  <tr>
+    <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
+  </tr>
+  <tr id="win32-dark-Text-search-cancel-buttons"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/issues/18 -->
+	<td class="title"><a href="#win32-dark-Text-search-cancel-buttons">Improved Text's search/cancel buttons in Windows dark theme</a></td>
+	<td class="content">
+		The Windows <code>Text</code> widget now supports improved search and cancel buttons in the dark theme:
+		<p>
+		<img src="images/windows-dark-theme-text-search-cancel-buttons.png" alt=""/>
+		</p>
+		<p>
+        On <b>Windows 10</b>, all the dark theme tweaks including the <a href="#win32-dark-Text-search-cancel-buttons">dark text's search and cancel buttons</a> can be disabled using the 
+        <code>org.eclipse.swt.internal.win32.disableCustomThemeTweaks</code> Java property.<br/>
+        For Example: add this VM argument in eclipse.ini or on the command line after <b><code>-vmargs</code></b>:
+      </p>
+      <pre><b>-Dorg.eclipse.swt.internal.win32.disableCustomThemeTweaks=true</b></pre>
+	</td>
+  </tr>
+  <!-- *********************** End of SWT *********************** -->
+  <tr><td colspan="2"/></tr>
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->

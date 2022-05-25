@@ -17,21 +17,21 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.23 (JDT)</title>
+<title>What's New in Eclipse 4.24 (JDT)</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.23 (JDT)</h2>
+<h2>What's New in Eclipse 4.24 (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.23 release of Eclipse.
+for the 4.24 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  	<!--li><a href="#Java17">Java&trade; 17 Support</a></li-->
-  	<!--li><a href="#JUnit">JUnit</a></li-->
+  	<li><a href="#Java18">Java&trade; 18 Support</a></li>
+  	<li><a href="#JUnit">JUnit</a></li>
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<!--<li><a href="#JavaCompiler">Java Compiler</a></li>-->
-	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
-	<li><a href="#JavaFormatter">Java Formatter</a></li>
+	<!--li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li-->
+	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
 	<li><a href="#Debug">Debug</a></li>
 	<!--li><a href="#JDTDev">JDT Developers</a></li-->
 </ul>
@@ -48,16 +48,53 @@ document for changes in the Platform.</p>
   <col />
 </colgroup>
 <tbody>
-
-  <!-- ******************* Java XX Support ************************************* -->
-  <!--
+<!-- ******************* Java 18 Support ************************************* -->
   <tr>
-    <td id="JavaXX" class="section" colspan="2">
-    <h2>Java&trade; XX Support </h2>
+    <td id="Java18" class="section" colspan="2">
+    <h2>Java&trade; 18 Support </h2></td>
+  </tr>
+   <tr id="Java_18"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=570733 -->
+      <td class="title"><a href="#Java_18">Java 18</a></td>
+      <td class="content">
+          <a href="https://jdk.java.net/18/" target="_blank">Java 18</a> is out and Eclipse JDT supports Java 18 in 4.24. 
+          <p></p>
+          <p>
+          The release notably includes the following Java 18 features:
+           <br/>
+           <a href="https://openjdk.java.net/jeps/420" target="_blank"> JEP 420: Pattern Matching for switch (Second Preview)</a>.
+           <br/>
+           <a href="https://openjdk.java.net/jeps/413" target="_blank"> JEP 413: Code Snippets in Java API Documentation</a>.
+           </p>
+           <p>
+           Please note that preview option should be on for <a href="https://openjdk.java.net/projects/jdk/18/" target="_blank">preview language features</a>.
+           For an informal introduction of the support, 
+           please refer to <a href="https://wiki.eclipse.org/Java18/Examples" target="_blank">Java 18 Examples wiki</a>. 
+           </p>
+      </td>
+  </tr>
+  <!-- ******************* End of Java 18 Support ************************************* -->
+
+
+  <!-- ******************* JUnit ************************************* -->
+  <tr>
+    <td id="JUnit" class="section" colspan="2">
+    <h2>JUnit</h2>
     </td>
   </tr>
-  -->
-  <!-- ******************* End of Java XX Support ************************************* -->
+  <tr id="junit5-rerun-failures-first"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=578747 -->
+    <td class="title"><a href="#junit5-rerun-failures-first">JUnit 5 'Rerun failures first' support</a></td>
+    <td class="content">
+      Support for rerunning a test with failures first from the <b>JUnit View</b> is now supported for JUnit 5 tests.  This support already existed for JUnit4 tests but was previously disabled for JUnit5 testing.
+      <p>
+        To run, click on the <b>Rerun Test - Failures First</b> button in the JUnit view.</p>
+      <p><img src="images/run-failures-first-before.png" alt="Before"/></p>
+      <p>
+        After pressing the button:
+      </p>
+      <p><img src="images/run-failures-first-after.png" alt="After"/></p>
+    </td>
+  </tr>
+  <!-- ******************* End of JUnit ************************************* -->
 
   <!-- ******************* Java Editor ************************************* -->
   <tr>
@@ -65,91 +102,79 @@ document for changes in the Platform.</p>
     <h2>Java Editor </h2>
     </td>
   </tr>
-  <tr id="codeassist-module"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=566060 -->
-    <td class="title"><a href="#codeassist-module">Code assist support for module in @see, @link and @linkplain javadoc tags</a></td>
+  
+  <tr id="strconcat-to-textblock"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=561484 -->
+    <td class="title"><a href="#strconcat-to-textblock">Remove unused private method parameters</a></td>
     <td class="content">
-      New code assist support has been added for modules in @see, @link and @linkplain javadoc tags for projects with Java level 15 or higher.
+      A new <b>cleanup</b> and <b>quick-assist</b> has been added to remove unused parameters of private methods. If removing parameters might
+      lead to a conflict with an another method, the private method is renamed to be unique. The cleanup is not available if there 
+      is a method reference to the method, as in <code>stream.filter(MyClass::foo)</code>
       <p>
-          In the below image: When <b>'Ctrl + Space'</b> is pressed at the cursor location, the module names that this project has access to are suggested.
-      </p>
-      <p><img src="images/codeassist-module-name.png" alt="module"/></p>
+        To apply the cleanup, select the <b>Remove unused private method parameters</b> checkbox on the <b>Unnecessary Code</b> tab in your cleanup profile:</p>
+      <p><img src="images/remove_param_1.png" alt="Preference"/></p>
       <p>
-          In the below image: When <b>'Ctrl + Space'</b> is pressed at the cursor location, the packages that the above selected module exports are shown.
+        With the cleanup, the following code:
       </p>
-      <p><img src="images/codeassist-module-packages.png" alt="package"/></p>
+      <p><img src="images/remove_param_2.png" alt="Before"/></p>
       <p>
-          In the below image: When <b>'Ctrl + Space'</b> is pressed at the cursor location, the classes in the above selected package are shown.
+        changes to:
       </p>
-      <p><img src="images/codeassist-module-package-classes.png" alt="class"/></p>
+      <p><img src="images/remove_param_3.png" alt="After"/></p>
+      <p>To remove a single parameter, a quick-assist has been added that can be activated with <b>CTRL+1</b> with the cursor located anywhere on the parameter.
+      </p>
     </td>
-  </tr>
-  <tr id="save-to-static-favorites"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577232 -->
-    <td class="title"><a href="#save-to-static-favorites">Save to static favorites</a></td>
-    <td class="content">
-      A new quick assist has been added to save a static import to the <b>Preferences &gt; Java &gt; Editor &gt; Content Assist &gt; Favorites</b> list of static members to propose via content assist.
-      To invoke the new feature, perform a <b>Ctrl + 1</b> on the desired static import to add:
-      <p><img src="images/save-to-static-favorites.png" alt="class"/></p>
-    </td>
-  </tr>
-  <tr id="extract-lambda-body-to-method"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=558292 -->
-    <td class="title"><a href="#extract-lambda-body-to-method">Extract lambda body to method</a></td>
-    <td class="content">
-      A new quick assist has been added to extract the body of a lambda to a method.
-      To invoke the new feature, perform a <b>Ctrl + 1</b> within the selected lambda body:
-      <p><img src="images/extract-lambda-body-to-method.png" alt="class"/></p>
-    </td>
-  </tr>
-  <!-- ******************* End of Java Editor ************************************* -->
+    </tr>
+
+    <tr id="extend_interface_assist"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=567666 -->
+        <td class="title"><a href="#extend_interface_assist">Extend Interface</a></td>
+        <td class="content">
+            A new <b>quick-assist</b> has been added to extend an Interface. When selected, the new Interface wizard opens up.
+        <p><img src="images/extend_interface_assist.png" alt="Before" /></p>
+        </td>
+    </tr>
+    
+    <tr id="create_sub_type_for_sealed_type"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577317 -->
+        <td class="title"><a href="#create_sub_type_for_sealed_type">Create sub type for sealed super type</a></td>
+        <td class="content">
+            A new set of <b>quick-fixes</b> has been added to create sub-type for a sealed type which does not have any permitted types. When selected, the appropriate new <b>Class/Record/Interface wizard</b> opens up.
+            <p>These quick fixes have been added to fix the error : 
+            <code>Sealed class or interface lacks the permits clause and no class or interface from the same compilation unit declares Cls1 as its direct superclass or superinterface</code></p>
+        <p>As shown below, two new quick fixes have been added to create sub-type for a sealed super class.</p>
+        <p><img src="images/permitted_sub_class.png" alt="Before" /></p>
+        <p>As shown below, six new quick fixes have been added to create sub-type for a sealed super interface.</p>
+        <p><img src="images/permitted_sub_type.png" alt="Before" /></p>
+        </td>
+    </tr>
+<!-- ******************* End of Java Editor ************************************* -->
 
   <!-- ******************* Java Views and Dialogs ************************************* -->
+  <!--
   <tr>
     <td id="JavaViewsAndDialogs" class="section" colspan="2">
     <h2>Java Views and Dialogs</h2>
     </td>
   </tr>
-  <tr id="show-implementations-of-callee"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577919 -->
-    <td class="title"><a href="#show-implementations-of-callee">Show implementations of callee</a></td>
-    <td class="content">
-      The <b>Call Hierarchy</b> view can now show implementing methods as potential callee methods when viewing callees.
-      <p><img src="images/callee_on_implementations.png" alt="Callee call hierarchy"/></p>
-      This behavior can be controlled using the following preference:
-      <p><img src="images/callee_preference.png" alt="Call hierarchy preference"/></p>
-    </td>
-  </tr>
-
+  -->
   <!-- ******************* End of Java Views and Dialogs ************************************* -->
 
+  <!-- ******************* Java Compiler ************************************* -->
+  <!--
+  <tr>
+    <td id="JavaCompiler" class="section" colspan="2">
+    <h2>Java Compiler</h2>
+    </td>
+  </tr>
+  -->
+  <!-- ******************* End of Java Compiler ************************************* -->
+
   <!-- ******************* Java Formatter ************************************* -->
+  <!--
   <tr>
     <td id="JavaFormatter" class="section" colspan="2">
     <h2>Java Formatter </h2>
     </td>
   </tr>
-  <tr id="formatter-switch-case"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=578122  -->
-                                  <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=578446  -->
-    <td class="title"><a href="formatter-switch-case">New options for switch/case constructs</a></td>
-    <td class="content">
-      A few new settings have been implemented in the <b>Java Formatter</b> that allow more control over switch constructs introduced in Java 14.
-      <p>In the <b>Line Wrapping</b> section, we can decide to allow <b>wrapping in switch cases: before or after an arrow,
-      and also inside lists of expressions to match</b> (this can be controlled separately for switch expressions and switch statements).</p>
-      <p><img src="images/formatter-switch-wrapping.png" alt="Switch case wrapping"/></p>
-      <p>In the <b>Keep braced code on one line</b> section there are two new options for a more compact formatting of <b>code blocks in switch cases with arrows</b>
-      or even <b>whole switch expressions/statements</b>.</p>
-      <p><img src="images/formatting-switch-oneline.png" alt="Switch on one line"/></p>
-      <p>The formatter configuration sections can be found in the <b>Profile Editor</b> (<b>Preferences &gt; Java &gt; Code Style &gt; Formatter &gt; Edit...</b>).</p>
-    </td>
-  </tr>
-  <tr id="formatter-wrap-invocation"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=578115  -->
-    <td class="title"><a href="formatter-wrap-invocation">Method invocation wrapping indentation</a></td>
-    <td class="content">
-      It turns out that it's not obvious how to indent a wrapped method invocation when the preceding expression itself is complex enough to also be wrapped into multiple lines.
-      Should the indentation be added to the existing indentation at the end of the expression, or just reset and assume that only the indentation of expression's first line matters?
-      <p>Previously only the former behavior was available, now there's a setting to choose the latter.
-      The checkbox called <b>Indent from the base expression's first line</b> is located in the <b>Line Wrapping &gt; Wrapping settings &gt; Function calls</b> section,
-      right under the <b>Qualified invocations</b> setting.</p>
-      <p><img src="images/formatter-invocation-wrapping.png" alt="Method invocation wrapping"/></p>
-    </td>
-  </tr>
+  -->
   <!-- ******************* End of Java Formatter ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
@@ -159,55 +184,31 @@ document for changes in the Platform.</p>
     </td>
   </tr>
   
-  <tr id="finalFields"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577564  -->
-    <td class="title"><a href="finalFields">Warning about changing final fields</a></td>
+  <tr id="debug-stack"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=547041 -->
+    <td class="title"><a href="#debug-stack">Console support for stack from Debug view</a></td>
     <td class="content">
-      Since Eclipse 3.1 <b>Eclipse Java debugger</b> allows changes on final field values.
-      While technically possible, the consequences of such changes are not trivial, 
-      could affect seemingly unrelated code and lead to various dangerous effects.
-      <p>Therefore, with Eclipse 4.23 Java debugger shows a new warning:</p> 
-      <p><img src="images/final_modification_warning.png" alt="Debugger warning"/></p>
-      <p>This warning is enabled by default and can be disabled via preferences:</p>
-      <p><img src="images/final_modification_option.png" alt="Updated preferences"/></p>
-      <p>Additionally, <code>org.eclipse.debug.ui.variableValueEditors</code> extension point
-      is updated to allow custom products to contribute their own <code>variableValueEditor</code> 
-      implementations to existing debug models and have even more control over final field modifications.</p>
-    </td>
-  </tr>
-
-  <tr id="labels-in-expressions-view"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577103  -->
-    <td class="title"><a href="labels-in-expressions-view">Highlight labelled objects in the "Expressions" view too</a></td>
-    <td class="content">
-      Since Eclipse 4.22, the <b>Java debugger</b> allows to label object instances with custom strings.
-      This feature has been extended to show those labels in the <b>Expressions</b> view, highlighted with red color by default.
-      <p><img src="images/labels_in_expressionview.png" alt="Expression view"/></p>
-      <p>This works for watched and inspected objects too.</p>
-    </td>
-  </tr>
-
-  <tr id="open-field-declaration"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=577622 -->
-    <td class="title"><a href="open-field-declaration">Open field declaration</a></td>
-    <td class="content">
-      During debugging, for a variable, previously it was only possible to navigate to the actual or to the declared type of that variable.
-      With the new <b>Open Field Declaration</b> context menu item, it is extended to go to the declaration of that field. This can be especially helpful,
-      if the object is inside a deep class inheritance hierarchy.
-      <p><img src="images/open-field-declaration-menuitem.png" alt="Open Field Declaration"/></p>
-    </td>
-  </tr>
-  
-  <tr id="lambda-entry-declaration"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=486264 -->
-    <td class="title"><a href="lambda-entry-declaration">Lambda Entry Breakpoint</a></td>
-    <td class="content">
-      During debugging, you can now add entry breakpoints for Lambda expressions which will enable the debugger to stop at the entry of lambda expression instead of stopping at the first expression of the line.
-      You can see the breakpoint in the <b>Breakpoints</b> view indicated by the implemented functional interface. Double clicking the breakpoint in Breakpoints view will display the associated Lambda Expression in the editor.
+      Surprisingly enough, <b>Java Stack Trace Console</b> never supported navigation to
+      Java types for Java stack traces copied from <b>Debug</b> view via <b>Copy Stack</b> action.
       <p>
-       You can add new Lambda Entry breakpoint by selecting the <b>Toggle Lambda Entry Breakpoint</b> from the <b>Ruler</b> context menu or <b>Run</b>  menu. You can select a particular lambda expression to add the breakpoint,
-       if none is selected the entry breakpoint is added to the first lambda expression on the line. You can add only one breakpoint per line.
+       Now, the console will underline type names and line numbers and clicking on
+       links will jump to the corresponding source code. If the type name is not unique,
+       default <b>Select type</b> dialog will appear to allow selection of the right type.
       </p>
-      <p><img src="images/lambda_entry_breakpoint.png" alt="Lambda Entry Breakpoint"/></p>
+      <p><img src="images/java_stack_console.png" alt="Console shows links to Java types"/></p>
     </td>
   </tr>
   <!--************************ End of Debug ******************************** -->
+
+  <!-- *********************** JDT Developers ******************************** -->
+  <!--
+  <tr>
+    <td id="JDTDev" class="section" colspan="2">
+    <h2>JDT Developers</h2>
+    </td>
+  </tr>
+  -->
+  <!-- *********************** End of JDT Developers ******************************** -->
+  <tr><td colspan="2"/></tr>
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->
