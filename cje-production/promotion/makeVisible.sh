@@ -186,8 +186,8 @@ then
     popd
     exit $RC
   fi
-  git submodule foreach git push --verbose origin tag ${TAG}
-  git push --verbose origin tag ${TAG}
+  git submodule foreach git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
+  git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
 
   RC=$?
   if [[ $RC != 0 ]]
