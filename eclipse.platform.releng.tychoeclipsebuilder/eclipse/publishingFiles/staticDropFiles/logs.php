@@ -72,6 +72,7 @@ listDetailedLogs($testresults,$expectedTestConfigs[2]);
 listDetailedLogs($testresults,$expectedTestConfigs[3]);
 listDetailedLogs($testresults,$expectedTestConfigs[4]);
 listDetailedLogs($testresults,$expectedTestConfigs[5]);
+listDetailedLogs($testresults,$expectedTestConfigs[6]);
 ?>
 
 </div>
