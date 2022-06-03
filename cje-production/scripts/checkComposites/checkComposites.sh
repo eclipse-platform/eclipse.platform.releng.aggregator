@@ -29,8 +29,8 @@ repoList="\
 /eclipse/updates/4.24/ \
 /eclipse/updates/4.25/ \
 /eclipse/updates/4.25-I-builds/ \
-/eclipse/updates/4.24-Y-builds/ \
-/eclipse/updates/4.24-P-builds/ \
+/eclipse/updates/4.25-Y-builds/ \
+/eclipse/updates/4.25-P-builds/ \
 "
 
 
