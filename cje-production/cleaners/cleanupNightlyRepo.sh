@@ -202,10 +202,10 @@ doDryrun=
 # global
 declare -a reposToRemove=()
 cleanRepo $eclipseIRepo I 4 $doDryrun
-#declare -a reposToRemove=()
-#cleanRepo $eclipseYRepo Y 2 $doDryrun
-#declare -a reposToRemove=()
-#cleanRepo $eclipsePRepo P 2 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipseYRepo Y 2 $doDryrun
+declare -a reposToRemove=()
+cleanRepo $eclipsePRepo P 2 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseBuildTools I 4 $doDryrun
 
