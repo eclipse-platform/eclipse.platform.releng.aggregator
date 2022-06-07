@@ -178,7 +178,7 @@ then
   git submodule foreach git pull --rebase
 
   git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
-  git submodule foreach git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
+  git submodule foreach 'git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}; git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}; || :'
   RC=$?
   if [[ $RC != 0 ]]
   then
@@ -186,7 +186,7 @@ then
     popd
     exit $RC
   fi
-  git submodule foreach git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
+  #git submodule foreach git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
   git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
 
   RC=$?
