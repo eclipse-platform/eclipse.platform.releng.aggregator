@@ -15,7 +15,18 @@
       name="isBuildTested"
       value="true" />
 
-    <script language="javascript">
+    <loadresource property="buildType">
+      <string value="${buildId}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="buildType: ${buildType}"/>
+   
+    <!--	
+  	<script language="javascript">
       <![CDATA[
         var buildId = project.getProperty("buildId");
         var pattern = new RegExp(/^([IMXYPNSRU])(\d{8})-(\d{4})$/);
@@ -25,6 +36,7 @@
         project.setProperty("buildType", sArray[1]);
       ]]>
     </script>
+    -->
     <property
     	name="dropsDirSegment"
     	value="drops4"/>
@@ -123,6 +135,38 @@
     <fail
       message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
       unless="streamOK" />
+
+    <loadresource property="eclipseStreamMajor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+
+    <loadresource property="eclipseStreamMinor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+
+    <loadresource property="eclipseStreamService">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\3"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamService: ${eclipseStreamService}"/>
+
+<!--
     <script language="javascript">
       <![CDATA[
             var eclipseStream = project.getProperty("eclipseStream");
@@ -136,7 +180,7 @@
             project.setProperty("eclipseStreamService", sArray[3]);
           ]]>
     </script>
-
+-->
   </target>
 
 </project>
