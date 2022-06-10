@@ -108,7 +108,40 @@
     <fail
       message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
       unless="streamOK" />
-    <script language="javascript">
+
+  	<loadresource property="eclipseStreamMajor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+
+    <loadresource property="eclipseStreamMinor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+
+    <loadresource property="eclipseStreamService">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\3"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamService: ${eclipseStreamService}"/>
+
+  	<!--
+    
+  	<script language="javascript">
       <![CDATA[
             var eclipseStream = project.getProperty("eclipseStream");
             var pattern = new
@@ -121,6 +154,7 @@
             project.setProperty("eclipseStreamService", sArray[3]);
           ]]>
     </script>
+    -->
 
     <!--regenerate the index page with links to test results -->
     <ant
