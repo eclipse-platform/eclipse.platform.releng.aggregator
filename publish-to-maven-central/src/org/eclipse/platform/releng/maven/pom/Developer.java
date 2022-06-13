@@ -74,7 +74,7 @@ public abstract class Developer {
 		String[] tokens = gitUrl.split("/");
 		String project = "eclipse.platform";
 		if (tokens.length >=5) {
-			switch (token[3]) {
+			switch (tokens[3]) {
 				case "eclipse-jdt" : 
 					project = "eclipse.jdt";
 					break;
