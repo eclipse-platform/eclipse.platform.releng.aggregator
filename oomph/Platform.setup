@@ -148,7 +148,7 @@
     </targlet>
   </setupTask>
   <project name="platform"
-      label="Base, Update, and Ant">
+      label="Base, Runtime, Update, and Ant">
     <setupTask
         xsi:type="git:GitCloneTask"
         id="github.clone.platform"
@@ -176,13 +176,32 @@
           name="Platform Base, Update, and Ant"
           activeRepositoryList="${eclipse.target.platform}">
         <requirement
+            name="org.eclipse.test.performance"
+            optional="true"/>
+        <requirement
             name="*"/>
         <sourceLocator
-            rootFolder="${github.clone.platform.location}"/>
+            rootFolder="${github.clone.platform.location}">
+          <predicate
+              xsi:type="predicates:NotPredicate">
+            <operand
+                xsi:type="predicates:NamePredicate"
+                pattern="org\.eclipse\.core\.tools-.*">
+              <annotation
+                  source="http://www.eclipse.org/oomph/base/Warning">
+                <detail
+                    key="diagnostic">
+                  <value>This bundle appears to be very old and no longer supported.</value>
+                </detail>
+              </annotation>
+            </operand>
+          </predicate>
+        </sourceLocator>
       </targlet>
     </setupTask>
     <setupTask
-        xsi:type="setup.workingsets:WorkingSetTask">
+        xsi:type="setup.workingsets:WorkingSetTask"
+        id="platform.base.workingsets">
       <workingSet
           name="Platform Base">
         <predicate
@@ -207,7 +226,7 @@
               pattern=".*/eclipse\.platform/ant/.*"/>
           <operand
               xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//@projects[name='platform']/@setupTasks.2/@workingSets[name='Platform%20Ant%20Tests']"/>
+              excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Ant%20Tests']"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -232,6 +251,33 @@
           <operand
               xsi:type="predicates:LocationPredicate"
               pattern=".*/eclipse\.platform/update/.*"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Runtime">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.core.runtime"/>
+          <operand
+              xsi:type="workingsets:ExclusionPredicate"
+              excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Runtime%20Tests'] //'platform.base.workingsets'/@workingSets[name='Platform%20Ant'] //'platform.base.workingsets'/@workingSets[name='Platform%20Ant%20Tests'] //'platform.base.workingsets'/@workingSets[name='Platform%20Base'] //'platform.base.workingsets'/@workingSets[name='Platform%20Update']"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Runtime Tests">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.core.runtime"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*\.tests.*|com\.google\.code\.atinject\.tck"/>
+          <operand
+              xsi:type="workingsets:ExclusionPredicate"
+              excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Ant%20Tests']"/>
         </predicate>
       </workingSet>
     </setupTask>
@@ -814,7 +860,6 @@
     <description>The Platform Releng Build Tools</description>
   </project>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.resources/master/bundles/org.eclipse.core.resources.releng/platformResources.setup#/"/>
-  <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.runtime/master/bundles/org.eclipse.core.runtime.releng/platformRuntime.setup#/"/>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.swt/master/bundles/org.eclipse.swt.tools/Oomph/platformSwt.setup#/"/>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.team/master/bundles/org.eclipse.team.releng/platformTeam.setup#/"/>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.text/master/org.eclipse.text.releng/platformText.setup#/"/>
