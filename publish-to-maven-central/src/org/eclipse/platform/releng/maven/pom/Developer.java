@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2016, 2018 GK Software SE and others.
+ * Copyright (c) 2016, 2022 GK Software SE and others.
  * 
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -72,6 +72,29 @@ public abstract class Developer {
 			return "https://projects.eclipse.org/projects/eclipse.platform/who";
 		}
 		String[] tokens = gitUrl.split("/");
+		String project = "eclipse.platform";
+		if (tokens.length >=5) {
+			switch (token[3]) {
+				case "eclipse-jdt" : 
+					project = "eclipse.jdt";
+					break;
+				case "eclipse-pde" : 
+					project = "eclipse.pde";
+					break;
+				case "eclipse-equinox" : 
+					project = "eclipse.equinox";
+					break;
+				case "eclipse-platform" : 
+					project = "eclipse.platform";
+					break;
+				default : 
+					project = "eclipse.platform";
+					break;
+			}
+		}
+		return "https://projects.eclipse.org/projects/"+project+"/who";
+		
+		/*
 		if (tokens.length >= 6) {
 			String token = tokens[5]; // https://git.eclipse.org/c/equinox/rt.equinox.framework.git => start with rt.equinox.framework
 			int end = token.endsWith(".git") ? token.length()-".git".length() : token.length();
@@ -106,6 +129,7 @@ public abstract class Developer {
 			return "https://projects.eclipse.org/projects/"+project+"/who";
 		}
 		return null;
+		*/
 	}
 
 	private static List<Developer> getDevelopers(String projRepo, String bsn) {

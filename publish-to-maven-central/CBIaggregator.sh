@@ -336,15 +336,20 @@ function buildSourceJar() {
 		/bin/rm -r assemble
 	fi
 	/bin/mkdir assemble
-	giturl=ssh://genie.releng@git.eclipse.org:29418/${1}
-	gitpath=${2}
+	giturl=git@github.com:${1}
+	gitcache_dir=${WORKSPACE}/gitcache
+	gitpath=${gitcache_dir}/repo/${2}
 	gittag=${3}
 	group=${4}
 	artifact=${5}
 	version=${6}
-	git archive --remote=${giturl} \
-		${gittag} ${gitpath} \
-		| tar xv
+	mkdir -p $gitcache_dir
+	pushd ${gitcache_dir}
+		git clone ${giturl} repo
+		pushd repo
+			git checkout ${3}
+		popd
+	popd
 	/bin/mv ${gitpath}/src/* assemble/
 	/bin/mv ${gitpath}/META-INF assemble/
 	if [ -d ${gitpath}/OSGI-INF ]
@@ -360,7 +365,7 @@ function buildSourceJar() {
 			/bin/mv "${gitpath}/${src}" assemble/ 
 		done
 	fi
-	/bin/rm -rf ${gitpath}
+	/bin/rm -rf ${gitcache_dir}
 	cd assemble
 	jar cf ../${group}/${artifact}/${version}/${artifact}-${version}-sources.jar *
 	cd -
