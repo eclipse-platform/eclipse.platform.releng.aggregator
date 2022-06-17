@@ -751,15 +751,12 @@
                 <configuration>
                   <exportAntProperties>true</exportAntProperties>
                   <target>
-                    <loadfile srcfile=".project" property="natureIn.project" failonerror="false">
-                      <filterchain>
-                        <linecontains>
-                          <contains value="org.eclipse.pde.api.tools.apiAnalysisNature"/>
-                        </linecontains>
-                      </filterchain>
-                    </loadfile>
                     <condition property="skipAPIDescription" value="false" else="true">
-                        <isset property="natureIn.project" />
+                      <!-- If the property is already set this has no effect because properties are immutable in ANT -->
+                      <and>
+                        <available file="${basedir}/META-INF/MANIFEST.MF"/>
+                        <resourcecontains resource="${basedir}/.project" substring="org.eclipse.pde.api.tools.apiAnalysisNature" />
+                      </and>
                     </condition>
                   </target>
                 </configuration>
@@ -844,10 +841,12 @@
                 <configuration>
                   <exportAntProperties>true</exportAntProperties>
                   <target>
-                    <condition property="skipAPIAnalysis" value="true" else="false">
-                      <not>
+                    <condition property="skipAPIAnalysis" value="false" else="true">
+                      <!-- If the property is already set this has no effect because properties are immutable in ANT -->
+                      <and>
                         <available file="${basedir}/META-INF/MANIFEST.MF"/>
-                      </not>
+                        <resourcecontains resource="${basedir}/.project" substring="org.eclipse.pde.api.tools.apiAnalysisNature" />
+                      </and>
                     </condition>
                     <echo file="${project.build.directory}/${project.artifactId}-apiBaseline.target">
                       <![CDATA[
