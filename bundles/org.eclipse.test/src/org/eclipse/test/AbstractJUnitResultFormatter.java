@@ -39,10 +39,10 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
 /**
- * Contains some common behaviour that's used by our internal {@link TestResultFormatter}s
+ * Contains some common behaviour that's used by our internal
+ * {@link TestResultFormatter}s
  */
 abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
-
 
 	protected static String NEW_LINE = System.lineSeparator();
 	protected TestExecutionContext context;
@@ -82,46 +82,48 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	}
 
 	/**
-	 * @return Returns true if there's any stdout data, that was generated during the
-	 * tests, is available for use. Else returns false.
+	 * @return Returns true if there's any stdout data, that was generated during
+	 *         the tests, is available for use. Else returns false.
 	 */
 	boolean hasSysOut() {
 		return this.sysOutStore != null && this.sysOutStore.hasData();
 	}
 
 	/**
-	 * @return Returns true if there's any stderr data, that was generated during the
-	 * tests, is available for use. Else returns false.
+	 * @return Returns true if there's any stderr data, that was generated during
+	 *         the tests, is available for use. Else returns false.
 	 */
 	boolean hasSysErr() {
 		return this.sysErrStore != null && this.sysErrStore.hasData();
 	}
 
 	/**
-	 * @return Returns a {@link Reader} for reading any stdout data that was generated
-	 * during the test execution. It is expected that the {@link #hasSysOut()} be first
-	 * called to see if any such data is available and only if there is, then this method
-	 * be called
-	 * @throws IOException If there's any I/O problem while creating the {@link Reader}
+	 * @return Returns a {@link Reader} for reading any stdout data that was
+	 *         generated during the test execution. It is expected that the
+	 *         {@link #hasSysOut()} be first called to see if any such data is
+	 *         available and only if there is, then this method be called
+	 * @throws IOException If there's any I/O problem while creating the
+	 *                     {@link Reader}
 	 */
 	Reader getSysOutReader() throws IOException {
 		return this.sysOutStore.getReader();
 	}
 
 	/**
-	 * @return Returns a {@link Reader} for reading any stderr data that was generated
-	 * during the test execution. It is expected that the {@link #hasSysErr()} be first
-	 * called to see if any such data is available and only if there is, then this method
-	 * be called
-	 * @throws IOException If there's any I/O problem while creating the {@link Reader}
+	 * @return Returns a {@link Reader} for reading any stderr data that was
+	 *         generated during the test execution. It is expected that the
+	 *         {@link #hasSysErr()} be first called to see if any such data is
+	 *         available and only if there is, then this method be called
+	 * @throws IOException If there's any I/O problem while creating the
+	 *                     {@link Reader}
 	 */
 	Reader getSysErrReader() throws IOException {
 		return this.sysErrStore.getReader();
 	}
 
 	/**
-	 * Writes out any stdout data that was generated during the
-	 * test execution. If there was no such data then this method just returns.
+	 * Writes out any stdout data that was generated during the test execution. If
+	 * there was no such data then this method just returns.
 	 *
 	 * @param writer The {@link Writer} to use. Cannot be null.
 	 * @throws IOException If any I/O problem occurs during writing the data
@@ -132,8 +134,8 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	}
 
 	/**
-	 * Writes out any stderr data that was generated during the
-	 * test execution. If there was no such data then this method just returns.
+	 * Writes out any stderr data that was generated during the test execution. If
+	 * there was no such data then this method just returns.
 	 *
 	 * @param writer The {@link Writer} to use. Cannot be null.
 	 * @throws IOException If any I/O problem occurs during writing the data
@@ -143,7 +145,8 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 		this.writeFrom(this.sysErrStore, writer);
 	}
 
-	static Optional<TestIdentifier> traverseAndFindTestClass(final TestPlan testPlan, final TestIdentifier testIdentifier) {
+	static Optional<TestIdentifier> traverseAndFindTestClass(final TestPlan testPlan,
+			final TestIdentifier testIdentifier) {
 		if (isTestClass(testIdentifier).isPresent()) {
 			return Optional.of(testIdentifier);
 		}
@@ -184,22 +187,24 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 
 	protected void handleException(final Throwable t) {
 		// we currently just log it and move on.
-		this.context.getProject().ifPresent(p -> p.log("Exception in listener "
-				+ AbstractJUnitResultFormatter.this.getClass().getName(), t, Project.MSG_DEBUG));
+		this.context.getProject()
+		.ifPresent(p -> p.log("Exception in listener " + AbstractJUnitResultFormatter.this.getClass().getName(),
+				t, Project.MSG_DEBUG));
 	}
 
-
 	/*
-    A "store" for sysout/syserr content that gets sent to the AbstractJUnitResultFormatter.
-    This store first uses a relatively decent sized in-memory buffer for storing the sysout/syserr
-    content. This in-memory buffer will be used as long as it can fit in the new content that
-    keeps coming in. When the size limit is reached, this store switches to a file based store
-    by creating a temporarily file and writing out the already in-memory held buffer content
-    and any new content that keeps arriving to this store. Once the file has been created,
-    the in-memory buffer will never be used any more and in fact is destroyed as soon as the
-    file is created.
-    Instances of this class are not thread-safe and users of this class are expected to use necessary thread
-    safety guarantees, if they want to use an instance of this class by multiple threads.
+	 * A "store" for sysout/syserr content that gets sent to the
+	 * AbstractJUnitResultFormatter. This store first uses a relatively decent sized
+	 * in-memory buffer for storing the sysout/syserr content. This in-memory buffer
+	 * will be used as long as it can fit in the new content that keeps coming in.
+	 * When the size limit is reached, this store switches to a file based store by
+	 * creating a temporarily file and writing out the already in-memory held buffer
+	 * content and any new content that keeps arriving to this store. Once the file
+	 * has been created, the in-memory buffer will never be used any more and in
+	 * fact is destroyed as soon as the file is created. Instances of this class are
+	 * not thread-safe and users of this class are expected to use necessary thread
+	 * safety guarantees, if they want to use an instance of this class by multiple
+	 * threads.
 	 */
 	private static final class SysOutErrContentStore implements Closeable {
 		private static final int DEFAULT_CAPACITY_IN_BYTES = 50 * 1024; // 50 KB
@@ -269,8 +274,8 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 
 		/*
 		 * Returns a Reader for reading the sysout/syserr content. If there's no data
-		 * available in this store, then this returns a Reader which when used for read operations,
-		 * will immediately indicate an EOF.
+		 * available in this store, then this returns a Reader which when used for read
+		 * operations, will immediately indicate an EOF.
 		 */
 		Reader getReader() throws IOException {
 			if (this.usingFileStore && this.filePath != null) {
@@ -280,15 +285,16 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 				return new BufferedReader(new FileReader(this.filePath.toFile()));
 			}
 			if (this.inMemoryStore != null) {
-				return new InputStreamReader(new ByteArrayInputStream(this.inMemoryStore.array(), 0, this.inMemoryStore.position()));
+				return new InputStreamReader(
+						new ByteArrayInputStream(this.inMemoryStore.array(), 0, this.inMemoryStore.position()));
 			}
 			// no data to read, so we return an "empty" reader
 			return EMPTY_READER;
 		}
 
 		/*
-		 *  Returns true if this store has any data (either in-memory or in a file). Else
-		 *  returns false.
+		 * Returns true if this store has any data (either in-memory or in a file). Else
+		 * returns false.
 		 */
 		boolean hasData() {
 			if (this.inMemoryStore != null && this.inMemoryStore.position() > 0) {

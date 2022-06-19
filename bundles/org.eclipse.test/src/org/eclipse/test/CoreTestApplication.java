@@ -24,22 +24,23 @@ import org.eclipse.equinox.app.IApplicationContext;
  */
 public class CoreTestApplication implements IApplication {
 	/** true if workspace tests should log their deltas */
-	private static boolean deltas= false;
+	private static boolean deltas = false;
 
 	/**
-	 * Runs a set of tests as defined by the given command line args.
-	 * This is the platform application entry point.
+	 * Runs a set of tests as defined by the given command line args. This is the
+	 * platform application entry point.
 	 */
 	public Object run(Object arguments) throws Exception {
-		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
+		String[] args = Platform.getCommandLineArgs();// getCommand//processCommandLine((String[]) arguments);
 		return Integer.valueOf(runTests(args));
 	}
 
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		String[] args = (String[]) context.getArguments().get("application.args");
-		if (args == null)
+		if (args == null) {
 			args = new String[0];
+		}
 		return run(args);
 	}
 
@@ -79,24 +80,26 @@ public class CoreTestApplication implements IApplication {
 			}
 			++i;
 
-			// done checking for args.  Remember where an arg was found
+			// done checking for args. Remember where an arg was found
 			if (found) {
 				configArgs[configArgIndex++] = i - 1;
 				configArgs[configArgIndex++] = i;
 			}
 		}
 
-		//remove all the arguments consumed by this argument parsing
-		if (configArgIndex == 0)
+		// remove all the arguments consumed by this argument parsing
+		if (configArgIndex == 0) {
 			return args;
+		}
 		String[] passThruArgs = new String[args.length - configArgIndex];
 		configArgIndex = 0;
 		int j = 0;
 		for (int i = 0; i < args.length; i++) {
-			if (i == configArgs[configArgIndex])
+			if (i == configArgs[configArgIndex]) {
 				configArgIndex++;
-			else
+			} else {
 				passThruArgs[j++] = args[i];
+			}
 		}
 		return passThruArgs;
 	}

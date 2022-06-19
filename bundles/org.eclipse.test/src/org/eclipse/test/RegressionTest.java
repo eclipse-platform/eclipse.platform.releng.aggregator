@@ -14,13 +14,13 @@
 package org.eclipse.test;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.StringTokenizer;
-import java.io.ByteArrayOutputStream;
 
 /**
  * Check the output of several tests for regressions.
@@ -29,14 +29,12 @@ public class RegressionTest {
 
 	PrintStream output;
 	String oldFilename, newFilename, outFilename;
-	public static final String NOTHING_CHANGED_MSG
-		= "All tests unchanged.";
+	public static final String NOTHING_CHANGED_MSG = "All tests unchanged.";
+
 	/**
 	 * Constructor for RegressionTest
 	 */
-	public RegressionTest(	String oldFilename,
-							String newFilename,
-							String outFilename) {
+	public RegressionTest(String oldFilename, String newFilename, String outFilename) {
 		this.oldFilename = oldFilename;
 		this.newFilename = newFilename;
 		this.outFilename = outFilename;
@@ -70,10 +68,7 @@ public class RegressionTest {
 		}
 
 		try {
-			output = new PrintStream(
-						new BufferedOutputStream(
-							new FileOutputStream(
-								new File(outFilename))));
+			output = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(outFilename))));
 		} catch (Exception e) {
 			System.err.println("Error opening output file");
 			System.err.println(e.getMessage());
@@ -167,10 +162,8 @@ public class RegressionTest {
 		return aStream.toString();
 	}
 
-
 	/**
-	 * Returns the next 2 tokens in st, if they exist.
-	 * Returns null if they do not.
+	 * Returns the next 2 tokens in st, if they exist. Returns null if they do not.
 	 */
 	static String[] nextTest(StringTokenizer st) {
 		String[] test = new String[2];
@@ -187,4 +180,3 @@ public class RegressionTest {
 		return test;
 	}
 }
-

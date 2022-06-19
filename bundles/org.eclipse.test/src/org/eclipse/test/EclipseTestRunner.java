@@ -84,12 +84,13 @@ public class EclipseTestRunner {
 	 * -testPluginName&lt;containingpluginName&gt;
 	 * -formatter=&lt;classname&gt;(,&lt;path&gt;)
 	 * </pre>
+	 *
 	 * Where &lt;classname&gt; is the formatter classname, currently ignored as only
-	 * LegacyXmlResultFormatter is used. The path is either the path to the
-	 * result file and should include the file extension (xml) if a single test
-	 * is being run or should be the path to the result directory where result
-	 * files should be created if multiple tests are being run. If no path is
-	 * given, the standard output is used.
+	 * LegacyXmlResultFormatter is used. The path is either the path to the result
+	 * file and should include the file extension (xml) if a single test is being
+	 * run or should be the path to the result directory where result files should
+	 * be created if multiple tests are being run. If no path is given, the standard
+	 * output is used.
 	 */
 	public static void main(String[] args) throws IOException {
 		System.exit(run(args));
@@ -117,24 +118,29 @@ public class EclipseTestRunner {
 		}
 		for (int i = startArgs; i < args.length; i++) {
 			if (args[i].toLowerCase().equals("-classname")) {
-				if (i < args.length - 1)
+				if (i < args.length - 1) {
 					className = args[i + 1];
+				}
 				i++;
 			} else if (args[i].toLowerCase().equals("-classesnames")) {
-				if (i < args.length - 1)
+				if (i < args.length - 1) {
 					classesNames = args[i + 1];
+				}
 				i++;
 			} else if (args[i].toLowerCase().equals("-testpluginname")) {
-				if (i < args.length - 1)
+				if (i < args.length - 1) {
 					testPluginName = args[i + 1];
+				}
 				i++;
 			} else if (args[i].toLowerCase().equals("-testpluginsnames")) {
-				if (i < args.length - 1)
+				if (i < args.length - 1) {
 					testPluginsNames = args[i + 1];
+				}
 				i++;
 			} else if (args[i].equals("-junitReportOutput")) {
-				if (i < args.length - 1)
+				if (i < args.length - 1) {
 					junitReportOutput = args[i + 1];
+				}
 				i++;
 			} else if (args[i].startsWith("haltOnError=")) {
 				System.err.println("The haltOnError option is no longer supported");
@@ -151,8 +157,9 @@ public class EclipseTestRunner {
 			} else if (args[i].equals("-testlistener")) {
 				System.err.println("The testlistener option is no longer supported");
 			} else if (args[i].equals("-timeout")) {
-				if (i < args.length - 1)
+				if (i < args.length - 1) {
 					timeoutString = args[i + 1];
+				}
 				i++;
 			}
 		}
@@ -184,37 +191,40 @@ public class EclipseTestRunner {
 			for (String oneClassName : suiteClasses) {
 				int result = runner.runTests(props, testPlugins[j], oneClassName, resultPathString, true);
 				j++;
-				if(result != 0) {
+				if (result != 0) {
 					returnCode = result;
 				}
 			}
 			return returnCode;
 		}
-		if (className == null)
+		if (className == null) {
 			throw new IllegalArgumentException("Test class name not specified");
+		}
 		EclipseTestRunner runner = new EclipseTestRunner();
 		return runner.runTests(props, testPluginName, className, resultPathString, false);
 	}
 
-	private int runTests(Properties props, String testPluginName, String testClassName, String resultPath, boolean multiTest) {
+	private int runTests(Properties props, String testPluginName, String testClassName, String resultPath,
+			boolean multiTest) {
 		ClassLoader currentTCCL = Thread.currentThread().getContextClassLoader();
 		ExecutionListener executionListener = new ExecutionListener();
-		if(testPluginName == null) {
+		if (testPluginName == null) {
 			testPluginName = ClassLoaderTools.getClassPlugin(testClassName);
 		}
-		if(testPluginName == null)
+		if (testPluginName == null) {
 			throw new IllegalArgumentException("Test class not found");
+		}
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
-				.selectors(selectClass(testClassName))
-				.build();
+				.selectors(selectClass(testClassName)).build();
 
 		try {
 			Thread.currentThread().setContextClassLoader(ClassLoaderTools.getJUnit5Classloader(getPlatformEngines()));
 			final Launcher launcher = LauncherFactory.create();
 
-			Thread.currentThread().setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPluginName, currentTCCL));
-			try(LegacyXmlResultFormatter legacyXmlResultFormatter = new LegacyXmlResultFormatter()){
-				try (OutputStream fileOutputStream = getResultOutputStream(resultPath,testClassName,multiTest)){
+			Thread.currentThread()
+					.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPluginName, currentTCCL));
+			try (LegacyXmlResultFormatter legacyXmlResultFormatter = new LegacyXmlResultFormatter()) {
+				try (OutputStream fileOutputStream = getResultOutputStream(resultPath, testClassName, multiTest)) {
 					legacyXmlResultFormatter.setDestination(fileOutputStream);
 					legacyXmlResultFormatter.setContext(new ExecutionContext(props));
 					launcher.execute(request, legacyXmlResultFormatter, executionListener);
@@ -229,44 +239,49 @@ public class EclipseTestRunner {
 		return executionListener.didExecutionContainedFailures() ? FAILURES : SUCCESS;
 	}
 
-	private OutputStream getResultOutputStream(String resultPathString, String testClassName, boolean multiTest) throws IOException {
-		if(resultPathString == null || resultPathString.isEmpty())
+	private OutputStream getResultOutputStream(String resultPathString, String testClassName, boolean multiTest)
+			throws IOException {
+		if (resultPathString == null || resultPathString.isEmpty()) {
 			return System.out;
+		}
 		File resultFile;
-		if(multiTest) {
+		if (multiTest) {
 			Path resultDirectoryPath = new Path(resultPathString);
 			File testDirectory = resultDirectoryPath.toFile();
-			if(!testDirectory.exists())
+			if (!testDirectory.exists()) {
 				testDirectory.mkdirs();
-			resultFile = resultDirectoryPath.append("TEST-"+testClassName+".xml").toFile();
-		}else {
+			}
+			resultFile = resultDirectoryPath.append("TEST-" + testClassName + ".xml").toFile();
+		} else {
 			IPath resultPath = new Path(resultPathString);
 			resultFile = resultPath.toFile();
-			if(resultFile.isDirectory()) {
-				resultFile = resultPath.append("TEST-"+testClassName+".xml").toFile();
+			if (resultFile.isDirectory()) {
+				resultFile = resultPath.append("TEST-" + testClassName + ".xml").toFile();
 			} else {
 				File resultDirectory = resultFile.getParentFile();
-				if(!resultDirectory.exists())
+				if (!resultDirectory.exists()) {
 					resultDirectory.mkdirs();
+				}
 			}
 		}
-		if(!resultFile.exists()) {
+		if (!resultFile.exists()) {
 			resultFile.createNewFile();
 		}
 		return new FileOutputStream(resultFile);
 	}
 
-
-	private List<String> getPlatformEngines(){
+	private List<String> getPlatformEngines() {
 		List<String> platformEngines = new ArrayList<>();
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 		Bundle[] bundles = bundle.getBundleContext().getBundles();
 		for (Bundle iBundle : bundles) {
 			try {
 				BundleWiring bundleWiring = Platform.getBundle(iBundle.getSymbolicName()).adapt(BundleWiring.class);
-				Collection<String> listResources = bundleWiring.listResources("META-INF/services", "org.junit.platform.engine.TestEngine", BundleWiring.LISTRESOURCES_LOCAL);
-				if (!listResources.isEmpty())
+				Collection<String> listResources = bundleWiring.listResources("META-INF/services",
+						"org.junit.platform.engine.TestEngine", BundleWiring.LISTRESOURCES_LOCAL);
+				if (!listResources.isEmpty()) {
 					platformEngines.add(iBundle.getSymbolicName());
+				}
 			} catch (Exception e) {
 				// check the next bundle
 			}
@@ -274,7 +289,7 @@ public class EclipseTestRunner {
 		return platformEngines;
 	}
 
-	private final class ExecutionListener implements TestExecutionListener {
+	private static final class ExecutionListener implements TestExecutionListener {
 		private boolean executionContainedFailures;
 
 		public ExecutionListener() {
@@ -287,13 +302,13 @@ public class EclipseTestRunner {
 
 		@Override
 		public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-			if(testExecutionResult.getStatus() == org.junit.platform.engine.TestExecutionResult.Status.FAILED) {
+			if (testExecutionResult.getStatus() == org.junit.platform.engine.TestExecutionResult.Status.FAILED) {
 				executionContainedFailures = true;
 			}
 		}
 	}
 
-	private final class ExecutionContext implements TestExecutionContext {
+	private static final class ExecutionContext implements TestExecutionContext {
 
 		private final Properties props;
 

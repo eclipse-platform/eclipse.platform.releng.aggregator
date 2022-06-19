@@ -32,7 +32,8 @@ class ClassLoaderTools {
 	public static ClassLoader getPluginClassLoader(String getfTestPluginName, ClassLoader currentTCCL) {
 		Bundle bundle = Platform.getBundle(getfTestPluginName);
 		if (bundle == null) {
-			throw new IllegalArgumentException("Bundle \"" + getfTestPluginName + "\" not found. Possible causes include missing dependencies, too restrictive version ranges, or a non-matching required execution environment."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException("Bundle \"" + getfTestPluginName //$NON-NLS-1$
+					+ "\" not found. Possible causes include missing dependencies, too restrictive version ranges, or a non-matching required execution environment."); //$NON-NLS-1$
 		}
 		return new TestBundleClassLoader(bundle, currentTCCL);
 	}
@@ -42,10 +43,10 @@ class ClassLoaderTools {
 		String plugin = null;
 		while (index != -1) {
 			plugin = className.substring(0, index);
-			if(Platform.getBundle(plugin) != null) {
+			if (Platform.getBundle(plugin) != null) {
 				break;
 			}
-			index = className.lastIndexOf('.', index-1);
+			index = className.lastIndexOf('.', index - 1);
 		}
 		return plugin;
 	}
@@ -80,7 +81,7 @@ class ClassLoaderTools {
 		@Override
 		protected URL findResource(String name) {
 			URL url = bundle.getResource(name);
-			if(url == null) {
+			if (url == null) {
 				url = currentTCCL.getResource(name);
 			}
 			return url;
@@ -89,7 +90,7 @@ class ClassLoaderTools {
 		@Override
 		protected Enumeration<URL> findResources(String name) throws IOException {
 			Enumeration<URL> enumeration = bundle.getResources(name);
-			if(enumeration == null) {
+			if (enumeration == null) {
 				enumeration = currentTCCL.getResources(name);
 			}
 			return enumeration;
@@ -98,8 +99,9 @@ class ClassLoaderTools {
 		@Override
 		public Enumeration<URL> getResources(String res) throws IOException {
 			Enumeration<URL> urls = currentTCCL.getResources(res);
-			if(urls.hasMoreElements())
+			if (urls.hasMoreElements()) {
 				return urls;
+			}
 
 			List<URL> resources = new ArrayList<>(6);
 			String location = null;
@@ -110,41 +112,46 @@ class ClassLoaderTools {
 			if (location != null && location.startsWith("reference:")) { //$NON-NLS-1$
 				location = location.substring(10, location.length());
 				URI uri = URI.create(location);
-				String newPath =( uri.getPath() == null ? "" : uri.getPath()) + "bin" + '/' + res; //$NON-NLS-1$
+				String newPath = (uri.getPath() == null ? "" : uri.getPath()) + "bin" + '/' + res; //$NON-NLS-1$
 				URI newUri = uri.resolve(newPath).normalize();
-				if(newUri.isAbsolute())
+				if (newUri.isAbsolute()) {
 					url = newUri.toURL();
+				}
 			}
 			if (url != null) {
 				File f = new File(url.getFile());
-				if (f.exists())
+				if (f.exists()) {
 					resources.add(url);
-			}
-			else
+				}
+			} else {
 				return Collections.emptyEnumeration();
+			}
 
 			return Collections.enumeration(resources);
 		}
 	}
 
 	static class MultiBundleClassLoader extends ClassLoader {
-		private List<Bundle> bundleList;
+		private final List<Bundle> bundleList;
 
 		public MultiBundleClassLoader(List<Bundle> platformEngineBundles) {
 			this.bundleList = platformEngineBundles;
 
 		}
+
 		public Class<?> findClasss(String name) throws ClassNotFoundException {
 			return findClass(name);
 		}
+
 		@Override
 		protected Class<?> findClass(String name) throws ClassNotFoundException {
 			Class<?> c = null;
 			for (Bundle temp : bundleList) {
 				try {
 					c = temp.loadClass(name);
-					if (c != null)
+					if (c != null) {
 						return c;
+					}
 				} catch (ClassNotFoundException e) {
 				}
 			}
@@ -156,8 +163,9 @@ class ClassLoaderTools {
 			URL url = null;
 			for (Bundle temp : bundleList) {
 				url = temp.getResource(name);
-				if (url != null)
+				if (url != null) {
 					return url;
+				}
 			}
 			return url;
 		}

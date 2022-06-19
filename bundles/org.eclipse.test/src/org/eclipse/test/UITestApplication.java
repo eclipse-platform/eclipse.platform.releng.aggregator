@@ -30,7 +30,7 @@ import org.eclipse.ui.testing.TestableObject;
 /**
  * A Workbench that runs a test suite specified in the command line arguments.
  */
-public class UITestApplication  implements ITestHarness, IApplication {
+public class UITestApplication implements ITestHarness, IApplication {
 
 	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.workbench"; //$NON-NLS-1$
 
@@ -40,7 +40,7 @@ public class UITestApplication  implements ITestHarness, IApplication {
 
 	public Object run(final Object args) throws Exception {
 		// Get the application to test
-		Object application = getApplication((String[])args);
+		Object application = getApplication((String[]) args);
 		assertNotNull(application);
 
 		fTestableObject = PlatformUI.getTestableObject();
@@ -50,19 +50,16 @@ public class UITestApplication  implements ITestHarness, IApplication {
 	}
 
 	/*
-	 * return the application to run, or null if not even the default application
-	 * is found.
+	 * return the application to run, or null if not even the default application is
+	 * found.
 	 */
 	private Object getApplication(String[] args) throws CoreException {
 		// Assume we are in 3.0 mode.
 		// Find the name of the application as specified by the PDE JUnit launcher.
 		// If no application is specified, the 3.0 default workbench application
 		// is returned.
-		IExtension extension =
-				Platform.getExtensionRegistry().getExtension(
-						Platform.PI_RUNTIME,
-						Platform.PT_APPLICATIONS,
-						getApplicationToRun(args));
+		IExtension extension = Platform.getExtensionRegistry().getExtension(Platform.PI_RUNTIME,
+				Platform.PT_APPLICATIONS, getApplicationToRun(args));
 
 		assertNotNull(extension);
 
@@ -73,24 +70,26 @@ public class UITestApplication  implements ITestHarness, IApplication {
 			IConfigurationElement[] runs = elements[0].getChildren("run"); //$NON-NLS-1$
 			if (runs.length > 0) {
 				Object runnable = runs[0].createExecutableExtension("class"); //$NON-NLS-1$
-				if (runnable instanceof IApplication)
+				if (runnable instanceof IApplication) {
 					return runnable;
+				}
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * The -testApplication argument specifies the application to be run.
-	 * If the PDE JUnit launcher did not set this argument, then return
-	 * the name of the default application.
-	 * In 3.0, the default is the "org.eclipse.ui.ide.worbench" application.
+	 * The -testApplication argument specifies the application to be run. If the PDE
+	 * JUnit launcher did not set this argument, then return the name of the default
+	 * application. In 3.0, the default is the "org.eclipse.ui.ide.worbench"
+	 * application.
 	 *
 	 */
 	private String getApplicationToRun(String[] args) {
 		for (int i = 0; i < args.length; i++) {
-			if (args[i].equals("-testApplication") && i < args.length -1) //$NON-NLS-1$
-				return args[i+1];
+			if (args[i].equals("-testApplication") && i < args.length - 1) { //$NON-NLS-1$
+				return args[i + 1];
+			}
 		}
 		return DEFAULT_APP_3_0;
 	}
@@ -108,13 +107,13 @@ public class UITestApplication  implements ITestHarness, IApplication {
 		fTestableObject.testingFinished();
 	}
 
-
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		this.appContext = context;
 		String[] args = (String[]) appContext.getArguments().get("application.args");
-		if (args == null)
+		if (args == null) {
 			args = new String[0];
+		}
 		return run(args);
 	}
 
@@ -124,4 +123,3 @@ public class UITestApplication  implements ITestHarness, IApplication {
 	}
 
 }
-
