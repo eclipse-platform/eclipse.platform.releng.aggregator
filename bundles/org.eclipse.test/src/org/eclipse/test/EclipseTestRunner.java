@@ -24,7 +24,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junitlauncher.TestExecutionContext;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.testing.dumps.TimeoutDumpTimer;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.Launcher;
@@ -45,7 +43,6 @@ import org.junit.platform.launcher.core.LauncherFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters and running
@@ -200,31 +197,27 @@ public class EclipseTestRunner {
 			boolean multiTest) {
 		Thread thisThread = Thread.currentThread();
 		ClassLoader currentTCCL = thisThread.getContextClassLoader();
-		if (testPluginName == null) {
-			testPluginName = ClassLoaderTools.getClassPlugin(testClassName);
-		}
-		if (testPluginName == null) {
-			throw new IllegalArgumentException("Test class not found");
-		}
+		Bundle testPlugin = ClassLoaderTools.getTestBundle(testPluginName, testClassName);
+
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
 				.selectors(selectClass(testClassName)).build();
 
 		AtomicBoolean executionFailed = new AtomicBoolean(false);
-		try {
+		try (LegacyXmlResultFormatter formatter = new LegacyXmlResultFormatter();
+				OutputStream out = getResultOutputStream(resultPath, testClassName, multiTest)) {
+
 			thisThread.setContextClassLoader(ClassLoaderTools.getJUnit5Classloader(getPlatformEngines()));
 			Launcher launcher = LauncherFactory.create(); // DO NOT MOVE! Uses the just set context-classloader
 
-			thisThread.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPluginName, currentTCCL));
-			try (LegacyXmlResultFormatter formatter = new LegacyXmlResultFormatter()) {
-				try (OutputStream out = getResultOutputStream(resultPath, testClassName, multiTest)) {
-					formatter.setDestination(out);
-					formatter.setContext(createExecutionContext(props));
-					launcher.execute(request, formatter, createExecutionListener(executionFailed));
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				return ERRORS;
-			}
+			thisThread.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPlugin, currentTCCL));
+
+			formatter.setDestination(out);
+			formatter.setContext(createExecutionContext(props));
+
+			launcher.execute(request, formatter, createExecutionListener(executionFailed));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return ERRORS;
 		} finally {
 			thisThread.setContextClassLoader(currentTCCL);
 		}
@@ -248,19 +241,15 @@ public class EclipseTestRunner {
 		return Files.newOutputStream(resultFile);
 	}
 
-	private static List<String> getPlatformEngines() {
+	private static List<Bundle> getPlatformEngines() {
 		BundleContext context = FrameworkUtil.getBundle(EclipseTestRunner.class).getBundleContext();
 		return Arrays.stream(context.getBundles()).filter(bundle -> {
 			try {
-				BundleWiring bundleWiring = Platform.getBundle(bundle.getSymbolicName()).adapt(BundleWiring.class);
-				Collection<String> listResources = bundleWiring.listResources("META-INF/services",
-						"org.junit.platform.engine.TestEngine", BundleWiring.LISTRESOURCES_LOCAL);
-				return !listResources.isEmpty();
+				return bundle.getEntry("META-INF/services/org.junit.platform.engine.TestEngine") != null;
 			} catch (Exception e) {
 				return false; // assume absent
 			}
-		}).map(Bundle::getSymbolicName).collect(Collectors.toList());
-
+		}).collect(Collectors.toList());
 	}
 
 	private static TestExecutionListener createExecutionListener(AtomicBoolean executionFailed) {

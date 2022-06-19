@@ -28,34 +28,31 @@ import org.osgi.framework.Bundle;
 
 @SuppressWarnings("restriction")
 class ClassLoaderTools {
-	public static ClassLoader getPluginClassLoader(String getfTestPluginName, ClassLoader currentTCCL) {
-		Bundle bundle = Platform.getBundle(getfTestPluginName);
-		if (bundle == null) {
-			throw new IllegalArgumentException("Bundle \"" + getfTestPluginName //$NON-NLS-1$
-					+ "\" not found. Possible causes include missing dependencies, too restrictive version ranges, or a non-matching required execution environment."); //$NON-NLS-1$
-		}
+
+	static ClassLoader getPluginClassLoader(Bundle bundle, ClassLoader currentTCCL) {
 		return new TestBundleClassLoader(bundle, currentTCCL);
 	}
 
-	public static String getClassPlugin(String className) {
-		int index = className.lastIndexOf('.');
-		String plugin = null;
-		while (index != -1) {
-			plugin = className.substring(0, index);
-			if (Platform.getBundle(plugin) != null) {
-				break;
+	static Bundle getTestBundle(String pluginName, String className) {
+		if (pluginName != null) {
+			Bundle bundle = Platform.getBundle(pluginName);
+			if (bundle != null) {
+				return bundle;
 			}
-			index = className.lastIndexOf('.', index - 1);
+		} else if (className != null) {
+			for (int index = className.lastIndexOf('.'); index != -1; index = className.lastIndexOf('.', index - 1)) {
+				String symbolicName = className.substring(0, index);
+				Bundle bundle = Platform.getBundle(symbolicName);
+				if (bundle != null) {
+					return bundle;
+				}
+			}
 		}
-		return plugin;
+		throw new IllegalArgumentException("Bundle \"" + pluginName
+				+ "\" not found. Possible causes include missing dependencies, too restrictive version ranges, or a non-matching required execution environment."); //$NON-NLS-1$
 	}
 
-	public static ClassLoader getJUnit5Classloader(List<String> platformEngine) {
-		List<Bundle> platformEngineBundles = new ArrayList<>();
-		for (String string : platformEngine) {
-			Bundle bundle = Platform.getBundle(string);
-			platformEngineBundles.add(bundle);
-		}
+	static ClassLoader getJUnit5Classloader(List<Bundle> platformEngineBundles) {
 		return new MultiBundleClassLoader(platformEngineBundles);
 	}
 
