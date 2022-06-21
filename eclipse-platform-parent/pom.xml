@@ -727,39 +727,11 @@
     <profile>
       <id>api-generation</id>
       <activation>
-        <!-- Does it have to be a profile if we can evaluate condition reliably in antrun? -->
+        <!-- Generate API for all Plug-in projects -->
         <file><exists>META-INF/MANIFEST.MF</exists></file>
-        <property>
-          <name>!longnotexistingproperty</name>
-        </property>
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>check-has-apiTools-nature</id>
-                <phase>validate</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <exportAntProperties>true</exportAntProperties>
-                  <target>
-                    <condition property="skipAPIDescription" value="false" else="true">
-                      <!-- If the property is already set this has no effect because properties are immutable in ANT -->
-                      <and>
-                        <available file="${basedir}/META-INF/MANIFEST.MF"/>
-                        <resourcecontains resource="${basedir}/.project" substring="org.eclipse.pde.api.tools.apiAnalysisNature" />
-                      </and>
-                    </condition>
-                  </target>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>
