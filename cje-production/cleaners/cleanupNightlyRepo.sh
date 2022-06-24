@@ -71,6 +71,7 @@ function getReposToRemove ()
   cDir="$1"
   buildType=$2
   nRetain=$3
+  buildDir=${remoteBase}/eclipse/downloads/drops4
 
   if [[ ! -e "${cDir}" ]]
   then
@@ -98,6 +99,34 @@ function getReposToRemove ()
     done
     #totalMinusOld=$(( nbuilds - nOldRepos ))
     #echo -e "\tDEBUG: total minus old: $totalMinusOld"
+
+    #remove unstable builds from the list
+    if [[ "$buildType" == "I" ]]
+    then
+      stableBuildRepos=()
+      for i in "${sortedallOldRepos[@]}"
+      do
+        if [[ ! -f ${buildDir}/${i}/buildUnstable ]]
+        then
+          stableBuildRepos+=(${i})
+        fi
+      done
+      echo "Stable Builds"
+      for item in "${stableBuildRepos[@]}"
+      do
+        echo -e "\t${item}"
+      done
+     sortedallOldRepos=("${stableBuildRepos[@]}")
+     nbuilds=${#sortedallOldRepos[@]}
+     stableBuildRepos=()
+    fi
+
+    echo -e "\tDEBUG contents of sortedallOldRepos array after removing unstable builds"
+    for item in "${sortedallOldRepos[@]}"
+    do
+      echo -e "\t${item}"
+    done
+
     if [[ $nbuilds -gt $nRetain ]]
     then
       # remove all old ones, except for nRetain
@@ -201,12 +230,12 @@ eclipseBuildTools="${remoteBase}/eclipse/updates/buildtools"
 doDryrun=
 # global
 declare -a reposToRemove=()
-cleanRepo $eclipseIRepo I 4 $doDryrun
+cleanRepo $eclipseIRepo I 2 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipseYRepo Y 2 $doDryrun
 declare -a reposToRemove=()
 cleanRepo $eclipsePRepo P 2 $doDryrun
 declare -a reposToRemove=()
-cleanRepo $eclipseBuildTools I 4 $doDryrun
+cleanRepo $eclipseBuildTools I 2 $doDryrun
 
 unset reposToRemove
