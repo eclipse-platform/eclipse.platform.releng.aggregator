@@ -58,7 +58,7 @@
          - Run [this](https://ci.eclipse.org/releng/job/eclipse.releng.stage2DeferredMakeVisible/) job in Releng jenkins
          - Parameters should match Rename and Promote job
        * Run [Tag Eclipse Release](https://ci.eclipse.org/releng/job/TagEclipseRelease) to tag the source code.
-         - Tag Parameter should match stream version, i.e `S4_24_0M1` etc
+         - Tag Parameter should match stream version, i.e `S4_24_0_M1` etc
        * Send email that the M1 build is available
          - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
        * For **Milestone builds** return the I-builds to the normal schedule.
