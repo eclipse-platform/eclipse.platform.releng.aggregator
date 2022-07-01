@@ -57,6 +57,16 @@ function create_baseline() {
 #================================================================================
 echo "==== CBI aggregator ===="
 
+# Set whether this is a snapshot build or not
+snapshot="false"
+for arg in "$@"; do
+	if [ "$arg" -eq "-snapshot" ]; then
+		snapshot="true"
+	fi
+done
+sed -e "s/snapshot=\".*\"/snapshot=\"${snapshot}\"/g" -i publish-to-maven-central/SDK4Mvn.aggr 
+
+
 if [ ! -d ${LOCAL_TOOLS} ]
 then
 	/bin/mkdir ${LOCAL_TOOLS}
