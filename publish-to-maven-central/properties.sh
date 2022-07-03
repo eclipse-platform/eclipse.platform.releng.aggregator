@@ -13,7 +13,6 @@
 #********************************************************************************
 
 # ECLIPSE:
-APP_NAME_P2DIRECTOR=org.eclipse.equinox.p2.director
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 SDK_BUILD_DIR=R-4.24-202206070700
 SDK_VERSION=4.24
@@ -23,9 +22,8 @@ FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86
 ECJ_VERSION=3.30.0
 
 # AGGREGATOR:
-IU_AGG_PRODUCT=org.eclipse.cbi.p2repo.cli.product
 # URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/aggregator/headless/4.13/I20200825-1209/
-URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/p2-aggregator/tools/nightly/latest/
+URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest
 
 # LOCAL TOOLS:
 LOCAL_TOOLS=${WORKSPACE}/tools

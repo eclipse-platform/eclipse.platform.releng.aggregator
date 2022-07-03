@@ -75,10 +75,10 @@ require_executable ${ECLIPSE}
 if [ ! -x ${AGGREGATOR} ]
 then
 	echo "Installing the CBI aggregator into ${LOCAL_TOOLS}/${DIR_AGGREGATOR} ..."
-	${ECLIPSE} -application ${APP_NAME_P2DIRECTOR} \
+	${ECLIPSE} -application org.eclipse.equinox.p2.director \
 		-r ${URL_AGG_UPDATES} \
 		-d ${LOCAL_TOOLS}/${DIR_AGGREGATOR} -p CBIProfile \
-		-installIU ${IU_AGG_PRODUCT}
+		-installIU org.eclipse.cbi.p2repo.cli.product
 fi
 require_executable ${AGGREGATOR}
 
