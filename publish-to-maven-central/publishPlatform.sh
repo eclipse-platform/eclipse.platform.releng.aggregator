@@ -74,15 +74,16 @@ function same_as_baseline() {
 
 for pomFile in org/eclipse/platform/*/*/*.pom
 do
-	xmllint --xpath "/*[local-name()='project']/*[local-name()='version']" $file | grep SNAPSHOT
+	xmllint --xpath "/*[local-name()='project']/*[local-name()='version']" $pomFile | grep SNAPSHOT
 	snapshot=$?
 	if [ $snapshot == 0 ]; then
-		URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
-		REPO=ossrh
-		SETTINGS="-s /home/jenkins/.m2/settings-deploy-ossrh-releng.xml"
-	else
 		URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 		REPO=repo.eclipse.org
+		SETTINGS=""
+	else
+		URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
+		REPO=ossrh
+		SETTINGS="-s /home/jenkins/.m2/settings-deploy-ossrh-jdt.xml"
 	fi
 	
   if same_as_baseline $pomFile; then
