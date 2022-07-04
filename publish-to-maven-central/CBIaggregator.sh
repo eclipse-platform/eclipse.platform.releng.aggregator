@@ -19,7 +19,6 @@
 
 source `dirname ${0}`/properties.sh
 
-
 #================================================================================
 # Util functions
 #================================================================================
@@ -60,11 +59,12 @@ echo "==== CBI aggregator ===="
 # Set whether this is a snapshot build or not
 snapshot="false"
 for arg in "$@"; do
-	if [ "$arg" -eq "-snapshot" ]; then
+	echo $arg
+	if [ "$arg" = "-snapshot" ]; then
 		snapshot="true"
 	fi
 done
-sed -e "s/snapshot=\".*\"/snapshot=\"${snapshot}\"/g" -i publish-to-maven-central/SDK4Mvn.aggr 
+sed -e "s/snapshot=\".*\"/snapshot=\"${snapshot}\"/g" -i ${FILE_SDK_AGGR} 
 
 
 if [ ! -d ${LOCAL_TOOLS} ]
