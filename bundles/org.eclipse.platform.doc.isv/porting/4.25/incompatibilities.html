@@ -29,21 +29,26 @@ See also the list of <a href="../removals.html">deprecated API removals</a> for 
 
 <!-- ############################################## -->
 
-<!--h2>1. <a name="equinox-serverside-sdk-removal">Feature <code>org.eclipse.equinox.serverside.sdk</code> removed</a></!--h2>
-<p><strong>What is affected:</strong> Clients that use <code>org.eclipse.equinox.serverside.sdk</code> Feature coming with Eclipse Platform.
+<h2>1. <a name="icu4j-change">Different providers for 3rd party packages may result on unmatched requirements</a></h2>
+<p><strong>What is affected:</strong> Clients that use <code>Import-Package</code> with a version requirement for some 3rd-party packages:
+<ul>
+<li>com.ibm.icu</li>
+</ul>
 </p>
 <p><strong>Description:</strong></p>
 <p>
-Eclipse has stopped to ship the Feature <code>org.eclipse.equinox.serverside.sdk</code>.
+Upstream bundles as provided by the 3rd-party projects are not shipped by default by Platform instead of Orbit's one. Orbit usually add
+a version on package exports; this version does not match what upstream projects define.
 </p>
 <p>
-All contained Features and Plug-ins remain available.
-Plug-ins that are not already contained in other features were added to the <code>org.eclipse.equinox.sdk</code> feature.
+As a result, some Import-Package requirements that used to be satisfied using Orbit-provided bundles may now not be satisfied with upstream
+bundles, preventing proper installation or execution.
 </p>
 <p><strong>Action required:</strong></p>
 <ol>
-	<li>Adjust build scripts, target platform and etc. to use the included Features or Plug-ins directly. </li>
-</ol-->
+	<li>Adjust Import-Pacakge directives in MANIFEST.MF for the affected packages, either by removing the version requirement or by fixing it according to new upstream provider (recommended), or</li>
+	<li>Update your build script and other package definition to force inclusion of legacy Orbit-provided bundles</li>
+</ol>
 
 </body>
 </html>
