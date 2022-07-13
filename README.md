@@ -5,11 +5,14 @@ This repo is used to build the Eclipse SDK which provides the framework for Ecli
 To clone it, it is recommended to use one of the URLs found on the following website: 
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator
 
-An anonymous clone can be done via the following command:
+An anonymous clone can be done via the following commands:
 
 ```
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
+git submodule update --init --recursive
 ```
+
+The latter command will clone all submodules.
 
 How to build the Eclipse SDK
 ----------------------------
