@@ -22,14 +22,40 @@ See also the list of <a href="../removals.html">deprecated API removals</a> for 
 
 
 <ol>
-<!--li><a href="#equinox-serverside-sdk-removal">Feature <code>org.eclipse.equinox.serverside.sdk</code> removed</a></li-->
+<li><a href="#upstream-bundles">Several bundles renamed for 3rd party libraries</a></li>
+<li><a href="#icu4j-change">Different Import-Package version for some 3rd party libraries</a></li>
 </ol>
 
 <hr>
 
 <!-- ############################################## -->
 
-<h2>1. <a name="icu4j-change">Different providers for 3rd party packages may result on unmatched requirements</a></h2>
+<h2>1. <a name="upstream-bundles">Different providers for 3rd party packages may result on unmatched Required-Bundle</a></h2>
+<p><strong>What is affected:</strong> Clients that use <code>Require-Bundle</code> with a bundle that was replaced in their target platform.
+<ul>
+<li>JUnit 5 bundles now have name of the form <code>junit-*</code> instead of Orbit variants <code>org.junit.*</code>,</li>
+<li>API Guardian bundle is now named <code>org.apiguardian.api</code> instead of Orbit variant <code>org.apiguardian</code>,</li>
+<li>BouncyCastle bundles are now directly named <code>bcprog</code> and <code>bcpg</code> directly instead of Orbit variants <code>org.bouncycastle.*</code>,</li>
+<li>JSP API bundles is now named <code>javax.servlet.jsp-api</code> instead of Orbit variant <code>javax.servlet.jsp</code>
+</ul>
+</p>
+<p><strong>Description:</strong></p>
+<p>
+Upstream bundles as officially provided by the 3rd-party projects are not shipped by default by Platform instead of Orbit's one. In some cases, the bundle has
+a different Bundle-SymbolicName than the legacy one.
+</p>
+<p>
+As a result, some Require-Bundle requirements that used to be satisfied using Orbit-provided bundles may now not be satisfied with upstream
+bundles, preventing proper installation or execution.
+</p>
+<p><strong>Action required:</strong></p>
+<ol>
+	<li>Replace usage of Require-Bundle by Import-Package which will pick the best provider available in target-platfrm, or</li>
+	<li>Adjust Require-Bundle directives in MANIFEST.MF for the affected bundles, replacing with newer variants, or</li>
+	<li>Adjust your target-platform so it includes the legacy Orbit variants for the mentioned bundles</li>
+</ol>
+
+<h2>2. <a name="icu4j-change">Different providers for 3rd party packages may result on unmatched Import-Package requirements</a></h2>
 <p><strong>What is affected:</strong> Clients that use <code>Import-Package</code> with a version requirement for some 3rd-party packages:
 <ul>
 <li>com.ibm.icu</li>
