@@ -33,9 +33,11 @@ $endingBreadCrumbs="<li><a href=\"../$BUILD_DIR_SEG/\">$BUILD_ID</a></li><li cla
 require("../DL.thin.header.php.html");
 
 ?>
-<h3 name="Performancefingerprint">Performance fingerprint</h3>
 
+<!-- Commenting out Fingerprint until I get it working - sdawley -->
+<!-- <h3 name="Performancefingerprint">Performance fingerprint</h3>
 <?php
+/*
 
     $performanceDir=".";
     $performance = dir($performanceDir);
@@ -57,6 +59,7 @@ require("../DL.thin.header.php.html");
             }
         }
     }
+    */
 ?>
   <p>
     <a name="unit"></a>Legend: <br/>*: Missing reference data. Build used for
@@ -66,28 +69,18 @@ require("../DL.thin.header.php.html");
     scenario. <br>x axis: difference between current value and
     baseline value as percentage<br>
   </p>
+-->
 
 <h3 name="ScenarioDetail">Detailed performance data grouped by scenario prefix</h3>
 
   <?php
 
-    if (count($componentFps)==0){
-        echo "Results pending.";
+    if (file_exists("../BasicResultsIndex.html")) {
+        $my_file = file_get_contents("../BasicResultsIndex.html");
+        echo $my_file;
     }
     else {
-        $type=$_SERVER['QUERY_STRING'];
-        if ($type=="") {
-            $type="fp_type=0";
-        }
-        sort($componentFps);
-
-        for ($counter=0;$counter<count($componentFps);$counter++){
-            $parts=split(".php",$componentFps[$counter]);
-            $prefix=$parts[0];
-            $href="<A HREF=\"$performanceDir/$componentFps[$counter]?";
-            $href=$href . $type . "\">$prefix*</A><br>";
-            echo $href;
-        }
+        echo "Results pending.";
     }
 ?>
 
