@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.test.performance;
 
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.Path;
-import java.util.Set;
-import java.util.HashMap;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -29,7 +29,7 @@ import org.eclipse.test.internal.performance.data.ResultsData;
 
 public class BasicResultsTable implements IApplication{
     private static String CURRENT_BUILD, BASELINE_BUILD=null;
-    private static ArrayList<Path> inputFiles = new ArrayList<Path>();
+    private static ArrayList<Path> inputFiles = new ArrayList<>();
     private static Path phpTemplateFile = null;
     private static String EOL = System.lineSeparator();
     private static String buildDirectory = "";
@@ -46,7 +46,7 @@ public class BasicResultsTable implements IApplication{
         }
         //Stuff
         run(args);
-        return this.EXIT_OK;
+        return EXIT_OK;
     }
 
     @Override
@@ -55,9 +55,9 @@ public class BasicResultsTable implements IApplication{
     }
 
     public static void run(String[] args) {
-        
+
         parse(args);
-        
+
         //Initialize results data
         ResultsData results = new ResultsData(CURRENT_BUILD, BASELINE_BUILD);
         try {
@@ -70,12 +70,12 @@ public class BasicResultsTable implements IApplication{
             System.out.println("Performance data import failed with exception!" + ex);
             System.exit(1);
         }
-        
+
         //Sort all scenarios into components, then make html file per component
         Set<String> scenarioIDs = results.getCurrentScenarios();
-        ArrayList<String> usedComponents = new ArrayList<String>();
+        ArrayList<String> usedComponents = new ArrayList<>();
         //group scenarios by component for making tables
-        HashMap<String, ArrayList<String>> componentMap = new HashMap<String, ArrayList<String>>();
+        HashMap<String, ArrayList<String>> componentMap = new HashMap<>();
 
         //get components from scenario name, for simplicity I'm just grabing everthing before .test/.tests but eventually should be mapped to actual components
         for (String scenarioID : scenarioIDs) {
@@ -91,7 +91,7 @@ public class BasicResultsTable implements IApplication{
                 }
                 scenarioComponent = scenarioComponent + part + ".";
             }
-            //trim final . 
+            //trim final .
             scenarioComponent = scenarioComponent.substring(0, scenarioComponent.length()-1);
 
              //check if component in used components list
@@ -102,7 +102,7 @@ public class BasicResultsTable implements IApplication{
                 componentMap.replace(scenarioComponent, componentScenarios);
             } else {
                 //Add component to used components and make new entry into HashMap
-                ArrayList<String> componentScenarios = new ArrayList<String>();
+                ArrayList<String> componentScenarios = new ArrayList<>();
                 componentScenarios.add(scenarioID);
                 componentMap.put(scenarioComponent, componentScenarios);
                 usedComponents.add(scenarioComponent);
@@ -144,7 +144,7 @@ public class BasicResultsTable implements IApplication{
                     for (int i=0; i < (scenarioParts.length - 1); i++ ) {
                         componentClass = componentClass + scenarioParts[i] + ".";
                     }
-                    //trim final . 
+                    //trim final .
                     componentClass = componentClass.substring(0, componentClass.length()-1);
                 } else {
                     scenarioParts = scenario.split("#");
@@ -226,9 +226,9 @@ public class BasicResultsTable implements IApplication{
 
         for (String component : usedComponents) {
             htmlString = htmlString + "<a href=\"./basicPerformance.php/" +
-                "?name=" + component + 
-                "&build=" + CURRENT_BUILD + 
-                "&baseline=" + BASELINE_BUILD + 
+                "?name=" + component +
+                "&build=" + CURRENT_BUILD +
+                "&baseline=" + BASELINE_BUILD +
                 "\">" + component + "*</a><br>" + EOL;
         }
 
@@ -318,8 +318,8 @@ public class BasicResultsTable implements IApplication{
           		    phpTemplateFile = inputFilePath;
         	    } else {
           		    System.err.println("ERROR: invalid input argument. Cannot read file: " + inputFile);
-        	    } 
-      	        
+        	    }
+
                 i++;
                 i++;
                 continue;
@@ -339,7 +339,7 @@ public class BasicResultsTable implements IApplication{
           		        inputFiles.add(inputFilePath);
         	        } else {
           		        System.err.println("ERROR: invalid input argument. Cannot read file: " + inputFile);
-        	        } 
+        	        }
       	        }
                 i = i+5;
                 continue;
@@ -353,7 +353,7 @@ public class BasicResultsTable implements IApplication{
 
     private static void printUsage() {
         System.out.println(
-            "Usage:\n" + 
+            "Usage:\n" +
             "-baseline: Build id for the baseline build.\n" +
             "-current: Build id for the current build.\n" +
             "-buildDirectory: Directory of performance.php file, usually /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/performance.\n" +

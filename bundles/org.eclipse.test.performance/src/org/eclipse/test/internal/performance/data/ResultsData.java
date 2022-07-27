@@ -18,14 +18,10 @@ import java.io.ObjectInputStream;
 import java.nio.file.Files;
 //import java.nio.file.Paths;
 import java.nio.file.Path;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-import org.eclipse.test.internal.performance.data.Sample;
-import org.eclipse.test.internal.performance.data.DataPoint;
-import org.eclipse.test.internal.performance.data.Scalar;
-import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.db.Variations;
 
 
@@ -58,8 +54,8 @@ public class ResultsData{
     public ResultsData(String current, String baseline) {
         CURRENT_BUILD = current;
     	BASELINE_BUILD = baseline;
-        CURRENT_SCENARIO_DATA = new HashMap<String, Sample>();
-        BASELINE_SCENARIO_DATA = new HashMap<String, Sample>();
+        CURRENT_SCENARIO_DATA = new HashMap<>();
+        BASELINE_SCENARIO_DATA = new HashMap<>();
     }
 
     public void importData(Path inputFile) {
