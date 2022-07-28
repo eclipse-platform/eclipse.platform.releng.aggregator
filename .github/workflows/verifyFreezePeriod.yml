@@ -11,11 +11,11 @@ jobs:
     steps:
       - name: Checking whether Eclipse project is currently in stabilization/code-freeze period ...
         run: |
-          today=$(TZ=UTC date "+%Y%m%d")
-          tomorrow=$(TZ=UTC date -d "+1 days" "+%Y%m%d")
-          calURL="https://calendar.google.com/calendar/u/0/htmlembed?src=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ"
-          echo "Querying calendar ${calURL}"
-          curl "${calURL}&mode=AGENDA&ctz=UTC&dates=${today}/${tomorrow}" | grep -i -q -e "stabilization"
+          today=$(TZ=UTC date "+%Y-%m-%d")
+          tomorrow=$(TZ=UTC date -d "+1 days" "+%Y-%m-%d")
+          calURL="https://clients6.google.com/calendar/v3/calendars/prfk26fdmpru1mptlb06p0jh4s@group.calendar.google.com/events?calendarId=prfk26fdmpru1mptlb06p0jh4s@group.calendar.google.com&singleEvents=true&timeZone=UTC&maxResults=250&sanitizeHtml=true&timeMin=${today}T00:00:00Z&timeMax=${tomorrow}T00:00:00Z&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"
+          echo "Querying calendar ${calURL}..."
+          curl "${calURL}" | grep -i -e "stabilization" -e "signoff" -e "promotion"
           if [[ $? == 0 ]]; then
             echo "::error::Today is a freeze day"
             exit 1 #Exiting with non-0 makes this workflow fail
