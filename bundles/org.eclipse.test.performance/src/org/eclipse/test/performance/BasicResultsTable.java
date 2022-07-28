@@ -27,6 +27,9 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.eclipse.test.internal.performance.data.ResultsData;
 
+/**
+ * @since 3.19
+ */
 public class BasicResultsTable implements IApplication{
     private static String CURRENT_BUILD, BASELINE_BUILD=null;
     private static ArrayList<Path> inputFiles = new ArrayList<>();

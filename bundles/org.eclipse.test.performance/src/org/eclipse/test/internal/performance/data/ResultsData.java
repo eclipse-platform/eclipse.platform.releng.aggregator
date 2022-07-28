@@ -24,7 +24,9 @@ import java.util.Set;
 
 import org.eclipse.test.internal.performance.db.Variations;
 
-
+/**
+ * @since 3.19
+ */
 public class ResultsData{
     //Static because there shouldn't be different groups of results
     private static Map<String, Sample> CURRENT_SCENARIO_DATA; //Map of scenarioID to Sample for the current build
