@@ -228,7 +228,7 @@ public class BasicResultsTable implements IApplication{
         htmlString = htmlString + EOL;
 
         for (String component : usedComponents) {
-            htmlString = htmlString + "<a href=\"./basicPerformance.php/" +
+            htmlString = htmlString + "<a href=\"./basicPerformance.php" +
                 "?name=" + component +
                 "&build=" + CURRENT_BUILD +
                 "&baseline=" + BASELINE_BUILD +
