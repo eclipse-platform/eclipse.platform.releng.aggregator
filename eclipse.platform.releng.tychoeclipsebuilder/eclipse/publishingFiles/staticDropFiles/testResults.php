@@ -121,8 +121,8 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 ?>
 <?php
   echo "<li>\n";
-  $generated=file_exists("performance/global_fp.php");
-  if (file_exists("performance/performance.php") && $generated) {
+  //$generated=file_exists("performance/global_fp.php");
+  if (file_exists("performance/performance.php")) {
     echo "View the <a href=\"performance/performance.php\">performance test results</a> for the current build.\n";
   } else {
     echo "Performance tests are pending.\n";
