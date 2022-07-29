@@ -38,7 +38,7 @@ See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
  */
 $endingBreadCrumbs="<li><a href=\"../$BUILD_DIR_SEG/\">$BUILD_ID</a></li><li><a href=\"./performance.php\">TEST RESULTS</a></li><li class=\"active\">$COMPONENT_ID RESULTS</li>";
 
-require("DL.thin.header.php.html");
+require("../DL.thin.header.php.html");
 
 echo "<h2>Performance of $COMPONENT_ID: $BUILD_ID relative to $BASELINE_ID</h2>";
 
