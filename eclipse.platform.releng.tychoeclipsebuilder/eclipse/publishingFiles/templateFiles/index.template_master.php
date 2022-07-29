@@ -224,8 +224,8 @@ else {
   }
 
   /* performance tests line item */
-  $generated=file_exists("performance/global_fp.php");
-  if (file_exists("performance/performance.php") && $generated) {
+  //$generated=file_exists("performance/global_fp.php");
+  if (file_exists("performance/performance.php")) {
     echo "<li>View the <a href=\"performance/performance.php\">performance test results</a> for the current build.</li>\n";
   } else {
     echo "<li>Performance tests are pending.</li>\n";
