@@ -75,8 +75,8 @@ require("../DL.thin.header.php.html");
 
   <?php
 
-    if (file_exists("../BasicResultsIndex.html")) {
-        $my_file = file_get_contents("../BasicResultsIndex.html");
+    if (file_exists("BasicResultsIndex.html")) {
+        $my_file = file_get_contents("BasicResultsIndex.html");
         echo $my_file;
     }
     else {
