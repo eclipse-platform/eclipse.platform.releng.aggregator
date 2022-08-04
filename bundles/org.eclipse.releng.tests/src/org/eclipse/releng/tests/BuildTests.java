@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.releng.tests;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -39,7 +38,6 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Platform;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class BuildTests {
@@ -607,54 +605,6 @@ public class BuildTests {
 		assertTrue(message, !problemLogsExist);
 	}
 
-	@Test
-	@Ignore("see bug 561174")
-	public void testDirtyLogSize() throws Exception {
-		final boolean DEBUG_DIRTY_TEST = true;
-		// MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
-		// "dirReport" always contains some information
-		// in response to the "git status" command. The goal, here, is to
-		// "hard code" previously observed values, to make sure
-		// there is no regressions, which would be implied by a report larger
-		// than those that had been produced before.
-		// The "size" should be expressed in exact bytes as "increases" in
-		// size might be small ... if just a file or two.
-		URL standardReportURL = this.getClass().getResource("standardDirtReport.txt");
-		URLConnection standardReportURLConnection = standardReportURL.openConnection();
-		// No need to get contents (yet, most of the time) unless getContentLenth doesn't work for plugin resources?
-		long MAX_ALLOWED_BYTES = standardReportURLConnection.getContentLength();
-		// long MAX_ALLOWED_BYTES = 37179;
-		System.out.println("DEBUG: MAX_ALLOWED_BYTES: " + MAX_ALLOWED_BYTES);
-		String buildId = System.getProperty("buildId");
-		assertNotNull("buildId property must be specified for testDirtyLogSize test", buildId);
-		String downloadHost = "build.eclipse.org/eclipse/builds/4" + buildId.charAt(0) + "/siteDir";
-		String urlOfFile = "http://" + downloadHost + "/eclipse/downloads/drops4/" + buildId + "/buildlogs/dirtReport.txt";
-		URL logURL = new URL(urlOfFile);
-
-		URLConnection urlConnection = logURL.openConnection();
-		// getContentLength calls "connect" if needed.
-		// urlConnection.connect();
-		// Note, if expect more than "2 Gig", use getContentLengthLong (in Java 7).
-		long nBytes = urlConnection.getContentLength();
-		if (DEBUG_DIRTY_TEST) {
-			System.out.println("Debug info for testDirtyLogSize");
-			System.out.println("Debug: nBytes: " + nBytes);
-			printHeaders(urlConnection);
-		}
-		// if find "response does not contain length, on a regular basis, for
-		// some servers, will have to read contents.
-		assertTrue(
-				"Either file (url) does not exist (build may have been removed?), or HTTP response does not contain content length. urlOfFile: "
-						+ urlOfFile,
-				(-1 != nBytes));
-		assertFalse("dirtReport file has increased in size, indicating a regression. See " + urlOfFile, nBytes > MAX_ALLOWED_BYTES);
-		assertFalse(
-				"Good news! dirtReport file has decreased in size, compared to standard, so the standardDirtReport.txt file should be replaced with the one at "
-						+ urlOfFile
-						+ ". But NOTE: results may not be accurate, if there are other errors in build, so diff is recommended.",
-				nBytes < MAX_ALLOWED_BYTES);
-
-	}
 
 	@Test
 	public void testJarSign() throws Exception {
