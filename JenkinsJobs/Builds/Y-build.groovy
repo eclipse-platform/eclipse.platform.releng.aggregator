@@ -14,7 +14,7 @@ kind: Pod
 spec:
   containers:
   - name: "jnlp"
-    image: "eclipsecbi/jiro-agent-centos-8:latest"
+    image: "eclipsecbi/jiro-agent-centos-8-jdk11:latest"
     imagePullPolicy: "Always"
     resources:
       limits:
