@@ -87,7 +87,7 @@ public class ResultsData{
 				String build = variations.getProperty("build");
 				if ((build.equals(CURRENT_BUILD)) && (!CURRENT_SCENARIO_DATA.containsKey(scenarioID))) {
 					CURRENT_SCENARIO_DATA.put(scenarioID, sample);
-				} else if ((build.equals(BASELINE_BUILD)) && (!BASELINE_SCENARIO_DATA.containsKey(scenarioID))) {
+				} else if ((build.contains(BASELINE_BUILD)) && (!BASELINE_SCENARIO_DATA.containsKey(scenarioID))) {
 					BASELINE_SCENARIO_DATA.put(scenarioID, sample);
 				} else {
 					System.err.println("WARN: Input contains Data from the wrong build or baseline");
