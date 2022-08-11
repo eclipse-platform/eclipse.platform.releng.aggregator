@@ -9,6 +9,7 @@ An anonymous clone can be done via the following commands:
 
 ```
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
+cd eclipse.platform.releng.aggregator
 git submodule update --init --recursive
 ```
 
