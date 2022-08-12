@@ -13,8 +13,9 @@ jobs:
         run: |
           today=$(TZ=UTC date "+%Y-%m-%d")
           tomorrow=$(TZ=UTC date -d "+1 days" "+%Y-%m-%d")
-          calURL="https://clients6.google.com/calendar/v3/calendars/prfk26fdmpru1mptlb06p0jh4s@group.calendar.google.com/events?calendarId=prfk26fdmpru1mptlb06p0jh4s@group.calendar.google.com&singleEvents=true&timeZone=UTC&maxResults=250&sanitizeHtml=true&timeMin=${today}T00:00:00Z&timeMax=${tomorrow}T00:00:00Z&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"
-          echo "Querying calendar ${calURL}..."
+          calId="calendarId=prfk26fdmpru1mptlb06p0jh4s@group.calendar.google.com"
+          calURL="https://clients6.google.com/calendar/v3/calendars/group.calendar.google.com/events?${calId}&singleEvents=true&timeZone=UTC&maxResults=250&sanitizeHtml=true&timeMin=${today}T00:00:00Z&timeMax=${tomorrow}T00:00:00Z&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"
+          echo "Querying calendar https://calendar.google.com/calendar/u/0/r?cid=${calId}"
           curl "${calURL}" | grep -i -e "stabilization" -e "signoff" -e "promotion"
           if [[ $? == 0 ]]; then
             echo "::error::Today is a freeze day"
