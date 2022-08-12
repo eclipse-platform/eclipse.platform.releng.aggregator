@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+      "Copyright (c) IBM Corporation and others 2022. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="stylesheet" href="../../../book.css" charset="ISO-8859-1" type="text/css" />
+    <title>
+      ANSI Support Preferences
+    </title>
+    <script language="JavaScript" src=
+      "PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript">
+    </script>
+  </head>
+  <body>
+    <h1>ANSI Support Preferences</h1>
+
+    <p>The following preferences can be set using the <a class="command-link" href=
+        'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.internal.console.ansi.preferences.AnsiConsolePreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt=
+        "Opens the ANSI Support Preferences page" /><b>Run/Debug &gt; Console &gt; ANSI Support</b></a> preference page.</p>
+    <p>Many console applications can interpret ANSI sequences to produce styled output.<br />
+      The codes supported by these applications is not consistent, but the most common attributes
+      supported include foreground and background colors, bold, italic, underline, invert.</p>
+    <p>See <a href="https://en.wikipedia.org/wiki/ANSI_escape_code">Wikipedia: ANSI escape code</a> for details.</p>
+    <p>The Eclipse Console supports 16 colors / 256 colors / true-colors for foreground and background, color palettes,
+      and attributes like bold, italic, underline, invert, conceal, strike, crossed-out, framed.</p>
+    <p>Only “CSI n m” (<a href="https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters">SGR,
+      Select Graphic Rendition</a>) control sequences are supported.<br />
+      They set display attributes, but cannot be used to change the content of the output
+      (erase actions, cursor positioning, scrolling).<br />
+      Non-SGR sequences are not interpreted, but are recognized and hidden, so you will not see them.</p>
+    <p>This functionality is available for all the text output to the standard output or standard error.
+      It works for Java, C/C++, Perl, Python, shell, Groovy, Maven, any Eclipse supported language.</p>
+
+    <table border="1" cellspacing="0" cellpadding="5">
+      <thead>
+        <tr>
+          <th rowspan="1" colspan="1">
+            <p>Option</p>
+          </th>
+          <th rowspan="1" colspan="1">
+            <p>Description</p>
+          </th>
+          <th rowspan="1" colspan="1">
+            <p>Default</p>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="1" colspan="1" valign="top" align="left">
+            <p>Enable ANSI support</p>
+          </td>
+          <td rowspan="1" colspan="1" valign="top" align="left">
+            <p>This preference controls whether the console interprets ANSI escape sequences to
+              generate styled output, or such sequences are rendered as is.</p>
+            <p>For example <code>&quot;Hello &#x241b;[31mGREEN&#x241b;[m world!&quot;</code> will be rendered as
+              <code>&quot;Hello <span style="color:green">GREEN</span> world!&quot;</code> when this this preference
+              is on, and as <code>&quot;Hello &#x241b;[32mGREEN&#x241b;[m world!&quot;</code> when it is off.</p>
+          </td>
+          <td rowspan="1" colspan="1" valign="top" align="left">
+            <p>On</p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" valign="top" align="left">
+            Use Windows color mapping (bold =&gt; intense, italic =&gt; reverse)
+          </td>
+          <td colspan="1" valign="top" align="left">
+            <p>This preference controls whether the console interprets the bold (1) ANSI code as
+              increased intensity and the italic (3) ANSI code as inverse.<br />
+              This is something that the “traditional” Windows command prompt (<code>cmd.exe</code>) does.</p>
+          </td>
+          <td colspan="1" valign="top" align="left">
+            Off
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" valign="top" align="left">
+            Show the escape sequences
+          </td>
+          <td colspan="1" valign="top" align="left">
+            <p>This preference controls whether the console shows the ANSI code or not.<br />
+               The codes still generate styles, but they are also rendered, in a smaller font.</p>
+            <p>This is useful for debugging problems with the codes.</p>
+            <p>For example <code>&quot;Hello &#x241b;[31mGREEN&#x241b;[m world!&quot;</code> will be rendered as
+              <code>&quot;Hello
+                <span style="color:green"><span style="font-size:50%;">&#x241b;[32m</span>GREEN</span><span style="font-size:50%;">&#x241b;[m</span>
+                world!&quot;</code> when this is on.</p>
+          </td>
+          <td colspan="1" valign="top" align="left">
+            Off
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" valign="top" align="left">
+            Try using the standard error color setting for stderr output
+          </td>
+          <td colspan="1" valign="top" align="left">
+            <p>This preference controls whether the console tries to preserve the default color associated with standard error stream.</p>
+            <p>Normally the Eclipse Console uses a different color for the standard output and the error output streams
+              (<code>stdout</code> and <code>stderr</code>).<br />
+              This can interfere with the colors generated by ANSI codes. When this is on the console will try its best to
+              preserve the <code>stderr</code> color when not explicitly overridden by an ANSI sequence.</p>
+            <p>When this is off the <code>stderr</code> color is completely ignored.</p>
+          </td>
+          <td colspan="1" valign="top" align="left">
+            On
+          </td>
+        </tr>
+        <tr>
+          <td colspan="1" valign="top" align="left">
+            Put RTF in Clipboard. You will be able to paste styled text in some applications.
+          </td>
+          <td colspan="1" valign="top" align="left">
+            <p>This preference controls whether the Copy command uses plain text or rich text (RTF) in the clipboard.</p>
+            <p>When this is on the RTF format is used, and pasting the content (in some applications) will preserve
+              the styles created by ANSI codes (colors, and attributes).<br />
+              If this is off then the Copy command will store only plain text in the clipboard.</p>
+          </td>
+          <td colspan="1" valign="top" align="left">
+            On
+          </td>
+        </tr>
+         <tr>
+          <td colspan="1" valign="top" align="left">
+            Color palette
+          </td>
+          <td colspan="1" valign="top" align="left">
+            <p>This preference controls what real colors correspond to various ANSI codes.</p>
+            <p>For example the “31” code means “red”.<br />
+               However, the exact shade of red depends on the terminal application.
+               Some terminal applications even have a configurable palette.<br />
+               This option allows you to select one of the commonly used color palettes.</p>
+          </td>
+          <td colspan="1" valign="top" align="left">
+            Will match current operating system.
+          </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3 class="related">Related concepts</h3>
+      <a href="../../../concepts/cdebugger.htm">Debugger</a><br />
+      <a href="../../../concepts/concept-java-perspective.htm">Java
+      perspectives</a><br />
+      <a href="../../../concepts/concept-java-views.htm">Java views</a><br />
+      <a href="../../../concepts/clocdbug.htm">Local debugging</a><br />
+      <a href="../../../concepts/cremdbug.htm">Remote debugging</a>
+
+    <h3 class="related">Related tasks</h3>
+      <a href="../../../tasks/task-launching_java_program.htm">Launching a Java
+      program</a><br />
+      <a href="../../../tasks/task-running_and_debugging.htm">Running and
+      debugging</a>
+
+    <h3 class="related">Related reference</h3>
+      <a href="../../../reference/views/console/ref-console_view.htm">Console
+      View</a><br />
+      <a href=
+      "../../../reference/preferences/java/debug/ref-installed_jres.htm">Installed
+      JREs Preferences</a><br />
+      <a href="../../../reference/preferences/java/debug/ref-debug.htm">Java
+      Debug Preferences</a><br />
+      <a href=
+      "../../../reference/preferences/run-debug/ref-launching.htm">Launching
+      Preferences</a><br />
+      <a href=
+      "../../../reference/preferences/run-debug/ref-perspectives.htm">Perspectives
+      Preferences</a><br />
+
+      <a href=
+      "../../../reference/preferences/run-debug/ref-run_debug.htm">Run/Debug
+      Preferences</a><br />
+      <a href=
+      "../../../reference/preferences/run-debug/ref-string_substitution.htm">String
+      Substitution Preferences</a><br />
+      <a href=
+      "../../../reference/preferences/run-debug/ref-view_management.htm">View
+      Management Preferences</a>
+  </body>
+</html>
