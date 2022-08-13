@@ -148,7 +148,7 @@
     </targlet>
   </setupTask>
   <project name="platform"
-      label="Base, Runtime, Update, and Ant">
+      label="Ant, Base, Runtime, Resources, Update, and Team">
     <setupTask
         xsi:type="git:GitCloneTask"
         id="github.clone.platform"
@@ -183,17 +183,48 @@
         <sourceLocator
             rootFolder="${github.clone.platform.location}">
           <predicate
-              xsi:type="predicates:NotPredicate">
+              xsi:type="predicates:AndPredicate">
             <operand
-                xsi:type="predicates:NamePredicate"
-                pattern="org\.eclipse\.core\.tools-.*">
-              <annotation
-                  source="http://www.eclipse.org/oomph/base/Warning">
-                <detail
-                    key="diagnostic">
-                  <value>This bundle appears to be very old and no longer supported.</value>
-                </detail>
-              </annotation>
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:NamePredicate"
+                  pattern="org\.eclipse\.core\.tools-.*">
+                <annotation
+                    source="http://www.eclipse.org/oomph/base/Warning">
+                  <detail
+                      key="diagnostic">
+                    <value>This bundle appears to be very old and no longer supported.</value>
+                  </detail>
+                </annotation>
+              </operand>
+            </operand>
+            <operand
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:NamePredicate"
+                  pattern="org\.eclipse\.core\.tools\.resources">
+                <annotation
+                    source="http://www.eclipse.org/oomph/base/Warning">
+                  <detail
+                      key="diagnostic">
+                    <value>This bundle appears to be very old and no longer supported.</value>
+                  </detail>
+                </annotation>
+              </operand>
+            </operand>
+            <operand
+                xsi:type="predicates:NotPredicate">
+              <operand
+                  xsi:type="predicates:NamePredicate"
+                  pattern="examples">
+                <annotation
+                    source="http://www.eclipse.org/oomph/base/Warning">
+                  <detail
+                      key="diagnostic">
+                    <value>This project is just a pom container and has errors because of the m2e nature</value>
+                  </detail>
+                </annotation>
+              </operand>
             </operand>
           </predicate>
         </sourceLocator>
@@ -208,10 +239,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.platform"/>
-          <operand
-              xsi:type="predicates:LocationPredicate"
-              pattern=".*/eclipse\.platform/platform/.*"/>
+              project="org.eclipse.platform"
+              relativePathPattern="platform/.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -220,10 +249,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.ant.core"/>
-          <operand
-              xsi:type="predicates:LocationPredicate"
-              pattern=".*/eclipse\.platform/ant/.*"/>
+              project="org.eclipse.ant.core"
+              relativePathPattern="ant/.*"/>
           <operand
               xsi:type="workingsets:ExclusionPredicate"
               excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Ant%20Tests']"/>
@@ -235,10 +262,11 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.ant.tests.core"/>
+              project="org.eclipse.ant.tests.core"
+              relativePathPattern="ant/.*"/>
           <operand
-              xsi:type="predicates:LocationPredicate"
-              pattern=".*/eclipse\.platform/ant/.*\.tests\..*"/>
+              xsi:type="predicates:NamePredicate"
+              pattern=".*\.tests\..*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -247,10 +275,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.update.configurator"/>
-          <operand
-              xsi:type="predicates:LocationPredicate"
-              pattern=".*/eclipse\.platform/update/.*"/>
+              project="org.eclipse.update.configurator"
+              relativePathPattern="update/.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -259,10 +285,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.core.runtime"/>
-          <operand
-              xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Runtime%20Tests'] //'platform.base.workingsets'/@workingSets[name='Platform%20Ant'] //'platform.base.workingsets'/@workingSets[name='Platform%20Ant%20Tests'] //'platform.base.workingsets'/@workingSets[name='Platform%20Base'] //'platform.base.workingsets'/@workingSets[name='Platform%20Update'] //'platform.base.workingsets'/@workingSets[name='Platform%20Team%20Tests'] //'platform.base.workingsets'/@workingSets[name='Platform%20Team'] //'platform.base.workingsets'/@workingSets[name='Platform%20Team%20Examples']"/>
+              project="org.eclipse.core.runtime"
+              relativePathPattern="runtime/(bundles|features).*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -271,13 +295,28 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.core.runtime"/>
+              project="org.eclipse.core.runtime"
+              relativePathPattern="runtime/tests/.*"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Resources">
+        <predicate
+            xsi:type="predicates:AndPredicate">
           <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*\.tests.*|com\.google\.code\.atinject\.tck"/>
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.core.resources"
+              relativePathPattern="resources/(bundles|examples)/.*"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Resources Tests">
+        <predicate
+            xsi:type="predicates:AndPredicate">
           <operand
-              xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Ant%20Tests'] //'platform.base.workingsets'/@workingSets[name='Platform%20Team%20Tests']"/>
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.core.resources"
+              relativePathPattern="resources/tests/.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -286,10 +325,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.team.core"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*\.(team|compare).*"/>
+              project="org.eclipse.team.core"
+              relativePathPattern="team/bundles/.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -298,10 +335,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.team.core"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*\.examples.*"/>
+              project="org.eclipse.team.core"
+              relativePathPattern="team/examples/.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -310,10 +345,8 @@
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.team.core"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*(team|compare)\.tests.*"/>
+              project="org.eclipse.team.core"
+              relativePathPattern="team/tests/.*"/>
         </predicate>
       </workingSet>
     </setupTask>
@@ -919,7 +952,6 @@
         label="Master"/>
     <description>The Platform Releng Build Tools</description>
   </project>
-  <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.resources/master/bundles/org.eclipse.core.resources.releng/platformResources.setup#/"/>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.swt/master/bundles/org.eclipse.swt.tools/Oomph/platformSwt.setup#/"/>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.text/master/org.eclipse.text.releng/platformText.setup#/"/>
   <project href="https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.ua/master/org.eclipse.ua.releng/platformUa.setup#/"/>
