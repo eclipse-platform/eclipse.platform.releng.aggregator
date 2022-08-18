@@ -57,14 +57,20 @@ public class BasicResultsTable implements IApplication{
         // Do nothing
     }
 
+    /**
+     * Reference for interpreting variable names:
+     * For the test org.eclipse.jface.tests.performance.FastTreeTest.testAddFifty
+     *   component = org.eclupse.jface
+     *   class = FastTreeTest
+     *   scenarioID = testAddFifty
+     */
     public static void run(String[] args) {
 
         parse(args);
 
-        //Initialize results data
+        //Import results data
         ResultsData results = new ResultsData(CURRENT_BUILD, BASELINE_BUILD);
         try {
-		    // import data
       	    System.out.println("INFO: Start importing " + inputFiles.size() + " performance data files.");
       	    for (Path inputFile : inputFiles) {
 			    results.importData(inputFile);
@@ -77,8 +83,7 @@ public class BasicResultsTable implements IApplication{
         //Sort all scenarios into components, then make html file per component
         Set<String> scenarioIDs = results.getCurrentScenarios();
         ArrayList<String> usedComponents = new ArrayList<>();
-        //group scenarios by component for making tables
-        HashMap<String, ArrayList<String>> componentMap = new HashMap<>();
+        HashMap<String, ArrayList<String>> componentMap = new HashMap<>(); //scenarios grouped by component
 
         //get components from scenario name, for simplicity I'm just grabing everthing before .test/.tests but eventually should be mapped to actual components
         for (String scenarioID : scenarioIDs) {
@@ -112,120 +117,32 @@ public class BasicResultsTable implements IApplication{
             }
         }
 
-        //for checking if a test has a baseline to reference
-        Set<String> baselineScenarios = results.getBaselineScenarios();
+        createResultsTables()
+        createIndex()
 
-        //Make component html files
-        for (String component : usedComponents) {
-            ArrayList<String> scenarioList = componentMap.get(component);
-            scenarioList.sort(String::compareToIgnoreCase);
+        //copy basicPerformance.php from templatefiles
+        String phpFileName = buildDirectory + "/basicPerformance.php";
+        File phpFile = new File(phpFileName);
 
-            //set up html string
-            String htmlString = "";
-            //htmlString = htmlString + EOL + "<h2>Performance of " + component + ": " + CURRENT_BUILD + " relative to " + BASELINE_BUILD + "</h2>" + EOL;
-            //htmlString = htmlString + EOL + "<a href=\"performance.php?fp_type=0\">Back to global results</a>" + EOL;
-            htmlString = htmlString + EOL + "<h3>All " + scenarioList.size() + " scenarios:</h3>" + EOL;
-            htmlString = htmlString + EOL + "<p>Times are given in milliseconds.</p>" + EOL;
-            htmlString = htmlString + "<table border=\"1\">" + EOL + "<tr>" + EOL;
-            htmlString = htmlString + "<td><h4>Class</h4></td>" + EOL;
-            htmlString = htmlString + "<td><h4>Name</h4></td>" + EOL;
-            htmlString = htmlString + "<td><h4>Elapsed Process (Current)</h4></td>" + EOL;
-            htmlString = htmlString + "<td><h4>Elapsed Process (Baseline)</h4></td>" + EOL;
-            htmlString = htmlString + "<td><h4>Difference</h4></td>" + EOL;
-            htmlString = htmlString + "<td><h4>CPU Time (Current)</h4></td>" + EOL;
-            htmlString = htmlString + "<td><h4>CPU Time (Baseline)</h4>" + EOL;
-            htmlString = htmlString + "<td><h4>Difference</h4>" + EOL;
-
-            for (String scenario : scenarioList) {
-                String[] scenarioParts = null;
-                String componentClass = null;
-                String componentName = null;
-                //swt is different
-                if (scenario.contains("swt")) {
-                    scenarioParts = scenario.split("\\.");
-                    componentName = scenarioParts[scenarioParts.length - 1];
-                    for (int i=0; i < (scenarioParts.length - 1); i++ ) {
-                        componentClass = componentClass + scenarioParts[i] + ".";
-                    }
-                    //trim final .
-                    componentClass = componentClass.substring(0, componentClass.length()-1);
-                } else {
-                    scenarioParts = scenario.split("#");
-                    componentClass = scenarioParts[0];
-                    componentName = scenarioParts[1];
-                }
-
-                double[] currentData = results.getData("current", scenario);
-                String elapsedCurrent = String.valueOf(currentData[0]);
-                String cpuCurrent = String.valueOf(currentData[1]);
-
-                String elapsedBaseline = "N/A";
-                String cpuBaseline = "N/A";
-
-                String elapsedPercent = "N/A";
-                String cpuPercent = "N/A";
-
-                String elapsedColor = "#4CE600";
-                String cpuColor = "#4CE600";
-
-                if (baselineScenarios.contains(scenario)) {
-                    double[] baselineData = results.getData("baseline", scenario);
-
-                    elapsedBaseline = String.valueOf(baselineData[0]);
-                    cpuBaseline = String.valueOf(baselineData[1]);
-
-                    double elapsedDifference = baselineData[0] - currentData[0];
-                    double cpuDifference = baselineData[1] - currentData[1];
-
-                    double elapsedPercentValue = Math.abs(elapsedDifference / baselineData[0]) * 100;
-                    double cpuPercentValue = Math.abs(cpuDifference / baselineData[1]) * 100;
-
-                    elapsedPercent = String.format("%.2f", elapsedPercentValue) + "%";
-                    cpuPercent = String.format("%.2f", cpuPercentValue) + "%";
-
-                    if (elapsedDifference < 0) {
-                        elapsedColor = "D7191C";
-                    }
-                    if (cpuDifference < 0) {
-                        cpuColor = "D7191C";
-                    }
-
-                }
-
-                htmlString = htmlString + "<tr>" + EOL;
-                htmlString = htmlString + "<td>" + componentClass + EOL;
-                htmlString = htmlString + "<td>" + componentName + EOL;
-                htmlString = htmlString + "<td>" + elapsedCurrent + EOL;
-                htmlString = htmlString + "<td>" + elapsedBaseline + EOL;
-                htmlString = htmlString + "<td bgcolor=\"" + elapsedColor + "\">" + elapsedPercent + EOL;
-                htmlString = htmlString + "<td>" + cpuCurrent + EOL;
-                htmlString = htmlString + "<td>" + cpuBaseline + EOL;
-                htmlString = htmlString + "<td bgcolor=\"" + cpuColor + "\">" + cpuPercent + EOL;
-            }
-
-            htmlString = htmlString + "</table>" + EOL;
-
-            //create file
-            String outputFileName = buildDirectory + "/" + component + "_BasicTable.html";
-            File outputFile = new File(outputFileName);
-
-            try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))){
-                outputStream.write(htmlString.getBytes());
-            }
-            catch (final FileNotFoundException ex) {
-                System.err.println("ERROR: File not found exception while writing: " + outputFile.getPath());
-                System.exit(1);
-            }
-            catch (final IOException ex) {
-                System.err.println("ERROR: IOException writing: " + outputFile.getPath());
-                System.exit(1);
-            }
-
+        try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(phpFile))){
+            outputStream.write(Files.readAllBytes(phpTemplateFile));
+        }
+        catch (final FileNotFoundException ex) {
+            System.err.println(EOL + "ERROR: File not found exception while writing: " + phpFile.getPath());
+            System.exit(1);
+        }
+        catch (final IOException ex) {
+            System.err.println(EOL + "ERROR: IOException writing: " + phpFile.getPath());
+            System.exit(1);
         }
 
-        //make basicResultsIndex.html file
-        String htmlString = "";
-        htmlString = htmlString + EOL;
+    }
+
+    /**
+     * Create basicResultsIndex.html file
+     */
+    private static void createIndex(ArrayList<String> usedComponents) {
+        String htmlString = EOL;
 
         for (String component : usedComponents) {
             htmlString = htmlString + "<a href=\"./basicPerformance.php" +
@@ -250,23 +167,191 @@ public class BasicResultsTable implements IApplication{
             System.err.println("ERROR: IOException writing: " + outputFile.getPath());
             System.exit(1);
         }
+    }
 
-        //copy basicPerformance.php from templatefiles
-        String phpFileName = buildDirectory + "/basicPerformance.php";
-        File phpFile = new File(phpFileName);
+    /**
+     * Create *_BasicResults.html files
+     */
+    private static void createResultsTables(ResultsData results, ArrayList<String> usedComponents, HashMap<String, ArrayList<String>> componentMap ) {
+        //for checking if a test has a baseline to reference
+        Set<String> baselineScenarios = results.getBaselineScenarios();
 
-        try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(phpFile))){
-            outputStream.write(Files.readAllBytes(phpTemplateFile));
+        //Make component html files
+        for (String component : usedComponents) {
+            ArrayList<String> scenarioList = componentMap.get(component);
+            scenarioList.sort(String::compareToIgnoreCase);
+
+            //Variables for aggregate data
+            double componentEPCurrent = 0;
+            double componentEPBaseline = 0;
+            double componentCPUCurrent = 0;
+            double componentCPUBaseline = 0;
+            HashMap<String, double[]> classMap = new HashMap<>; 
+            
+            String scenarioTable = makeHeader(true);
+            for (String scenario : scenarioList) {
+                String[] scenarioClassName = {null, null}; //class, name
+
+                //swt is different
+                if (scenario.contains("swt")) {
+                    String scenarioParts = scenario.split("\\.");
+                    scenarioClassName[1] = scenarioParts[scenarioParts.length - 1];
+                    for (int i=0; i < (scenarioParts.length - 1); i++ ) {
+                        scenarioClassName[0] = scenarioClassName[0] + scenarioParts[i] + ".";
+                    }
+                    //trim final .
+                    scenarioClassName[0] = scenarioClassName[0].substring(0, scenarioClassName[0].length()-1);
+                } else {
+                    String scenarioParts = scenario.split("#");
+                    scenarioClassName[0] = scenarioParts[0];
+                    scenarioClassName[1] = scenarioParts[1];
+                }
+
+                double[] currentData = results.getData("current", scenario);
+                double[] baselineData = null; //null in case no baseline
+
+                if (baselineScenarios.contains(scenario)) {
+                    baselineData = results.getData("baseline", scenario);
+
+                    //only add times to aggregate totals if there's also a baseline, otherwise will inflate current times.
+                    if (classMap.contains(scenarioClassName[0])) { //add data
+                    //class
+                        double[] classData = classMap.get(scenarioClassName[0]);
+                        double classEPCurrent = classData[0] + currentData[0];
+                        double classCPUCurrent = classData[1] + currentData[1];
+                        double classEPBaseline = classData[2] + baselineData[0];
+                        double classCPUBaseline = classData[3] + baselineData[1];
+                        double[] newClassData = {classEPCurrent, classCPUCurrent, classEPBaseline, classCPUBaseline};
+                        classMap.replace(scenarioClassName[0], newClassData);
+
+                    //component
+                        componentEPCurrent += currentData[0];
+                        componentCPUCurrent += currentData[1];
+                        componentEPBaseline += baselineData[0];
+                        componentCPUBaseline += baselineData[1];
+                    } else { //add to map
+                    //class
+                        double[] classData = {currentData[0], currentData[1], baselineData[0], baselineData[1]}; //currentEP, currentCPU, baselineEP, baselineCPU
+                        classMap.put(scenarioClassName[0], classData);
+                    //component
+                        componentEPCurrent += currentData[0];
+                        componentCPUCurrent += currentData[1];
+                        componentEPBaseline += baselineData[0];
+                        componentCPUBaseline += baselineData[1];
+                    }
+                }
+
+                scenarioTable += makeTableRow(scenarioClassName, currentData, baselineData);
+            }
+            scenarioTable += "</table>" + EOL;
+
+            //create class and component tables
+            String componentTable = makeHeader(false);
+                componentTable += makeTableRow({component, null}, {componentEPCurrent, componentCPUCurrent}, {componentEPBaseline, componentCPUBaseline});
+                componentTable += "</table>" + EOL;
+
+            String classTable = makeHeader(false);
+            for (String class : classMap.keySet()) {
+                classData = classMap.get(class);
+                classTable += makeTableRow({class, null}, {classData[0], classData[1]}, {classData[2], classData[3]});
+            }
+            classTable += "</table>" + EOL;
+
+            //assemble final html string
+            String htmlString = EOL + "<p>Times are given in milliseconds.</p>" + EOL +
+                "<h3>Total Component Time:</h3>" + EOL +
+                componentTable + EOL +
+                "<h3>Total Class Times:</h3>" + EOL +
+                classTable + EOL +
+                "<h3>All " + scenarioList.size() + " individual scenarios:</h3>" + EOL + 
+                scenarioTable + EOL;
+
+            //create file
+            String outputFileName = buildDirectory + "/" + component + "_BasicTable.html";
+            File outputFile = new File(outputFileName);
+
+            try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))){
+                outputStream.write(htmlString.getBytes());
+            }
+            catch (final FileNotFoundException ex) {
+                System.err.println("ERROR: File not found exception while writing: " + outputFile.getPath());
+                System.exit(1);
+            }
+            catch (final IOException ex) {
+                System.err.println("ERROR: IOException writing: " + outputFile.getPath());
+                System.exit(1);
+            }
         }
-        catch (final FileNotFoundException ex) {
-            System.err.println(EOL + "ERROR: File not found exception while writing: " + phpFile.getPath());
-            System.exit(1);
+    }
+
+    private static String makeHeader(boolean scenario) {
+        String htmlString = "<table border=\"1\">" + EOL + 
+            "<thead>" + EOL + 
+            "<tr>" + EOL +
+            "<th>Class</th>" + EOL;
+        if (scenario) {
+            htmlString += "<th>Scenario</th>" + EOL;
         }
-        catch (final IOException ex) {
-            System.err.println(EOL + "ERROR: IOException writing: " + phpFile.getPath());
-            System.exit(1);
+        htmlString = htmlString + "<th>Elapsed Process (Current)</th>" + EOL +
+            "<th>Elapsed Process (Baseline)</th>" + EOL +
+            "<th>Difference</th>" + EOL + 
+            "<th>CPU Time (Current)</th>" + EOL + 
+            "<th>CPU Time (Baseline)</th>" + EOL +
+            "<th>Difference</th>" + EOL +
+            "</tr>" + EOL;
+        
+        return htmlString;
+    }
+
+    private static String makeTableRow(String[] className, double[] currentData, double[] baselineData) {
+        String elapsedCurrent = String.valueOf(currentData[0]);
+        String cpuCurrent = String.valueOf(currentData[1]);
+
+        //defaults
+        String elapsedBaseline = "N/A";
+        String cpuBaseline = "N/A";
+
+        String elapsedPercent = "N/A";
+        String cpuPercent = "N/A";
+
+        String elapsedColor = "#4CE600";
+        String cpuColor = "#4CE600";
+
+        if (baselineData[0]) { //if baseline data isn't null
+            elapsedBaseline = String.valueOf(baselineData[0]);
+            cpuBaseline = String.valueOf(baselineData[1]);
+
+            double elapsedDifference = baselineData[0] - currentData[0];
+            double cpuDifference = baselineData[1] - currentData[1];
+
+            double elapsedPercentValue = Math.abs(elapsedDifference / baselineData[0]) * 100;
+            double cpuPercentValue = Math.abs(cpuDifference / baselineData[1]) * 100;
+
+            elapsedPercent = String.format("%.2f", elapsedPercentValue) + "%";
+            cpuPercent = String.format("%.2f", cpuPercentValue) + "%";
+
+            if (elapsedDifference < 0) {
+                elapsedColor = "D7191C";
+            }
+            if (cpuDifference < 0) {
+                cpuColor = "D7191C";
+            }
         }
 
+        String htmlString = "<tr>" + EOL +
+            "<td>" + className[0] + EOL;
+        if (className[1]) {
+            htmlString += "<td>" + className[1] + EOL;
+        }
+        htmlString += "<td>" + elapsedCurrent + EOL +
+            "<td>" + elapsedBaseline + EOL +
+            "<td bgcolor=\"" + elapsedColor + "\">" + elapsedPercent + EOL +
+            "<td>" + cpuCurrent + EOL +
+            "<td>" + cpuBaseline + EOL +
+            "<td bgcolor=\"" + cpuColor + "\">" + cpuPercent + EOL +
+            "</tr>" + EOL;
+        
+        return htmlString;
     }
 
     //args = baseline, current build, input file array
