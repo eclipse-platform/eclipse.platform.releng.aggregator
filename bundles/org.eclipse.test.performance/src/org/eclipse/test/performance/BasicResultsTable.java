@@ -34,17 +34,21 @@ public class BasicResultsTable implements IApplication{
     private static String CURRENT_BUILD, BASELINE_BUILD=null;
     private static ArrayList<Path> inputFiles = new ArrayList<>();
     private static Path phpTemplateFile = null;
-    private static String EOL = System.lineSeparator();
     private static String buildDirectory = "";
+
+    //String formatting shorthand
+    private static String EOL = System.lineSeparator();
+    private static String T = "\t";
+    private static String T2 = "\t\t";
 
     @Override
     public Object start(IApplicationContext context) {
         String[] args = (String[]) context.getArguments().get("application.args");
         //DEBUG
         if (args.length > 0) {
-            System.out.println("\n\t= = Raw arguments ('application.args') passed to performance import application: = =");
+            System.out.println(EOL + T +"= = Raw arguments ('application.args') passed to performance import application: = =");
             for (String arg : args) {
-                System.out.println("\t\t>" + arg + "<");
+                System.out.println(T2 + ">" + arg + "<");
             }
         }
         //Stuff
@@ -117,8 +121,8 @@ public class BasicResultsTable implements IApplication{
             }
         }
 
-        createResultsTables()
-        createIndex()
+        createResultsTables(results, usedComponents, componentMap);
+        createIndex(usedComponents);
 
         //copy basicPerformance.php from templatefiles
         String phpFileName = buildDirectory + "/basicPerformance.php";
@@ -182,11 +186,11 @@ public class BasicResultsTable implements IApplication{
             scenarioList.sort(String::compareToIgnoreCase);
 
             //Variables for aggregate data
-            double componentEPCurrent = 0;
-            double componentEPBaseline = 0;
-            double componentCPUCurrent = 0;
-            double componentCPUBaseline = 0;
-            HashMap<String, double[]> classMap = new HashMap<>; 
+            Double componentEPCurrent = 0.0;
+            Double componentEPBaseline = 0.0;
+            Double componentCPUCurrent = 0.0;
+            Double componentCPUBaseline = 0.0;
+            HashMap<String, Double[]> classMap = new HashMap<>(); 
             
             String scenarioTable = makeHeader(true);
             for (String scenario : scenarioList) {
@@ -194,7 +198,7 @@ public class BasicResultsTable implements IApplication{
 
                 //swt is different
                 if (scenario.contains("swt")) {
-                    String scenarioParts = scenario.split("\\.");
+                    String[] scenarioParts = scenario.split("\\.");
                     scenarioClassName[1] = scenarioParts[scenarioParts.length - 1];
                     for (int i=0; i < (scenarioParts.length - 1); i++ ) {
                         scenarioClassName[0] = scenarioClassName[0] + scenarioParts[i] + ".";
@@ -202,26 +206,26 @@ public class BasicResultsTable implements IApplication{
                     //trim final .
                     scenarioClassName[0] = scenarioClassName[0].substring(0, scenarioClassName[0].length()-1);
                 } else {
-                    String scenarioParts = scenario.split("#");
+                    String[] scenarioParts = scenario.split("#");
                     scenarioClassName[0] = scenarioParts[0];
                     scenarioClassName[1] = scenarioParts[1];
                 }
 
-                double[] currentData = results.getData("current", scenario);
-                double[] baselineData = null; //null in case no baseline
+                Double[] currentData = results.getData("current", scenario);
+                Double[] baselineData = null; //null in case no baseline
 
                 if (baselineScenarios.contains(scenario)) {
                     baselineData = results.getData("baseline", scenario);
 
                     //only add times to aggregate totals if there's also a baseline, otherwise will inflate current times.
-                    if (classMap.contains(scenarioClassName[0])) { //add data
+                    if (classMap.containsKey(scenarioClassName[0])) { //add data
                     //class
-                        double[] classData = classMap.get(scenarioClassName[0]);
-                        double classEPCurrent = classData[0] + currentData[0];
-                        double classCPUCurrent = classData[1] + currentData[1];
-                        double classEPBaseline = classData[2] + baselineData[0];
-                        double classCPUBaseline = classData[3] + baselineData[1];
-                        double[] newClassData = {classEPCurrent, classCPUCurrent, classEPBaseline, classCPUBaseline};
+                        Double[] classData = classMap.get(scenarioClassName[0]);
+                        Double classEPCurrent = classData[0] + currentData[0];
+                        Double classCPUCurrent = classData[1] + currentData[1];
+                        Double classEPBaseline = classData[2] + baselineData[0];
+                        Double classCPUBaseline = classData[3] + baselineData[1];
+                        Double[] newClassData = {classEPCurrent, classCPUCurrent, classEPBaseline, classCPUBaseline};
                         classMap.replace(scenarioClassName[0], newClassData);
 
                     //component
@@ -231,7 +235,7 @@ public class BasicResultsTable implements IApplication{
                         componentCPUBaseline += baselineData[1];
                     } else { //add to map
                     //class
-                        double[] classData = {currentData[0], currentData[1], baselineData[0], baselineData[1]}; //currentEP, currentCPU, baselineEP, baselineCPU
+                        Double[] classData = {currentData[0], currentData[1], baselineData[0], baselineData[1]}; //currentEP, currentCPU, baselineEP, baselineCPU
                         classMap.put(scenarioClassName[0], classData);
                     //component
                         componentEPCurrent += currentData[0];
@@ -241,24 +245,33 @@ public class BasicResultsTable implements IApplication{
                     }
                 }
 
-                scenarioTable += makeTableRow(scenarioClassName, currentData, baselineData);
+                String scenarioRow = makeTableRow(scenarioClassName, currentData, baselineData);
+                scenarioTable += scenarioRow;
             }
             scenarioTable += "</table>" + EOL;
 
             //create class and component tables
             String componentTable = makeHeader(false);
-                componentTable += makeTableRow({component, null}, {componentEPCurrent, componentCPUCurrent}, {componentEPBaseline, componentCPUBaseline});
-                componentTable += "</table>" + EOL;
+            String componentRow = makeTableRow(new String[]{component, null}, 
+                new Double[]{componentEPCurrent, componentCPUCurrent}, 
+                new Double[]{componentEPBaseline, componentCPUBaseline});
+            componentTable += componentRow + "</table>" + EOL;
 
             String classTable = makeHeader(false);
-            for (String class : classMap.keySet()) {
-                classData = classMap.get(class);
-                classTable += makeTableRow({class, null}, {classData[0], classData[1]}, {classData[2], classData[3]});
+            Set<String> classNames = classMap.keySet();
+            for (String className : classNames) {
+                Double[] classData = classMap.get(className);
+                String classRow = makeTableRow(new String[]{className, null}, 
+                    new Double[]{classData[0], classData[1]}, 
+                    new Double[]{classData[2], classData[3]});
+                classTable += classRow;
             }
             classTable += "</table>" + EOL;
 
+            String style = getStyleString(); //make pretty
+
             //assemble final html string
-            String htmlString = EOL + "<p>Times are given in milliseconds.</p>" + EOL +
+            String htmlString = style + EOL + "<p>Times are given in milliseconds.</p>" + EOL +
                 "<h3>Total Component Time:</h3>" + EOL +
                 componentTable + EOL +
                 "<h3>Total Class Times:</h3>" + EOL +
@@ -285,25 +298,24 @@ public class BasicResultsTable implements IApplication{
     }
 
     private static String makeHeader(boolean scenario) {
-        String htmlString = "<table border=\"1\">" + EOL + 
-            "<thead>" + EOL + 
-            "<tr>" + EOL +
-            "<th>Class</th>" + EOL;
+        String htmlString = "<table cellpadding=\"5\" width=\"95%\" class=\"details\">" + EOL + 
+            T + "<tr>" + EOL +
+            T2 + "<th>Class</th>" + EOL;
         if (scenario) {
-            htmlString += "<th>Scenario</th>" + EOL;
+            htmlString += T2 + "<th>Scenario</th>" + EOL;
         }
-        htmlString = htmlString + "<th>Elapsed Process (Current)</th>" + EOL +
-            "<th>Elapsed Process (Baseline)</th>" + EOL +
-            "<th>Difference</th>" + EOL + 
-            "<th>CPU Time (Current)</th>" + EOL + 
-            "<th>CPU Time (Baseline)</th>" + EOL +
-            "<th>Difference</th>" + EOL +
-            "</tr>" + EOL;
+        htmlString = htmlString + T2 + "<th>Elapsed Process (Current)</th>" + EOL +
+            T2 + "<th>Elapsed Process (Baseline)</th>" + EOL +
+            T2 + "<th>Difference</th>" + EOL + 
+            T2 + "<th>CPU Time (Current)</th>" + EOL + 
+            T2 + "<th>CPU Time (Baseline)</th>" + EOL +
+            T2 + "<th>Difference</th>" + EOL +
+            T + "</tr>" + EOL;
         
         return htmlString;
     }
 
-    private static String makeTableRow(String[] className, double[] currentData, double[] baselineData) {
+    private static String makeTableRow(String[] className, Double[] currentData, Double[] baselineData) {
         String elapsedCurrent = String.valueOf(currentData[0]);
         String cpuCurrent = String.valueOf(currentData[1]);
 
@@ -317,15 +329,15 @@ public class BasicResultsTable implements IApplication{
         String elapsedColor = "#4CE600";
         String cpuColor = "#4CE600";
 
-        if (baselineData[0]) { //if baseline data isn't null
+        if (baselineData[0] != null) { //if baseline data isn't null
             elapsedBaseline = String.valueOf(baselineData[0]);
             cpuBaseline = String.valueOf(baselineData[1]);
 
-            double elapsedDifference = baselineData[0] - currentData[0];
-            double cpuDifference = baselineData[1] - currentData[1];
+            Double elapsedDifference = baselineData[0] - currentData[0];
+            Double cpuDifference = baselineData[1] - currentData[1];
 
-            double elapsedPercentValue = Math.abs(elapsedDifference / baselineData[0]) * 100;
-            double cpuPercentValue = Math.abs(cpuDifference / baselineData[1]) * 100;
+            Double elapsedPercentValue = Math.abs(elapsedDifference / baselineData[0]) * 100;
+            Double cpuPercentValue = Math.abs(cpuDifference / baselineData[1]) * 100;
 
             elapsedPercent = String.format("%.2f", elapsedPercentValue) + "%";
             cpuPercent = String.format("%.2f", cpuPercentValue) + "%";
@@ -338,19 +350,47 @@ public class BasicResultsTable implements IApplication{
             }
         }
 
-        String htmlString = "<tr>" + EOL +
-            "<td>" + className[0] + EOL;
-        if (className[1]) {
-            htmlString += "<td>" + className[1] + EOL;
+        String htmlString = T + "<tr>" + EOL +
+            T2 + "<td>" + className[0] + "</td>" + EOL;
+        if (className[1] != null) {
+            htmlString += T2 + "<td>" + className[1] + "</td>" + EOL;
         }
-        htmlString += "<td>" + elapsedCurrent + EOL +
-            "<td>" + elapsedBaseline + EOL +
-            "<td bgcolor=\"" + elapsedColor + "\">" + elapsedPercent + EOL +
-            "<td>" + cpuCurrent + EOL +
-            "<td>" + cpuBaseline + EOL +
-            "<td bgcolor=\"" + cpuColor + "\">" + cpuPercent + EOL +
-            "</tr>" + EOL;
+        htmlString += T2 + "<td>" + elapsedCurrent + "</td>" + EOL +
+            T2 + "<td>" + elapsedBaseline + "</td>" + EOL +
+            T2 + "<td bgcolor=\"" + elapsedColor + "\">" + elapsedPercent + "</td>" + EOL +
+            T2 + "<td>" + cpuCurrent + "</td>" + EOL +
+            T2 + "<td>" + cpuBaseline + "</td>" + EOL +
+            T2 + "<td bgcolor=\"" + cpuColor + "\">" + cpuPercent + "</td>" + EOL +
+            T + "</tr>" + EOL;
         
+        return htmlString;
+    }
+
+    private static String getStyleString() {
+        String htmlString = "<style type=\"text/css\">" + EOL +
+            T + "body {" + EOL +
+            T2 + "font:normal 75% verdana,arial,helvetica;" + EOL +
+            T2 + "color:#000000;" + EOL +
+            T + "}" + EOL + 
+            T + "table tr td, table tr th {" + EOL + 
+            T2 + "font-size: 75%;" + EOL + 
+            T + "}" + EOL + 
+            T + "table.details tr th{" + EOL + 
+            T2 + "font-weight: bold;" + EOL + 
+            T2 + "text-align:left;" + EOL + 
+            T2 + "background:#a6caf0;" + EOL + 
+            T + "}" + EOL + 
+            T + "table.details tr {" + EOL + 
+            T2 + "background:#eeeee0;" + EOL + 
+            T + "}" + EOL + 
+            T + "p {" + EOL + 
+            T2 + "margin-top:0.5em; margin-bottom:1.0em;" + EOL + 
+            T + "}" + EOL + 
+            T + "h3 {" + EOL + 
+            T2 + "margin-bottom: 0.5em; font: bold 115% verdana,arial,helvetica" + EOL + 
+            T + "}" + EOL + 
+            "</style>" + EOL;
+
         return htmlString;
     }
 

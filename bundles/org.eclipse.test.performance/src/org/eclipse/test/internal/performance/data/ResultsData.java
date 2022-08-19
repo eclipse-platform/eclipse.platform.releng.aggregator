@@ -115,7 +115,7 @@ public class ResultsData{
 		return BASELINE_SCENARIO_DATA.keySet();
 	}
 
-    public double[] getData(String build, String scenarioID) {
+    public Double[] getData(String build, String scenarioID) {
         Sample sample = null;
 
         if (build == "current") {
@@ -126,8 +126,8 @@ public class ResultsData{
         
         DataPoint[] data = sample.getDataPoints();
 
-        double elapsedProcess = 0;
-        double cpuTime = 0;
+        Double elapsedProcess = 0.0;
+        Double cpuTime = 0.0;
 
         for (DataPoint datum : data) {
             Dim[] dimensions = datum.getDimensions();
@@ -161,7 +161,7 @@ public class ResultsData{
             }
         }
 
-        double[] currentData = {elapsedProcess, cpuTime};
+        Double[] currentData = {elapsedProcess, cpuTime};
         return currentData;
     }
 }
