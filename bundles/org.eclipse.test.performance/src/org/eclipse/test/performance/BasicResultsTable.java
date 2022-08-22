@@ -298,7 +298,7 @@ public class BasicResultsTable implements IApplication{
     }
 
     private static String makeHeader(boolean scenario) {
-        String htmlString = "<table cellpadding=\"5\" width=\"95%\" class=\"details\">" + EOL + 
+        String htmlString = "<table cellpadding=\"5\" class=\"details\">" + EOL + 
             T + "<tr>" + EOL +
             T2 + "<th>Class</th>" + EOL;
         if (scenario) {
