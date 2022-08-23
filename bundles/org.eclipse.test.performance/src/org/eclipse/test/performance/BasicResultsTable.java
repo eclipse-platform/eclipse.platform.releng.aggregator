@@ -369,11 +369,8 @@ public class BasicResultsTable implements IApplication{
     private static String getStyleString() {
         String htmlString = "<style type=\"text/css\">" + EOL +
             T + "body {" + EOL +
-            T2 + "font:normal 75% verdana,arial,helvetica;" + EOL +
+            T2 + "font:normal verdana,arial,helvetica;" + EOL +
             T2 + "color:#000000;" + EOL +
-            T + "}" + EOL + 
-            T + "table tr td, table tr th {" + EOL + 
-            T2 + "font-size: 75%;" + EOL + 
             T + "}" + EOL + 
             T + "table.details tr th{" + EOL + 
             T2 + "font-weight: bold;" + EOL + 
