@@ -31,7 +31,7 @@ import org.eclipse.test.internal.performance.data.ResultsData;
  * @since 3.19
  */
 public class BasicResultsTable implements IApplication{
-    private static String CURRENT_BUILD, BASELINE_BUILD=null;
+    private static String CURRENT_BUILD, BASELINE_BUILD="";
     private static ArrayList<Path> inputFiles = new ArrayList<>();
     private static Path phpTemplateFile = null;
     private static String buildDirectory = "";
@@ -194,7 +194,7 @@ public class BasicResultsTable implements IApplication{
             
             String scenarioTable = makeHeader(true);
             for (String scenario : scenarioList) {
-                String[] scenarioClassName = {null, null}; //class, name
+                String[] scenarioClassName = {"", ""}; //class, name
 
                 //swt is different
                 if (scenario.contains("swt")) {
@@ -212,7 +212,7 @@ public class BasicResultsTable implements IApplication{
                 }
 
                 Double[] currentData = results.getData("current", scenario);
-                Double[] baselineData = null; //null in case no baseline
+                Double[] baselineData = {0.0, 0.0}; //0.0 in case no baseline
 
                 if (baselineScenarios.contains(scenario)) {
                     baselineData = results.getData("baseline", scenario);
@@ -252,7 +252,7 @@ public class BasicResultsTable implements IApplication{
 
             //create class and component tables
             String componentTable = makeHeader(false);
-            String componentRow = makeTableRow(new String[]{component, null}, 
+            String componentRow = makeTableRow(new String[]{component, ""}, 
                 new Double[]{componentEPCurrent, componentCPUCurrent}, 
                 new Double[]{componentEPBaseline, componentCPUBaseline});
             componentTable += componentRow + "</table>" + EOL;
@@ -261,7 +261,7 @@ public class BasicResultsTable implements IApplication{
             Set<String> classNames = classMap.keySet();
             for (String className : classNames) {
                 Double[] classData = classMap.get(className);
-                String classRow = makeTableRow(new String[]{className, null}, 
+                String classRow = makeTableRow(new String[]{className, ""}, 
                     new Double[]{classData[0], classData[1]}, 
                     new Double[]{classData[2], classData[3]});
                 classTable += classRow;
@@ -329,7 +329,7 @@ public class BasicResultsTable implements IApplication{
         String elapsedColor = "#4CE600";
         String cpuColor = "#4CE600";
 
-        if (baselineData[0] != null) { //if baseline data isn't null
+        if (baselineData[0] != 0.0) { //if baseline data isn't 0
             elapsedBaseline = String.valueOf(baselineData[0]);
             cpuBaseline = String.valueOf(baselineData[1]);
 
@@ -352,7 +352,7 @@ public class BasicResultsTable implements IApplication{
 
         String htmlString = T + "<tr>" + EOL +
             T2 + "<td>" + className[0] + "</td>" + EOL;
-        if (className[1] != null) {
+        if (className[1] != "") {
             htmlString += T2 + "<td>" + className[1] + "</td>" + EOL;
         }
         htmlString += T2 + "<td>" + elapsedCurrent + "</td>" + EOL +
