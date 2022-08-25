@@ -154,50 +154,50 @@ case ${DL_TYPE} in
     exit 1
 esac
 
-if [[ "${DL_TYPE}" != "R" ]]
-then 
+#if [[ "${DL_TYPE}" != "R" ]]
+#then 
   #Tag Source
-  echo "Tag source"
-  TAG=${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}_${BUILD_SERVICE}_${CHECKPOINT}
+#  echo "Tag source"
+#  TAG=${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}_${BUILD_SERVICE}_${CHECKPOINT}
 
-  cd ${WORKSPACE}
-  git config --global user.email "releng-bot@eclipse.org"
-  git config --global user.name "Eclipse Releng Bot"
-  git clone --recurse-submodules git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+#  cd ${WORKSPACE}
+#  git config --global user.email "releng-bot@eclipse.org"
+#  git config --global user.name "Eclipse Releng Bot"
+#  git clone --recurse-submodules git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
 
-  pushd eclipse.platform.releng.aggregator
-  git checkout master
-  git submodule foreach git checkout master
-  git clean -f -d -x
-  git submodule foreach git clean -f -d -x
-  git reset --hard
-  git submodule foreach git reset --hard
-  git checkout master
-  git submodule foreach git checkout master
-  git pull --rebase
-  git submodule foreach git pull --rebase
+#  pushd eclipse.platform.releng.aggregator
+#  git checkout master
+#  git submodule foreach git checkout master
+#  git clean -f -d -x
+#  git submodule foreach git clean -f -d -x
+#  git reset --hard
+#  git submodule foreach git reset --hard
+#  git checkout master
+#  git submodule foreach git checkout master
+#  git pull --rebase
+#  git submodule foreach git pull --rebase
 
-  git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
-  git submodule foreach 'git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}; git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}; || :'
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    printf "\n\t%s\n" "ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${TAG} and annotation of ${DL_LABEL}."
-    popd
-    exit $RC
-  fi
+#  git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
+#  git submodule foreach 'git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}; git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}; || :'
+#  RC=$?
+#  if [[ $RC != 0 ]]
+#  then
+#    printf "\n\t%s\n" "ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${TAG} and annotation of ${DL_LABEL}."
+#    popd
+#    exit $RC
+#  fi
   #git submodule foreach git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
-  git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
+#  git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
 
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    printf "\n\t%s\n" "ERROR: Failed to push new tag, ${TAG}."
-    popd
-    exit $RC
-  fi
-  popd
-else
+#  RC=$?
+#  if [[ $RC != 0 ]]
+#  then
+#    printf "\n\t%s\n" "ERROR: Failed to push new tag, ${TAG}."
+#    popd
+#    exit $RC
+#  fi
+#  popd
+#else
   #Repository will be available only for R builds. add it to composite
   epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
   dropsPath=${epDownloadDir}/downloads/drops4
@@ -236,4 +236,4 @@ else
   ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/addToComposite.xml ${extraArgs} -vmargs $devArgs
 
   ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
-fi
+#fi
