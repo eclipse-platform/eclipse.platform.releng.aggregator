@@ -68,7 +68,6 @@ public class ArtifactInfo {
 			fixData();
 			StringBuilder buf = new StringBuilder();
 			String indent = INDENT;
-			element("name", indent, buf, this.name);
 			element("url", indent, buf, "http://www.eclipse.org/"+getProject());
 			buf.append(FRONT_MATTER);
 			if (this.scmConnection == null) {
