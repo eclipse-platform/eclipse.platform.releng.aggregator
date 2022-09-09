@@ -43,6 +43,7 @@ cp -r ${REPO}/${PLATFORM}/* ${PLATFORM}/
 
 echo "==== UPLOAD ===="
 
+SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-releng.xml
 MVN=/opt/tools/apache-maven/latest/bin/mvn
 
 /bin/mkdir .log
@@ -79,11 +80,9 @@ do
 	if [ $snapshot == 0 ]; then
 		URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 		REPO=repo.eclipse.org
-		SETTINGS=""
 	else
 		URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
 		REPO=ossrh
-		SETTINGS="-s /home/jenkins/.m2/settings-deploy-ossrh-jdt.xml"
 	fi
 	
   if same_as_baseline $pomFile; then
@@ -93,21 +92,21 @@ do
 	sourcesFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-sources.jar|"`
 	javadocFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
 	
-	echo "${MVN} -f platform-pom.xml ${SETTINGS} gpg:sign-and-deploy-file -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
+	echo "${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
 	
-	${MVN} -e -X -f platform-pom.xml ${SETTINGS} gpg:sign-and-deploy-file \
+	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	   -Durl=${URL} -DrepositoryId=${REPO} \
 	   -Dfile=${file} -DpomFile=${pomFile} \
 	   >> .log/artifact-upload.txt
 	   
 	echo -e "\t${sourcesFile}"
-	${MVN} -e -X -f platform-pom.xml ${SETTINGS} gpg:sign-and-deploy-file \
+	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	   -Durl=${URL} -DrepositoryId=${REPO} \
 	   -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
 	   >> .log/sources-upload.txt
 	
 	echo -e "\t${javadocFile}"
-	${MVN} -e -X -f platform-pom.xml ${SETTINGS} gpg:sign-and-deploy-file \
+	${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	   -Durl=${URL} -DrepositoryId=${REPO} \
 	   -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
 	   >> .log/javadoc-upload.txt
