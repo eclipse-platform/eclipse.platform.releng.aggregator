@@ -45,7 +45,6 @@ function create_baseline() {
 		then
 			version=${previous},${version}
 		fi
-		eval VERSION_$name=$version
 		echo VERSION_$name=$version
 	done > ${WORKSPACE}/baseline-next.txt 
 	cd -
