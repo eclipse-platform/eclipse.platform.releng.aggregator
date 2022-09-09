@@ -115,5 +115,9 @@ done
 
 /bin/ls -la .log
 
-/bin/grep -i fail .log/*
+/bin/grep "BUILD FAILURE" .log/*
+if [ "$?" -eq 0 ]; then
+	echo "Deployment failed, see logs for details"
+	exit 1
+fi
 
