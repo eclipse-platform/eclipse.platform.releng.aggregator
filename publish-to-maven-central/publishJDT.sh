@@ -98,17 +98,21 @@ do
 	     -Dfile=${file} -DpomFile=${pomFile} \
 	     >> .log/artifact-upload.txt
 	     
-	  echo -e "\t${sourcesFile}"
-	  ${MVN} -f jdt-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-	     -Durl=${URL} -DrepositoryId=${REPO} \
-	     -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
-	     >> .log/sources-upload.txt
-	  
-	  echo -e "\t${javadocFile}"
-	  ${MVN} -f jdt-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-	     -Durl=${URL} -DrepositoryId=${REPO} \
-	     -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
-	     >> .log/javadoc-upload.txt
+		if [ -f "${sourcesFile}" ]; then
+		  echo -e "\t${sourcesFile}"
+		  ${MVN} -f jdt-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+		     -Durl=${URL} -DrepositoryId=${REPO} \
+		     -Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
+		     >> .log/sources-upload.txt
+		fi
+
+		if [ -f "${javadocFile}" ]; then
+		  echo -e "\t${javadocFile}"
+		  ${MVN} -f jdt-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+		     -Durl=${URL} -DrepositoryId=${REPO} \
+		     -Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
+		     >> .log/javadoc-upload.txt
+		fi
   fi
 done
 
