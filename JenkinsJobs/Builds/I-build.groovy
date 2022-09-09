@@ -471,6 +471,11 @@ spec:
               build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
 		}
+		stage('Trigger publication to Maven snapshots repo') {
+			steps {
+				build job: 'CBIaggregator', parameters: [string(name: 'snapshotOrRelease', value: '-snapshot')], wait: false
+			}
+		}
 	}
 	post {
         failure {
