@@ -42,7 +42,7 @@ cp -r ${REPO}/${JDT}/* ${JDT}/
 
 echo "==== UPLOAD ===="
 
-SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-releng.xml
+SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-jdt.xml
 MVN=/opt/tools/apache-maven/latest/bin/mvn
 
 /bin/mkdir .log
