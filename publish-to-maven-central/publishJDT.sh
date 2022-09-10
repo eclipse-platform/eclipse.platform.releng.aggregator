@@ -123,7 +123,7 @@ wget https://download.eclipse.org/eclipse/downloads/drops4/R-4.25-202208311800/d
 ${MVN} -f jdt-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 	-Durl=${URL} -DrepositoryId=${REPO} \
 	-Dfile=ecjsrc.jar -DpomFile=org/eclipse/jdt/ecj/*/ecj-*.pom -Dclassifier=sources \
-	>> .log/sources-upload.tx
+	>> .log/sources-upload.txt
 
 /bin/ls -la .log
 
