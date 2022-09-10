@@ -116,6 +116,15 @@ do
   fi
 done
 
+# WORKAROUND TO PUBLISH ECJ SOURCES AS REQUESTED BY NEXUS
+# PRETTY FRAGILE! NEEDS VERSION UPDATES ON EVERY STREAM
+# suggested fix: https://github.com/eclipse-jdt/eclipse.jdt.core/issues/384
+wget https://download.eclipse.org/eclipse/downloads/drops4/R-4.25-202208311800/download.php?dropFile=ecjsrc-4.25.jar -o ecjsrc.jar
+${MVN} -f jdt-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	-Durl=${URL} -DrepositoryId=${REPO} \
+	-Dfile=ecjsrc.jar -DpomFile=org/eclipse/jdt/ecj/*/ecj-*.pom -Dclassifier=sources \
+	>> .log/sources-upload.tx
+
 /bin/ls -la .log
 
 /bin/grep "BUILD FAILURE" .log/*
