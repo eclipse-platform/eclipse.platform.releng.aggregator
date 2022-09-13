@@ -482,7 +482,8 @@ spec:
                 build job: 'ep425Y-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'ep425Y-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'ep425Y-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'ep425Y-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+		build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
             }
 		}
