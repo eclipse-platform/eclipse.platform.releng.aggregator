@@ -92,11 +92,6 @@ job('Builds/markUnstable'){
   }
 
   publishers {
-    extendedEmail {
-      recipientList('sravankumarl@in.ibm.com')
-      contentType('default')
-    }
-
     downstreamParameterized {
       trigger('updateIndex') {
         condition('STABLE')
