@@ -86,11 +86,4 @@ for (STREAM in STREAMS){
       ''')
     }
   }
-
-  publishers {
-      extendedEmail {
-        recipientList('sravankumarl@in.ibm.com')
-        contentType('default')
-      }
-    }
 }
