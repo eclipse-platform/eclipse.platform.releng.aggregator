@@ -1,4 +1,4 @@
-def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('../JobDSL.json'))
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('${WORKSPACE}/JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
 for (STREAM in STREAMS){
