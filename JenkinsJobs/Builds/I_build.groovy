@@ -41,7 +41,7 @@ for (STREAM in STREAMS){
 
       cps {
         sandbox()
-        script(readFileFromWorkspace('JenkinsJobs/Builds/I-build.jenkinsfile'))
+        script(readFileFromWorkspace('JenkinsJobs/Builds/I_build.jenkinsfile'))
       }
     }
   }
