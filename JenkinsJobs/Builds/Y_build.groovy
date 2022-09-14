@@ -30,7 +30,7 @@ pipelineJob('Builds/Y-build'){
 
     cps {
       sandbox()
-      script(readFileFromWorkspace('JenkinsJobs/Builds/Y-build.jenkinsfile'))
+      script(readFileFromWorkspace('JenkinsJobs/Builds/Y_build.jenkinsfile'))
     }
   }
 }

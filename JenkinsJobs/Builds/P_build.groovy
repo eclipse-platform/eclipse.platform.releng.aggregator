@@ -25,7 +25,7 @@ pipelineJob('Builds/P-build'){
 
     cps {
       sandbox()
-      script(readFileFromWorkspace('JenkinsJobs/Builds/P-build.jenkinsfile'))
+      script(readFileFromWorkspace('JenkinsJobs/Builds/P_build.jenkinsfile'))
     }
   }
 }

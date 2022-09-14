@@ -87,7 +87,7 @@ job('Builds/markStable'){
   publishers {
     downstreamParameterized {
       trigger('updateIndex') {
-        condition('STABLE')
+        condition('SUCCESS')
         triggerWithNoParameters(true)
       }
     }
