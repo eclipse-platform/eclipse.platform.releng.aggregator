@@ -1,19 +1,23 @@
 pipelineJob('Builds/Y-build'){
   description('Daily Maintenance Builds.')
 
-  triggers {
-    cron('''
-      TZ=America/Toronto
-      # format: Minute Hour Day Month Day of the week (0-7)
+  properties {
+    pipelineTriggers {
+      triggers {
+        cron('''
+TZ=America/Toronto
+# format: Minute Hour Day Month Day of the week (0-7)
 
-      #Daily Y-build
-      0 10 * * *
-      #milestone week
-      #0 6 * * 2
-      #0 6 * * 4
-      #
-      #0 2 21 7 4
-    ''')
+#Daily Y-build
+0 10 * * *
+#milestone week
+#0 6 * * 2
+#0 6 * * 4
+#
+#0 2 21 7 4
+        ''')
+      }
+    }
   }
 
   logRotator {
