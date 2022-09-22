@@ -1,14 +1,18 @@
 pipelineJob('Builds/P-build'){
   description('Java Update Builds CHECK NOTES.')
 
-  triggers {
-    cron('''
-      TZ=America/Toronto
-      # format: Minute Hour Day Month Day of the week (0-7)
+  properties {
+    pipelineTriggers {
+      triggers {
+        cron('''
+TZ=America/Toronto
+# format: Minute Hour Day Month Day of the week (0-7)
 
-      #Daily P-build
-      #0 5 * * *
-    ''')
+#Daily P-build
+#0 5 * * *
+        ''')
+      }
+    }
   }
 
   logRotator {
