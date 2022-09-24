@@ -3,6 +3,7 @@ pipeline {
 		timeout(time: 240, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 		disableConcurrentBuilds(abortPrevious: true)
+		timestamps()
 	}
 	agent {
 		label "centos-latest"
@@ -53,7 +54,11 @@ pipeline {
 			}
 			post {
 				always {
-					archiveArtifacts artifacts: '.*log,*/target/work/data/.metadata/.*log,*/tests/target/work/data/.metadata/.*log,apiAnalyzer-workspace/.metadata/.*log,eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*', allowEmptyArchive: true
+					archiveArtifacts allowEmptyArchive: true, artifacts: '\
+						.*log,*/target/work/data/.metadata/.*log,\
+						*/tests/target/work/data/.metadata/.*log,\
+						apiAnalyzer-workspace/.metadata/.*log,\
+						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*'
 				}
 			}
 		}
