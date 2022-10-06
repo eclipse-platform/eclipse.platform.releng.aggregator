@@ -1151,6 +1151,50 @@
         <surefire.moduleProperties>--add-modules=ALL-SYSTEM</surefire.moduleProperties>
       </properties>
     </profile>
+	<profile>
+		<id>javadoc</id>
+		<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<!-- Must use older version see https://issues.apache.org/jira/projects/MJAVADOC/issues/MJAVADOC-707 -->
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.0.1</version>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<phase>package</phase>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<source>${java.version}</source>
+						<failOnError>false</failOnError>
+						<!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
+						<additionalDependencies>
+							<additionalDependency>
+								<groupId>org.osgi</groupId>
+								<artifactId>org.osgi.annotation.bundle</artifactId>
+								<version>2.0.0</version>
+							</additionalDependency>
+							<additionalDependency>
+								<groupId>org.osgi</groupId>
+								<artifactId>org.osgi.annotation.versioning</artifactId>
+								<version>1.1.2</version>
+							</additionalDependency>
+							<additionalDependency>
+								<groupId>org.osgi</groupId>
+								<artifactId>org.osgi.service.component.annotations</artifactId>
+								<version>1.5.0</version>
+							</additionalDependency>
+						</additionalDependencies>
+					</configuration>
+				</plugin>
+			</plugins>
+		</build>
+	</profile>
   </profiles>
   <scm>
     <connection>scm:git:https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git</connection>
