@@ -55,8 +55,8 @@ ${WORKSPACE}/promoteSites.sh
     archiveArtifacts {
       pattern('**/stage2output*/**')
     }
-    email-ext {
-      project_recipient_list('sravankumarl@in.ibm.com')
+    extendedEmail {
+      recipientList("sravankumarl@in.ibm.com")
     }
   }
 }

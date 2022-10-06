@@ -1,4 +1,4 @@
-job('AutomatedTests/ep425Y-unit-win32-java11'){
+job('AutomatedTests/ep426I-unit-win32-java11'){
   description('Run Eclipse SDK Windows Tests ')
 
   logRotator {
@@ -46,32 +46,32 @@ IF NOT DEFINED WORKSPACE (
           set /a currentLoop=0
 
           set /a nFilesOrDirs=0
-          for /D %%f in ("%WORKSPACE%\*") do set /a nFilesOrDirs+=1
-          for    %%f in ("%WORKSPACE%\*") do set /a nFilesOrDirs+=1
+          for /D %%f in ("%WORKSPACE%\\*") do set /a nFilesOrDirs+=1
+          for    %%f in ("%WORKSPACE%\\*") do set /a nFilesOrDirs+=1
           echo currentLoop: !currentLoop!   nFilesOrDirs:  !nFilesOrDirs!
 
           :LOOP
           IF !nFilesOrDirs! GTR 0 (
             rem this first for loop is for all subdirectories of workspace
-            FOR /D %%p IN ("%WORKSPACE%\*") DO (
+            FOR /D %%p IN ("%WORKSPACE%\\*") DO (
               echo removing dir: %%p
               rmdir "%%p" /s /q
               )
             rem this for loop is for for all files remaining, directly under workspace
-            FOR %%p IN ("%WORKSPACE%\*") DO (
+            FOR %%p IN ("%WORKSPACE%\\*") DO (
               echo deleting file: %%p
               del "%%p"  /q
               )
             set /a currentLoop+=1
             IF !currentLoop! GTR !maxLoops! GOTO MAXLOOPS
             set /a nFilesOrDirs=0
-            for /D %%f in ("%WORKSPACE%\*") do set /a nFilesOrDirs+=1
-            for    %%f in ("%WORKSPACE%\*") do set /a nFilesOrDirs+=1
+            for /D %%f in ("%WORKSPACE%\\*") do set /a nFilesOrDirs+=1
+            for    %%f in ("%WORKSPACE%\\*") do set /a nFilesOrDirs+=1
             echo currentLoop: !currentLoop!   nFilesOrDirs:  !nFilesOrDirs!
             if !nFilesOrDirs! GTR 0 (
               rem Pause a bit before retrying, since if we could not delete, likely due to some process still running.
               rem 'timeout' causes "redirection not allowed" error. See bug 482598. 
-              rem C:\Windows\System32\timeout.exe /t !sleepTime!
+              rem C:\\Windows\\System32\\timeout.exe /t !sleepTime!
               ping 127.0.0.1 -n1 -w !sleepTime! >NUL 
               GOTO LOOP
               )
@@ -108,11 +108,11 @@ For /F "tokens=1* delims==" %%A IN (buildProperties.properties) DO (
 echo on
 set STREAM
 set EBUILDER_HASH
-set JAVA_HOME=C:\openjdk\jdk-11\
+set JAVA_HOME=C:\\openjdk\\jdk-11\\
 set JAVA_HOME
-rem set Path="C:\openjdk\jdk-11\bin;C:\Program Files\AdoptOpenJDK\jdk-8.0.202.08\bin";C:\ProgramData\Boxstarter;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\ProgramData\chocolatey\bin;C:\tools\cygwin\bin;C:\Program Files\IcedTeaWeb\WebStart\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Users\jenkins_vnc\AppData\Local\Microsoft\WindowsApps;
+rem set Path="C:\\openjdk\\jdk-11\\bin;C:\\Program Files\\AdoptOpenJDK\\jdk-8.0.202.08\\bin";C:\\ProgramData\\Boxstarter;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\ProgramData\\chocolatey\\bin;C:\\tools\\cygwin\\bin;C:\\Program Files\\IcedTeaWeb\\WebStart\\bin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Users\\jenkins_vnc\\AppData\\Local\\Microsoft\\WindowsApps;
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\tmp -Djvm="C:\\openjdk\\jdk-11\\bin\\java.exe" -DbuildId=%buildId%  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH%  -DdownloadURL="http://download.eclipse.org/eclipse/downloads/drops4/%buildId%" -Dargs=all -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 -DtestSuite=all
+ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\\tmp -Djvm="C:\\\\openjdk\\\\jdk-11\\\\bin\\\\java.exe" -DbuildId=%buildId%  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH%  -DdownloadURL="http://download.eclipse.org/eclipse/downloads/drops4/%buildId%" -Dargs=all -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 -DtestSuite=all
 
     ''')
   }
@@ -120,16 +120,16 @@ ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\tmp -Djvm="C:\\openjdk\\jdk-
   publishers {
     archiveJunit('**/eclipse-testing/results/xml/*.xml') {
       retainLongStdout()
-      healthScaleFactor(1.0)
+      healthScaleFactor((1.0).doubleValue())
     }
     archiveArtifacts {
       pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt')
     }
-    email-ext {
-      project_recipient_list('sravankumarl@in.ibm.com')
+    extendedEmail {
+      recipientList("sravankumarl@in.ibm.com")
     }
     downstreamParameterized {
-      trigger('ep-collectYbuildResults') {
+      trigger('ep-collectResults') {
         condition('ALWAYS')
         parameters {
           predefinedProp('triggeringJob', '$JOB_NAME')

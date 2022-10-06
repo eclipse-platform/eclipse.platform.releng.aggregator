@@ -56,8 +56,8 @@ ${WORKSPACE}/makeVisible.sh
         triggerWithNoParameters(true)
       }
     }
-    email-ext {
-      project_recipient_list('sravankumarl@in.ibm.com')
+    extendedEmail {
+      recipientList("sravankumarl@in.ibm.com")
     }
   }
 }

@@ -4,8 +4,8 @@ pipelineJob('Builds/Y-build'){
   properties {
     pipelineTriggers {
       triggers {
-        cron('''
-TZ=America/Toronto
+        cron {
+          spec("""TZ=America/Toronto
 # format: Minute Hour Day Month Day of the week (0-7)
 
 #Daily Y-build
@@ -15,7 +15,8 @@ TZ=America/Toronto
 #0 6 * * 4
 #
 #0 2 21 7 4
-        ''')
+          """)
+        }
       }
     }
   }

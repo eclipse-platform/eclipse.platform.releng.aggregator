@@ -31,8 +31,8 @@ scp ${TEMP_INDEX} genie.releng@projects-storage.eclipse.org:/home/data/httpd/dow
   }
 
   publishers {
-    email-ext {
-      project_recipient_list('sravankumarl@in.ibm.com')
+    extendedEmail {
+      recipientList("sravankumarl@in.ibm.com")
     }
   }
 }

@@ -11,7 +11,9 @@ job('Releng/checkCompositesValidity'){
   label('centos-8')
 
   triggers {
-    cron('@daily')
+    cron {
+      spec('@daily')
+    }
   }
 
   wrappers { //adds pre/post actions
@@ -19,13 +21,17 @@ job('Releng/checkCompositesValidity'){
     sshAgent('ssh://genie.releng@projects-storage.eclipse.org')
     buildTimeoutWrapper{
       strategy {
-        absoluteTimeoutStrategy {
-          timeoutMinutes(30)
+        absoluteTimeOutStrategy {
+          timeoutMinutes('30')
         }
+        timeoutEnvVar('')
       }
     }
-    email-ext {
-      project_recipient_list('sravankumarl@in.ibm.com')
+  }
+
+  publishers {
+    extendedEmail {
+      recipientList("sravankumarl@in.ibm.com")
     }
   }
   

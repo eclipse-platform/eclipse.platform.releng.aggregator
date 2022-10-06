@@ -24,11 +24,16 @@ job('Releng/CBIaggregator'){
       branch('master')
       browser {
         githubWeb {
-          url('https://github.com/eclipse-platform/eclipse.platform.releng')
+          repoUrl('https://github.com/eclipse-platform/eclipse.platform.releng')
         }
       }
-      cloneOption {
-        shallow(true)
+      extensions {
+        cloneOption {
+          shallow(true)
+          noTags(false)
+          reference('')
+          timeout(10)
+        }
       }
     }
   }

@@ -10,8 +10,8 @@ for (STREAM in STREAMS){
     properties {
       pipelineTriggers {
         triggers {
-          cron('''
-TZ=America/Toronto
+          cron {
+            spec("""TZ=America/Toronto
 # format: Minute Hour Day Month Day of the week (0-7)
 
 # - - - Integration Eclipse SDK builds - - - 
@@ -26,7 +26,8 @@ TZ=America/Toronto
 #0 18 * * 5,6,7,1,2,3
 # rebuilds
 #45 2 07 04 4
-          ''')
+            """)
+          }
         }
       }
     }

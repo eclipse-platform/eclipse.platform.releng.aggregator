@@ -1,4 +1,4 @@
-pipelineJob('AutomatedTests/ep425Y-unit-cen64-gtk3-java19'){
+pipelineJob('AutomatedTests/ep426I-unit-cen64-gtk3-java17'){
 
   logRotator {
     numToKeep(5)
@@ -6,7 +6,7 @@ pipelineJob('AutomatedTests/ep425Y-unit-cen64-gtk3-java19'){
 
   parameters {
     stringParam('buildId', null, null)
-    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk19/877d6127e982470ba2a7faa31cc93d04/36/GPL/openjdk-19_linux-x64_bin.tar.gz', null)
+    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz', null)
   }
 
   definition {
@@ -21,7 +21,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod19'
+      label 'centos-unitpod17'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -81,7 +81,7 @@ spec:
           steps {
               container ('custom'){
                   wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
-                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk18-latest' }"]) {
+                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk15-latest' }"]) {
                           withAnt(installation: 'apache-ant-latest') {
                               sh \'\'\'#!/bin/bash -x
                                 
@@ -90,9 +90,9 @@ spec:
                                 
                                 export LANG=en_US.UTF-8
                                 cat /etc/*release
-                                echo -e "\n\tRAW Date Start: ${RAW_DATE_START} \n"
-                                echo -e "\n\t whoami:  $( whoami )\n"
-                                echo -e "\n\t uname -a: $(uname -a)\n"
+                                echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
+                                echo -e "\\n\\t whoami:  $( whoami )\\n"
+                                echo -e "\\n\\t uname -a: $(uname -a)\\n"
                                 
                                 # 0002 is often the default for shell users, but it is not when ran from
                                 # a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
@@ -126,7 +126,7 @@ spec:
                                 export JAVA_HOME=$JAVA_HOME_NEW
                                 echo ANT_HOME: $ANT_HOME
                                 echo PATH: $PATH
-                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
+                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp"
                                 
                                 env 1>envVars.txt 2>&1
                                 ant -diagnostics 1>antDiagnostics.txt 2>&1
@@ -136,11 +136,11 @@ spec:
                                 
                                 RAW_DATE_END="$(date +%s )"
                                 
-                                echo -e "\n\tRAW Date End: ${RAW_DATE_END} \n"
+                                echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
                                 
                                 TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
                                 
-                                echo -e "\n\tTotal elapsed time: ${TOTAL_TIME} \n"
+                                echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
                               \'\'\'
                           }
                       }
@@ -148,7 +148,7 @@ spec:
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-              build job: 'ep-collectYbuildResults', parameters: [string(name: 'triggeringJob', value: "${JOB_NAME}"), string(name: 'triggeringBuildNumber', value: "${BUILD_NUMBER}"), string(name: 'buildId', value: "${params.buildId}")], wait: false
+              build job: 'ep-collectResults', parameters: [string(name: 'triggeringJob', value: "${JOB_NAME}"), string(name: 'triggeringBuildNumber', value: "${BUILD_NUMBER}"), string(name: 'buildId', value: "${params.buildId}")], wait: false
           }
       }
   }
@@ -157,4 +157,3 @@ spec:
     }
   }
 }
-
