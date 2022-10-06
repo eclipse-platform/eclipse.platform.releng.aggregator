@@ -1,5 +1,5 @@
-job('AutomatedTests/ep-collectResults'){
-  displayName('Collect Results')
+job('Releng/ep-collectYbuildResults'){
+  displayName('Collect Y-build Results')
   description('This job is to perform some summary analysis and then write unit test results to the download page.')
 
   //disabling for now so we keep using the original ones
@@ -26,8 +26,8 @@ job('AutomatedTests/ep-collectResults'){
     timestamps()
     preBuildCleanup()
     sshAgent('ssh://genie.releng@git.eclipse.org', 'ssh://genie.releng@projects-storage.eclipse.org')
-    timeout {
-      absolute(30)
+    xvnc {
+      useXauthority()
     }
     withAnt {
       installation('apache-ant-latest')
@@ -37,7 +37,7 @@ job('AutomatedTests/ep-collectResults'){
 
   steps {
     shell('''
-#!/bin/bash -x
+ #!/bin/bash -x
 
 buildId=$(echo $buildId|tr -d ' ')
 triggeringBuildNumber=$(echo $triggeringBuildNumber|tr -d ' ')
@@ -65,12 +65,12 @@ ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
 epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
-ssh genie.releng@projects-storage.eclipse.org PATH=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin:$PATH ${workspace}/eclipse/eclipse -nosplash \
-  -debug -consolelog -data ${workspace}/workspace-toolsinstall \
-  -application org.eclipse.equinox.p2.director \
-  -repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO},${WEBTOOLS_REPO} \
-  -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \
-  -destination ${workspace}/basebuilder \
+ssh genie.releng@projects-storage.eclipse.org PATH=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin:$PATH ${workspace}/eclipse/eclipse -nosplash \\
+  -debug -consolelog -data ${workspace}/workspace-toolsinstall \\
+  -application org.eclipse.equinox.p2.director \\
+  -repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO},${WEBTOOLS_REPO} \\
+  -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \\
+  -destination ${workspace}/basebuilder \\
   -profile SDKProfile
 
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workspace}/eclipse
@@ -78,16 +78,13 @@ ssh genie.releng@projects-storage.eclipse.org rm -rf ${workspace}/eclipse
 #get requisite tools
 ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
 ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/genTestIndexes.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/genTestIndexes.xml
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/publish.xml
+ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/Y-build/publish.xml
 
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-#wget -r -l 3 -np https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles
-cd git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/eclipse.platform.releng.tychoeclipsebuilder/eclipse
 cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
 scp -r publishingFiles genie.releng@projects-storage.eclipse.org:${workspace}/publishingFiles
 cd ${WORKSPACE}
-
 
 #triggering ant runner
 baseBuilderDir=${workspace}/basebuilder
@@ -100,21 +97,22 @@ source ./buildproperties.shsource
 
 devworkspace=${workspace}/workspace-antRunner
 
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \
-  -Djob=${triggeringJob} \
-  -DbuildNumber=${triggeringBuildNumber} \
-  -DbuildId=${buildId} \
-  -DeclipseStream=${STREAM} \
+ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \\
+  -Djob=${triggeringJob} \\
+  -DbuildNumber=${triggeringBuildNumber} \\
+  -DbuildId=${buildId} \\
+  -DeclipseStream=${STREAM} \\
   -DEBUILDER_HASH=${EBUILDER_HASH}
   
 #
+
 devworkspace=${workspace}/workspace-updateTestResults
 
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/genTestIndexes.xml \
-  -Djob=${triggeringJob} \
-  -DbuildId=${buildId} \
-  -DeclipseStream=${STREAM} \
-  -Dbasebuilder=$baseBuilderDir \
+ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/genTestIndexes.xml \\
+  -Djob=${triggeringJob} \\
+  -DbuildId=${buildId} \\
+  -DeclipseStream=${STREAM} \\
+  -Dbasebuilder=$baseBuilderDir \\
   -Dworkspace=${workspace}
 
 
@@ -125,9 +123,8 @@ ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
 
   publishers {
     extendedEmail {
-      recipientList('sravankumarl@in.ibm.com')
-      contentType('default')
+      recipientList("sravankumarl@in.ibm.com")
     }
-    downstream('eclipse.releng.updateIndex', 'STABLE')
+    downstream('Releng/updateIndex', 'SUCCESS')
   }
 }

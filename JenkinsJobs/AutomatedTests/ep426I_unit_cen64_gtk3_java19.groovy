@@ -90,9 +90,9 @@ spec:
                                 
                                 export LANG=en_US.UTF-8
                                 cat /etc/*release
-                                echo -e "\n\tRAW Date Start: ${RAW_DATE_START} \n"
-                                echo -e "\n\t whoami:  $( whoami )\n"
-                                echo -e "\n\t uname -a: $(uname -a)\n"
+                                echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
+                                echo -e "\\n\\t whoami:  $( whoami )\\n"
+                                echo -e "\\n\\t uname -a: $(uname -a)\\n"
                                 
                                 # 0002 is often the default for shell users, but it is not when ran from
                                 # a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
@@ -136,11 +136,11 @@ spec:
                                 
                                 RAW_DATE_END="$(date +%s )"
                                 
-                                echo -e "\n\tRAW Date End: ${RAW_DATE_END} \n"
+                                echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
                                 
                                 TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
                                 
-                                echo -e "\n\tTotal elapsed time: ${TOTAL_TIME} \n"
+                                echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
                               \'\'\'
                           }
                       }
