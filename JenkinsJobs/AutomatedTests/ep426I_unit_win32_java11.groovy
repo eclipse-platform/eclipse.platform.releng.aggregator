@@ -129,7 +129,7 @@ ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\\tmp -Djvm="C:\\\\openjdk\\\
       recipientList("sravankumarl@in.ibm.com")
     }
     downstreamParameterized {
-      trigger('ep-collectResults') {
+      trigger('Releng/ep-collectResults') {
         condition('ALWAYS')
         parameters {
           predefinedProp('triggeringJob', '$JOB_NAME')
