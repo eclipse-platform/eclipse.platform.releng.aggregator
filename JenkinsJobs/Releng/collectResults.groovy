@@ -1,4 +1,4 @@
-job('AutomatedTests/ep-collectResults'){
+job('Releng/ep-collectResults'){
   displayName('Collect Results')
   description('This job is to perform some summary analysis and then write unit test results to the download page.')
 
