@@ -54,9 +54,9 @@ buildDir=${dropsPath}/${buildId}
 
 workingDir=${epDownloadDir}/workingDir
 
-workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
+workspace=${workingDir}/${JOB_BASE_NAME}-${BUILD_NUMBER}
 
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
 
 ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
 ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
@@ -119,7 +119,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
 
 
 #Delete Workspace
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
     ''')
   }
 
