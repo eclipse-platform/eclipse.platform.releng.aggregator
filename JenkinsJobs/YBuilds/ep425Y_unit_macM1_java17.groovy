@@ -1,9 +1,8 @@
-job('AutomatedTests/ep425Y-unit-mac64-java17'){
+job('AutomatedTests/ep425Y-unit-macM1-java17'){
   description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
 
   logRotator {
-    daysToKeep(5)
-    numToKeep(10)
+    numToKeep(5)
   }
 
   parameters {
@@ -19,7 +18,6 @@ job('AutomatedTests/ep425Y-unit-mac64-java17'){
   authenticationToken('windows2012tests')
  
   wrappers { //adds pre/post actions
-
     timestamps()
     timeout {
       absolute(600)
@@ -102,7 +100,7 @@ curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4
 cat getEBuilder.xml
 source buildProperties.sh
 
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
+export JAVA_HOME=/usr/local/openjdk-17/Contents/Home
 export ANT_HOME=/opt/homebrew/Cellar/ant/1.10.11/libexec
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
 
@@ -110,13 +108,14 @@ echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
 
+export eclipseArch=aarch64
+
 
 env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
-export eclipseArch=x86_64
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=aarch64 -DtestSuite=${testSuite}
 
 RAW_DATE_END="$(date +%s )"
 
@@ -125,6 +124,7 @@ echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
 TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
 
 echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
+
     ''')
   }
 
@@ -143,7 +143,7 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
       trigger('Releng/ep-collectYbuildResults') {
         condition('UNSTABLE_OR_BETTER')
         parameters {
-          predefinedProp('triggeringJob', '$JOB_NAME')
+          predefinedProp('triggeringJob', '$JOB_BASE_NAME')
           predefinedProp('triggeringBuildNumber', '$BUILD_NUMBER')
           predefinedProp('buildId', '$buildId')
         }

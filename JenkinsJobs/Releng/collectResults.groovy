@@ -82,8 +82,6 @@ ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml h
 
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-#wget -r -l 3 -np https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles
-cd git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/eclipse.platform.releng.tychoeclipsebuilder/eclipse
 cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
 scp -r publishingFiles genie.releng@projects-storage.eclipse.org:${workspace}/publishingFiles
 cd ${WORKSPACE}
