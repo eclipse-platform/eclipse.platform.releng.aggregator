@@ -116,7 +116,7 @@ env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=aarch64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=aarch64 -DtestSuite=${testSuite}
 
 RAW_DATE_END="$(date +%s )"
 
