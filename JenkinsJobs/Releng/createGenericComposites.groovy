@@ -18,7 +18,7 @@ job('Releng/createGenericComposites'){
 
   wrappers { //adds pre/post actions
     timestamps()
-    sshAgent('ssh://genie.releng@projects-storage.eclipse.org')
+    sshAgent('projects-storage.eclipse.org-bot-ssh')
   }
   
   steps {

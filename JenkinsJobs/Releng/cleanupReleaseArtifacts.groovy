@@ -34,7 +34,7 @@ job('Releng/cleanupReleaseArtifacts'){
   wrappers { //adds pre/post actions
     preBuildCleanup()
     timestamps()
-    sshAgent('ssh://genie.releng@projects-storage.eclipse.org')
+    sshAgent('projects-storage.eclipse.org-bot-ssh')
   }
 
   steps {

@@ -19,7 +19,7 @@ job('Releng/CBIaggregator'){
       remote{
         name('origin')
         url('git@github.com:eclipse-platform/eclipse.platform.releng.git')
-        credentials('GitHub bot (SSH)')
+        credentials('github-bot-ssh')
       }
       branch('master')
       browser {
@@ -41,7 +41,7 @@ job('Releng/CBIaggregator'){
   wrappers { //adds pre/post actions
     preBuildCleanup()
     timestamps()
-    sshAgent('ssh://genie.releng@projects-storage.eclipse.org', 'ssh://genie.releng@git.eclipse.org', 'GitHub bot (SSH)')
+    sshAgent('projects-storage.eclipse.org-bot-ssh', 'git.eclipse.org-bot-ssh', 'github-bot-ssh')
   }
   
   steps {

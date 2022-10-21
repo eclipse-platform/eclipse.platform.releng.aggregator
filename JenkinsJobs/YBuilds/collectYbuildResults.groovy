@@ -25,7 +25,7 @@ job('Releng/ep-collectYbuildResults'){
   wrappers { //adds pre/post actions
     timestamps()
     preBuildCleanup()
-    sshAgent('ssh://genie.releng@git.eclipse.org', 'ssh://genie.releng@projects-storage.eclipse.org')
+    sshAgent('git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh')
     xvnc {
       useXauthority()
     }

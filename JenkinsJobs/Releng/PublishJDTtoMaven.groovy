@@ -20,7 +20,7 @@ job('Releng/PublishJDTtoMaven'){
       file('KEYRING', 'secret-subkeys.asc (secret-subkeys.asc fpr JDT')
     }
     timestamps()
-    sshAgent( 'ssh://genie.releng@git.eclipse.org', 'GitHub bot (SSH)')
+    sshAgent('git.eclipse.org-bot-ssh', 'github-bot-ssh')
   }
   
   steps {
