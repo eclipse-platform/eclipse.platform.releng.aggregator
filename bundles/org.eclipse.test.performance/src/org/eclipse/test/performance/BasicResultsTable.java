@@ -190,8 +190,8 @@ public class BasicResultsTable implements IApplication{
             Double componentEPBaseline = 0.0;
             Double componentCPUCurrent = 0.0;
             Double componentCPUBaseline = 0.0;
-            HashMap<String, Double[]> classMap = new HashMap<>(); 
-            
+            HashMap<String, Double[]> classMap = new HashMap<>();
+
             String scenarioTable = makeHeader(true);
             for (String scenario : scenarioList) {
                 String[] scenarioClassName = {"", ""}; //class, name
@@ -252,8 +252,8 @@ public class BasicResultsTable implements IApplication{
 
             //create class and component tables
             String componentTable = makeHeader(false);
-            String componentRow = makeTableRow(new String[]{component, ""}, 
-                new Double[]{componentEPCurrent, componentCPUCurrent}, 
+            String componentRow = makeTableRow(new String[]{component, ""},
+                new Double[]{componentEPCurrent, componentCPUCurrent},
                 new Double[]{componentEPBaseline, componentCPUBaseline});
             componentTable += componentRow + "</table>" + EOL;
 
@@ -261,8 +261,8 @@ public class BasicResultsTable implements IApplication{
             Set<String> classNames = classMap.keySet();
             for (String className : classNames) {
                 Double[] classData = classMap.get(className);
-                String classRow = makeTableRow(new String[]{className, ""}, 
-                    new Double[]{classData[0], classData[1]}, 
+                String classRow = makeTableRow(new String[]{className, ""},
+                    new Double[]{classData[0], classData[1]},
                     new Double[]{classData[2], classData[3]});
                 classTable += classRow;
             }
@@ -276,7 +276,7 @@ public class BasicResultsTable implements IApplication{
                 componentTable + EOL +
                 "<h3>Total Class Times:</h3>" + EOL +
                 classTable + EOL +
-                "<h3>All " + scenarioList.size() + " individual scenarios:</h3>" + EOL + 
+                "<h3>All " + scenarioList.size() + " individual scenarios:</h3>" + EOL +
                 scenarioTable + EOL;
 
             //create file
@@ -298,7 +298,7 @@ public class BasicResultsTable implements IApplication{
     }
 
     private static String makeHeader(boolean scenario) {
-        String htmlString = "<table cellpadding=\"5\" class=\"details\">" + EOL + 
+        String htmlString = "<table cellpadding=\"5\" class=\"details\">" + EOL +
             T + "<tr>" + EOL +
             T2 + "<th>Class</th>" + EOL;
         if (scenario) {
@@ -306,12 +306,12 @@ public class BasicResultsTable implements IApplication{
         }
         htmlString = htmlString + T2 + "<th>Elapsed Process (Current)</th>" + EOL +
             T2 + "<th>Elapsed Process (Baseline)</th>" + EOL +
-            T2 + "<th>Difference</th>" + EOL + 
-            T2 + "<th>CPU Time (Current)</th>" + EOL + 
+            T2 + "<th>Difference</th>" + EOL +
+            T2 + "<th>CPU Time (Current)</th>" + EOL +
             T2 + "<th>CPU Time (Baseline)</th>" + EOL +
             T2 + "<th>Difference</th>" + EOL +
             T + "</tr>" + EOL;
-        
+
         return htmlString;
     }
 
@@ -362,33 +362,32 @@ public class BasicResultsTable implements IApplication{
             T2 + "<td>" + cpuBaseline + "</td>" + EOL +
             T2 + "<td bgcolor=\"" + cpuColor + "\">" + cpuPercent + "</td>" + EOL +
             T + "</tr>" + EOL;
-        
+
         return htmlString;
     }
 
     private static String getStyleString() {
-        String htmlString = "<style type=\"text/css\">" + EOL +
+        return "<style type=\"text/css\">" + EOL
+                +
             T + "body {" + EOL +
             T2 + "font:normal verdana,arial,helvetica;" + EOL +
             T2 + "color:#000000;" + EOL +
-            T + "}" + EOL + 
-            T + "table.details tr th{" + EOL + 
-            T2 + "font-weight: bold;" + EOL + 
-            T2 + "text-align:left;" + EOL + 
-            T2 + "background:#a6caf0;" + EOL + 
-            T + "}" + EOL + 
-            T + "table.details tr {" + EOL + 
-            T2 + "background:#eeeee0;" + EOL + 
-            T + "}" + EOL + 
-            T + "p {" + EOL + 
-            T2 + "margin-top:0.5em; margin-bottom:1.0em;" + EOL + 
-            T + "}" + EOL + 
-            T + "h3 {" + EOL + 
-            T2 + "margin-bottom: 0.5em; font: bold 115% verdana,arial,helvetica" + EOL + 
-            T + "}" + EOL + 
+            T + "}" + EOL +
+            T + "table.details tr th{" + EOL +
+            T2 + "font-weight: bold;" + EOL +
+            T2 + "text-align:left;" + EOL +
+            T2 + "background:#a6caf0;" + EOL +
+            T + "}" + EOL +
+            T + "table.details tr {" + EOL +
+            T2 + "background:#eeeee0;" + EOL +
+            T + "}" + EOL +
+            T + "p {" + EOL +
+            T2 + "margin-top:0.5em; margin-bottom:1.0em;" + EOL +
+            T + "}" + EOL +
+            T + "h3 {" + EOL +
+            T2 + "margin-bottom: 0.5em; font: bold 115% verdana,arial,helvetica" + EOL +
+            T + "}" + EOL +
             "</style>" + EOL;
-
-        return htmlString;
     }
 
     //args = baseline, current build, input file array
@@ -471,7 +470,6 @@ public class BasicResultsTable implements IApplication{
             }
             System.err.println("ERROR: Unrecognized argument (arg) found, with value of >" + arg + "<");
             i++;
-            continue;
         }
 
     }
