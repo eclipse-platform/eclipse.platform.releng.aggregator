@@ -117,16 +117,6 @@ do
   fi
 done
 
-# WORKAROUND org.eclipse.e4.ui.progress.sources missing in p2 repo
-# artifact was built locally and can be used for publication
-# Root issue is fixed in 4.26-I-build repo, so this block can be removed
-# as soon as 4.25 is pushed to Maven Central
-wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1QxAIx2tI9oNOVC7ZYUIi9oPVcCK8tfbu' -O sources.jar
-${MVN} -f platform-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-   -Durl=${URL} -DrepositoryId=${REPO} \
-   -Dfile=sources.jar -DpomFile=org/eclipse/platform/org.eclipse.e4.ui.progress/0.3.500/org.eclipse.e4.ui.progress-0.3.500.pom -Dclassifier=sources \
-   >> .log/sources-upload.txt
-
 /bin/ls -la .log
 
 /bin/grep "BUILD FAILURE" .log/*
