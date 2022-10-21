@@ -125,6 +125,6 @@ ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NA
     extendedEmail {
       recipientList("sravankumarl@in.ibm.com")
     }
-    downstream('eclipse.releng.updateIndex', 'SUCCESS')
+    downstream('Releng/updateIndex', 'SUCCESS')
   }
 }
