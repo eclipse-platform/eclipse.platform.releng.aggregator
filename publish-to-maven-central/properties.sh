@@ -19,7 +19,7 @@ SDK_VERSION=4.25
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
 # JDT / ECJ:
-ECJ_VERSION=3.30.0
+ECJ_VERSION=3.32.0
 
 # AGGREGATOR:
 # URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/aggregator/headless/4.13/I20200825-1209/
