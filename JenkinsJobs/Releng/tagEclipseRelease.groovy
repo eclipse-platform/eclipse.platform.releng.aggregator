@@ -25,7 +25,7 @@ GitHub issue (or legacy bugzilla bug ID) to track tagging the release, for examp
 
   wrappers { //adds pre/post actions
     timestamps()
-    sshAgent('ssh://genie.releng@git.eclipse.org', 'GitHub bot (SSH)')
+    sshAgent('git.eclipse.org-bot-ssh', 'github-bot-ssh')
     preBuildCleanup()
   }
   

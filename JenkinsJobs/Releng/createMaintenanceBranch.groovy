@@ -18,7 +18,7 @@ job('Releng/createMaintenanceBranch'){
 
   wrappers { //adds pre/post actions
     timestamps()
-    sshAgent('ssh://genie.releng@git.eclipse.org', 'GitHub bot (SSH)')
+    sshAgent('git.eclipse.org-bot-ssh', 'github-bot-ssh')
   }
   
   steps {

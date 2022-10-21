@@ -26,7 +26,7 @@ and other such scripts.
   wrappers { //adds pre/post actions
     timestamps()
     preBuildCleanup()
-    sshAgent('ssh://genie.releng@projects-storage.eclipse.org')
+    sshAgent('projects-storage.eclipse.org-bot-ssh')
     timeout {
       absolute(30)
     }
