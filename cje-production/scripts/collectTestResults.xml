@@ -228,11 +228,16 @@
     <!-- attempt to create incase hasn't been created yet -->
     <mkdir dir="${resultsDir}" />
 
-    <property
-      name="hudsonResultRootJobURL"
-      value="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/${job}/${buildNumber}" />
-
-
+  	<condition
+  	  property="hudsonResultRootJobURL"
+  	  value="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/${job}/${buildNumber}"
+  	  else="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/AutomatedTests/job/${job}/${buildNumber}">
+  	  <contains
+  	    string="${job}"
+  	    substring="-perf-"
+  	    casesensitive="yes" />
+  	</condition>
+  	
     <property
       name="hudsonResultRootURL"
       value="${hudsonResultRootJobURL}/artifact/*zip*" />
