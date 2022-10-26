@@ -31,7 +31,7 @@ job('Releng/ep-collectResults'){
     }
     withAnt {
       installation('apache-ant-latest')
-      jdk('Default')
+      jdk('openjdk-jdk17-latest')
     }
   }
 
