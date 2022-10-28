@@ -15,59 +15,10 @@
 
 <project
   name="Publish Build"
-  default="default">
+  default="generateIndex">
 
-  <!-- Properties that must be passed to this script:
-    buildDirectory: Path to perform the build in. (A working directory)
-    buildType: Type of build (nightly, integration etc.)
-    buildId: Build name
-    buildLabel: <buildType>-<buildName>-<timestamp>
-  -->
-  <fail
-    if="result"
-    message="the value result was passed in as publish.xml started. As if someone was overriding buildDirectory?" />
-  <fail
-    if="dropDirectory"
-    message="the value dropDirectory was passed in as publish.xml started. But we expect to compute it." />
-
-  <fail
-    unless="buildDirectory"
-    message="buildDirectory must be defined for publish.xml " />
-
-  <fail
-    unless="buildLabel"
-    message="buildLabel must be defined for publish.xml" />
-  <!-- this is the "top" of the drop directory
-    It is used internal to this script to define
-    the "real" dropDirecotry. Sometimes equal to this root,
-    but for tests, will be one level lower, such as testResult (for unit tests),
-    performance (for main stream performance tests).
-  -->
-  <property
-    name="dropDirectoryName"
-    value="${postingDirectory}/${buildLabel}" />
-
-  <condition property="notRedundantDir">
-    <not>
-      <equals
-        arg1="${buildDirectory}"
-        arg2="${dropDirectoryName}" />
-    </not>
-  </condition>
-
-  <echo message="== buildDirectory: ${line.separator}==${buildDirectory}" />
-  <echo message="== dropDirectoryName: ${line.separator}==${dropDirectoryName}" />
-
-  <fail
-    if="notRedundantDir"
-    message="buildDirectory and dropDirectoryName are surpisingly NOT equal. Caller has passed in wrong value." />
-
-  <target name="default">
-    <antcall target="getStaticFiles" />
-    <antcall target="generateIndex" />
-  </target>
-
-  <target name="generateIndex">
+  <target name="generateIndex"
+    depends="initResultsVariables">
 
     <property
       name="class"
@@ -75,180 +26,6 @@
     <taskdef
       name="indexResults"
       classname="${class}" />
-
-    <!--
-      isBuildTested: true|false should JUnit plugin test results be used to generate index page
-      dropTokenList: comma separated list of strings which should be replaced by the fileName attribute settings in the testManifest.xml.
-      xmlDirectoryName: path to directory containing JUnit plugin test results in xml format (see doc is org.eclipse.test).
-      dropDirectoryName: path to directory containing the result of the build.
-      testResultsHtmlFileName: name of file which will be generated with links to JUnit test results
-      dropHtmlFileName: name of generated index page
-      hrefTestResultsTargetPath: relative path from index page to parent directory containing JUnit html and xml test results
-      for example,
-      if html is in
-      .../testResults/html/...
-      and xml is in
-      .../testResults/xml/...
-      then hrefTestResultsTargetPath would be set to testResults
-      if, that is, the "testResults.php" page is a peer of the 'testResults'
-      directory. If testResults.php page is under testResults directory,
-      then the value would be ".".
-      hrefCompileLogsTargetPath: relative path from index page directory containing compilelogs
-      testManifestFileName: name of xml file containing descriptions of zip types and log files
-
-    -->
-    
-    <!-- This list is for Eclipse. Equinox overrides and provides their own list -->
-    <property
-      name="dropTokenList"
-      value="%repository%,%sdk%,%tests%,%runtime%,%jdtc%,%swt%" />
-
-    <!-- xml results directory -->
-    <condition
-      property="xmlDirectoryName"
-      value="${buildDirectory}/performance/xml">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <!-- else standard default for unit tests -->
-    <property
-      name="xmlDirectoryName"
-      value="${buildDirectory}/testresults/xml" />
-
-    <condition
-      property="indexFileName"
-      value="performance/performance.php">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <condition
-      property="indexFileName"
-      value="testResults.php">
-      <contains
-        string="${job}"
-        substring="-unit-" />
-    </condition>
-    <!-- else standard default for download page -->
-    <property
-      name="indexFileName"
-      value="index.php" />
-
-    <condition
-      property="dropTemplateFileName"
-      value="${basedir}/templateFiles/performance.php">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <condition
-      property="dropTemplateFileName"
-      value="${basedir}/staticDropFiles/testResults.php">
-      <contains
-        string="${job}"
-        substring="-unit-" />
-    </condition>
-    <!-- else standard default for download index.php page -->
-    <property
-      name="dropTemplateFileName"
-      value="${basedir}/templateFiles/index.template.php" />
-
-    <condition
-      property="manifestFile"
-      value="${basedir}/performanceTestManifest.xml"
-      else="${basedir}/testManifest.xml">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-
-    <condition
-      property="expectedConfigFilename"
-      value="perfTestConfigs.php"
-      else="testConfigs.php">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <condition
-      property="foundConfigFilename"
-      value="perfTestConfigsFound.php"
-      else="testConfigsFound.php">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-
-    <condition
-      property="testResultsHtmlFileName"
-      value="performanceResultsTable.html">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <property
-      name="testResultsHtmlFileName"
-      value="testResultsTables.html" />
-
-    <condition
-      property="hrefTestResultsTargetPath"
-      value=".">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <property
-      name="hrefTestResultsTargetPath"
-      value="testresults" />
-
-    <!-- we should be able to do this now, and refine list in manifest. -->
-    <property
-      name="doMissingListValue"
-      value="true" />
-
-    <!-- it is surprising these are defined here? -->
-    <property
-      name="hrefCompileLogsTargetPath"
-      value="compilelogs/plugins/" />
-    <property
-      name="compileLogsDirectoryName"
-      value="${buildDirectory}/${hrefCompileLogsTargetPath}" />
-
-    <property
-      name="testManifestFileName"
-      value="${manifestFile}" />
-
-    <!-- test configs: follows pattern of [job]_[OSGiTriplet]_[VM]
-      the underscores are significant. When we "select files" to group,
-      in a column, part of the selection is based on plugin unit test result files that *end with*:
-      '_' + [job]_[OSGiTriplet]_[VM] + ".xml" where what comes before the '_' is the plugin name.
-      Then later, for display, we break [job]_[OSGiTriplet]_[VM] at the first and last underscores.
-      (There can be other underscores besides "first and last", such as in 'x86_64'.
-      In other words, the "expected config" must match exactly what the unit tests produce as
-      the end of the filename. (Not sure of impact of "LR" on our
-      heuristics.)
-    -->
-    <fail unless="eclipseStreamMajor" message="This publish.xml script needs eclipseStreamMajor and eclipseStreamMinor" />
-    <fail unless="eclipseStreamMinor" message="This publish.xml script needs eclipseStreamMajor and eclipseStreamMinor"/>
-    <condition
-      property="perfLRtestsConfigExpected"
-      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}LR-perf-lin64_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}LR-perf-lin64-baseline_linux.gtk.x86_64_11">
-      <contains
-        string="${job}"
-        substring="LR-perf-" />
-    </condition>
-    <condition
-      property="testsConfigExpected"
-      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64-baseline_linux.gtk.x86_64_11">
-      <contains
-        string="${job}"
-        substring="-perf-" />
-    </condition>
-    <!-- else normal unit tests configs -->
-    <property
-      name="testsConfigExpected"
-      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64-java17_macosx.cocoa.x86_64_17,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-macM1-java17_macosx.cocoa.aarch64_17,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32-java11_win32.win32.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java11_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java17_linux.gtk.x86_64_17,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java19_linux.gtk.x86_64_19" />
 
     <echo message=" = = properties in publish.xml == " />
     <echo message="     job: ${job}" />
@@ -276,23 +53,214 @@
       dropTokenList="${dropTokenList}"
       dropHtmlFileName="${indexFileName}"
       xmlDirectoryName="${xmlDirectoryName}"
-      dropDirectoryName="${dropDirectoryName}"
+      dropDirectoryName="${buildDirectory}"
       dropTemplateFileName="${dropTemplateFileName}"
       testResultsHtmlFileName="${testResultsHtmlFileName}"
       hrefTestResultsTargetPath="${hrefTestResultsTargetPath}"
       hrefCompileLogsTargetPath="${hrefCompileLogsTargetPath}"
       compileLogsDirectoryName="${compileLogsDirectoryName}"
-      testManifestFileName="${testManifestFileName}"
+      testManifestFileName="${manifestFile}"
       testsConfigExpected="${testsConfigExpected}"
       expectedConfigFilename="${expectedConfigFilename}"
       foundConfigFilename="${foundConfigFilename}"
       doMissingList="${doMissingListValue}" />
   </target>
 
-  <target name="getStaticFiles">
-    <!--get static files required in the buildLabel directory -->
-    <copy todir="${buildDirectory}">
-      <fileset dir="staticDropFiles" />
-    </copy>
+  <target name="initResultsVariables"
+    depends="init">
+    <fail unless="job" />
+
+    <property
+      name="isBuildTested"
+      value="true" />
+
+    <loadresource property="buildType">
+      <string value="${buildID}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+
+    <property
+      name="dropTokenList"
+      value="%repository%,%sdk%,%tests%,%runtime%,%jdtc%,%swt%" />
+
+    <condition
+      property="indexFileName"
+      value="performance/performance.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="indexFileName"
+      value="testResults.php">
+      <contains
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+    <!-- else standard default for download page -->
+    <property
+      name="indexFileName"
+      value="index.php" />
+
+    <!-- xml results directory -->
+    <condition
+      property="xmlDirectoryName"
+      value="${buildDirectory}/performance/xml">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <!-- else standard default for unit tests -->
+    <property
+      name="xmlDirectoryName"
+      value="${buildDirectory}/testresults/xml" />
+
+    <condition
+      property="dropTemplateFileName"
+      value="${basedir}/templateFiles/performance.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="dropTemplateFileName"
+      value="${basedir}/staticDropFiles/testResults.php">
+      <contains
+        string="${job}"
+        substring="-unit-" />
+    </condition>
+    <!-- else standard default for download index.php page -->
+    <property
+      name="dropTemplateFileName"
+      value="${basedir}/templateFiles/index.template.php" />
+
+    <condition
+      property="testResultsHtmlFileName"
+      value="performanceResultsTable.html">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <property
+      name="testResultsHtmlFileName"
+      value="testResultsTables.html" />
+
+    <condition
+      property="hrefTestResultsTargetPath"
+      value=".">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <property
+      name="hrefTestResultsTargetPath"
+      value="testresults" />
+
+    <property
+      name="hrefCompileLogsTargetPath"
+      value="compilelogs/plugins/" />
+    <property
+      name="compileLogsDirectoryName"
+      value="${buildDirectory}/${hrefCompileLogsTargetPath}" />
+    
+    <condition
+      property="manifestFile"
+      value="${basedir}/performanceTestManifest.xml"
+      else="${basedir}/testManifest.xml">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+
+    <condition
+      property="testsConfigExpected"
+      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64-baseline_linux.gtk.x86_64_11">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <!-- else normal unit tests configs -->
+    <property
+      name="testsConfigExpected"
+      value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64-java17_macosx.cocoa.x86_64_17,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-macM1-java17_macosx.cocoa.aarch64_17,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32-java11_win32.win32.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java11_linux.gtk.x86_64_11,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java17_linux.gtk.x86_64_17,ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64-gtk3-java19_linux.gtk.x86_64_19" />
+
+    <condition
+      property="expectedConfigFilename"
+      value="perfTestConfigs.php"
+      else="testConfigs.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+
+    <condition
+      property="foundConfigFilename"
+      value="perfTestConfigsFound.php"
+      else="testConfigsFound.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+
+    <!-- we should be able to do this now, and refine list in manifest. -->
+    <property
+      name="doMissingListValue"
+      value="true" />
+
   </target>
+
+  <target name="init">
+    <fail unless="buildID" />
+    <fail unless="eclipseStream" />
+    <fail unless="postingDirectory" />
+
+    <property
+      name="buildDirectory"
+      value="${postingDirectory}/${buildID}" />
+
+    <condition property="streamOK">
+      <matches
+        pattern="\d+\.\d+\.\d+"
+        string="${eclipseStream}" />
+    </condition>
+    <fail
+      message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
+      unless="streamOK" />
+
+    <loadresource property="eclipseStreamMajor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+
+    <loadresource property="eclipseStreamMinor">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+
+    <loadresource property="eclipseStreamService">
+      <string value="${eclipseStream}"/>
+      <filterchain>
+        <tokenfilter>
+          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\3"/>
+        </tokenfilter>
+      </filterchain>
+    </loadresource>
+    <echo message="eclipseStreamService: ${eclipseStreamService}"/>
+  
+  </target>
+
 </project>
