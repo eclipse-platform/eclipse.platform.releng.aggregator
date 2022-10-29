@@ -19,19 +19,20 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junitlauncher.TestExecutionContext;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.testing.dumps.TimeoutDumpTimer;
 import org.junit.platform.engine.TestExecutionResult;
@@ -42,6 +43,7 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.wiring.BundleWiring;
 
@@ -196,8 +198,8 @@ public class EclipseTestRunner {
 
 	private static int runTests(Properties props, String testPluginName, String testClassName, String resultPath,
 			boolean multiTest) {
-		ClassLoader currentTCCL = Thread.currentThread().getContextClassLoader();
-		ExecutionListener executionListener = new ExecutionListener();
+		Thread thisThread = Thread.currentThread();
+		ClassLoader currentTCCL = thisThread.getContextClassLoader();
 		if (testPluginName == null) {
 			testPluginName = ClassLoaderTools.getClassPlugin(testClassName);
 		}
@@ -207,26 +209,26 @@ public class EclipseTestRunner {
 		LauncherDiscoveryRequest request = LauncherDiscoveryRequestBuilder.request()
 				.selectors(selectClass(testClassName)).build();
 
+		AtomicBoolean executionFailed = new AtomicBoolean(false);
 		try {
-			Thread.currentThread().setContextClassLoader(ClassLoaderTools.getJUnit5Classloader(getPlatformEngines()));
-			final Launcher launcher = LauncherFactory.create();
+			thisThread.setContextClassLoader(ClassLoaderTools.getJUnit5Classloader(getPlatformEngines()));
+			Launcher launcher = LauncherFactory.create(); // DO NOT MOVE! Uses the just set context-classloader
 
-			Thread.currentThread()
-					.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPluginName, currentTCCL));
-			try (LegacyXmlResultFormatter legacyXmlResultFormatter = new LegacyXmlResultFormatter()) {
-				try (OutputStream fileOutputStream = getResultOutputStream(resultPath, testClassName, multiTest)) {
-					legacyXmlResultFormatter.setDestination(fileOutputStream);
-					legacyXmlResultFormatter.setContext(new ExecutionContext(props));
-					launcher.execute(request, legacyXmlResultFormatter, executionListener);
+			thisThread.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPluginName, currentTCCL));
+			try (LegacyXmlResultFormatter formatter = new LegacyXmlResultFormatter()) {
+				try (OutputStream out = getResultOutputStream(resultPath, testClassName, multiTest)) {
+					formatter.setDestination(out);
+					formatter.setContext(createExecutionContext(props));
+					launcher.execute(request, formatter, createExecutionListener(executionFailed));
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 				return ERRORS;
 			}
 		} finally {
-			Thread.currentThread().setContextClassLoader(currentTCCL);
+			thisThread.setContextClassLoader(currentTCCL);
 		}
-		return executionListener.didExecutionContainedFailures() ? FAILURES : SUCCESS;
+		return executionFailed.get() ? FAILURES : SUCCESS;
 	}
 
 	private static OutputStream getResultOutputStream(String resultPathString, String testClassName, boolean multiTest)
@@ -234,87 +236,56 @@ public class EclipseTestRunner {
 		if (resultPathString == null || resultPathString.isEmpty()) {
 			return System.out;
 		}
-		File resultFile;
+		Path resultFile = Path.of(resultPathString);
 		if (multiTest) {
-			Path resultDirectoryPath = new Path(resultPathString);
-			File testDirectory = resultDirectoryPath.toFile();
-			if (!testDirectory.exists()) {
-				testDirectory.mkdirs();
-			}
-			resultFile = resultDirectoryPath.append("TEST-" + testClassName + ".xml").toFile();
+			resultFile = resultFile.resolve("TEST-" + testClassName + ".xml");
 		} else {
-			IPath resultPath = new Path(resultPathString);
-			resultFile = resultPath.toFile();
-			if (resultFile.isDirectory()) {
-				resultFile = resultPath.append("TEST-" + testClassName + ".xml").toFile();
-			} else {
-				File resultDirectory = resultFile.getParentFile();
-				if (!resultDirectory.exists()) {
-					resultDirectory.mkdirs();
-				}
+			if (Files.isDirectory(resultFile)) {
+				resultFile = resultFile.resolve("TEST-" + testClassName + ".xml");
 			}
 		}
-		if (!resultFile.exists()) {
-			resultFile.createNewFile();
-		}
-		return new FileOutputStream(resultFile);
+		Files.createDirectories(resultFile.getParent());
+		return Files.newOutputStream(resultFile);
 	}
 
 	private static List<String> getPlatformEngines() {
-		List<String> platformEngines = new ArrayList<>();
-		Bundle bundle = FrameworkUtil.getBundle(EclipseTestRunner.class);
-		Bundle[] bundles = bundle.getBundleContext().getBundles();
-		for (Bundle iBundle : bundles) {
+		BundleContext context = FrameworkUtil.getBundle(EclipseTestRunner.class).getBundleContext();
+		return Arrays.stream(context.getBundles()).filter(bundle -> {
 			try {
-				BundleWiring bundleWiring = Platform.getBundle(iBundle.getSymbolicName()).adapt(BundleWiring.class);
+				BundleWiring bundleWiring = Platform.getBundle(bundle.getSymbolicName()).adapt(BundleWiring.class);
 				Collection<String> listResources = bundleWiring.listResources("META-INF/services",
 						"org.junit.platform.engine.TestEngine", BundleWiring.LISTRESOURCES_LOCAL);
-				if (!listResources.isEmpty()) {
-					platformEngines.add(iBundle.getSymbolicName());
-				}
+				return !listResources.isEmpty();
 			} catch (Exception e) {
-				// check the next bundle
+				return false; // assume absent
 			}
-		}
-		return platformEngines;
+		}).map(Bundle::getSymbolicName).collect(Collectors.toList());
+
 	}
 
-	private static final class ExecutionListener implements TestExecutionListener {
-		private boolean executionContainedFailures;
-
-		public ExecutionListener() {
-			this.executionContainedFailures = false;
-		}
-
-		public boolean didExecutionContainedFailures() {
-			return executionContainedFailures;
-		}
-
-		@Override
-		public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-			if (testExecutionResult.getStatus() == org.junit.platform.engine.TestExecutionResult.Status.FAILED) {
-				executionContainedFailures = true;
+	private static TestExecutionListener createExecutionListener(AtomicBoolean executionFailed) {
+		return new TestExecutionListener() {
+			@Override
+			public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult executionResult) {
+				if (executionResult.getStatus() == org.junit.platform.engine.TestExecutionResult.Status.FAILED) {
+					executionFailed.set(true);
+				}
 			}
-		}
+		};
 	}
 
-	private static final class ExecutionContext implements TestExecutionContext {
+	private static TestExecutionContext createExecutionContext(Properties props) {
+		return new TestExecutionContext() {
+			@Override
+			public Properties getProperties() {
+				return props;
+			}
 
-		private final Properties props;
-
-		ExecutionContext(Properties props) {
-			this.props = props;
-		}
-
-		@Override
-		public Properties getProperties() {
-			return this.props;
-		}
-
-		@Override
-		public Optional<Project> getProject() {
-			return null;
-		}
+			@Override
+			public Optional<Project> getProject() {
+				return Optional.empty();
+			}
+		};
 	}
 
 	/**

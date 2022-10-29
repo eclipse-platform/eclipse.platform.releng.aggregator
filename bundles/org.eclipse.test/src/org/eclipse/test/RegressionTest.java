@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,9 @@
  *******************************************************************************/
 package org.eclipse.test;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.StringTokenizer;
 
 /**
@@ -27,9 +23,7 @@ import java.util.StringTokenizer;
  */
 public class RegressionTest {
 
-	PrintStream output;
-	String oldFilename, newFilename, outFilename;
-	public static final String NOTHING_CHANGED_MSG = "All tests unchanged.";
+	private final String oldFilename, newFilename, outFilename;
 
 	/**
 	 * Constructor for RegressionTest
@@ -56,24 +50,18 @@ public class RegressionTest {
 	 */
 	public void testRegressions() {
 		// Read the old and new files
-		String oldPass = "";
-		String newPass = "";
-		try {
-			oldPass = readFile(oldFilename);
-			newPass = readFile(newFilename);
+		try (PrintStream output = new PrintStream(outFilename)) {
+			String oldPass = Files.readString(Path.of(oldFilename));
+			String newPass = Files.readString(Path.of(newFilename));
+			parse(oldPass, newPass, output);
 		} catch (Exception e) {
-			System.err.println("Error opening input file");
+			System.err.println("Error opening file");
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
+	}
 
-		try {
-			output = new PrintStream(new BufferedOutputStream(new FileOutputStream(new File(outFilename))));
-		} catch (Exception e) {
-			System.err.println("Error opening output file");
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		}
+	private void parse(String oldPass, String newPass, PrintStream output) {
 		// Establish their relationship
 		StringTokenizer oldst = new StringTokenizer(oldPass);
 		StringTokenizer newst = new StringTokenizer(newPass);
@@ -121,9 +109,8 @@ public class RegressionTest {
 		}
 		// Make sure that there is always some output.
 		if (nothingChanged) {
-			output.println(NOTHING_CHANGED_MSG);
+			output.println("All tests unchanged.");
 		}
-		output.close();
 	}
 
 	/**
@@ -145,21 +132,6 @@ public class RegressionTest {
 	 */
 	static String testAdded(String[] test) {
 		return "New test: " + test[0] + ", Status: " + test[1];
-	}
-
-	/**
-	 * Read the file given by s, and return its contents.
-	 */
-	static String readFile(String s) throws IOException {
-		byte[] buf = new byte[8192];
-		ByteArrayOutputStream aStream = new ByteArrayOutputStream();
-		try (FileInputStream r = new FileInputStream(s)) {
-			int n;
-			while ((n = r.read(buf)) != -1) {
-				aStream.write(buf, 0, n);
-			}
-		}
-		return aStream.toString();
 	}
 
 	/**

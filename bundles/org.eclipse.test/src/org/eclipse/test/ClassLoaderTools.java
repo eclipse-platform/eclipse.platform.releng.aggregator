@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc. and others.
+ * Copyright (c) 2018, 2022 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.internal.framework.EquinoxBundle;
@@ -162,23 +161,14 @@ class ClassLoaderTools {
 
 		@Override
 		protected Enumeration<URL> findResources(String name) throws IOException {
-			Enumeration<URL> enumFinal = null;
-			for (int i = 0; i < bundleList.size(); i++) {
-				if (i == 0) {
-					enumFinal = bundleList.get(i).getResources(name);
-					continue;
+			List<URL> resources = new ArrayList<>();
+			for (Bundle bundle : bundleList) {
+				Enumeration<URL> bundleResources = bundle.getResources(name);
+				while (bundleResources != null && bundleResources.hasMoreElements()) {
+					resources.add(bundleResources.nextElement());
 				}
-				Enumeration<URL> e2 = bundleList.get(i).getResources(name);
-				Vector<URL> temp = new Vector<>();
-				while (enumFinal != null && enumFinal.hasMoreElements()) {
-					temp.add(enumFinal.nextElement());
-				}
-				while (e2 != null && e2.hasMoreElements()) {
-					temp.add(e2.nextElement());
-				}
-				enumFinal = temp.elements();
 			}
-			return enumFinal;
+			return Collections.enumeration(resources);
 		}
 	}
 }
