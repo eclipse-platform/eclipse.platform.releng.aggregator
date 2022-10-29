@@ -60,7 +60,7 @@ class ClassLoaderTools {
 		return new MultiBundleClassLoader(platformEngineBundles);
 	}
 
-	static class TestBundleClassLoader extends ClassLoader {
+	private static class TestBundleClassLoader extends ClassLoader {
 		protected Bundle bundle;
 		protected ClassLoader currentTCCL;
 
@@ -102,13 +102,11 @@ class ClassLoaderTools {
 			if (urls.hasMoreElements()) {
 				return urls;
 			}
-
-			List<URL> resources = new ArrayList<>(6);
 			String location = null;
-			URL url = null;
 			if (bundle instanceof EquinoxBundle) {
 				location = ((EquinoxBundle) bundle).getLocation();
 			}
+			URL url = null;
 			if (location != null && location.startsWith("reference:")) { //$NON-NLS-1$
 				location = location.substring(10, location.length());
 				URI uri = URI.create(location);
@@ -118,56 +116,48 @@ class ClassLoaderTools {
 					url = newUri.toURL();
 				}
 			}
+			List<URL> resources = new ArrayList<>(6);
 			if (url != null) {
-				File f = new File(url.getFile());
-				if (f.exists()) {
+				if (new File(url.getFile()).exists()) {
 					resources.add(url);
 				}
 			} else {
 				return Collections.emptyEnumeration();
 			}
-
 			return Collections.enumeration(resources);
 		}
 	}
 
-	static class MultiBundleClassLoader extends ClassLoader {
+	private static class MultiBundleClassLoader extends ClassLoader {
 		private final List<Bundle> bundleList;
 
 		public MultiBundleClassLoader(List<Bundle> platformEngineBundles) {
 			this.bundleList = platformEngineBundles;
-
-		}
-
-		public Class<?> findClasss(String name) throws ClassNotFoundException {
-			return findClass(name);
 		}
 
 		@Override
 		protected Class<?> findClass(String name) throws ClassNotFoundException {
-			Class<?> c = null;
-			for (Bundle temp : bundleList) {
+			for (Bundle bundle : bundleList) {
 				try {
-					c = temp.loadClass(name);
+					Class<?> c = bundle.loadClass(name);
 					if (c != null) {
 						return c;
 					}
 				} catch (ClassNotFoundException e) {
 				}
 			}
-			return c;
+			return null;
 		}
 
 		@Override
 		protected URL findResource(String name) {
-			URL url = null;
-			for (Bundle temp : bundleList) {
-				url = temp.getResource(name);
+			for (Bundle bundle : bundleList) {
+				URL url = bundle.getResource(name);
 				if (url != null) {
 					return url;
 				}
 			}
-			return url;
+			return null;
 		}
 
 		@Override

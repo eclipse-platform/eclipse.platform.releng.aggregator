@@ -51,7 +51,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	private SysOutErrContentStore sysErrStore;
 
 	@Override
-	public void sysOutAvailable(final byte[] data) {
+	public void sysOutAvailable(byte[] data) {
 		if (this.sysOutStore == null) {
 			this.sysOutStore = new SysOutErrContentStore(true);
 		}
@@ -64,7 +64,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	}
 
 	@Override
-	public void sysErrAvailable(final byte[] data) {
+	public void sysErrAvailable(byte[] data) {
 		if (this.sysErrStore == null) {
 			this.sysErrStore = new SysOutErrContentStore(false);
 		}
@@ -77,7 +77,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	}
 
 	@Override
-	public void setContext(final TestExecutionContext context) {
+	public void setContext(TestExecutionContext context) {
 		this.context = context;
 	}
 
@@ -128,9 +128,9 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	 * @param writer The {@link Writer} to use. Cannot be null.
 	 * @throws IOException If any I/O problem occurs during writing the data
 	 */
-	void writeSysOut(final Writer writer) throws IOException {
+	void writeSysOut(Writer writer) throws IOException {
 		Objects.requireNonNull(writer, "Writer cannot be null");
-		this.writeFrom(this.sysOutStore, writer);
+		writeFrom(this.sysOutStore, writer);
 	}
 
 	/**
@@ -140,40 +140,38 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	 * @param writer The {@link Writer} to use. Cannot be null.
 	 * @throws IOException If any I/O problem occurs during writing the data
 	 */
-	void writeSysErr(final Writer writer) throws IOException {
+	void writeSysErr(Writer writer) throws IOException {
 		Objects.requireNonNull(writer, "Writer cannot be null");
-		this.writeFrom(this.sysErrStore, writer);
+		writeFrom(this.sysErrStore, writer);
 	}
 
-	static Optional<TestIdentifier> traverseAndFindTestClass(final TestPlan testPlan,
-			final TestIdentifier testIdentifier) {
+	static Optional<TestIdentifier> traverseAndFindTestClass(TestPlan testPlan, TestIdentifier testIdentifier) {
 		if (isTestClass(testIdentifier).isPresent()) {
 			return Optional.of(testIdentifier);
 		}
-		final Optional<TestIdentifier> parent = testPlan.getParent(testIdentifier);
+		Optional<TestIdentifier> parent = testPlan.getParent(testIdentifier);
 		return parent.isPresent() ? traverseAndFindTestClass(testPlan, parent.get()) : Optional.empty();
 	}
 
-	static Optional<ClassSource> isTestClass(final TestIdentifier testIdentifier) {
+	static Optional<ClassSource> isTestClass(TestIdentifier testIdentifier) {
 		if (testIdentifier == null) {
 			return Optional.empty();
 		}
-		final Optional<TestSource> source = testIdentifier.getSource();
+		Optional<TestSource> source = testIdentifier.getSource();
 		if (!source.isPresent()) {
 			return Optional.empty();
 		}
-		final TestSource testSource = source.get();
+		TestSource testSource = source.get();
 		if (testSource instanceof ClassSource) {
 			return Optional.of((ClassSource) testSource);
 		}
 		return Optional.empty();
 	}
 
-	private void writeFrom(final SysOutErrContentStore store, final Writer writer) throws IOException {
-		final char[] chars = new char[1024];
-		int numRead = -1;
-		try (final Reader reader = store.getReader()) {
-			while ((numRead = reader.read(chars)) != -1) {
+	private void writeFrom(SysOutErrContentStore store, Writer writer) throws IOException {
+		char[] chars = new char[1024];
+		try (Reader reader = store.getReader()) {
+			for (int numRead = -1; (numRead = reader.read(chars)) != -1;) {
 				writer.write(chars, 0, numRead);
 			}
 		}
@@ -185,7 +183,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 		FileUtils.close(this.sysErrStore);
 	}
 
-	protected void handleException(final Throwable t) {
+	protected void handleException(Throwable t) {
 		// we currently just log it and move on.
 		this.context.getProject()
 		.ifPresent(p -> p.log("Exception in listener " + AbstractJUnitResultFormatter.this.getClass().getName(),
@@ -210,7 +208,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 		private static final int DEFAULT_CAPACITY_IN_BYTES = 50 * 1024; // 50 KB
 		private static final Reader EMPTY_READER = new Reader() {
 			@Override
-			public int read(final char[] cbuf, final int off, final int len) throws IOException {
+			public int read(char[] cbuf, int off, int len) throws IOException {
 				return -1;
 			}
 
@@ -225,11 +223,11 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 		private Path filePath;
 		private FileOutputStream fileOutputStream;
 
-		SysOutErrContentStore(final boolean isSysOut) {
+		SysOutErrContentStore(boolean isSysOut) {
 			this.tmpFileSuffix = isSysOut ? ".sysout" : ".syserr";
 		}
 
-		void store(final byte[] data) throws IOException {
+		void store(byte[] data) throws IOException {
 			if (this.usingFileStore) {
 				this.storeToFile(data, 0, data.length);
 				return;
@@ -258,7 +256,7 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 			this.inMemoryStore = null;
 		}
 
-		private void storeToFile(final byte[] data, final int offset, final int length) throws IOException {
+		private void storeToFile(byte[] data, int offset, int length) throws IOException {
 			if (this.fileOutputStream == null) {
 				// no backing file was created so we can't do anything
 				return;

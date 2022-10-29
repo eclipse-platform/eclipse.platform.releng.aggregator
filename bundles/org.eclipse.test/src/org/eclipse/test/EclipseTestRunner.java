@@ -53,14 +53,6 @@ import org.osgi.framework.wiring.BundleWiring;
  * .XMLJUnitResultFormatter
  */
 public class EclipseTestRunner {
-	static class ThreadDump extends Exception {
-
-		private static final long serialVersionUID = 1L;
-
-		ThreadDump(String message) {
-			super(message);
-		}
-	}
 
 	/**
 	 * No problems with this test.
@@ -187,9 +179,8 @@ public class EclipseTestRunner {
 			String[] suiteClasses = classesNames.split(",");
 			int returnCode = 0;
 			int j = 0;
-			EclipseTestRunner runner = new EclipseTestRunner();
 			for (String oneClassName : suiteClasses) {
-				int result = runner.runTests(props, testPlugins[j], oneClassName, resultPathString, true);
+				int result = runTests(props, testPlugins[j], oneClassName, resultPathString, true);
 				j++;
 				if (result != 0) {
 					returnCode = result;
@@ -200,11 +191,10 @@ public class EclipseTestRunner {
 		if (className == null) {
 			throw new IllegalArgumentException("Test class name not specified");
 		}
-		EclipseTestRunner runner = new EclipseTestRunner();
-		return runner.runTests(props, testPluginName, className, resultPathString, false);
+		return runTests(props, testPluginName, className, resultPathString, false);
 	}
 
-	private int runTests(Properties props, String testPluginName, String testClassName, String resultPath,
+	private static int runTests(Properties props, String testPluginName, String testClassName, String resultPath,
 			boolean multiTest) {
 		ClassLoader currentTCCL = Thread.currentThread().getContextClassLoader();
 		ExecutionListener executionListener = new ExecutionListener();
@@ -239,7 +229,7 @@ public class EclipseTestRunner {
 		return executionListener.didExecutionContainedFailures() ? FAILURES : SUCCESS;
 	}
 
-	private OutputStream getResultOutputStream(String resultPathString, String testClassName, boolean multiTest)
+	private static OutputStream getResultOutputStream(String resultPathString, String testClassName, boolean multiTest)
 			throws IOException {
 		if (resultPathString == null || resultPathString.isEmpty()) {
 			return System.out;
@@ -270,9 +260,9 @@ public class EclipseTestRunner {
 		return new FileOutputStream(resultFile);
 	}
 
-	private List<String> getPlatformEngines() {
+	private static List<String> getPlatformEngines() {
 		List<String> platformEngines = new ArrayList<>();
-		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		Bundle bundle = FrameworkUtil.getBundle(EclipseTestRunner.class);
 		Bundle[] bundles = bundle.getBundleContext().getBundles();
 		for (Bundle iBundle : bundles) {
 			try {
