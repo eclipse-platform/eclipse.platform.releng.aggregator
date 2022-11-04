@@ -13,9 +13,7 @@
  *******************************************************************************/
 package org.eclipse.test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,14 +21,36 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.osgi.internal.framework.EquinoxBundle;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.BundleWiring;
 
-@SuppressWarnings("restriction")
 class ClassLoaderTools {
 
-	static ClassLoader getPluginClassLoader(Bundle bundle, ClassLoader currentTCCL) {
-		return new TestBundleClassLoader(bundle, currentTCCL);
+	public static ClassLoader getPluginClassLoader(Bundle bundle, ClassLoader fallback) {
+		// The fallback classloader is used in order to make ServiceLoader capable of
+		// loading
+		// services defined in JUnit bundles but not visible in the test bundle
+		// classloader
+		// (which will then be used by SuiteLauncher to lookup other JUnit engines the
+		// test
+		// is not aware of).
+		return new ClassLoader(bundle.adapt(BundleWiring.class).getClassLoader()) {
+			@Override
+			public Enumeration<URL> getResources(String name) throws IOException {
+				Enumeration<URL> supr = super.getResources(name);
+				return supr != null && supr.hasMoreElements() ? supr
+						: fallback.getResources(name);
+			}
+
+			@Override
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
+				try {
+					return super.loadClass(name);
+				} catch (ClassNotFoundException ex) {
+					return fallback.loadClass(name);
+				}
+			}
+		};
 	}
 
 	static Bundle getTestBundle(String pluginName, String className) {
@@ -56,73 +76,6 @@ class ClassLoaderTools {
 		return new MultiBundleClassLoader(platformEngineBundles);
 	}
 
-	private static class TestBundleClassLoader extends ClassLoader {
-		protected Bundle bundle;
-		protected ClassLoader currentTCCL;
-
-		public TestBundleClassLoader(Bundle target, ClassLoader currentTCCL) {
-			this.bundle = target;
-			this.currentTCCL = currentTCCL;
-		}
-
-		@Override
-		protected Class<?> findClass(String name) throws ClassNotFoundException {
-			try {
-				return bundle.loadClass(name);
-			} catch (ClassNotFoundException e) {
-				return currentTCCL.loadClass(name);
-			}
-		}
-
-		@Override
-		protected URL findResource(String name) {
-			URL url = bundle.getResource(name);
-			if (url == null) {
-				url = currentTCCL.getResource(name);
-			}
-			return url;
-		}
-
-		@Override
-		protected Enumeration<URL> findResources(String name) throws IOException {
-			Enumeration<URL> enumeration = bundle.getResources(name);
-			if (enumeration == null) {
-				enumeration = currentTCCL.getResources(name);
-			}
-			return enumeration;
-		}
-
-		@Override
-		public Enumeration<URL> getResources(String res) throws IOException {
-			Enumeration<URL> urls = currentTCCL.getResources(res);
-			if (urls.hasMoreElements()) {
-				return urls;
-			}
-			String location = null;
-			if (bundle instanceof EquinoxBundle) {
-				location = ((EquinoxBundle) bundle).getLocation();
-			}
-			URL url = null;
-			if (location != null && location.startsWith("reference:")) { //$NON-NLS-1$
-				location = location.substring(10, location.length());
-				URI uri = URI.create(location);
-				String newPath = (uri.getPath() == null ? "" : uri.getPath()) + "bin" + '/' + res; //$NON-NLS-1$
-				URI newUri = uri.resolve(newPath).normalize();
-				if (newUri.isAbsolute()) {
-					url = newUri.toURL();
-				}
-			}
-			List<URL> resources = new ArrayList<>(6);
-			if (url != null) {
-				if (new File(url.getFile()).exists()) {
-					resources.add(url);
-				}
-			} else {
-				return Collections.emptyEnumeration();
-			}
-			return Collections.enumeration(resources);
-		}
-	}
 
 	private static class MultiBundleClassLoader extends ClassLoader {
 		private final List<Bundle> bundleList;

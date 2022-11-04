@@ -206,10 +206,11 @@ public class EclipseTestRunner {
 		try (LegacyXmlResultFormatter formatter = new LegacyXmlResultFormatter();
 				OutputStream out = getResultOutputStream(resultPath, testClassName, multiTest)) {
 
-			thisThread.setContextClassLoader(ClassLoaderTools.getJUnit5Classloader(getPlatformEngines()));
+			ClassLoader jUnit5Classloader = ClassLoaderTools.getJUnit5Classloader(getPlatformEngines());
+			thisThread.setContextClassLoader(jUnit5Classloader);
 			Launcher launcher = LauncherFactory.create(); // DO NOT MOVE! Uses the just set context-classloader
 
-			thisThread.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPlugin, currentTCCL));
+			thisThread.setContextClassLoader(ClassLoaderTools.getPluginClassLoader(testPlugin, jUnit5Classloader));
 
 			formatter.setDestination(out);
 			formatter.setContext(createExecutionContext(props));
