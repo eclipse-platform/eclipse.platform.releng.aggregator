@@ -168,7 +168,7 @@ public class EclipseTestRunner {
 			}
 			System.err.println("INFO: timeoutScreenOutputDir: " + timeoutScreenOutputDir);
 			System.err.println("INFO: timeout: " + timeoutString);
-			startStackDumpTimeoutTimer(timeoutString, new File(timeoutScreenOutputDir));
+			TimeoutDumpTimer.startTimeoutDumpTimer(timeoutString, new File(timeoutScreenOutputDir));
 		}
 
 		if (testPluginsNames != null && classesNames != null) {
@@ -275,16 +275,5 @@ public class EclipseTestRunner {
 				return Optional.empty();
 			}
 		};
-	}
-
-	/**
-	 * Starts a timer that dumps interesting debugging information shortly before
-	 * the given timeout expires.
-	 *
-	 * @param timeoutArg      the -timeout argument from the command line
-	 * @param outputDirectory where the test results end up
-	 */
-	private static void startStackDumpTimeoutTimer(final String timeoutArg, final File outputDirectory) {
-		TimeoutDumpTimer.startTimeoutDumpTimer(timeoutArg, outputDirectory);
 	}
 }
