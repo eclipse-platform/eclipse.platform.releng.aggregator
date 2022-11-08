@@ -25,6 +25,15 @@ pipeline {
 				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
 			}
 		}
+		stage('Deploy eclipse-platform-parent pom and eclipse-sdk target') {
+			when {
+				branch 'master'
+			}
+			steps {
+				sh 'mvn clean deploy -f eclipse-platform-parent/pom.xml'
+				sh 'mvn clean deploy -f eclipse.platform.releng.prereqs.sdk/pom.xml'
+			}
+		}
 		stage('Build') {
 			steps {
 				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
