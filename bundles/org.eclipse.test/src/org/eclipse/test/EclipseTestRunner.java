@@ -133,10 +133,6 @@ public class EclipseTestRunner {
 					junitReportOutput = args[i + 1];
 				}
 				i++;
-			} else if (args[i].startsWith("haltOnError=")) {
-				System.err.println("The haltOnError option is no longer supported");
-			} else if (args[i].startsWith("haltOnFailure=")) {
-				System.err.println("The haltOnFailure option is no longer supported");
 			} else if (args[i].startsWith("formatter=")) {
 				String formatterString = args[i].substring(10);
 				int seperatorIndex = formatterString.indexOf(',');
@@ -145,8 +141,6 @@ public class EclipseTestRunner {
 				try (FileInputStream in = new FileInputStream(args[i].substring(10))) {
 					props.load(in);
 				}
-			} else if (args[i].equals("-testlistener")) {
-				System.err.println("The testlistener option is no longer supported");
 			} else if (args[i].equals("-timeout")) {
 				if (i < args.length - 1) {
 					timeoutString = args[i + 1];
