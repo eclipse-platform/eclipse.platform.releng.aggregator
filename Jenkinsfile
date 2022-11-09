@@ -27,7 +27,10 @@ pipeline {
 		}
 		stage('Deploy eclipse-platform-parent pom and eclipse-sdk target') {
 			when {
-				branch 'master'
+				anyOf {
+					branch 'master'
+					branch 'R*_maintenance'
+				}
 			}
 			steps {
 				sh 'mvn clean deploy -f eclipse-platform-parent/pom.xml'
