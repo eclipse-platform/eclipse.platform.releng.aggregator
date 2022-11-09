@@ -76,8 +76,7 @@ rm -rf ${workspace}/eclipse
 #get requisite tools
 if [[ $useLocalFiles -eq 0 ]]; then
   wget -O ${workspace}/collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
-  #wget -O ${workspace}/genTestIndexes.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/genTestIndexes.xml
-  wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/publish.xml
+  wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/publish.xml
 fi
 
 cd ${workspace}
