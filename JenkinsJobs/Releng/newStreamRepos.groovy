@@ -11,7 +11,7 @@ job('Releng/newStreamRepos'){
     stringParam('streamVersion', null, 'The stream version for which repos should be initialized.')
   }
 
-  label('migration')
+  label('centos-latest')
 
   wrappers { //adds pre/post actions
     timestamps()

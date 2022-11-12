@@ -10,7 +10,7 @@ for (STREAM in STREAMS){
       stringParam('buildId', null, 'Build ID of the build to be added.')
     }
 
-    label('migration')
+    label('centos-latest')
 
     logRotator {
       daysToKeep(3)

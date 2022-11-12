@@ -28,7 +28,7 @@ I-builds promote to 'S' until 'R'.
 
   jdk('adoptopenjdk-hotspot-jdk11-latest')
 
-  label('migration')
+  label('centos-latest')
 
   wrappers { //adds pre/post actions
     timestamps()
