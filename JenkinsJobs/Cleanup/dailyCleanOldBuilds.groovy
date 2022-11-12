@@ -14,7 +14,7 @@ and other such scripts.
 
   jdk('oracle-jdk8-latest')
 
-  label('migration')
+  label('centos-latest')
 
   triggers {
     cron('''

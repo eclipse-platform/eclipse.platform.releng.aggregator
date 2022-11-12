@@ -6,7 +6,7 @@ pipelineJob('AutomatedTests/ep426I-unit-cen64-gtk3-java20'){
 
   parameters {
     stringParam('buildId', null, null)
-    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk20/20/GPL/openjdk-20-ea+20_linux-aarch64_bin.tar.gz', null)
+    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk20/23/GPL/openjdk-20-ea+23_linux-x64_bin.tar.gz', null)
   }
 
   definition {

@@ -3,7 +3,7 @@ job('rt.equinox.releng.cleanupDLsite'){
     cron('45 7 * * *')
   }
 
-  label('migration')
+  label('centos-latest')
 
   logRotator {
     daysToKeep(10)

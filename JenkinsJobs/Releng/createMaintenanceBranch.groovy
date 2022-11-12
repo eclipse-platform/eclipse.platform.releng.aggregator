@@ -14,7 +14,7 @@ job('Releng/createMaintenanceBranch'){
 
   jdk('openjdk-jdk11-latest')
 
-  label('migration')
+  label('centos-latest')
 
   wrappers { //adds pre/post actions
     timestamps()
