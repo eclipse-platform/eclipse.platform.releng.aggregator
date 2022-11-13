@@ -2,9 +2,6 @@ job('Releng/ep-collectResults'){
   displayName('Collect Results')
   description('This job is to perform some summary analysis and then write unit test results to the download page.')
 
-  //disabling for now so we keep using the original ones
-  disabled()
-
   parameters {
     stringParam('triggeringJob', null, 'Name of the job to collect results from: i.e. \'ep425I-unit-cen64-gtk3-java11\'.')
     stringParam('triggeringBuildNumber', null, 'Build number of the triggering job.')
