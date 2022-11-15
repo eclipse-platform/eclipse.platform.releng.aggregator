@@ -133,8 +133,8 @@ ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\\tmp -Djvm="C:\\\\openjdk\\\
         condition('ALWAYS')
         parameters {
           predefinedProp('triggeringJob', '$JOB_BASE_NAME')
-          predefinedProp('triggeringBuildNumber', '$BUILD_NUMBER')
-          predefinedProp('buildId', '$buildId')
+          predefinedProp('buildURL', '$BUILD_URL')
+          predefinedProp('buildID', '$buildId')
         }
       }
     }

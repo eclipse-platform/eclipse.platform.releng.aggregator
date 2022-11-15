@@ -4,8 +4,8 @@ job('Releng/ep-collectResults'){
 
   parameters {
     stringParam('triggeringJob', null, 'Name of the job to collect results from: i.e. \'ep425I-unit-cen64-gtk3-java11\'.')
-    stringParam('triggeringBuildNumber', null, 'Build number of the triggering job.')
-    stringParam('buildId', null, 'ID of the I-build being tested.')
+    stringParam('buildURL', null, 'Build URL of the triggering job.')
+    stringParam('buildID', null, 'ID of the I-build being tested.')
   }
 
   label('centos-8')
@@ -36,18 +36,18 @@ job('Releng/ep-collectResults'){
     shell('''
 #!/bin/bash -x
 
-buildId=$(echo $buildId|tr -d ' ')
-triggeringBuildNumber=$(echo $triggeringBuildNumber|tr -d ' ')
+buildID=$(echo $buildID|tr -d ' ')
+buildURL=$(echo $buildURL|tr -d ' ')
 triggeringJob=$(echo $triggeringJob|tr -d ' ')
 
-wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
+wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
 cat ${WORKSPACE}/buildproperties.shsource
 source ${WORKSPACE}/buildproperties.shsource
 
 
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 dropsPath=${epDownloadDir}/downloads/drops4
-buildDir=${dropsPath}/${buildId}
+buildDir=${dropsPath}/${buildID}
 
 workingDir=${epDownloadDir}/workingDir
 
@@ -95,21 +95,21 @@ source ./buildproperties.shsource
 devworkspace=${workspace}/workspace-antRunner
 
 ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \\
-  -Djob=${triggeringJob} \\
-  -DbuildNumber=${triggeringBuildNumber} \\
-  -DbuildId=${buildId} \\
-  -DeclipseStream=${STREAM} \\
+  -DpostingDirectory=${dropsPath} \\
+  -DbuildURL=${buildURL} \\
+  -DbuildID=${buildID} \\
   -DEBUILDER_HASH=${EBUILDER_HASH}
   
 #
 devworkspace=${workspace}/workspace-updateTestResults
 
 ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/genTestIndexes.xml \\
+  -DpostingDirectory=${dropsPath} \\
   -Djob=${triggeringJob} \\
-  -DbuildId=${buildId} \\
-  -DeclipseStream=${STREAM} \\
-  -Dbasebuilder=$baseBuilderDir \\
-  -Dworkspace=${workspace}
+  -DbuildID=${buildID} \\
+  -DeclipseStream=${STREAM} 
+
+
 
 
 #Delete Workspace
