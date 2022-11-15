@@ -144,8 +144,8 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
         condition('UNSTABLE_OR_BETTER')
         parameters {
           predefinedProp('triggeringJob', '$JOB_BASE_NAME')
-          predefinedProp('triggeringBuildNumber', '$BUILD_NUMBER')
-          predefinedProp('buildId', '$buildId')
+          predefinedProp('buildURL', '$BUILD_URL')
+          predefinedProp('buildID', '$buildId')
         }
       }
     }
