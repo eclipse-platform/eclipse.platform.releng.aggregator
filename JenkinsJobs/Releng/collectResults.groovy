@@ -103,7 +103,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
 #
 devworkspace=${workspace}/workspace-updateTestResults
 
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/genTestIndexes.xml \\
+ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/publish.xml \\
   -DpostingDirectory=${dropsPath} \\
   -Djob=${triggeringJob} \\
   -DbuildID=${buildID} \\
