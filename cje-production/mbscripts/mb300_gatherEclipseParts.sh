@@ -227,6 +227,7 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-verifyCompile \
+  -DcjeDir=$CJE_ROOT \
   -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -DbuildId=$BUILD_ID \
@@ -256,6 +257,7 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-publish \
   -DAGGR_DIR=$CJE_ROOT/$AGG_DIR \
+  -DcjeDir=$CJE_ROOT \
   -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -DbuildId=$BUILD_ID \
