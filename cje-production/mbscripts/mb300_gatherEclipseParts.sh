@@ -230,7 +230,7 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -DcjeDir=$CJE_ROOT \
   -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-  -DbuildId=$BUILD_ID \
+  -DbuildID=$BUILD_ID \
   -DbuildLabel=$BUILD_ID \
   -DpostingDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
@@ -260,7 +260,7 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -DcjeDir=$CJE_ROOT \
   -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-  -DbuildId=$BUILD_ID \
+  -DbuildID=$BUILD_ID \
   -DbuildLabel=$BUILD_ID \
   -DbuildDir=$BUILD_ID \
   -DbuildRepo=$PLATFORM_REPO_DIR \
