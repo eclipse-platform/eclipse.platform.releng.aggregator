@@ -78,9 +78,10 @@ ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml h
 
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
-scp -r publishingFiles genie.releng@projects-storage.eclipse.org:${workspace}/publishingFiles
-cd ${WORKSPACE}
+EBUILDERDIR=${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+#cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
+#scp -r publishingFiles genie.releng@projects-storage.eclipse.org:${workspace}/publishingFiles
+#cd ${WORKSPACE}
 
 
 #triggering ant runner
@@ -108,6 +109,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -Djob=${triggeringJob} \\
   -DbuildID=${buildID} \\
   -DeclipseStream=${STREAM} 
+  -DEBuilderDir=${EBUILDERDIR}
 
 
 
