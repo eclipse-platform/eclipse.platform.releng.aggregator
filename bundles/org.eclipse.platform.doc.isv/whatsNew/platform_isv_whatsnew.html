@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.25</title>
+<title>Eclipse Platform What's New in 4.26</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.25</h2>
+<h2>What's New in Eclipse 4.26</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.25 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.26 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
@@ -48,15 +48,83 @@ section of the Eclipse Platform User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  
-    
-  <tr id="less-icons-in-message-dialogs"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/181-->
-    <td class="title"><a href="#less-icons-in-message-dialogs">MessageDialog not using icons for user facing dialogs.</a></td>
+  <tr id="JobManager_Implementation"> 
+  <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=574883 -->
+  <!-- https://github.com/eclipse-platform/eclipse.platform/commit/dc7bfe70caa56ad3a63b3181dad3364ec7498cf7 -->
+    <td class="title">JobManager implementation changes</td>
     <td class="content">
-		The <code>org.eclipse.jface.dialogs.MessageDialog</code> has been updated to not use icons for user facing dialogs of type <code>QUESTION, QUESTION_WITH_CANCEL and CONFIRM</code> 
-		to align with the UI guidelines regarding such dialogs for the various operating systems.
-    </td>
+  <h2 id="possible-deadlock-in-ijobchangelistener">Possible deadlock in IJobChangeListener</h2>
+<p><b>Attention:</b> The JobManager implementation was changed! The old
+JobMangager implementation notified IJobChangeListener about various
+IJobChangeEvent without strict order in various threads. For example
+scheduled() was called in a thread that did call schedule() on a job
+while done() was normally called within a worker thread. In case of a
+repeated schedule() both notifications could run in parallel. That was a
+race condition. The listener could not deterministically know if the job
+was still scheduled or already done. As a consequence a join() could
+have returned too early or the Progress View did not show jobs that did
+still run. And probably many other things went wrong totally unnoticed.
+Even multiple notifications could have happened in parallel in various
+worker threads, as there is no guarantee that the next execution is done
+in the same worker.</p>
+<p>To fix this indeterministic behavior all events for the same Job instance will
+now be sent one after the other. It is still not defined in which thread
+job events will be sent, but the new implementation will not call any
+IJobChangeListener until all pending events for the same job instance are processed
+by all registered IJobChangeListener. The new implementation will also
+wait with any job state change until all calls to IJobChangeListener for
+that job returned.</p>
+<p>The IJobChangeListener javadoc clearly specifies &quot;whether the state
+change occurs before, during, or after listeners are notified is
+unspecified.&quot; - and the implementation changed within that broad
+specification. Unfortunately some IJobChangeListener around rely on the
+old implementation. They may now deadlock. For example the following
+snippet can now deadlock:</p>
+<pre><code> job.schedule(); // may result in done();
+ synchronized (lock){
+  boolean schedule = ...; // lock needed for reasons
+  if (schedule ) job.schedule(); // schedule() will notify scheduled()
+  // - which may not return before previous Notifications return!
+ }
+
+ public void done(IJobChangeEvent event) {
+  // can not enter while other Thread holds lock:
+  synchronized (lock) {// possible deadlock
+  }
+ }
+</code></pre><p>Instead use:</p>
+<pre><code> job.schedule();
+ boolean schedule;
+ synchronized (lock) {
+  schedule=...; // lock needed for reasons
+ }
+ if (schedule) job.schedule();
+
+ public void done(IJobChangeEvent event) {
+  synchronized (lock) {// OK
+  }
+ }
+</code></pre><p>The same problem may occur on all IJobChangeListener methods and all
+methods that result in IJobChangeEvent being sent: Job.schedule(),
+cancel(), wakeUp(), sleep() and JobManager shutdown. Make sure all
+IJobChangeListener implementations do not block and return promptly.</p>
+<p>Due to the extreme risk the new implementation tries to identify
+non-conforming IJobChangeListener and do a fall back: when an
+IJobChangeEvent is not handled within 3 seconds a timeout error is
+logged with stacktraces of the competing threads and the JobManager will
+no longer wait - until JVM is restarted. Further calls to
+IJobChangeListener may occur in non deterministic order and JobManager.join(family) can return
+too soon. It is however possible, that there may also be some deadlocks in clients code due
+to the changed JobManager implementation that may be undetected by
+JobManager.</p> 
+<p>
+Also note that it is undefined in which thread IJobChangeListener methods are called. 
+Clients may have relied on the old implementation which called done() in the UI (SWT) thread for UIJob - but that is not the case anymore - it may happen in a background thread.
+</p>
+<strong>It is recommended to check existing IJobChangeListener implementations for possible regressions if updating to the new target platform.</strong>
+      </td>
   </tr>
+  
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
@@ -64,27 +132,12 @@ section of the Eclipse Platform User Guide.
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
 
-  <tr id="CTabFolder-setSelectionBarThickness"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/pull/55 -->
-    <td class="title"><a href="#CTabFolder-setSelectionBarThickness">Configure highlight bar thickness on CTabFolder</a></td>
+  <tr id="styled-text-multi-selection"> <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=562676 -->
+    <td class="title">StyledText copy to clipboard now also adds HTML format</td>
     <td class="content">
-      The <code>CTabFolder</code> now has a new API <code>setSelectionBarThickness(int thickness)</code> that allows to set the thickness of the highlight bar in the selected tab.
-      
-      <p>By default a highlight bar is now drawn in the selected tab. You can switch to the old look without highlight bar by using <code>CTabFolder#setSelectionBarThickness(0)</code>.</p>
-      <p>Old look and feel:</p>
-      <img  src="images/ctabfolder-before.png" alt="" />
-      <p>New look and feel:</p>
-      <img  src="images/ctabfolder-after.png" alt=""/>
-    </td>
-  </tr>
-
-  <tr id="MessageBox-setButtonLabels"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/issues/233 -->
-    <td class="title"><a href="#MessageBox-setButtonLabels">Set custom text for MessageBox's buttons</a></td>
-    <td class="content">
-		The <code>MessageBox</code> now has a new API <code>setButtonLabels(Map&#60;Integer&#44; String&#62; labels)</code> that allows to configure the text on the buttons.
-      <p>Old behavior:</p>
-      <img  src="images/messageBox-before.png" alt="" />
-      <p>New behavior: You can now set custom text for the buttons using <code>MessageBox#setButtonLabels(Map.of(SWT.YES, "Close"))</code>:</p>
-      <img  src="images/messageBox-after.png" alt=""/>
+      <code>StyledText</code> widget now adds HTML format when copying to the clipboard, in addition to plain text and RTF.<br/>
+      Many web-based applications don't support RTF, so it was not possible to copy and paste styled text (and preserve fonts, colors, and so on).<br/>
+      By adding HTML to the clipboard this is now possible.
     </td>
   </tr>
   <!-- *********************** End of SWT *********************** -->
