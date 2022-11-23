@@ -26,6 +26,7 @@ TITLE="Preparation work for ${NEXT_STREAM} (${NEXT_TRAIN}) and open master for d
 BODY="This preparation work involves the following tasks. For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggregator#${PREV_ISSUE}.
 
 - [ ] Create R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
+- [ ] Update R${PREV_MAJOR}_${PREV_MINOR}maintenance branch with release version for ${PREV_MAJOR}.${PREV_MINOR}+ changes
 - [ ] Move ${PREV_MAJOR}.${PREV_MINOR}-I and ${PREV_MAJOR}.${PREV_MINOR}-Y builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - [ ] Update Parent pom and target sdk deployment jobs for R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - [ ] Create new test jobs for ${NEXT_STREAM}
