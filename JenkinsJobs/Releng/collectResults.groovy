@@ -107,7 +107,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -DpostingDirectory=${dropsPath} \\
   -Djob=${triggeringJob} \\
   -DbuildID=${buildID} \\
-  -DeclipseStream=${STREAM} 
+  -DeclipseStream=${STREAM} \\
   -DEBuilderDir=${workspace}
 
 
