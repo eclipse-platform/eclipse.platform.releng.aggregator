@@ -61,8 +61,6 @@ fi
 # DL_TYPE ("download type") is the build type we are naming 
 # the build *TO*
 # for main line (master) code, it is always 'S' (from I-build) until it's 'R'
-#export DL_TYPE=S
-#export DL_TYPE=R
 DL_TYPE=$(echo $DL_TYPE|tr -d ' ')
 if [[ -z "${DL_TYPE}" ]]
 then
@@ -140,13 +138,13 @@ then
 fi
 
 #Add to composite
-buildId=${ECLIPSE_DL_DROP_DIR_SEGMENT}
+
 case ${DL_TYPE} in
   "S" )
     export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}milestones
     ;;
   "R" )
-    export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
+    
     ;;
   *)
     echo -e "\n\tERROR: case statement for repo output did not match any pattern."
@@ -154,55 +152,16 @@ case ${DL_TYPE} in
     exit 1
 esac
 
-#if [[ "${DL_TYPE}" != "R" ]]
-#then 
-  #Tag Source
-#  echo "Tag source"
-#  TAG=${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}_${BUILD_SERVICE}_${CHECKPOINT}
+if [[ "${DL_TYPE}" = "R" ]]
+then 
+  buildID=${ECLIPSE_DL_DROP_DIR_SEGMENT}
+  export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
 
-#  cd ${WORKSPACE}
-#  git config --global user.email "releng-bot@eclipse.org"
-#  git config --global user.name "Eclipse Releng Bot"
-#  git clone --recurse-submodules git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
-
-#  pushd eclipse.platform.releng.aggregator
-#  git checkout master
-#  git submodule foreach git checkout master
-#  git clean -f -d -x
-#  git submodule foreach git clean -f -d -x
-#  git reset --hard
-#  git submodule foreach git reset --hard
-#  git checkout master
-#  git submodule foreach git checkout master
-#  git pull --rebase
-#  git submodule foreach git pull --rebase
-
-#  git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}
-#  git submodule foreach 'git tag -a -m "${DL_LABEL}" ${TAG} ${DROP_ID}; git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}; || :'
-#  RC=$?
-#  if [[ $RC != 0 ]]
-#  then
-#    printf "\n\t%s\n" "ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${TAG} and annotation of ${DL_LABEL}."
-#    popd
-#    exit $RC
-#  fi
-  #git submodule foreach git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
-#  git push --verbose $(toPushRepo $(git config --get remote.origin.url)) tag ${TAG}
-
-#  RC=$?
-#  if [[ $RC != 0 ]]
-#  then
-#    printf "\n\t%s\n" "ERROR: Failed to push new tag, ${TAG}."
-#    popd
-#    exit $RC
-#  fi
-#  popd
-#else
   #Repository will be available only for R builds. add it to composite
   epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
   dropsPath=${epDownloadDir}/downloads/drops4
   p2RepoPath=${epDownloadDir}/updates
-  buildDir=${dropsPath}/${buildId}
+  buildDir=${dropsPath}/${buildID}
 
   workingDir=${epDownloadDir}/workingDir
 
@@ -232,8 +191,8 @@ esac
 
   devworkspace=${workspace}/workspace-antRunner
   devArgs=-Xmx512m
-  extraArgs="addToComposite -Drepodir=${repoDir} -Dcomplocation=${buildId}"
+  extraArgs="addToComposite -Drepodir=${repoDir} -Dcomplocation=${buildID}"
   ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/addToComposite.xml ${extraArgs} -vmargs $devArgs
 
   ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
-#fi
+fi
