@@ -7,9 +7,8 @@
 ## Milestone and RC Releases
 
 **Friday before release week**:
- * Update [I-builds](https://ci.eclipse.org/releng/view/Builds/) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
- * Create prerequisite issues for tracking ECF, EMF and Orbit
-   * See previous Bugzilla issues for [ECF](https://bugs.eclipse.org/bugs/show_bug.cgi?id=578002), [EMF](https://bugs.eclipse.org/bugs/show_bug.cgi?id=578003) and [Orbit](https://bugs.eclipse.org/bugs/show_bug.cgi?id=578004)
+ * Update [I-builds](JenkinsJobs/Builds/I_build.groovy) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
+ * Create or update prerequisite issues for tracking ECF, EMF and Orbit
  * Send reminder email for upcoming milestone week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
    * [Example from 4.23 M1](https://www.eclipse.org/lists/platform-releng-dev/msg38067.html) but the usual schedule:
      * Monday: Last day of development.
@@ -26,7 +25,7 @@
  **Milestone Week**
    - **Wednesday**:
      * Verify that EMF, ECF and Orbit contributions have been included (if applicable).
-     * Final release candidate [build](https://ci.eclipse.org/releng/view/Builds/) runs at 6PM EST.
+     * Final release candidate build runs at 6PM EST.
      * Because of time zones, PST/EST might want to do Thursday's tasks EOD Wednesday after the release candidate has built. 
    - **Thursday**:
      * Create a Sign-Off issue for the Release Candidate in [eclipse.platform.releng.aggregator](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues). 
@@ -37,7 +36,7 @@
        * Just [1 line](https://www.eclipse.org/lists/platform-releng-dev/msg38086.html) asking for sign off on the GitHub issue created in the previous step.
    - **Friday**:
      * **Promote** the release candidate (if go).
-       * Run the [rename and promote](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/) job in Jenkins
+       * Run the [rename and promote](https://ci.eclipse.org/releng/job/Releng/job/renameAndPromote/) job in Jenkins
          - DROP_ID: Release candidate build ID (make sure there is no space before or after the ID).
          - CHECKPOINT: M1 etc (blank for final releases)
          - SIGNOFF_BUG: Needs to be updated to sign-off issue (numeric part only)
@@ -55,14 +54,14 @@
            5. Commit Simrel updates to Gerrit
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
        * Make the build visible
-         - Run [this](https://ci.eclipse.org/releng/job/eclipse.releng.stage2DeferredMakeVisible/) job in Releng jenkins
+         - Run the [make visible](https://ci.eclipse.org/releng/job/Releng/job/makeVisible/) job in Releng jenkins to make the promoted build visible on the download page.
          - Parameters should match Rename and Promote job
-       * Run [Tag Eclipse Release](https://ci.eclipse.org/releng/job/TagEclipseRelease) to tag the source code.
+         - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
          - Tag Parameter should match stream version, i.e `S4_24_0_M1` etc
        * Send email that the M1 build is available
          - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
        * For **Milestone builds** return the I-builds to the normal schedule.
-     * **Update ECJ compiler** in the platform build.
+     * **Update ECJ compiler** in the platform build (if it needs to be updated).
        * To find the new compiler version:
          - Go to the update site for the release candidate
          - Click `plugins`
@@ -89,7 +88,7 @@
   * Create an issue to track preparation work for the next stream (see [Preparation work for 4.25 (2022-09)](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284)).
   * **Maintenance Branch Creation:**
     - Create an issue for [maintenance branch creation](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/301) from the item in the Preparation issue created above.  
-      Create the branch from RC2 using the [ep-createMaintenanceBranch](https://ci.eclipse.org/releng/job/ep-createMaintenanceBranch/) job in the Eclipse Platform Releng jeknins.
+      Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng jeknins.
     - Create an issue for [moving I-builds to the maintenance branch](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/317).
     - Create an issue to [Update parent pom and target sdk deployment jobs](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/286) in jenkins.  
       Update [deploy-eclipse-sdk-target-pom](https://ci.eclipse.org/releng/job/deploy-eclipse-sdk-target-pom/) and [deploy-eclipse-platform-parent-pom](https://ci.eclipse.org/releng/job/deploy-eclipse-platform-parent-pom/) jobs to include the new maintenance branch.
