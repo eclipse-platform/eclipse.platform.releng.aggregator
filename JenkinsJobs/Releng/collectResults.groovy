@@ -96,6 +96,7 @@ devworkspace=${workspace}/workspace-antRunner
 
 ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \\
   -DpostingDirectory=${dropsPath} \\
+  -Djob=${triggeringJob} \\
   -DbuildURL=${buildURL} \\
   -DbuildID=${buildID} \\
   -DEBUILDER_HASH=${EBUILDER_HASH}
