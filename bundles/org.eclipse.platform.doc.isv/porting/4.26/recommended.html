@@ -15,6 +15,7 @@
 	<p>This section describes changes that are required if you are
 		trying to change your 4.25 plug-in to adopt the 4.26 mechanisms and
 		APIs.</p>
+
 	<h2>JobManager implementation changes: Possible deadlock in IJobChangeListener</h2>
 <p>Attention: The JobManager implementation was changed! The old
 JobMangager implementation notified IJobChangeListener about various
@@ -82,6 +83,23 @@ JobManager.</p>
 <p>Also note that it is undefined in which thread IJobChangeListener methods are called. 
 Clients may have relied on the old implementation which called done() in the UI (SWT) thread for UIJob - but that is not the case anymore - it may happen in a background thread.</p>
 <strong>It is recommended to check existing IJobChangeListener implementations for possible regressions if updating to the new target platform.</strong>
+	
+	<h2>Migration to SLF4J 1.7.36 from Maven-Central</h2
+      <p>
+      The Eclipse Platform migrated to the SLF4J artifacts from Maven-Central in version 1.7.36.
+      With this migration the <code>Bundle-SymbolicName</code> changed from <code>org.slf4j.api</code> to <code>slf4j.api</code>.
+      </p>
+      <p>
+      Furthermore the way how a SLF4J-binding Plugin is wired to the slf4j-api Plugin has changed.
+      Previously with the artifacts provided by Eclipse Orbit, each binding had a separate fragment whose host was the <code>org.slf4j.api</code> Plugin and that required the binding Plugin.
+      The <code>slf4j.api</code> Plugin from Maven-Central instead imports the package <code>org.slf4j.impl</code>, which is exported by each binding Plugin.
+      Consequently, unlike before, <code>slf4j.api</code> does not resolve if no binding is present.
+      If you want to disable logging with slf4j, you can add the <code>slf4j-nop</code> binding to your application or product.
+      </p>
+      <p>
+      Additionally the <code>slf4j.api</code> Plugin as well as <code>org.apache.commons.logging</code> have been removed from all Features of the Eclipse Platform to enable Application/Product builders to freely choose the logging-framework and bridging strategy eventually used in their product.
+      If nothing is chosen explicitly P2 assembles a minimal result depending on the available Plugins.
+      </p>
 	
 </body>
 </html>
