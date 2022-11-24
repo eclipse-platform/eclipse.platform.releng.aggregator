@@ -82,9 +82,6 @@ fi
 cd ${workspace}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
 EBUILDERDIR=${workspace}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-#cd ${workspace}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
-#scp -r publishingFiles ${workspace}/publishingFiles
-#cd ${workspace}
 
 #triggering ant runner
 baseBuilderDir=${workspace}/basebuilder
@@ -96,10 +93,11 @@ devworkspace=${workspace}/workspace-antRunner
 
 java -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \
   -DpostingDirectory=${postingDirectory} \
+  -Djob=${triggeringJob} \
   -DbuildURL=${buildURL} \
   -DbuildID=${buildID} \
   -DEBUILDER_HASH=${EBUILDER_HASH}
-  -DEBuilderDir=${EBUILDERDIR}
+  
   
 devworkspace=${workspace}/workspace-updateTestResults
 
@@ -107,4 +105,5 @@ java -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -appli
   -DpostingDirectory=${postingDirectory} \
   -Djob=${triggeringJob} \
   -DbuildID=${buildID} \
-  -DeclipseStream=${STREAM} 
+  -DeclipseStream=${STREAM} \
+  -DEBuilderDir=${EBUILDERDIR}
