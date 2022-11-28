@@ -3,21 +3,20 @@
 Help () {
     echo "
     Usage: $0 -v NEXT_STREAM -t NEXT_TRAIN -i PREVIOUS_RELEASE_ISSUE -p PREVIOUS_STREAM
-    Example: $0 -v 4.25 -t (2022-09) -i 48 -p 4.24
+    Example: $0 -v 4.25 -t 2022-09 -i 48 -p 4.24
     "
     exit
 }
 
 if [[ $# -lt 4 ]]; then Help; exit; fi
 
-while getopts "v:t:i:p:" opt
-do
-  case $opt in
-    v) NEXT_STREAM="${OPTARG}";;
-    t) NEXT_TRAIN="${OPTARG}";;
-    i) PREV_ISSUE="${OPTARG}";;
-    p) PREV_MAJOR="${OPTARG%.*}"; PREV_MINOR="${OPTARG#*.}";;
-    \?) Help; exit;;
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    '-v') NEXT_STREAM=$(echo $2|tr -d ' '); shift 2;;
+    '-t') NEXT_TRAIN=$(echo $2|tr -d ' '); shift 2;;
+    '-i') PREV_ISSUE=$(echo $2|tr -d ' '); shift 2;;
+    '-p') PREV_MAJOR="${2%.*}"; PREV_MINOR="${2#*.}"; shift 2;;
+    '-h') Help; exit;;
   esac
 done
 
@@ -26,7 +25,7 @@ TITLE="Preparation work for ${NEXT_STREAM} (${NEXT_TRAIN}) and open master for d
 BODY="This preparation work involves the following tasks. For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggregator#${PREV_ISSUE}.
 
 - [ ] Create R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
-- [ ] Update R${PREV_MAJOR}_${PREV_MINOR}maintenance branch with release version for ${PREV_MAJOR}.${PREV_MINOR}+ changes
+- [ ] Update R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch with release version for ${PREV_MAJOR}.${PREV_MINOR}+ changes
 - [ ] Move ${PREV_MAJOR}.${PREV_MINOR}-I and ${PREV_MAJOR}.${PREV_MINOR}-Y builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - [ ] Update Parent pom and target sdk deployment jobs for R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - [ ] Create new test jobs for ${NEXT_STREAM}
@@ -52,5 +51,6 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 "
 
 echo "Creating Issue $TITLE"
+echo "$BODY"
 
 gh issue create --title "$TITLE" --body "$BODY" --assignee @me
