@@ -36,7 +36,7 @@ fn_branch_create()
 {
 	cd ${WORKSPACE}/eclipse.platform.releng.aggregator/$1
 	git checkout -b ${branchName} ${tag}
-    git branch --set-upstream-to ${branchName} origin/${branchName}
+    git branch --set-upstream-to origin ${branchName}
     PUSH_URL="$(fn_toPushRepo $(git config --get remote.origin.url))"
 	git push -u $PUSH_URL ${branchName}
 }
