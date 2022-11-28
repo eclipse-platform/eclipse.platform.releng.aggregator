@@ -10,12 +10,11 @@ Help () {
 
 if [[ $# -lt 2 ]]; then Help; exit; fi
 
-while getopts "v" opt
-do
-  case $opt in
-    v) STREAM="${OPTARG}";;
-    i) PREV_ISSUE="${OPTARG}";;
-    \?) Help; exit;;
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    '-v') STREAM=$(echo $2|tr -d ' '); shift 2;;
+    '-i') PREV_ISSUE=$(echo $2|tr -d ' '); shift 2;;
+    '-h') Help; exit;;
   esac
 done
 
@@ -30,7 +29,7 @@ For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggreg
 
 - [ ] New & Noteworthy
 - [ ] Readme file for ${STREAM}
-- [ ] ${STREAM} Acknowledgements/sravanlakkimsetti
+- [ ] ${STREAM} Acknowledgements
 - [ ] Tips & Tricks
 - [ ] Migration Guide
 - [ ] SWT Javadoc bash for ${STREAM}
@@ -43,5 +42,6 @@ For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggreg
 "
 
 echo "Creating Issue $TITLE"
+echo "$BODY"
 
 gh issue create --title "$TITLE" --body "$BODY" --assignee @me
