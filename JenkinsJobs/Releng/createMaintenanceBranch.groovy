@@ -34,7 +34,6 @@ function fn_toPushRepo() {
 
 fn_branch_create() 
 {
-	cd ${WORKSPACE}/eclipse.platform.releng.aggregator/$1
 	git checkout -b ${branchName} ${tag}
     git branch --set-upstream-to origin ${branchName}
     PUSH_URL="$(fn_toPushRepo $(git config --get remote.origin.url))"
@@ -51,7 +50,7 @@ cd eclipse.platform.releng.aggregator/
 #create maintenance branch in aggregator if it does not exist
 existingBranches=$(git branch -r)
 
-if [[ ! $(echo $existingbranches | grep 'origin/${branchName}') ]]; then {
+if [[ ! $(echo $existingBranches | grep $branchName) ]]; then {
 	git checkout -b ${branchName} ${tag}
     git branch --set-upstream-to origin ${branchName}
     PUSH_URL="$(fn_toPushRepo $(git config --get remote.origin.url))"
@@ -66,7 +65,7 @@ do
 	if [[ -d $i ]]; then {
 	pushd $i
     existingBranches=$(git branch -r)
-		if [[ ! $(echo $existingbranches | grep 'origin/${branchName}') ]]; then {
+		if [[ ! $(echo $existingBranches | grep $branchName) ]]; then {
 			fn_branch_create $i
 		} else {
 			echo "Already created branch ${branchName} in $i)"
