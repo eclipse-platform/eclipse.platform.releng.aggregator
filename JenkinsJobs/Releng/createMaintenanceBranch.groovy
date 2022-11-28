@@ -41,51 +41,41 @@ fn_branch_create()
 	git push -u $PUSH_URL ${branchName}
 }
 
-
-
 git config --global user.email "genie.releng@eclipse.org"
 git config --global user.name "Eclipse Releng Bot"
 
 git clone --recurse-submodules git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
 
 cd eclipse.platform.releng.aggregator/
-git clean -f -d -x
-git submodule foreach git clean -f -d -x
-git reset --hard
-git submodule foreach git reset --hard
-git checkout master
-git submodule foreach git checkout master
-git clean -f -d -x
-git submodule foreach git clean -f -d -x
-git reset --hard
-git submodule foreach git reset --hard
-git pull
-git submodule foreach git pull
 
-fn_branch_create eclipse.jdt
-fn_branch_create eclipse.jdt.core
-fn_branch_create eclipse.jdt.core.binaries
-fn_branch_create eclipse.jdt.debug
-fn_branch_create eclipse.jdt.ui
-fn_branch_create eclipse.pde
-fn_branch_create eclipse.platform
-fn_branch_create eclipse.platform.common
-fn_branch_create eclipse.platform.debug
-fn_branch_create eclipse.platform.releng
-fn_branch_create eclipse.platform.resources
-fn_branch_create eclipse.platform.runtime
-fn_branch_create eclipse.platform.swt
-fn_branch_create eclipse.platform.swt.binaries
-fn_branch_create eclipse.platform.team
-fn_branch_create eclipse.platform.text
-fn_branch_create eclipse.platform.ua
-fn_branch_create eclipse.platform.ui
-fn_branch_create eclipse.platform.ui.tools
-fn_branch_create rt.equinox.binaries
-fn_branch_create rt.equinox.bundles
-fn_branch_create equinox
-fn_branch_create rt.equinox.p2
-fn_branch_create 
+#create maintenance branch in aggregator if it does not exist
+existingBranches=$(git branch -r)
+
+if [[ ! $(echo $existingbranches | grep 'origin/${branchName}') ]]; then {
+	git checkout -b ${branchName} ${tag}
+    git branch --set-upstream-to origin ${branchName}
+    PUSH_URL="$(fn_toPushRepo $(git config --get remote.origin.url))"
+	git push -u $PUSH_URL ${branchName}
+} else {
+	echo "Already created branch ${branchName} in eclipse.platform.releng.aggregator"
+}
+fi
+
+for i in $(ls)
+do
+	if [[ -d $i ]]; then {
+	pushd $i
+    existingBranches=$(git branch -r)
+		if [[ ! $(echo $existingbranches | grep 'origin/${branchName}') ]]; then {
+			fn_branch_create $i
+		} else {
+			echo "Already created branch ${branchName} in $i)"
+		}
+		fi
+    popd
+	}
+	fi
+done
     ''')
   }
 }
