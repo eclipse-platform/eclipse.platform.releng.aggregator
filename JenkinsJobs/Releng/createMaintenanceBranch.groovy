@@ -8,11 +8,9 @@ job('Releng/createMaintenanceBranch'){
   }
 
   parameters {
-    stringParam('branchName', null, 'Name of the branch to be created. For example: R4_25_maintenance')
-    stringParam('tag', null, 'Release tag to be used when making the branch. For example: S4_25_0_RC2')
+    stringParam('branchName', null, 'Name of the branch to be created. For example: R4_26_maintenance')
+    stringParam('tag', null, 'Release tag to be used when making the branch. For example: S4_26_0_RC2')
   }
-
-  jdk('openjdk-jdk11-latest')
 
   label('centos-latest')
 
@@ -38,7 +36,7 @@ fn_branch_create()
 {
 	cd ${WORKSPACE}/eclipse.platform.releng.aggregator/$1
 	git checkout -b ${branchName} ${tag}
-    git branch --set-upstream ${branchName} origin/${branchName}
+    git branch --set-upstream-to ${branchName} origin/${branchName}
     PUSH_URL="$(fn_toPushRepo $(git config --get remote.origin.url))"
 	git push -u $PUSH_URL ${branchName}
 }
@@ -69,8 +67,6 @@ fn_branch_create eclipse.jdt.core
 fn_branch_create eclipse.jdt.core.binaries
 fn_branch_create eclipse.jdt.debug
 fn_branch_create eclipse.jdt.ui
-#fn_branch_create eclipse.pde.build
-#fn_branch_create eclipse.pde.ui
 fn_branch_create eclipse.pde
 fn_branch_create eclipse.platform
 fn_branch_create eclipse.platform.common
