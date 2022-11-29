@@ -1,18 +1,26 @@
-pipelineJob('AutomatedTests/ep426I-unit-cen64-gtk3-java20'){
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(5)
-  }
+for (STREAM in STREAMS){
+  def BRANCH = config.Branches.STREAM
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
-  parameters {
-    stringParam('buildId', null, null)
-    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk20/23/GPL/openjdk-20-ea+23_linux-x64_bin.tar.gz', null)
-  }
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java19'){
 
-  definition {
-    cps {
-      sandbox()
-      script('''
+    logRotator {
+      numToKeep(5)
+    }
+
+    parameters {
+      stringParam('buildId', null, null)
+      stringParam('javaDownload', 'https://download.java.net/java/GA/jdk19/877d6127e982470ba2a7faa31cc93d04/36/GPL/openjdk-19_linux-x64_bin.tar.gz', null)
+    }
+
+    definition {
+      cps {
+        sandbox()
+        script('''
 pipeline {
 	options {
 		timeout(time: 600, unit: 'MINUTES')
@@ -148,25 +156,13 @@ spec:
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+              build job: 'Releng/ep-collectResults', parameters: [string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"), string(name: 'buildURL', value: "${BUILD_URL}"), string(name: 'buildID', value: "${params.buildId}")], wait: false
           }
       }
   }
-  post {
-    failure {
-      emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
-      subject: "Java 20 Tests - BUILD FAILED", 
-      to: "akurtako@redhat.com",
-      from:"genie.releng@eclipse.org"
-    }
-    success {
-      emailext body: "Link: <a href='${BUILD_URL}'>${BUILD_URL}</a> <br><br>",
-      subject: "Java 20 Tests - BUILD SUCCESS", 
-      to: "akurtako@redhat.com",
-      from:"genie.releng@eclipse.org"
-    }
-	}
 }
-      ''')
+        ''')
+      }
     }
   }
 }

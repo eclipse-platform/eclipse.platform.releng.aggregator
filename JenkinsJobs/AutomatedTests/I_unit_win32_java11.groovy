@@ -1,27 +1,35 @@
-job('AutomatedTests/ep426I-unit-win32-java11'){
-  description('Run Eclipse SDK Windows Tests ')
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(25)
-  }
+for (STREAM in STREAMS){
+  def BRANCH = config.Branches.STREAM
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
-  parameters {
-    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-  }
+  job('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-win32-java11'){
+    description('Run Eclipse SDK Windows Tests ')
 
-  label('qa6xd-win11')
-
-  authenticationToken('windows2012tests')
- 
-  wrappers { //adds pre/post actions
-    timestamps()
-    timeout {
-      absolute(901)
+    logRotator {
+      numToKeep(25)
     }
-  }
+
+    parameters {
+      stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
+    }
+
+    label('qa6xd-win11')
+
+    authenticationToken('windows2012tests')
+ 
+    wrappers { //adds pre/post actions
+      timestamps()
+      timeout {
+        absolute(901)
+      }
+    }
   
-  steps {
-    batchFile('''
+    steps {
+      batchFile('''
 @echo off
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 echo start cleaning ...
@@ -86,8 +94,8 @@ exit 0
 echo Reached max loops waiting for files to be free to delete
 rem note use of "hard exit" (no /B) as an attempt to get Hudson to fail.
 exit 0
-    ''')
-    batchFile('''
+      ''')
+      batchFile('''
 rem May want to try and restrict path, as we do on cron jobs, so we
 rem have more consistent conditions.
 rem export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/bin
@@ -114,27 +122,28 @@ rem set Path="C:\\openjdk\\jdk-11\\bin;C:\\Program Files\\AdoptOpenJDK\\jdk-8.0.
 
 ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\\tmp -Djvm="C:\\\\openjdk\\\\jdk-11\\\\bin\\\\java.exe" -DbuildId=%buildId%  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH%  -DdownloadURL="https://download.eclipse.org/eclipse/downloads/drops4/%buildId%" -Dargs=all -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 -DtestSuite=all
 
-    ''')
-  }
+      ''')
+    }
 
-  publishers {
-    archiveJunit('**/eclipse-testing/results/xml/*.xml') {
-      retainLongStdout()
-      healthScaleFactor((1.0).doubleValue())
-    }
-    archiveArtifacts {
-      pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt')
-    }
-    extendedEmail {
-      recipientList("sravankumarl@in.ibm.com")
-    }
-    downstreamParameterized {
-      trigger('Releng/ep-collectResults') {
-        condition('ALWAYS')
-        parameters {
-          predefinedProp('triggeringJob', '$JOB_BASE_NAME')
-          predefinedProp('buildURL', '$BUILD_URL')
-          predefinedProp('buildID', '$buildId')
+    publishers {
+      archiveJunit('**/eclipse-testing/results/xml/*.xml') {
+        retainLongStdout()
+        healthScaleFactor((1.0).doubleValue())
+      }
+      archiveArtifacts {
+        pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt')
+      }
+      extendedEmail {
+        recipientList("sravankumarl@in.ibm.com")
+      }
+      downstreamParameterized {
+        trigger('Releng/ep-collectResults') {
+          condition('ALWAYS')
+          parameters {
+            predefinedProp('triggeringJob', '$JOB_BASE_NAME')
+            predefinedProp('buildURL', '$BUILD_URL')
+            predefinedProp('buildID', '$buildId')
+          }
         }
       }
     }
