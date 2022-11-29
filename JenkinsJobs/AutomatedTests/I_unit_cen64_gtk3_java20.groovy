@@ -1,18 +1,26 @@
-pipelineJob('AutomatedTests/ep426I-unit-cen64-gtk3-java17'){
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(5)
-  }
+for (STREAM in STREAMS){
+  def BRANCH = config.Branches.STREAM
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
-  parameters {
-    stringParam('buildId', null, null)
-    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz', null)
-  }
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java20'){
 
-  definition {
-    cps {
-      sandbox()
-      script('''
+    logRotator {
+      numToKeep(5)
+    }
+
+    parameters {
+      stringParam('buildId', null, null)
+      stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk20/23/GPL/openjdk-20-ea+23_linux-x64_bin.tar.gz', null)
+    }
+
+    definition {
+      cps {
+        sandbox()
+        script('''
 pipeline {
 	options {
 		timeout(time: 600, unit: 'MINUTES')
@@ -21,7 +29,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod17'
+      label 'centos-unitpod19'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -81,7 +89,7 @@ spec:
           steps {
               container ('custom'){
                   wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
-                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk15-latest' }"]) {
+                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk18-latest' }"]) {
                           withAnt(installation: 'apache-ant-latest') {
                               sh \'\'\'#!/bin/bash -x
                                 
@@ -126,7 +134,7 @@ spec:
                                 export JAVA_HOME=$JAVA_HOME_NEW
                                 echo ANT_HOME: $ANT_HOME
                                 echo PATH: $PATH
-                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp"
+                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
                                 
                                 env 1>envVars.txt 2>&1
                                 ant -diagnostics 1>antDiagnostics.txt 2>&1
@@ -148,12 +156,27 @@ spec:
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-              build job: 'Releng/ep-collectResults', parameters: [string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"), string(name: 'buildURL', value: "${BUILD_URL}"), string(name: 'buildID', value: "${params.buildId}")], wait: false
           }
       }
   }
+  post {
+    failure {
+      emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
+      subject: "Java 20 Tests - BUILD FAILED", 
+      to: "akurtako@redhat.com",
+      from:"genie.releng@eclipse.org"
+    }
+    success {
+      emailext body: "Link: <a href='${BUILD_URL}'>${BUILD_URL}</a> <br><br>",
+      subject: "Java 20 Tests - BUILD SUCCESS", 
+      to: "akurtako@redhat.com",
+      from:"genie.releng@eclipse.org"
+    }
+	}
 }
-      ''')
+        ''')
+      }
     }
   }
 }
+

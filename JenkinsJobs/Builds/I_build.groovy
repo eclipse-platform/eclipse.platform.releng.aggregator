@@ -3,6 +3,8 @@ def STREAMS = config.Streams
 
 for (STREAM in STREAMS){
   def BRANCH = config.Branches.STREAM
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
   pipelineJob('Builds/I-build-' + STREAM){
     description('Daily Eclipse Integration builds.')
@@ -40,7 +42,7 @@ for (STREAM in STREAMS){
       cpsScm {
         lightweight(true)
         scm {
-          github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/', BRANCH)
+          github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/')
         }
       }
 
@@ -168,7 +170,7 @@ spec:
                   sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh \'\'\'
-                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+                            git clone -b ''' + BRANCH + ''' git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
                         \'\'\'
                       }
                     }
@@ -510,14 +512,14 @@ spec:
 		}
 	  stage('Trigger tests'){
           steps {
-              build job: 'AutomatedTests/ep426I-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep426I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep426I-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep426I-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep426I-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep426I-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep426I-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'ep426I-perf-lin64-baseline', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'ep''' + MAJOR + MINOR + '''I-perf-lin64-baseline', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
 		}
