@@ -87,20 +87,27 @@
     - Update the Acknowledgements.
   * Create an issue to track preparation work for the next stream (see [Preparation work for 4.25 (2022-09)](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284)).
   * **Maintenance Branch Creation:**
-    - Create an issue for [maintenance branch creation](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/301) from the item in the Preparation issue created above.  
-      Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng jeknins.
-    - Create an issue for [moving I-builds to the maintenance branch](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/317).
-    - Create an issue to [Update parent pom and target sdk deployment jobs](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/286) in jenkins.  
-      Update [deploy-eclipse-sdk-target-pom](https://ci.eclipse.org/releng/job/deploy-eclipse-sdk-target-pom/) and [deploy-eclipse-platform-parent-pom](https://ci.eclipse.org/releng/job/deploy-eclipse-platform-parent-pom/) jobs to include the new maintenance branch.
-  * Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).  
+    - Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng jeknins.
+  * **Update Jenkins for the next Release:**
+    - Edit the [JobDSL.json](JenkinsJobs/JobDSL.json)
+      * Add the next release version to the `Streams` key item.
+      * In the `branches` item update the current release to map to the maintenance branch and add a new key:value pair mapping the next release to master.
+    - Update [deployPlatformParentPom.groovy](JenkinsJobs/Releng/deployPlatformParentPom.groovy) and [deploySdkPom.groovy](JenkinsJobs/Releng/deploySdkPom.groovy) to include the new maintenance branch.
+    - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.
+      This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.
+      Performance and Unit tests should also be generated for the new release automatically.
+  * **Create new Stream Repo:**
+    - Run the [Create New Stream Repos](https://ci.eclipse.org/releng/job/Releng/job/newStreamRepos/) job to make an I-builds repo for the next release.
+  * **Update the Build Calendar:**
+    - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).  
     Each stream has its own [wiki](https://wiki.eclipse.org/Category:SimRel-2022-06) page with a more detailed schedule. 
-  * Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/287) to track the creation of new [Performance Test](https://ci.eclipse.org/releng/view/Performance%20Tests/) and [Automated Test](https://ci.eclipse.org/releng/view/Automated%20tests/) jobs in the Releng jenkins. 
-  * Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/290) and run the [newStreamRepos](https://ci.eclipse.org/releng/job/eclipse.releng.newStreamRepos/) job to make an I-builds repo for the next release. Once the repos are made create new I-build (and Y or P-builds as necessary) for the next release. 
-  * [Update cleanup scripts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/305) to include Y and P-builds if those were added, or take them out if not.
-  * [Cleanup approved API list](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/294).
-  * [Clean forceQualifierUpdate files for doc bundles](https://github.com/eclipse-platform/eclipse.platform.common/issues/32). The context here is that the doc builds only check for changes in this repo and so these files need to be changed to trigger a full rebuild.
-  - Update splash screen.  
+  * **Update Splash Screen:**
+    - Update splash screen.  
     Splash screens are created 4 at a time, for 4 consequtive quarterly releases, so they only need to be requested once a year before the 20XX-06 release (the cycle is 2022-06 -> 2023-03, etc). Create an issue in the [Eclipse Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) similar to [Bug 575781](https://bugs.eclipse.org/bugs/show_bug.cgi?id=575781). It is customary to do this by the previous -09 (September) release so that there's plenty of time for discussion before the -06 (June) release is opened. 
+  * **General Cleanup**
+    - [Update cleanup scripts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/305) to include Y and P-builds if those were added, or take them out if not.
+    - [Cleanup approved API list](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/294).
+    - [Clean forceQualifierUpdate files for doc bundles](https://github.com/eclipse-platform/eclipse.platform.common/issues/32). The context here is that the doc builds only check for changes in this repo and so these files need to be changed to trigger a full rebuild.
   * **Version Updates**  
     These updates are currently broken into multiple github issues, but the changes can be made at once and merged in a single commit. 
     - [Set the previous version to RC2](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/302).
