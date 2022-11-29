@@ -56,6 +56,7 @@ For this to be used by consuming projects, they must have their local maven repo
     maven {
       mavenInstallation('apache-maven-latest')
       goals('deploy')
+      rootPOM('eclipse-platform-parent/pom.xml')
     }
   }
 
