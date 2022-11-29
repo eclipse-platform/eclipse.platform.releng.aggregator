@@ -2,7 +2,6 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 def STREAMS = config.Streams
 
 for (STREAM in STREAMS){
-  def BRANCH = config.Branches.STREAM
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
@@ -27,7 +26,6 @@ for (STREAM in STREAMS){
     authenticationToken('windows2012tests')
  
     wrappers { //adds pre/post actions
-
       timestamps()
       timeout {
         absolute(600)
