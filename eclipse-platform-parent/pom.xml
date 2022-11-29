@@ -745,87 +745,23 @@
       </activation>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>check-has-apiTools-nature</id>
-                <phase>validate</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <exportAntProperties>true</exportAntProperties>
-                  <target>
-                    <condition property="skipAPIDescription" value="false" else="true">
-                      <!-- If the property is already set this has no effect because properties are immutable in ANT -->
-                      <and>
-                        <available file="${basedir}/META-INF/MANIFEST.MF"/>
-                        <resourcecontains resource="${basedir}/.project" substring="org.eclipse.pde.api.tools.apiAnalysisNature" />
-                      </and>
-                    </condition>
-                  </target>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-eclipserun-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>eclipse-run</goal>
-                </goals>
-                <phase>process-classes</phase>
-                <id>build-.api_description</id>
-                <configuration>
-                  <skip>${skipAPIDescription}</skip>
-                  <work>${project.build.directory}/apigeneration-workspace</work>
-                  <applicationsArgs>
-	                  <args>-application</args>
-	                  <args>org.eclipse.pde.api.tools.apiGeneration</args>
-	                  <args>-projectName</args>
-	                  <args>${project.artifactId}_${qualifiedVersion}</args>
-	                  <args>-project</args>
-	                  <args>${project.basedir}</args>
-	                  <args>-binary</args>
-	                  <args>${tychoProject.build.outputDirectories}</args>
-	                  <args>-target</args>
-	                  <args>${project.build.directory}</args>
-                  </applicationsArgs>
-                  <dependencies>
-                    <!-- list of bundles that we need -->
-                    <dependency>
-                      <artifactId>org.eclipse.pde.api.tools</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.build</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.equinox.launcher</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>javax.annotation</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                  </dependencies>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+			<plugin>
+	            <groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-apitools-plugin</artifactId>
+	            <version>${tycho.version}</version>
+				<executions>
+					<execution>
+						<id>generate</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+                  			<skip>${skipAPIDescription}</skip>
+                  			<projectName>${project.artifactId}_${qualifiedVersion}</projectName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
       </build>
     </profile>
