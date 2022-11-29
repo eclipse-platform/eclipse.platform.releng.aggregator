@@ -5,31 +5,60 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-  job('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-macM1-java17'){
-    description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
+  job('PerformanceTests/ep' + MAJOR + MINOR + 'I-perf-lin64-baseline'){
+    parameters {
+      stringParam('buildId', null, 'Build ID to test, such as I20140821-0800 or M20140822-0800')
+      stringParam('testToRun', 'selectPerformance', '''
+Name of test suite (or test suite collection) to run. 
+Collections:
+selectPerformance  (a group of tests that complete in about 3 hours)
+otherPerformance   (a small group of tests that either are not working, or take greater than one hour each). 
+
+Individual Tests Suites, per collection: 
+selectPerformance:
+
+antui
+compare
+coreresources
+coreruntime
+jdtdebug
+jdtui
+osgi
+pdeui
+swt
+teamcvs
+ua
+uiforms
+uiperformance
+uircp
+
+otherPerformance:
+equinoxp2ui
+pdeapitooling
+jdtcoreperf
+jdttext
+jdtuirefactoring
+''')
+    }
 
     logRotator {
       numToKeep(5)
     }
 
-    parameters {
-      stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-      stringParam('testSuite', 'all', null)
-    }
-
-    label('nc1ht-macos11-arm64')
-
     jdk('openjdk-jdk11-latest')
 
+    label('performance')
+
     authenticationToken('windows2012tests')
- 
+
     wrappers { //adds pre/post actions
       timestamps()
-      timeout {
-        absolute(600)
+      preBuildCleanup()
+      xvnc {
+        useXauthority()
       }
     }
-  
+
     steps {
       shell('''
 #!/usr/bin/env bash
@@ -51,14 +80,14 @@ else
     SleepTime=60
     currentLoop=0
     nFilesOrDirs=$( find "${WORKSPACE}" -mindepth 1 -maxdepth 1 | wc -l )
-    while [[ ${nFilesOrDirs} -gt 0 ]]
+    while [[ ${nFilesOrDirs} > 0 ]]
     do
       currentLoop=$(( ${currentLoop} + 1 ))
       if [[ ${currentLoop} -gt ${MaxLoops} ]]
       then
         echo -e "\\n\\tERROR: Number of re-try loops, ${currentLoop}, exceeded maximum, ${MaxLoops}. "
         echo -e " \\t\\tPossibly due to files still being used by another process?"
-        exit 0
+        exit 1
         break
       fi
       echo -e "\\tcurrentLoop: ${currentLoop}   nFilesOrDirs:  ${nFilesOrDirs}"
@@ -76,7 +105,10 @@ echo -e "\\t... ending cleaning"
 exit 0
       ''')
       shell('''
-#!/bin/bash -x
+#!/usr/bin/env bash
+
+buildId=$(echo $buildId|tr -d ' ')
+testToRun=$(echo $testToRun|tr -d ' ')
 
 RAW_DATE_START="$(date +%s )"
 
@@ -85,10 +117,6 @@ echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
 echo -e "\\n\\t whoami:  $( whoami )\\n"
 echo -e "\\n\\t uname -a: $(uname -a)\\n"
 
-# unset commonly defined system variables, which we either do not need, or want to set ourselves.
-# (this is to improve consistency running on one machine versus another)
-echo -e "Unsetting variables: JAVA_BINDIR JAVA_HOME JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH ANT_HOME\\n"
-unset -v JAVA_BINDIR JAVA_HOME JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH ANT_HOME
 
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
@@ -100,28 +128,34 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 # we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
 mkdir -p tmp
 
-curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-cat getEBuilder.xml
-curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4/$buildId/buildproperties.shsource
-cat getEBuilder.xml
-source buildProperties.sh
+echo PATH: $PATH
 
-export JAVA_HOME=/usr/local/openjdk-17/Contents/Home
-export ANT_HOME=/opt/homebrew/Cellar/ant/1.10.11/libexec
-export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
+wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+curl -o buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
+cat buildproperties.shsource
+source buildproperties.shsource
+
+#unset JAVA_HOME
+#export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64/jre
+#export ANT_HOME=/shared/common/apache-ant-1.9.6
+
+#export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
+export baselinePerf=true
+
+JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
 
 echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
+echo baselinePerf: $baselinePerf
 
-export eclipseArch=aarch64
+export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp"
 
+env 1>envVars.txt 2>&1
+ant -diagnostics 1>antDiagnostics.txt 2>&1
+java -XshowSettings -version 1>javaSettings.txt 2>&1
 
-env  1>envVars.txt 2>&1
-ant -diagnostics  1>antDiagnostics.txt 2>&1
-java -XshowSettings -version  1>javaSettings.txt 2>&1
-
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=aarch64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -Djvm=$JAVA_HOME/bin/java -DeclipseStream=${STREAM} -DEBUILDER_HASH=${EBUILDER_HASH}  -DbaselinePerf=${baselinePerf} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=${testToRun} -Dtest.target=performance
 
 RAW_DATE_END="$(date +%s )"
 
@@ -135,19 +169,26 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
 
     publishers {
       archiveJunit('**/eclipse-testing/results/xml/*.xml') {
-        retainLongStdout()
         healthScaleFactor((1.0).doubleValue())
       }
       archiveArtifacts {
-        pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt')
+        pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**,  *.properties, *.txt, **/eclipse-testing/platformLocation/eclipse/configuration/*.log')
       }
       extendedEmail {
-        recipientList("sravankumarl@in.ibm.com")
+        recipientList("sdawley@redhat.com")
       }
       downstreamParameterized {
-        trigger('Releng/ep-collectResults') {
+        trigger('PerformanceTests/ep' + MAJOR + MINOR + 'I-perf-lin64') {
           condition('UNSTABLE_OR_BETTER')
           parameters {
+            currentBuildParameters()
+            predefinedProp('testToRun', '${testToRun}')
+          }
+        }
+        trigger('Releng/collectPerfResults') {
+          condition('UNSTABLE_OR_BETTER')
+          parameters {
+            currentBuildParameters()
             predefinedProp('triggeringJob', '$JOB_BASE_NAME')
             predefinedProp('buildURL', '$BUILD_URL')
             predefinedProp('buildID', '$buildId')
