@@ -222,7 +222,7 @@ function cleanRepo ()
 workspace=$1
 remoteBase="/home/data/httpd/download.eclipse.org"
 
-eclipseIRepo="${remoteBase}/eclipse/updates/4.26-I-builds"
+eclipseIRepo="${remoteBase}/eclipse/updates/4.27-I-builds"
 eclipseYRepo="${remoteBase}/eclipse/updates/4.25-Y-builds"
 eclipsePRepo="${remoteBase}/eclipse/updates/4.25-P-builds"
 eclipseBuildTools="${remoteBase}/eclipse/updates/buildtools"
