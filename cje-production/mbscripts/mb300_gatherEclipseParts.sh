@@ -146,11 +146,11 @@ if [ -z $PATCH_BUILD ]; then
 fi
 
 # gather ecj jars
-ECJ_JAR_DIR=$CJE_ROOT/$AGG_DIR/eclipse.jdt.core/org.eclipse.jdt.core/target
+ECJ_JAR_DIR=$CJE_ROOT/$AGG_DIR/eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch/target
 if [ -d $ECJ_JAR_DIR ]; then
   pushd $ECJ_JAR_DIR
-  cp org.eclipse.jdt.core-*-SNAPSHOT-batch-compiler.jar $CJE_ROOT/$DROP_DIR/$BUILD_ID/ecj-$BUILD_ID.jar
-  cp org.eclipse.jdt.core-*-SNAPSHOT-batch-compiler-src.jar $CJE_ROOT/$DROP_DIR/$BUILD_ID/ecjsrc-$BUILD_ID.jar
+  cp org.eclipse.jdt.core.compiler.batch-*-SNAPSHOT.jar $CJE_ROOT/$DROP_DIR/$BUILD_ID/ecj-$BUILD_ID.jar
+  cp org.eclipse.jdt.core.compiler.batch-*-SNAPSHOT-sources.jar $CJE_ROOT/$DROP_DIR/$BUILD_ID/ecjsrc-$BUILD_ID.jar
   popd
 fi
 
