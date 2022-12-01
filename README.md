@@ -47,6 +47,15 @@ The build commands require the installation and setup of Java 11 or higher and M
 See also the complete instructions on the [Platform Build wiki](https://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build"). 
 Note, it is highly recommended to use toolchains.xml and -Pbree-libs as decribed in [Using BREE Libs](https://wiki.eclipse.org/Platform-releng/Platform_Build#Using_BREE_Libs "Using BREE Libs").
 
+Integration builds
+------------------
+
+The integrations (nightly) build jobs are hosted on Jenkins instance https://ci.eclipse.org/releng/job/Builds/.
+
+The job with the highest release number is the one that builds nightly SDK build, like https://ci.eclipse.org/releng/job/Builds/job/I-build-4.27/ job for 4.27 SDK.
+
+The build artifacts and test results are accessible at https://download.eclipse.org/eclipse/downloads/index.html
+
 Performance Tests
 -----------------
 See [Performance README.md](production/README.md)
