@@ -52,6 +52,15 @@ ${WORKSPACE}/promoteSites.sh
   }
 
   publishers {
+    downstreamParameterized {
+      trigger('tagEclipseRelease') {
+        parameters {
+          predefinedProp('tag', '$TAG')
+          predefinedProp('buildID', '$DROP_ID')
+          predefinedProp('annotation', '$SIGNOFF_BUG')
+        }
+      }
+    }
     archiveArtifacts {
       pattern('**/stage2output*/**')
     }
