@@ -73,6 +73,18 @@ ${SCRIPT} ${snapshotOrRelease}
           predefinedProp('REPO_ID', '${BUILD_NUMBER}')
         }
       }
+      trigger('Releng/PublishPDEtoMaven') {
+        condition('SUCCESS')
+        parameters {
+          predefinedProp('REPO_ID', '${BUILD_NUMBER}')
+        }
+      }
+      trigger('Releng/PublishPlatformtoMaven') {
+        condition('SUCCESS')
+        parameters {
+          predefinedProp('REPO_ID', '${BUILD_NUMBER}')
+        }
+      }
     }
     archiveArtifacts {
       pattern('repo-*/**, baseline-next.txt')
