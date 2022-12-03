@@ -17,7 +17,7 @@ job('Releng/PublishJDTtoMaven'){
   wrappers { //adds pre/post actions
     preBuildCleanup()
     credentialsBinding {
-      file('KEYRING', 'secret-subkeys.asc (secret-subkeys.asc for JDT')
+      file('KEYRING', 'secret-subkeys-jdt.asc')
     }
     timestamps()
     sshAgent('git.eclipse.org-bot-ssh', 'github-bot-ssh')

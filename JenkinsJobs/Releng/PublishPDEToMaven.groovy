@@ -17,7 +17,7 @@ job('Releng/PublishPDEToMaven'){
   wrappers { //adds pre/post actions
     preBuildCleanup()
     credentialsBinding {
-      file('KEYRING', 'secret-subkeys.asc (secret-subkeys.asc for PDE')
+      file('KEYRING', 'secret-subkeys-pde.asc')
     }
     timestamps()
     sshAgent('git.eclipse.org-bot-ssh', 'github-bot-ssh')

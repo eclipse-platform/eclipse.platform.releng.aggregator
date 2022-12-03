@@ -17,7 +17,7 @@ job('Releng/PublishPlatformToMaven'){
   wrappers { //adds pre/post actions
     preBuildCleanup()
     credentialsBinding {
-      file('KEYRING', 'secret-subkeys.asc (secret-subkeys.asc for Releng')
+      file('KEYRING', 'secret-subkeys-releng.asc')
     }
     timestamps()
     sshAgent('git.eclipse.org-bot-ssh', 'github-bot-ssh')
