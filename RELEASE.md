@@ -137,7 +137,9 @@
 **Friday before GA Release**
   * After Simrel declares RC2 run the [rename and promote](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/) job to promote RC2 (or RC2a). Change the DL_TYPE from S to R.  
     You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
-  * Once you have the release url for the GA release you can complete the [Publish to Maven Central](https://github.com/eclipse-platform/eclipse.platform.releng/issues/45) and [Update maintenance branch with release version](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/334) tasks.
+  * Once you have the release url for the GA release...
+  * [Publish Maven artifacts to oss.sonatype.org staging area to prepare for Maven Central](https://github.com/eclipse-platform/eclipse.platform.releng/issues/45) and send a mail to the mailing-list sharing the URLs of the Maven staging repositories for testing.
+  * [Update maintenance branch with release version](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/334) tasks.
   * [Set the previous release to the GA release across build scripts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284).
   * Update and contribute to Simrel.
    
@@ -149,7 +151,7 @@
     - Sometimes there are new source bundles that need to be added/generated, add these to [sourceBundles.txt](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/sourceBundles.txt)
   * Run [Publish Platform to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/PublishPlatformToMaven/), [Publish JDT to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/PublishJDTtoMaven/) and [Publish PDE to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/PublishPDEToMaven/) in parallel, using the CBI aggregator build number for the argument.
   * If you do not have an account on oss.sonatype.org for performing the rest of the release request one by creating an issue like https://issues.sonatype.org/browse/OSSRH-43870 to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
-  * Log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories, then select each and click release to release them.
+  * Log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
   * Replace contents of [baseline.txt](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/baseline.txt) with the contents of baseline-next.txt created in CBI aggregator.
 
 **Wednesday, GA Release**
@@ -159,4 +161,5 @@
   * At around 9:30 EST run (or have scheduled) [ep_createGenericComposites](https://ci.eclipse.org/releng/job/ep_createGenericComposites/) to [update the generic repos](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/319) for this release.  
     For reference, the generic repositories are for the [latest GA release](https://download.eclipse.org/eclipse/updates/latest/) and the current (ongoing) [I-builds](https://download.eclipse.org/eclipse/updates/I-builds/), [Y-builds](https://download.eclipse.org/eclipse/updates/Y-builds/) and [P-builds](https://download.eclipse.org/eclipse/updates/P-builds/). 
   * Schedule the [make visible](https://ci.eclipse.org/releng/job/eclipse.releng.stage2DeferredMakeVisible/) job for about 9:45AM EST.
+  * Complete publication Maven Central: go to https://oss.sonatype.org/#stagingRepositories and "Release" the already closed staging Maven repositories.
   * Once Simrel announces the GA release send the announcement email.
