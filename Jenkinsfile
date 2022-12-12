@@ -42,7 +42,7 @@ pipeline {
 			steps {
 				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
 					sh '''
-					mvn clean verify -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-Pbree-libs -Peclipse-sign \
 						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
