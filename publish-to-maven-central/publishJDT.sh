@@ -20,7 +20,7 @@ JDT=org/eclipse/jdt
 # load versions from the baseline (to avoid illegal double-upload):
 source ${WORKSPACE}/baseline.txt
 
-wget https://ci.eclipse.org/releng/job/Releng/job/CBIaggregator/${REPO_ID}/artifact/*zip*/archive.zip
+wget https://ci.eclipse.org/releng/job/CBIaggregator/${REPO_ID}/artifact/*zip*/archive.zip
 unzip archive.zip
 
 if [ ! -d ${REPO} ]
