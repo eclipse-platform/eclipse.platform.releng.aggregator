@@ -512,7 +512,6 @@ spec:
 		}
 	  stage('Trigger tests'){
           steps {
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false

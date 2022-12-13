@@ -6,7 +6,7 @@ job('Releng/ep-collectYbuildResults'){
   disabled()
 
   parameters {
-    stringParam('triggeringJob', null, 'Name of the job to collect results from: i.e. \'ep425I-unit-cen64-gtk3-java11\'.')
+    stringParam('triggeringJob', null, 'Name of the job to collect results from: i.e. \'ep427I-unit-cen64-gtk3-java17\'.')
     stringParam('triggeringBuildNumber', null, 'Build number of the triggering job.')
     stringParam('buildId', null, 'ID of the I-build being tested.')
   }

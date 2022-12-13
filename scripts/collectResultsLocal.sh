@@ -9,7 +9,7 @@ usage () {
 Arguments:
   '-id'|'--buildID'                 ID of the I-build being tested, i.e. I20221020-1800 
   '-url'                            URL of the test job to collect results from
-  '-j'|'--triggeringJob'            Name of the test job results are being collected from, i.e. ep426I-unit-cen64-gtk3-java11
+  '-j'|'--triggeringJob'            Name of the test job results are being collected from, i.e. ep426I-unit-cen64-gtk3-java17
   '-w'|'--workspace'                [Optional] Set a custom workspace location, defaults to /tmp/collectResults
   '-p'|'--postingDirectory'         [Optional] Location for output files, defaults to \${workspace}/output
   '-L'|'--localFiles'               [Optional] Use local versions of collectTestResults.xml, genTestIndexes.xml and publish.xml. For testing changes.

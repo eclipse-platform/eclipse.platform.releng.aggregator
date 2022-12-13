@@ -514,7 +514,6 @@ spec:
 	  stage('Trigger tests'){
           steps {
               container('jnlp') {
-                build job: 'AutomatedTests/ep425Y-unit-cen64-gtk3-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'AutomatedTests/ep425Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'AutomatedTests/ep425Y-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'AutomatedTests/ep425Y-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
