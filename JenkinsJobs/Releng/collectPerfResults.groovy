@@ -50,9 +50,9 @@ buildDir=${dropsPath}/${buildID}
 
 workingDir=${epDownloadDir}/workingDir
 
-workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
+workspace=${workingDir}/${JOB_BASE_NAME}-${BUILD_NUMBER}
 
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
 
 ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
 
@@ -76,8 +76,8 @@ ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml h
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
 #wget -r -l 3 -np https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles
-cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
-scp -r publishingFiles genie.releng@projects-storage.eclipse.org:${workspace}/publishingFiles
+cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+scp -r eclipse genie.releng@projects-storage.eclipse.org:${workspace}/eclipse
 cd ${WORKSPACE}
 
 #triggering ant runner
@@ -129,7 +129,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -DEBuilderDir=${workspace}
 
 #Delete Workspace
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
     ''')
   }
 

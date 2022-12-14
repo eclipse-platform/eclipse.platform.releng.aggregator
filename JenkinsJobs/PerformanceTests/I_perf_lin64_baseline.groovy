@@ -133,7 +133,7 @@ echo PATH: $PATH
 wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 curl -o buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
 cat buildproperties.shsource
-source buildproperties.shsource
+source ./buildproperties.shsource
 
 #unset JAVA_HOME
 #export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.el7_8.x86_64/jre
