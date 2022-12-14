@@ -115,7 +115,7 @@ fi
 
 #==== remove the p2 repository (not logged): ====
 
-/bin/rm -r p2.index p2.packed content.jar artifacts.jar
+/bin/rm -rf p2.index p2.packed content.jar artifacts.jar
 
 #==== remove features: ====
 
