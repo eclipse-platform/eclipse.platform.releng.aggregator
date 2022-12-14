@@ -135,7 +135,7 @@ mkdir -p tmp
 wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 curl -o buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
 cat buildproperties.shsource
-source buildproperties.shsource
+source ./buildproperties.shsource
 set +x
 
 export JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
