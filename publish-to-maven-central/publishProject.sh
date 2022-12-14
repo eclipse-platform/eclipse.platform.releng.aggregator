@@ -109,7 +109,12 @@ do
 			-Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
 			>> .log/sources-upload.txt
 	else
-		echo -e "\tMissing ${sourcesFile}"
+		# If the -sources.jar is missing, and the main jar contains .class files, then we won't be able to promote this to Maven central.
+		if unzip -l ${file} | grep -q -e '.class$'; then 
+			echo "BUILD FAILURE ${file} contains .class files and requires a ${sourcesFile}" | tee >> .log/sources-upload.txt
+		else
+			echo -e "\tMissing ${sourcesFile} but ${file} contains no .class files."
+		fi; 
 	fi
 
 	if [ -f "${javadocFile}" ]; then
