@@ -94,8 +94,8 @@ do
 	sourcesFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-sources.jar|"`
 	javadocFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
 
-	echo "${MVN} -f ${PROJECT}-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
-	echo ${MVN} -f ${PROJECT}-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+	echo "${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
+	${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 		-Dgpg.key.id=${GPG_KEY_ID} \
 		-Durl=${URL} -DrepositoryId=${REPO} \
 		-Dfile=${file} -DpomFile=${pomFile} \
@@ -103,7 +103,7 @@ do
 
 	if [ -f "${sourcesFile}" ]; then
 		echo -e "\t${sourcesFile}"
-		echo ${MVN} -f ${PROJECT}-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+		${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 			-Dgpg.key.id=${GPG_KEY_ID} \
 			-Durl=${URL} -DrepositoryId=${REPO} \
 			-Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
@@ -112,7 +112,7 @@ do
 
 	if [ -f "${javadocFile}" ]; then
 		echo -e "\t${javadocFile}"
-		echo ${MVN} -f ${PROJECT}-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
+		${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
 			-Dgpg.key.id=${GPG_KEY_ID} \
 			-Durl=${URL} -DrepositoryId=${REPO} \
 			-Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
