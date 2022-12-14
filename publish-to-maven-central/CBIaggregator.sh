@@ -33,23 +33,6 @@ function require_executable() {
 	fi
 }
 
-function create_baseline() {
-	cd ${Repo}
-	for line in `find org/eclipse -name \*[0-9].jar | sort`
-	do
-		file=`basename $line`
-		name=`echo $file | sed -e 's/\(.*\)-.*/\1/' | tr '.' '_'`
-		version=`echo $file | sed -e 's/.*-\(.*\)\.jar/\1/'`
-		previous=`eval echo \\${VERSION_$name}`
-		if [ "$previous" != "" ]
-		then
-			version=${previous},${version}
-		fi
-		echo VERSION_$name=$version
-	done > ${WORKSPACE}/baseline-next.txt 
-	cd -
-}	
-
 #================================================================================
 #   (1) Install and run the CBI aggregator
 #================================================================================
@@ -385,13 +368,6 @@ do
     buildSourceJar $line 
 done < ${WORKSPACE}/work/sourceBundles.txt
 
-# copy ecj-src from build output (NB: we are mapping from SDK version (4.x) back to ECJ version (3.x)):
-scp genie.releng@projects-storage.eclipse.org:${DROPS4}/${SDK_BUILD_DIR}/ecjsrc-${SDK_VERSION}.jar org/eclipse/jdt/ecj/${ECJ_VERSION}/ecj-${ECJ_VERSION}-sources.jar
-
 echo "========== Repo completed ========="
-
-create_baseline
-
-echo "========== Next baseline created ========="
 
 cd ${WORKSPACE}

@@ -108,6 +108,8 @@ do
 			-Durl=${URL} -DrepositoryId=${REPO} \
 			-Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
 			>> .log/sources-upload.txt
+	else
+		echo -e "\tMissing ${sourcesFile}"
 	fi
 
 	if [ -f "${javadocFile}" ]; then
@@ -117,7 +119,9 @@ do
 			-Durl=${URL} -DrepositoryId=${REPO} \
 			-Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
 			>> .log/javadoc-upload.txt
-		fi
+	else
+		echo -e "\tMissing ${javadocFile}"
+	fi
 done
 
 ls -la .log

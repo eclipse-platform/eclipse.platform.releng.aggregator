@@ -18,11 +18,7 @@ SDK_BUILD_DIR=R-4.26-202211231800
 SDK_VERSION=4.26
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
-# JDT / ECJ:
-ECJ_VERSION=3.32.0
-
 # AGGREGATOR:
-# URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/aggregator/headless/4.13/I20200825-1209/
 URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest
 
 # LOCAL TOOLS:
