@@ -43,7 +43,7 @@ mvn clean verify  -DskipTests=true
 Build requirements
 ------------------
 
-The build commands require the installation and setup of Java 11 or higher and Maven version 3.5.4 or higher.
+The build commands require the installation and setup of Java 17 or higher and Maven version 3.5.4 or higher.
 See also the complete instructions on the [Platform Build wiki](https://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build"). 
 Note, it is highly recommended to use toolchains.xml and -Pbree-libs as decribed in [Using BREE Libs](https://wiki.eclipse.org/Platform-releng/Platform_Build#Using_BREE_Libs "Using BREE Libs").
 
