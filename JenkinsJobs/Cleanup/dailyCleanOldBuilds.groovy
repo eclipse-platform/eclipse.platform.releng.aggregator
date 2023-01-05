@@ -1,4 +1,4 @@
-job('dailyCleanOldBuilds'){
+job('Cleanup/dailyCleanOldBuilds'){
   displayName('Daily Cleanup for Old Builds')
   description('''
 This job runs several types of "cleanup" on the build machine and downloads server to remove old builds and other left overs from old build.

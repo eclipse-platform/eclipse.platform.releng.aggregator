@@ -103,7 +103,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
 #do first so performance.php regenerated
 devworkspace=${workspace}/workspace-newjar
 performanceDir=${buildDir}/performance
-phpFile=${workspace}/publishingFiles/templateFiles/basicPerformance.php
+phpFile=${workspace}/eclipse/publishingFiles/templateFiles/basicPerformance.php
 
 files=$(ssh genie.releng@projects-storage.eclipse.org ls ${performanceDir}/*.dat)
 
