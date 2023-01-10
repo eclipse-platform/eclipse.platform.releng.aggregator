@@ -20,10 +20,6 @@ It must match the name of the build on the build machine.
 This is the build type we are promoting TO. 
 I-builds promote to 'S' until 'R'. 
     ''')
-    stringParam('TAG', null, ''' For passing to the tagEclipseRelease job.
-R is used for release builds. For example: R4_25
-S is used for milestones and includes the milestone version. For example: S4_25_0_RC2
-    ''')
   }
 
   logRotator {
