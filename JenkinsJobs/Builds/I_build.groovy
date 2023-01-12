@@ -518,7 +518,7 @@ spec:
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-java11', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'PerformanceTests/ep''' + MAJOR + MINOR + '''I-perf-lin64-baseline', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
