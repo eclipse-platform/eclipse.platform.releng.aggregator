@@ -94,24 +94,16 @@ do
 	sourcesFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-sources.jar|"`
 	javadocFile=`echo $pomFile | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
 
-	echo "${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} -Durl=${URL} -DrepositoryId=${REPO} -Dfile=${file} -DpomFile=${pomFile}"
-	${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-		-Dgpg.key.id=${GPG_KEY_ID} \
-		-Durl=${URL} -DrepositoryId=${REPO} \
-		-Dfile=${file} -DpomFile=${pomFile} \
-		>> .log/artifact-upload.txt
+	echo -e "\t${file}"
 
 	if [ -f "${sourcesFile}" ]; then
 		echo -e "\t${sourcesFile}"
-		${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-			-Dgpg.key.id=${GPG_KEY_ID} \
-			-Durl=${URL} -DrepositoryId=${REPO} \
-			-Dfile=${sourcesFile} -DpomFile=${pomFile} -Dclassifier=sources \
-			>> .log/sources-upload.txt
+		SOURCES_ARG="-Dsources=${sourcesFile}"
 	else
+		SOURCES_ARG=""
 		# If the -sources.jar is missing, and the main jar contains .class files, then we won't be able to promote this to Maven central.
 		if unzip -l ${file} | grep -q -e '.class$'; then 
-			echo "BUILD FAILURE ${file} contains .class files and requires a ${sourcesFile}" | tee -a .log/sources-upload.txt
+			echo "BUILD FAILURE ${file} contains .class files and requires a ${sourcesFile}" | tee -a .log/upload.txt
 		else
 			echo -e "\tMissing ${sourcesFile} but ${file} contains no .class files."
 		fi; 
@@ -119,14 +111,25 @@ do
 
 	if [ -f "${javadocFile}" ]; then
 		echo -e "\t${javadocFile}"
-		${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file \
-			-Dgpg.key.id=${GPG_KEY_ID} \
-			-Durl=${URL} -DrepositoryId=${REPO} \
-			-Dfile=${javadocFile} -DpomFile=${pomFile} -Dclassifier=javadoc \
-			>> .log/javadoc-upload.txt
+		JAVADOC_ARG="-Djavadoc=${javadocFile}"
 	else
+		JAVADOC_ARG=""
 		echo -e "\tMissing ${javadocFile}"
 	fi
+
+	echo "${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} -Durl=${URL} -DrepositoryId=${REPO} -DpomFile=${pomFile} -Dfile=${file} ${SOURCES_ARG} ${JAVADOC_ARG}"
+	${MVN} \
+		-f project-pom.xml \
+		-s ${SETTINGS} \
+		gpg:sign-and-deploy-file \
+		-Dgpg.key.id=${GPG_KEY_ID} \
+		-Durl=${URL} \
+		-DrepositoryId=${REPO} \
+		-DpomFile=${pomFile} \
+		-Dfile=${file} \
+		${SOURCES_ARG} \
+		${JAVADOC_ARG} \
+		>> .log/upload.txt
 done
 
 ls -la .log
