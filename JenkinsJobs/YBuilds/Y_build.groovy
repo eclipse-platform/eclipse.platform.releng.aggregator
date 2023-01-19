@@ -1,4 +1,4 @@
-pipelineJob('Builds/Y-build'){
+pipelineJob('YPBuilds/Y-build'){
   description('Daily Maintenance Builds.')
 
   properties {
@@ -29,7 +29,7 @@ pipelineJob('Builds/Y-build'){
     cpsScm {
       lightweight(true)
       scm {
-        github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/', 'R4_25_maintenance')
+        github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/', 'master')
       }
     }
 
@@ -307,8 +307,6 @@ spec:
                         cp testConfigs.php ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/.
                         cp publish.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
                         cp publish.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
-                        cp publish2.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
-                        cp publish2.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
                     \'\'\'
                 }
             }
@@ -514,10 +512,11 @@ spec:
 	  stage('Trigger tests'){
           steps {
               container('jnlp') {
-                build job: 'AutomatedTests/ep425Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'AutomatedTests/ep425Y-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'AutomatedTests/ep425Y-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'AutomatedTests/ep425Y-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep425Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep425Y-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep425Y-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep425Y-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep425Y-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
             }

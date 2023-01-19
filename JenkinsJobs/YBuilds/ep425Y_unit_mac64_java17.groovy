@@ -1,4 +1,4 @@
-job('AutomatedTests/ep425Y-unit-mac64-java17'){
+job('YPBuilds/ep425Y-unit-mac64-java17'){
   description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
 
   logRotator {
@@ -116,7 +116,7 @@ ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
 export eclipseArch=x86_64
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DtestSuite=${testSuite}
 
 RAW_DATE_END="$(date +%s )"
 
@@ -140,12 +140,12 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
       recipientList("sravankumarl@in.ibm.com")
     }
     downstreamParameterized {
-      trigger('Releng/ep-collectYbuildResults') {
+      trigger('YPBuilds/ep-collectYbuildResults') {
         condition('UNSTABLE_OR_BETTER')
         parameters {
           predefinedProp('triggeringJob', '$JOB_BASE_NAME')
-          predefinedProp('triggeringBuildNumber', '$BUILD_NUMBER')
-          predefinedProp('buildId', '$buildId')
+          predefinedProp('buildURL', '$BUILD_URL')
+          predefinedProp('buildID', '$buildId')
         }
       }
     }
