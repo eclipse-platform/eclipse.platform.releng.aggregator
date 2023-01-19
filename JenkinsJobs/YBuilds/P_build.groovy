@@ -1,4 +1,4 @@
-pipelineJob('Builds/P-build'){
+pipelineJob('YPBuilds/P-build'){
   description('Java Update Builds CHECK NOTES.')
 
   properties {
@@ -24,7 +24,7 @@ pipelineJob('Builds/P-build'){
     cpsScm {
       lightweight(true)
       scm {
-        github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/', 'R4_25_maintenance')
+        github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/', 'master')
       }
     }
 

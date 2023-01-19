@@ -1,14 +1,11 @@
-job('Releng/ep-collectYbuildResults'){
+job('YPBuilds/ep-collectYbuildResults'){
   displayName('Collect Y-build Results')
   description('This job is to perform some summary analysis and then write unit test results to the download page.')
 
-  //disabling for now so we keep using the original ones
-  disabled()
-
   parameters {
     stringParam('triggeringJob', null, 'Name of the job to collect results from: i.e. \'ep427I-unit-cen64-gtk3-java17\'.')
-    stringParam('triggeringBuildNumber', null, 'Build number of the triggering job.')
-    stringParam('buildId', null, 'ID of the I-build being tested.')
+    stringParam('buildURL', null, 'Build URL of the triggering job.')
+    stringParam('buildID', null, 'ID of the I-build being tested.')
   }
 
   label('centos-8')
@@ -26,12 +23,15 @@ job('Releng/ep-collectYbuildResults'){
     timestamps()
     preBuildCleanup()
     sshAgent('git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh')
+    timeout {
+      absolute(30)
+    }
     xvnc {
       useXauthority()
     }
     withAnt {
       installation('apache-ant-latest')
-      jdk('Default')
+      jdk('openjdk-jdk17-latest')
     }
   }
 
@@ -39,18 +39,18 @@ job('Releng/ep-collectYbuildResults'){
     shell('''
  #!/bin/bash -x
 
-buildId=$(echo $buildId|tr -d ' ')
-triggeringBuildNumber=$(echo $triggeringBuildNumber|tr -d ' ')
+buildID=$(echo $buildID|tr -d ' ')
+buildURL=$(echo $buildURL|tr -d ' ')
 triggeringJob=$(echo $triggeringJob|tr -d ' ')
 
-wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
+wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
 cat ${WORKSPACE}/buildproperties.shsource
 source ${WORKSPACE}/buildproperties.shsource
 
 
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 dropsPath=${epDownloadDir}/downloads/drops4
-buildDir=${dropsPath}/${buildId}
+buildDir=${dropsPath}/${buildID}
 
 workingDir=${epDownloadDir}/workingDir
 
@@ -81,8 +81,8 @@ ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml h
 
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse
-scp -r publishingFiles genie.releng@projects-storage.eclipse.org:${workspace}/publishingFiles
+cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+scp -r eclipse genie.releng@projects-storage.eclipse.org:${workspace}/eclipse
 cd ${WORKSPACE}
 
 #triggering ant runner
@@ -97,23 +97,21 @@ source ./buildproperties.shsource
 devworkspace=${workspace}/workspace-antRunner
 
 ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \\
+  -DpostingDirectory=${dropsPath} \\
   -Djob=${triggeringJob} \\
-  -DbuildNumber=${triggeringBuildNumber} \\
-  -DbuildId=${buildId} \\
-  -DeclipseStream=${STREAM} \\
+  -DbuildURL=${buildURL} \\
+  -DbuildID=${buildID} \\
   -DEBUILDER_HASH=${EBUILDER_HASH}
   
 #
-
 devworkspace=${workspace}/workspace-updateTestResults
 
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/genTestIndexes.xml \\
+ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/publish.xml \\
+  -DpostingDirectory=${dropsPath} \\
   -Djob=${triggeringJob} \\
-  -DbuildId=${buildId} \\
+  -DbuildID=${buildID} \\
   -DeclipseStream=${STREAM} \\
-  -Dbasebuilder=$baseBuilderDir \\
-  -Dworkspace=${workspace}
-
+  -DEBuilderDir=${workspace}
 
 #Delete Workspace
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
