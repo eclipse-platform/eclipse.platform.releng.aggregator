@@ -11,47 +11,47 @@ pipeline {
           parallel {
               stage('Ubuntu 22.04 Java17'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
               stage('Opensuse Leap Java17'){
                   steps {
-                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
               stage('Centos 9.x Java17'){
                   steps {
-                        build job: 'ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
               stage('Centos 8 arm64 Java17'){
                   steps {
-                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17arm64}")]
+                        build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17arm64}")]
                   }
               }
               stage('Centos 8.x ppc64le Java17'){
                   steps {
-                        build job: 'ep-smoke-test-ppcle', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17ppcle}")]
+                        build job: 'SmokeTests/ep-smoke-test-ppcle', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17ppcle}")]
                   }
               }
               stage('Ubuntu 22.04 Java19'){
                   steps {
-                        build job: 'ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
                   }
               }
               stage('Opensuse Leap Java19'){
                   steps {
-                        build job: 'ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
                   }
               }
               stage('Centos 9.x Java19'){
                   steps {
-                        build job: 'ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19x64}")]
                   }
               }
               stage('Centos 8 arm64 Java19'){
                   steps {
-                        build job: 'ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19arm64}")]
+                        build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java19arm64}")]
                   }
               }
           }
