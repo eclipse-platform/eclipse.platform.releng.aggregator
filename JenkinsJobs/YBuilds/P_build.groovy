@@ -1,5 +1,5 @@
 pipelineJob('YPBuilds/P-build'){
-  description('Java Update Builds CHECK NOTES.')
+  description('Java Update Builds.')
 
   properties {
     pipelineTriggers {
@@ -21,13 +21,6 @@ pipelineJob('YPBuilds/P-build'){
   }
 
   definition {
-    cpsScm {
-      lightweight(true)
-      scm {
-        github('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/', 'master')
-      }
-    }
-
     cps {
       sandbox()
       script('''
@@ -152,7 +145,7 @@ spec:
                  sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh \'\'\'
-                            git clone -b R4_25_maintenance git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
                         \'\'\'
                       }
                     }
@@ -265,7 +258,7 @@ spec:
 		stage('Aggregator maven build'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
+                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -284,8 +277,8 @@ spec:
 	  stage('Gather Eclipse Parts'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk11-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk11-latest') {
+                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
+                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk17-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
