@@ -1,4 +1,4 @@
-pipelineJob('YPBuilds/ep425Y-unit-cen64-gtk3-java19'){
+pipelineJob('YPBuilds/ep425Y-unit-cen64-gtk3-java20'){
 
   logRotator {
     numToKeep(5)
