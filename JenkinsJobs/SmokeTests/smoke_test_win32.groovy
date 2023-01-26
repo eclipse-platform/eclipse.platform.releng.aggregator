@@ -64,7 +64,7 @@ IF NOT DEFINED WORKSPACE (
               rmdir "%%p" /s /q
               )
             rem this for loop is for for all files remaining, directly under workspace
-            FOR %%p IN ("%WORKSPACE%\*") DO (
+            FOR %%p IN ("%WORKSPACE%\\*") DO (
               echo deleting file: %%p
               del "%%p"  /q
               )
@@ -114,7 +114,7 @@ For /F "tokens=1* delims==" %%A IN (buildProperties.properties) DO (
 echo on
 set STREAM
 set EBUILDER_HASH
-set JAVA_HOME=C:\\openjdk\\jdk-11\
+set JAVA_HOME=C:\\openjdk\\jdk-11\\
 set JAVA_HOME
 rem set Path="C:\\openjdk\\jdk-11\\bin;C:\\Program Files\\AdoptOpenJDK\\jdk-8.0.202.08\\bin";C:\\ProgramData\\Boxstarter;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\ProgramData\\chocolatey\\bin;C:\\tools\\cygwin\\bin;C:\\Program Files\\IcedTeaWeb\\WebStart\\bin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Users\\jenkins_vnc\\AppData\\Local\\Microsoft\\WindowsApps;
 
