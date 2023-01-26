@@ -54,7 +54,8 @@ The integrations (nightly) build jobs are hosted on Jenkins instance https://ci.
 
 The job with the highest release number is the one that builds nightly SDK build, like https://ci.eclipse.org/releng/job/Builds/job/I-build-4.27/ job for 4.27 SDK.
 
-The build artifacts and test results are accessible at https://download.eclipse.org/eclipse/downloads/index.html
+- The build artifacts and test results are accessible at https://download.eclipse.org/eclipse/downloads/index.html
+- If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/view/Builds/job/AutomatedTests/
 
 Performance Tests
 -----------------
