@@ -34,8 +34,7 @@ job('SmokeTests/ep-smoke-test-ppcle'){
   }
   
   steps {
-    shell('''
-#!/usr/bin/env bash
+    shell('''#!/usr/bin/env bash
 
 buildId=$(echo $buildId|tr -d ' ')
 
