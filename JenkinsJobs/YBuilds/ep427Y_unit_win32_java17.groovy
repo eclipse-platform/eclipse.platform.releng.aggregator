@@ -1,4 +1,4 @@
-job('YPBuilds/ep425Y-unit-win32-java17'){
+job('YPBuilds/ep427Y-unit-win32-java17'){
   description('Run Eclipse SDK Windows Tests ')
 
   logRotator {

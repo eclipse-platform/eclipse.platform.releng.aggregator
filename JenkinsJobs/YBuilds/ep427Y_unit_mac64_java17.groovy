@@ -1,4 +1,4 @@
-job('YPBuilds/ep425Y-unit-mac64-java17'){
+job('YPBuilds/ep427Y-unit-mac64-java17'){
   description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
 
   logRotator {
