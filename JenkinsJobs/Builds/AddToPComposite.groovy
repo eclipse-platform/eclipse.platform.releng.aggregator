@@ -35,7 +35,7 @@ for (STREAM in STREAMS){
         buildId=$(echo $buildId|tr -d ' ')
 
         STREAMMajor=4
-        STREAMMinor=25
+        STREAMMinor=27
         BUILD_TYPE='P'
 
 
