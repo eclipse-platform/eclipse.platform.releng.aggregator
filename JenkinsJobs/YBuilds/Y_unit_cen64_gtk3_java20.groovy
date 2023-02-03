@@ -1,18 +1,25 @@
-pipelineJob('YPBuilds/ep425Y-unit-cen64-gtk3-java19'){
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(5)
-  }
+for (STREAM in STREAMS){
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
-  parameters {
-    stringParam('buildId', null, null)
-    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk19/877d6127e982470ba2a7faa31cc93d04/36/GPL/openjdk-19_linux-x64_bin.tar.gz', null)
-  }
-
-  definition {
-    cps {
-      sandbox()
-      script('''
+	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java20'){
+	
+	  logRotator {
+	    numToKeep(5)
+	  }
+	
+	  parameters {
+	    stringParam('buildId', null, null)
+	    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk20/31/GPL/openjdk-20-ea+31_linux-x64_bin.tar.gz', null)
+	  }
+	
+	  definition {
+	    cps {
+	      sandbox()
+	      script('''
 pipeline {
 	options {
 		timeout(time: 600, unit: 'MINUTES')

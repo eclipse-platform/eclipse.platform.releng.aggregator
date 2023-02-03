@@ -1,18 +1,25 @@
-pipelineJob('YPBuilds/ep425Y-unit-cen64-gtk3-java17'){
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(5)
-  }
-
-  parameters {
-    stringParam('buildId', null, null)
-    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz', null)
-  }
-
-  definition {
-    cps {
-      sandbox()
-      script('''
+for (STREAM in STREAMS){
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
+  
+	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java17'){
+	
+	  logRotator {
+	    numToKeep(5)
+	  }
+	
+	  parameters {
+	    stringParam('buildId', null, null)
+	    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz', null)
+	  }
+	
+	  definition {
+	    cps {
+	      sandbox()
+	      script('''
 pipeline {
 	options {
 		timeout(time: 600, unit: 'MINUTES')
