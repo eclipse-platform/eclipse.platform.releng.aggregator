@@ -1,31 +1,40 @@
-job('YPBuilds/ep425Y-unit-macM1-java17'){
-  description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(5)
-  }
+for (STREAM in STREAMS){
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
-  parameters {
-    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-    stringParam('testSuite', 'all', null)
-  }
-
-
-  label('nc1ht-macos11-arm64')
-
-  jdk('openjdk-jdk11-latest')
-
-  authenticationToken('windows2012tests')
- 
-  wrappers { //adds pre/post actions
-    timestamps()
-    timeout {
-      absolute(600)
-    }
-  }
-  
-  steps {
-    shell('''
+	job('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-mac64-java17'){
+	  description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
+	
+	  logRotator {
+	    daysToKeep(5)
+	    numToKeep(10)
+	  }
+	
+	  parameters {
+	    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
+	    stringParam('testSuite', 'all', null)
+	  }
+	
+	
+	  label('nc1ht-macos11-arm64')
+	
+	  jdk('openjdk-jdk11-latest')
+	
+	  authenticationToken('windows2012tests')
+	 
+	  wrappers { //adds pre/post actions
+	
+	    timestamps()
+	    timeout {
+	      absolute(600)
+	    }
+	  }
+	  
+	  steps {
+	    shell('''
 #!/usr/bin/env bash
 
 if [[ -z "${WORKSPACE}" ]]
@@ -100,7 +109,7 @@ curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4
 cat getEBuilder.xml
 source buildProperties.sh
 
-export JAVA_HOME=/usr/local/openjdk-17/Contents/Home
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 export ANT_HOME=/opt/homebrew/Cellar/ant/1.10.11/libexec
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
 
@@ -108,14 +117,13 @@ echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
 
-export eclipseArch=aarch64
-
 
 env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=aarch64 -DtestSuite=${testSuite}
+export eclipseArch=x86_64
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DtestSuite=${testSuite}
 
 RAW_DATE_END="$(date +%s )"
 
@@ -124,7 +132,6 @@ echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
 TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
 
 echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
-
     ''')
   }
 
