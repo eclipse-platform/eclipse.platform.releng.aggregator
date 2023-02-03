@@ -1,27 +1,34 @@
-job('YPBuilds/ep425Y-unit-win32-java17'){
-  description('Run Eclipse SDK Windows Tests ')
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
+def STREAMS = config.Streams
 
-  logRotator {
-    numToKeep(25)
-  }
-
-  parameters {
-    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-  }
-
-  label('qa6xd-win11')
-
-  authenticationToken('windows2012tests')
- 
-  wrappers { //adds pre/post actions
-    timestamps()
-    timeout {
-      absolute(901)
-    }
-  }
+for (STREAM in STREAMS){
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
   
-  steps {
-    batchFile('''
+	job('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-win32-java17'){
+	  description('Run Eclipse SDK Windows Tests ')
+	
+	  logRotator {
+	    numToKeep(25)
+	  }
+	
+	  parameters {
+	    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
+	  }
+	
+	  label('qa6xd-win11')
+	
+	  authenticationToken('windows2012tests')
+	 
+	  wrappers { //adds pre/post actions
+	    timestamps()
+	    timeout {
+	      absolute(901)
+	    }
+	  }
+	  
+	  steps {
+	    batchFile('''
 @echo off
 SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 echo start cleaning ...
