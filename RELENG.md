@@ -77,7 +77,8 @@ When the JDT team is ready they will raise an issue to create new Y and P builds
   * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
     - Repos without a BETA_JAVA## branch should be set to master
   * Update (eclipse-platform-parent/pom.xml)[eclipse-platform-parent/pom.xml]
-    - Update all instances of java and java##patch to the new java version
+    - Update all instances of java to the new java version
+    - Update all instances of the maven profile to the new name
     - `<featureToPatchVersion>` corresponds to the feature version of jdt being replaced, the same version number as `org.eclipse.jdt-feature-dummy/feature.xml` in step 1.
     - `<versionRangeForPatch>` defines what versions of jdt the patch can be applied to with the intention of invalidating the patch after the next major release. The minimum is the current jdt version, the convention for setting the maximum is `<JDTMajor>.<JDTMinor>.49` and the qualifier is the approximate date of the next major release. So for 4.27 the range would be: `[3.19.0.v20230104-1800,3.19.49.v20230604-1800)`
     - The comparator repo should be the updates folder of the latest release/milestone.
