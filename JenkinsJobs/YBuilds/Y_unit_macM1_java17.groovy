@@ -157,4 +157,5 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
       }
     }
   }
+ }
 }
