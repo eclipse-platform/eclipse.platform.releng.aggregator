@@ -6,7 +6,7 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-	pipelineJob('YPBuilds/Y-build' + STREAM){
+	pipelineJob('YPBuilds/Y-build-' + STREAM){
 	  description('Daily Maintenance Builds.')
 	
 	  properties {
@@ -549,4 +549,5 @@ spec:
       ''')
     }
   }
+ }
 }
