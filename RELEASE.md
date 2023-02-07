@@ -23,6 +23,8 @@
        - Make sure to mention that the Master branch will stay closed until the milestone is officially released.
 
  **Milestone Week**
+   - **M2 Release**
+     * The M2 release is 'lightweight', meaning there is no announcement or signoff. No additional builds need to be run, just the daily I-build at 6PM EST. Thursdays build is promoted to simrel on friday (unless there are problems with Thursdays build, in which case promote Wednesdays) and the compiler is updated if necessary, but the promote and makevisible jobs don't need to be run.
    - **Wednesday**:
      * Verify that EMF, ECF and Orbit contributions have been included (if applicable).
      * Final release candidate build runs at 6PM EST.
