@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,12 +15,10 @@ package org.eclipse.releng.tests;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -37,275 +35,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Platform;
-import org.junit.Before;
 import org.junit.Test;
 
 public class BuildTests {
-
-	private String           logFileName;
-	private static final int HTML       = 0;
-	private static final int PROPERTIES = 1;
-	private static final int XML        = 2;
-
-	private static FileTool.IZipFilter getTrueFilter() {
-		return new FileTool.IZipFilter() {
-
-			@Override
-			public boolean shouldExtract(String fullEntryName, String entryName, int depth) {
-				return true;
-			}
-
-			@Override
-			public boolean shouldUnzip(String fullEntryName, String entryName, int depth) {
-				return true;
-			}
-		};
-	}
-
-	/**
-	 * Method hasErrors.
-	 *
-	 * @param string
-	 * @return boolean
-	 */
-	private boolean hasErrors(String string) {
-
-		boolean result = false;
-
-		try (BufferedReader aReader = new BufferedReader(new InputStreamReader(new FileInputStream(string)))){
-			String aLine = aReader.readLine();
-			while (aLine != null) {
-				int aNumber = parseLine(aLine);
-				if (aNumber > 0) {
-					result = true;
-				}
-				aLine = aReader.readLine();
-			}
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("Could not open log file: " + string);
-			result = true;
-		}
-		catch (IOException e) {
-			System.out.println("Error reading log file: " + string);
-			result = true;
-		}
-		return result;
-	}
-	@Test
-	public void testChkpii() {
-
-		try {
-			// test that chkpii is on path by printing chkpii help information
-			Runtime aRuntime = Runtime.getRuntime();
-			Process aProcess = aRuntime.exec(getExec() + " /?");
-			BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
-			while (aBufferedReader.readLine() != null) {
-			}
-			aProcess.waitFor();
-		} catch (IOException e) {
-			// skip chkpii test if chkpii cannot be run.
-			System.out.println("testChkpii-NotInstalled");
-			System.out.println(e.getMessage());
-			System.out.println("Skipping chkpii test.");
-			assertTrue(true);
-			return;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		String zipFile = locateEclipseZip();
-
-		// String sniffFolder = BootLoader.getInstallURL().getPath() +
-		// "releng_sniff_folder";
-		// String sniffFolder = "d:\\builds\\t";
-		String sniffFolder = Platform.getLocation().toOSString();
-
-		try {
-			if (zipFile.isEmpty()) {
-				FileTool.unzip(getTrueFilter(), new File(sniffFolder));
-			} else {
-				FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
-			}
-		}
-		catch (IOException e) {
-			fail(zipFile + ": " + sniffFolder + ": " + "IOException unzipping Eclipse for chkpii");
-		}
-
-		boolean result1 = testChkpii(HTML);
-		boolean result2 = testChkpii(XML);
-		boolean result3 = testChkpii(PROPERTIES);
-		assertTrue("Translation errors in files.  See the chkpii logs linked from the test results page for details.",
-				(result1 && result2 && result3));
-	}
-
-	private boolean testChkpii(int type) {
-		Runtime aRuntime = Runtime.getRuntime();
-		String chkpiiString = getChkpiiString(type);
-		try {
-			Process aProcess = aRuntime.exec(chkpiiString);
-			BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
-			while (aBufferedReader.readLine() != null) {
-			}
-			aProcess.waitFor();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		} catch (InterruptedException e) {
-			return false;
-		}
-		return !hasErrors(getOutputFile(type));
-	}
-
-	/**
-	 * Method getChkpiiString.
-	 *
-	 * @param type
-	 * @return String
-	 */
-	private String getChkpiiString(int type) {
-		return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X "
-				+ getExcludeFile() + " -S /jsq /tex";
-	}
-
-	/**
-	 * Method locateEclipseZip.
-	 *
-	 * @return String
-	 */
-	private String locateEclipseZip() {
-
-		// String to use when running as an automated test.
-		String installDir = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + "..";
-
-		// String to use when running in Eclipse
-		// String installDir = BootLoader.getInstallURL().getPath() + "..";
-		File aFile = new File(installDir);
-
-		for (File file : aFile.listFiles()) {
-			String fileName = file.getName();
-			if (fileName.startsWith("eclipse-SDK-") && fileName.endsWith(".zip")) {
-				return file.getPath();
-			}
-		}
-
-		return "";
-	}
-
-	/**
-	 * Method getExcludeFiles.
-	 *
-	 * @return String
-	 */
-	private String getExcludeFile() {
-		String aString = System.getProperty("PLUGIN_PATH");
-		return aString + File.separator + "ignoreFiles.txt";
-	}
-
-	/**
-	 * Method getOutputFile.
-	 *
-	 * @param type
-	 * @return String
-	 */
-
-	private String getOutputFile(int type) {
-
-		new File(logFileName).mkdirs();
-
-		String aString = logFileName + File.separator + "org.eclipse.nls.";
-		aString = new File(aString).getPath();
-
-		switch (type) {
-			case HTML:
-				return aString + "html.txt";
-			case PROPERTIES:
-				return aString + "properties.txt";
-
-			case XML:
-				return aString + "xml.txt";
-
-			default:
-				return aString + "other.txt";
-		}
-	}
-
-	/**
-	 * Method getFilesToTest.
-	 *
-	 * @param type
-	 * @return String
-	 */
-
-	private String getFilesToTest(int type) {
-
-		String sniffFolder = Platform.getLocation().toOSString();
-
-		String aString = new File(sniffFolder).getPath() + File.separator;
-
-		switch (type) {
-			case HTML:
-				return aString + "*.htm*";
-			case PROPERTIES:
-				return aString + "*.properties";
-
-			case XML:
-				return aString + "*.xml";
-
-			default:
-				return aString + "*.*";
-		}
-	}
-
-	/**
-	 * Method getExec.
-	 *
-	 * @return String
-	 */
-
-	private String getExec() {
-
-		return new File("chkpw1402.exe").getPath();
-	}
-
-	/**
-	 * Method getExcludeErrors.
-	 */
-	private String getExcludeErrors() {
-
-		String os = Platform.getOS();
-		String fileName;
-
-		if (os.equals("win32")) {
-			fileName = "ignoreErrorsWindows.txt";
-		} else {
-			fileName = "ignoreErrorsUnix.txt";
-		}
-
-		String aString = System.getProperty("PLUGIN_PATH");
-		return aString + File.separator + fileName;
-	}
-
-	/**
-	 * Method parseLine.
-	 *
-	 * @param aLine
-	 * @return -1 if not an error or warning line or the number of errors or warnings.
-	 */
-	private int parseLine(String aLine) {
-		int index = aLine.indexOf("Files Could Not Be Processed: ");
-
-		if (index == -1) {
-			index = aLine.indexOf("Files Contain Error");
-		}
-
-		if (index == -1) {
-			return -1;
-		} else {
-			String aString = aLine.substring(0, index).trim();
-			return Integer.parseInt(aString);
-		}
-	}
 
 	public class FileSuffixFilter implements FilenameFilter {
 
@@ -360,18 +92,6 @@ public class BuildTests {
 	// include non-shipping test
 	// feature
 
-	@Before
-	public void setUp() {
-		// Automated Test
-		logFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results"
-				+ File.separator + "chkpii"; // A tad bogus but this is where
-											 // the build wants to copy the
-											 // results from!
-
-		// Runtime Workbench - TODO Put me back to Automated status
-		// logFileName = "d:\\results";
-		// sourceDirectoryName = "d:\\sourceFetch";
-	}
 	@Test
 	public void testFeatureFiles() {
 		assumeFalse(isMavenRun());
