@@ -51,7 +51,8 @@ spec:
         memory: "4096Mi"
         cpu: "1000m"
       requests:
-        memory: "512Mi"
+        # memory needs to be at least 1024Mi, see https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2478
+        memory: "1024Mi"
         cpu: "1000m"
     securityContext:
       privileged: false
