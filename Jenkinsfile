@@ -31,6 +31,7 @@ pipeline {
 				anyOf {
 					branch 'master'
 					branch 'R*_maintenance'
+					branch 'prepare_R*'
 				}
 			}
 			steps {
@@ -39,6 +40,7 @@ pipeline {
 			}
 		}
 		stage('Build') {
+		    when { not { branch pattern: "prepare_R.*", comparator: "REGEXP" } }
 			steps {
 				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
 					sh '''
