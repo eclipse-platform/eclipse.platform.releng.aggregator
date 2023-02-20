@@ -1,0 +1,48 @@
+name: Update For Next Release
+
+on:
+  workflow_call:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    if: contains(github.event.milestone.description, 'Release') 
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: master
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Update Versions
+      run: >-
+          mvn -U -Pbuild-individual-bundles -ntp
+          org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
+          org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:set-parent-version -DnewParentVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
+    - name: Build and Bump Versions
+      uses: Wandalen/wretry.action@master
+      with:
+        attempt_delay: 120000
+        attempt_limit: 10
+        command: >-
+            mvn -U -Pbuild-individual-bundles -ntp
+            clean verify
+            -DskipTests
+            -Dcompare-version-with-baselines.skip=false
+            org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:bump-versions -Dtycho.bump-versions.increment=100
+    - name: Create Pull Request for Release ${{ github.event.milestone.title }}
+      uses: peter-evans/create-pull-request@v4
+      with:
+        commit-message: Update for release ${{ github.event.milestone.title }}
+        branch: update_R${{ github.event.milestone.title }}
+        title: Update for release ${{ github.event.milestone.title }}
+        body: A new release milstone was created, please review the changes and merge if appropriate.
+        delete-branch: true
+        milestone: ${{ github.event.milestone.number }}
+        add-paths: |
+            pom.xml
+            *.MF
+
