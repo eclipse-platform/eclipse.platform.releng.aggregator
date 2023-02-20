@@ -1,0 +1,43 @@
+name: Prepare Next Release
+on:
+  milestone:
+    types: [created]
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    if: contains(github.event.milestone.description, 'Release')
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+    - id: get-release-name
+      run: |
+        name=$(echo ${{ github.event.milestone.due_on }} | cut -d- -f-2)
+        echo "name=$name" >> $GITHUB_OUTPUT
+    - uses: actions/checkout@v3
+      with:
+        ref: master
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Update Main Versions
+      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk
+    - name: Update Release Versions
+      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:set-property -Dproperties=releaseNumberSDK,releaseNumberPlatform,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewReleaseNumberSDK=${{ github.event.milestone.title }} -DnewReleaseNumberPlatform=${{ github.event.milestone.title }}
+    - name: Create Pull Request for Release ${{ github.event.milestone.title }}
+      uses: peter-evans/create-pull-request@v4
+      with:
+        commit-message: Prepare Release ${{ github.event.milestone.title }}
+        branch: prepare_R${{ github.event.milestone.title }}
+        title: Prepare Release ${{ github.event.milestone.title }}
+        body: A new Release Milstone was created, please review the changes and merge if appropriate.
+        delete-branch: true
+        milestone: ${{ github.event.milestone.number }}
+        add-paths: |
+            eclipse-platform-parent/pom.xml
+            eclipse.platform.releng.prereqs.sdk/pom.xml
+
