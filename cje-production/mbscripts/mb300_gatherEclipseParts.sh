@@ -90,14 +90,6 @@ if [ -z $PATCH_BUILD ]; then
   fi
 
 
-  # gather platform sources
-  TARBALL_DIR=$CJE_ROOT/$AGG_DIR/eclipse-platform-sources/target/
-  if [ -d $TARBALL_DIR ]; then
-    pushd $TARBALL_DIR
-    cp eclipse-platform-sources-*.tar.xz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-sources-$BUILD_ID.tar.xz
-    popd
-  fi
-
   # gather swt zips
   SWT_BUNDLES_DIR=$CJE_ROOT/$AGG_DIR/eclipse.platform.swt.binaries/bundles
   if [ -d $SWT_BUNDLES_DIR ]; then
