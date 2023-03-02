@@ -30,15 +30,13 @@ For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggreg
 - [ ] New & Noteworthy
 - [ ] Readme file for ${STREAM}
 - [ ] ${STREAM} Acknowledgements
-- [ ] Tips & Tricks
 - [ ] Migration Guide
 - [ ] SWT Javadoc bash for ${STREAM}
 - [ ] Publish ${STREAM} to Maven central
-- [ ] Tag Eclipse ${STREAM} Release
 - [ ] Clean up intermediate artifacts (milestones, I-builds and old releases)
 
 @notifications:
-@SDawley, @lshanmug, @SarikaSinha, @ktatavarthi, @niraj-modi, @vik-chand
+@SDawley, @lshanmug, @SarikaSinha, @ktatavarthi, @niraj-modi
 "
 
 echo "Creating Issue $TITLE"
