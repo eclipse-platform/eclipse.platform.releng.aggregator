@@ -26,9 +26,11 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 
 - [ ] Create R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - [ ] Update R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch with release version for ${PREV_MAJOR}.${PREV_MINOR}+ changes
-- [ ] Move ${PREV_MAJOR}.${PREV_MINOR}-I and ${PREV_MAJOR}.${PREV_MINOR}-Y builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
-- [ ] Update Parent pom and target sdk deployment jobs for R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
-- [ ] Create new test jobs for ${NEXT_STREAM}
+- [ ] Update JenkinsJobs for ${NEXT_STREAM}:
+- - [ ] Add ${NEXT_STREAM} to JobDSL.json to create new jobs
+- - [ ] Update "Brances" in JobDSL.json to move ${PREV_MAJOR}.${PREV_MINOR}-I builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
+- - [ ] Add R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch to parent pom and target sdk deployment jobs
+- - [ ] Update I-build triggers with dates for ${NEXT_STREAM} milestone
 - [ ] Configure SWT build scripts for ${NEXT_STREAM}
 - [ ] Splash Screen for ${NEXT_STREAM} (${NEXT_TRAIN})
 - [ ] Create ${NEXT_STREAM}-I-builds repo
@@ -36,11 +38,9 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 - [ ] Update product version number to ${NEXT_STREAM} across build scripts
 - [ ] Move previous version to ${PREV_MAJOR}.${PREV_MINOR}RC2 across build scripts
 - [ ] Update version number in Mac's Eclipse.app for ${NEXT_STREAM}
-- [ ] Disable the freeze report for ${NEXT_STREAM}
 - [ ] Clean forceQualifierUpdate files for doc bundles
 - [ ] Cleanup approved api list
 - [ ] Update builds and repo cleanup scripts for ${NEXT_STREAM}
-- [ ] Create new I-build job for ${NEXT_STREAM} release
 - [ ] Update check composites script to verify ${NEXT_STREAM} repositories
 - [ ] Update Comparator repo and eclipse run repo to ${NEXT_STREAM}-I-builds repo
 - [ ] Version bumps for ${NEXT_STREAM} stream

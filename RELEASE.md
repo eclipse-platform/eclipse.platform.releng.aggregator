@@ -6,7 +6,7 @@
 
 ## Milestone and RC Releases
 
-**Friday before release week**:
+### Friday before release week:
  * Update [I-builds](JenkinsJobs/Builds/I_build.groovy) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
  * Create or update prerequisite issues for tracking ECF, EMF and Orbit
  * Send reminder email for upcoming milestone week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
@@ -15,14 +15,14 @@
      * Tuesday: Tests
      * Wednesday: 
        - Fixes from Tuesday. 
-       - "New and Noteworthy entries due. 
+       - "New and Noteworthy" entries due. 
        - Release Candidate is built Wednesday evening at 6PM EST. 
      * Thursday: Sign-Off
      * Friday: 
        - Build delcared and released.
        - Make sure to mention that the Master branch will stay closed until the milestone is officially released.
 
- **Milestone Week**
+### Milestone Week
    - **M2 Release**
      * The M2 release is 'lightweight', meaning there is no announcement or signoff. No additional builds need to be run, just the daily I-build at 6PM EST. Thursdays build is promoted to simrel on friday (unless there are problems with Thursdays build, in which case promote Wednesdays) and the compiler is updated if necessary, but the promote and makevisible jobs don't need to be run.
    - **Wednesday**:
@@ -45,7 +45,9 @@
          - TRAIN_NAME: Whenever the current GA release is planned for (formatted 4 digit year - 2 digit month, i.e `2022-06`)
          - STREAM: 4.24.0 etc
          - DL_TYPE: S is used to promote I-builds.
+         - TAG: Parameter should match stream version, i.e `S4_24_0_M1` etc
          - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) and have it ready.
+         - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
        * Contribute to SimRel
          - If you have not already set up SimRel you can do so using Auto Launch [here](https://www.eclipse.org/setups/installer/?url=https://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/interim/SimultaneousReleaseTrainConfiguration.setup&show=true)
          - Clone [org.eclipse.simrel.build](https://git.eclipse.org/c/simrel/org.eclipse.simrel.build.git) (Should have been done by the installer during set up, but make sure you have latest).
@@ -58,8 +60,6 @@
        * Make the build visible
          - Run the [make visible](https://ci.eclipse.org/releng/job/Releng/job/makeVisible/) job in Releng jenkins to make the promoted build visible on the download page.
          - Parameters should match Rename and Promote job
-         - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
-         - Tag Parameter should match stream version, i.e `S4_24_0_M1` etc
        * Send email that the M1 build is available
          - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
        * For **Milestone builds** return the I-builds to the normal schedule.
@@ -74,94 +74,155 @@
          - Update the build triggers to schedule a build for the current date.
        * Finally update the `cbi-ecj-version` in [eclipse.platform.releng.aggregator/eclipse-platform-parent/pom.xml](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse-platform-parent/pom.xml)
      * **After RC1**
-       * Open an issue in [eclipse.platform.releng.aggregator](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator) to enable the API Freeze Report for the current release. 
-         - Open [buildproperties.txt](cje-production/buildproperties.txt) 
-         - Comment out the empty `FREEZE_PARAMS` line and uncomment the line with the freeze arguments. Update `freezeBaseURL` with the RC1 build number.
-         - Comment out the empty `API_FREEZE_REF_LABEL` line and update the version of the label to RC1.
        * Leave the I-builds running on the milestone schedule for RC2. 
        * Comment on EMF, ECF and Orbit issues to ask for final release builds.
 
-## GA Releases
+## GA Releases 
+<sup> Tasks to be completed after RC2 <sub>
 
-**After RC2**
+### **Release Preparation**: 
+<sup> Tasks that need to be completed before Friday <sub>
+
   * Create an issue to track the current release tasks (see [Release 4.24](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/273)).
-    - Tag @lshanmug (New & Noteworthy), @SarikaSinha (Readme), @vik-chand (Tips & Tricks), @ktatavarthi (JDT and Platform Migration Guides), @niraj-modi (SWT Javadoc bash).
+    - Tag @lshanmug (New & Noteworthy), @SarikaSinha (Readme), @ktatavarthi (JDT and Platform Migration Guides), @niraj-modi (SWT Javadoc bash).
     - Update the Acknowledgements.
-  * Create an issue to track preparation work for the next stream (see [Preparation work for 4.25 (2022-09)](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284)).
+    - A script to create this issue exists [here](scripts/GAReleasePrep.sh) for those who have the hub cli tool installed.
+  * **New & Noteworthy**
+    Currently this is handled by @lshanmug who will
+    - Create a tracking issue in the [eclipse.platform.common](https://github.com/eclipse-platform/eclipse.platform.common) repo (see [N&N for 4.26](https://github.com/eclipse-platform/eclipse.platform.common/pull/93) as an example).
+    - Update the WhatsNew files and folders for the doc bundles.
+  * **Readme**
+    Currently handled by @SarikaSinha
+    - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) (see [Readme file for 4.26](https://github.com/eclipse-platform/www.eclipse.org-eclipse/issues/24) as an example).
+    - Add Readme files and update generatation scripts.
+  * **Acknowledgements**
+    - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) and link it to the main release issue in eclipse.platform.releng.aggregator.
+    - Create a new acknowledgements file for the current release and add it to [www.eclipse.org-eclipse/development](https://github.com/eclipse-platform/www.eclipse.org-eclipse/tree/master/development).
+    - The previous acknowledgement files are there for reference.
+  * **Migration Guide**
+    - Create a tracking issue in [eclipse.platform.common](https://github.com/eclipse-platform/eclipse.platform.common) and link it to the main release issue in eclipse.platform.releng.aggregator.
+    - Every release a new porting guide and folder need to be added to [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting](https://github.com/eclipse-platform/eclipse.platform.common/tree/master/bundles/org.eclipse.jdt.doc.isv/porting), named with the version being migrated *to*.
+      - i.e `eclipse_4_27_porting_guide.html` is for migrating from 4.26 tp 4.27.
+    - Update topics_Porting.xml in [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv](https://github.com/eclipse-platform/eclipse.platform.common/tree/master/bundles/org.eclipse.jdt.doc.isv) and [eclipse.platform.common/bundles/org.eclipse.platform.doc.isv](https://github.com/eclipse-platform/eclipse.platform.common/tree/master/bundles/org.eclipse.platform.doc.isv)
+    - Update the name of the proting html document in [eclipse.platform/platform/org.eclipse.platform/intro/migrateExtensionContent.xml](https://github.com/eclipse-platform/eclipse.platform/blob/master/platform/org.eclipse.platform/intro/migrateExtensionContent.xml) 
+  * **SWT Javadoc bash**
+    Currently handled by @niraj-modi 
+    - Create a tracking issue in [eclipse.platform.swt](https://github.com/eclipse-platform/eclipse.platform.swt).
+    - The javadoc bash tool needs to be run on SWT sources to make it consistent.
+
+### **Release**: 
+<sup> The actual steps to release <sub>
+
+**Friday**
+  * #### **Promote to GA**
+    - After Simrel declares RC2 (usually the Friday before release) run the [rename and promote](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/) job to promote RC2 (or RC2a). 
+      - Change the DL_TYPE from S to R.  
+      - TAG will be set to R as well, for example `R4_27` 
+    - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
+  * #### **Publish to Maven central**
+    - Publishing to maven should happen by at least Tuesday before the release since there is up to a 24 hour delay for the maven mirrors.
+    - Update [SDK4Mvn.aggr](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/SDK4Mvn.aggr) and [properties.sh](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/properties.sh) to the release build.
+      - SDK4Mvn.aggr determines what is being published to Maven
+      - Updating properties.sh determines which Eclipse version is used to run the CBI aggregator
+    - Run the [CBI Aggregator](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/CBIaggregator/) job in jenkins with the `-release` parameter.
+      - This will trigger the [Repository Validator](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/RepositoryValidator/) job which will then trigger [Publish JDT to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/PublishJDTtoMaven/), [Publish PDE to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/PublishPDEToMaven/) and [Publish Platform to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/PublishPlatformToMaven/).
+    - Once the three publish jobs complete successfully log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
+      - If you do not have an account on oss.sonatype.org for performing the rest of the release request one by creating an issue like https://issues.sonatype.org/browse/OSSRH-43870 to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
+  * **Contribute to Simrel**
+
+**Wednesday**  
+The release is scheduled for 10AM EST. Typically the jobs are scheduled beforehand and run automatically.
+
+  * #### **Create Generic Composites**
+   - Run the [Create Generic Composites](https://ci.eclipse.org/releng/job/Releng/job/createGenericComposites/) job to recreate the generic build repos for the next release. 
+      - `currentStream`: To clarify this is the next stream, not the one currently being released. If you are releasing 4.24, the 'current' stream is 4.25 so that repos are created for it.
+      - `previousStream`: The stream being released, which needs to be removed.  
+      - For reference, the generic repositories created are for the [latest GA release](https://download.eclipse.org/eclipse/updates/latest/) and the current (ongoing) [I-builds](https://download.eclipse.org/eclipse/updates/I-builds/), [Y-builds](https://download.eclipse.org/eclipse/updates/Y-builds/) and [P-builds](https://download.eclipse.org/eclipse/updates/P-builds/). 
+  * **Make the Release Visible**
+    - Same process as for a milestone but with release versions.
+  * **Complete Publication to Maven Central**
+    - Go to https://oss.sonatype.org/#stagingRepositories and "Release" the three staging repositories.
+  * **Send the Announcement Email**
+
+### **Post Release Tasks:**
+  * #### **Clean up intermediate artifacts** 
+    - To clean up specific artifacts from the old stream (milestones, I-builds and old releases) run the [Cleanup Release Artifacts](https://ci.eclipse.org/releng/job/Cleanup/job/cleanupReleaseArtifacts/) job. 
+    - `release_to_clean` is the release that was just published.
+    - `release_build` is the I-build that was promoted, this is used as a landmark to the build will clear out all previous I-builds.
+    - `release_to_remove` only the last 3 major releases are kept on the download page, so if 4.25 was promoted then remove 4.22.
+    - For the Y and P build parameters it's important to know whether or not Y and P builds were run during the release. Since they correspond to java releases on a 6 month cycle, typically they are built in odd-numbered releases.  
+    The existing builds are kept for one release, then cleaned up before the next stream that will have Y and P builds. it's convoluted and I dont want to type it out. Remove Y builds on even releases. 
+    - If something doesn't get cleaned up properly you can use  Use the [list artifacts](https://ci.eclipse.org/releng/view/Cleanup/job/list_artifacts_from_download_server/) job to generate ta list of what's on the download server and either create a new job to clean it up or update and rerun the cleanup job as appropriate.
+  * **Set Maven to Publish to I-builds**
+    - Update [SDK4Mvn.aggr](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/SDK4Mvn.aggr) and point it to the new streams I-builds.
+  * **Set Previous Release to GA** 
+    - Everything that was updated to RC2 (see below) should now use the released build.
+
+### **Preparation for the next Release**
+  After RC2 create an issue to track preparation work for the next stream (see [Preparation work for 4.25 (2022-09)](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284)).
+  - A script to create this issue exists [here](scripts/newReleasePrep.sh) for those who have the hub cli tool installed. The process has been in flux recently so please update the script if necessary, but it provides a helpful template since most tasks in the previous release's issue become links.
+
+#### **Maintenance Branches:**
   * **Maintenance Branch Creation:**
     - Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng jeknins.
-  * **Update Jenkins for the next Release:**
-    - Edit the [JobDSL.json](JenkinsJobs/JobDSL.json)
+  * **Update maintenance branch with release version**
+    - Once the I-build repo is removed for the previous release the maintenance branch will have to use the release location, i.e. any references to `https://download.eclipse.org/eclipse/updates/4.25-I-builds/` will need to be updated to `https://download.eclipse.org/eclipse/updates/4.26/R-4.26-202211231800/`
+    - Functionally this means:
+      - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
+      - Update eclipserun-repo, comparator.repo and eclipse-p2-repo.url in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
+    - This step can be prepared ahead of time but can't be merged until the release build has been promoted and the update site exists.
+
+#### **Update the Build Calendar:**
+  - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).  
+  - Each stream has its own [wiki](https://wiki.eclipse.org/Category:SimRel-2022-06) page with a more detailed schedule. 
+
+#### **Update Splash Screen:**
+  - Create a tracking issue in [eclipse.platform](https://github.com/eclipse-platform/eclipse.platform) and link it to the main issue in eclipse.platform.releng.aggregator.
+  - Future spash screens are kept in a subfolder of [eclipse.platform/platform/org.eclipse.platform](https://github.com/eclipse-platform/eclipse.platform/tree/master/platform/org.eclipse.platform), usually named something like 'splashscreens2022' (or the current year).
+  - Find the appropriate splash screen, copy it one level up and rename it splash.png, replacing the existing png.
+  - NOTE: Splash screens are created 4 at a time, for 4 consequtive quarterly releases, so they need to be requested once a year before the 20XX-06 release (the cycle is 2022-06 -> 2023-03, etc). Create an issue in the [Eclipse Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) similar to [Bug 575781](https://bugs.eclipse.org/bugs/show_bug.cgi?id=575781). It is customary to do this by the previous -09 (September) release so that there's plenty of time for discussion before the -06 (June) release is opened. 
+  - Issue for the 2023 releases is [https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2336](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2336)
+  
+#### **Update Jenkins for the next Release:**
+  - Edit the [JobDSL.json](JenkinsJobs/JobDSL.json)
       * Add the next release version to the `Streams` key item.
       * In the `branches` item update the current release to map to the maintenance branch and add a new key:value pair mapping the next release to master.
-    - Update [deployPlatformParentPom.groovy](JenkinsJobs/Releng/deployPlatformParentPom.groovy) and [deploySdkPom.groovy](JenkinsJobs/Releng/deploySdkPom.groovy) to include the new maintenance branch.
-    - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.
-      This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.
-      Performance and Unit tests should also be generated for the new release automatically.
-  * **Create new Stream Repo:**
-    - Run the [Create New Stream Repos](https://ci.eclipse.org/releng/job/Releng/job/newStreamRepos/) job to make an I-builds repo for the next release.
-  * **Update the Build Calendar:**
-    - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).  
-    Each stream has its own [wiki](https://wiki.eclipse.org/Category:SimRel-2022-06) page with a more detailed schedule. 
-  * **Update Splash Screen:**
-    - Update splash screen.  
-    Splash screens are created 4 at a time, for 4 consequtive quarterly releases, so they only need to be requested once a year before the 20XX-06 release (the cycle is 2022-06 -> 2023-03, etc). Create an issue in the [Eclipse Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) similar to [Bug 575781](https://bugs.eclipse.org/bugs/show_bug.cgi?id=575781). It is customary to do this by the previous -09 (September) release so that there's plenty of time for discussion before the -06 (June) release is opened. 
-  * **General Cleanup**
-    - [Update cleanup scripts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/305) to include Y and P-builds if those were added, or take them out if not.
-    - [Cleanup approved API list](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/294).
-    - [Clean forceQualifierUpdate files for doc bundles](https://github.com/eclipse-platform/eclipse.platform.common/issues/32). The context here is that the doc builds only check for changes in this repo and so these files need to be changed to trigger a full rebuild.
-  * **Version Updates**  
-    These updates are currently broken into multiple github issues, but the changes can be made at once and merged in a single commit. 
-    - [Set the previous version to RC2](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/302).
-    - Update versions to the next release across product files and build scripts:  
-      [POM and product version changes](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/290)  
-      [Update product version number across build scripts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/291).  
-      This is a large task so it's better to get started as soon as possible after the RC2 release, though it won't be merged until there's a final GA candidate. Most of the version updates can be done by updating [updateProductVersion.sh](scripts/updateProductVersion.sh) and running it in `eclipse.platform.releng.aggregator`. Clone recursively to get each submodule: 
-      ```
-      git clone -b master --recursive git clone -b master --recursive git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
-      ```
-      then run `updateProductVersion.sh`, then commit the changes in a new branch for each repo. Once that's done it's easiest to just grep for the previous release version or stream number to find the remaining instances that need to be updated.   
-      The repos that need to be updated (excluding the ones included in `eclipse.platform.releng.aggregator`) are:
-        * [eclipse-platform/eclipse.platform.releng.aggregator](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator)
-        * [eclipse-platform/eclipse.platform.runtime](https://github.com/eclipse-platform/eclipse.platform.runtime)
-        * [eclipse-equinox/p2](https://github.com/eclipse-equinox/p2)
-        * [eclipse-equinox/equinox.framework](https://github.com/eclipse-equinox/equinox.framework)
-        * [eclipse-equinox/equinox.bundles](https://github.com/eclipse-equinox/equinox.bundles)
-    - [Disable the freeze report](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/300) for the next stream.
-    - [Update the checkComposities script](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/299).
-    - [Update comparator repo and eclipse run repo](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/298).
-    - [Update version number in mac's Eclipse.app](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/303).
-      
+  - Update [deployPlatformParentPom.groovy](JenkinsJobs/Releng/deployPlatformParentPom.groovy) and [deploySdkPom.groovy](JenkinsJobs/Releng/deploySdkPom.groovy) to include the new maintenance branch.
+  - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.  
+    This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.  
+    Performance and Unit tests should also be generated for the new release automatically.
+
+#### **Create new Stream Repo:**
+  - Run the [Create New Stream Repos](https://ci.eclipse.org/releng/job/Releng/job/newStreamRepos/) job to make an I-builds repo for the next release.
+
+#### **Create Git Milestones for the next Release:**
+  - Milestones in git are created by running the create-milestones job in jenkins, usually after RC1 or RC2. Only specific users can access this job for security reasons. If milestones need to be created and have not please contact @sdawley @sravanlakkimsetti or @laeubi to run it.
+
+#### **Version Updates:**
+  - Once the milestones are created (see above) the [Prepare Next Release](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/actions/workflows/prepareRelease.yml) workflow will run, which will update pom and product versions for the Eclipse repositories and submit pull requests for the changes.  
+  This is still a work in progress so if there are any issues or a repo gets missed you can fall back to the old process below:   
+  If you cloned eclipse.platform.releng.aggregator's submodules you can fix the set version and run [updateProductVersion.sh](scripts/updateProductVersion.sh) to update most of the versions.  
+  Once that's done it's easiest to just grep for the previous release version or stream number to find the remaining instances that need to be updated, then commit the changes in a new branch for each repo.   
+  - **Update version number in mac's Eclipse.app**
+    - In [eclipse-equinox/equinox](https://github.com/eclipse-equinox/equinox) update the versions in the Info.plist for both architectures under `eclipse-equinox/equinox/features/org.eclipse.equinox.executable.feature/bin/cocoa/macosx`
+  - **Update comparator repo and eclipse run repo**
+    - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
+    - Update eclipserun-repo, comparator.repo and eclipse-p2-repo.url in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
+  - **Set Previous Version to RC2** 
+    - RC2 becomes the new baseline for the week before the GA release.
+    - Update previous-release.baseline in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
+    - Update the last release build versions in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties)
+    - Update the previousReleaseVersion in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties)
+    - Update the name of the copied files in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh)
+    - Update baselineCode in [production/testScripts/updateTestResultsPages.sh](production/testScripts/updateTestResultsPages.sh)
+**General Cleanup**
+  - In [eclipse.platform.common] search for and clear out all of the forceQualifierUpdate.txt files.  
+    The context here is that the doc builds only check for changes in this repo and so these files need to be changed to trigger a full rebuild.
+
 **RC2a Release**
   * Sometimes there is a critical issue that requires a fix, if it's decided that one is needed then an RC2a (followed by RC2b, RC2c etc if necessary) is built from the maintenance branch and promoted using the RC2 process.
   * Create an issue to set the previous release version to RC2a and add it to the Preparation issue for the next version, then update all references to RC2 to the RC2a release.
 
-**Friday before GA Release**
-  * After Simrel declares RC2 run the [rename and promote](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/) job to promote RC2 (or RC2a). Change the DL_TYPE from S to R.  
-    You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
-  * Once you have the release url for the GA release...
-  * [Publish Maven artifacts to oss.sonatype.org staging area to prepare for Maven Central](https://github.com/eclipse-platform/eclipse.platform.releng/issues/45) and send a mail to the mailing-list sharing the URLs of the Maven staging repositories for testing.
-  * [Update maintenance branch with release version](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/334) tasks.
-  * [Set the previous release to the GA release across build scripts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284).
-  * Update and contribute to Simrel.
+
    
-**Publishing to Maven**
 
-  * Publishing to maven should happen by at least Tuesday before the release since there is up to a 24 hour delay for the maven mirrors.
-  * Update [SDK4Mvn.aggr](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/SDK4Mvn.aggr) and [properties.sh](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/properties.sh) to the release build, and update EMF and Orbit urls.
-  * Run the [CBI aggregator](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/CBIaggregator/) job in jenkins.
-    - Sometimes there are new source bundles that need to be added/generated, add these to [sourceBundles.txt](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/sourceBundles.txt)
-  * Run [Publish Platform to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/PublishPlatformToMaven/), [Publish JDT to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/PublishJDTtoMaven/) and [Publish PDE to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven%20Central/job/PublishPDEToMaven/) in parallel, using the CBI aggregator build number for the argument.
-  * If you do not have an account on oss.sonatype.org for performing the rest of the release request one by creating an issue like https://issues.sonatype.org/browse/OSSRH-43870 to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
-  * Log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
-  * Replace contents of [baseline.txt](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/baseline.txt) with the contents of baseline-next.txt created in CBI aggregator.
-
-**Wednesday, GA Release**
-  * The release is scheduled for 10AM EST 
-  * The [Tag Eclipse Release](https://ci.eclipse.org/releng/job/TagEclipseRelease) needs to be run before then, so it's usually scheduled to run at about 8AM EST. This will complete the [Tag GA release](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/343) task.
-  * For the [Clean up intermediate artifacts](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/348) task, update the [cleanup release artifacts](https://ci.eclipse.org/releng/view/Cleanup/job/cleanup_release_artifacts/) job and schedule it to run at 8AM on Wednesday. Use the [list artifacts](https://ci.eclipse.org/releng/view/Cleanup/job/list_artifacts_from_download_server/) job to generate the list used by the cleanup job.
-  * At around 9:30 EST run (or have scheduled) [ep_createGenericComposites](https://ci.eclipse.org/releng/job/ep_createGenericComposites/) to [update the generic repos](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/319) for this release.  
-    For reference, the generic repositories are for the [latest GA release](https://download.eclipse.org/eclipse/updates/latest/) and the current (ongoing) [I-builds](https://download.eclipse.org/eclipse/updates/I-builds/), [Y-builds](https://download.eclipse.org/eclipse/updates/Y-builds/) and [P-builds](https://download.eclipse.org/eclipse/updates/P-builds/). 
-  * Schedule the [make visible](https://ci.eclipse.org/releng/job/eclipse.releng.stage2DeferredMakeVisible/) job for about 9:45AM EST.
-  * Complete publication Maven Central: go to https://oss.sonatype.org/#stagingRepositories and "Release" the already closed staging Maven repositories.
-  * Once Simrel announces the GA release send the announcement email.
