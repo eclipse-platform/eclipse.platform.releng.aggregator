@@ -223,8 +223,8 @@ workspace=$1
 remoteBase="/home/data/httpd/download.eclipse.org"
 
 eclipseIRepo="${remoteBase}/eclipse/updates/4.28-I-builds"
-eclipseYRepo="${remoteBase}/eclipse/updates/4.25-Y-builds"
-eclipsePRepo="${remoteBase}/eclipse/updates/4.25-P-builds"
+eclipseYRepo="${remoteBase}/eclipse/updates/4.27-Y-builds"
+eclipsePRepo="${remoteBase}/eclipse/updates/4.27-P-builds"
 eclipseBuildTools="${remoteBase}/eclipse/updates/buildtools"
 
 doDryrun=
