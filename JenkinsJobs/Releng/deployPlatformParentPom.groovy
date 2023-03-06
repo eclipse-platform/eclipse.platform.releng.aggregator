@@ -27,8 +27,8 @@ For this to be used by consuming projects, they must have their local maven repo
       branch('R4_8_maintenance')
       branch('R4_19_maintenance')
       branch('R4_23_maintenance')
-      branch('R4_25_maintenance')
       branch('R4_26_maintenance')
+      branch('R4_27_maintenance')      
     }
   }
 
