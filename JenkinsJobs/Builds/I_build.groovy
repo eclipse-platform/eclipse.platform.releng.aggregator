@@ -230,11 +230,6 @@ spec:
                 }
             }
         }
-	  stage('Swt build input') {
-	      steps {
-	          build 'SWT-Increment_if_needed'
-	      }
-	    }
 	  stage('Create Base builder'){
           steps {
               container('jnlp') {
