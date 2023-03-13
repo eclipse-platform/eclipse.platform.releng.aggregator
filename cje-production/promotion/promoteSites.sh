@@ -419,16 +419,19 @@ PATTERN="^([MI])([[:digit:]]{8})-([[:digit:]]{4})$"
 if [[ "${DROP_ID}" =~ $PATTERN ]]
 then
   export BUILD_TYPE=${BASH_REMATCH[1]}
+  export REPO_BUILD_TYPE=${BUILD_TYPE}
   export BUILD_TIMESTAMP=${BASH_REMATCH[2]}${BASH_REMATCH[3]}
   # Label and ID are the same, in this case
   export BUILD_LABEL=$DROP_ID
   export BUILD_LABEL_EQ=$DROP_ID
   export DROP_ID_EQ=$DROP_ID
+  export REPO_ID=$DROP_ID
 else
   PATTERN="^(S)-([[:digit:]]{1})\.([[:digit:]]{2})(.*)-([[:digit:]]{8})([[:digit:]]{4})$"
   if [[ "${DROP_ID}" =~ $PATTERN ]]
   then
-    export BUILD_TYPE=I
+    export BUILD_TYPE=${BASH_REMATCH[1]}
+    export REPO_BUILD_TYPE=I
     export BUILD_TIMESTAMP=${BASH_REMATCH[5]}${BASH_REMATCH[6]}
     # Label and ID are the same, in this case
     export BUILD_LABEL=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
@@ -491,7 +494,7 @@ esac
 export HIDE_SITE=true
 # Build machine locations (would very seldom change)
 export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
-export BUILD_REPO_ORIGINAL=${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
+export BUILD_REPO_ORIGINAL=${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds
 export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/eclipse/updates/${BUILD_REPO_ORIGINAL}
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/eclipse/downloads/drops4
@@ -665,10 +668,10 @@ popd
 if [[ "${DL_TYPE}" == "R" ]]
 then
   pushd ${LOCAL_REPO}
-    BUILDMACHINE_SITE=${LOCAL_REPO}/${DROP_ID}
+    BUILDMACHINE_SITE=${LOCAL_REPO}/${REPO_ID}
     addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
     createXZ ${BUILDMACHINE_SITE}
-    mv ${DROP_ID} ${DL_DROP_ID}
+    mv ${REPO_ID} ${DL_DROP_ID}
     scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
   popd
 fi
