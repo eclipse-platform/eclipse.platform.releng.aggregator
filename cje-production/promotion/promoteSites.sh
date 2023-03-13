@@ -434,6 +434,7 @@ else
     export BUILD_LABEL=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
     export BUILD_LABEL_EQ=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
     export DROP_ID_EQ=$DROP_ID
+    export REPO_ID=I${BASH_REMATCH[5]}-${BASH_REMATCH[6]}
   else
     echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
     exit 1
@@ -592,7 +593,7 @@ scp -r genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_EQ}/${DROP_
 popd
 
 pushd ${LOCAL_REPO}
-scp -r genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_SITE}/${DROP_ID} .
+scp -r genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_SITE}/${REPO_ID} .
 popd
 
 # ### Begins the point of making modifications to the build ###
