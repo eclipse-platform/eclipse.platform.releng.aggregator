@@ -425,8 +425,19 @@ then
   export BUILD_LABEL_EQ=$DROP_ID
   export DROP_ID_EQ=$DROP_ID
 else
-  echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
-  exit 1
+  PATTERN="^(S)-([[:digit:]]{1})\.([[:digit:]]{2})([[:alnum:]]{3})-([[:digit:]]{12})$"
+  if [[ "${DROP_ID}" =~ $PATTERN ]]
+  then
+    export BUILD_TYPE=${BASH_REMATCH[1]}
+    export BUILD_TIMESTAMP=${BASH_REMATCH[5]}
+    # Label and ID are the same, in this case
+    export BUILD_LABEL=$DROP_ID
+    export BUILD_LABEL_EQ=$DROP_ID
+    export DROP_ID_EQ=$DROP_ID
+  else
+    echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
+    exit 1
+  fi
 fi
 
 # For initial releases, do not include service in label
