@@ -425,14 +425,14 @@ then
   export BUILD_LABEL_EQ=$DROP_ID
   export DROP_ID_EQ=$DROP_ID
 else
-  PATTERN="^(S)-([[:digit:]]{1})\.([[:digit:]]{2})([[:alnum:]]{3})-([[:digit:]]{12})$"
+  PATTERN="^(S)-([[:digit:]]{1})\.([[:digit:]]{2})(.*)-([[:digit:]]{8})([[:digit:]]{4})$"
   if [[ "${DROP_ID}" =~ $PATTERN ]]
   then
-    export BUILD_TYPE=${BASH_REMATCH[1]}
-    export BUILD_TIMESTAMP=${BASH_REMATCH[5]}
+    export BUILD_TYPE=I
+    export BUILD_TIMESTAMP=${BASH_REMATCH[5]}${BASH_REMATCH[6]}
     # Label and ID are the same, in this case
-    export BUILD_LABEL=$DROP_ID
-    export BUILD_LABEL_EQ=$DROP_ID
+    export BUILD_LABEL=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
+    export BUILD_LABEL_EQ=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
     export DROP_ID_EQ=$DROP_ID
   else
     echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
