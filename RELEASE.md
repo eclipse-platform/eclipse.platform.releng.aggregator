@@ -76,12 +76,14 @@
      * **After RC1**
        * Leave the I-builds running on the milestone schedule for RC2. 
        * Comment on EMF, ECF and Orbit issues to ask for final release builds.
+     * **After RC2**
+       * (optional) Disable the automatic [nightly cleanup](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) of I-builds
 
 ## GA Releases 
-<sup> Tasks to be completed after RC2 <sub>
+Tasks to be completed after RC2
 
 ### **Release Preparation**: 
-<sup> Tasks that need to be completed before Friday <sub>
+Tasks that need to be completed before Friday
 
   * Create an issue to track the current release tasks (see [Release 4.24](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/273)).
     - Tag @lshanmug (New & Noteworthy), @SarikaSinha (Readme), @ktatavarthi (JDT and Platform Migration Guides), @niraj-modi (SWT Javadoc bash).
@@ -111,11 +113,11 @@
     - The javadoc bash tool needs to be run on SWT sources to make it consistent.
 
 ### **Release**: 
-<sup> The actual steps to release <sub>
+The actual steps to release
 
 **Friday**
   * #### **Promote to GA**
-    - After Simrel declares RC2 (usually the Friday before release) run the [rename and promote](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/) job to promote RC2 (or RC2a). 
+    - After Simrel declares RC2 (usually the Friday before release) run the [rename and promote](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/) job to promote RC2 (or RC2a). If the [daily cleanup for old builds](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) job was not disabled and the original I-build is no longer available you can use the promoted RC2 build.
       - Change the DL_TYPE from S to R.  
       - TAG will be set to R as well, for example `R4_27` 
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.

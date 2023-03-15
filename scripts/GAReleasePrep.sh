@@ -33,6 +33,7 @@ For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggreg
 - [ ] Migration Guide
 - [ ] SWT Javadoc bash for ${STREAM}
 - [ ] Publish ${STREAM} to Maven central
+- [ ] Contribute ${STREAM} to SimRel
 - [ ] Clean up intermediate artifacts (milestones, I-builds and old releases)
 
 @notifications:
