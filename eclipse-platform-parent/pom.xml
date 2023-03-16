@@ -800,125 +800,30 @@
        </activation>
        <build>
          <plugins>
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>check-skip-api-analysis</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <exportAntProperties>true</exportAntProperties>
-                  <target>
-                    <condition property="skipAPIAnalysis" value="false" else="true">
-                      <!-- If the property is already set this has no effect because properties are immutable in ANT -->
-                      <and>
-                        <available file="${basedir}/META-INF/MANIFEST.MF"/>
-                        <resourcecontains resource="${basedir}/.project" substring="org.eclipse.pde.api.tools.apiAnalysisNature" />
-                      </and>
-                    </condition>
-                    <echo file="${project.build.directory}/${project.artifactId}-apiBaseline.target">
-                      <![CDATA[
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?>
-<target name="${project.artifactId}-apiBaseline" sequenceNumber="1">
-	<locations>
-		<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
-			<repository location="${previous-release.baseline}"/>
-			<unit id="${project.artifactId}" version="0.0.0"/>
-		</location>
-	</locations>
-</target>
-                      ]]>
-                    </echo>
-                  </target>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-dependency-tools-plugin</artifactId>
-            <version>${tycho.version}</version>
-            <executions>
-              <execution>
-                <id>list-dependencies</id>
-                <goals>
-                  <goal>list-dependencies</goal>
-                </goals>
-                <phase>verify</phase>
-                <configuration>
-                  <skip>${skipAPIAnalysis}</skip>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-eclipserun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>api-analysis</id>
-                <goals>
-                  <goal>eclipse-run</goal>
-                </goals>
-                <phase>verify</phase>
-                <configuration>
-                  <skip>${skipAPIAnalysis}</skip>
-                  <!-- keep workspace across execution to reuse downloaded artifacts -->
-                  <clearWorkspaceBeforeLaunch>false</clearWorkspaceBeforeLaunch>
-                  <!-- need to set workspace to a dir that's not a child of the project and that the same for all executions -->
-                  <work>${user.dir}/apiAnalyzer-workspace</work>
-                  <applicationsArgs>
-                    <args>-application</args>
-                    <args>org.eclipse.pde.api.tools.apiAnalyzer</args>
-                    <args>-project</args>
-                    <args>${project.basedir}</args>
-                    <args>-baseline</args>
-                    <args>${project.build.directory}/${project.artifactId}-apiBaseline.target</args>
-                    <args>-dependencyList</args>
-                    <args>${project.build.directory}/dependencies-list.txt</args>
-                    <args>-failOnError</args>
-                  </applicationsArgs>
-                  <jvmArgs>
-                  	<jvmArg>-Xmx2048M</jvmArg>
-                  	<jvmArg>-Dp2.RepositoryPreferences.retryOnSocketTimeout=true</jvmArg>
-                  	<jvmArg>-Dp2.RepositoryPreferences.connectionRetryCount=3</jvmArg>
-                  	<jvmArg>-Dp2.RepositoryPreferences.connectionMsRetryDelay=500</jvmArg>
-                  	<jvmArg>-Dorg.eclipse.ecf.provider.filetransfer.retrieve.readTimeout=10000</jvmArg>
-                  </jvmArgs>
-                  <dependencies>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.api.tools</artifactId>
-                      <type>p2-installable-unit</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>javax.annotation</artifactId>
-                      <type>p2-installable-unit</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
-                      <type>p2-installable-unit</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.ecf.provider.filetransfer.ssl</artifactId>
-                      <type>p2-installable-unit</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
-                      <type>p2-installable-unit</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-                      <type>p2-installable-unit</type>
-                    </dependency>
-                  </dependencies>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+         	<plugin>
+	            <groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-apitools-plugin</artifactId>
+	            <version>${tycho.version}</version>
+				<executions>
+					<execution>
+						<id>verify</id>
+						<goals>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+						 	<apiToolsRepository>
+						 		<url>${eclipserun-repo}</url>
+						 	</apiToolsRepository>
+						 	<baselines>
+							 	<repository>
+							 		<url>${previous-release.baseline}</url>
+							 	</repository>
+						 	</baselines>
+						 	<skip>${skipAPIAnalysis}</skip>
+						</configuration>
+					</execution>
+				</executions>
+		  	</plugin>
          </plugins>
       </build>
     </profile>
