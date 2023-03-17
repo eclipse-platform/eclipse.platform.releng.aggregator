@@ -388,6 +388,22 @@
          </execution>
        </executions>
      </plugin>
+     <plugin>
+       <groupId>org.eclipse.tycho</groupId>
+       <artifactId>tycho-apitools-plugin</artifactId>
+       <version>${tycho.version}</version>
+       <executions>
+         <execution>
+           <id>generate</id>
+           <goals>
+             <goal>generate</goal>
+           </goals>
+           <configuration>
+             <projectName>${project.artifactId}_${qualifiedVersion}</projectName>
+           </configuration>
+         </execution>
+       </executions>
+     </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -761,37 +777,6 @@
           <layout>p2</layout>
         </repository>
       </repositories>
-    </profile>
-    <profile>
-      <id>api-generation</id>
-      <activation>
-        <!-- Does it have to be a profile if we can evaluate condition reliably in antrun? -->
-        <file><exists>META-INF/MANIFEST.MF</exists></file>
-        <property>
-          <name>!longnotexistingproperty</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-			<plugin>
-	            <groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-apitools-plugin</artifactId>
-	            <version>${tycho.version}</version>
-				<executions>
-					<execution>
-						<id>generate</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-                  			<skip>${skipAPIDescription}</skip>
-                  			<projectName>${project.artifactId}_${qualifiedVersion}</projectName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-        </plugins>
-      </build>
     </profile>
     <profile>
        <id>api-check</id>
