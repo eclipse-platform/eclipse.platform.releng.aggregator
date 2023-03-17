@@ -18,12 +18,10 @@ job('Cleanup/cleanup-performance-tests-machine'){
     shell('''
 #!/bin/bash -x
 
-cd ${WORKSPACE}
-
+cd ${WORKSPACE}/../..
 pwd
-
 ls -al
-
+rm -rf Build-Docker-images PerformanceTests
 df -h
     ''')
   }
