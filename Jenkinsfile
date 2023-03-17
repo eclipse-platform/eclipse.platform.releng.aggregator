@@ -57,7 +57,8 @@ pipeline {
 						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
 						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
-						-Dproject.build.sourceEncoding=UTF-8 
+						-Dproject.build.sourceEncoding=UTF-8 \
+						-Papi-check
 					'''
 				}
 
