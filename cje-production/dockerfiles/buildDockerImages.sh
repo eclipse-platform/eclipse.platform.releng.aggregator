@@ -30,16 +30,6 @@ echo "Building Centos 8 docker image"
 docker build --pull -t eclipse/platformreleng-centos-gtk3-metacity:8 .
 popd
 
-pushd ubuntu-gtk3-metacity/18.04-gtk3
-echo "Building Ubuntu 18.04 docker image"
-docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:18.04 .
-popd
-
-pushd ubuntu-gtk3-metacity/20.04-gtk3
-echo "Building Ubuntu 20.04 docker image"
-docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:20.04 .
-popd
-
 pushd ubuntu-gtk3-metacity/22.04-gtk3
 echo "Building Ubuntu 22.04 docker image"
 docker build --pull -t eclipse/platformreleng-ubuntu-gtk3-metacity:22.04 .
