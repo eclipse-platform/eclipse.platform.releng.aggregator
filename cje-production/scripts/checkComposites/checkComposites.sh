@@ -27,7 +27,6 @@ repoAccess=${repoHttpAccess}
 # TODO: reduce this list soon
 repoList="\
 /eclipse/updates/4.27/ \
-/eclipse/updates/4.27-I-builds/ \
 /eclipse/updates/4.27-Y-builds/ \
 /eclipse/updates/4.27-P-builds/ \
 /eclipse/updates/4.28/ \
