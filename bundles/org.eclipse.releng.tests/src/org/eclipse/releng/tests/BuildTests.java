@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.releng.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
@@ -22,22 +23,28 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.Platform;
 import org.junit.Test;
+import org.osgi.framework.Version;
 
 public class BuildTests {
+
+	private static final String PLATFORM_FEATURE = "org.eclipse.platform_";
 
 	public class FileSuffixFilter implements FilenameFilter {
 
@@ -113,6 +120,37 @@ public class BuildTests {
 			}
 		}
 		assertTrue("Feature directory missing required files: " + aString, result.isEmpty());
+	}
+
+	@Test
+	public void testProductFileVersion() throws Exception {
+		assumeFalse(isMavenRun());
+		String installDir = Platform.getInstallLocation().getURL().getPath();
+		File productFile = new File(installDir, ".eclipseproduct");
+		Properties props = new Properties();
+		try (InputStream stream = Files.newInputStream(productFile.toPath())) {
+			props.load(stream);
+		}
+		String versionProp = props.getProperty("version");
+		assertNotNull("'version' property not found in " + productFile, versionProp);
+
+		File featureDir = new File(installDir, "features");
+		String versionStr = null;
+		for (File feature : featureDir.listFiles()) {
+			String featureName = feature.getName();
+			if (!featureName.startsWith(PLATFORM_FEATURE)) {
+				continue;
+			}
+			// something like org.eclipse.platform_4.28.0.v20230328-1800
+			versionStr = featureName.substring(PLATFORM_FEATURE.length(), featureName.length());
+			break;
+		}
+		assertNotNull("Failed to find platform feature at " + featureDir, versionStr);
+		assertTrue("Failed to find product file at " + productFile, productFile.isFile());
+		Version featureVersion = new Version(versionStr);
+		featureVersion = new Version(featureVersion.getMajor(), featureVersion.getMinor(), featureVersion.getMicro());
+		Version productVersion = new Version(versionProp);
+		assertEquals("Product version doesn't match version of the platform", featureVersion, productVersion);
 	}
 
 	/**
