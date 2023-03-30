@@ -56,6 +56,7 @@ The job with the highest release number is the one that builds nightly SDK build
 
 - The build artifacts and test results are accessible at https://download.eclipse.org/eclipse/downloads/index.html
 - If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/view/Builds/job/AutomatedTests/
+- If the build is successful but SDK is broken and shouldn't be used, the build can be marked as unstable via https://ci.eclipse.org/releng/job/Builds/job/markUnstable/
 
 Performance Tests
 -----------------
