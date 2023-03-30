@@ -17,18 +17,16 @@ for (STREAM in STREAMS){
 # format: Minute Hour Day Month Day of the week (0-7)
 
 # - - - Integration Eclipse SDK builds - - - 
-# 2023-03 Release Schedule
+# 2023-06 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
 # 0 18 * * *
-0 18 * * *
 
 
-# Milestone Schedule 2/10 - 2/22
-# Post M3, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-# 0 6 * * 6,7,1,2,3
-# 0 18 * * 5,6,7,1,2,
-0 6 10-22 2 6,7,1,2,3
-0 18 10-22 2 5,6,7,1,2,3
+# Milestone Schedule 3/31 - 4/7
+# Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
+0 6 * * 6,7,1,2,3
+0 18 * * 5,6,7,1,2,3
+
             """)
           }
         }
