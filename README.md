@@ -58,6 +58,10 @@ The job with the highest release number is the one that builds nightly SDK build
 - If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/view/Builds/job/AutomatedTests/
 - If the build is successful but SDK is broken and shouldn't be used, the build can be marked as unstable via https://ci.eclipse.org/releng/job/Builds/job/markUnstable/
 
+Milestone and release tasks
+-----------------
+See [Releng-Tasks 2.0](RELEASE.md) (includes links to schedule, calendar etc)
+
 Performance Tests
 -----------------
 See [Performance README.md](production/README.md)
