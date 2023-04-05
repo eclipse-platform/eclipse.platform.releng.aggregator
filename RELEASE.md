@@ -176,8 +176,15 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     - This step can be prepared ahead of time but can't be merged until the release build has been promoted and the update site exists.
 
 #### **Update the Build Calendar:**
-  - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).  
-  - Each stream has its own [wiki](https://wiki.eclipse.org/Category:SimRel-2022-06) page with a more detailed schedule. 
+  - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).
+  - Each stream has its own [wiki](https://wiki.eclipse.org/Category:SimRel-2022-06) page with a more detailed schedule.
+  - List of people who can edit the calendar
+    - Alexander Kurtakov(@akurtakov)
+    - David Williams
+    - Gireesh Punathil
+    - Rahul Mohanan
+    - Samantha Dawley
+    - Sravan Kumar Lakkimsetti
 
 #### **Update Splash Screen:**
   - Create a tracking issue in [eclipse.platform](https://github.com/eclipse-platform/eclipse.platform) and link it to the main issue in eclipse.platform.releng.aggregator.
