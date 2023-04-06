@@ -13,7 +13,7 @@ for (STREAM in STREAMS){
 
     parameters {
       stringParam('buildId', null, null)
-      stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk20/23/GPL/openjdk-20-ea+23_linux-x64_bin.tar.gz', null)
+      stringParam('javaDownload', 'https://download.java.net/java/GA/jdk20/bdc68b4b9cbc4ebcb30745c85038d91d/36/GPL/openjdk-20_linux-x64_bin.tar.gz', null)
     }
 
     definition {
@@ -28,7 +28,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod19'
+      label 'centos-unitpod20'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -156,6 +156,7 @@ spec:
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+			  build job: 'Releng/ep-collectResults', parameters: [string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"), string(name: 'buildURL', value: "${BUILD_URL}"), string(name: 'buildID', value: "${params.buildId}")], wait: false
           }
       }
   }
@@ -163,13 +164,13 @@ spec:
     failure {
       emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
       subject: "Java 20 Tests - BUILD FAILED", 
-      to: "akurtako@redhat.com",
+      to: "akurtako@redhat.com","rahul.mohanan@ibm.com"
       from:"genie.releng@eclipse.org"
     }
     success {
       emailext body: "Link: <a href='${BUILD_URL}'>${BUILD_URL}</a> <br><br>",
       subject: "Java 20 Tests - BUILD SUCCESS", 
-      to: "akurtako@redhat.com",
+      to: "akurtako@redhat.com","rahul.mohanan@ibm.com"
       from:"genie.releng@eclipse.org"
     }
 	}

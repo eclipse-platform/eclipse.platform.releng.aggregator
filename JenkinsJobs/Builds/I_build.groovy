@@ -19,13 +19,13 @@ for (STREAM in STREAMS){
 # - - - Integration Eclipse SDK builds - - - 
 # 2023-06 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
-# 0 18 * * *
+0 18 * * *
 
 
 # Milestone Schedule 3/31 - 4/7
 # Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-0 6 * * 6,7,1,2,3
-0 18 * * 5,6,7,1,2,3
+# 0 6 * * 6,7,1,2,3
+# 0 18 * * 5,6,7,1,2,3
 
             """)
           }
@@ -507,7 +507,7 @@ spec:
 	  stage('Trigger tests'){
           steps {
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java19', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
