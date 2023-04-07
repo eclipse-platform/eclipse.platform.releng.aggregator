@@ -62,6 +62,7 @@
          - Parameters should match Rename and Promote job
        * Send email that the M1 build is available
          - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
+         - Make sure to mention that the Master branch is now again open for development.
        * For **Milestone builds** return the I-builds to the normal schedule.
      * **Update ECJ compiler** in the platform build (if it needs to be updated).
        * To find the new compiler version:
