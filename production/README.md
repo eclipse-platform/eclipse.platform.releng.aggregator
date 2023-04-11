@@ -10,7 +10,7 @@ In order to run the performance tests locally:
   * Set environment variables for `JOB_NAME`, `WORKSPACE` and `testToRun`.
     * `JOB_NAME` can be anything, it's used to generate the names for results files and folders
     * `WORKSPACE` is the location where generated files will be placed.
-    * `testToRun` determines whether to run `selectPerformance` or `otherPerformance` (usually `selectPerformance`)
+    * `testToRun` determines whether to run `selectPerformance` or `otherPerformance`
       For Reference:
       * `selectPerformance` is used when running the [ep424I-perf-lin64](https://ci.eclipse.org/releng/view/Performance%20Tests/job/ep424I-perf-lin64/) and [ep424I-perf-lin64-baseline](https://ci.eclipse.org/releng/view/Performance%20Tests/job/ep424I-perf-lin64-baseline/) tests.
       * `otherPerformance` is used to run [ep424ILR-perf-lin64](https://ci.eclipse.org/releng/view/Performance%20Tests/job/ep424ILR-perf-lin64/) and [ep424ILR-perf-lin64-baseline](https://ci.eclipse.org/releng/view/Performance%20Tests/job/ep424ILR-perf-lin64-baseline/)
@@ -31,6 +31,10 @@ In order to run the performance tests locally:
     ```
     ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -Djvm=$JAVA_HOME/bin/java -DeclipseStream=${STREAM} -DEBUILDER_HASH=${EBUILDER_HASH}  -DbaselinePerf=${baselinePerf} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=${testToRun} -Dtest.target=performance
     ```
+
+The current process uses [getEBuilder.xml](testScripts/hudsonBootstrap/getEBuilder.xml) to download a pre-zipped version of the testScripts folder then calls [runTests2.xml](testScripts/runTests2.xml).
+
+runTests2.xml downloads the installer for the build being tested and the zip of the tests being run, then runs them.
 
 ###  Select and Other Performance
 
@@ -66,3 +70,12 @@ jdtcoreperf
 jdttext
 jdtuirefactoring
 ```
+### Performance Results Collection
+
+After performance tests have run they produce a dat file with the results. These were originally designed to be consumed by a database, but the original database was decommissioned in 2016 and never replaced. 
+
+Results collection now waits for all 4 dat files to have been built and coped to the posting directory by [collectTestResults.xml](../cje-production/scripts/collectTestResults.xml), then uses [BasicResultsTable](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/bundles/org.eclipse.test.performance/src/org/eclipse/test/performance/BasicResultsTable.java) to parse the information and create the results tables. 
+
+Once the tables have been generated [publish.xml](../cje-production/scripts/publish.xml) is called which prepared and runs the [TestResultsGenerator](https://github.com/eclipse-platform/eclipse.platform.releng.buildtools/blob/master/bundles/org.eclipse.build.tools/src/org/eclipse/releng/generators/TestResultsGenerator.java).
+
+Since the files are stored and processed on the eclipse storage machine you can access the perrformance results from the download site by going to https://download.eclipse.org/eclipse/downloads/drops4/BUILDID/performance/
