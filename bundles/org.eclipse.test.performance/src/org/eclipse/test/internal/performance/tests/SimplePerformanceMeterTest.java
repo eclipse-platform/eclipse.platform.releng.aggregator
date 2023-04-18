@@ -23,7 +23,8 @@ import junit.framework.TestCase;
 public class SimplePerformanceMeterTest extends TestCase {
 
     public void testPerformanceMeterFactory() {
-        PerformanceMeter meter = Performance.getDefault().createPerformanceMeter("scenarioId"); //$NON-NLS-1$
+        Performance performance = Performance.getDefault();
+        PerformanceMeter meter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 
         assertTrue(meter instanceof OSPerformanceMeter);
 

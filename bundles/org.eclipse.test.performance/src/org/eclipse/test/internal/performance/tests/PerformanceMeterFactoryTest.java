@@ -26,7 +26,8 @@ public class PerformanceMeterFactoryTest extends TestCase {
         System.setProperty(
                 "PerformanceMeterFactory", "org.eclipse.test.performance:org.eclipse.test.internal.performance.OSPerformanceMeterFactory"); //$NON-NLS-1$ //$NON-NLS-2$
 
-        PerformanceMeter pm = Performance.getDefault().createPerformanceMeter("scenarioId"); //$NON-NLS-1$
+        Performance performance = Performance.getDefault();
+        PerformanceMeter pm = performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
 
         assertTrue(pm instanceof OSPerformanceMeter);
     }
