@@ -37,7 +37,7 @@ git submodule update
 mvn clean verify  -DskipTests=true
 
 # find the results in
-# eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products/*
+# eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products
 ```
 
 Build requirements
