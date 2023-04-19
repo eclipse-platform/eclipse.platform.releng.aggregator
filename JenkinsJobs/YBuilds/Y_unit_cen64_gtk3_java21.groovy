@@ -5,7 +5,7 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java19'){
+	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java21'){
 	
 	  logRotator {
 	    numToKeep(5)
@@ -13,7 +13,7 @@ for (STREAM in STREAMS){
 	
 	  parameters {
 	    stringParam('buildId', null, null)
-	    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk19/877d6127e982470ba2a7faa31cc93d04/36/GPL/openjdk-19_linux-x64_bin.tar.gz', null)
+	    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk21/18/GPL/openjdk-21-ea+18_linux-x64_bin.tar.gz', null)
 	  }
 	
 	  definition {
@@ -28,7 +28,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod19'
+      label 'centos-unitpod21'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
