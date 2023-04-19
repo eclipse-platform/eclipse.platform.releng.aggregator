@@ -160,20 +160,6 @@ spec:
           }
       }
   }
-  post {
-    failure {
-      emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
-      subject: "Java 20 Tests - BUILD FAILED", 
-      to: "akurtako@redhat.com","rahul.mohanan@ibm.com"
-      from:"genie.releng@eclipse.org"
-    }
-    success {
-      emailext body: "Link: <a href='${BUILD_URL}'>${BUILD_URL}</a> <br><br>",
-      subject: "Java 20 Tests - BUILD SUCCESS", 
-      to: "akurtako@redhat.com","rahul.mohanan@ibm.com"
-      from:"genie.releng@eclipse.org"
-    }
-	}
 }
         ''')
       }
