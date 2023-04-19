@@ -4,8 +4,8 @@ def STREAMS = config.Streams
 for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
-  
-	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java17'){
+
+	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java21'){
 	
 	  logRotator {
 	    numToKeep(5)
@@ -13,7 +13,7 @@ for (STREAM in STREAMS){
 	
 	  parameters {
 	    stringParam('buildId', null, null)
-	    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz', null)
+	    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk21/18/GPL/openjdk-21-ea+18_linux-x64_bin.tar.gz', null)
 	  }
 	
 	  definition {
@@ -28,7 +28,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod17'
+      label 'centos-unitpod21'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -89,7 +89,7 @@ spec:
           steps {
               container ('custom'){
                   wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
-                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk15-latest' }"]) {
+                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk18-latest' }"]) {
                           withAnt(installation: 'apache-ant-latest') {
                               sh \'\'\'#!/bin/bash -x
                                 
@@ -134,7 +134,7 @@ spec:
                                 export JAVA_HOME=$JAVA_HOME_NEW
                                 echo ANT_HOME: $ANT_HOME
                                 echo PATH: $PATH
-                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp"
+                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
                                 
                                 env 1>envVars.txt 2>&1
                                 ant -diagnostics 1>antDiagnostics.txt 2>&1
