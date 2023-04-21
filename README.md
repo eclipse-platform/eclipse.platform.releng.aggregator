@@ -67,6 +67,12 @@ Performance Tests
 -----------------
 See [Performance README.md](production/README.md)
 
+How to contribute
+-----------------
+Contributions to Eclipse Platform are most welcome. There are many ways to contribute,
+from entering high quality bug reports, to contributing code or documentation changes.
+For a complete guide, see https://github.com/eclipse-platform/.github/blob/main/CONTRIBUTING.md.
+
 Additional informations
 -----------------------
 
