@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.milestone.description, 'Release') 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
       with:
         fetch-depth: 0
         ref: master
     - name: Set up JDK
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@5ffc13f4174014e2d4d4572b3d74c3fa61aeb2c2 # v3.11.0
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -23,7 +23,7 @@ jobs:
           org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
           org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:set-parent-version -DnewParentVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
     - name: Build and Bump Versions
-      uses: Wandalen/wretry.action@master
+      uses: Wandalen/wretry.action@e6cf3db7de3777ba5f999f903c2f4efdd9ac7288 # master
       with:
         attempt_delay: 120000
         attempt_limit: 10
@@ -34,7 +34,7 @@ jobs:
             -Dcompare-version-with-baselines.skip=false
             org.eclipse.tycho:tycho-versions-plugin:4.0.0-SNAPSHOT:bump-versions -Dtycho.bump-versions.increment=100
     - name: Create Pull Request for Release ${{ github.event.milestone.title }}
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@284f54f989303d2699d373481a0cfa13ad5a6666 # v5.0.1
       with:
         commit-message: Update for release ${{ github.event.milestone.title }}
         branch: update_R${{ github.event.milestone.title }}
