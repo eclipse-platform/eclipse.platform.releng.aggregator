@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -238,20 +238,9 @@ public class TracingSuite extends Suite {
             stream.format("freeMemory (after GC): %11d\n", Runtime.getRuntime().freeMemory());
 
             ThreadMXBean threadStuff = ManagementFactory.getThreadMXBean();
-            ThreadInfo[] allThreads = threadStuff.getThreadInfo(threadStuff.getAllThreadIds(), 200);
+            ThreadInfo[] allThreads = threadStuff.dumpAllThreads(true, true, 200);
             for (ThreadInfo threadInfo : allThreads) {
-                stream.print("\"");
-                stream.print(threadInfo.getThreadName());
-                stream.print("\": ");
-                stream.print(threadInfo.getThreadState());
-                stream.println();
-                final StackTraceElement[] elements = threadInfo.getStackTrace();
-                for (StackTraceElement element : elements) {
-                    stream.print("    ");
-                    stream.print(element);
-                    stream.println();
-                }
-                stream.println();
+                stream.print(threadInfo);
             }
             for (Thread t : Thread.getAllStackTraces().keySet()) {
                 String name = t.getName();
