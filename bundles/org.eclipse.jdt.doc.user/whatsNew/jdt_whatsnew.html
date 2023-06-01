@@ -17,22 +17,22 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.27 (JDT)</title>
+<title>What's New in Eclipse 4.28 (JDT)</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.27 (JDT)</h2>
+<h2>What's New in Eclipse 4.28 (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
 for the 4.27 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   	<!--li><a href="#Java19">Java 19 Support</a></li-->
-	<li><a href="#JavaCompiler">Java Compiler</a></li>
-  	<li><a href="#JUnit">JUnit</a></li>
+	<!--li><a href="#JavaCompiler">Java Compiler</a></li-->
+  	<!--li><a href="#JUnit">JUnit</a></li-->
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<!--li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li-->
-	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
-	<!--li><a href="#Debug">Debug</a></li-->
+	<li><a href="#JavaFormatter">Java Formatter</a></li>
+	<li><a href="#Debug">Debug</a></li>
 	<li><a href="#JDTDev">JDT Developers</a></li>
 </ul>
 
@@ -49,135 +49,63 @@ document for changes in the Platform.</p>
 </colgroup>
 <tbody>
 
-  <!-- ******************* Java XX Support ************************************* -->
-  <!--
-  <tr>
-    <td id="JavaXX" class="section" colspan="2">
-    <h2>Java&trade; XX Support </h2>
-    </td>
-  </tr>
-  -->
-  <!-- ******************* End of Java XX Support ************************************* -->
-
-  <!-- ******************* Java Compiler ************************************* -->
-  <tr>
-    <td id="JavaCompiler" class="section" colspan="2">
-    <h2>Eclipse compiler for Java (ECJ)</h2>
-    </td>
-  </tr>
-  <tr id="ecj-separated-from-core"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/182 -->
-    <td class="title"><a href="#ecj-separated-from-core">ECJ separated from JDT Core</a></td>
-    <td class="content">
-      <p>
-      Historically the code for ECJ was always in the same <code>org.eclipse.jdt.core</code>
-       project that also contained the code for the Java support in the IDE, just in a different source folder.
-      The well known standalone ECJ compiler library that could be used outside of 
-      Eclipse (for compilation with external tooling) was generated out of this 
-      core bundle at build time and was not included in the default SDK (because 
-      it contained subset of packages and classes provided by <code>org.eclipse.jdt.core</code>).
-      </p>
-      <p>
-      This lead to few issues, with both Eclipse / standalone use of the ECJ compiler.
-      The (non-JDT) code inside Eclipse that required "default" <code>javax.tools.JavaCompiler</code>
-      API implementation and had no need for full JDT / workspace support 
-      was not able to use <code>org.eclipse.jdt.core</code> without pulling in
-      <code>org.eclipse.core.resources</code> bundle and so the dependency to the workspace.
-      Another interesting side effect of hosting ECJ code next to IDE code inside
-      same <code>org.eclipse.jdt.core</code> bundle was that developers couldn't see 
-      if the ECJ code per mistake got some dependency to the IDE. 
-      </p>
-      <p>
-      To resolve these (and other) problems, the ECJ code is moved from <code>org.eclipse.jdt.core</code>
-      to dedicated <code>org.eclipse.jdt.core.compiler.batch</code> project and will be
-      deployed as a separated bundle.
-      The <code>org.eclipse.jdt.core.compiler.batch</code> is now included in SDK
-      as a regular Eclipse bundle and can be compiled / deployed / used separately
-      from <code>org.eclipse.jdt.core</code> bundle.
-      All of ECJ packages are re-exported by <code>org.eclipse.jdt.core</code>, therefore
-      from OSGI point of view, all 3rd party code that used some compiler related API 
-      from <code>org.eclipse.jdt.core</code> doesn't require any change.
-      The <code>org.eclipse.jdt.core.compiler.batch</code> bundle itself doesn't have any dependencies
-      and so can be used in Eclipse products that do not use workspace concepts.
-      </p>
-      <p>
-      However, no change is without side effects.
-      </p>
-      <p>
-      <b>Known problems with the split of the ECJ from core bundle</b>
-      </p>
-      <ul>
-      <li>
-      As part of the <code>org.eclipse.jdt.core.compiler.batch</code> code separation from 
-      <code>org.eclipse.jdt.core</code>, the two fragments of <code>org.eclipse.jdt.core</code> - 
-      <code>org.eclipse.jdt.compiler.apt</code> and <code>org.eclipse.jdt.compiler.tool</code>
-      were merged into <code>org.eclipse.jdt.core.compiler.batch</code>.
-      So if some target definition, launch configuration or build file referenced the two fragments, these
-      references can and should be removed now.
-      </li>
-      <li>
-      Another issue might affect standalone (non OSGI based) applications that
-      were using <code>org.eclipse.jdt.core</code> as a "simple" Java library 
-      (which jdt.core never was).
-      So for example code that had <code>org.eclipse.jdt.core_XYZ.jar</code> on 
-      classpath and tried to call this outside Eclipse:
-      <pre>ASTParser parser = ASTParser.newParser(AST.getJLSLatest());</pre>
-      would fail now with <pre>NoClassDefFoundError: org.eclipse.jdt.internal.compiler.env.ICompilationUnit</pre> 
-      because <code>org.eclipse.jdt.core.dom.ASTParser</code> uses internally ECJ 
-      APIs and they are now ... surprise ... moved to <code>org.eclipse.jdt.core.compiler.batch</code>
-      jar. To fix this error, <code>org.eclipse.jdt.core.compiler.batch</code> library
-      should be added to the application classpath.
-      </li>
-      </ul>
-    </td>
-  </tr>
-  
-  <!-- ******************* JUnit ************************************* -->
-  <tr>
-    <td id="JUnit" class="section" colspan="2">
-    <h2>JUnit</h2>
-    </td>
-  </tr>
-  <tr id="junit-subpackage-support"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/424 -->
-    <td class="title"><a href="#junit-subpackage-support">Launch JUnit tests in subpackages</a></td>
-    <td class="content">
-      Previously, if one selected a package in the explorer that contained JUnit tests and subpackages that also contained JUnit tests, only the tests directly owned by the package would be run.  The functionality has been enhanced so that JUnit tests in subpackages will be found by the JUnitLauncher and launched as well.
-      <p>For example, in the following project, selecting the package <b>test</b> and right-clicking to <b>Run as &gt; JUnit Plug-in Test</b></p>
-      <p><img src="images/junit-subpackage-before.png" alt="Before"/></p>
-      <p>will result in:</p>
-      <p><img src="images/junit-subpackage-results.png" alt="JUnit results"/></p>
-    </td>
-  </tr>
-  <!-- ******************* End of JUnit ************************************* -->
-
   <!-- ******************* Java Editor ************************************* -->
   <tr>
     <td id="JavaEditor" class="section" colspan="2">
     <h2>Java Editor </h2>
     </td>
   </tr>
-  <tr id="new-code-mining-preference">
-  <td class="title"><a href="#new-code-mining-preference">New code mining preference</a></td>
+  <tr id="call-hierarchy-on-ctrl-click">
+  <td class="title"><a href="#call-hierarchy-on-ctrl-click">Call Hierarchy on Ctrl+Click</a></td>
+  <td class="content">
+  <p><code>Open Call Hierarchy</code> action added to the list of actions shown on <code>Ctrl+Click</code> for fields or methods</p>
+  <p><img src="images/call-hierarchy-on-ctrl-click1.png" alt="Call hierarchy action for fields"/></p>
+  <p><img src="images/call-hierarchy-on-ctrl-click.png" alt="Call hierarchy action for methods"/></p>
+  </td>
+  </tr>
+  <!-- ******************* End of Java Editor ************************************* -->
+
+  <!-- ******************* Java Formatter ************************************* -->
+  <tr>
+    <td id="JavaFormatter" class="section" colspan="2">
+    <h2>Java Formatter </h2>
+    </td>
+  </tr>
+  <tr id="new-javadoc-html-formatting-option">
+  <td class="title"><a href="#new-javadoc-html-formatting-option">New Javadoc html format option</a></td>
+  <td class="content">
+      When the formatter option <b>Comments &gt; Javadocs &gt; Format HTML tags</b> is selected, the default behavior for block tags (&lt;pre&gt;, &lt;p&gt;, &lt;dl&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;hr&gt;, and &lt;dir&gt;) is to put each tag and it's closing tag on separate lines.  A new sub-option: <b>Do not put block tags on separate lines</b> has been added to specify not to do this and instead have the tags start on a new line and have their closing tags end a line.
+  <p>For example, without the option, the following:</p>
+  <p><img src="images/javadoc-html-sample.png" alt="Javadoc sample unformatted"/></p>
+  <p>is formatted to:</p>
+  <p><img src="images/javadoc-default-html-format.png" alt="Javadoc default html format"/></p>
+  <p>and with the option specified, is formatted:</p>
+  <p><img src="images/javadoc-new-html-format.png" alt="Javadoc new html format"/></p>
+  </td>
+  </tr>
+  <!-- ******************* End of Java Formatter ************************************* -->
+  
+  <!-- *********************** Debug ******************************** -->
+  <tr>
+    <td id="Debug" class="section" colspan="2">
+    <h2>Debug</h2>
+    </td>
+  </tr>
+  <tr id="new-launch-config-name-preferences">
+  <td class="title"><a href="#new-launch-config-name-preferences">New launch config name preference</a></td>
    <td class="content">
-      In the past, the code minings for method references used the <b>Search</b> preferences page setting: <b>Ignore potential matches</b> to determine if inexact matches should be filtered out.  By default, this setting is false and so code mining could result in a number of entries that were only potential matches.  To make this more intuitive and to change the default behavior, the <b>Code Mining</b> preference page has been enhanced to have its own setting: <b>Ignore inexact matches</b> which by default is set to true.
-      <p>To set the new option, go to: <b>Preferences &gt; Java &gt; Editor &gt; Code Minings</b>
-      </p>
-      <p><img src="images/new-code-mining-pref.png" alt="New Code Mining Preference"/></p>
+        For launch configurations, a name is often generated on behalf of the user which is simply the type name of the Java application, Java applet, or the JUnit test class.  In some instances, a user may have classes with the same name in different packages or projects.  Creating launch configurations for each will reuse the type name and add <b>(nn)</b> for each configuration created after the first.  Looking in the <b>Run Configurations</b> or <b>Debug Configurations</b> dialogs or the pull-down for <b>Run</b> or <b>Debug</b>, it may be difficult to determine via the name which type the configuration is referring to.
+	<p>To alleviate this, a new set of preferences has been added to specify that the launch configuration name generated use the fully qualified type name.  Once set, new configurations (either manually created in the <b>Run Configurations</b> or <b>Debug Configurations</b> dialogs or as a result of specifying <b>Run as...</b> or <b>Debug as...</b> from the context menu will qualify the generated name.  Existing configurations are not altered.
+	</p>
+	<p>To specify the new preferences, go to <b>Preferences &gt; Java &gt; Launching</b>
+	</p>
+	<p><img src="images/new-launch-name-prefs.png" alt="New Launch Config Name Preferences"/></p>
+	<p>Launching a Java application results in:</p>
+	<p><img src="images/new-launch-config.png" alt="New Launch Config for Java Application"/></p>
    </td>
   </tr>
 
-  <tr id="javadoc-inline-return"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/340 -->
-    <td class="title"><a href="#javadoc-inline-return">Javadoc inline @return</a></td>
-    <td class="content">
-      As of Java 16, the Javadoc <b>@return</b> tag can be specified as an inline tag (with curly braces) in a method's Javadoc comment.  When used it generates both the method description and the <b>Returns</b> section of the Javadoc for the method.  It is specified as follows: {<b>@return </b><i>&lt;return description&gt;}</i>.  The generated Javadoc will show: <b>Returns</b> <i>&lt;return description&gt;</i>. for the method's main description and will use the same description to generate the <b>Returns</b> section.  In the case where both the inline <b>@return</b> tag and block <b>@return</b> tag are specified, the new inline tag will override.
-
-     <p>Support has been added in Eclipse to recognize the inline version of the tag and show the proper Javadoc hover.</p>
-
-     <p>For details on the inline <b>@return</b> tag, see: <a href="https://docs.oracle.com/en/java/javase/19/docs/specs/javadoc/doc-comment-spec.html#return" target="_blank">Javadoc Comment Spec</a></p>
-      <p><img src="images/javadoc-inline-return.png" alt="Using new inline return tag"/></p>
-    </td>
-  </tr>
-
-  <!-- ******************* End of Java Editor ************************************* -->
+  <!--************************ End of Debug ******************************** -->
 
   <!-- *********************** JDT Developers ******************************** -->
   <tr>
@@ -185,38 +113,22 @@ document for changes in the Platform.</p>
     <h2>JDT Developers</h2>
     </td>
   </tr>
-  <tr id="new-old-jdt-views"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/387 
-  								   https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/364 -->
-    <td class="title"><a href="#new-old-jdt-views">Four new views added to SDK</a></td>
-    <td class="content">
-      Following four new Java / JDT related views are shipped now by default with the Eclipse SDK:
-      <ol>
-      <li><code>Abstract Syntax Tree</code></li>
-      <li><code>Bytecode</code></li>
-      <li><code>Bytecode Reference</code></li>
-      <li><code>Java Element</code></li>
-      </ol>
-	  <p><img src="images/new-jdt-views-list.png" alt="List of views"/></p>
-      <p>
-      All four views are actually not new, however they were previously only available for installation 
-      via Eclipse Marketplace and not included in the SDK itself.
-      Now they are shipped with SDK package and also will be available for installation in other packages
-      via <a href="https://download.eclipse.org/eclipse/updates/latest/" target="_blank">https://download.eclipse.org/eclipse/updates/latest/</a> 
-      update site.
-      </p> 
-      <ul>
-      <li>
-      <code>Bytecode</code> and <code>Bytecode Reference</code> views are of general use for advanced Java developers
-      interested how the Java code compiled to the class files, independently
-      if the class file was compiled by Eclipse or by other Java compiler.
-      </li>
-      <li>
-      <code>Abstract Syntax Tree</code> and <code>Java Element</code> views are
-      showing JDT internal representation of the Java code and are useful mostly for JDT developers only.
-      </li>
-      </ul>
-	  <p><img src="images/new-jdt-views-content.png" alt="Views with some content"/></p>
-    </td>
+  <tr id="new-method-to-mark-used-message-keys">
+  <td class="title"><a href="#new-method-to-mark-used-message-keys">Method to mark message keys used</a></td>
+  <td class="content">
+      When developing Java code, there are set mechanisms for handling message translation.  There is also a context action <b>Source &gt; Find Broken Externalized Strings</b> which checks <i>.properties</i> file and Java message translation classes that access the <i>.properties</i> file.  The action checks for a number of issues including whether a message key is unused or missing and provides the results in the <b>Search</b> dialog.
+   <p>When detecting unused keys, it is possible for the action to generate false positives.  For example, a message could be used by another plug-in or product which is not in the workspace or a message key could be dynamically created and the action cannot detect this.</p>
+   <p>A new mechanism has been added for a developer to denote that a message key is known to be used and should be ignored by the <b>Find Broken Externalized Strings</b> action.  Simply copy any known used messages from the existing <i>.properties</i> file into a <i>.usedproperties</i> file with the same name, in the same package.  The <i>.usedproperties</i> file follows the same syntax as a <i>.properties</i> file and any message keys added there will not be marked as unused by the action.  The message data in the <i>.usedproperties</i> file is ignored and can be removed if desired.</p>
+   </td>
+  </tr>
+  
+  <tr id="new-compilationparticipant-api">
+  <td class="title"><a href="#new-compilationparticipant-api">Updated CompilationParticipant API</a></td>
+  <td class="content">
+  	<p>New <code>CompilationParticipant.postProcess()</code> method was added that 
+  	notifies participants about finished class compilation. This notification occurs right before the compiled 
+  	class is written out to disk. This allows participants perform arbitrary byte code manipulation on generated classes.</p>
+  </td>
   </tr>
   <!-- *********************** End of JDT Developers ******************************** -->
   <tr><td colspan="2"/></tr>
