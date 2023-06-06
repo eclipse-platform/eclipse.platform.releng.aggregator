@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 vogella GmbH and others.
+ * Copyright (c) 2018, 2023 vogella GmbH and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ package org.eclipse.platform.doc.tips;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -64,10 +65,8 @@ public class HtmlTableTipProvider extends TipProvider {
 		SubMonitor subMonitor = SubMonitor.convert(monitor);
 		Bundle bundle = Platform.getBundle("org.eclipse.platform.doc.user"); //$NON-NLS-1$
 		URL platformTipsURL = bundle.getEntry("tips/platform_tips.html"); //$NON-NLS-1$
-		try {
-			String platformTipsHtmlContents = new BufferedReader(
-					new InputStreamReader(platformTipsURL.openStream(), StandardCharsets.UTF_8)).lines()
-							.collect(Collectors.joining("\n"));
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(platformTipsURL.openStream(), StandardCharsets.UTF_8))){
+			String platformTipsHtmlContents = reader.lines().collect(Collectors.joining("\n"));
 			List<Tip> browserTips = HtmlExtractor.getTips(getID(), platformTipsHtmlContents, subMonitor);
 			setTips(browserTips);
 		} catch (IOException ex) {
