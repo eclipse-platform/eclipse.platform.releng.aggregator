@@ -159,7 +159,7 @@ function cleanRepo ()
     echo -e "\t${eclipseexe}"
     exit 1
   fi
-  javaexe=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
+  javaexe=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin/java
   if [[ ! -x ${javaexe} ]]
   then
     echo -e "\n\tERROR: expected java location not found, or not executable"

@@ -13,7 +13,7 @@ job('Builds/markStable'){
     numToKeep(5)
   }
 
-  jdk('openjdk-jdk11-latest')
+  jdk('openjdk-jdk17-latest')
 
   wrappers { //adds pre/post actions
     timestamps()
@@ -61,7 +61,7 @@ job('Builds/markStable'){
 
       #triggering ant runner
       baseBuilderDir=${workspace}/eclipse
-      javaCMD=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
+      javaCMD=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin/java
 
       launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
 
