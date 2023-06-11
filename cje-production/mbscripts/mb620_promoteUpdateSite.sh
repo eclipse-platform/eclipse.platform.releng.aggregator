@@ -26,6 +26,8 @@ source $1
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
 dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 latestRelDir=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
+java_home=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin
+
 pushd $CJE_ROOT/$UPDATES_DIR
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
 popd
@@ -51,7 +53,7 @@ ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposit
 
 #triggering ant runner
 baseBuilderDir=${workspace}/eclipse
-javaCMD=/opt/public/common/java/openjdk/jdk-11_x64-latest/bin/java
+javaCMD=${java_home}/java
 
 launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
 

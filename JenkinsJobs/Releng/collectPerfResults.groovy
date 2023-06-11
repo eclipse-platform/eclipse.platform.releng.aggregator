@@ -39,6 +39,7 @@ set -e
 buildID=$(echo $buildID|tr -d ' ')
 buildURL=$(echo $buildURL|tr -d ' ')
 triggeringJob=$(echo $triggeringJob|tr -d ' ')
+java_home=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin
 
 wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
 cat ${WORKSPACE}/buildproperties.shsource
@@ -60,7 +61,7 @@ ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
 epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
-ssh genie.releng@projects-storage.eclipse.org PATH=/opt/tools/java/openjdk/jdk-17/17/bin:$PATH ${workspace}/eclipse/eclipse -nosplash \\
+ssh genie.releng@projects-storage.eclipse.org PATH=${java_home}:$PATH ${workspace}/eclipse/eclipse -nosplash \\
   -debug -consolelog -data ${workspace}/workspace-toolsinstall \\
   -application org.eclipse.equinox.p2.director \\
   -repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO},${WEBTOOLS_REPO} \\
@@ -82,7 +83,7 @@ cd ${WORKSPACE}
 
 #triggering ant runner
 baseBuilderDir=${workspace}/basebuilder
-javaCMD=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin/java
+javaCMD=${java_home}/java
 
 launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
 
