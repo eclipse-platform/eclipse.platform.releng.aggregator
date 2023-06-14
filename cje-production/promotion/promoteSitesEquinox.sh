@@ -330,7 +330,7 @@ export DL_DROP_ID_EQ=${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}
 
 export HIDE_SITE=true
 # Build machine locations (would very seldom change)
-
+export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/equinox/drops
 
 # Equinox Drop Site (final segment)
