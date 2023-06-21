@@ -7,6 +7,19 @@ on:
         required: false
         default: 'clean verify'
         type: string
+      submodules:
+        description: |
+          Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
+          When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
+          The value is just passed as it is to the github/actions/checkout action: https://github.com/actions/checkout#usage
+        type: string
+        required: false
+        default: 'false'
+      mavenVersion: 
+        description: 'The version of Maven set up'
+        type: string
+        required: false
+        default: '3.9.2'
 
 permissions: {}
 
@@ -35,6 +48,7 @@ jobs:
       uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       with:
        fetch-depth: 0 # required for jgit timestamp provider to work
+       submodules: ${{ inputs.submodules }}
     - name: Set up Java
       uses: actions/setup-java@5ffc13f4174014e2d4d4572b3d74c3fa61aeb2c2 # v3.11.0
       with:
@@ -47,7 +61,7 @@ jobs:
     - name: Set up Maven
       uses: stCarolas/setup-maven@07fbbe97d97ef44336b7382563d66743297e442f # v4.5
       with:
-        maven-version: 3.9.2
+        maven-version: ${{ inputs.mavenVersion }}
     - name: Download the API Tools matcher
       uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
       id: api-tools-matcher

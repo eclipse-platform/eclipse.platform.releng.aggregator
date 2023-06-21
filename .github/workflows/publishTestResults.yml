@@ -55,7 +55,7 @@ jobs:
           event_name: ${{ github.event.workflow_run.event }}
           files: "artifacts/**/*.xml"
       - name: Set badge color
-        if: github.ref == 'refs/heads/master' && inputs.config-path != ''
+        if: github.ref == 'refs/heads/master' && inputs.gist-url != ''
         shell: bash
         run: |
           case ${{ fromJSON( steps.test-results.outputs.json ).conclusion }} in
@@ -71,7 +71,7 @@ jobs:
           esac
 
       - name: Create badge
-        if: github.ref == 'refs/heads/master' && inputs.config-path != ''
+        if: github.ref == 'refs/heads/master' && inputs.gist-url != ''
         uses: emibcn/badge-action@4209421db54c8764d8932070ffd0f81715a629bf
         with:
           label: Tests
@@ -80,7 +80,7 @@ jobs:
           path: badge.svg
 
       - name: Upload badge to Gist
-        if: github.ref == 'refs/heads/master' && inputs.config-path != ''
+        if: github.ref == 'refs/heads/master' && inputs.gist-url != ''
         uses: andymckay/append-gist-action@6e8d64427fe47cbacf4ab6b890411f1d67c07f3e
         with:
           token: ${{ secrets.gist-token }}
