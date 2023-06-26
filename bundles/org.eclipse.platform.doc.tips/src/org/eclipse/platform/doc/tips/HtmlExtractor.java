@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -134,7 +135,7 @@ public final class HtmlExtractor {
 		URL imgUrl = bundle.getEntry(srcAttr);
 		if (imgUrl == null) {
 			Bundle thisBundle = FrameworkUtil.getBundle(HtmlExtractor.class);
-			Platform.getLog(thisBundle).log(new Status(IStatus.WARNING, thisBundle.getSymbolicName(),
+			ILog.of(thisBundle).log(new Status(IStatus.WARNING, thisBundle.getSymbolicName(),
 					srcAttr + " not found in " + bundle.getSymbolicName() + " bundle.")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
