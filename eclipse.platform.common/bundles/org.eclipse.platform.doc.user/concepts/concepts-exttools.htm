@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright" content=
+  "Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title>External tools</title>
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+</head>
+<body>
+  <h1>External tools</h1>
+  <p>External tools allow you to configure and run programs, batch files, Ant buildfiles, and others using the
+  Workbench. You can save these external tool configurations and run them at a later time.</p>
+  <p>Output from external tools is displayed in the <b><a href=
+  "PLUGINS_ROOT/org.eclipse.jdt.doc.user/reference/views/console/ref-console_view.htm">Console view</a></b>.</p>
+  <p>You can add external tools as part of the build process for a project. These external tools will run in the
+  specified order every time a project is built.</p>
+  <p>The following variables are available when you configure an external tool. These variables are automatically
+  expanded each time the external tool is run.</p>
+  <table border="1" width="80%" cellpadding="5" cellspacing="0" summary="Variables available to external tools">
+    <thead>
+      <tr>
+        <th width="25%" colspan="1" rowspan="1">
+          <p>Variable Name</p>
+        </th>
+        <th colspan="1" rowspan="1">
+          <p>Description</p>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>${workspace_loc}</b></td>
+        <td>The absolute path on the system's hard drive to Eclipse's workspace directory</td>
+      </tr>
+      <tr>
+        <td><b>${workspace_loc:<i>&lt;resource path&gt;</i>}</b></td>
+        <td>The absolute path on the system's hard drive to the specified resource. The <i>&lt;resource path&gt;</i> is
+        the full path of the resource relative to the workspace root. For example
+        ${workspace_loc:/MyProject/MyFile.txt}. Note that the expanded result of this variable is not the same as
+        ${workspace_loc}/MyProject/MyFile.txt if the project's contents directory for MyProject is outside the
+        workspace directory.</td>
+      </tr>
+      <tr>
+        <td><b>${project_loc}</b></td>
+        <td>The absolute path on the system's hard drive to the currently selected resource's project or to the project
+        being built if the external tool is run as part of a build.</td>
+      </tr>
+      <tr>
+        <td><b>${project_loc:<i>&lt;resource path&gt;</i>}</b></td>
+        <td>The absolute path on the system's hard drive to the specified resource's project. The <i>&lt;resource
+        path&gt;</i> is the full path of the resource relative to the workspace root. For example
+        ${workspace_loc:/MyProject/MyFile.txt}. Note that the expanded result of this variable is not the same as
+        ${workspace_loc}/MyProject if the project's contents directory for MyProject is outside the workspace
+        directory.</td>
+      </tr>
+      <tr>
+        <td><b>${container_loc}</b></td>
+        <td>The absolute path on the system's hard drive to the currently selected resource's parent (either a folder
+        or project).</td>
+      </tr>
+      <tr>
+        <td><b>${container_loc:<i>&lt;resource path&gt;</i>}</b></td>
+        <td>The absolute path on the system's hard drive to the specified resource's parent (either a folder or
+        project). The <i>&lt;resource path&gt;</i> is the full path of the resource relative to the workspace root. For
+        example:${workspace_loc:/MyProject/MyFolder/MyFile.txt}. Note that the expanded result of this variable is not
+        the same as ${workspace_loc}/MyProject/MyFolder if the project's contents directory for MyProject is outside
+        the workspace directory.</td>
+      </tr>
+      <tr>
+        <td><b>${resource_loc}</b></td>
+        <td>The absolute path on the system's hard drive to the currently selected resource.</td>
+      </tr>
+      <tr>
+        <td><b>${resource_loc:<i>&lt;resource path&gt;</i>}</b></td>
+        <td>The absolute path on the system's hard drive to the specified resource. The <i>&lt;resource path&gt;</i> is
+        the full path of the resource relative to the workspace root. For example
+        ${workspace_loc:/MyProject/MyFile.txt}. Note that the expanded result of this variable is not the same as
+        ${workspace_loc}/MyProject/MyFile.txt if the project's contents directory for MyProject is outside the
+        workspace directory.</td>
+      </tr>
+      <tr>
+        <td><b>${project_path}</b></td>
+        <td>The full path, relative to the workspace root, of the currently selected resource's project or of the
+        project being built if the external tool is run as part of a build.</td>
+      </tr>
+      <tr>
+        <td><b>${container_path}</b></td>
+        <td>The full path, relative to the workspace root, of the currently selected resource's parent (either a folder
+        or project).</td>
+      </tr>
+      <tr>
+        <td><b>${resource_path}</b></td>
+        <td>The full path, relative to the workspace root, of the currently selected resource.</td>
+      </tr>
+      <tr>
+        <td><b>${project_name}</b></td>
+        <td>The name of the currently selected resource's project or of the project being built if the external tool is
+        run as part of a build.</td>
+      </tr>
+      <tr>
+        <td><b>${container_name}</b></td>
+        <td>The name of the currently selected resource's parent (either a folder or project).</td>
+      </tr>
+      <tr>
+        <td><b>${resource_name}</b></td>
+        <td>The name of the currently selected resource.</td>
+      </tr>
+      <tr>
+        <td><b>${build_type}</b></td>
+        <td>The kind of build when the external tool is run as part of a build. The value can be one of "full",
+        "incremental", or "auto". If the external tool is run outside of a build, the value is then "none".</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Lets assume your Eclipse workspace directory is <code>c:\eclipse\workspace</code> and you have two projects,
+  <code>MyProject1</code> and <code>MyProject2</code>. The first project, <code>MyProject1</code>, is located inside
+  the workspace directory, the second project, <code>MyProject2</code>, is located outside the workspace directory at
+  <code>c:\projects\MyProject2</code>. Lets look at how the variable examples below will be expanded when an external
+  tool is run, if the resource <code>/MyProject2/MyFolder/MyFile.txt</code> is selected.</p>
+  <table border="1" width="50%" cellpadding="5" cellspacing="0" summary="Variables available to external tools">
+    <thead>
+      <tr>
+        <th width="25%" colspan="1" rowspan="1">
+          <p>Variable Example</p>
+        </th>
+        <th colspan="1" rowspan="1">
+          <p>Expanded Results</p>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>${workspace_loc}</td>
+        <td>c:\eclipse\workspace</td>
+      </tr>
+      <tr>
+        <td>${workspace_loc:/MyProject1/MyFile.txt}</td>
+        <td>c:\eclipse\workspace\MyProject\MyFile.txt</td>
+      </tr>
+      <tr>
+        <td>${workspace_loc:/MyProject2/MyFile.txt}</td>
+        <td>c:\projects\MyProject2\MyFile.txt</td>
+      </tr>
+      <tr>
+        <td>${project_loc}</td>
+        <td>c:\projects\MyProject2</td>
+      </tr>
+      <tr>
+        <td>${project_loc:/MyProject1/MyFile.txt}</td>
+        <td>c:\eclipse\workspace\MyProject</td>
+      </tr>
+      <tr>
+        <td>${container_loc}</td>
+        <td>c:\projects\MyProject2\MyFolder</td>
+      </tr>
+      <tr>
+        <td>${resource_loc}</td>
+        <td>c:\projects\MyProject2\MyFile.txt</td>
+      </tr>
+      <tr>
+        <td>${project_path}</td>
+        <td>/MyProject2</td>
+      </tr>
+      <tr>
+        <td>${container_path}</td>
+        <td>/MyProject2/MyFolder</td>
+      </tr>
+      <tr>
+        <td>${resource_path}</td>
+        <td>/MyProject2/MyFolder/MyFile.txt</td>
+      </tr>
+      <tr>
+        <td>${project_name}</td>
+        <td>MyProject2</td>
+      </tr>
+      <tr>
+        <td>${container_name}</td>
+        <td>MyFolder</td>
+      </tr>
+      <tr>
+        <td>${resource_name}</td>
+        <td>MyFile.txt</td>
+      </tr>
+      <tr>
+        <td>${build_type}</td>
+        <td>none</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 class="related">Related concepts</h3><a href="concepts-antsupport.htm">Ant support</a><br>
+  <a href="concepts-22.htm">Builds</a>
+  <h3 class="related">Related reference</h3><a href="../reference/ref-exttoolsprefs.htm">External Tools
+  preferences</a><br>
+  <a href="../reference/ref-anticons.htm">External Tools and Ant icons</a><br>
+  <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/reference/views/console/ref-console_view.htm">Console view</a>
+  <h3 class="related">Related tasks</h3><a href="../tasks/tasks-exttools-running.htm">Running external tools</a><br>
+  <a href="../tasks/tasks-ant-running.htm">Running Ant buildfiles</a>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>
+Other text editor responsibilities
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Other text editor responsibilities</H2>
+<p>The Java example editor inherits a lot of useful default behavior from <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>.&nbsp;
+The text editing framework handles several other responsibilities that you can
+customize by overriding methods in <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>.&nbsp;
+Browse the implementation of this class and its subclasses to see how behavior
+is customized in the framework.</p>
+<p>The following are some of the useful framework features that can be
+configured.</p>
+<h3>Preference handling</h3>
+<p>Text editors typically contribute user preferences that control the
+presentation and behavior of the editor.&nbsp; In the text framework, each text
+editor instance has an associated preference store that is used for accessing
+user preferences.&nbsp; This preference store can be set up by your editor, or
+you can inherit from preference stores already used in the framework.</p>
+<p>In the case of the Java example editor, it inherits the preference store
+initialized by <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a>.&nbsp;
+This is the preference store defined by the workbench editors
+plug-in.&nbsp;&nbsp;</p>
+
+<pre>protected void initializeEditor() {
+	...
+	setPreferenceStore(EditorsPlugin.getDefault().getPreferenceStore());
+}</pre>
+
+The editors plug-in preferences can be manipulated in the 
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Editors)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>General &gt; Editors</b></a>
+
+and
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.GeneralTextEditor)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>General &gt; Editors &gt; Text Editors</b></a>
+
+preference pages.
+<p>If you do not want to use the standard workbench text preferences for your 
+  editor, you can set a different preference store.&nbsp; This is typically done 
+  by overriding <b>initializeEditor</b> and setting your own preference store.&nbsp; 
+  If you do use your own preference store, you will also need to override the 
+  method <b>handlePreferenceStoreChanged()</b> which is triggered whenever a preference 
+  is updated.</p>
+<h3>Key bindings</h3>
+<p><a href="wrkAdv_keyBindings_contexts.htm">Key binding contexts</a> are useful
+for establishing a lookup order for key bindings. Having contextual key bindings
+reduces the chances of different plug-ins contributing conflicting key
+sequences.  By default, the workbench operates in a generic context for working with 
+windows or dialogs.  When a text editor becomes active, it is responsible
+for resetting the context to the text editing context, so that editor specific key
+bindings will be active.</p>
+
+<p>In the platform text framework, each text editor instance has an associated array of
+key binding scopes. It is responsible for setting the correct scopes when it becomes 
+  active. <a href="../reference/api/org/eclipse/ui/texteditor/AbstractDecoratedTextEditor.html"><b>AbstractDecoratedTextEditor</b></a> 
+  defines this scope and takes care of making it active. The scope is assigned 
+  in a method that is called from the constructor:</p>
+
+<pre>protected void initializeKeyBindingScopes() {
+	setKeyBindingScopes(new String[] { &quot;org.eclipse.ui.textEditorScope&quot; });  
+}</pre>
+
+<p>The argument to the method is an array of ids that have been defined for contexts.
+If you want your editor to define its own key binding context, then you can
+override this method in your editor class, or set the scope dynamically using <b>setKeybindingScopes</b>.</p>
+<p>The context itself must be defined with the corresponding id in the <b><a href="../reference/extension-points/org_eclipse_ui_contexts.html">org.eclipse.ui.contexts</a></b>
+extension point. The following is the definition for the text editing context.</p>
+<pre>
+&lt;extension
+	point=&quot;org.eclipse.ui.contexts&quot;&gt;
+	&lt;context
+		name=&quot;%context.editingText.name&quot;
+		description=&quot;%context.editingText.description&quot;
+		id=&quot;org.eclipse.ui.textEditorScope&quot;
+		parentId=&quot;org.eclipse.ui.contexts.window&quot;&gt;
+	&lt;/context&gt;
+	...
+</pre>
+<p>(Note:&nbsp; We use the terms <b>scope</b> and <b>context</b> interchangeably in this
+discussion.  The method names in the text classes still refer to key binding contexts
+as scopes.  These method names reflect the original implementation of contexts as scopes 
+and use outdated terminology.)</p>
+
+
+
+</BODY>
+</HTML>

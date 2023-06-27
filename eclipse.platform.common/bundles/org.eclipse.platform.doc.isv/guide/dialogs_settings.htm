@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+<TITLE>Dialog settings</TITLE>
+
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+
+<h2>
+Dialog settings</h2>
+<p>
+The <a href="../reference/api/org/eclipse/jface/dialogs/package-summary.html"> <b> org.eclipse.jface.dialogs</b></a> 
+package provides a utility class,
+<a href="../reference/api/org/eclipse/jface/dialogs/DialogSettings.html"><b>DialogSettings</b></a>, 
+for storing and retrieving keyed values. You can use this class to save and retrieve primitive data types 
+and string values that you associate with key names. The settings are loaded and saved using an XML file.</p>
+<p><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"><b>AbstractUIPlugin</b></a> provides support for plug-in wide dialog settings stored in an XML file in your plug-in's directory. If a dialog settings file is not found in your plug-in directory, an empty
+<a href="../reference/api/org/eclipse/jface/dialogs/DialogSettings.html"> <b> DialogSettings</b></a> will be created for you. When the plug-in is shut down, any settings that were added to it will be saved in an XML file and retrieved the next time the plug-in is started up.</p>
+<p>
+You can access your dialog settings anywhere in your plug-in code. The following snippet shows how you could obtain the dialog settings for the readme tool.</p>
+<pre>
+   IDialogSettings settings = ReadmePlugin.getDefault().getDialogSettings();
+</pre>
+<p>
+Values are stored and retrieved using get and put methods. The get methods are named after the type of primitive that is being accessed. You can store and retrieve
+boolean, long, double, float, int, array, and string values. The following snippet shows how we could use dialog settings to initialize control values in a dialog.</p>
+<pre>
+   protected Control createDialogArea(Composite parent) {
+      IDialogSettings settings = ReadmePlugin.getDefault().getDialogSettings();
+      checkbox = new Button(parent,SWT.CHECK);
+      checkbox.setText(&quot;Generate sample section titles&quot;);
+      // initialize the checkbox according to the dialog settings
+<b>      checkbox.setSelection(settings.getBoolean(&quot;GenSections&quot;));
+</b>   }
+</pre>
+<p>
+The value of the setting can be stored later when the ok button is pressed.</p>
+<pre>
+   protected void okPressed() {
+      IDialogSettings settings = ReadmePlugin.getDefault().getDialogSettings();
+      // store the value of the generate sections checkbox
+<b>      settings.put(&quot;GenSections&quot;, checkbox.getSelection());
+</b>      super.okPressed();
+   }
+</pre>
+<h3>Dialog bounds settings</h3>
+<p>
+In general, the definition and interpretation of dialog settings are the responsibility of your plug-in.  However, there are some specific dialog
+settings keys defined inside the JFace dialog framework that are used to remember the last size and position of a dialog, so that the dialog
+can be opened to that size and position on its next invocation.  The framework will do the work to query and store the dialog's size
+and position, but you must implement a method that supplies the 
+<a href="../reference/api/org/eclipse/jface/dialogs/IDialogSettings.html"> <b>IDialogSettings</b></a> instance that should be used
+to store the dialog bounds information.  The following snippet shows how the <b>SectionsDialog</b>
+could take advantage of this feature.
+</p>
+<pre>
+   protected IDialogSettings getDialogBoundsSettings() {
+	   return ReadmePlugin.getDefault().getDialogSettings();
+   }
+</pre>
+<p>
+By implementing this method, the size and position of the <b>SectionsDialog</b> will be stored in predefined keys within the
+plug-in's dialog settings, causing the dialog to open at its previous location.</p>
+
+</BODY>
+</HTML>

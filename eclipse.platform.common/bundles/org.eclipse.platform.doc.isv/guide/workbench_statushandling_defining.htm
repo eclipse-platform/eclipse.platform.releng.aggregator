@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"  type="text/javascript"></script>
+<title>Defining a status handler</title>
+</head>
+<body>
+
+<h2>Defining a status handler</h2>
+
+<p>There are two ways for contributing handlers to the Workbench:</p>
+<ol>
+	<li>using the <em>org.eclipse.ui.statusHandlers</em> extension
+	point, see <a href="ua_statushandling.htm">User assistance and
+	status handling</a></li>
+	<li>using a custom workbench advisor and overriding its <em>getWorkbenchErrorHandler()</em> method</li>
+</ol>
+
+
+<h3>Contributing a status handler using the custom advisor</h3>
+
+<p>First, a custom workbench advisor for your application has
+to be created. In this new custom advisor override <em>getWorkbenchErrorHandler()</em>. 
+This will now return the default error handler.</p>
+<pre>
+   public class CustomWorkbenchAdvisor extends WorkbenchAdvisor {
+      public AbstractStatusHandler getWorkbenchErrorHandler() {
+         ...
+         
+         return customStatusHandler;
+      }
+   }
+</pre>
+
+
+<p>In the custom application use your new advisor when creating the
+<code>Workbench</code>.</p>
+<pre>
+   public class CustomApplication implements IApplication{
+      public Object start(IApplicationContext appContext) throws Exception {
+         ...
+         Display display = createDisplay();
+         PlatformUI.createAndRunWorkbench(display, new CustomWorkbenchAdvisor());
+         ...
+      }
+
+      protected Display createDisplay() {
+         return PlatformUI.createDisplay();
+      }
+   }
+</pre>
+
+<p>For details how to run a custom application see the <b><a
+	href="../reference/extension-points/org_eclipse_core_runtime_applications.html">
+org.eclipse.core.runtime.applications</a></b> extension point documentation.</p>
+
+<p>When the status handling facility is accessed, the facility will
+get instance of the handler that is provided by the custom advisor. This handler will be 
+used for handling of status or error occurred in the application.</p>
+
+</body>
+</html>

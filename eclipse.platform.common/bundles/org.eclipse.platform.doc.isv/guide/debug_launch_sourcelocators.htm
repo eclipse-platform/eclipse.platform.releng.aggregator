@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Obtaining a program's source code</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h4>Obtaining a program's source code</h4>
+<p>For certain kinds of launch modes, it may be important to obtain the source code that corresponds
+with the current execution point in the code.  This is typically important when debugging or profiling
+a program.  Several different extension points are provided by the debug plug-in that allow plug-ins to
+register classes that can assist with locating source code.</p>
+<h5>Source locators</h5>
+<p>
+<a href="../reference/api/org/eclipse/debug/core/model/ISourceLocator.html"><b>ISourceLocator</b></a>
+and <a href="../reference/api/org/eclipse/debug/core/model/IPersistableSourceLocator.html"><b>IPersistableSourceLocator</b></a>
+define interfaces for mapping from an executing program back to the source
+code. </p>
+<p>Source locators are typically implemented to work with a corresponding launch
+configuration and launch configuration delegate.  A source locator id may be specified when a launch configuration
+type is defined, or it may be associated programmatically with a launch configuration using the 
+<b>ILaunchConfiguration.ATTR_SOURCE_LOCATOR_ID</b> attribute.  In either case, at some point the id
+of a source locator for a configuration must be resolved to the class that actually implements 
+<a href="../reference/api/org/eclipse/debug/core/model/IPersistableSourceLocator.html"><b>IPersistableSourceLocator</b></a>.
+The association between a source locator id and its class is established using the 
+<a href="../reference/extension-points/org_eclipse_debug_core_sourceLocators.html"><b>org.eclipse.debug.core.sourceLocators</b></a>
+extension point.</p>
+<p>The following markup is from the Java tooling:</p>
+<pre>
+&lt;extension point=&quot;org.eclipse.debug.core.sourceLocators&quot;&gt;
+    &lt;sourceLocator
+        name=&quot;%javaSourceLocatorName&quot;
+        class=&quot;org.eclipse.jdt.launching.sourcelookup.JavaSourceLocator&quot;
+        id=&quot;org.eclipse.jdt.launching.javaSourceLocator&quot;&gt;
+    &lt;/sourceLocator&gt;
+&lt;/extension&gt;
+</pre>
+<p>Since launch configurations can be persisted, source locator ids may will be stored
+with the launch configuration.  When it's time to instantiate a source locator, the
+debug plug-in looks up the source locator id attribute and instantiates the class associated with
+that id.</p>
+<p>The implementation for source lookup necessarily depends on the type of program being launched.  However, the platform
+defines an abstract implementation for a source locator that looks up source files on a given path that includes
+directories, zip files, jar files, and the like.  To take advantage of this implementation, your plug-in can extend
+<a href="../reference/api/org/eclipse/debug/core/sourcelookup/AbstractSourceLookupDirector.html"><b>AbstractSourceLookupDirector</b></a>.
+All that is needed from the specific implementation is the ability to provide an appropriate
+<a href="../reference/api/org/eclipse/debug/core/sourcelookup/ISourceLookupParticipant.html"><b>ISourceLookupParticipant</b></a>, which can
+map a stack frame to a file name. See the extenders of <a href="../reference/api/org/eclipse/debug/core/sourcelookup/AbstractSourceLookupDirector.html"><b>AbstractSourceLookupDirector</b></a>.
+for examples.</p>
+<h5>Source path computers</h5>
+<p>The <a href="../reference/api/org/eclipse/debug/core/sourcelookup/AbstractSourceLookupDirector.html"><b>AbstractSourceLookupDirector</b></a>
+searches for source files according to a particular source code lookup path.  This path is expressed as an array of
+<a href="../reference/api/org/eclipse/debug/core/sourcelookup/ISourceContainer.html"><b>ISourceContainer</b></a>.  The source containers
+that should be searched for source are typically computed according to the particulars of the source configuration that is being
+launched.  <a href="../reference/api/org/eclipse/debug/core/sourcelookup/ISourcePathComputer.html"><b>ISourcePathComputer</b></a>
+defines the interface for an object that computes the appropriate source path for a launch configuration.  A source path computer,
+much like a source locator, is specified by id, and can be specified in the extension definition for a launch configuration type, or 
+associated programmatically by setting the <b>ISourceLocator.ATTR_SOURCE_PATH_COMPUTER_ID</b> attribute for the launch configuration.
+The id for a source path computer is associated with its implementing class in the
+<a href="../reference/extension-points/org_eclipse_debug_core_sourcePathComputers.html"><b>org.eclipse.debug.core.sourcePathComputers</b></a>
+extension point.  The following markup shows the definition used by JDT for its Java source path computer:
+</p>
+<pre>
+&lt;extension point=&quot;org.eclipse.debug.core.sourcePathComputers&quot;&gt;
+	&lt;sourcePathComputer
+		id=&quot;org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer&quot;
+		class=&quot;org.eclipse.jdt.launching.sourcelookup.containers.JavaSourcePathComputer&quot;&gt;
+ 	&lt;/sourcePathComputer&gt;
+ 	...
+</pre>
+<p>
+The source path computer is responsible for computing an array of <a href="../reference/api/org/eclipse/debug/core/sourcelookup/ISourceContainer.html"><b>ISourceContainer</b></a>
+that represents the source lookup path.  For example, the Java source path computer considers the classpath when building the
+path. 
+</p>
+<h5>Source container types</h5>
+<p>The containers specified as part of a source lookup path must implement <a href="../reference/api/org/eclipse/debug/core/sourcelookup/ISourceContainer.html"><b>ISourceContainer</b></a>,
+which can search the container represented for a named source element.  Different kinds of source containers may be needed to represent the
+different kinds of places source code is stored.  For example, the JDT defines source containers that represent source in a Java project,
+source on the classpath, and source in a package fragment.  The source containers used for a launch configuration may be stored by id in
+the launch configuration.  Since launch configurations can be persisted, there must be a way to associate the id of a source container
+with its implementation class.  This is done using the 
+<a href="../reference/extension-points/org_eclipse_debug_core_sourceContainerTypes.html"><b>org.eclipse.debug.core.sourceContainerTypes</b></a>
+extension point. The following example comes from the JDT:
+</p>
+<pre>
+&lt;extension point=&quot;org.eclipse.debug.core.sourceContainerTypes&quot;&gt;
+	&lt;sourceContainerType
+		id=&quot;org.eclipse.jdt.launching.sourceContainer.javaProject&quot;
+		name=&quot;%javaProjectSourceContainerType.name&quot;
+		description=&quot;%javaProjectSourceContainerType.description&quot;
+		class=&quot;org.eclipse.jdt.internal.launching.JavaProjectSourceContainerTypeDelegate&quot;&gt;
+	&lt;/sourceContainerType&gt; 
+	...
+</pre>
+
+</BODY>
+</HTML>

@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>PDE Build Integration with p2</title>
+</head>
+<body>
+<h1>PDE Build Integration with p2</h1>
+<p>This page describes a deprecated old way of integrating with p2.  See the "<a href="pde_p2_builds.htm">Building p2 Repositories and Products</a>" page for the recommended methods to build with p2.
+The properties described below work using a backward compability layer and do not support any new features that may be added to the <a href="../../org.eclipse.platform.doc.isv/guide/p2_publisher.html">p2 publisher</a>.</p>
+<p>See the <a href="../../org.eclipse.platform.doc.isv/guide/p2_publisher.html">Generating p2 metadata</a> page in the Platform Plugin-in Developer Guide for details on p2 metadata generation.  Generating metadata by itself it not sufficient to create a p2-enabled product.  To do this you must perform an actual p2 install from the generated metadata.  See the <a href="../../org.eclipse.platform.doc.isv/guide/p2_director.html">p2 director</a> documentation for details on how to perform this install from a headless script.</p>
+<p>It is possible to generate p2 metadata with manual calls to the p2 metadata generator in any of PDE/Build's custom tasks (see <a href="pde_customization.htm">Customizing a Headless Build</a>).
+However, PDE/Build does provide integration with p2 via the following properties:</p>
+
+	<table border="5" cellspacing="0" cellpadding="1">
+		<tr>
+			<td><pre>generate.p2.metadata</pre></td>
+			<td>(DEPRECATED, use <a href="pde_p2_builds.htm">p2.gathering</a> instead) Set to true to turn on p2 metadata generation.  The ant scripts are based on the existence of this property and not the value.  To turn off metadata generation, the property must be removed and not just set to false.<br>
+			In the build scripts, calls to p2 targets are generated when the p2 bundle <tt>org.eclipse.equinox.p2.metadata.generator</tt> and its dependencies are present in the Eclipse that is running the build.
+			These p2 targets are conditional on the <tt>generate.p2.metadata</tt> property.
+			</td>
+		</tr>
+		<tr>
+			<td><pre>p2.metadata.repo<br>p2.artifact.repo</pre></td>
+			<td>Specify a <b>file:</b> URI giving the location of the p2 metadata and artifact repositories to publish to.  It is common, but not necessary for the artifact repository to use the same location as the metadata repository.<br>
+			Example:<br>
+			<pre>
+			p2.metadata.repo=file:${buildDirectory}/repository
+			p2.artifact.repo=file:${buildDirectory}/repository
+			</pre>
+			</td>
+		</tr>
+		<tr>
+			<td><pre>p2.metadata.repo.name<br>p2.artifact.repo.name</pre></td>
+			<td>Optional. Specify a names for the generator p2 repositories.<br>When using a repository that already exists, the existing name of the repository will not be changed.  
+			If not specified, p2 will name the repositories according to their location.
+			</td>
+		</tr>
+		<tr>
+			<td><pre>p2.flavor</pre></td>
+			<td>Set the flavor for the p2 metadata.  When metadata is generated for the Eclipse SDK, a flavor of "tooling" is used. </td>
+		</tr>
+		<tr>
+			<td><pre>p2.publish.artifacts</pre></td>
+			<td>Set to true to publish jars into the artifact repository.  If set to false, then artifact metadata is generated but the jars are not copied to the artifact repository.  WARNING: when set to true, make sure that the p2.artifact.repo is not the same location as the assembly directories used by PDE/Build, otherwise jars might end up deleted!</td>
+		</tr>
+		<tr>
+			<td><pre>p2.root.name<br>p2.root.version</pre></td>
+			<td>Specify the name and version for the root IU that will contain everything that was built.<br>
+			If a <b>.product</b> file is specified in the build, then these properties will be <b>ignored</b>.  Instead, when a .product file is available the root name and version will be the product id and version from the .product file.  See below for more information.
+			</td>
+		</tr>
+	</table>
+	
+<h2>Metadata Generation for Products</h2>
+<p>When running a build with a product file set in the top level build configuration build.properties file (both in builds using the productBuild.xml and the normal build.xml), then PDE/Build will automatically generate metadata for that product.</p>
+<p>In addition to creating Installable Units for all the features and bundles, this will also create the following product Installable Units:</p>
+<ul>
+<li>A top level Product IU using the product-id and the product version.  If no version is set in the .product file, "1.0.0" is used.</li>
+<li>Configuration Units that set start level information for individual bundles as specified in the config.ini used for the product.</li>
+<li>Configuration Units that set program and vm arguments for the product's launcher .ini file.</li>
+<li>Configuration Units that add entries to the config.ini based on the config.ini used for the product.</li>
+<li>Installable Units to deliver the branded launcher as well as any root files.</li>
+<li>Configuration Units that set arguments in the launcher .ini file specifying <tt>-startup</tt> and <tt>--launcher.library</tt> to enable installing the product with a bundle pool.</li>
+</ul>
+<p>With all of these generated Installable Units, it is possible to use p2 to install the complete product out of the repository.</p>
+
+<h2>The Details</h2>
+<p>PDE/Build is essentially calling the metadata generation task provided by p2 at certain points during the build.  It is likely that during a build there is never a single point in time where all build artifacts exist on disk at the same place.  Therefore, it would be necessary to either call the p2 metadata generater on the final archives or, as an optimization, call it multiple times throughout the build.</p>
+<p>Metadata generation will occur throughout the assemble and packaging phases.  This is true for both normal builds and <a href="pde_packager.htm">packager</a> builds.  To illustrate, for a product build using productBuild.xml, the following scripts will be generated (assuming <tt>configs=win32,win32,x86 &amp; linux,gtk,ppc</tt>):</p>
+<ul>
+<li>assemble.org.eclipse.pde.build.container.feature.all.xml</li>
+<li>assemble.org.eclipse.pde.build.container.feature.win32.win32.x86.xml</li>
+<li>assemble.org.eclipse.pde.build.container.feature.linux.gtk.ppc.xml</li>
+<li>package.org.eclipse.pde.build.container.feature.all.xml</li>
+<li>package.org.eclipse.pde.build.container.feature.win32.win32.x86.xml</li>
+<li>package.org.eclipse.pde.build.container.feature.linux.gtk.ppc.xml</li>
+</ul>
+<p>Assemble scripts collect features and plug-ins that were built along with associated root files.  Package scripts collect pre built binary features and plug-ins.  The platform specific scripts collect the pieces for those particular configurations and the "all" scripts delegate to each of the platform specific scripts.</p>
+<p>p2 generation calls will occur as follows:</p>
+<ol>
+<li>assemble win32.win32.x86 : Generate metadata for collected features and plug-ins for windows.</li>
+<li>assemble win32.win32.x86 : Second call to generated metadata for collected root files for windows.</li>
+<li>assemble linux.gtk.ppc : Generate metadata for collected features and plug-ins for linux.</li>
+<li>assemble linux.gtk.ppc : Second call to generated metadata for collected root files for linux.</li>
+<li>assemble all : If not running the packager: Generate metadata for a root installable unit that includes everything above.</li>
+<li>package win32.win32.x86 : Generate metadata for packaged features and plug-ins for windows.</li>
+<li>package win32.win32.x86 : Second call to generated metadata on rootfiles from packaging windows.</li>
+<li>package linux.gtk.ppc : Generate metadata for packaged features and plug-ins for linux.</li>
+<li>package linux.gtk.ppc : Second call to generated metadata on rootfiles from packaging for linux.</li>
+<li>package all : Generate metadata for a root installable unit that includes everything above.</li>
+</ol>
+<p>The p2 metadata generator task supports incremental generation, each call to the p2 metadata generated is done with <tt>mode=incremental</tt>, the final call to generate the root installable unit will run with <tt>mode="final"</tt></p>
+</body>
+</html>

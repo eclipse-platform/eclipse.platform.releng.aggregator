@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) Red Hat Inc. and others 2017. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+The generic and extensible text editor
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2 CLASS="Heading2">The generic and extensible text editor</H2>
+<p>Instead of fully defining a new new editor, Platform Text does also provide a unique <em>generic and extensible text editor</em> that you can enrich to support your text files.
+The features of this editor (hover, completion...) can be provided by plugin developers as regular extensions, without requiring to
+define yet another editor. The approach is to contribute to the generic editor rather than creating a new editor.</p>
+<p>To achieve that, the generic editor framework provides a few extension points that allow customers to enrich the editor according
+to the <a href="runtime_content_using.htm">content-type</a> of the editor input. The generic editor takes care of either selecting the most
+suitable extension for a given features, or to compose the multiple valid extensions and to present the aggregated result to user.</p>
+<p>Here are the current extension points provided to augment the generic editor:</p>
+<ul>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_presentationReconcilers.html">org.eclipse.ui.genericeditor.presentationReconciliers</a> for syntax highlighting.
+      </li>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_contentAssistProcessors.html">org.eclipse.ui.genericeditor.contentAssistProcessors</a> for code completion/intellisense.
+      </li>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_hoverProviders.html">org.eclipse.ui.genericeditor.hoverProviders</a> for hover documentation.
+      </li>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_autoEditStrategies.html">org.eclipse.ui.genericeditor.autoEditStrategies</a> for auto-edit actions (auto-indent, closing braces or other automatic syntax addition).
+      </li>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_reconcilers.html">org.eclipse.ui.genericeditor.reconcilers</a> for updating underlying models after the user edits the document.
+      </li>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_highlightReconcilers.html">org.eclipse.ui.genericeditor.highlightReconcilers</a> for adding text highlighting to the document.
+      </li>
+      <li>
+        <a href="../reference/extension-points/org_eclipse_ui_genericeditor_icons.html">org.eclipse.ui.genericeditor.icons</a> for adding content-type-specific icons to the editor.
+      </li>
+</ul>
+The generic editor also provides some non-customizable features typically desired for any text editor such as:
+<ul>
+<li>asynchronous code completion</li>
+<li><a href="resAdv_markers.htm">error markers</a> as underline and rules annotations, and enable details and quick-fixes on hover</li>
+</ul>
+The generic editor inherits most features from the AbstractTextEditor so it integrates into the workbench like a regular text editor. So you can for example:
+<ul>
+<li>use common commands to trigger word-wrap, split editor, change font size...</li>
+<li><a href="../reference/extension-points/org_eclipse_ui_editors.html#editorContentTypeBinding">associate the generic editor with a given content-type</a></li>
+<li>create useful adapters, for example to an <a href="editors_workbench_outliner.htm">outline</a> (a recommendation would be to make such adapter work according to the content-type rather than according to the editor, and to implement the outline with the Common Navigator Framework)</li>
+<li>...</li>
+</ul>
+<p>Validation of the document, synchronization with a model and error discovery are not part of the generic editor per-se, although the generic editor allows
+to interact with the reported problems. The recommended way is to make <a href="editors_documents.htm">document processing</a> independent from the editor, and to rely on <a href="../reference/api/org/eclipse/jface/text/IDocumentListener.html">IDocumentListener</a> and <a href="editors_documents.htm#documentSetip">documentSetupParticipant extension</a> to react to immediate changes on the working copy,
+or on <a href="../reference/api/org/eclipse/core/resources/IResourceChangeListener.html">IResourceChangeListener</a> to react on save. For best results in user experience, reacting to document change should be a fast operation, so any long computation and reporting operation should happen asynchronously in a non-blocking way.
+</p>
+<p>The generic editor works on plain text level and does <b>not</b> mandate the underlying document to be <a href="editors_documents.htm#Partitions">partitioned</a>, it's up to the individual extensions to the generic editor to consider partitioning or not, and to contribute some document partitioning if they need it.</p>
+
+</BODY>
+</HTML>

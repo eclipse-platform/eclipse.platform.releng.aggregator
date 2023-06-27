@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Concurrency and the workspace
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Concurrency and the workspace</h3>
+
+<p>We've already seen that workspace code must be aware of concurrency even if it is not using the 
+concurrency framework.  Batching of workspace changes and use of scheduling rules helps in sharing 
+the workspace with other plug-ins (and their threads) that are modifying the workspace.  Once your plug-in
+is using batching and rules (see <a href="resAdv_batching.htm">Batching resource changes</a>), it is
+easy to perform the same work using the platform concurrency mechanisms.
+</p>
+
+<h4>Workspace jobs</h4>
+<p>A <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> is a basic unit of 
+asynchronous work running concurrently with other jobs.  The resources plug-in defines 
+<b><a href="../reference/api/org/eclipse/core/resources/WorkspaceJob.html">WorkspaceJob</a></b>
+as a convenient mechanism for defining asynchronous resource modifications.  Code that would
+normally be batched in an <b><a href="../reference/api/org/eclipse/core/resources/IWorkspaceRunnable.html">IWorkspaceRunnable</a></b> 
+is instead put in the <b>runInWorkspace</b> method of a workspace job subtype.  Instead of running the code using 
+<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html">IWorkspace</a></b> protocol,
+the job is scheduled just like any other job.  The appropriate scheduling rules must be added on the job before 
+it is scheduled.
+</p>
+<p>Let's look at an example workspace runnable and what we should do to make it a job:
+</p>
+<pre>IWorkspaceRunnable myRunnable = 
+	new IWorkspaceRunnable() {
+		public void run(IProgressMonitor monitor) throws CoreException {
+			//do the actual work in here
+			doSomeWork();
+			...
+		}
+}
+</pre>
+<p>The work is moved to the appropriate method of our
+<b><a href="../reference/api/org/eclipse/core/resources/WorkspaceJob.html">WorkspaceJob</a></b>
+subtype.
+</p>
+<pre>class MyWorkspaceJob extends WorkspaceJob {
+	public MyWorkspaceJob() {
+		super("My Workspace Job");
+	}
+	public IStatus runInWorkspace(IProgressMonitor monitor) {
+		//do the actual work in here
+		doSomeWork();
+		return Status.OK_STATUS;
+	}
+}
+</pre>
+<p>Our runnable had to be invoked specifically:
+</p>
+<pre>IWorkspace workspace = ResourcesPlugin.getWorkspace();
+workspace.run(myRunnable, myProject, IWorkspace.AVOID_UPDATE, null);
+</pre>
+<p>Our job is scheduled like any other job.  The platform job manager will run it according to its
+priority, other jobs in the queue, and the scheduling rules.  Note that we must attach the 
+scheduling rule to the job in order to prevent simultaneous modification of <tt>myProject</tt>.
+</p>
+<pre>MyWorkspaceJob job = new MyWorkspaceJob();
+<b>job.setRule(myProject);</b>
+job.schedule();
+</pre>
+<p>Now that the operation has been structured as a job, all of the scheduling mechanisms (priority, delay, rescheduling) can
+be used.  Resource change events will be batched until the job is finished running.
+</p>
+
+</BODY>
+</HTML>

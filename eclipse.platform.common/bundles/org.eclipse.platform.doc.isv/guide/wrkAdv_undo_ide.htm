@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Undo and the IDE Workbench
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Undo and the IDE Workbench</h3>
+<p>
+We've seen code snippets that use workbench protocol for accessing the operations history and the workbench undo
+context.  This is achieved using <a href="../reference/api/org/eclipse/ui/operations/IWorkbenchOperationSupport.html"><b>IWorkbenchOperationSupport</b></a>,
+which can be obtained from the workbench.  The notion of a workbench-wide undo context is fairly general.  It is up to the workbench application
+to determine what specific scope is implied by the workbench undo context, and which views or editors use the
+workbench context when providing undo support.
+</p>
+<p>
+In the case of the Eclipse IDE workbench, the workbench undo context should be assigned to any operation that affects the IDE workspace at large.
+This context is used by views that manipulate the workspace, such as the Resource Navigator.  The IDE workbench installs an adapter on
+the workspace for <a href="../reference/api/org/eclipse/core/commands/operations/IUndoContext.html"><b>IUndoContext</b></a> that returns the
+workbench undo context.  This model-based registration allows plug-ins that manipulate the workspace to obtain the appropriate undo context, even if they are headless and
+do not reference any workbench classes.</p>
+<pre>// get the operation history
+IOperationHistory history = OperationHistoryFactory.getOperationHistory();
+
+// obtain the appropriate undo context for my model
+IUndoContext workspaceContext = (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
+if (workspaceContext != null) {
+	// create an operation and assign it the context
+}
+
+</pre>
+Other plug-ins are encouraged to use this same technique for registering
+model-based undo contexts.
+<h3>Undoable Workspace Operations</h3>
+<p>
+Undoable operations are provided by the IDE plug-in that allow you to execute, 
+undo, and redo common workspace manipulations.  Operations are provided for
+creating, moving, copying, and deleting projects, folders, and files.  The IDE
+plug-in uses these operations to provide undo support in the Resource Navigator.
+These classes can also be used by clients.  They are available in the package
+<a href="../reference/api/org/eclipse/ui/ide/undo/package-summary.html"><b>org.eclipse.ui.ide.undo</b></a>.
+ </p>
+<p>
+Using the workspace undoable operations is similar to the examples shown for using
+any <a href="../reference/api/org/eclipse/core/commands/operations/IUndoableOperation.html"><b>IUndoableOperation</b></a>.
+The primary difference is that some of the details, such as assigning the appropriate
+undo context, are handled internally by the operation.  The following snippet shows
+how to use an undoable operation for creating a new file.
+</p>
+<pre>
+IFile newFileHandle = IDEWorkbenchPlugin.getPluginWorkspace().getRoot().
+	getFile(myNewFilePath);
+CreateFileOperation op = new CreateFileOperation(newFileHandle, null,
+	initialContentStream, "Create New File");
+</pre>
+<p>
+The operation is configured with a file handle for the file to be created, an
+input stream with the initial contents, and a label describing the operation.  Internally,
+the operation will assign the workspace undo context and handle other details such
+as keeping track of which resources the operation manipulates.  To execute the operation,
+the caller uses the standard <a href="../reference/api/org/eclipse/core/commands/operations/IOperationHistory.html"><b>IOperationHistory</b></a>
+protocol.  
+</p>
+<pre>
+try {
+	PlatformUI.getWorkbench().getOperationSupport().getOperationHistory()
+		.execute(op, myProgressMonitor, 
+			WorkspaceUndoUtil.getUIInfoAdapter(getShell()));
+} catch (final ExecutionException e) {
+	// handle exceptions
+}
+</pre>
+<p>
+Note that the caller is responsible for providing a progress monitor if desired, and
+an <a href="../reference/api/org/eclipse/core/runtime/IAdaptable.html"><b>IAdaptable</b></a> that
+can provide the shell that should be used for any prompting. The utility class
+<a href="../reference/api/org/eclipse/ui/ide/undo/WorkspaceUndoUtil.html"><b>WorkspaceUndoUtil</b></a>
+provides a utility method for creating the necessary adapter from a shell.  
+</p>
+<p>Callers are also responsible for determining whether to execute the operation in 
+the UI thread, the background, or a workbench job.  If the operation should be executed 
+in the background, then the caller should create the appropriate progress monitor and run the 
+snippet shown above in the appropriate runnable.  
+</p>
+<p>The undo and redo of the operation will be performed by the undo and redo action handlers
+when the user initiates undo or redo.  The standard workbench action handlers use 
+<a href="../reference/api/org/eclipse/core/commands/operations/IAdvancedUndoableOperation2.html"><b>IAdvancedUndoableOperation2</b></a>
+protocol to determine how to perform the undo and redo of operations.
+All of the workspace operations implement protocol that instructs clients to run the undo or redo 
+of the operation in the background if possible.
+</p>
+</BODY>
+</HTML>

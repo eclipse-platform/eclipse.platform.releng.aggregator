@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>org.eclipse.ui.perspectiveExtensions</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+
+<H3>
+org.eclipse.ui.perspectiveExtensions</H3>
+<P >
+ Plug-ins can add their own action sets, views, and various shortcuts to existing
+ perspectives by contributing to the <b><a href="../reference/extension-points/org_eclipse_ui_perspectiveExtensions.html">org.eclipse.ui.perspectiveExtensions</a></b>
+ extension point.</P>
+
+
+<P >The contributions that can be defined for new perspectives (action sets, wizard entries, view layout,
+view shortcuts, and perspective shortcuts) can also be supplied for
+an existing perspective.&nbsp; One important difference is that these
+contributions are
+specified in the <b>plugin.xml</b> markup instead of
+configuring them into an
+ <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a>.</b>
+</P>
+
+
+<P >The following markup shows how the JDT extends the platform's debug
+perspective.</P>
+
+
+<pre>
+&lt;extension point=&quot;org.eclipse.ui.perspectiveExtensions&quot;&gt;
+  &lt;perspectiveExtension 
+	<b>targetID</b>=&quot;org.eclipse.debug.ui.DebugPerspective&quot;&gt;
+	&lt;actionSet id=&quot;org.eclipse.jdt.debug.ui.JDTDebugActionSet&quot;/&gt;
+    	&lt;view id=&quot;org.eclipse.jdt.debug.ui.DisplayView&quot; 
+        	relative=&quot;org.eclipse.debug.ui.ExpressionView&quot; 
+    		relationship=&quot;stack&quot;/&gt;	
+        &lt;view id=&quot;org.eclipse.jdt.ui.PackageExplorer&quot; 
+                relative=&quot;org.eclipse.debug.ui.DebugView&quot; 
+                relationship=&quot;stack&quot;
+                visible=&quot;false&quot;/&gt;
+        &lt;view id=&quot;org.eclipse.jdt.ui.TypeHierarchy&quot; 
+                relative=&quot;org.eclipse.debug.ui.DebugView&quot; 
+                relationship=&quot;stack&quot;
+                visible=&quot;false&quot;/&gt;
+        &lt;view id=&quot;org.eclipse.search.SearchResultView&quot; 
+                relative=&quot;org.eclipse.debug.ui.ConsoleView&quot; 
+                relationship=&quot;stack&quot;
+                visible=&quot;false&quot;/&gt; 
+    	&lt;viewShortcut id=&quot;org.eclipse.jdt.debug.ui.DisplayView&quot;/&gt;
+  &lt;/perspectiveExtension&gt; 
+&lt;/extension&gt;</pre>
+
+
+<P >The <b>targetID</b> is the id of the perspective to which the plug-in is
+contributing new behavior.&nbsp; The <b>actionSet</b> parameter identifies the <b>id</b>
+of a previously declared action set that should be added to the target
+perspective.&nbsp; This markup is analogous to using<b>
+IPageLayout.addActionSet</b> in the&nbsp;<b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>.</P>
+
+
+<P >Contributing a view to a perspective is a little more involved, since the
+perspective page layout information must be declared.&nbsp; The <b>visible</b>
+attribute controls whether the contributed view is initially visible when the perspective is
+opened.&nbsp; In addition to
+supplying the <b>id</b> of the contributed view, the id
+of a view that already exists in the perspective ( a <b>relative</b>
+view) must be specified as a reference point for placing the new view.&nbsp; The
+<b>relationship</b> parameter specifies the layout
+relationship between the new view and the <b>relative</b>
+view.&nbsp;&nbsp;</P>
+
+
+<ul>
+  <li> <b>stack</b> indicates that the
+view will be stacked with the relative view in a folder</li>
+  <li><b>fast</b> indicates that the view will be shown as a fast
+    view&nbsp;&nbsp;</li>
+  <li> <b>left</b>, <b>right</b>,
+<b>top</b>, or <b>bottom</b> indicate that the new view will be placed beside the <b>relative</b>
+view.&nbsp; In this case, a <b> ratio</b> between 0.0 and 1.0 must be defined, which
+indicates the percentage of area in the <b>relative</b>
+view that will be allocated to the new view.&nbsp;&nbsp;</li>
+</ul>
+
+
+<P >Specifying a <b>perspectiveShortcut</b>
+indicates that another perspective (specified by <b>id</b>)
+should be added to the
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.perspectives.showPerspective")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>Window &gt; Open Perspective...</b></a>
+
+menu of the target
+perspective.&nbsp; This markup is analogous to calling <b>IPageLayout.addPerspectiveShortcut</b>
+in the original perspective definition in the <b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>.&nbsp;
+Plug-ins can also add view shortcuts and new wizard shortcuts in a similar
+manner.&nbsp;&nbsp;</P>
+
+
+<P >You can also specify one or more views as a valid <b>showInPart</b>.&nbsp; The
+views should be specified by the id used in their <b><a href="../reference/extension-points/org_eclipse_ui_views.html">org.eclipse.ui.views</a></b>
+extension contribution.&nbsp;&nbsp; This controls which views are available as
+targets in the <b>Navigate &gt; Show In </b>menu.&nbsp; The ability to specify a
+&quot;show in&quot; view in the extension markup allows you to add your
+newly contributed views as targets in another perspective's &quot;show in&quot;
+menus.&nbsp; See <a href="workbench_perspectives.htm#showin">Linking views and
+editors</a> for more information on &quot;show in.&quot;</P>
+
+
+<P > See <b><a href="../reference/extension-points/org_eclipse_ui_perspectiveExtensions.html">org.eclipse.ui.perspectiveExtensions</a></b>
+for a complete definition of the extension point.</P>
+
+
+<P >&nbsp;</P>
+
+
+
+
+</BODY>
+</HTML>

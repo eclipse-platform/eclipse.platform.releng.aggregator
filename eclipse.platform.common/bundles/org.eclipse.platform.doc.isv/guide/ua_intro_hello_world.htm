@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Contributing a HelloWorld intro Part</title>
+</head>
+<body>
+
+<h2>Contributing a HelloWorld intro Part</h2>
+
+<p>
+ We will now contribute a very basic intro part just to illustrate the steps needed to contribute a part implementation to the Workbench and get it to show up as the welcome page. To do this:</p>
+<ol>
+  <li>use the <em>org.eclipse.ui.intro </em> extension point to register an intro part implementation and bind this intro part to your product.</li>
+  <li>implement the <em>org.eclipse.ui.intro.IIntroPart </em> interface and use this class as the class attribute in the above extension point contribution.</li>
+  <li>run your Eclipse based product with the correct product id. </li>
+</ol>
+<p> Here is the <em>org.eclipse.ui.intro </em>extension point registration needed: </p>
+
+<pre>
+   &lt;extension point="org.eclipse.ui.intro"&gt; 
+      &lt;intro
+            class="org.eclipse.ui.intro.HelloWorldIntroPart"
+            id="org.eclipse.ui.intro.examples.basic001_introId"
+            icon="some_icon.jpg"/&gt;
+      &lt;introProductBinding
+            introId="org.eclipse.ui.intro.HelloWorld_introId"
+            productId="org.eclipse.ui.intro.HelloWorld_product"&gt;
+      &lt;/introProductBinding&gt;
+   &lt;/extension&gt; 
+</pre>
+
+<p>An <em>intro </em> part is registered with the workbench. The class that implements this intro part is <em>org.eclipse.ui.intro..HelloWorldIntroPart </em>. An icon is also registered with the intro part and it will appear at the top right corner of the intro part window. An <em>introProductBinding </em> contribution tells the workbench that the intro part we just created is bound to our product with the id <em>org.eclipse.ui.intro.HelloWorld_product</em>. On startup, the workbench looks for the first intro bound to the current product, and instantiates the class registered with this intro contribution.</p>
+<p>The second step is to implement the <em>org.eclipse.ui.intro.IIntroPart </em> interface. The following is sample code that simply creates a label and centers it in the parent composite. This code can be used to actually create the IntroPart:</p> 
+
+<pre>
+   public void createPartControl(Composite container) {
+        Composite outerContainer = new Composite(container, SWT.NONE);
+        GridLayout gridLayout = new GridLayout();
+        outerContainer.setLayout(gridLayout);
+        outerContainer.setBackground(outerContainer.getDisplay().getSystemColor(
+             SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+        label = new Label(outerContainer, SWT.CENTER);
+        label.setText("WELCOME TO ECLIPSE");
+        GridData gd = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
+        gd.horizontalAlignment = GridData.CENTER;
+        gd.verticalAlignment = GridData.CENTER;
+        label.setLayoutData(gd);
+        label.setBackground(outerContainer.getDisplay().getSystemColor(
+             SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+   }
+</pre>
+
+<p> The third and last step is to make sure you run the correct product. For example, if you are self hosting, create a new runtime-workbench launch configuration, choose the "Run a product" option, and select <em>org.eclipse.ui.intro.HelloWorld_product </em>from the dropdown. <br>
+This is what you will see if you run the above HelloWorld sample:</p>
+<p align="center">	 <img src="images/basicIntro.png" border="0" alt="Image of a basic intro part"></p>
+<p>Note that the intro part is in control of the full real-estate of the window. A more elaborate intro part can be created that interacts with the workbench and progressively reveals the functionality of the product. <br>
+  <br>
+</p>
+
+</body>
+</html>

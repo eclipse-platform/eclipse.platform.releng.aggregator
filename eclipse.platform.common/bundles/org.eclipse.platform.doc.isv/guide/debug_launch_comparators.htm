@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Comparing launch configurations</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h4>Comparing launch configurations</h4>
+<p>We've seen how a plug-in can use named attributes and values to store important data with a
+launch configuration. Since the interpretation of a plug-in's attributes are not known by the platform, 
+an extension point is provided that allows you to supply a comparator for a specific attribute.
+This comparator is used to determine whether attributes of the specified name are
+equal. In many cases, the simple string compare provided by
+java.lang.Object.equals(Object) is suitable for comparing attributes. This
+technique will be used if no comparator has been provided. However, some attribute values
+may require special handling, such as stripping white space values from text
+before comparing for equality. </p>
+<p>Comparators are contributed using the <a href="../reference/extension-points/org_eclipse_debug_core_launchConfigurationComparators.html"><b>org.eclipse.debug.core.launchConfigurationComparators</b></a>
+extension point.&nbsp; </p>
+<p>The Java tools supply launch configuration comparators for comparing program
+source paths and class paths.</p>
+<pre>&lt;extension point = &quot;org.eclipse.debug.core.launchConfigurationComparators&quot;&gt;
+	&lt;launchConfigurationComparator
+		id = &quot;org.eclipse.jdt.launching.classpathComparator&quot;
+		class = &quot;org.eclipse.jdt.internal.launching.RuntimeClasspathEntryListComparator&quot;
+		attribute = &quot;org.eclipse.jdt.launching.CLASSPATH&quot;/&gt;
+	&lt;launchConfigurationComparator
+		id = &quot;org.eclipse.jdt.launching.sourcepathComparator&quot;
+		class = &quot;org.eclipse.jdt.internal.launching.RuntimeClasspathEntryListComparator&quot;
+		attribute = &quot;org.eclipse.jdt.launching.SOURCE_PATH&quot;/&gt;		
+&lt;/extension&gt;</pre>
+<p>Comparators must implement the interface <b>java.util.Comparator</b>.</p>
+</BODY>
+</HTML>

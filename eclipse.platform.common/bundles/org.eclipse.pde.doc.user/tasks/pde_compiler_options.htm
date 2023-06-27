@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2010, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Specifying Compiler Options</title>
+</head>
+<body>
+<h1>Compiler options</h1>
+<p>PDE/Build supports a number of options to control the compiler for individual plug-ins.  For settings related to 
+source and target levels and bootclasspath, see <a href="pde_compilation_env.htm">"Setting the Compilation Environment"</a>.
+</p>
+
+<h2>Warnings and Errors</h2>
+<p>PDE/Build allows specifying custom compile warnings and errors in the build.properties file.  These can be set on a per library basis (a single plug-in can
+contain multiple jar libraries) with the <b>javacWarnings.&lt;library&gt;</b> and <b>javacErrors.&lt;library&gt;</b> options. The values for these properties 
+are given in the "-warn:..." section on the <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/tasks/task-using_batch_compiler.htm#warn">using the batch compiler</a> page (from the Java development user guide).</p>
+
+Example:
+<pre>		javacErrors.. = forbidden,discouraged,
+		javacWarnings.library.jar = deprecation,nullDereference
+</pre>
+
+<h3>Warnings and Errors from Project preferences</h3>
+The JDT project preferences can now also be used during PDE/Build.  PDE/Build itself is not able to read the preference files, but it is able to pass them
+to the JDT compiler which does understand them.
+
+To use this, a plug-in should specify the <b>javacProjectSettings</b> property in its build.properties file.  The value should be:
+<ul>
+<li><tt><b>javacProjectSettings=true</b></tt> :  Use the project setting specified in the default <tt>.settings/org.eclipse.jdt.core.prefs</tt> preferences file.</li>
+<li><tt><b>javacProjectSettings=path/to/jdt.prefs</b></tt> : Use the specified preference file.</li>
+</ul>
+Some projects may wish to use different warning and error settings in the workspace as compared to a releng build.  This allows a more convenient method
+of specifying these settings compared to the "javacWarnings.&lt;library&gt;" property.
+
+<h2>File Encoding</h2>
+PDE/Build can accept custom file encodings on a per library, folder or file basis.
+<ul>
+  <li><span style="font-weight: bold;">javacDefaultEncoding.&lt;library&gt;</span>
+- sets default encoding to use when compiling the given library.</li>
+  <li><span style="font-weight: bold;">javacCustomEncodings.&lt;library&gt;</span>
+- a comma separated list of
+paths and encodings to use when compiling the given library.  When specifying a folder, the encoding is used for everything contained in that folder.  When 
+specifying a file, the encoding is used for just that file.&nbsp;
+Example: <br>
+    <div style="text-align: center;">
+    <pre>javacCustomEncodings.library.jar = src/org/foo[US-ASCII], src/org/foo/bar.java[ISO-8859-1]</pre>
+    </div>
+  </li>
+</ul>
+<h2>Custom Compiler Arguments</h2>
+Custom compiler arguments can now be specified per bundle using the <b>compilerArg</b> property in the bundle's build.properties file.  This property is similar 
+to the <a href="../reference/pde_builder_config.htm">compilerArg</a> property in the builder configuration except that it affects only the single plug-in instead
+of all plug-ins.  The specific arguments here depend on the compiler being used.  The JDT compiler arguments are listed <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/tasks/task-using_batch_compiler.htm">here</a>.
+
+<h2>Compiler Option Precedence</h2>
+There are a number of difference ways to specify different compiler options.  As a general rule, option precedence is as follows:
+<ul>
+<li>javacDefaultEncoding.&lt;library&gt; has precedence over a custom <b>-encoding</b> command line option.</li>
+<li>For general options, an option appearing later on the compiler command line overrides options specified earlier.  The options are provided to the JDT in the following order:
+<ol> 
+<li>The <b>compilerArg</b> property from the builder configuration.  (Affects all bundles).</li>
+<li>The <b>compilerArg</b> property from this plug-in's build.properties. </li>
+<li>The compiler preferences file specified with <b>javacProjectSettings</b>.</li>
+<li>The generated compiler arguments file (javaCompiler.&lt;library&gt;.args) containing file encodings, <b>javacWarnings</b>, <b>javacErrors</b> and access rules.</li> 
+</ol>
+</li>
+</ul>
+
+<h2>Using a Custom Compiler</h2>
+A bundle can now use a custom compiler by setting the <b>compilerAdapter</b> property.  The specified compiler adapter must be available in the ant environment.  The JDT compiler
+adapter used by default is <b>org.eclipse.jdt.core.JDTCompilerAdapter</b>.  One particular reason for specifying an alternate compiler is for Aspect J or Groovy bundles.  Bundles specifying
+a custom compiler adapter may need to also specify some of the following properties:
+<ul>
+<li><b>sourceFileExtensions</b> : A list of extensions that should be considered source. (eg *.java, *.aj, *.groovy).</li>
+<li><b>compilerAdapter.useLog</b> : whether or not to pass "-log" argument to the compiler</li>
+<li><b>compilerAdapter.useArgFile</b> : whether or not to pass the generated javaCompiler.&lt;library&gt;.args argument file.  (Contains access rules, file encodings and warning/error levels).</li>
+</ul>
+</body>
+</html>

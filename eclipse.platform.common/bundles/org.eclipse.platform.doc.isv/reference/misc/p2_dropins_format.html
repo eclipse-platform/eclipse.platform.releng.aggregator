@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<title>The dropins folder and supported file layouts</title>
+</head>
+<body>
+<h1>The dropins folder and supported file layouts</h1>
+<p>Provisioning operations should generally occur using the software updates dialog,
+or by invoking p2 tools or APIs. However, there are situations where
+scripts need to install plugins and features via file system operations,
+and have the new content dynamically discovered by the system either at
+startup, or while running. To support this kind of low-level
+manipulation of the system, p2 supports the notion of watched
+directories. A watched directory is a place where a user or script can
+drop files and have them discovered by p2. Various policies can be
+applied to watched directories to configure when they are checked for
+new content, and whether to eagerly install discovered content.</p>
+
+<p>The Eclipse platform ships with a default watched directory
+called <code>dropins</code>. The dropins folder is configured to be scanned during
+startup. Thus the dropins folder can be used much like the plugins
+directory was used in the past. A subtle twist on old behavior here is
+that plug-ins and features added to the dropins folder are properly
+installed into the system rather than being forced in. This means p2 has
+an opportunity to confirm that the new plug-in doesn't conflict with
+other installed plug-ins, and it could even go out and fetch any missing
+prerequisites of the newly dropped in plug-ins. This also means you can
+later use the GUI to install extra functionality that depends on the
+plug-ins in the dropins folder, since p2 knows about them and can reason
+about their dependencies. In other words, new plug-ins installed via the
+dropins folder behave exactly like plug-ins installed via the user
+interface.</p>
+
+<h2>Supported file layouts</h2>
+<p>The dropins folder supports a variety of layouts, depending on
+the scale of your application and the desired degree of separation of
+its parts. The simplest layout is to just drop plug-ins in either jar or
+directory format directly into the dropins folder:</p>
+<pre>
+<code>
+ eclipse/
+   dropins/
+     org.eclipse.core.tools_1.4.0.200710121455.jar
+     org.eclipse.releng.tools_3.3.0.v20070412/
+       plugin.xml
+       tools.jar
+       ... etc ...
+   ...
+</code>
+</pre>
+<p>You can also drop in the traditional Eclipse application or
+extension layout directly in the dropins folder:</p>
+<pre>
+<code>
+ eclipse/
+   dropins/
+     eclipse/
+       features/
+       plugins/
+</code>
+</pre>
+<p>If you have various different components being dropped in, and
+you want to keep them separate, you can add an additional layer of
+folders immediately below the dropins folder that contain traditional
+Eclipse extensions:</p>
+<pre>
+<code>
+ eclipse/
+   dropins/
+     emf/
+       eclipse/
+         features/
+         plugins/
+     gef/
+       eclipse/
+         features/
+         plugins/
+     ... etc ...
+</code>
+</pre>
+<p>Finally, you can add link files as in the traditional Eclipse
+links folder. The link file format is the same as a <code>java.util.Properties</code> file
+with a key <code>path</code> pointing to the extension location. If the location is not an
+absolute path, then it is considered relative to the Eclipse install directory. The path can
+also start with a variable of the form %PROP% which will be replaced with the
+Java system property called PROP if defined.
+</p>
+<p>There is also
+an optional key named <code>optional</code> whose boolean value indicates whether or not
+the repository is considered optional. A missing optional repository will suppress error messages
+from being printed in the log file.</p>
+<pre>
+<code>
+ eclipse/
+   dropins/
+     emf.link
+</code>
+</pre>
+
+</body>
+</html>

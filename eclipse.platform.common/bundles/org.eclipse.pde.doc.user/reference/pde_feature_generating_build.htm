@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" type="text/css">
+  <title>Feature build configuration</title>
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h3>Feature and Plug-in Build Configuration Properties<br>
+</h3>
+<p>The build mechanism is driven by a build configuration.&nbsp; The
+build configuration for an individual plug-in, fragment, or feature is
+found
+in a <b> build.properties</b> file for the corresponding element.</p>
+<p>PDE project creation wizards generate the <b> build.properties</b>
+file when
+plug-in projects are created. The file contains information on how to
+compile source folders into
+JARs. This information can be indirectly updated in the Runtime page of
+the
+manifest editor. It can also be directly modified using the appropriate
+editor.</p>
+<p>PDE provides a simple editor for the <b> build.properties</b> that
+has form and source views.
+The file itself follows the Java properties format. You need to provide
+a number of
+keys and their corresponding values. Multiple values are separated
+using a comma
+as the delimiter. </p>
+<h4>Common properties</h4>
+<ul>
+  <li><b>bin.includes</b> - lists files that will included in the
+binary version of the plug-in being built;</li>
+  <li><b>bin.excludes</b> - lists files to exclude from the binary
+build;</li>
+</ul>
+<ul>
+  <li><b>qualifier</b> - when the element version number ends with <b>.qualifier</b>
+this indicates by which value ".qualifier" must be replaced. The value
+of the property can either be <b>context</b>, <b>&lt;value&gt;</b> or
+    <b>none</b>. Context will generate a date according to the system
+date, or use the CVS tags when the built is automated. Value is an
+actual value. None will remove ".qualifier". If the property is
+omitted, context is used. (See <a href="../tasks/pde_version_qualifiers.htm">Version Qualifiers</a>.)</li>
+</ul>
+<ul>
+  <li><b>custom=true</b> - indicates that the build script is
+hand-crafted as opposed to automatically generated. Therefore no other
+value is consulted.</li> 	
+</ul>
+<ul>
+  <li><span style="font-weight: bold;">customBuildCallbacks</span> -
+indicates an xml file containing custom targets to use when using this
+feature/plug-in.&nbsp; (See <a href="../tasks/pde_custom_callbacks.htm">Feature
+and Plug-in Custom Build Steps</a>)<br>
+  </li>
+      <li><span style="font-weight: bold;">customBuildCallbacks.failonerror</span> - 
+      sets the subant task's failonerror parameter.  The default is "false".<br>
+  </li>
+    <li><span style="font-weight: bold;">customBuildCallbacks.buildpath</span> -
+     sets the subant task's buildpath parameter.  Use when the location of the custom callbacks file is not
+     relative to the root of the plug-in.<br>
+  </li>
+    <li><span style="font-weight: bold;">customBuildCallbacks.inheritall</span> - sets the subant task's inheritall parameter.  Ant's default is false.<br>
+  </li>
+</ul>
+<h4>Plug-in specific properties</h4>
+<ul>
+  <li><b>source.&lt;library&gt;</b> - lists source folders that will be
+compiled (e.g. <b>source.xyz.jar=src/, src-ant/</b>). If the library
+is specified in your plug-in.xml or manifest.mf, the value should match
+it;</li>
+  <li><b>output.&lt;library&gt;</b> - lists the output folder receiving
+the result of the compilation;</li>
+  <li><b>exclude.&lt;library&gt;</b> - lists the files that should not
+be copied into the library by the compiler;</li>
+  <li> <b>extra.&lt;library&gt;</b> - extra classpaths used to perform
+automated build. Classpath can either be relative paths, or platform
+urls referring to plug-ins and fragments of your development
+environment (e.g. <b>../someplugin/xyz.jar</b>, <b>platform:/plugins/org.apache.ant/ant.jar</b>).
+Platform urls are recommended over relative paths;</li>
+  <li><b>manifest.&lt;library&gt;</b> - indicate the file that will be
+used as a manifest for the library. The file must be located in one of
+the source folder being used as input of the jar.</li>
+</ul>
+<ul>
+  <li><b>src.includes</b> - lists files to include in the source build;</li>
+  <li> <b>src.excludes</b> - lists files to exclude from the source
+build;</li>
+</ul>
+<ul>
+  <li> <b>jars.extra.classpath</b> - <b>(deprecated)</b> same effect
+than extra.&lt;library&gt; except that the entries are applied to all
+libraries;</li>
+  <li> <b>jars.compile.order</b> - defines the order in which jars
+should be compiled (in case there are multiple libraries).</li>
+</ul>
+
+Compiler related options.  See also the <a href="../tasks/pde_compilation_env.htm">Controlling the Compilation Environment</a> and
+<a href="../tasks/pde_compiler_options.htm">Compiler Options</a> pages.
+<ul>
+  <li><span style="font-weight: bold;">jre.compilation.profile</span> -
+set the Environment used to compile this bundle.&nbsp; 
+  </li>
+  <li><span style="font-weight: bold;">javacSource</span> - set the
+source compatibility level for compiling this bundle.&nbsp; Overrides
+jre.compilation.profile.<br>
+  </li>
+  <li><span style="font-weight: bold;">javacTarget</span> - set the
+target .class compatibility level for compiling this bundle.&nbsp;
+Overrides jre.compilation.profile.</li>
+  <li><span style="font-weight: bold;">bootClasspath</span> - set the
+boot classpath to compile this bundle against, Overrides
+jre.compilation.profile.<br>
+  </li>
+</ul>
+<ul>
+  <li><span style="font-weight: bold;">javacWarnings.&lt;library&gt;</span>
+- set the warning options to pass to the compiler.&nbsp; (See the -warn option in
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/tasks/task-using_batch_compiler.htm#warn">Using the batch compiler</a>
+from the Java development user guide).</li>
+<li><span style="font-weight: bold;">javacErrors.&lt;library&gt;</span>
+- set the error options to pass to the compiler.&nbsp; (See the -err option in
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/tasks/task-using_batch_compiler.htm#warn">Using the batch compiler</a>
+from the Java development user guide).</li>
+  <li><span style="font-weight: bold;">javacDefaultEncoding.&lt;library&gt;</span>
+- sets default encoding to use when compiling the given library.</li>
+  <li><span style="font-weight: bold;">javacCustomEncodings.&lt;library&gt;</span>
+- a comma separated list of
+paths and encodings to use when compiling the given library.&nbsp;
+Example: <br>
+    <div style="text-align: center;">
+    <pre>javacCustomEncodings.library.jar = src/org/foo[US-ASCII], src/org/foo/bar.java[ISO-8859-1]</pre>
+    </div>
+  </li>
+  <li><b>javacProjectSettings</b> - A relative path to a preference file specifying properties for the JDT Compiler.  Set to <tt>true</tt> to use the default "<i>.settings/org.eclipse.jdt.core.prefs</i>".</li>
+  <li><b>compilerArg</b> - specify custom compiler arguments</li>
+  <li><b>compilerAdapter</b> - specify a custom compiler adapter to use instead of the default org.eclipse.jdt.core.JDTCompilerAdapter</li>
+  <li><b>compilerAdapter.useLog</b> - true/false: whether or not the custom compiler adapter should receive the -log argument.</li>
+  <li><b>compilerAdapter.useArgFile</b> - true/false: whether or not the custom compiler adapter should receive the generated javaCompiler.&lt;library&gt;.args argument file.</li> 
+  <li><b>sourceFileExtensions</b> - a list of extensions (*.java, *.aj) that should be considered as source when using a custom compiler adapter.</li>
+  
+</ul>
+<p> The values
+defined for these keys ending with "includes" or "excludes" are
+expressed as Ant "patterns". Standard formats give the expected
+results.&nbsp; For example, "*<b>.jar</b>" indicates all jar files in
+the top level directory. The patterns are not deep by default.&nbsp; If
+you want to
+describe all Java files for example, you should use the pattern "<b>**/*.java</b>".&nbsp;&nbsp;
+The pattern "<b>**</b>" matches any number of directory levels.&nbsp;
+Similarly, to describe whole sub-trees, use "<b>xyz/</b>". </p>
+<h4><a name="Feature_specific_properties"></a>Feature specific
+properties</h4>
+<ul>
+	<li><b>root</b> - List the files and folders that must be included in
+the root of the product. See the <a href="../tasks/pde_rootfiles.htm">Rootfiles help page</a> for more detail, incuding the following additional properties:
+    <ul>
+      <li>root.&lt;config&gt;: per configuration rootfiles.</li>
+      <li>root.folder : rootfiles placed in subfolders.</li>
+      <li>root.permissions : perform chmods on rootfiles.</li>
+      <li>root.link : generate softlinks for rootfiles.</li>
+    </ul>
+  </li>
+  <li><b>root.&lt;config&gt;</b> - list the files and folders that must
+be included in the root of the product when it is built for the
+specified configuration. config is composed of the three (3) segments
+of a configuration separated with a dot;</li>
+</ul>
+<ul>
+  <li><b>root.permissions.&lt;permissionValue&gt;</b> - list the files
+and folders to chmod to the given value. Reference to folders must ends
+with a '/';</li>
+  <li><b>root.permissions.&lt;config&gt;.&lt;permissionValue&gt;</b> -
+list the files and folders to chmod to the given value for a specific
+configuration. Reference to folders must ends with '/';</li>
+</ul>
+<ul>
+  <li><b>root.link</b> - list by pairs (separated by a comma) the files
+and folders that need to be symbolicly linked. The first entry indicate
+the source (target in the unix terminology) and the second entry the
+link name;</li>
+  <li><b>root.link.&lt;config&gt;</b> - a comma separated list of pairs
+of files and folders that need to be symbolicly linked for a specific
+configuration. The first entry indicate the source (target in the unix
+terminology) and the second entry the link name;</li>
+</ul>
+<ul>
+  <li><b>generate.feature@&lt;featureId&gt;</b> - indicates that the
+source feature <b>featureId</b> will be the source feature for the
+feature indicated as value of this property. The values listed after
+the first comma indicates elements to be fetched from the
+repository;&nbsp; (See <a href="../tasks/pde_source_generation.htm">Source
+Plugin and Feature Generation</a>)<br>
+  </li>
+  <li><b>generate.plugin@&lt;pluginId&gt;</b> - indicates that the
+source plug-in <b>pluginId</b> will be the source plug-in for the
+indicated as value of this property.</li>
+</ul>
+<ul>
+  <li><span style="font-weight: bold;">significantVersionDigits</span>
+- The number of significant digits used when generating feature version
+suffixes&nbsp; (See <a href="../tasks/pde_version_qualifiers.htm">Version
+Qualifiers</a>)<br>
+  </li>
+  <li><span style="font-weight: bold;">generatedVersionLength</span> -
+The length of the generated feature version suffix.<br>
+  </li>
+</ul>
+The following example has been extracted from the build.properties of
+the org.eclipse.platform feature.
+<pre style="margin-left: 40px;">bin.includes=epl-v10.html,feature.xml,feature.properties,license.html<br><br>root=rootfiles,configuration/<br>root.permissions.755=eclipse<br><br>root.linux.motif.x86=../../plugins/platform-launcher/bin/linux/motif,linux.motif<br>root.linux.motif.x86.link=libXm.so.2.1,libXm.so.2,libXm.so.2.1,libXm.so<br>root.linux.motif.x86.permissions.755=*.so*<br></pre>
+<br>
+</body>
+</html>

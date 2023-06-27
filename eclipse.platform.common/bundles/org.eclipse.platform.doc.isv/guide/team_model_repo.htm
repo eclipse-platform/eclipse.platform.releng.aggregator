@@ -1,0 +1,594 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2000, 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type">
+<meta content="text/css" http-equiv="Content-Style-Type">
+<link type="text/css" charset="ISO-8859-1" href="../book.css"
+	rel="STYLESHEET">
+<title>Repository Roadmap for Logical Model Integration</title>
+<link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+
+<body bgcolor="#ffffff">
+
+
+<h1>Repository Roadmap for Logical Model Integration</h1>
+
+<p>To provide full support for logical models, a repository provider
+can perform the following steps:</p>
+<ol>
+
+	<li>Contribute the appropriate repository operations to elements
+	that adapt to <a href="#ResourceMapping"><code>ResourceMapping</code></a>.</li>
+
+	<li>Ensure that operations performed on resource mappings include
+	all the appropriate model elements and resources by using an <a
+		href="#SyncScope"><code>ISynchronizationScope</code></a> and
+	supporting API.</li>
+
+	<li>Allow model providers to participate in headless merging
+	through the <a href="#AutoMerge"><code>IMergeContext</code></a>
+	interface and supporting API.</li>
+
+	<li>Allow model providers to participate in merge previews by
+	using the <a href="#TeamContent"><code>teamContentProviders</code></a>
+	for the models involved in the merge. A <code>ModelSynchronizeParticipant</code>
+	class is provided to help manage the relationship between the model
+	content, a merge context and the Compare framework.</li>
+
+	<li>Provide access to the history of workspace files through the <a
+		href="#FileHistory"><code>IFileHistoryProvider</code></a> API</li>
+
+	<li>Provide access to remote configurations using the Eclipse File
+	System API in the <em>org.eclipse.core.filesystem</em> plug-in and link
+	this to workspace projects through the <a href="#EFS"><code>ProjectSetCapability</code></a>
+
+	</li>
+	<li>Support logical model element decoration by providing a
+	workspace <code>Subscriber</code> for use with the <a
+		href="#Decoration"><code>SynchronizationStateTester</code></a> API.</li>
+		
+	<li>Allow models to group related changes by implementing the <a
+		href="#ChangeGrouping"><code>IChangeGroupingRequestor</code></a> API.</li>
+</ol>
+
+<p>The following sections describe each of these points in more
+detail. The <a
+ href="http://git.eclipse.org/c/www.eclipse.org/eclipse.git/tree/platform-ui/plugins/org.eclipse.ui.examples.filesystem/">org.eclipse.ui.examples.filesystem</a> 
+  plug-in contain an example that illustrate several of these points.
+  You can check the project out from the Git repository and use it as 
+  a reference while you are reading this tutorial. <em>Disclaimer</em>: The source 
+  code in the example plug-ins may change over time. To get a copy that matches 
+  what is used in this example, you can check out the project using the 3.3 version 
+  tag (most likely R3_3) or a date tag of June 30, 2007.
+</p>
+
+
+<h2><a name="ResourceMapping"></a>Contributing Actions to Resource
+Mappings</h2>
+
+<h3>The Basic Resource Mapping API</h3>
+
+<p>The resource mapping API consists of the following classes:</p>
+<ul>
+	<li><a
+		href="../reference/api/org/eclipse/core/resources/mapping/ResourceMapping.html">ResourceMapping</a>:
+	The class to which logical model elements adapt to indicate that the
+	model corresponds to a set of resources in the workspace. The methods
+	of interest are:
+	<ul>
+		<li><code>Object getModelObject()</code>: The model object from
+		which the mapping was derived (or adapted).</li>
+		<li><code>ResourceTraversal[]
+		getTraversals(ResourceMappingContext, IProgressMonitor)</code>: The resource
+		traversal that cover the resources that constitute the model object.</li>
+	</ul>
+	</li>
+	<li><a
+		href="../reference/api/org/eclipse/core/resources/mapping/ResourceTraversal.html">ResourceTraversal</a>:
+	A <code>ResourceTraversal</code> contains a set of resources and a
+	depth flag that indicates the depth to which the resources in the
+	traversal are associated with the originating model object. Resource
+	traversals are provided to a client by a resource mapping in order to
+	describe the contents of a model in such a way that the client (e.g. a
+	repository provider) can perform its operations in as efficient a means
+	as possible. Methods of interest are:
+	<ul>
+		<li><code>getResources()</code></li>
+		<li><code>getDepth()</code></li>
+	</ul>
+	</li>
+	<li><a
+		href="../reference/api/org/eclipse/core/resources/mapping/ResourceMappingContext.html">ResourceMappingContext</a>:
+	a context that is provided to the resource mapping by the client when
+	obtaining traversals. This context allows the logical model to
+	determine what the remote state of the model is so that the proper
+	resources can be covered by the resource traversals returned by the
+	resource mapping. The use of the <code>ResourceMappingContext</code>
+	and <code><a
+		href="../reference/api/org/eclipse/core/resources/mapping/RemoteResourceMappingContext.html">RemoteResourceMappingContext</a></code>
+	is a bit more complicated and is described <a
+		href="#ResourceMappingContext">later</a>.</li>
+</ul>
+<p>There are two types of plugins that should be interested in
+resource mappings. Those who provide a model that consists of, or is
+persisted in, resources in the workspace and those that want to perform
+operations on resources. The former case will be covered in the <a
+	href="team_model_model.htm">model roadmap</a> and the later case is
+covered in the next section.</p>
+
+<h3>Resource Mappings and Object Contributions</h3>
+
+<p>Plug-ins that contribute extensions to adaptable extension points
+will have to make two changes to support the new <code>ResourceMapping</code>
+APIs:</p>
+<ol>
+	<li>Update any <em>objectContributions</em> of the <a
+		href="../reference/extension-points/org_eclipse_ui_popupMenus.html">popupMenus</a>
+	extension point in their plugin.xml file to target <code>ResourceMapping</code>
+	instead of <code>IResource</code> (for those for which this is
+	appropriate).</li>
+	<li>Update their actions to work on <code>ResourceMapping</code>
+	instead of <code>IResource</code> and respect the depth constraints
+	provided in the traversals.</li>
+</ol>
+<p>Plug-ins that add object contributions to <code>IResource</code>
+can now add them to <code>ResourceMapping</code> instead, if the action
+can apply to multiple resources. Here is an XML snippet that contributes
+a menu action to objects that adapt to resource mappings:</p>
+
+<pre style="background-color: rgb(204, 204, 255);">   &lt;extension
+       point="org.eclipse.ui.popupMenus"&gt;
+      &lt;objectContribution
+            objectClass="org.eclipse.core.resources.mapping.ResourceMapping"
+            adaptable="true"
+            id="org.eclipse.team.ccvs.ui.ResourceMapperContributions"&gt;
+         &lt;enablement&gt;<br>           &lt;adapt type="org.eclipse.core.resources.mapping.ResourceMapping"&gt;<br>              &lt;test <br>                 property="org.eclipse.core.resources.projectPersistentProperty" <br>                 args="org.eclipse.team.core.repository,org.eclipse.team.cvs.core.cvsnature" /&gt;<br>           &lt;/adapt&gt;<br>         &lt;/enablement&gt;<br>         &lt;action<br>               label="%UpdateAction.label"<br>               definitionId="org.eclipse.team.cvs.ui.update"<br>               class="org.eclipse.team.internal.ccvs.ui.actions.UpdateAction"<br>               tooltip="%UpdateAction.tooltip"<br>               menubarPath="team.main/group2"<br>               id="org.eclipse.team.cvs.ui.update"&gt;<br>         &lt;/action&gt;<br>         ...<br>      	&lt;/objectContribution&gt;<br>   &lt;/extension&gt;</pre>
+
+<p>Contributions to <code>ResourceMapping</code> will automatically
+apply to objects that adapt to <code>IResource</code>. This transitive
+association is handled by the Workbench. Filtering of the contributions
+to resource mappings can be done using enablement expressions. An
+expression for filtering by project persistent property has been added
+to allow repository providers to have their menus appear on projects
+that are mapped to their repositories.</p>
+
+<p>Actions that have been contributed to the <code>ResourceMapping</code>
+class will be given a selection that contains one or more <code>ResourceMappings</code>.
+It is the actions responsibility to translate the resource mapping into
+a set of resources to be operated on. This can be done by calling <code>getTraversals</code>
+to get the traversals of the mapping. Traversals are used to allow the
+clients of the traversal to optimize their operations based on the depth
+of the resources being traversed. A client may traverse the resource
+manually or may use the resource and the depth as input into an
+operation that the action delegates to do the work. As an example, if
+the user performs a CVS update on a java package and the java package
+resource mapping maps to a folder of depth one, CVS would issue an
+appropriate command ("cvs update -l" for those who are curious) which
+would perform a shallow update on the folder the package represents.</p>
+
+<p>Although it is possible to obtain a set of traversals directly
+from the selected resource mappings, there are model relationships (or
+repository relationships) that may require the inclusion of additional
+resources or model elements in an operation. The next section describes
+how to ensure that all required resources are included in an operation</p>
+
+<h2><a name="SyncScope"></a>Operation Scope</h2>
+
+<p>For team operations, the selected mappings need to be translated
+into the set of mappings to be operated on. This process involves
+consulting all model providers to ensure that they get included in
+operations on resources that match their enablement rules. The term we
+use to describe the complete set of resource mappings to be operated on
+is the operation <em>scope</em>. The following API has been provided for
+this:</p>
+<ul>
+	<li><code><a
+		href="../reference/api/org/eclipse/team/core/mapping/ISynchronizationScope.html">ISynchronizationScope</a></code>:
+	Interface that defines the API for accessing the scope of the
+	operation. It provides access to all the resource mappings being
+	operated on and the traversals for those mappings as they were
+	calculated during the scope building process.</li>
+	<li><code><a
+		href="../reference/api/org/eclipse/team/core/mapping/ISynchronizationScopeManager.html">ISynchronizationScopeManager</a></code>:
+	Interface that defines the API for creating and managing a scope.</li>
+	<li><code><a
+		href="../reference/api/org/eclipse/team/core/mapping/provider/SynchronizationScopeManager.html">SynchronizationScopeManager</a></code>:
+	Extendable class that provides a default implementation of the <code>ISynchronizationScopeManager</code>
+	API.</li>
+	<li><code><a
+		href="../reference/api/org/eclipse/team/ui/synchronize/ModelOperation.html">ModelOperation</a></code>:
+	Extendable operation class that generates a scope using a provided
+	scope manager and prompts if additional resources or mappings have been
+	included in the operation due to model provider relationships.</li>
+</ul>
+<p>The <em>initialize(IProgressMonitor)</em> method of the <code>SynchronizationScopeManager</code>
+class handles the entire process of converting an input set of resource
+mappings into the complete set of mappings that need to be operated on
+as well as the complete set of traversals that cover these mappings. A
+repository provider can tailor the process by:</p>
+<ol>
+	<li>Providing a <code>RemoteResourceMappingContext</code> for use
+	when obtaining resource traversals from resource mappings.</li>
+	<li>Overriding <code>SynchronizationScopeManager</code> to tailor
+	the scope management process as required.</li>
+</ol>
+<p>The next two sections describe these points in more detail.</p>
+
+<h3><a name="ResourceMappingContext"></a>Remote Resource Mapping
+Context</h3>
+
+<p>In order to guarantee that all necessary resources get included
+in a team operation, the model provider may need the ability to glimpse
+at the state of one or more resources in the repository. For some
+models, this may not be required. For instance, a java package is a
+container visited to a depth of one, regardless of the remote state of
+the model. Given this, a repository provider can easily determine that
+outgoing deletions should be included when committing or that incoming
+additions should be included when updating. However, the resources that
+constitute some logical models may change over time. For instance, the
+resources that constitute a model element may depend of the contents of
+a manifest file (or some other similar mechanism). In order for the
+resource mapping to return the proper traversal, it must access the
+remote contents of the manifest file (if it differs from the local
+contents) in order to see if there are additional resources that need to
+be included. These additional resources may not exist in the workspace
+but the repository provider would know how to make sure they did when
+the selected action was performed.</p>
+<p>In order to support these more complex models, a <code>RemoteResourceMappingContext</code>
+can be passed to the <code>ResourceMapping#getTraversals</code> method.
+When a context is provided, the mapping can use it to ensure that all
+the necessary resources are included in the traversal. If a context is
+not provided, the mapping can assume that only the local state is of
+interest.</p>
+
+<p>The remote resource mapping context provides three basic queries:</p>
+<ul>
+	<li>What type of comparison is being performed: two-way or
+	three-way?
+	<ul>
+		<li>For two-way, does the local contents differ from the remote
+		contents?</li>
+		<li>For three-way, are there local changes and are there remote
+		changes?</li>
+	</ul>
+	</li>
+	<li>What are the contents of the remote (and base for three-way)
+	counterparts of the file?</li>
+	<li>What are the remote members of a folder?</li>
+</ul>
+<p>The answer to the first question above depends on the type of
+operation that is being performed. Typically, updates and merges are
+three-way while comparisons and replace operations (at least for CVS)
+are two-way.</p>
+<p>The Eclipse Team API includes a <code>Subscriber</code> class
+that defines an API for providing the synchronization state between the
+local workspace and a remote server. A <code><a
+	href="../reference/api/org/eclipse/team/core/subscribers/SubscriberResourceMappingContext.html">SubscriberResourceMappingContext</a></code>
+is provided that uses a <code><a
+	href="../reference/api/org/eclipse/team/core/subscribers/Subscriber.html">Subscriber</a></code>
+to access the necessary remote state. Clients that have a <code>Subscriber</code>
+do not need to do any additional work to get a resource mapping context.</p>
+
+<h3>Subclassing SynchronizationScopeManager</h3>
+
+<p>The <code>SynchronizationScopeManager</code> class can be
+subclassed to tailor the scope generation and management process. The
+two main reasons for subclassing the scope manager are:</p>
+<ol>
+	<li>The repository provider needs to include additional resources
+	due to some repository level relationship (e.g. change set). This can
+	be accomplished by overriding the <em>adjustInputTraversals(ResourceTraversal[])</em>
+	method.</li>
+	<li>The synchronization has a longer lifecycle (e.g. Synchronize
+	view vs. dialog) and needs the potential to react to scope changes. The
+	<code><a
+		href="../reference/api/org/eclipse/team/core/mapping/ISynchronizationScopeParticipant.html">ISynchronizationScopeParticipant</a></code>
+	interface defines the API that model providers can use to participate
+	in the scope management process. The <code><a
+		href="../reference/api/org/eclipse/team/core/subscribers/SubscriberScopeManager.html">SubscriberScopeManager</a></code>
+	class is a <code>Subscriber</code> based subclass of <code>SynchronizationScopeManager</code>
+	that involves participants in the scope management process. An example
+	of why this type of process is needed is working sets. If a working set
+	is one of the resource mappings in a scope, the set of traversals
+	covered by the scope would increase if resources were added to the
+	working set.</li>
+</ol>
+
+<h2><a name="AutoMerge"></a>Model-based Merging</h2>
+
+<p>The main repository operation type that requires model
+participation is merging. In many cases, models only need to participate
+at the file level. For this, the <code>IStorageMerger</code> API was
+introduced to allow model providers to contribute mergers that should be
+used to merge files of a particular extension or content type. However,
+in some cases, models may need additional context to participate
+properly in a merge. For this purpose, we introduced the <code>IResourceMappingMerger</code>
+and <code>IMergeContext</code> APIs.</p>
+
+<p>Merge operations are still triggered by actions associated with a
+repository provider. However, once a merge type operation is requested
+by the user, the repository provider needs to involve the model
+providers in the merge process to ensure that the merge does not corrupt
+the model in some way.</p>
+
+<p>There are two main pieces of repository provider API related to
+the model-based merging support.</p>
+<ol>
+	<li>API to describe the synchronization state of the resources
+	involved in the merge.</li>
+	<li>API to allow model providers to merge model elements.</li>
+</ol>
+The following sections describe these two pieces.
+
+<h3>API for Synchronization State Description</h3>
+
+<p>An important aspect of model-based merging is the API used to
+communicate the synchronization state of the resources involved to the
+model provider. The following interfaces are used to describe the
+synchronization state:</p>
+<ul>
+	<li><a
+		href="../reference/api/org/eclipse/team/core/mapping/ISynchronizationContext.html">ISynchronzationContext</a>:
+	provides access to the synchronization state of all resources within
+	the scope of the operation. The following API pieces are used to
+	describe the synchronization state of resources.
+	<ul>
+		<li><a
+			href="../reference/api/org/eclipse/team/core/diff/IDiff.html">IDiff</a>:
+		A generic path-based diff that consist of a diff kind (NO_CHANGE, ADD,
+		REMOVE, CHANGE).</li>
+		<li><a
+			href="../reference/api/org/eclipse/team/core/diff/ITwoWayDiff.html">ITwoWayDiff</a>:
+		A diff that provides more details about a change between two states of
+		an element (CONTENT, MOVE_TO, MOVE_FROM, COPY_FROM, REPLACE).</li>
+		<li><a
+			href="../reference/api/org/eclipse/team/core/diff/IThreeWayDiff.html">IThreeWayDiff</a>:
+		A diff that consists of either a local or remote two-way diff or both
+		and provides a direction description for the change (INCOMING,
+		OUTGOING, CONFLICTING) based on the presence of either or both the
+		local and remote change.</li>
+		<li><a
+			href="../reference/api/org/eclipse/team/core/mapping/IResourceDiff.html">IResourceDiff</a>:
+		A two-way diff that applies to resources and provides access to the
+		before state and after state of files through the <a
+			href="../reference/api/org/eclipse/team/core/history/IFileRevision.html">IFileRevision</a>
+		API.</li>
+		<li><a
+			href="../reference/api/org/eclipse/team/core/diff/IDiffTree.html">IDiffTree</a>:
+		A generic path-based data structure for accessing a tree of diffs.</li>
+		<li><a
+			href="../reference/api/org/eclipse/team/core/mapping/IResourceDiffTree.html">IResourceDiffTree</a>:
+		A resource-based data structure that contains the synchronization
+		state for all resources in the operation scope that are out-of-sync.</li>
+	</ul>
+	</li>
+</ul>
+
+<p>Abstract classes are provided for all these interfaces with the
+convention that the class names match the interface names with the "I"
+prefix removed. The only class that repository providers must override
+is the <code>ResourceDiff</code> class so that appropriate before and
+after file revisions can be provided.</p>
+
+<h3>API for Model Merging</h3>
+
+<p>The <a
+	href="../reference/api/org/eclipse/team/core/mapping/IMergeContext.html">IMergeContext</a>
+interface extends synchronization context with additional methods that
+support merging. Callback methods exist for:</p>
+<ul>
+	<li>Merging one or more diffs.</li>
+	<li>Rejecting the remote changes in one or more diffs</li>
+	<li>Indicating that one or more conflicts have been merged by the
+	model</li>
+	<li>Performing a group of operations while holding an appropriate
+	scheduling rule.</li>
+</ul>
+<p>An abstract <a
+	href="../reference/api/org/eclipse/team/core/mapping/provider/MergeContext.html">MergeContext</a>
+class is provided that contains default implementations for much of the
+merging behavior and also uses the <a
+	href="../reference/api/org/eclipse/team/core/mapping/IStorageMerger.html">IStorageMerger</a>
+to perform three-way merges. A <a
+	href="../reference/api/org/eclipse/team/core/subscribers/SubscriberMergeContext.html">SubscriberMergeContext</a>
+class is also provided which handles the population and maintenance of
+the synchronization state description associated with the merge context.</p>
+
+<p>An operation class, <a
+	href="../reference/api/org/eclipse/team/ui/synchronize/ModelMergeOperation.html">ModelMergeOperation</a>
+is provided which uses the <code>IResourceMappingMerger</code> API to
+perform a model-based merge operation. Subclasses need to override the <code>initializeContext(IProgressMonitor)</code>
+method to return a merge context. The operation uses this context to
+attempt a headless model-based merge. If conflicts exist, the preview of
+the merge is left to the subclass. As we'll see in the next section,
+there is a <a
+	href="../reference/api/org/eclipse/team/ui/synchronize/ModelParticipantMergeOperation.html">ModelParticipantMergeOperation</a>
+that provides preview capabilities using a <a
+	href="../reference/api/org/eclipse/team/ui/synchronize/ModelSynchronizeParticipant.html">ModelSynchronizeParticipant</a>.</p>
+
+
+<h2><a name="TeamContent"></a>Model Content in Team Viewers</h2>
+
+<p>Support for the display of logical models in a team operation is
+provided using the Common Navigator framework which was introduced in
+Eclipse 3.2. Logical models can associate a content extension with a
+model provider using the <em><a
+	href="../reference/extension-points/org_eclipse_team_ui_teamContentProviders.html">org.eclipse.team.ui.teamContentProviders</a></em>
+extension point. Team providers access these content providers through
+the <code>ITeamContentProviderManager</code>.</p>
+
+<p>There are several places where a team provider may wish to
+display logical models:</p>
+<ul>
+	<li>When the scope of an operation has been expanded due to model
+	provider relationships. The <code>ModelOperation</code> class provides
+	a prompt that uses the registered team content providers to inform the
+	user of a scope expansion.</li>
+	<li>When a merge preview is required. The <a
+		href="../reference/api/org/eclipse/team/ui/synchronize/ModelSynchronizeParticipant.html">ModelSynchronizeParticipant</a>
+	class makes use of the team content providers and a merge context to
+	display a merge preview. Team providers can extend this class in
+	several ways to tailor the preview.</li>
+</ul>
+<p>The <code>ModelSynchronizeParticipant</code> provides integration
+into the Synchronize view or any container that can display <code>ISynchronizePage</code>s.
+The participant makes use of both the pre-existing synchronization
+participant capabilities and the Common Navigator capabilities to allow
+for team providers and models to tailor the toolbar, context menu and
+other aspects of the merge preview. The <code>ModelSynchronizeParticipant</code>
+provides the following:</p>
+<ul>
+	<li>A synchronize page that defines the link between a scope
+	manager, merge context and team content providers.</li>
+	<li>Toolbar actions for displaying direction modes (Incoming,
+	Outgoing, Both and Conflicting modes).</li>
+	<li>Toolbar action for cycling through models involved (i.e. Show
+	All, Show Resources, Show Java, etc).</li>
+	<li>Refresh and scheduled refresh actions.</li>
+	<li>Action to open elements in a compare editor.</li>
+	<li>Change Navigation actions.</li>
+	<li>Standard Merge actions (Merge, Overwrite and Mark as Merged) for
+	which models can register handlers and team providers can provide
+	appropriate labels (e.g. Update for CVS).</li>
+</ul>
+
+<p>Here's a checklist of steps for tailoring a model synchronize
+participant for a particular Team provider:</p>
+<ul>
+	<li>Define the participant using the 
+	<em><a
+	href="../reference/extension-points/org_eclipse_team_ui_synchronizeParticipants.html">org.eclipse.team.ui.synchronizeParticipants</a></em>
+	extension point. This will require team providers to create a subclass
+	of <code>ModelSynchronizeParticipant</code></li>
+	<li>Define a viewer for the participant using the 
+		<em><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_viewer.html">org.eclipse.ui.navigator.viewer</a></em>
+	extension point. The viewer definition is used to specify what menu
+	groups appear in the context menu.</li>
+	<li>Override the <em>initializeConfiguration</em> method of the
+	participant in order to set the <code>ISynchronizePageConfiguration.P_VIEWER_ID</code>
+	to the id of the viewer specified in the previous step.</li>
+	<li>Override the <em>createMergeActionGroup</em> to provide a
+	custom subclass of <code>MergeActionGroup</code> in order to tailor the
+	appearance of the merge related actions.</li>
+	<li>If the participant is persistable, override the <em>createScopeManager</em>
+	and <em>restoreContext</em> methods to recreate the scope manager and
+	merge context for the participant when it is restored on startup.</li>
+	<li>Implement a subclass of <code>ModelParticipantMergeOperation</code>
+	for handling the transition from a model-based merge to a preview in a
+	dialog or Synchronize view.</li>
+</ul>
+<p>The following XML snipets illustrate how the CVS participant class
+is registered and how it's viewer is defined.</p>
+<pre style="background-color: rgb(204, 204, 255);">   &lt;extension point="org.eclipse.team.ui.synchronizeParticipants"&gt;
+      &lt;participant
+            name="CVS"
+            icon="$nl$/icons/full/eview16/cvs_persp.gif"
+            class="org.eclipse.team.internal.ccvs.ui.mappings.WorkspaceModelParticipant"
+            id="org.eclipse.team.cvs.ui.workspace-participant"&gt;
+      &lt;/participant&gt;
+   &lt;/extension&gt;
+   
+   &lt;extension point="org.eclipse.ui.navigator.viewer"&gt;
+       &lt;viewer viewerId="org.eclipse.team.cvs.ui.workspaceSynchronization"&gt;
+           &lt;popupMenu
+                allowsPlatformContributions="false"
+                id="org.eclipse.team.cvs.ui.workspaceSynchronizationMenu"&gt; 
+             &lt;insertionPoint name="file"/&gt;
+             &lt;insertionPoint name="edit" separator="true"/&gt;       
+             &lt;insertionPoint name="synchronize"/&gt;
+             &lt;insertionPoint name="navigate" separator="true"/&gt;
+             &lt;insertionPoint name="update" separator="true"/&gt;
+             &lt;insertionPoint name="commit" separator="false"/&gt;
+             &lt;insertionPoint name="overrideActions" separator="true"/&gt;
+             &lt;insertionPoint name="otherActions1" separator="true"/&gt;
+             &lt;insertionPoint name="otherActions2" separator="true"/&gt;
+             &lt;insertionPoint name="sort" separator="true"/&gt;
+             &lt;insertionPoint name="additions" separator="true"/&gt;             
+             &lt;insertionPoint name="properties" separator="true"/&gt;
+          &lt;/popupMenu&gt;
+       &lt;/viewer&gt;
+   &lt;/extension&gt;
+</pre>
+
+<h2><a name="FileHistory"></a>File History</h2>
+<p>A file history API has been added to allow models to access the
+history of files. The file history API consists of the following
+interfaces:</p>
+<ul>
+	<li><a
+		href="../reference/api/org/eclipse/team/core/history/IFileHistoryProvider.html">IFileHistoryProvider</a>:
+	Obtained from a RepositoryProvider, the file history provider allows
+	clients to obtain the file history of a particular file.</li>
+	<li><a
+		href="../reference/api/org/eclipse/team/core/history/IFileHistory.html">IFileHistory</a>:
+	A data structure that allows access to the history of a file</li>
+	<li><a
+		href="../reference/api/org/eclipse/team/core/history/IFileRevision.html">IFileRevision</a>:
+	The description of a single revision or state of a file at a particular
+	point in time in its history.</li>
+</ul>
+<p>Along with this API, a generic file History view has been added.
+This will allow Team providers to display their file/resource history in
+a shared view and also allows models to display model element history
+for elements that do not map directly to files. The History view is a
+page-based view which obtains a page for the selected element in the
+following way:</p>
+<ul>
+	<li>A history page for workspace resources is obtained by adapting
+	the <code>RepositoryProvider</code> associated with the project that
+	contains the resource to an <a
+		href="../reference/api/org/eclipse/team/ui/history/IHistoryPageSource.html">IHistoryPageSource</a>.
+	</li>
+	<li>A history page for other objects is obtained by adapting the
+	object itself to an <code>IHistoryPageSource</code>.</li>
+</ul>
+
+
+<h2><a name="EFS"></a>Project Set Capability</h2>
+
+<p>Methods have been added to <code><a
+		href="../reference/api/org/eclipse/team/core/ProjectSetCapability.html">ProjectSetCapability</a></code> to
+support the translation between a reference string used to identify a
+mapping between a project and remote content and URIs that identify a
+file-system scheme registered with the 
+	<em><a
+	href="../reference/extension-points/org_eclipse_core_filesystem_filesystems.html">org.eclipse.core.filesystem.filesystems</a></em>
+extension point. Team providers can optionally provide support for this
+in order to allow logical models to performing remote browsing and
+project loading.</p>
+
+<h2><a name="Decoration"></a>Decorating Model Elements</h2>
+
+<p>Team providers can decorate model elements by converting their
+lightweight decorators to work for resource mappings in the same way
+object contributions are converted to work for resource mappings.
+However, there is one aspect of logical model element decoration that is
+problematic. If a model element does not have a one-to-one mapping to a
+resource, the model element may not receive a label update when the
+underlying resources change.</p>
+
+<p>To address this issue, the <code><a
+		href="../reference/api/org/eclipse/team/ui/mapping/ITeamStateProvider.html">ITeamStateProvider</a></code> was introduced in order to give model
+providers access to state changes that may affect team decorations. In addition,
+model views can use a <code><a
+		href="../reference/api/org/eclipse/team/ui/mapping/SynchronizationStateTester.html">SynchronizationStateTester</a></code> to determine when the
+labels of logical model elements need to be updated. This API relies on
+the <code>ITeamStateProvider</code> interface to determine when the team state
+of resource has changed and can be passed to a team decorator as part of an <code><a
+		href="../reference/api/org/eclipse/jface/viewers/IDecorationContext.html">IDecorationContext</a></code>.</p>
+		
+<h2><a name="ChangeGrouping"></a>Grouping Related Changes</h2>
+
+Some logical models need to ensure that a set of changed files get committed or checked-in to the repository at the same time.
+To facilitate this, repository providers can adapt their 
+<code><a href="../reference/api/org/eclipse/team/core/RepositoryProviderType.html">RepositoryProviderType</a></code>
+to an instance of 
+<code><a href="../reference/api/org/eclipse/team/core/mapping/IChangeGroupingRequestor.html">IChangeGroupingRequestor</a></code>.
+This API allows models to request that a set of files get committed or checked-in as a single unit.
+		
+</body>
+</html>

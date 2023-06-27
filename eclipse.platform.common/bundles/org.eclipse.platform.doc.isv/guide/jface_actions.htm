@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Actions and contributions
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Actions and contributions (Deprecated)</H2>
+<P >
+The action classes allow you to define user commands independently from their presentation in the UI. This gives you the flexibility to change the presentation of an action in your plug-in without changing the code that actually performs the command once it has been chosen. The contribution classes are used to manage the actual UI items representing the commands. You don't program to the contribution classes, but you will see them in some of the workbench and JFace API.</P>
+
+<H3>
+Actions</H3>
+<P >
+An action (<a href="../reference/api/org/eclipse/jface/action/IAction.html"><b>IAction</b></a>) represents a command
+that can be triggered by the end user. Actions are typically associated with buttons, menu items, and items in tool bars. </P>
+<P >
+Although actions do not place themselves in the UI, they do have UI oriented properties, such as tool tip text, label text,
+and an image. This allows other classes to construct widgets for the presentation of the action.</P>
+<P >
+When the user triggers the action in the UI, the action's run method is invoked to do the actual work. A common pattern in the run method is to query the workbench selections and manipulate the objects that are selected. Another common pattern is to launch a wizard or dialog when an action is chosen. </P>
+<P >
+You should not directly implement the <a href="../reference/api/org/eclipse/jface/action/IAction.html"><b> IAction</b></a> interface. Instead, you should subclass the
+<b><a href="../reference/api/org/eclipse/jface/action/Action.html"> Action</a></b> class. Browse the subclasses of this class to see many of the common patterns for actions. The code below implements the &quot;About&quot; action. It is one of the simpler actions in the workbench.</P>
+<pre>
+   public void run() {
+      new AboutDialog(workbenchWindow.getShell()).open();
+   }
+</pre>
+<P >
+Earlier we saw the workbench interfaces <b><a href="../reference/api/org/eclipse/ui/IViewActionDelegate.html"> IViewActionDelegate</a></b> and
+<b><a href="../reference/api/org/eclipse/ui/IEditorActionDelegate.html">IEditorActionDelegate</a></b>. These interfaces are used when contributing view actions or editor actions to the workbench. The workbench action delegates are initialized with a reference to their associated view or editor. With this knowledge, they can navigate to the workbench page or window, accessing selections or any other information needed to perform the action. </P>
+<P >
+You will implement your own action classes whenever you want to define a command in your plug-in. If you are contributing actions to other views and editors, you will implement action delegates.</P>
+
+
+<H3>
+Contribution items</H3>
+<P >
+A contribution item (<a href="../reference/api/org/eclipse/jface/action/IContributionItem.html"><b>IContributionItem</b></a>) represents the UI portion of an action. More specifically, it represents an item that is contributed to a shared UI resource such as a menu or tool bar.</P>
+<P >
+Contribution items know how to fill a specific SWT widget with the appropriate SWT item that represents the contribution.</P>
+<P >
+You don't have to worry about creating a contribution item when you are
+contributing actions to the workbench UI. This is done on your behalf when the workbench creates UI items for the actions that you have defined.</P>
+
+
+<H3>
+Contribution managers</H3>
+<P >
+A contribution manager (<b><a href="../reference/api/org/eclipse/jface/action/IContributionManager.html">IContributionManager</a></b>) represents a collection of contribution items that will be
+presented in the UI. You can add and insert contribution items using named contribution ids to place the items in the appropriate order. You can also find items by id and remove individual items.</P>
+<P >
+Each implementation of <a href="../reference/api/org/eclipse/jface/action/IContributionManager.html"><b> IContributionManager</b></a> knows how to fill a specific SWT widget with its items. JFace provides contribution managers for
+menus (<b><a href="../reference/api/org/eclipse/jface/action/IMenuManager.html">IMenuManager</a></b>),
+tool bars (<b><a href="../reference/api/org/eclipse/jface/action/IToolBarManager.html">IToolBarManager</a></b>), and status
+lines (<b><a href="../reference/api/org/eclipse/jface/action/IStatusLineManager.html">IStatusLineManager</a></b>).</P>
+<P >
+As a plug-in developer, you do not need to implement these interfaces, but you will see references to some of these managers in API methods.</P>
+
+
+
+</BODY>
+</HTML>

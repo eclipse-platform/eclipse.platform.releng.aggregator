@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Customizing a Headless Build</title>
+</head>
+<body>
+<h1>Customizing a Headless Build</h1>
+<p>There are multiple methods for customizing a headless build:</p>
+<ul>
+<li>Using a customTargets.xml file</li>
+<li>Using an allElements.xml file</li>
+<li>Using a customAssembly.xml file</li>
+<li>Using feature or plug-in custom callbacks.  (See <a href="pde_custom_callbacks.htm">Customizing feature and plug-in builds</a>)</li>
+</ul>
+<p>The exact format of the contents of these files all depend on each other.  Therefore, when using customTargets, allElements or customAssembly customizations, it is recommended to ensure that the templates used for these files all come from the same version of PDE/Build.  New versions of PDE/Build are backward compatible with old versions of these customization scripts.</p>
+<p>Template versions of these scripts are available in the <tt>org.eclipse.pde.build</tt> plug-in under the <tt>templates/headless-build</tt> folder.  To use the customization, simply copy the template into your build configuration directory and edit the appropriate targets.</p>
+
+<h2><a name="custom_targets">customTargets.xml</a></h2>
+<p>The customTargets.xml script is for top level customization of the build process.  It provides ant targets that are called between the major phases of the build.  There are pre and post targets available around each of the following build steps:</p>
+<ul>
+<li>Process p2 repositories</li>
+<li>Get Map files</li>
+<li>Fetch source</li>
+<li>Generate build scripts</li>
+<li>Process and run the build scripts</li>
+<li>Assemble the compiled plug-ins and features</li>
+<li>Package pre-compiled binary plug-ins and features</li>
+</ul>
+<p>To use the customTargets.xml script, simply copy it from the PDE/Build templates directory into your build configuration directory and edit the appropriate ant targets.  The script will be automatically detected and used by the headless build.</p>
+<p>The customTargets.xml script also provides delegation to the allElements.xml script for each of the build phases.</p>
+
+<h2>allElements.xml</h2>
+<p>The allElements.xml script is a kind of delegation script that is used to run the various build steps on a given element (usually a feature).  As with the customTargets.xml, to use these customization steps, copy the template from PDE/Build into your build configuration directory.  In Eclipse 3.4, the target element that will be built can be specified in the top level build configuration build.properties file using the properties <tt>topLevelElementType</tt> and <tt>topLevelElementId</tt>.  The elementType should be set to <tt>feature</tt> and the elementId should be set to the feature-id you wish to build.</p>
+<pre>
+ 	&lt;target name="allElementsDelegator"&gt;
+ 		&lt;ant antfile="${genericTargets}" target="${target}"&gt;
+	 		&lt;property name="type" value="${topLevelElementType}" /&gt;
+	 		&lt;property name="id" value="${topLevelElementId}" /&gt;
+ 		&lt;/ant&gt;
+ 	&lt;/target&gt;
+</pre>
+<p>The allElements.xml also provides targets used during the assembly and packaging phase of the build.  The <tt>defaultAssemble</tt> target will be called to assemble the archives for all platforms.  If desired, custom targets can be defined for individual platforms.</p>
+<p>To use a custom target for a given platform, define a property "<tt>assemble.&lt;element-id&gt;[.&lt;config&gt;]</tt> and a corresponding target.  The property tells PDE/Build to use this custom target instead of the default target.  This custom target can then be used to give the archive a custom name or perform pre or post processing on the archive.</p>
+<p><b>Example:</b></p>
+<pre>
+	&lt;property name="assemble.org.foo.feature.id.linux.gtk.x86" value="true" /&gt;
+ 	&lt;target name="assemble.org.foo.feature.id.linux.gtk.x86"&gt;
+ 		&lt;property name="archiveName" value="acme-RCP-${buildId}-linux.gtk.x86.tar.gz" /&gt;
+ 		&lt;-- custom pre assemble steps for linux.gtk.x86--&gt;
+ 		&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}"/&gt;
+ 		&lt;-- custom post assemble steps for linux.gtk.x86--&gt;
+ 	&lt;/target&gt;
+</pre>
+
+<h2>customAssembly.xml</h2>
+<p>The customAssembly.xml script is new in 3.4.  It provides customization points that will be called during the assembly and packaging phases of the build.  As with customTargets.xml and allElements.xml, to use these customization, copy the template from PDE/Build into your build configuration directory.</p>
+<p>The assemble and packaging scripts generated by PDE/Build perform the following actions:</p>
+<ul>
+<li>Call the gather.bin.parts target in the generated build.xml for all features and plug-ins being built.</li>
+<li>Jar up (and optionally sign) any plug-ins and features that are not shipped as folders</li>
+<li>Copy the final results into a staging area and create the final archive</li>
+</ul>
+<p>The assemble scripts deal with collecting the features and plug-ins that were compiled during the build and the package scripts deal with collecting any pre-compiled binary features and plug-ins.  The customAssembly.xml script provides the following targets before or after each of the above steps:</p>
+<ul>
+<li>gather.bin.parts: Called after each invocation of the gather.bin.parts target on the individual plug-ins and features.</li>
+<li>post.gather.bin.parts: Called after invoking the gather.bin.parts targets for all plug-ins and features. Results exist as folders and have not yet been jarred.</li>
+<li>pre.jarsigning: Called just prior to signing a jar.</li>
+<li>post.jarup: Called after all plug-ins and features have been jarred (and potentially signed). </li>
+<li>pre.archive: Called just before the archive file is built</li>
+</ul>
+
+
+</body>
+</html>

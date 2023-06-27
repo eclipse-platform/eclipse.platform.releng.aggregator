@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2006, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Runtime components</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Runtime components</H2>
+<p> The Eclipse runtime itself is factored into several bundles:
+</p><ul>
+<li><b>org.eclipse.core.contenttype</b> - <a href="runtime_content.htm">Content type mechanism</a></li>
+<li><b>org.eclipse.core.jobs</b> - <a href="runtime_jobs.htm">Concurrency infrastructure</a></li>
+<li><b>org.eclipse.core.net</b> - <a href="network.htm">Network and proxy management infrastructure</a></li>
+<li><b>org.eclipse.equinox.app</b> - <a href="runtime_app_model.htm">Application Model</a></li>
+<li><b>org.eclipse.equinox.common</b> - Common basic functionality</li>
+<li><b>org.eclipse.equinox.preferences</b> - <a href="runtime_preferences.htm">Runtime preferences</a></li>
+<li><b>org.eclipse.equinox.registry</b> - <a href="runtime_registry.htm">Extension registry</a></li>
+<li><b>org.eclipse.equinox.security</b> - <a href="runtime_registry.htm">Security infrastructure</a></li>
+<li><b>org.eclipse.core.runtime</b> - Aggregates the Eclipse runtime bundles into a single capability that can be depended on</li>
+</ul>
+<p> If your plug-in has a dependency on the <b>org.eclipse.core.runtime</b> bundle, then it will continue to 
+run unchanged. However, if you would like to minimize the number of dependencies, then you are able to 
+pick only the runtime bundles that you use.  Dependencies on the runtime bundles may be declared using
+either the <a href="https://docs.osgi.org/javadoc/osgi.core/7.0.0/org/osgi/framework/Constants.html#IMPORT_PACKAGE">Import-Package</a>
+or <a href="https://docs.osgi.org/javadoc/osgi.core/7.0.0/org/osgi/framework/Constants.html#REQUIRE_BUNDLE">Require-Bundle</a></p>
+<p> If you would like to use Import-Package header (rather than Require-Bundle) then you should be 
+aware that the <b><a href="../reference/api/org/eclipse/core/runtime/package-summary.html">org.eclipse.core.runtime</a></b> 
+package is split across several bundles.  The bundles that export a portion of the split package <b>org.eclipse.core.runtime</b>
+use a <a href="https://docs.osgi.org/javadoc/osgi.core/7.0.0/org/osgi/framework/Constants.html#MANDATORY_DIRECTIVE">mandatory</a>
+directive.  The <b>mandatory</b> directive requires importers to specify additional matching attributes in order to 
+successfully wire to the exported package.</p>
+<p>For example, to import only the content of the package provided by 
+the <b>org.eclipse.equinox.common</b> bundle, use this line in the manifest file:</p>
+<pre>
+	Import-Package: org.eclipse.core.runtime; common="split" 
+</pre>
+<p>To import the content of the package from the <b>org.eclipse.equinox.registry</b> and 
+<b>org.eclipse.equinox.common</b> bundles, use:</p>
+<pre>
+	Import-Package: org.eclipse.core.runtime; registry="split"
+</pre>
+<p>The above examples use the mandatory matching attributes <b>common</b> and <b>registry</b> respectively.
+This allows the bundle to get resolved to the desired part of the split package.  To import the complete package then
+do not use any matching attributes:</p>
+<pre>
+	Import-Package: org.eclipse.core.runtime
+</pre>
+<p>This will resolve to the complete package as exported by the <b>org.eclipse.core.runtime</b> aggregate bundle.</p>
+</BODY>
+</HTML>

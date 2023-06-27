@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>org.eclipse.ui.views</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H3>
+org.eclipse.ui.views</H3>
+
+<P >A view is a workbench part that can navigate a hierarchy of information or display properties for an
+object.&nbsp; Only one instance of any given view
+is open in a workbench page.&nbsp; When the user makes selections or other changes in a view,
+those changes are immediately reflected in the workbench. Views are often provided to support a corresponding editor.&nbsp;
+For example, an <b>outline</b> view shows a structured view of the information
+in an editor.&nbsp; A <b>properties</b> view shows the properties of an object
+that is currently being edited.</P>
+
+<P >
+The extension point <b><a href="../reference/extension-points/org_eclipse_ui_views.html">org.eclipse.ui.views</a></b>
+allows plug-ins to add views to the workbench. Plug-ins that contribute a view must register the view in their
+<b> plugin.xml </b> file and provide configuration information about the view, such as its implementation class, the category (or group) of views to which it belongs, and the name and icon that should be used to describe the view in menus and labels.</P>
+<P >
+The interface for views is defined in <b><a href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart</a></b>, but plug-ins
+can choose to extend the
+<b><a href="../reference/api/org/eclipse/ui/part/ViewPart.html"> ViewPart</a></b> class rather than implement an
+<b><a href="../reference/api/org/eclipse/ui/IViewPart.html"> IViewPart</a></b> from scratch.</P>
+<P >
+We implemented a minimal view extension in the hello world example. Now we'll look at one that is aware of other workbench views and responds to user navigation and selection
+changes in the workbench. First,
+let's take a look at the declaration of the extension in the <b>plugin.xml</b>.</P>
+<pre>&lt;extension 
+   point=&quot;org.eclipse.ui.views&quot;&gt;
+      &lt;category
+            id="org.eclipse.ui.examples.contributions.viewCategory"
+            name="%contributions.viewCategory.name"&gt;
+      &lt;/category&gt;
+      &lt;view
+            category="org.eclipse.ui.examples.contributions.viewCategory"
+            class="org.eclipse.ui.examples.contributions.view.InfoView"
+            id="org.eclipse.ui.examples.contributions.view"
+            name="%contributions.view.name"&gt;
+      &lt;/view&gt;
+&lt;/extension&gt;
+</pre>
+<P >
+This should look pretty familiar. We see that a new view, <b>InfoView</b>, is contributed to the workbench. The
+<b>view id</b>, <b>name</b>,
+and
+<b> category</b> are specified as we've seen before.</P>
+<P >
+Let's look at the <b>InfoView</b>. You can show any view in the
+workbench by choosing
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.views.showView")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>Window &gt; Show View &gt; Other...</b></a>
+
+and selecting the view from the <b>Show View</b> list.</P>
+<P >
+When we show the <b>InfoView</b>, a view with a list in it pops up.
+The list is pre-populated with some data.</P>
+
+<img src="images/contributions_window.png" alt="Picture of the workbench, showing the contributions">
+<P >
+We'll start with the familiar <b>createPartControl</b>
+method.&nbsp; As we saw in the Hello World example, this is where the widgets
+that represent a view are created.&nbsp; We'll ignore some of the code to get
+started.</P>
+<pre>
+   public void createPartControl(Composite parent) {
+      viewer = new ListViewer(parent);
+      viewer.setContentProvider(new ContentProvider());
+      viewer.setLabelProvider(new LabelProvider());
+      viewer.addDoubleClickListener(new IDoubleClickListener() {
+         public void doubleClick(DoubleClickEvent event) {
+            editSelection();
+         }
+      });
+      // A service will be providing our input
+      IPersonService service = (IPersonService) getSite().getService(
+         IPersonService.class);
+      viewerInput = new ArrayList(service.getPeople());
+      viewer.setInput(viewerInput);
+      ...
+      // register myself as a selection provider for this view
+      getSite().setSelectionProvider(viewer);
+   }
+</pre>
+<P >
+The view creates and stores a ListViewer and sets the content and label provides.
+It also registers itself as the selection
+provider for this view.
+(The concept of selection provider, label provider, and content provider come
+ from JFace <a href="jface_viewers.htm">viewers</a>.)
+It obtains the service from its
+<b><a href="../reference/api/org/eclipse/ui/IViewSite.html">IViewSite</a></b>, which contains information about the view's context, such as its workbench window,
+its containing page, its local services, and its plug-in.</P>
+<p>
+</p>
+<P >
+We've covered a lot of common workbench concepts by studying this extension. Now we'll move on to some other workbench extensions and examine how your plug-in can further contribute to the workbench UI. </P>
+
+
+</BODY>
+</HTML>

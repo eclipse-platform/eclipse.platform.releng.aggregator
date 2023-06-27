@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Handling errors from a launched program</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Handling errors from a launched program</h3>
+<p>If you have defined your own type of launch configuration, it's likely that
+you will want to handle errors or other status information that arises during the
+running of the program. For example, you may want to prompt or alert the
+user when certain types of errors occur during a launch, or provide information
+messages for certain status changes in the program. Since it's good
+practice to separate UI handling from core function, you do not want to have
+direct references from your launch delegate to status handling classes.</p>
+<p>This problem is addressed by the 
+<a href="../reference/extension-points/org_eclipse_debug_core_statusHandlers.html"><b>org.eclipse.debug.core.statusHandlers</b></a>
+extension point. It allows you to associate a status handler with a
+specific status code. Using this extension point, you can define all of
+the possible status and error codes in your launch delegate and core classes,
+while registering unique handlers for the different status codes from another
+plug-in.</p>
+<p>The extension point does not designate any association between a status
+handler and a launch configuration. It is up to the implementation of the
+launch delegate to detect errors, find the appropriate status handler, and
+invoke it. The extension merely provides a registry so that the status
+handlers can be found for particular status codes. 
+<a href="../reference/api/org/eclipse/debug/core/DebugPlugin.html"><b>DebugPlugin</b></a>
+provides a utility method for obtaining a specific status handler.</p>
+<pre>
+IStatusHandler handler = DebugPlugin.getDefault().getStatusHandler(status);</pre>
+<p>Status handlers should implement <a href="../reference/api/org/eclipse/debug/core/IStatusHandler.html"><b>IStatusHandler</b></a>.
+The status handling class is specified in the extension definition, along with
+its associated status code and the plug-in that is expected to generate the
+status codes.</p>
+<p>The following markup shows how the Java tools declare status handlers:</p>
+<pre>&lt;extension point = &quot;org.eclipse.debug.core.statusHandlers&quot;&gt;
+	&lt;statusHandler
+		id=&quot;org.eclipse.jdt.debug.ui.statusHandler.vmConnectTimeout&quot;
+		class=&quot;org.eclipse.jdt.internal.debug.ui.launcher.VMConnectTimeoutStatusHandler&quot;
+		plugin =&quot;org.eclipse.jdt.launching&quot;
+		code=&quot;117&quot;&gt;
+	&lt;/statusHandler&gt;	
+	...
+&lt;/extension&gt;</pre>
+</BODY>
+</HTML>

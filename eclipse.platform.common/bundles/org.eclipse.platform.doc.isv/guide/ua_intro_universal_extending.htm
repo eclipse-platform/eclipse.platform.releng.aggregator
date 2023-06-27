@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Extending the universal intro</title>
+</head>
+<body>
+
+<h2>Extending the universal intro</h2>
+
+<p>
+When launching the universal Welcome configured as shown above, you will notice 
+that all of the second level page that branch off the root page have an empty 
+content area. This is because shared Welcome does not have content of its own. 
+These areas are populated using intro config extensions.
+</p>
+
+<p>
+The traditional way of contributing config extensions is to specify a full 
+path of the anchor element in the target page. This method is still supported 
+but it has proven to be somewhat fragile. As mentioned before, specifying an 
+exact place where the extension will end up in the target is premature for 
+extension authors. They may not know all the products in which their extension 
+will end up, and therefore don't know where they should appear according to each 
+product's focus. In the universal Welcome, this decision is left to product 
+authors. Extension authors now have the option of specifying an incomplete 
+target path, allowing the product author to fill in the blanks.
+</p>
+
+<p>
+Config extensions that want to use late target path resolution need to 
+fulfill three conditions:
+</p>
+
+<ol>
+	<li>Config extension needs to specify a unique identifier using the 'id' 
+	attribute. Extensions without the id will be ignored. This is important 
+	because id will be used to refer to the extension by the product author.</li>
+	<li>Config extension needs to specify a user-friendly name using the 'name' 
+	attribute. This is important if the customization preference page will be 
+	used because extensions will show up in the UI.</li>
+	<li>The target path should have the following form: "page_id/@" where 'page_id' 
+	is the identifier of the target page. When '/@' is detected in the target 
+	path, an attempt will be made to dynamically resolve the path into the 
+	expected full form.</li>
+</ol>
+
+<p>
+The ability to resolve extension target paths is a new intro support
+feature in Eclipse 3.2 added to make universal Welcome more powerful.
+The feature itself is generic in that it can be used in other Welcome
+implementations, not just the universal one. In Eclipse 3.2,
+CustomizableIntroPart can accept an optional intro customizer class
+that can affect its behavior in several ways. One of the roles of the
+customizer is to perform late target path resolution. Of course, as far
+as product authors are concerned, this is all just implementation
+detail because in universal Welcome implementation, late target path
+resolution is performed using the data file mentioned earlier. This
+file is stored using the org.eclipse.ui.intro/INTRO_DATA preference.
+</p>
+
+<p>
+The 'INTRO_DATA' file uses XML format and allows product authors to control 
+the content of the main Welcome pages. Welcome contribution authors are required 
+to specify only the page Id in their target paths. The rest is defined in this 
+file. The file contains a sequence of 'page' elements, each containing a number 
+of 'group' elements. Group elements specify page-relative path and have 
+contributions for children. Contribution elements are used to specify two 
+aspects:
+</p>
+
+<pre>
+   &lt;extensions&gt;
+      &lt;page id="overview"&gt;
+         &lt;group path="page-content/top-left"&gt;
+            &lt;extension id="foo1" importance="high"/&gt;
+            &lt;extension id="bar"  importance="high"/&gt;
+            &lt;extension id="foo2" importance="medium"/&gt;
+         &lt;/group&gt;
+         &lt;group path="page-content/top-right"&gt;
+            &lt;extension id="foo3" importance="low"/&gt;
+            &lt;extension id="foo4" importance="low"/&gt;
+            &lt;extension id="foo5" importance="callout"/&gt;
+         &lt;/group&gt;
+         &lt;hidden&gt;
+            &lt;extension id="foo6"/&gt;
+            &lt;extension id="foo7"/&gt;
+         &lt;/hidden&gt;
+      &lt;/page&gt;
+      &lt;page id="whatsnew"&gt;
+      ...
+      &lt;/page&gt;
+   &lt;/extensions&gt;
+</pre>
+
+<p>
+In the example above, contributions 'foo1', 'bar' and foo2' will be in the 
+left, and 'foo3', 'foo4' and 'foo5' in the right column on the page. The 
+relative order of contributions is also extracted from this file. In addition, 
+contributions are classified based on the <code>importance</code> attribute that 
+can have four valid values: <b>high</b>, <b>medium</b>, <b>low</b> and <b>
+callout</b>, with <b>low</b> as the default. Each value has matching 
+presentation that makes it stand out on the page. First three are simply 
+different levels of importance according to the product author (note that the 
+same contribution may receive a different importance classification in two 
+separate products). The last one (<b>callout</b>) is used to single out 
+contributions that are of a completely different nature (for example, a 
+contribution that offers links to videos or animation).
+</p>
+
+<p>
+Contributions that are not listed are appended after the listed contributions 
+and assigned a low importance value. This is important for contributions added 
+after the product has shipped - they still need to show up.
+</p>
+
+<p>
+Contributions not relevant to the project can be hidden by explicitly listing 
+them as children of the 'hidden' element.
+</p>
+
+<h3>Contributing into extensions</h3>
+
+<p>
+An extension contributed into one of the root pages can itself contain 
+anchors, providing for others to add content. This causes a problem because the 
+final resolved path of the content in the extension is not known in advance. For 
+this reason, target paths for content in extensions that use late path 
+resolution must itself be resolved:
+</p>
+
+<blockquote>
+	<pre>&lt;?xml version="1.0" encoding="utf-8" ?&gt;
+&lt;introContent&gt;
+   &lt;extensionContent id="extra" name="Extra" alt-style="css/swt.properties" style="css/overview.css" path="overview/@"&gt;
+      &lt;group id="extra-group" style-id="content-group"&gt;
+         &lt;link label="Extra Overview link" url="http://org.eclipse.ui.intro/showPage?id=extraOverview" 
+					  id="extra-overview"&gt;
+      	    &lt;text&gt;Showing the third-level extra page for overview&lt;/text&gt;
+
+         &lt;/link&gt;
+         &lt;anchor id="additions"/&gt;
+      &lt;/group&gt;
+   &lt;/extensionContent&gt;
+&lt;/introContent&gt;</pre>
+</blockquote>
+
+<p>
+In order to contribute into the anchor 'additions' in the extension above, we 
+should use the following path: "overview/@extra/extra-group/additions". The 
+segment '@extra' will be replaced with the resolved path of the extension with 
+the id 'extra' in the 'overview' page. For example, if the extension is placed 
+in the upper left segment of the page, the resolved path will be: 
+"overview/page-content/upper-left/extra-group/additions".
+</p>
+
+</body>
+</html>

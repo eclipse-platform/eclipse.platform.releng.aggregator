@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Syntax coloring
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Syntax coloring</H2>
+<p>Syntax coloring is provided in the platform text framework using a model of damage, repair, and reconciling.&nbsp;
+For
+    each change applied to a document, a presentation reconciler determines
+    which region of the visual presentation should be invalidated and how to
+    repair it.&nbsp; Different strategies can be used for different content
+types in the document.</p>
+<p>Implementing syntax coloring (and doing so with a presentation reconciler) is
+optional.&nbsp; By default, <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>does not install a presentation reconciler since it does not know the
+document model used for a particular editor, and has no generic behavior for
+syntax highlighting.&nbsp;&nbsp;</p>
+<p>In order to use the reconciling classes to implement syntax highlighting, your editor's source
+viewer configuration must be <a href="editors_sourceviewers.htm">configured</a>
+to define a presentation reconciler.&nbsp; Once again, we start with <b>JavaSourceViewerConfiguration</b>
+ to see how a presentation reconciler is defined for our editor.</p>
+
+<pre>public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
+
+	PresentationReconciler reconciler= new PresentationReconciler();
+	...
+	return reconciler;
+}</pre>
+<p>To understand what a presentation reconciler does, we must first look at the
+concepts of damage, repair, and reconciling.</p>
+<h3>Damage, repair, and reconciling</h3>
+<p>As the user modifies text in an editor, parts of the editor must be
+redisplayed to show the changes.&nbsp; Computing the text that must be
+redisplayed is known as computing <b>damage</b>.&nbsp; When syntax coloring is
+involved, the amount of damage caused by an editing operation becomes more
+extensive, since the presence or absence of a single character could change the
+coloring of the text around it.&nbsp;&nbsp;</p>
+<p>Damagers (<b><a href="../reference/api/org/eclipse/jface/text/presentation/IPresentationDamager.html">IPresentationDamager</a></b>)
+  determine the region of a document's presentation which must be rebuilt because 
+  of a document change. A presentation damager is assumed to be specific to a 
+  particular document content type (or region). It must be able to return a damage 
+  region that is valid input for a presentation repairer (<b><a href="../reference/api/org/eclipse/jface/text/presentation/IPresentationRepairer.html">IPresentationRepairer</a></b>).&nbsp; 
+  A repairer must be able to derive all of the information 
+  it needs from a damage region in order to successfully describe the <b>repairs</b> 
+  that are needed for a particular content type.</p>
+<p><b>Reconciling</b> describes the overall process of
+maintaining the presentation of a document as changes are made in the
+editor.&nbsp; A presentation reconciler (<b><a href="../reference/api/org/eclipse/jface/text/presentation/IPresentationReconciler.html">IPresentationReconciler</a></b>)
+monitors changes to the text through its associated viewer.&nbsp; It uses the
+document's regions to determine the content types affected by the change and
+notifies a damager that is appropriate for the affected content type.&nbsp; Once
+the damage is computed, it is passed to the appropriate repairer which will
+construct repair descriptions that are applied to the viewer to put it back in
+sync with the underlying content.&nbsp;</p>
+<p>The classes in <b><a href="../reference/api/org/eclipse/jface/text/reconciler/package-summary.html">org.eclipse.jface.text.reconciler</a></b>
+ define additional support classes for synchronizing a document model with
+external manipulation of the document.</p>
+<p>Presentation reconcilers should be provided with a repairer and
+damager pair for each content type to be found in the document.&nbsp; It is up to each editor to determine the appropriate implementation for a
+presentation reconciler.&nbsp; However, the platform provides support in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
+ for using rule-based document scanners to compute and repair damage.&nbsp;
+Default damagers and repairers are defined in this package.&nbsp; They can be
+used along with the standard reconcilers in <b><a href="../reference/api/org/eclipse/jface/text/presentation/package-summary.html">org.eclipse.jface.text.presentation</a></b>
+to implement syntax coloring by defining scanning rules for the document.</p>
+<h4>Rule based reconciling</h4>
+<p>Now we have enough background to look in detail at the creation of the
+example presentation
+reconciler.&nbsp; Recall that the Java editor example implements a <b>JavaPartitionScanner</b>
+ which partitions the document into content types representing javadoc, multi
+line comments, and everything else.&nbsp;</p>
+<p>For each of these content types, a damager/repairer pair must be
+specified.&nbsp; This is done below using the <b><a href="../reference/api/org/eclipse/jface/text/presentation/PresentationReconciler.html">PresentationReconciler</a></b>
+and the <b><a href="../reference/api/org/eclipse/jface/text/rules/DefaultDamagerRepairer.html">DefaultDamagerRepairer</a></b>.</p>
+<pre>
+	JavaColorProvider provider= JavaEditorEnvironment.getJavaColorProvider();
+	PresentationReconciler reconciler= new PresentationReconciler();
+		
+	DefaultDamagerRepairer dr= new DefaultDamagerRepairer(JavaEditorEnvironment.getJavaCodeScanner());
+	reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
+	reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
+
+	dr= new DefaultDamagerRepairer(new SingleTokenScanner(new TextAttribute(provider.getColor(JavaColorProvider.JAVADOC_DEFAULT))));
+	reconciler.setDamager(dr, JavaPartitionScanner.JAVA_DOC);
+	reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_DOC);
+
+	dr= new DefaultDamagerRepairer(new SingleTokenScanner(new TextAttribute(provider.getColor(JavaColorProvider.MULTI_LINE_COMMENT))));
+	reconciler.setDamager(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
+	reconciler.setRepairer(dr, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
+
+	return reconciler;
+</pre>
+<p> Note that the example provide scanners for each content type.&nbsp;&nbsp;</p>
+<p>The default content type is set up with a <b>JavaCodeScanner</b> so that
+keywords can be detected and colored.&nbsp; The <b>JavaCodeScanner</b> builds
+rules for detecting different kinds of tokens, such as single line comments,
+white space, and words.&nbsp; It describes the colors that should be used for
+words of different token types.&nbsp;&nbsp;&nbsp;</p>
+<p>The other content types are set up with a <b>SingleTokenScanner</b> and given
+a color to be used for tokens in these content types.</p>
+<p>All of the details for damaging and repairing the proper parts of the
+documents according to the scanning rules are handled by <b><a href="../reference/api/org/eclipse/jface/text/rules/DefaultDamagerRepairer.html">DefaultDamagerRepairer</a></b>.&nbsp;
+These details typically don't need to be understood by plug-in code.&nbsp; Your
+plug-in should focus on building a set of rules that are appropriate for
+partitioning and scanning its editor content.</p>
+<h4>Dynamically installing a reconciler</h4>
+<p>The Java editor example provides a subclass of <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b> for installing the presentation reconciler as seen earlier.&nbsp; A
+presentation reconciler can also be installed dynamically on a text viewer using
+<b><a href="../reference/api/org/eclipse/jface/text/presentation/IPresentationRepairer.html">IPresentationReconciler</a></b>
+protocol.&nbsp; There is no
+particular runtime benefit to doing it either way, but putting all of the
+pluggable behavior overrides in a subclass of <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>provides the advantage of consolidating all of the behavioral overrides in one place.&nbsp;
+The dynamic protocol may be useful when different presentation reconcilers are
+attached to a viewer throughout the life of an editor.</p>
+
+
+</BODY>
+</HTML>

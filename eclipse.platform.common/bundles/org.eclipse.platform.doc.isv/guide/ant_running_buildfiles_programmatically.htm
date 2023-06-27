@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Running Ant buildfiles programmatically
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>
+Running Ant buildfiles programmatically</h2>
+<p>
+The Ant support built into Eclipse allows plug-ins to programmatically run Ant buildfiles.
+This is done via the <a href="../reference/api/org/eclipse/ant/core/AntRunner.html"><b>AntRunner</b></a> 
+class included in the <b> org.eclipse.ant.core</b> plug-in.
+</p>
+
+<p>The following code snippet shows an example of how to use the <a href="../reference/api/org/eclipse/ant/core/AntRunner.html"><b>AntRunner</b></a> from within code of another plug-in:</p>
+
+<pre>import org.eclipse.ant.core.AntRunner;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+...
+
+public void runBuild() {
+	IProgressMonitor monitor = ...
+	AntRunner runner = new AntRunner();
+	runner.setBuildFileLocation(&quot;c:/buildfiles/build.xml&quot;);
+	runner.setArguments(&quot;-Dmessage=Building -verbose&quot;);
+	runner.run(monitor);
+}</pre>
+
+<p>If a progress monitor is used, it is made available for the running tasks.
+See <a href="./ant_contributing_task.htm#monitor">Progress Monitors</a> for more details.
+</p><p>Note that only one Ant build can occur at any given time if the builds do not occur in separate VMs. See <a href="../reference/api/org/eclipse/ant/core/AntRunner.html#isBuildRunning()">
+AntRunner.isBuildRunning()</a>;
+</p>
+
+<h3>
+Special care for native libraries if build occurs within the same JRE as the workspace</h3>
+<P >
+Every time an Ant buildfile runs in Eclipse a new classloader is created. Since a library can only be
+loaded by one classloader in Java, tasks making use of native libraries could run into problems during
+multiple buildfile runs. If the previous classloader has not been garbage collected at the time the new
+classloader tries to load the native library, an exception is thrown indicating the problem and the
+build fails. One way of avoiding this problem is having the library load be handled by
+a class inside a plug-in library. The task can make use of that class for accessing native
+methods. This way, the library is loaded by the plug-in classloader and it does not run into the
+load library conflict.
+</P>
+
+
+<P >
+&nbsp;</P>
+
+
+</BODY></HTML>

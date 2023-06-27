@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008, 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Reusing parts of the UI</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Reusing parts of the UI</H2>
+<p>
+You may reuse the p2 UI in its entirety, or you may pick and choose which aspects of the UI you want to include in your application.
+</p>
+<h3>Reusing the Eclipse SDK UI in its entirety</h3>
+<p>If your goal is to simply use the same update UI used in the SDK inside your RCP app, very few modifications are required. You'll 
+need to include the org.eclipse.equinox.p2.user.ui feature in your application.  This will add the following UI bundles to your 
+application (in addition to all of the p2 core and other required bundles):</p>
+<ul>
+<li>org.eclipse.equinox.p2.ui</li>
+<li>org.eclipse.equinox.p2.ui.sdk</li>
+<li>org.eclipse.equinox.p2.ui.sdk.scheduler</li>
+</ul>
+
+<p>The contributions made in the <b>org.eclipse.equinox.p2.ui.sdk</b> assume that the application has defined a <b>Help</b> menu and
+an <b>additions</b> group for adding menu contributions.
+</p>
+<p>
+A sample RCP Mail application which shows this kind of reuse can be found 
+<a href="http://git.eclipse.org/c/equinox/rt.equinox.p2.git/tree/examples/org.eclipse.equinox.p2.examples.rcp.sdkui/">
+here</a>.</p>
+<p><img border="0" src="images/p2reuse.png" alt="Example RCP Application with p2 UI" >
+</p>
+<h3>Reusing the Eclipse SDK UI without automatic updating</h3>
+<p>
+If you want to use the SDK UI, but do not wish to add automatic update support, the application is modified as above.  
+However, the following bundles can be eliminated from the product:</p>
+<ul>
+<li>org.eclipse.equinox.p2.ui.sdk.scheduler</li>
+<li>org.eclipse.equinox.p2.updatechecker</li>
+</ul>
+
+<p>
+A sample RCP Mail application which shows how to do this can also be found 
+<a href="http://git.eclipse.org/c/equinox/rt.equinox.p2.git/tree/examples/org.eclipse.equinox.p2.examples.rcp.sdknoautoupdates/">here</a>.  
+</p>
+<h3>Modifying the UI contributions</h3>
+<p>
+If you want to include p2 update functionality in the UI, but you don't want these items to appear in exactly the 
+same way as they do in the SDK, you can provide your own bundle that makes p2 UI contributions in lieu of the SDK bundle.  
+This allows you to simply rearrange the way users encounter the install/update functionality, or provide more precise 
+control of what can be done by the user.  For example, you may wish to expose a subset of functionality, such as 
+permitting updating, but not allowing the user to uninstall, install, or revert configurations.  
+</p>
+<p>The general approach for this kind of reuse is as follows:</p>
+<ul>
+<li>Decide which p2 UI bundles to include in your product</li>
+<li>
+<ul>
+<li>Always include <b>org.eclipse.equinox.p2.ui</b></li>
+<li>If you wish to use automatic update checking, include <b>org.eclipse.equinox.p2.updatechecker</b></li>
+<li>If you wish to reuse the SDK UI for automatic update checking (the same pref page, popup, etc.), then you can also include 
+<b>org.eclipse.equinox.p2.ui.sdk.scheduler</b></li>
+</ul>
+</li>
+<li>Your application must replace the functionality provided by <b>org.eclipse.equinox.p2.ui.sdk</b> according to what functionality 
+is needed. </li>
+</ul>
+
+<p>
+Use the <b>org.eclipse.equinox.p2.ui.sdk</b> bundle as a model when determining which contributions to make.  For example, if you are exposing 
+user preferences, and you are including the SDK's automatic update support (and pref page), then you probably want the automatic 
+update preferences to appear underneath your application's update preferences. If so, then you'll want to use the same preference page 
+ID as used by <b>org.eclipse.equinox.p2.ui.sdk</b> so that the automatic update preference page contribution falls underneath it.
+</p>
+<p>
+The <b>IHandler</b> classes in <b>org.eclipse.equinox.p2.ui.sdk</b> invoke the update and install function.  If you are simply 
+rearranging the menus in your application, you can copy these handler classes and command contributions to your bundle and 
+revise the menu contributions as you wish.  Or you can invoke the UI in a completely different way.
+</p>
+<p>The <b>org.eclipse.ui.about.installationPages</b> contributions made by the SDK UI provide access to update functionality.  
+Consider replacing or modifying the installation page contributions if some of the actions are not relevant.
+</p>
+</BODY>
+</HTML>

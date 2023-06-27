@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Developing with Secure Storage</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Developing with Secure Storage</H2>
+
+<h4>Central Classes and Interfaces</h4>
+
+<p>The functionality of secure storage is exposed via APIs of the <b>org.eclipse.equinox.security</b> bundle. 
+
+The <b><a href="../reference/api/org/eclipse/equinox/security/storage/package-summary.html">
+org.eclipse.equinox.security.storage</a></b> package contains several classes and interfaces that are likely 
+going to serve as a starting point.</p>
+
+<p>The <a href="../reference/api/org/eclipse/equinox/security/storage/SecurePreferencesFactory.html">
+<b>SecurePreferencesFactory</b></a> can be used to obtain the root node of the secure preferences. The 
+<a href="../reference/api/org/eclipse/equinox/security/storage/SecurePreferencesFactory.html#getDefault()">
+<b>SecurePreferencesFactory#getDefault()</b></a> method will return default secure preference root node. 
+If you prefer your secure storage to be isolated from the rest of the application, you can use 
+<a href="../reference/api/org/eclipse/equinox/security/storage/SecurePreferencesFactory.html#open(java.net.URL, java.util.Map)">
+<b>SecurePreferencesFactory#open(URL location, Map options)</b></a> method to open a secure storage corresponding to 
+the location of your choice. This method also takes a map of optional hints that can be used to influence 
+the behavior of this instance of secure storage.</p>
+
+<p>The restrictions put on the node names are similar to the 
+<a href="https://docs.osgi.org/javadoc/osgi.cmpn/7.0.0/org/osgi/service/prefs/Preferences.html" title="Preferences specification in org.osgi.service.prefs"><b>OSGi Preferences</b></a>: 
+no double forward slashes, no trailing forward slash. In addition, node names can only contain printable ASCII characters. 
+If you need to use a string that does not fit those restrictions, the 
+<a href="../reference/api/org/eclipse/equinox/security/storage/EncodingUtils.html">
+<b>EncodingUtils</b></a> class can be used to convert the string into a compliant form.</p>
+
+<p>The functionality provided by the nodes is described by the 
+<a href="../reference/api/org/eclipse/equinox/security/storage/ISecurePreferences.html">
+<b>ISecurePreferences</b></a> interface. You'll find this interface is very similar to the OSGi Preferences with 
+a few minor differences. One of the differences is that many methods use 
+<a href="../reference/api/org/eclipse/equinox/security/storage/StorageException.html">
+<b>StorageException</b></a> to provide more detailed description of exceptions.</p>
+
+<h4>Debugging</h4>
+
+<p>The contents of the default secure storage can be seen in the 
+   <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.equinox.security.ui.storage)")'>
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+  <strong>General &gt; Security &gt; Secure Storage</strong></a> 
+preferences page. To enable modifications of the contents of secure storage, enable debug options of 
+the <b>org.eclipse.equinox.security.ui</b> bundle. Enabling debug options will add context menus to the preferences 
+page tree and to the values table. The context menus allow removal and addition of nodes and values to be performed 
+directly from the preferences page.</p>
+
+<p>You'll notice that context menus are disabled for the <i>&quot;org.eclipse.equinox.secure.storage&quot;</i> 
+node. This node and its children are reserved for secure storage use and should not be modified directly.</p>
+
+</BODY>
+</HTML>

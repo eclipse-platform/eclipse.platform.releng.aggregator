@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Refresh providers
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Refresh providers</H2>
+<P >
+The <a href="../reference/extension-points/org_eclipse_core_resources_refreshProviders.html"><b>org.eclipse.core.resources.refreshProviders</b></a> 
+extension point allows plug-ins to register and implement their own mechanisms for monitoring the external file system
+and refreshing the workspace appropriately.  This extension point is intended for plug-ins that implement
+specialized, often native, schemes for monitoring file system changes.</P>
+<p>
+The plug-in fragment <b>org.eclipse.core.resources.win32</b> implements a native refresh monitor based on
+file system callbacks.  A more naive refresh monitor based on polling is defined for other platforms.
+</p>
+<p>The following snippet shows the definition for this extension in the <b>org.eclipse.core.resources.win32</b>
+fragment.
+</p>
+<pre>   &lt;extension
+         id="win32"
+         point="org.eclipse.core.resources.refreshProviders"&gt;
+      &lt;refreshProvider
+            name="%win32MonitorFactoryName"
+            <b>class="org.eclipse.core.internal.resources.refresh.win32.Win32RefreshProvider"</b>&gt;
+      &lt;/refreshProvider&gt;
+   &lt;/extension&gt;
+</pre>
+<p>The <b>class</b> attribute must be a class that extends 
+<b><a href="../reference/api/org/eclipse/core/resources/refresh/RefreshProvider.html">RefreshProvider</a></b>.
+This class is responsible for installing a monitor on a specific resource and its resource subtree if it is a 
+project or folder.  The monitor must implement 
+<b><a href="../reference/api/org/eclipse/core/resources/refresh/IRefreshMonitor.html">IRefreshMonitor</a></b>.
+</p>
+
+
+</BODY>
+</HTML>

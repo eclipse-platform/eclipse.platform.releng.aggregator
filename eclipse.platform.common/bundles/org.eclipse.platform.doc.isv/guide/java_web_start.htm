@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>
+Deploying eclipse based application with Java Web Start
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Deploying eclipse based application with Java Web Start</h2>
+<p>
+Applications built on Eclipse can be deployed using Java Web Start.</p><p>
+Java Web Start "is an application-deployment technology that gives you the power to launch full-featured 
+applications with a single click from your web browser".</p>
+ <p>
+The prerequisites to start eclipse from Java Web Start are:</p>
+<ul>
+<li> The deployed application must be based on Eclipse 3.1 or later; </li>
+<li> All deployed plug-ins must be jar'ed;</li>
+<li> All plug-ins must be signed since the application needs full permission from the client.</li>
+</ul> 
+The following steps describe how to setup a Java Web Start site serving up a feature based RCP application. 
+These steps are for applications based on eclipse 3.3. Instructions on how to achieve the same for eclipse
+3.1 and 3.2 can respectively be found in the 3.1 and 3.2 SDKs.
+
+<h3>Step 1, creating a wrapper feature</h3>
+<ul>
+<li> Create a feature including all the features that are listed in your product definition;</li>
+<li> Ensure that the <tt>org.eclipse.equinox.launcher</tt> plug-in is in the feature or in one of the included feature;</li>
+</ul>
+
+<h3> Step 2, exporting the wrapper feature</h3>
+Note. Before proceeding with this step make sure to have a key store available. Eclipse does not provide any
+facility to create key stores. You can use the <tt>keytool</tt> application that
+comes with the JDK. In addition, ensure that the eclipse you are developing 
+with is running on a Java SDK instead of a JRE. If this constraint is not satisfied, the jar signing will fail.
+
+<ul>
+<li> Select the wrapper feature and do
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.file.export(exportWizardId=org.eclipse.pde.ui.featureExportWizard)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>File &gt; Export &gt; Plug-in Development &gt; Deployable Features</b></a>.
+
+In the wizard, select the wrapper feature, 
+choose the "directory" option to export your JNLP application to, and check the option "package features and 
+plug-ins as individual JAR archives". On the next page of the wizard, fill in the information relative to your key store 
+in the "Signing JAR Archives" section. Then in the "JNLP section", enter the name of the server that will serve up your 
+application and the level of JRE required to start your application. That last value will be used to in the generated JNLP 
+files to fill in the value of <code>&lt;j2se version="1.4+" /&gt; </code>. Click finish.</li>
+ 
+<li> Once the export is done you should have the following structure on disk
+<pre>
+site/   <i>(The root of your jnlp site)</i>
+  features/
+    WrapperingFeature_1.0.0.jar
+    WrapperingFeature_1.0.0.jnlp
+    com.xyz.abc_1.0.0.jar
+    com.xyz.abc_1.0.0.jnlp
+    ...
+  plugins/
+    org.eclipse.core.runtime_3.1.0.jar
+    com.foo.baz_1.0.0.jnlp
+    org.eclipse.equinox.launcher_&lt;version&gt;.jar
+    ...
+</pre>
+</li>
+</ul>
+
+<h3>Step 3, creating the main JNLP file</h3>
+<p>A Java Web Start application is described by JNLP files. They replace the <tt>eclipse.exe</tt> and the <tt>config.ini</tt>
+files by some equivalent mechanism. For example, JNLP has its own mechanism to control splash screen, ways
+to pass parameters and define what constitutes the application.</p>
+<p>
+When you did the export, all the simple JNLP files have been created, so you are left with writing
+the main file that will control the application. Because the majority of the main file is common to all 
+applications, it is recommended to start from the following self documented template.</p>
+<p>
+On the site serving up your application, the file must be located at the root.
+Once you will be done editing this file, your application will be ready.</p>
+<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;jnlp 
+    spec="1.0+" 
+    codebase="http://myCompany.org/jnlpServer" 
+    href="mail.jnlp"&gt; &lt;!-- URL to the site containing the jnlp application. It should match the value used on  export. Href, the name of this file --&gt;
+  &lt;information&gt;
+    &lt;!-- user readable name of the application --&gt;
+    &lt;title&gt; Mail Application &lt;/title&gt;  
+    &lt;!-- vendor name --&gt;
+    &lt;vendor&gt;My company&lt;/vendor&gt;
+    &lt;!-- vendor homepage --&gt; 
+    &lt;homepage href="My company website" /&gt; 
+    &lt;!-- product description --&gt;
+    &lt;description&gt;This is a mail client&lt;/description&gt; 
+    &lt;icon kind="splash" href="splash.gif"/&gt;
+  &lt;/information&gt;
+ 
+  &lt;!--request all permissions from the application. This does not change--&gt;
+  &lt;security&gt;
+    &lt;all-permissions/&gt;
+  &lt;/security&gt;
+ 
+  &lt;!-- The name of the main class to execute. This does not change--&gt;
+  &lt;application-desc main-class="org.eclipse.equinox.launcher.WebStartMain"&gt;
+    &lt;argument&gt;-nosplash&lt;/argument&gt;
+  &lt;/application-desc&gt;
+ 
+  &lt;resources&gt;
+    &lt;!-- Reference to the launcher jar. The version segment must be updated to the version being used--&gt;
+    &lt;jar href="plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar"/&gt;
+ 
+    &lt;!-- Reference to all the plugins and features constituting the application --&gt;
+    &lt;!-- Here we are referring to the wrapper feature since it transitively refers to all the other plug-ins  necessary --&gt;
+    &lt;extension 
+        name="Wrapper feature"
+        href="features/Wrappering_1.0.0.jnlp"/&gt;
+ 
+    &lt;!-- Information usually specified in the config.ini --&gt;
+    &lt;property 
+        name="osgi.instance.area" 
+        value="@user.home/Application Data/mail"/&gt;
+    &lt;property 
+        name="osgi.configuration.area" 
+        value="@user.home/Application Data/mail"/&gt;
+        
+    &lt;!-- The id of the product to run, like found in the overview page of the product editor --&gt;
+    &lt;property 
+        name="eclipse.product" 
+        value="mail.product"/&gt;
+  &lt;/resources&gt;
+
+  &lt;!-- Indicate on a platform basis which JRE to use --&gt; 
+  &lt;resources os="Mac"&gt;
+    &lt;j2se version="1.5+" java-vm-args="-XstartOnFirstThread"/&gt;
+  &lt;/resources&gt;
+  &lt;resources os="Windows"&gt;
+    &lt;j2se version="1.4+"/&gt;
+  &lt;/resources&gt;
+  &lt;resources os="Linux"&gt;
+    &lt;j2se version="1.4+"/&gt;
+  &lt;/resources&gt;
+&lt;/jnlp&gt;
+</pre>
+<p>Tip: once you have created this file, you can store it in the wrapper feature in a folder such that on every export you will get the complete structure.
+This folder needs to be referenced from the <tt>root</tt> property of the build.properties (e.g: <tt>root=&lt;folderContainingMainJNLPFile&gt;/</tt>).
+</p>
+
+<h3>Plug-ins based application</h3>
+<p>Even though your RCP application does not use features, Java Web Start-ing it is possible.</p><p>
+To do so, it is recommended to create a wrapper feature in order to facilitate the creation of the 
+main jnlp file and ease the deployment. This wrapper feature will list all the plug-ins of your application. Once the feature has been updated
+copy the generated JNLP file and modify it to become your main JNLP file.</p>
+
+<h3>Miscellaneous</h3>
+<h4>Java Web Start on linux</h4>
+<p>
+When an eclipse application is started with Web Start on Linux the default windowing system is motif. 
+If you want to run GTK, you need to set the property osgi.ws to &quot;gtk&quot; in the main jnlp file.
+For example you can add:
+</p>
+<pre>
+  &lt;resources os="Linux"&gt;
+        &lt;property name="osgi.ws" value="gtk"/&gt;
+  &lt;/resources&gt;
+</pre>
+<h3>Known limitations</h3>
+<ul>
+<li>Eclipse Update and Java Web Start<br>
+Those two deployment technologies can work together under the following restrictions:
+plug-ins installed by Java Web Start can not be updated by Update and vice-versa. Features and plug-ins installed
+by Java Web Start can't be referred in the prerequisites of features that needs to be installed by Update;</li>
+<li> Request to exit the application with a restart code are ignored;</li>
+<li>On the Mac, you can only use Web Start with Java 1.5 or later.</li>
+</ul>
+</BODY>
+</HTML>

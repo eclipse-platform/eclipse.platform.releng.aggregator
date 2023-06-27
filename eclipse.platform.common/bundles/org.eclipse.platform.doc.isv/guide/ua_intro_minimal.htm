@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2007, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Defining intro content</title>
+</head>
+<body>
+
+<h2>Defining a minimal intro configuration</h2>
+
+<p>
+The first stage in creating a new intro configuration is to add the necessary 
+extension points and create a minimal amount of content. This stage is often the 
+hardest. Below are the steps required to create a minimal intro configuration 
+and have it show up in a product.</p>
+
+<h3>
+Create a plugin project and add extension points</h3>
+
+<p>
+Create an new plugin project &quot;org.eclipse.intro.minimal&quot; which has a dependency 
+on org.eclipse.ui.intro. In the plugin manifest editor add the extension 
+org.eclipse.ui.intro. Edit plugin.xml until it looks like this:</p>
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;?eclipse version=&quot;3.2&quot;?&gt;
+&lt;plugin&gt;
+    &lt;extension
+         point=&quot;org.eclipse.ui.intro&quot;&gt;
+      &lt;intro
+            class=&quot;org.eclipse.ui.intro.config.CustomizableIntroPart&quot;
+            icon=&quot;$nl$/icons/image_obj.gif&quot;
+            id=&quot;org.eclipse.intro.minimal&quot;
+            label=&quot;Minimal Intro&quot;/&gt;
+   &lt;/extension&gt;
+   &lt;extension
+         point=&quot;org.eclipse.ui.intro.config&quot;&gt;
+      &lt;config
+            content=&quot;$nl$/introContent.xml&quot;
+            id=&quot;org.eclipse.intro.minimal.config&quot;
+            introId=&quot;org.eclipse.intro.minimal&quot;&gt;
+         &lt;presentation
+               home-page-id=&quot;root&quot; standby-page-id=&quot;standby&quot;&gt;
+            &lt;implementation
+                  kind=&quot;html&quot;&gt;
+            &lt;/implementation&gt;
+         &lt;/presentation&gt;
+      &lt;/config&gt;
+   &lt;/extension&gt;
+&lt;/plugin&gt;</pre>
+
+<h3>
+Create the intro config file</h3>
+
+<p>
+Create a file introcontent.xml in the plugin project org.eclipse.intro.minimal 
+with these contents.</p>
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+&lt;introContent&gt;
+    &lt;!-- Root page --&gt;
+    &lt;page id=&quot;root&quot; style=&quot;html/style.css&quot;  style-id=&quot;page&quot;&gt;	    
+        &lt;title style-id=&quot;intro-header&quot;&gt;Minimal Intro&lt;/title&gt;
+        &lt;link url=&quot;http://org.eclipse.ui.intro/switchToLaunchBar&quot; label=&quot;Go to theWorkbench&quot; id=&quot;workbench&quot; /&gt;
+        &lt;link label=&quot;Link to tutorials&quot; url=&quot;http://org.eclipse.ui.intro/showPage?id=tutorials&quot; id=&quot;tutorials&quot; /&gt;
+    &lt;/page&gt;
+	
+    &lt;!-- Standby page --&gt;
+    &lt;page id=&quot;standby&quot; style=&quot;html/style.css&quot; style-id=&quot;page&quot;&gt;
+   		 &lt;title style-id=&quot;intro-header&quot;&gt;Standby Page&lt;/title&gt; 
+    &lt;/page&gt;    
+    
+    &lt;!-- Tutorials page --&gt;
+	&lt;page id=&quot;tutorials&quot; style= &quot;html/style.css&quot; style-id=&quot;page&quot;&gt;
+        &lt;title style-id=&quot;intro-header&quot;&gt;Tutorials&lt;/title&gt;	
+        &lt;text&gt;This page under construction&lt;/text&gt;
+    &lt;/page&gt;   
+&lt;/introContent&gt;</pre>
+<h3>Define a product binding</h3>
+<p>In this step we need to determine the product which is being used and create 
+an intro product binding and modify its plugin.xml file. If you are using the 
+Eclipse SDK this will be in the plugin project org.eclipse.sdk&nbsp; which can 
+be found in the plugins directory of your Eclipse installation. The following 
+directions assume you are using the Eclipse SDK, with slight modifications these 
+will work equally well for an RCP or other Eclipse based product. Open 
+plugin.xml and locate the following section:</p>
+<pre>&lt;extension
+	 point=&quot;org.eclipse.ui.intro&quot;&gt;
+      &lt;introProductBinding
+            introId=&quot;org.eclipse.ui.intro.universal&quot;
+            productId=&quot;org.eclipse.sdk.ide&quot;&gt;
+      &lt;/introProductBinding&gt;
+&lt;/extension&gt;</pre>
+<p>Change the introId to &quot;org.eclipse.intro.minimal&quot; so that the extension code 
+looks like this.</p>
+<pre>&lt;extension
+		point=&quot;org.eclipse.ui.intro&quot;&gt;
+      &lt;introProductBinding
+            introId=&quot;org.eclipse.intro.minimal&quot;
+            productId=&quot;org.eclipse.sdk.ide&quot;&gt;
+      &lt;/introProductBinding&gt;
+    &lt;/extension&gt;</pre>
+<h3>Test and Customize</h3>
+<p>Launch a new Eclipse application from your workbench.&nbsp; Your intro screen 
+may already be showing (depending on the state when Eclipse last exited). If it 
+is not showing select Help/Minimal Intro from the workbench menu. By editing the 
+file html/style.css you can modify the appearance of your intro. You can now 
+extend your intro either by editing the intro.xml file or by adding config 
+extensions.</p>
+
+</body>
+</html>

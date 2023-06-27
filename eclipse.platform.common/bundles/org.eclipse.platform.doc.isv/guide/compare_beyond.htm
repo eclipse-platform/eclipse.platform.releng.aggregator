@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Advanced compare techniques</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Advanced compare techniques</H2>
+
+<p>
+This section provides additional information about advanced API in the compare
+plug-in.</p>
+
+<h3>Writing compare operations</h3>
+
+<p>A compare operation must be implemented as a subclass of
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>.&nbsp;
+A
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>
+runs a (potentially lengthy) compare operation
+under progress monitor control, creates a UI for drilling-down into the
+compare results, tracks the dirty state of the result in case of merge,
+and saves any changes that occurred during a merge.</p>
+
+<p>
+
+<a href="../reference/api/org/eclipse/compare/CompareUI.html"><b>CompareUI</b></a>
+defines the entry point to initiate a configurable
+compare operation on arbitrary resources. The result of the compare is
+opened into a compare editor where the details can be browsed and edited
+in dynamically selected structure and content viewers.</p>
+<p>
+
+<a href="../reference/api/org/eclipse/compare/NavigationAction.html"><b>NavigationAction</b></a>
+is used to navigate (step) through the individual
+differences of a 
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>.</p>
+<p>
+
+<a href="../reference/api/org/eclipse/compare/CompareConfiguration.html"><b>CompareConfiguration</b></a>
+configures various UI aspects
+of compare/merge viewers like title labels and images, or whether a side
+of a merge viewer is editable. It is passed to the
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>
+on creation.</p>
+<p>
+
+When implementing a hierarchical compare operation as a subclass of
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>,
+clients must provide a tree of objects where each
+node implements the interface
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>.
+This interface is used by the hierarchical differencing engine
+(<a href="../reference/api/org/eclipse/compare/structuremergeviewer/Differencer.html"><b>Differencer</b></a>) to walk the tree.
+<br>
+In addition every leaf of the tree must implement the
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+interface in order to give the differencing engine access to its stream content.</p>
+<p>
+
+<a href="../reference/api/org/eclipse/compare/BufferedContent.html"><b>BufferedContent</b></a>
+provides a default implementation
+for the
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+and
+<a href="../reference/api/org/eclipse/compare/IContentChangeNotifier.html"><b>IContentChangeNotifier</b></a>
+interfaces.
+Its subclass
+<a href="../reference/api/org/eclipse/compare/ResourceNode.html"><b>ResourceNode</b></a>
+adds an implementation for the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>
+and
+<a href="../reference/api/org/eclipse/compare/ITypedElement.html"><b>ITypedElement</b></a>
+interfaces
+based on platform workbench resources
+(<a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>). 
+It can be used without modification as the input to the differencing engine.</p>
+
+
+<h3>Compare functionality outside of compare editors</h3>
+
+
+<p>If you want to use compare functionality outside of the standard compare editor 
+(for example, in a dialog or wizard) the compare plug-in provides additional helper
+classes.</p>
+
+<p>
+
+<a href="../reference/api/org/eclipse/compare/CompareViewerPane.html"><b>CompareViewerPane</b></a>
+is a convenience class which provides
+a label and local toolbar for a compare viewer (or any other subclass of a <a href="jface_viewers.htm"> JFace
+viewer</a>).&nbsp; Its abstract subclass
+<a href="../reference/api/org/eclipse/compare/CompareViewerSwitchingPane.html"><b>CompareViewerSwitchingPane</b></a>
+supports <b>dynamic viewer switching</b>, that is the viewer installed in the pane is dynamically 
+determined by the pane's input object.</p>
+
+<h3><a name="Single">Comparing a single file in an editor</a></h3>
+
+<p>The <a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a> supports
+the comparison of an arbitrary file/folder structure which can be displayed in an editor, dialog or view. 
+However, the specific case of comparing a single file in an editor warrants special handling because, in that case, the
+desired behavior should be close to that of editing the file. So, for this purpose a subclass of CompareEditorInput
+has been provided. The <a href="../reference/api/org/eclipse/team/ui/synchronize/SaveableCompareEditorInput.html">
+<b>SaveableCompareEditorInput</b></a> class provides this capability and has the following features:</p>
+<ul>
+<li>provides a static method <code>createFileElement</code> for creating a type element that represents a file.</li>
+<li>supports the use of shared documents (i.e. file buffers).</li>
+<li>supports the workbench Saveables API.</li>
+<li>auto-closes when changes are resolved.</li>
+<li>initializes asynchronously.</li>
+</ul>
+
+<h3><a name="Patch">Working with patches</a></h3>
+
+<p>The <a href="../reference/api/org/eclipse/compare/patch/ApplyPatchOperation.html"><b>ApplyPatchOperation</b></a> provides
+the ability to launch the Apply Patch wizard programmatically. The pages shown by the wizard are determined using the inputs to the operation.
+The class also contains the static method <code>parsePatch</code> which can be used by clients to deal with patches in a custom manner.
+
+</p>
+</BODY>
+</HTML>

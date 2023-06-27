@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2007, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Creating a custom filtered item selection dialog</title>
+</head>
+<body>
+
+<h2>Creating a custom filtered items selection dialog</h2>
+<p>In this example, we will contribute a basic search dialog to illustrate the steps 
+needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/dialogs/FilteredItemsSelectionDialog.html">
+<b> FilteredItemsSelectionDialog</b></a>.</p>
+
+<ol>
+	<li>
+	Create a new Plug-in Project using Hello, world template. 
+	</li>
+	<li>
+	Create a class extending <em>org.eclipse.ui.dialogs.FilteredItemsSelectionDialog</em>.
+	Let's name it <em>FilteredResourcesSelectionDialogExample</em>.
+	</li>
+	<li>
+	Choose a source of  the resources that will be used during filtering. In our 
+	example we will generate our own set of random strings as follows:
+	<pre>
+   private static ArrayList resources = new ArrayList();
+   
+   static {
+      generateRescourcesTestCases('A', 'C', 8, ""); //$NON-NLS-1$
+      generateRescourcesTestCases('a', 'c', 4, ""); //$NON-NLS-1$
+   }
+
+   private static void generateRescourcesTestCases(char startChar, char endChar, int length, String resource){
+      for (char ch = startChar; ch &lt;= endChar; ch++) {
+         String res = resource + String.valueOf(ch);
+         if (length == res.length()) 
+            resources.add(res);
+         else if ((res.trim().length() % 2) == 0)
+            generateRescourcesTestCases(Character.toUpperCase((char)(startChar + 1)), Character.toUpperCase((char)(endChar + 1)), length, res);
+         else 
+            generateRescourcesTestCases(Character.toLowerCase((char)(startChar + 1)), Character.toLowerCase((char)(endChar + 1)), length, res);
+      }
+   }
+</pre></li>
+	<li>
+	Now, let's implement abstract methods from the <em>FilteredItemsSelectionDialog</em>
+	class.
+	<ul>
+		<li><em>createExtendedContentArea(Composite)</em>: This method
+		creates an extra content area located above the details. For now,
+		we will just return null because we don't need any extra fields for this simple
+		example: 
+		<pre>
+   protected Control createExtendedContentArea(Composite parent) {
+      return null;
+   }</pre></li>
+		<li><em>createFilter()</em>: Creates a new instance of a filter.
+		In the simplest implementation you should also extend <em>
+		FilteredItemsSelectionDialog.ItemsFilter </em> and implement the abstract
+		methods. Eg.: <pre>
+   protected ItemsFilter createFilter() {
+      return new ItemsFilter() {
+         public boolean matchItem(Object item) {
+            return matches(item.toString());
+         }
+         public boolean isConsistentItem(Object item) {
+            return true;
+         }
+      };
+   }</pre></li>
+		<li><em>
+		fillContentProvider(FilteredItemsSelectionDialog.AbstractContentProvider,
+		FilteredItemsSelectionDialog.ItemsFilter,
+		org.eclipse.core.runtime.IProgressMonitor)</em>: Fills the content provider
+		with matching items. Eg.: <pre>
+   protected void fillContentProvider(AbstractContentProvider contentProvider,
+      ItemsFilter itemsFilter, IProgressMonitor progressMonitor)
+         throws CoreException {
+      progressMonitor.beginTask("Searching", resources.size()); //$NON-NLS-1$
+      for (Iterator iter = resources.iterator(); iter.hasNext();) {
+         contentProvider.add(iter.next(), itemsFilter);
+         progressMonitor.worked(1);
+      }
+      progressMonitor.done();
+   }</pre></li>
+
+		<li><em>getDialogSettings()</em>: Returns the settings object that stores
+		information about how the dialog information is persisted. This method can't
+		return null, so we'll just return a simple settings object: 
+		<pre>
+   private static final String DIALOG_SETTINGS = "FilteredResourcesSelectionDialogExampleSettings";	
+		
+   protected IDialogSettings getDialogSettings() {
+      	IDialogSettings settings = Activator.getDefault().getDialogSettings()
+				.getSection(DIALOG_SETTINGS);
+		if (settings == null) {
+			settings = Activator.getDefault().getDialogSettings()
+					.addNewSection(DIALOG_SETTINGS);
+		}
+		return settings;
+   }</pre></li>
+
+		<li><em>getElementName(Object)</em>: Returns a name for the given
+		object. This is used to check duplicates. <pre>
+   public String getElementName(Object item) {
+      return item.toString();
+   }</pre></li>
+		
+		<li><em>getItemsComparator()</em>: Returns a comparator used to
+		sort items. In our example we will just use standard string comparison:<pre>
+   protected Comparator getItemsComparator() {
+      return new Comparator() {
+         public int compare(Object arg0, Object arg1) {
+            return arg0.toString().compareTo(arg1.toString());
+         }
+      };
+   }</pre></li>
+
+		<li><em>validateItem(Object)</em>: Validates that the item is a valid
+		selection.  In our example we just return an OK status, because all items
+		are valid:<pre>
+   protected IStatus validateItem(Object item) {
+      return Status.OK_STATUS;
+   }</pre></li>
+
+	</ul>
+	</li>
+	<li>
+	Add title of dialog and set simple implementation of <em>SelectionHistory</em> on dialog:<pre>
+	public FilteredResourcesSelectionDialogExample(Shell shell, boolean multi) {
+	   super(shell, multi);
+	   setTitle("Filtered Resources Selection Dialog Example");
+	   setSelectionHistory(new ResourceSelectionHistory());
+	}
+	
+	private class ResourceSelectionHistory extends SelectionHistory {
+	   protected Object restoreItemFromMemento(IMemento element) {
+		  return null; 
+	   }
+	   protected void storeItemToMemento(Object item, IMemento element) {
+	   }
+	}</pre></li>
+	<li>
+	Change <em>run(IAction)</em> method from <em>SimpleAction</em> to:<pre>
+	public void run(IAction action) {
+	   Shell shell = new Shell();
+	   FilteredItemsSelectionDialog dialog = new FilteredResourcesSelectionDialogExample(shell, true);
+	   dialog.setInitialPattern("a");
+	   dialog.open();
+	}</pre></li>	
+	<li>
+	Change tooltip of SimpleAction from <em>"Hello, Eclipse world"</em> to <em>"Filtered Items Selection Dialog Example"</em>.
+	</li>
+	<li>
+	Run Eclipse with created plug-in.
+	</li>
+	<li>
+	The resulting dialog looks as follows:
+	<p><img
+		src="images/filteredResourcesSelectionDialogExample.png" border="0"
+		alt="Screen shot of a simple search dialog"></p>
+	</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Custom widgets</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h3>Custom widgets</h3>
+
+<P>You may want to extend SWT by implementing your own custom widget. SWT itself provides a package,
+<strong><a href="../reference/api/org/eclipse/swt/custom/package-summary.html">org.eclipse.swt.custom</a></strong>,
+which contains custom controls that are not in the core set of SWT controls but are
+needed to implement the platform workbench.</P>
+
+<table border="1" width="600">
+<colgroup>
+    <col width="34%">
+    <col width="66%">
+</colgroup>
+<tr>
+<th><div CLASS="CellHeading">Control</div></th>
+<th><div CLASS="CellHeading">Purpose</div></th>
+</tr>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/CBanner.html">CBanner</a></strong></td>
+<td>CBanner is used in the workbench to layout the toolbar area and
+perspective switching toolbar.</td>
+</tr>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/CCombo.html">CCombo</a></strong></td>
+<td>Similar to Combo, but is vertically resizable allowing it to fit inside table cells.</td>
+</tr>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/CLabel.html">CLabel</a></strong></td>
+<td>Similar to Label, but supports shortening of text with an ellipsis. Also supports
+a gradient effect for the background color as seen in the active workbench view.
+Does not support wrapping.</td>
+</TR>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/CTabFolder.html">CTabFolder</a></strong></td>
+<td>Similar to TabFolder, but supports additional configuration of the visual
+appearance of tabs (top or bottom) and borders.</td>
+</TR>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/CTabItem.html">CTabItem</a></strong></td>
+<td>Selectable user interface object corresponding to a tab for a page in a
+CTabFolder.</td>
+</TR>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/SashForm.html">SashForm</a></strong></td>
+<td>Composite control that lays out its children in a row or column arrangement
+and uses a Sash to separate them so that the user can resize them.</td>
+</TR>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/ScrolledComposite.html">ScrolledComposite</a></strong></td>
+<td>Composite control that scrolls its contents and optionally stretches its
+contents to fill the available space.</td>
+</TR>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/StyledText.html">StyledText</a></strong></td>
+<td>Editable control that allows the user to type text.  Ranges of text inside
+the control can have distinct colors and font styles.</td>
+</TR>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/ViewForm.html">ViewForm</a></strong></td>
+<td>ViewForm is used in the workbench to position and size a view's label/toolbar/menu local bar.</td>
+</tr>
+</table>
+
+
+
+<h4>Implementing a custom widget</h4>
+
+<p>Once you've determined that you need a custom widget and have decided which
+platforms must be supported, you can consider several implementation techniques
+for your widget. These techniques can be mixed and matched depending on what
+is available in the underlying OS platform.</p>
+
+
+<h4>Native implementation</h4>
+
+<p>If your application requires a native widget that is not provided by SWT,
+you will need to implement it natively. This may be a platform widget, a third
+party widget, or any other widget in a platform shared library.  A complete
+example of a native custom widget implementation can be found in
+<a href="http://www.eclipse.org/articles/Article-Writing%20Your%20Own%20Widget/Writing%20Your%20Own%20Widget.htm">Creating
+Your Own Widgets using SWT</a>.</p>
+
+
+<h4>Combining existing widgets</h4>
+
+<p>Widgets can be combined to form widgets that are more sophisticated.  For
+example, a Combo can be implemented using a text entry widget along with a
+button and a drop-down list.  To implement a combined widget, you create a
+subclass of
+<a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>
+and manage the children internally.</p>
+
+<p>A simple example can be found in
+<a href="../reference/api/org/eclipse/swt/custom/CCombo.html"><strong>CCombo</strong></a>.</p>
+
+<h4>Custom drawn implementation</h4>
+
+<p>In some cases, you don't have any native code or existing widgets that help
+you in the implementation of your new widget. This means you must draw the
+widget yourself in the handler for the Paint event.  Although this technique
+can become quite complicated, it has the advantage of producing a completely
+portable implementation.</p>
+
+<p>Custom drawn controls are implemented by subclassing the
+<a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a> or
+<a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>.
+Subclass <a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a>
+if your widget will not contain any child controls.</p>
+
+<P>The internal implementation of a custom drawn widget usually involves these
+major tasks:</P>
+
+<ul>
+  <li>Create any graphics objects needed in your constructor and store them in
+      an instance variable. Register a listener for the <strong>dispose</strong>
+      event on your canvas or composite so that you can free these objects
+      when the widget is destroyed.</li>
+  <li>Add a <strong>paintListener</strong> to your canvas or composite and
+      paint the widget according to your design. For complex widgets, a lot
+      of work goes into optimizing this process by calculating and repainting
+      only what's absolutely necessary.</li>
+  <li>Ensure that any API calls that affect the appearance of your widget
+      trigger a repaint of the widget. In general, you should use
+      <strong>redraw</strong> to damage your widget when you know you must
+      repaint, rather than call your internal painting code directly. This
+      gives the platform a chance to collapse the paint you want to generate
+      with any other pending paints and helps streamline your code by funneling
+      all painting through one place.</li>
+  <li>If your widget defines events in its API, determine what low level
+      <a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a> or
+      <a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>
+      events will trigger your widget's events. For example, if you have a
+      clicked event, you will want to register a mouse event on your canvas and
+      perform calculations (such as hit testing) to determine whether the mouse
+      event in your canvas should trigger your widget event.</li>
+</ul>
+
+<P>Many of the widgets implemented in the
+<a href="../reference/api/org/eclipse/swt/custom/package-summary.html"><strong>org.eclipse.swt.custom</strong></a>
+use this approach. A simple example can be found in
+<a href="../reference/api/org/eclipse/swt/custom/CLabel.html"><strong>CLabel</strong></a>.</P>
+
+<P>Further information on custom widgets can be found in
+<a href="http://www.eclipse.org/articles/Article-Writing%20Your%20Own%20Widget/Writing%20Your%20Own%20Widget.htm">Creating
+your own widgets using SWT.</a></P>
+
+</BODY>
+</HTML>

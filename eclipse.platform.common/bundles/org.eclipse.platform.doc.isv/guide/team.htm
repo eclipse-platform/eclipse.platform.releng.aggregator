@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type">
+<meta content="text/css" http-equiv="Content-Style-Type">
+<link type="text/css" charset="ISO-8859-1" href="../book.css" rel="STYLESHEET">
+<title>Team support</title>
+<link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+
+<body bgcolor="#ffffff">
+<h1>Version Control (Team) support</h1>
+<p>The Eclipse version control support, via the team plug-ins, defines API that allow plug-ins to
+integrate the function of a versioning and configuration management
+repository. The function provided by a repository fundamentally affects
+the user workflow, since there are additional steps for retrieving
+files, comparing their content with local content, versioning them, and
+returning updated files to the repository. The goal of the team plug-in
+API is to be passive enough to allow repository plug-in providers to
+define their own workflow so that users familiar with their product can
+use the platform in a similar fashion and provide support for workflows
+that we have found are useful for team plug-ins. </p>
+<p>
+This goal is accomplished by supplying several building blocks:
+</p>
+<ul>
+  <li><a href="team_provider_repository.htm">Repository Providers</a>
+    <blockquote> A repository provider allows synchronization of
+workspace resources with a remote location. At a minimum it allows
+pushing resources in the workspace to a remote location and pulling
+resources from a remote location into the workspace. A repository
+provider is associated with a project and controls the resources in the
+project by optionally providing a <a
+ href="../reference/api/org/eclipse/core/resources/team/FileModificationValidator.html">FileModificationValidator
+      </a>and <a
+ href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html">IMoveDeleteHook</a>.
+There is only one repository provider associated with each project. A
+user associates a repository provider with a project by providing a <a
+ href="../reference/api/org/eclipse/team/ui/IConfigurationWizard.html">IConfigurationWizard</a>.
+Repository providers can also participate in exporting and importing of
+projects into the workspace via the team project set feature. To
+support this a repository provider should implement a <a
+ href="../reference/api/org/eclipse/team/core/ProjectSetCapability.html">ProjectSetCapability</a>.<br>
+    </blockquote>
+  </li>
+  <li><a href="team_resources.htm">Resource Management</a>
+    <blockquote> Allows other plug-ins to indicate special handling of resources 
+      with respect to team operations. The repository provider can mark resources 
+      as team-private which essentially hides the resource from other plug-ins. 
+      This is done via the <a href="../reference/api/org/eclipse/core/resources/IResource.html#setTeamPrivateMember(boolean)">IResource#setTeamPrivateMember</a> 
+      method and is commonly done to hide repository provider specific meta-files 
+      from the user. Also, builders will often mark build output as derived which 
+      is a hint to a repository provider that the resource is transient and could 
+      be ignored by the repository provider. A provider can check this flag on 
+      a resource via the <a href="../reference/api/org/eclipse/core/resources/IResource.html#isDerived()">IResource#isDerived</a> 
+      method.<br>
+      <br>
+      In addition, other plug-ins can add provide hints to the repository provider 
+      about file type information via the <a
+ href="../reference/extension-points/org_eclipse_team_core_fileTypes.html">org.eclipse.team.core.fileTypes</a> 
+      extension and about common files that should be ignored by the repository 
+      via the <a
+ href="../reference/extension-points/org_eclipse_team_core_ignore.html">org.eclipse.team.core.ignore</a> 
+      extension.<br>
+    </blockquote>
+  </li>
+</ul>
+<ul>
+  <li><a href="team_synchronize.htm">Synchronization Support</a>
+    <blockquote> Synchronize support provides classes and interfaces
+for managing dynamic collections of synchronization information (<a
+ href="../reference/api/org/eclipse/team/core/synchronize/SyncInfo.html">SyncInfo</a>,
+      <a href="../reference/api/org/eclipse/team/core/synchronize/SyncInfoSet.html">SyncInfoSet</a>).
+This support helps you manage information about variants of the
+resources in the workspace. For example, with FTP you could store
+timestamps for the latest remote file and the base for the currently
+loaded resource. Synchronization support provides APIs to help manage
+and persist resource variants and display synchronization state to the
+user.<br>
+    </blockquote>
+  </li>
+    <li><a href="team_model.htm">Support for Logical Model Integration</a>
+    <blockquote> The logical model integration support defines API that allows 
+      logical models to participate in team operations. In model based views, 
+      model providers can use this support in order to have team decorations and 
+      operations appear on their model elements. In resource based views (e.g. 
+      Resource Navigator), model providers can use this support to validate that 
+      operations performed on resources will not corrupt the model and to ensure 
+      that all the resources that constitute a model element are included in team 
+      operations. For team merge operations, the API allows model providers to 
+      use model semantics during merge operations and to participate in the preview 
+      of merge operation. The description of the support for logical model integration 
+      is divided into a <a href="team_model_repo.htm">Repository Roadmap for Logical 
+      Model Integration</a> and a <a href="team_model_model.htm">Model Roadmap 
+      for Logical Model Integration</a>.<br>
+    </blockquote>
+  </li>
+</ul>
+
+<p>The UI support is also structured passively.&nbsp;Placeholders for
+team provider actions, preferences, and properties are defined by the team
+UI plug-in, but it's up to the team plug-in provider to define these UI
+elements.&nbsp;The team UI plug-in also includes a simple, extendable
+configuration wizard that lets users associate projects with
+repositories.&nbsp;Plug-ins can supply content for this wizard that let
+the user specify repository specific information.
+</p>
+<p>Multiple repository providers can coexist peacefully within the
+platform.&nbsp;In fact, it's even possible to have different client
+implementations for the same repository installed.</p>
+
+</body>
+</html>

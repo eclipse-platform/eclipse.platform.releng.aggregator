@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Project sets</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Project sets</h3>
+<p>Since the resources inside a project under version control are kept in the
+repository, it is possible to share projects with team members by sharing a
+reference to the repository specific information needed to reconstruct a project
+in the workspace.&nbsp; This is done using a special type of file export for <b>team
+project sets</b>.&nbsp;&nbsp;</p>
+<p><img src="images/projectset.png" alt="" border="0" ></p>
+<p>&nbsp;</p>
+<p>In 3.0, API was added to <a href="../reference/api/org/eclipse/team/core/ProjectSetCapability.html">ProjectSetCapability</a> 
+  to allow repository providers to declare a class that implements project saving 
+  for projects under their control.&nbsp; When the user chooses to export project 
+  sets, only the projects configured with repositories that define project sets 
+  are shown as candidates for export. This API replaces the old project set serialization 
+  API (see below). </p>
+<p>The project set capability class for a repository provider is obtained from 
+  the <a href="../reference/api/org/eclipse/team/core/ProjectSetCapability.html">RepositoryProviderType</a> 
+  class which is registered in the same extension as the repository provider. 
+  For example:</p>
+<pre>&lt;extension point="org.eclipse.team.core.repository"&gt;
+    &lt;repository
+          typeClass=&quot;org.eclipse.team.internal.ccvs.core.CVSTeamProviderType&quot;
+          class=&quot;org.eclipse.team.internal.ccvs.core.CVSTeamProvider&quot;
+          id=&quot;org.eclipse.team.cvs.core.cvsnature&quot;&gt;
+    &lt;/repository&gt;
+&lt;/extension&gt;</pre>
+<p>Prior to 3.0, The <a href="../reference/extension-points/org_eclipse_team_core_projectSets.html"><b>org.eclipse.team.core.projectSets</b></a> 
+  extension point allowed repository providers to declare a class that implements 
+  project saving for projects under their control.&nbsp; When the user chooses 
+  to export project sets, only the projects configured with repositories that 
+  define project sets are shown as candidates for export.</p>
+<p>For example, the CVS client declares the following:</p>
+<pre>&lt;extension point=&quot;org.eclipse.team.core.projectSets&quot;&gt;
+	&lt;projectSets id=&quot;org.eclipse.team.cvs.core.cvsnature&quot; class=&quot;org.eclipse.team.internal.ccvs.ui.CVSProjectSetSerializer&quot;/&gt;
+&lt;/extension&gt;</pre>
+<p>The specified class must implement <a href="../reference/api/org/eclipse/team/core/IProjectSetSerializer.html"><b>IProjectSetSerializer</b></a>. 
+  Use of this interface is still supported in 3.0 but has been deprecated.</p>
+<p>&nbsp;
+   
+</p>
+
+
+
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright" content=
+  "Copyright (c) SAP SE and others 2018. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Link Handlers</title>
+</head>
+<body>
+  <h1>Link Handlers</h1>
+  <h2>Definition</h2>
+  <p>A link handler defines how your application deals with hyperlinks, or simply links.</p>
+  <p>Plug-ins can contribute link handlers for custom URL schemes using the extension point
+  <code>org.eclipse.urischeme.uriSchemeHandlers</code>.</p>
+  <h2>Use</h2>
+  <p>You can add link handlers only by installing software into your application.</p>
+  <p>Link handlers can be enabled or disabled in the preference dialog. To do this, open the <a class="command-link"
+  href=
+  'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.General.LinkHandlers)")'>
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link"><strong>General &gt; Link
+  Handlers</strong></a> preference page and select the relevant option.</p>
+  <p>The workbench will automatically try to enable link handlers at startup. If you do not want a link handler to be
+  enabled you can manually disable it afterwards. In this case the workbench will no longer automatically registered
+  this link handler again (for the same workspace).</p>
+  <h2>Introduction</h2>
+  <p>Links are best known from the web where clicking on a links navigates the user to another web page. But the
+  concept of links is also usefull for other use-case, for example file sharing. Here, a user uploads a file to a file
+  hosting service and grants access to others by sending a link to that shared document through e-mail. When choosing
+  such a link, the web browser, or another locally installed application will open this link.</p>
+  <h3>Sample</h3>
+  <p>The URL of each link consists of a scheme, host, and path: <code>https://www.eclipse.org/downloads</code></p>
+  <p>In this URL, the scheme is "https", the host name is "www.eclipse.org", and the path is "downloads". This URL
+  addresses a hypertext document using the "https" URL scheme.</p>
+  <p>Choosing such a link, typically a web browser is opened. The web browser then downloads and displays the relevant
+  document.</p>
+  <h2>URL Schemes</h2>
+  <p>Link handlers incorporate the concept of custom URL schemes into this application. Different URL schemes have
+  different meanings and need different handling. A link handler can handle specific URL schemes.</p>
+  <p>When a user clicks a link containing an URL scheme, which is enabled, the operating system will start the
+  corresponding application or set the corresponding window to the foreground - if the application is already running.
+  Link handling is specific to the URL scheme - it may open a file in an editor, open a dialog, install new software,
+  clone a repository, or result in something else.</p>
+  <p>The <a class="command-link" href=
+  'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.General.LinkHandlers)")'>
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link"><strong>Link Handlers</strong></a>
+  preference page provides a list of URL schemes which the applicaiton can handle. For each scheme, a description
+  further explains the URL scheme. A checkbox shows if handling of this URL scheme is enabled or disabled. If handling
+  is disabled, the list will also display if this URL scheme is handled by another application or not.</p>
+  <h3>Examples of Eclipse-related URL schemes and how they are handled</h3>
+  <ul>
+    <li><strong>eclipse+command://</strong> URL scheme handler makes the application start a command.<br>
+    Such URLs have the form <code>eclipse+command://commandId?param1Id=value&amp;param2Id=value</code>.<br>
+    For example, to open a preference page:
+    <code>eclipse+command://org.eclipse.ui.window.preferences?preferencePageId=org.eclipse.ui.browser.preferencePage</code>.</li>
+    <li><strong>eclipse+mpc://</strong> URL scheme handler makes the application which has Marketplace Client plugin
+    installed start the installation dialog for the given marketplace entry.<br>
+    Such URLs have the form <code>eclipse+mpc://marketplaceCatalogPath/marketplaceEntryId</code>.<br>
+    For example, <code>eclipse+mpc://marketplace.eclipse.org/install/1640500</code>.</li>
+  </ul>
+  <h3>Note</h3>
+  <ul>
+    <li>The internal Web browser automatically checks available Link Handlers when processing links and use suitable
+    one to open referenced URL inside the current application.</li>
+    <li>The enabled state of each URL scheme is not persisted in the preference store, but it is directly registered in
+    the operating system. Therefore, this page does not take part in the export and import of preferences and does not
+    provide a "Restore Defaults" button.</li>
+    <li>For the "macOS" and "Linux" operating system: If an URL scheme is handled by another application (Eclipse-based
+    or not), it <strong>cannot</strong> be enabled directly. Handling of this URL scheme must first be disabled in the
+    other application, before it can be enabled in the current application.</li>
+    <li>When multiple Eclipse-based applications are running at the same time, the operating system may set a window to
+    the foreground, which cannot handle the link. In such cases, ensure that only the expected Eclipse-based
+    application is running.</li>
+    <li>In rare cases (e.g. PDE development) the path to the application launcher can not be determined from the
+    <code>eclipse.launcher</code> or <code>eclipse.home.location</code> system properties. The preference page will
+    then show an error message and will not allow any interaction.</li>
+  </ul>
+</body>
+</html>

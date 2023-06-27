@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Updating a product or extension</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Updating a product or extension</h2>
+<p>By following the prescribed procedures for packaging and installing products,
+we can take advantage of <b>platform provisioning support,</b> which treats
+products and extensions in a uniform way and allows users to discover and
+install updated versions of products and extensions.</p>
+<p>Before looking at the implementation of such a server, it's important to
+revisit some important concepts:</p>
+<ul>
+  <li>The platform provides a framework for defining <b>features</b> and software <b>sites</b>.&nbsp;
+    The platform itself defines a concrete implementation of features and
+    sites.&nbsp; This concrete implementation is what allows the platform
+    to upgrade and install additional features.</li>
+  <li>The platform <b>software site</b> can be used to <b>update</b> products by
+    installing new versions of features.&nbsp; It can also be used to <b>install</b>
+    or <b>update</b> extensions by adding or upgrading features.&nbsp;&nbsp;
+    This is only possible for products and extensions that conform to the
+    platform's concrete implementation of features and sites and conform to the
+    appropriate install guidelines.</li>
+  <li>Developers are free to use native installers and uninstallers to upgrade
+    their own products and extensions without regard to sites and the
+    platform update support.</li>
+</ul>
+<p>That said, what do we do if we want to fully participate in the platform
+implementation of product updating and use its update server?</p>
+<h3>Feature and plug-in packaging</h3>
+<p>The previous example product and extension directory structures show how
+features and plug-ins are laid out once they are installed.&nbsp; In order to
+install features using the software site, the features must be packaged in a
+feature archive file.&nbsp; This is described in <a href="../reference/misc/feature_archive.html"> Feature
+Archive Files</a>. </p>
+<p>Plug-ins and fragments must be packaged according to the format described in <a href="../reference/misc/plugin_archive.html"> Plug-in
+Archive Files</a>.</p>
+<h3>Software site layout</h3>
+<p>The software site must be a URL-accessible server with a fixed layout.&nbsp;
+The list of available features and plug-ins provided by the server is described
+in a site map file, <b>content.xml</b>.&nbsp; The server URL can be
+specified as a full URL to the site map file, or a URL of a directory path
+containing the site map.&nbsp; Prefer using the directory path as this will allow
+for future changes to the software site format.
+&nbsp; The site map file contains a list of all the
+available features and the location of the feature archives on the server.&nbsp;
+It also describes the locations of the plug-in archives that are referenced in
+the feature manifest.</p>
+<p>A simple site layout for our example web product and extension could look something like this:</p>
+<pre>&lt;site root&gt;/
+	artifacts.jar <i>(compressed p2 artifact repository - present in p2 optimized site)</i>
+	content.jar <i>(compressed p2 metadata repository - present in p2 optimized site)</i>
+	features/	<i>(contains feature archive files)</i>
+		com.example.acme.acmefeature_1.0.1.jar
+		com.example.betterwebs.betterfeature_1.0.1.jar
+		...
+	plugins/	<i>(contains plug-in archive files)</i>
+		com.example.acme.acmefeature_1.0.1.jar
+		com.example.acme.acmewebsupport_1.0.3.jar
+		com.example.betterwebs.betterfeature_1.0.1.jar
+		com.example.betterwebs.betterwebsupport_1.0.1.jar
+		...</pre>
+<h3>Update servers</h3>
+<p>An Eclipse project software site is provided for updating the platform
+itself.  In addition, the platform update UI allows users to maintain a list of software sites that
+can be searched for new features.  Any site that conforms to the specified update server
+layout may be added to the list. Users can choose to manually or automatically search for
+additional features or upgrades to their installed features.  </p>
+<p>
+Software sites can be created and manipulated by creating an "update site"
+project in PDE, or by using the <a href="p2_publisher.html">publishing</a>
+and <a href="p2_repositorytasks.htm">repository manipulation</a> command
+line tools and Ant tasks.
+</p>
+</BODY>
+</HTML>

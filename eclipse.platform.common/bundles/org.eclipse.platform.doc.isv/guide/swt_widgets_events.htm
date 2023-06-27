@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Events</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H3>Events</H3>
+
+<P>Once we create a display and some widgets, and start up the application's
+message loop, where does the real work happen? It happens every time an event is
+read from the queue and dispatched to a widget. Most of the application logic is
+implemented as responses to user events.</P>
+
+<P>The basic pattern is that you add a listener to some widget that you have
+created, and when the appropriate event occurs the listener code will be
+executed. This simple example is adapted from
+<strong>org.eclipse.swt.examples.helloworld.HelloWorld3</strong>:</P>
+
+<pre>
+   Display display = new Display ();
+   Shell shell = new Shell (display);
+   Label label = new Label (shell, SWT.CENTER);
+   ...
+   shell.addControlListener (new ControlAdapter () {
+      public void controlResized (ControlEvent e) {
+         label.setBounds (shell.getClientArea ());
+      }
+   });
+</pre>
+
+<P>For each type of listener, there is an interface that defines the listener
+(<em>Xyz</em><strong>Listener</strong>), a class that provides event information
+(<em>Xyz</em><strong>Event</strong>), and an API method to add the listener
+(<strong>add</strong><em>Xyz</em><strong>Listener</strong>).  If there is more
+than one method defined in the listener interface then there is an adapter
+(<em>Xyz</em><strong>Adapter</strong>) that implements the listener interface
+and provides empty methods.   All of the events, listeners,
+and adapters are defined in the package
+<strong><a href="../reference/api/org/eclipse/swt/events/package-summary.html">org.eclipse.swt.events</a></strong>.</P>
+
+<P>The following tables summarize the events that are available and the widgets
+that support each event.  Events can be split into two general categories:
+high level events which represent a logical operation on a control, and low
+level events which describe more specific user interactions.  High level events
+may be represented by multiple low level events which may differ per
+platform.  Low level events should generally only be used for custom widget
+implementations.</P>
+
+
+<h4>High level events</h4>
+
+<TABLE BORDER="1" width="600">
+<colgroup>
+    <col width="34%">
+    <col width="66%">
+</colgroup>
+<TR>
+<TH><P CLASS="CellHeading">Event Type</P></TH>
+<TH><P CLASS="CellHeading">Description</P></TH>
+</TR>
+
+<tr>
+<td><strong>Activate</strong>, <strong>Deactivate</strong></td>
+<td>Generated when a Control is activated or deactivated.</td>
+</tr>
+
+<TR>
+<td><strong>Arm</strong></td>
+<td>A MenuItem is armed (highlighted and ready to be selected).</td>
+</TR>
+
+<TR>
+<td><strong>Close</strong></td>
+<td>A Shell is about to close as requested by the window manager.</td>
+</TR>
+
+<TR>
+<td><strong>DefaultSelection</strong></td>
+<td>The user selects an item by invoking a default selection action.  For
+example, by hitting Enter or double clicking on a row in a Table.</td>
+</tr>
+
+<TR>
+<td><strong>Dispose</strong></td>
+<td>A widget is about to be disposed, either programmatically or by user.</td>
+</TR>
+
+<tr>
+<td><strong>DragDetect</strong></td>
+<td>The user has initiated a possible drag operation.</td>
+</tr>
+
+<tr>
+<td><strong>EraseItem</strong></td>
+<td>A TableItem or TreeItem is about to have its background drawn.</td>
+</tr>
+
+<TR>
+<td><strong>Expand</strong>, <strong>Collapse</strong></td>
+<td>An item in a Tree is expanded or collapsed.</td>
+</TR>
+
+<tr>
+<td><strong>Gesture</strong></td>
+<td>The user has used a touch-based input source to perform a gesture over the control.</td>
+</tr>
+
+<TR>
+<td><strong>Help</strong></td>
+<td>The user has requested help for a widget.  For example, this occurs when
+the F1 key is pressed under Windows.</td>
+</TR>
+
+<TR>
+<td><strong>Iconify</strong>, <strong>Deiconify</strong></td>
+<td>A Shell has been minimized, maximized, or restored.</td>
+</TR>
+
+<TR>
+<td><strong>ImeComposition</strong></td>
+<td>Allows custom text editors to implement in-line editing of international text.</td>
+</TR>
+
+<tr>
+<td><strong>MeasureItem</strong></td>
+<td>The size of a custom drawn TableItem or TreeItem is being requested.</td>
+</tr>
+
+<tr>
+<td><strong>MenuDetect</strong></td>
+<td>The user has requested a context menu.</td>
+</tr>
+
+<TR>
+<td><strong>Modify</strong></td>
+<td>The widget's text has been modified.</td>
+</TR>
+
+<TR>
+<td><strong>Move</strong>, <strong>Resize</strong></td>
+<td>A control has changed position or has been resized, either programmatically
+or by user.</td>
+</TR>
+
+<TR>
+<td><strong>Movement</strong></td>
+<td>An updated caret offset is needed in response to a user action in a StyledText.</td>
+</TR>
+
+<tr>
+<td><strong>OpenDocument</strong></td>
+<td>The operating system has requested that a document be opened.</td>
+</tr>
+
+<tr>
+<td><strong>OrientationChange</strong></td>
+<td>The orientation of a Text control is changing.</td>
+</tr>
+
+<tr>
+<td><strong>PaintItem</strong></td>
+<td>A TableItem or TreeItem is about to have its foreground drawn.</td>
+</tr>
+
+<tr>
+<td><strong>Selection</strong></td>
+<td>The user selects an item in the control.  For example, by single clicking
+on a row in a Table or by keyboard navigating through the items.</td>
+</tr>
+
+<tr>
+<td><strong>SetData</strong></td>
+<td>Data needs to be set on a TableItem when using a virtual table.</td>
+</tr>
+
+<tr>
+<td><strong>Settings</strong></td>
+<td>An operating system property, such as a system font or color, has been changed.</td>
+</tr>
+
+<tr>
+<td><strong>Show</strong>, <strong>Hide</strong></td>
+<td>A control's visibility has changed.</td>
+</tr>
+
+<tr>
+<td><strong>Skin</strong></td>
+<td>A control needs to be skinned.</td>
+</tr>
+
+<TR>
+<td><strong>Traverse</strong></td>
+<td>The user is trying to traverse out of the control using a keystroke.  For
+example, the escape or tab keys are used for traversal.</td>
+</TR>
+
+<TR>
+<td><strong>Verify</strong></td>
+<td>A widget's text is about to be modified.  This event gives the application
+a chance to alter the text or prevent the modification.</td>
+</TR>
+</TABLE>
+
+
+<h4>Low level events</h4>
+
+<TABLE BORDER="1" width="600">
+<colgroup>
+    <col width="34%">
+    <col width="66%">
+</colgroup>
+<TR>
+<TH><P CLASS="CellHeading">Event Type</P></TH>
+<TH><P CLASS="CellHeading">Description</P></TH>
+</TR>
+
+<TR>
+<td><strong>FocusIn</strong>, <strong>FocusOut</strong></td>
+<td>A control has gained or lost focus.</td>
+</TR>
+
+<TR>
+<td><strong>KeyDown</strong>, <strong>KeyUp</strong></td>
+<td>The user has pressed or released a keyboard key when the control has
+keyboard focus.</td>
+</TR>
+
+<TR>
+<td><strong>MouseDown</strong>, <strong>MouseUp</strong>,
+<strong>MouseDoubleClick</strong></td>
+<td>The user has pressed, released, or double clicked the mouse over the
+control.</td>
+</TR>
+
+<TR>
+<td><strong>MouseMove</strong></td>
+<td>The user has moved the mouse above the control.</td>
+</TR>
+
+<TR>
+<td><strong>MouseEnter</strong>, <strong>MouseExit</strong>,
+<strong>MouseHover</strong></td>
+<td>The mouse has entered, exited, or hovered over the control.</td>
+</TR>
+
+<TR>
+<td><strong>MouseHorizontalWheel, MouseVerticalWheel, MouseWheel</strong></td>
+<td>The mouse wheel has been rotated.</td>
+</TR>
+
+<TR>
+<td><strong>Paint</strong></td>
+<td>The control has been damaged and requires repainting.</td>
+</TR>
+
+<TR>
+<td><strong>Touch</strong></td>
+<td>The user has touched a touch-based input source over the control.</td>
+</TR>
+</table>
+
+
+<H4>Untyped events</H4>
+<P>In addition to the typed event system described above, SWT supports a low level,
+untyped widget event mechanism.  The untyped mechanism relies on a constant to 
+identify the event type and defines a generic listener that is supplied with 
+this constant. This allows the listener to implement a &quot;case style&quot; listener.
+In the following snippet, we define a generic event handler and add several listeners to a shell.</P>
+
+<pre>
+   Shell shell = new Shell ();
+   Listener listener = new Listener () {
+      public void handleEvent (Event e) {
+         switch (e.type) {
+            case SWT.Resize:
+               System.out.println (&quot;Resize received&quot;);
+               break;
+            case SWT.Paint:
+               System.out.println (&quot;Paint received&quot;);
+               break;
+            default:
+               System.out.println (&quot;Unknown event received&quot;);
+         }
+      }
+   };
+   shell.addListener (SWT.Resize, listener);
+   shell.addListener (SWT.Paint, listener);
+</pre>
+
+</BODY>
+</HTML>

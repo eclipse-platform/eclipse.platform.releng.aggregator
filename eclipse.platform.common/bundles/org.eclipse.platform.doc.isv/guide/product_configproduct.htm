@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>Customizing a product</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Customizing a product</h3>
+<p>There are many customizable aspects of a product, such as its splash screen,
+  about dialog text,  window icons, etc. Most of these customizations are defined
+  in the contribution to the <a href="../reference/extension-points/org_eclipse_core_runtime_products.html"><b>org.eclipse.core.runtime.products</b></a>
+extension point.</p>
+<p>
+Let's look at how some of the more common customizable elements are defined.</p>
+<h3>About dialogs</h3>
+<p>The platform &quot;about&quot; dialog is shown whenever the user selects
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.help.aboutAction")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>Help &gt; About</b></a>
+
+in the workbench menu.&nbsp;&nbsp;</p>
+<p><img src="images/about.png" alt="About dialog" border="0" ></p>
+<p>The upper part of the about dialog shows product level information while the
+  lower part details the features (if any) and plug-ins installed.&nbsp; The
+  feature details (branding if you will) are supplied using<b> about.ini</b>, <b>about.properties</b> and <b>about.html</b>
+files in the plug-in associated with the feature.&nbsp; This
+information is displayed when the user requests feature details and selects a
+particular feature.</p>
+<p>The product branding (top half of the dialog) is specify by extension properties
+that describe the text and images that are shown in this dialog.
+For example, the following extract from the Eclipse Platform product declaration.</p>
+<pre>	&lt;property
+		name="aboutText"
+		value="%aboutText"/&gt;
+	&lt;property
+		name="aboutImage"
+		value="icons/eclipse_lg.png"/&gt;
+	&lt;/product&gt;</pre>
+<ul>
+  <li><b>aboutText</b> specifies the text to show in the about dialog</li>
+  <li><b>aboutImage</b> specifies an image that should be used in the about dialog.  Large
+  images will be shown by themselves, and smaller images will be shown along with the about
+  text.</li>
+</ul>
+<p>See <b><a href="../reference/api/org/eclipse/ui/branding/IProductConstants.html">IProductConstants</a></b>
+for more information about these properties.
+</p>
+<h3>Window images</h3>
+<p>A 16x16 pixel color image can be used to brand windows created by the
+product.&nbsp; It will appear in the upper left hand corner of product
+windows.&nbsp; It is specified in the <b>windowImage</b> attribute in the 
+products extension definition.  Alternatively, the <b>windowImages</b> attribute
+can be used to describe an array of images of different sizes that should be used in the
+upper left hand corner.</p>
+<pre>	&lt;property
+		name="windowImages"
+		value="icons/eclipse.png,icons/eclipse32.png"/&gt;</pre>
+<p>The <b>windowImages</b> property supercedes the <b>windowImage</b> property if
+both are specified.</p>
+<h3>Welcome page</h3>
+<p>Products using the Eclipse 2.1 welcome page mechanism can specify the name and location
+of their welcome page file in the <b>welcomePage</b> property.</p>
+<pre>	&lt;property
+		name="welcomePage"
+		value="$nl$/welcome.xml"/&gt;</pre>
+<p>Use of this property is 
+now discouraged in favor of the <b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org.eclipse.ui.intro</a></b>
+extension point.  See <a href="ua_intro.htm">Welcome/Intro support</a> for more
+detail about the new welcome/intro mechanisms.</p>
+<h3><a name="preferences"></a>Preferences defaults</h3>
+
+<p>The <b>preferenceCustomization</b> property can be used to specify a file containing
+default preference values for the product.</p>
+<pre>	&lt;property
+		name="preferenceCustomization"
+		value="plugin_customization.ini"/&gt;</pre>
+<p>This file is a <b>java.util.Properties</b> format file.
+  Typically this file is used to set the values for preferences that are published
+  as part of a plug-in's public API.&nbsp; That is, you are taking a risk if you
+  refer to preferences that are used by plug-ins but not defined formally in the
+  API.&nbsp;&nbsp;</p>
+
+<h3><a name="dialogSettings"></a>Dialog settings defaults</h3>
+
+<p>If the custom preferences file is used as described above, setting the <tt>org.eclipse.ui/default_dialog_settings_rootUrl</tt>
+property in that file allows to specify a folder containing default dialog settings values for product plug-ins.
+The property value must be a valid URL.<br>
+The preference can be set using the following URL schemes.
+</p>
+<pre>
+org.eclipse.ui/default_dialog_settings_rootUrl=http://mycompany/dialog_settings
+org.eclipse.ui/default_dialog_settings_rootUrl=file:/etc/mycompany/dialog_settings
+org.eclipse.ui/default_dialog_settings_rootUrl=platform:/plugin/my.company.bundle/dialog_settings
+</pre>
+<p>
+The directory specified by this URL must contain folders with
+<tt>dialog_settings.xml</tt> files for every plug-in to be customized,
+each directory with the symbolic name of concrete plug-in,
+such as such as <tt>dialog_settings/org.eclipse.ui.ide/dialog_settings.xml</tt>, <tt>dialog_settings/org.eclipse.ui.navigator/dialog_sttings.xml</tt>, <tt>dialog_settings/my.company.bundle/dialog_settings.xml</tt>...
+Those <tt>dialog_settings.xml</tt> files for each bundle can be retrieved from a running instance of the Eclipse Platform, under the folder <tt>${workspace}/.metadata/.plugins</tt>. You can simply copy-paste those existing files into the directory set as value for the <tt>org.eclipse.ui/default_dialog_settings_rootUrl</tt> preference.
+</p>
+
+<h3>Splash screens</h3>
+<p>The product splash screen is specified in the <tt>config.ini</tt> which is
+  located underneath the product's <tt>configuration</tt> directory. The <b>osgi.splashPath</b> property
+  in this file describes places to search for a file called <b>splash.bmp</b>.
+  The <strong>osgi.splashLocation </strong>property identifes a complete and
+  exact path to the splash screen file to use. Specifying a splash path allows
+  for locale specific splash screens to be used as the given search path can
+  indicate several plug-ins or fragments to search as well as <code>$nl$</code> style paths.
+  See the
+  platform
+  SDK's <tt>config.ini</tt> file
+  for a complete description of properties that can be configured in this file.
+  The image should be supplied in 24-bit color BMP format (RGB format) and should
+  be approximately 500x330 pixels in size.</p>
+  <p>The location, size, and color of the progress bar and progress message shown
+  in the splash screen during startup can be configured using the properties
+  <b>startupProgressRect</b>, <b>startupMessageRect</b>, and
+  <b>startupForegroundColor</b>. See
+  <b><a href="../reference/api/org/eclipse/ui/branding/IProductConstants.html">IProductConstants</a></b>
+  for more information about these properties.  Note that by default, no progress
+  will be reported at startup.  To enable startup progress reporting, set the following
+  preference to <b>true</b>, for example in the preference customization file:
+  <b><a href="../reference/api/org/eclipse/ui/IWorkbenchPreferenceConstants.html#SHOW_PROGRESS_ON_STARTUP">IWorkbenchPreferenceConstants.SHOW_PROGRESS_ON_STARTUP</a></b></p>
+
+</BODY>
+</HTML>

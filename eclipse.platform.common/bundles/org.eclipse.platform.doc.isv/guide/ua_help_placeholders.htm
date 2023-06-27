@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Help Placeholders</title>
+</head>
+<body>
+
+<h2>Help Placeholders</h2>
+
+<p>
+A help placeholder is used when documentation is not installed at the same time as the corresponding software bundles. 
+A placeholder contains a reference to a help page which describes how to install help bundles.
+</p>
+<p>
+As an example suppose that for reasons of size the documentation bundle org.eclipse.myfeature.doc
+was a separate download from org.eclipse.myfeature. Users who installed only org.eclipse.myfeature 
+without the documentation would not see the help content for myfeature and a help search would  not search org.eclipse.myfeature.doc. If the developers of myfeature add a toc placeholder
+the user will be made aware that documentation is available and be able to get instructions for installing it.
+</p>
+<p>
+A help placeholder is defined using the placeholder element of the extension point org.eclipse.help.toc.
+The easiest way to manage placeholders is to create bundles 
+which contain one or more help placeholder extensions and no code. 
+The code bundles will have a dependency to these help placeholder bundles.
+</p>
+<p>
+As an example here is how to setup a placeholder for the ( nonexistent ) help bundle org.eclipse.myfeature.doc
+A bundle org.eclipse.myfeature.doc.placeholder is created which contains the extension point below and no code.</p>
+<pre>
+  &lt;extension
+         point="org.eclipse.help.toc"*gt;
+      &lt;placeholder
+            placeholderPage="http://www.eclipse.org/installingmyfeaturedocs.html"
+            plugin="org.eclipse.myfeature.doc"*gt;
+      &lt;/placeholder*gt;
+   &lt;/extension*gt;
+</pre>
+<p>
+A dependency is added from the Java bundle org.eclipse.myfeature to org.eclipse.myfeature.doc.placeholder. 
+If the help system is launched with org.eclipse.myfeature installed and org.eclipse.myfeature.doc not installed the
+ home page will be replaced with a page informing of the missing documentation bundle. 
+ In this example clicking on the link "org.eclipse.myfeature.doc" will open the page http://www.eclipse.org/installingmyfeaturedocs.html.
+ </p>
+ <p>
+ <img src = "images/helpplaceholder.png" alt="help showing placeholder page">
+ </p>
+</body>
+</html>

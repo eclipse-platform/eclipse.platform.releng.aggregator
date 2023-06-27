@@ -1,0 +1,156 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Decorators</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H3>
+Decorators</H3>
+
+<p>Your plug-in can use <b>decorators</b> to annotate the images for resources
+and other objects that appear in the workbench views.&nbsp; Decorators are
+useful when your plug-in adds functionality for existing resource types.&nbsp;
+Many of the standard workbench views participate in showing decorations.&nbsp;&nbsp;</p>
+
+
+<p>For example, PDE contributes decorators that allow you to distinguish between
+binary and source projects.</p>
+
+
+<p><img src="images/workbenchdecorators.png" alt="Package Explorer view with PDE decorators" border="0"></p>
+
+
+<p>The <b>com.example.helloworld&nbsp; </b>project is the only source project
+shown in the package explorer.&nbsp; Note how all of the other binary projects show the
+binary decorator at the top left of the Java project icon.&nbsp; This decorator
+is contributed by PDE using the <a href="../reference/extension-points/org_eclipse_ui_decorators.html"><b>org.eclipse.ui.decorators</b></a>
+extension point.</p>
+
+
+<pre>&lt;extension
+         point=&quot;org.eclipse.ui.decorators&quot;&gt;
+      &lt;decorator
+            <b>lightweight=&quot;true&quot;
+</b>            <b>quadrant=&quot;TOP_LEFT&quot;</b>
+            adaptable=&quot;true&quot;
+            label=&quot;%decorator.label&quot;
+            <b>icon=&quot;icons/full/ovr16/binary_co.png&quot;</b>
+            state=&quot;false&quot;
+            id=&quot;org.eclipse.pde.ui.binaryProjectDecorator&quot;&gt;
+         &lt;description&gt;
+            %decorator.desc
+         &lt;/description&gt;
+         &lt;enablement&gt;
+            ...
+         &lt;/enablement&gt;
+      &lt;/decorator&gt;
+ &lt;/extension&gt;</pre>
+
+
+<p>There are several different ways to supply a decorator implementation.&nbsp;
+This markup uses the simplest way, known as a <b>declarative</b> <b>lightweight</b>
+decorator.&nbsp; When a declarative lightweight decorator is defined, the markup
+contains a complete description of the decorator's icon, placement, and enabling
+conditions.&nbsp; Declarative decorators are useful when only an icon is used to
+decorate the label.&nbsp; The plug-in need only specify the <b>quadrant</b> where the decorator should be
+overlayed on the regular icon and the <b>icon</b> for the overlay.&nbsp; As
+shown in the picture, the PDE binary icon is overlayed in the top left quadrant of the
+package icon.</p>
+
+
+<p>If your plug-in needs to manipulate the label text in addition to the icon,
+or if the type of icon is determined dynamically, you can use a non-declarative <b>lightweight</b>
+ decorator.&nbsp; In this case, an implementation <strong>class</strong> that implements <a href="../reference/api/org/eclipse/jface/viewers/ILightweightLabelDecorator.html"><b>ILightweightLabelDecorator</b></a>
+must be defined.&nbsp; The designated class is responsible for supplying a prefix,
+suffix, and overlay image at runtime which are applied to the label.&nbsp; The mechanics of
+concatenating the prefix and suffix with the label text and performing the overlay
+are handled by the workbench code in a background thread.&nbsp; Thus, any work
+performed by your plug-in in its <a href="../reference/api/org/eclipse/jface/viewers/ILightweightLabelDecorator.html"><b>ILightweightLabelDecorator</b></a>
+implementation must be UI-thread safe.&nbsp; (See <a href="swt_threading.htm#syncExec">Executing
+code from a non-UI thread</a> for more details.)</p>
+
+
+<p>&nbsp; The following markup shows how the CVS
+client defines its decorator using this technique:</p>
+
+
+<pre>&lt;extension
+         point=&quot;org.eclipse.ui.decorators&quot;&gt;
+    &lt;decorator
+            objectClass=&quot;org.eclipse.core.resources.IResource&quot;
+            adaptable=&quot;true&quot;
+            label=&quot;%DecoratorStandard.name&quot;
+            state=&quot;false&quot;
+            <b>lightweight= &quot;true&quot;</b>
+            <b>quadrant = &quot;BOTTOM_RIGHT&quot;</b>
+            <b>class=&quot;org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator&quot;</b>
+            id=&quot;org.eclipse.team.cvs.ui.decorator&quot;&gt;
+         &lt;description&gt;
+            %DecoratorStandard.desc
+         &lt;/description&gt;
+    &lt;/decorator&gt;
+&lt;/extension&gt;</pre>
+
+
+<p>Decorators are ultimately controlled by the user via the workbench <b>Label
+Decorations</b> preferences page.&nbsp;
+Individual decorators can be turned on and off.&nbsp; Even so, it is a good idea
+to design your decorators so that they do not overlap or conflict with existing
+platform SDK decorators.&nbsp;If multiple plug-ins contribute lightweight
+decorators to the same quadrant, the conflicts are resolved
+non-deterministically.&nbsp;&nbsp;</p>
+
+
+<p>Your plug-in may also do all of the image and label management
+itself.&nbsp; In this case, the <b>lightweight</b> attribute should be set to
+false and the <b>class </b>attribute should name a class that implements <a href="../reference/api/org/eclipse/jface/viewers/ILabelDecorator.html"><b>ILabelDecorator</b></a>.&nbsp;
+This class allows you to decorate the original label's image and text with your
+own annotations.&nbsp;&nbsp;It gives you increased flexibility since you aren't
+limited to prefixes, suffixes, and simple quadrant overlays.</p>
+
+
+<p>Other attributes of a decorator are independent of the particular
+implementation style.&nbsp; The <b>label</b> and <b>description</b> attributes
+designate the text that is used to name and describe the decorator in the
+preferences dialog.&nbsp; The <b>objectClass</b> names the class of objects to
+which the decorator should be applied.&nbsp; The <b>enablement</b> attribute
+allows you to describe the conditions under which the object should be
+decorated.&nbsp;&nbsp; The <b>adaptable</b> flag indicates
+whether objects that adapt to <b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
+should also be decorated.&nbsp; The <b>
+state</b> flag controls whether the decorator is visible by default.</p>
+
+
+<p> If your decorators include information that is
+expensive to compute or potentially distracting, you may want to contribute your
+own preferences that allow the user to further fine-tune the decorator once it
+is on.&nbsp; This technique is used by the CVS client.</p>
+
+
+<p><img src="images/cvsdecorators.png" alt="CVS decorators preference page" border="0"></p>
+
+
+<p>&nbsp;</p>
+<p><strong>Decorator Update Cycle</strong></p>
+<p>Decoration is initiated by refreshing label providers that use the DecoratorManager 
+  to provide decoration. As decoration processing is done in the background there 
+  will be a period between when the label is requested and the labelProviderChanged 
+  event is fired that will be taken up by decoration calculation. During this 
+  time decoration on an Object will only be calculated once for effeciency reasons. 
+  If the decorator changes during this time it is possible that a stale result 
+  will be broadcast as the second and subsequent calls to decorate an element 
+  will be ignored.</p>
+<p>Decorator contributors should avoid changing thier decorators while decoration 
+  is occuring. If this is not possible a second call to decorate an element after 
+  the labelProviderChanged in processed will be required.</p>
+</BODY>
+</HTML>

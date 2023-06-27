@@ -1,0 +1,573 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" type="text/css">
+  <title>Builder Configuration</title>
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h3>Builder Configuration Properties<br>
+</h3>
+<p>The overall build mechanism is driven by a builder configuration
+which includes a build.properties file.<br>
+</p>
+<ul>
+  <li>Basic Settings<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+      	<tr>
+          <td style="vertical-align: top;">topLevelElementId</td>
+          <td style="vertical-align: top;">The id of the feature being built.<br>This property is new in 3.4 and depends on the use of the 3.4 allElements.xml file.  Build configurations using older style customTargets.xml and/or allElements.xml files should not use this property.</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">buildDirectory<br>
+          </td>
+          <td style="vertical-align: top;">The directory where the
+build will take place.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">configs<br>
+          </td>
+          <td style="vertical-align: top;">A list of configurations to
+build.&nbsp; A configuration is an ampersand separated list of comma
+separated operating system, windowing system and architecture.&nbsp; If
+no config is specified, the platform independent config will be
+built.&nbsp; Example:
+          <div style="text-align: center;">
+          <pre style="margin-left: 40px;">configs = win32, win32, x86 &amp; linux, gtk, ppc</pre>
+          </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+<li>p2 Integration<br>
+See the p2 Integration documentation for properties controlling <a href="../tasks/pde_p2_featurebuilds.htm">feature builds</a>, and <a href="../tasks/pde_p2_featurebuilds.htm">product builds</a>.</li>
+</ul>
+<ul>
+  <li>Base Control:&nbsp; The base is a target eclipse install
+containing plug-ins and features that you require but are not building
+yourself.<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">baseLocation<br>
+          </td>
+          <td style="vertical-align: top;">The location of the target
+eclipse install. In the default template, the value of this is
+${base}/eclipse.&nbsp; (See the base property below).&nbsp; This
+directory is expected to contain <tt>plugins/</tt> and <tt>features/</tt>
+subdirectories
+which contain the binary plug-ins and features respectively.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">baseos<br>
+          </td>
+          <td style="vertical-align: top;">The operating system of the
+eclipse specified by baseLocation<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">basews<br>
+          </td>
+          <td style="vertical-align: top;">The windowing system of the
+eclipse specified by baseLocation<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">basearch<br>
+          </td>
+          <td style="vertical-align: top;">The architecture of the
+eclipse specified by baseLocation<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">pluginPath<br>
+          </td>
+          <td style="vertical-align: top;">A platform path-separator
+separated list of locations to find additional plug-ins and features.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">skipBase<br>
+          </td>
+          <td style="vertical-align: top;">If set, automatically
+download a base eclipse to use as a target<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">base<br>
+          </td>
+          <td style="vertical-align: top;">The location the base
+eclipse will be downloaded to.&nbsp; This should be the parent of
+baseLocation, such that <tt>baseLocation = ${base}/eclipse</tt>.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">eclipseURL<br>
+          </td>
+          <td style="vertical-align: top;">The URL for the eclipse
+download site<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">eclipseBuildId<br>
+          </td>
+          <td style="vertical-align: top;">The build ID of the eclipse
+to download<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">eclipseBaseURL<br>
+          </td>
+          <td style="vertical-align: top;">The actual URL of the zip to
+download.&nbsp; In the default template, the value is:
+          <div style="text-align: center;">
+          <pre>eclipseBaseURL = ${eclipseURL}/eclipse-platform-${eclipseBuildId}-win32.zip</pre>
+          </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">filteredDependencyCheck<br>
+          </td>
+          <td style="vertical-align: top;">Constraint the set of plug-ins and features
+          to be considered during the build to the one reachable from the features / plugins being built when set to true<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">resolution.devMode<br>
+          </td>
+          <td style="vertical-align: top;">When set to true, the validation done on the set of plug-ins being built will be
+          less strict. For example it will allow multiple versions of a singleton bundle to be resolved.<br>
+          </td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li>Output
+Control:&nbsp; The following properties affect the shape
+of the build results.<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">runPackager<br>
+          </td>
+          <td style="vertical-align: top;">Set if the packager needs to
+be run.&nbsp; Set this if your build results need to contain binary
+features and plug-ins that come from the baseLocation.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">product<br>
+          </td>
+          <td style="vertical-align: top;">The product configuration
+file.&nbsp; Set this if you are building a product.&nbsp; It controls
+branding of your build results.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">archiveNamePrefix<br>
+          </td>
+          <td style="vertical-align: top;">The prefix of the name of
+the final archive files.&nbsp; This is used in allElements.xml when
+setting the archive name on a per config basis.&nbsp; By default, the
+value will be ${buildId}<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">archivePrefix<br>
+          </td>
+          <td style="vertical-align: top;">The name of the archive root
+folder, this is "eclipse" for eclipse builds.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">buildType </td>
+          <td style="vertical-align: top;">Type of build, normally
+something like I, N, M, etc. </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">buildLabel </td>
+          <td style="vertical-align: top;">The label for the build. In
+the default template, the value is <tt>${buildType}.${buildId}</tt> </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">collectingFolder<br>
+          </td>
+          <td style="vertical-align: top;">The folder where the build
+output will be collected.&nbsp;&nbsp; In the default template, the
+value is <tt>${archivePrefix}</tt>.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">groupConfigurations<br>
+          </td>
+          <td style="vertical-align: top;">Whether or not to group all
+configuration into one archive file.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">archivesFormat<br>
+          </td>
+          <td style="vertical-align: top;">The archive format for the
+different configs being built.&nbsp; This is an ampersand separated
+list of configs and their archive format.&nbsp; The format is separated
+by a dash (-).&nbsp; Example:<br>
+          <div style="text-align: center;">
+          <pre>archivesFormat =&nbsp; win32, win32, x86 - antzip &amp; linux, gtk, ppc - tar</pre>
+          </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">outputUpdateJars<br>
+          </td>
+          <td style="vertical-align: top;">When set, generates plug-ins
+and features in JAR format for an update site.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">zipArgs<br>
+          </td>
+          <td style="vertical-align: top;">Arguments to be sent to the
+zip executable when the archive format is zip.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">tarArgs<br>
+          </td>
+          <td style="vertical-align: top;">Arguments to be sent to the
+tar executable when the archive format is tar.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+  </li>
+</ul>
+<ul>
+  <li>Signing and Jnlp control:<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">generateJnlp<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to generate JNLP
+manifests for the JAR archives<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">jnlp.codebase<br>
+          </td>
+          <td style="vertical-align: top;">The site URL.&nbsp; This
+should be a URL that will be used as the root of all relative URLs in
+the output.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">jnlp.j2se<br>
+          </td>
+          <td style="vertical-align: top;">The J2SE version required to run the JNLP app being exported<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">jnlp.locale<br>
+          </td>
+          <td style="vertical-align: top;">The locale in which the generated jnlp files should be generated.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">jnlp.generateOfflineAllowed<br>
+          </td>
+          <td style="vertical-align: top;">Generate the  &lt;offlineAllowed/&gt; in the generated files when set to true.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">jnlp.configs<br>
+          </td>
+          <td style="vertical-align: top;">Filter the content of the generated jnlp files based on the configuration being built. The configurations need to be listed.<br>
+          </td>
+        </tr>                
+        <tr>        
+          <td style="vertical-align: top;">signJars<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to sign
+jars&nbsp; for features and plug-ins.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">sign.alias<br>
+          </td>
+          <td style="vertical-align: top;">The alias passed to the ant
+signJar task.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">sign.keystore<br>
+          </td>
+          <td style="vertical-align: top;">The keystore passed to the
+ant signJar task.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">sign.storepass<br>
+          </td>
+          <td style="vertical-align: top;">The storepass passed to the
+ant signJar task.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">sign.keypass<br>
+          </td>
+          <td style="vertical-align: top;">The keypass passed to the
+ant signJar task.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li>Version Control.&nbsp; (See also <a
+ href="../tasks/pde_version_qualifiers.htm">Version Qualifiers</a>)<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">forceContextQualifier<br>
+          </td>
+          <td style="vertical-align: top;">The value of this property
+is used when replacing qualifiers in plug-in and feature
+versions.&nbsp; If set it is used instead of the tags from the map
+files
+or the timestamp.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">generateFeatureVersionSuffix<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to generate
+feature version suffixes<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">generateVersionsLists<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to generate
+properties files listing the final version numbers of features and
+plug-ins being built.&nbsp; This will create
+finalFeaturesVersions.properties
+and finalPluginsVersions.properties files in the builder directory.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+  </li>
+  <li><a name="fetchControl">Fetch phase Control</a> (See also <a href="../tasks/pde_fetch_phase.htm">Fetching
+from Repositories</a>)<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">skipMaps<br>
+          </td>
+          <td style="vertical-align: top;">If set, do not attempt to
+fetch map files from CVS<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">mapsRepo<br>
+          </td>
+          <td style="vertical-align: top;">The CVS repository to fetch
+map files from.&nbsp; Example:<br>
+          <div style="text-align: center;">
+          <pre>:pserver:anonymous@example.com/path/to/repo</pre>
+          </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">mapsRoot<br>
+          </td>
+          <td style="vertical-align: top;">The path in the CVS
+repository to the directory containing the map files<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">mapsCheckoutTag<br>
+          </td>
+          <td style="vertical-align: top;">The CVS tag to use to
+checkout the map files<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">tagMaps<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to tag the map
+files after fetching them.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">mapsTagTag<br>
+          </td>
+          <td style="vertical-align: top;">The tag with which to tag
+the map files after fetching them.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">skipFetch<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to skip the
+entire fetch phase.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">fetchTag<br>
+          </td>
+          <td style="vertical-align: top;">The tag to use when fetching
+features and plug-ins from CVS.&nbsp; This property overrides the
+values in the map files.<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li>Compilation Control (See also <a href="../tasks/pde_compilation_env.htm">Controlling
+Compilation Environment</a>)<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">logExtension<br>
+          </td>
+          <td style="vertical-align: top;">The extension of the
+generated log file.&nbsp; This only applies when using the default JDT
+compiler.&nbsp; Default value is ".log".<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">javacDebugInfo<br>
+          </td>
+          <td style="vertical-align: top;">Whether or not to include
+debug info in the output jars.&nbsp; This is passed to the ant javac
+task. If not set, default value is on.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">javacFailOnError<br>
+          </td>
+          <td style="vertical-align: top;">Whether or not to fail the
+build if there are compilation errors.&nbsp; This is passed to the ant
+javac task.&nbsp; If not set, default value is true.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">javacVerbose<br>
+          </td>
+          <td style="vertical-align: top;">Whether or not to enable the
+verbose mode of the compiler.&nbsp; This is passed to the ant javac
+task.&nbsp; If not set, default value is false.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">compilerArg<br>
+          </td>
+          <td style="vertical-align: top;">Set specific arguments to
+pass directly to the compiler.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">javacSource<br>
+          </td>
+          <td style="vertical-align: top;">The java source
+compatibility level to use if a plug-in does not specify any
+settings.&nbsp; If not set, 1.3 is the default value.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">javacTarget<br>
+          </td>
+          <td style="vertical-align: top;">The target .class
+compatibility level to use if a plug-in does not specify any
+settings.&nbsp; If not set, 1.2 is the default value.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">flattenDependencies<br>
+          </td>
+          <td style="vertical-align: top;">Sort bundle dependencies across feature boundaries.  (See also <a href="../tasks/pde_compilation_order.htm">Compilation Order and Parallelization</a>)<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">parallelCompilation<br>
+          </td>
+          <td style="vertical-align: top;">Set to true to enable parallel compilation.  (Requires flattenDependencies=true)</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">parallelThreadCount<br>
+          </td>
+          <td style="vertical-align: top;">The maximum number of threads to use.  Corresponds to <i>threadCount</i> on the ant parallel task.</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">parallelThreadsPerProcessor<br>
+          </td>
+          <td style="vertical-align: top;">The maximum number of threads to use per available processor.  Corresponds to <i>threadsPerProcessor</i> on the ant parallel task.</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">bootclasspath<br>
+          </td>
+          <td style="vertical-align: top;">The bootclasspath to use if
+the plug-in does not specify any settings itself.&nbsp; This is a
+platform path separator separated list of jars.&nbsp; If not set, the
+file set matching ${java.home}/jre/lib/*.jar will be used.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;">&lt;Execution Environment&gt;<br>
+          </td>
+          <td style="vertical-align: top;">Set properties for each JRE
+that can be used to build.&nbsp; These properties will match up against
+Execution Environments specified by individual bundles.&nbsp; The
+values should specify the jars to compile against when using that
+environment.&nbsp; See&nbsp; <a href="../tasks/pde_compilation_env.htm">Controlling
+Compilation Environment</a>.</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+  </li>
+</ul>
+<ul>
+  <li>Other properties<br>
+    <table style="width: 100%; text-align: left;" border="1"
+ cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr><td style="vertical-align: top;">generateAPIDescription<br></td>
+            <td style="vertical-align: top;">Enable automatic generation of API description files for bundles.</td>
+        </tr>
+        <tr><td style="vertical-align: top;">generateSourceReferences</td>
+            <td style="vertical-align: top;">Enable generation of Eclipse-SourceReferences headers into bundle manifests. </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+  </li>
+</ul>
+</body>
+</html>

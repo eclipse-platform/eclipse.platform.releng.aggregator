@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Wizard dialogs
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<h2>
+Wizard dialogs</h2>
+<P >
+The previous example supplied a wizard for a specified extension point. Another, perhaps more common,
+case is that you want to launch your own plug-in's wizard from some action that you have defined. (In
+<a HREF="workbench_menus.htm" CLASS="XRef"> Workbench menu contributions</a>, we discuss the ways you can contribute actions to the workbench.) </P>
+<P >Wizards are displayed in the UI by placing them in a containing
+dialog.&nbsp; This detail is handled for you when you contribute to a wizard
+extension.&nbsp; When you are launching your own wizard, you must display it
+yourself by wrapping it in a <a href="../reference/api/org/eclipse/jface/wizard/WizardDialog.html"><b>WizardDialog</b></a>.</P>
+<P >
+For example, the <b> ReadmeCreationWizard</b> could be launched independently by creating a wizard dialog and associating it with the
+<b>ReadmeCreationWizard</b>. The following code snippet shows how this could be done from some action delegate. (The method assumes that we know the workbench and the selection.)</P>
+<pre>
+   public void run(IAction action) {
+      // Create the wizard
+      ReadmeCreationWizard wizard = new ReadmeCreationWizard();
+      wizard.init(getWorkbench(), selection);
+
+      // Create the wizard dialog
+      WizardDialog dialog = new WizardDialog
+         (getWorkbench().getActiveWorkbenchWindow().getShell(),wizard);
+      // Open the wizard dialog
+      dialog.open();
+   }</pre>
+   <p>If you need to embed a wizard anywhere else in your plug-in's user
+   interface, the interface <a href="../reference/api/org/eclipse/jface/wizard/IWizardContainer.html"><b>IWizardContainer</b></a>
+   defines the necessary protocol for hosting a wizard.</p>
+
+
+
+</BODY>
+</HTML>

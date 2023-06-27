@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Incremental project builders</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Incremental project builders</H2>
+<P >
+An <b>incremental project builder</b> is an object that manipulates the resources in a project in
+a particular way.  Incremental project builders are often used to apply a
+transformation on a resource to produce a resource or artifact of another kind.
+Resources created by a builder are typically marked as <a href="resAdv_derived.htm">derived resources</a>.
+</P>
+<p>Plug-ins contribute incremental project builders to the platform in order to implement specialized resource 
+transformations. For example, the Java development tools (JDT)define an incremental project builder that compiles
+a Java source file into a class file any time a file is added or modified in a Java project.  It also
+keeps track of dependent files and recompiles them when necessary.
+</p>
+<p>From an API point of view, the platform defines two basic types of builds:
+</p>
+<ul>
+<li>A <b> full build </b> performs a build from scratch. It treats all resources in a project
+as if they have never been seen by the builder.</li>
+<li>An <b> incremental build</b> uses a &quot;last build state,&quot; maintained internally by the builder,
+to do an optimized build based on the changes in the project since the last build.</li>
+</ul>
+<p>Incremental builds are seeded with a resource change delta. The delta reflects the net effect of all resource 
+changes since the builder last built the project.  This delta is similar to the one used inside resource change events.
+</p>
+<p>Projects can be periodically <b>cleaned</b> by the user in order to force a rebuild of a complete project
+the next time an incremental build is performed on that project.  Cleaning a project removes build information
+such as problem markers and class files.
+</p>
+<p>Projects support multiple <a href="resAdv_buildconfigs.htm">build configurations</a> which allow Incremental 
+Project Builders to build a project in more than one way while providing a resource delta for each build configuration.
+</p>
+<p>Builders are best understood by example. The JDT Java compiler is driven by a Java incremental project builder 
+which recompiles the files in a project that are affected by changes. When a full build is triggered, (or an incremental
+build after a clean), all of the <b> .java</b> files in the project are compiled. Any compile problems encountered 
+are added as problem markers on the affected <b> .java</b> files. When an incremental build is triggered, the builder 
+selectively recompiles the added, changed, or otherwise affected <b>.java</b> files that are described in the 
+resource delta and updates the problem markers as necessary. Any <b>.class</b> files or markers that are no 
+longer appropriate are removed.
+</p>
+<p>Incremental building has obvious performance benefits for projects with hundreds or thousands of resources, 
+most of which are unchanging at any given point in time.
+</p>
+<P >
+The technical challenge for incremental building is to determine exactly what needs to be rebuilt. For example, the
+internal state maintained by the Java builder includes things like a dependency
+graph and a list of compilation problems reported.  This information is used during an incremental build to 
+identify which classes need to be recompiled in response to a change in a Java resource. </P>
+<P >
+Although the basic structure for building is defined in the platform, the real work is done in the builder
+code.  Patterns for implementing complex incremental builders are beyond the scope of this discussion, since the 
+implementation is dependent on the specific builder design. </P>
+
+<H3>Invoking a build</H3>
+<p>A builder can be invoked explicitly in one of the following ways:
+</p>
+<ul>
+<li><b>IProject.build()</b> runs the build processing on the receiving project according to the build
+method's arguments.</li>
+<li><b>IWorkspace.build()</b> runs the build processing on all open projects in the workspace.</li>
+</ul>
+<P >
+In practice, the workbench user triggers a build by selecting corresponding commands in the resource 
+navigator menu.</P>
+<P >
+Incremental project builders are also invoked implicitly by the platform during an auto-build.
+If enabled, auto-builds run whenever the workspace is changed.</P>
+<H3>
+Defining an incremental project builder</H3>
+<P >
+The <a href="../reference/extension-points/org_eclipse_core_resources_builders.html"> <b> org.eclipse.core.resources.builders</b></a> extension point is used to contribute an
+incremental project builder to the platform. The following markup shows how the hypothetical plug-in
+<b> com.example.builders</b> could contribute an incremental project builder.</P>
+<pre>
+   &lt;extension
+      id=&quot;mybuilder&quot; name=&quot;My Sample Builder&quot; point=&quot;org.eclipse.core.resources.builders&quot;&gt;
+      &lt;builder
+         &lt;run 
+            <b>class=&quot;com.example.builders.BuilderExample&quot;</b>&gt;
+            &lt;parameter name=&quot;optimize&quot; value=&quot;true&quot; /&gt;
+            &lt;parameter name=&quot;comment&quot; value=&quot;Builder comment&quot; /&gt;
+         &lt;/run&gt;
+      &lt;/builder&gt;
+   &lt;/extension&gt;
+</pre>
+<P >
+The <b> class</b> identified in the extension point must extend the platform class 
+<b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>. </P>
+<pre>
+   public class BuilderExample extends IncrementalProjectBuilder {
+      IProject[] build(int kind, Map args, IProgressMonitor monitor)
+            throws CoreException {
+         // add your build logic here
+         return null;
+      }
+      protected void startupOnInitialize() {
+         // add builder init logic here
+      }
+      protected void clean(IProgressMonitor monitor) {
+         // add builder clean logic here
+      }
+   }
+</pre>
+<P >
+Build processing begins with the <b> build()</b> method, which includes information about the kind of build that 
+has been requested.  The build is one of the following values:</p>
+<ul>
+<li><b>FULL_BUILD</b> indicates that all resources in the project should be built. No delta is available.</li>
+<li><b>INCREMENTAL_BUILD</b> indicates that the build is incremental.</li>
+<li><b>AUTO_BUILD</b> indicates that an incremental build is being triggered automatically because a
+resource has changed and the autobuild feature is on.</li>
+</ul>
+<p>If an incremental build or workspace auto-build have been requested, a resource delta is provided to describe the changes in the 
+resources since the last build.</p>
+<p><strong>NOTE:</strong> If no delta is available, the build kind will
+always be FULL_BUILD. See <a href="#advanced_build_kinds">Advanced Build Kinds</a> for more on build kinds.</p>
+
+<p>The following snippet further refines the
+<b> build() </b> method.
+</P>
+<pre>   protected IProject[] build(int kind, Map args, IProgressMonitor monitor
+         throws CoreException {
+      if (kind == IncrementalProjectBuilder.FULL_BUILD) {
+         fullBuild(monitor);
+      } else {
+         IResourceDelta delta = getDelta(getProject());
+         if (delta == null) {
+            fullBuild(monitor);
+         } else {
+            incrementalBuild(delta, monitor);
+         }
+      }
+      return null;
+   }
+</pre>
+
+<P>It sometimes happens that when building project &quot;X,&quot; a builder
+needs information about changes in some other project &quot;Y.&quot;&nbsp; (For
+example, if a Java class in X implements an interface provided in Y.)&nbsp;
+While building X, a delta for Y is available by calling <b>getDelta(Y)</b>.&nbsp;
+To ensure that the platform can provide such deltas, X's builder must have
+declared the dependency between X and Y by returning an array containing Y from
+a previous <b>build()</b> call.&nbsp; If a builder has no dependencies, it can simply return null.
+See <b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>
+for further information.</P>
+
+<H4>
+Full build</H4>
+<P >
+The logic required to process a full build request is specific to the plug-in. It may involve visiting every 
+resource in the project or even examining other projects if there are dependencies between projects.
+The following snippet suggests how a full build might be implemented.</P>
+<pre>
+   protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
+      try {
+         getProject().accept(new MyBuildVisitor());
+      } catch (CoreException e) { }
+   }
+</pre>
+<P >
+The build visitor would perform the build for the specific resource (and answer true to continue visiting all 
+child resources).</P>
+<pre>
+   class MyBuildVisitor implements IResourceVisitor {
+      public boolean visit(IResource res) {
+         //build the specified resource.
+         //return true to continue visiting children.
+         return true;
+      }
+   }
+</pre>
+<P >
+The visit process continues until the full resource tree has been traveled.</P>
+
+<H4>
+Incremental build</H4>
+<P >
+When performing an incremental build, the builder works with a resource change delta instead of a complete
+resource tree.</P>
+<pre>
+   protected void incrementalBuild(IResourceDelta delta, 
+         IProgressMonitor monitor) throws CoreException {
+      // the visitor does the work.
+      delta.accept(new MyBuildDeltaVisitor());
+   }
+</pre>
+<P >
+The visit process continues until the complete resource delta tree has been traveled. The specific nature of changes
+is similar to that described in
+<a HREF="resAdv_events.htm#resAdv_events_listener" CLASS="XRef">Implementing a resource change listener</a>.&nbsp;
+One important difference is that with incremental project builders, you are working with a resource delta based 
+on a particular project, not the entire workspace.</P>
+
+<H4>
+Cleaning before a build</H4>
+<P>
+The workbench allows users to <b>clean</b> a project or set of projects before initiating a build.  This feature
+allows the user to force a rebuild from scratch on only certain projects.  Builders should implement 
+this method to clean up any problem markers and <a href="resAdv_derived.htm">derived resources</a> in the project.
+</P>
+
+<h4>Build Locking</h4>
+
+<p>
+By default, builders run with the <a href="resAdv_batching.htm">Workspace Root scheduling rule</a>.  This prevents other threads from modifying the Eclipse
+workspace while the build is in progress.  Long running builders, or builders which do not care about concurrent changes
+in parts of the resource tree, may wish to allow modification while the build is in progress.
+A builder may relax the scheduling rule its run with by overriding the #getRule method:
+</p>
+
+<pre>
+  public ISchedulingRule <a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#getRule(int, java.util.Map)">getRule</a>(int kind, Map&lt;String,String&gt; args) {
+    // Allow any resource to be modified concurrently with this buidler's invocation.
+    return null;
+  }
+</pre>
+
+<h4>Discovering what's being built</h4>
+
+It's sometimes useful for a builder to discover why its being built.  Builders have access to a build context by calling
+<pre>
+<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html">IBuildContext</a> buildContext = <a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#getContext()">getContext</a>();
+</pre>
+When building a project and its references, projects may be implicitly built if they are reachable 
+in the reference graph of the top-level project the user requested built.
+With this API a builder can discover which <a href="resAdv_buildconfigs.htm">build configurations</a> have been built before it 
+(<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html#getAllReferencedBuildConfigs()">IBuildContext#getAllReferencedBuildConfigs()</a>), will be built after 
+it (<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html#getAllReferencingBuildConfigs()">IBuildContext#getAllReferencingBuildConfigs()</a>), as well as 
+which build configurations the user asked to be built (<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html#getRequestedConfigs()">IBuildContext#getRequestedConfigs()</a>).  
+
+<H3>
+Associating an incremental project builder with a project</H3>
+<P >
+To make a builder available for a given project, it must be included in the build spec for the project. 
+A project's build spec is a list of commands to run, in sequence, when the project is built. Each command 
+names a single incremental project builder. </P>
+<P>
+<b>NOTE:</b> The builder name in a build command is the fully qualified id
+of the builder extension. The fully qualified id of an extension is created by combining
+the plug-in id with the simple extension id in the plugin.xml file. For example, a builder with simple extension
+id &quot;mybuilder&quot; in the plug-in &quot;com.example.builders&quot; would have the
+name &quot;com.example.builders.mybuilder&quot;</p>
+<P >
+The following snippet adds a new builder as the first builder in the existing list of builders.</P>
+<pre>
+   final String BUILDER_ID = "com.example.builders.mybuilder";
+   IProjectDescription desc = project.getDescription();
+   ICommand[] commands = desc.getBuildSpec();
+   boolean found = false;
+
+   for (int i = 0; i &lt; commands.length; ++i) {
+      if (commands[i].getBuilderName().equals(BUILDER_ID)) {
+         found = true;
+         break;
+      }
+   }
+   if (!found) { 
+      //add builder to project
+      ICommand command = desc.newCommand();
+      command.setBuilderName(BUILDER_ID);
+      ICommand[] newCommands = new ICommand[commands.length + 1];
+
+      // Add it before other builders.
+      System.arraycopy(commands, 0, newCommands, 1, commands.length);
+      newCommands[0] = command;
+      desc.setBuildSpec(newCommands);
+      project.setDescription(desc, null);
+   }
+</pre>
+<P >
+Configuring a project's builder is done just once, usually as the project is being created.
+A common way to associate a builder with a project is by configuring a <a href="resAdv_natures.htm">project nature</a>.
+</P>
+<H3><a name="advanced_build_kinds">Advanced Build Kinds</a></H3>
+
+<h4>Triggers vs. Kinds</h4>
+<p>When a build is invoked on an IProject or IWorkspace, we call the passed in build kind the build <i>trigger</i>.
+This trigger is usually passed through to the IncrementalProjectBuilder as the build <i>kind</i> argument when IncrementalProjectBuilder#build
+is invoked.</p> 
+<p>The major exception to this is where no delta exists. In this case the build <i>trigger</i> is always promoted to <b>FULL_BUILD</b>.</p>
+
+The mapping between triggers and kinds looks like: 
+<table border="1">
+<tr>
+<th>Trigger</th>
+<th>Kind</th>
+</tr>
+<tr>
+<td>FULL_BUILD</td>
+<td>FULL_BUILD</td>
+</tr>
+<tr>
+<td>INCREMENTAL_BUILD</td>
+<td>INCREMENTAL_BUILD or FULL_BUILD</td>
+</tr>
+<tr>
+<td>AUTO_BUILD</td>
+<td>AUTO_BUILD or FULL_BUILD</td>
+</tr>
+<tr>
+<td>CLEAN_BUILD</td>
+<td>IncrementalProjectBuilder#clean(...)</td>
+</tr>
+</table>
+
+<h4>Ignoring Build Kinds</h4>
+
+<p>
+The platform provides API for configuring which build <i>kind</i>s a builder responds to.  If the builder is marked
+as 'isConfigurable' in its <a href="../reference/extension-points/org_eclipse_core_resources_builders.html">extension point</a> it can be configured at runtime to respond to, or ignore, certain build <i>triggers</i>.
+</p>
+
+For example a long running builder which doesn't want to be called during workspace AUTO_BUILD, can use:
+<pre>
+  <a href="../reference/api/org/eclipse/core/resources/ICommand.html">ICommand</a>#setBuilding(AUTO_BUILD, false);
+</pre>
+
+It is important to note that: 
+<ul>
+<li>
+if INCREMENTAL_BUILD (or AUTO_BUILD) is promoted to FULL_BUILD, a builder that responds to INCREMENTAL_BUILD (or AUTO_BUILD) will be called,
+</li><li>
+if INCREMENTAL_BUILD is promoted to FULL_BUILD, a builder that responds to FULL_BUILD will be called,
+</li><li>
+if AUTO_BUILD is promoted to FULL_BUILD, <strong>only</strong> builders that respond to AUTO_BUILD will be called. 
+This is to allow long running builders to ignore AUTO_BUILD requests completely.
+</li>
+</ul>
+
+<p>See <a href="../reference/api/org/eclipse/core/resources/ICommand.html">ICommand</a> for more information.</p>
+
+</BODY>
+</HTML>

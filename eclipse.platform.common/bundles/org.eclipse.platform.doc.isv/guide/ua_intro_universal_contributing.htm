@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Contributing to universal intro</title>
+</head>
+<body>
+
+<h2>Contributing to universal intro</h2>
+
+<p>
+In order to hook into to the universal intro, developers should have a 
+product-based eclipse application. This requires the use of the
+<code><b>org.eclipse.runtime.products</b></code> extension point (the assumption is
+that the product has already been defined):
+</p>
+
+<pre>   &lt;extension
+         id="foo"
+         point="org.eclipse.core.runtime.products"&gt;
+      &lt;product
+            application="org.eclipse.ui.ide.workbench"
+            description="Product Foo to use for testing the universal intro"
+            name="Product Foo"&gt;
+      &lt;/product&gt;
+   &lt;/extension&gt;
+</pre>
+
+<p>
+For this example, assume that the extension is defined in the <code>plugin.xml
+</code> file in the <code><b>com.example.intro</b></code> plug-in. A
+long-standing feature of the eclipse intro support is the ability to hook
+products and intros using the product-intro binding:
+</p>
+
+<pre>   &lt;extension
+         point="org.eclipse.ui.intro"&gt;
+      &lt;introProductBinding
+            introId="org.eclipse.ui.intro.universal"
+            productId="com.example.intro.foo"/&gt;
+   &lt;/extension&gt;
+</pre>
+
+<p>
+The extension above binds the universal intro implementation
+(<b>org.eclipse.ui.intro.universal</b>) and our product id.
+</p>
+
+<p>
+Universal intro customization is split between product branding properties and 
+preferences. Product branding properties are set by the product and cannot be 
+modified. They include product title, branding image and branding image text:
+</p>
+
+<pre>   &lt;product
+         application="org.eclipse.ui.ide.workbench"
+         description="Product Foo to use for testing the universal intro"
+         name="Product Foo"&gt;
+      &lt;property
+            name="introTitle"
+            value="Welcome to Product Bar"/&gt;
+      &lt;property
+            name="introBrandingImage"
+            value="product:eclipse.png"/&gt;
+      &lt;property
+            name="introBrandingImageText"
+            value="XYZ Company"/&gt;
+   &lt;/product&gt;
+</pre>
+
+<p>
+Product properties whose values represent a file name relative to the product 
+bundle must be qualified with the 'product:' prefix. The following properties are 
+supported:
+</p>
+
+<ul>
+  <li>
+    <b>introTitle</b> - the value of the property will be used at the top of 
+    the root page (assuming that the current presentation theme elected to show 
+    the root page title)
+  </li>
+  <li>
+    <b>introBrandingImage</b> - the value of the property represents the 
+    file name of the image to be used as the root page brand mark. The image 
+    should ideally be as SVG file or a PNG file with alpha blending. 
+    Image file names relative to the product bundle must have a 'product:' 
+    prefix. 
+  </li>
+  <li>
+    <b>introBrandingImageText</b> - an alternative text to be used for the 
+    branding image.
+  </li>
+  <li>
+    <b>introDescription-&lt;pageId&gt;</b> - an option description text that 
+    appears below the title on each of the sections, where pageId is one of the 
+    values listed further below (e.g. introDescription-overview, 
+    introDescription-samples etc.). This value should be translated in 
+    plugin.properties file.
+  </li>
+</ul>
+<p>The universal intro supports replacing file-based
+properties such as <b>introBrandingImage</b> with a theme-specific
+alternative.  For example, a product may contribute a <b>introBrandingImage</b>
+as <code>"product:gizmo.png"</code>, but this image does not match the
+the <code>com.acme.theme</code> theme.  A more suitable image can be placed
+in the product bundle in <code>com.acme.theme/gizmo.png</code>. 
+When a replacement image is not found, the resolver will fall back
+to the general image <code>gizmo.png</code> image found at the root
+of the product bundle.
+</p>
+
+<p>
+Second half of universal intro variables are accessible as preferences. The 
+split is due to the fact that these variables can be configured by users and are 
+exposed in the new Welcome preference page. The initial values for these preferences 
+should be placed in the 'plugin_customization.ini' file that is referenced from 
+the product extension. These preferences are:
+</p>
+
+<ul>
+  <li>
+    <b>org.eclipse.ui.intro.universal/INTRO_ROOT_PAGES</b> - a comma-separated list of 
+    root page identifiers that should be visible in the home page. Valid values 
+    are:
+    <ul>
+      <li><b>overview</b></li>
+      <li><b>firststeps</b></li>
+      <li><b>tutorials</b></li>
+      <li><b>samples</b></li>
+      <li><b>whatsnew</b></li>
+      <li><b>migrate</b></li>
+      <li><b>webresources</b></li>
+    </ul>
+  </li>
+  <li>
+    <b>org.eclipse.ui.intro.universal/INTRO_DATA</b> - a file name pointing at 
+    the XML file with the page layout settings (see more about this below). The 
+    file name relative to the product bundle must have 'product:' prefix.
+  </li>
+  <li>
+    <b>org.eclipse.ui.intro/INTRO_THEME</b> - a unique identifier of the 
+    <a href="ua_intro_ext_theme.htm">presentation theme</a> to be used for this
+    product. <b>Note that this preference comes from 'org.eclipse.ui.intro
+    plug-in'</b> because active theme selection is performed at the framework
+    level.
+  </li>
+  <li>
+    <b>org.eclipse.ui.intro/INTRO_START_PAGE</b> - the id of the page which will 
+    be shown when Eclipse starts the first time.
+  </li>
+  <li>
+    <b>org.eclipse.ui.intro/INTRO_HOME_PAGE</b> - the id of the page which will 
+    be shown when the home button is pressed.
+  </li>
+  <li>
+    <b>org.eclipse.ui.intro/INTRO_STANDBY_PAGE</b> - the id of the page which will 
+    be shown when welcome is displayed in a non-maximized form.</li>
+  <li>
+    When using universal intro valid values for the three page related 
+    properties are are <b>root, overview,&nbsp; firststeps, tutorials, samples, whatsnew, migrate  </b>or&nbsp;<b> webresources</b> 
+    or the name of a page contributed using a config extension.</li>
+</ul>
+
+<p>&nbsp;</p>
+
+</body>
+</html>

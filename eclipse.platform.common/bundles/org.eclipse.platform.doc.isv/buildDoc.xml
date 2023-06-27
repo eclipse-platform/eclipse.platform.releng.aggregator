@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Platform Doc Isv Build" default="all"  basedir="." >
+
+	<property file="${basedir.properties}"/>
+
+	<target name="init">
+	    <property environment="env" />
+        <echo message="env.JAVA_DOC_PROXIES: ${env.JAVA_DOC_PROXIES}" />
+		<available file="${basedir}/index" property="index.present"/>
+	</target>
+
+	<target name="all" depends="init" unless="index.present">
+		<antcall target="convertSchemaToHtml" />
+		<antcall target="examplesDocCopy" />
+		<antcall target="generateJavadoc" />
+	</target>
+
+	<target name="convertSchemaToHtml" if="eclipse.running">
+		<property name="dest" value="reference/extension-points" />
+		<property name="platformSearchPath" value="${eclipse.platform.ant},${eclipse.platform.debug},${eclipse.platform.platform},${eclipse.platform.resources.bundles},${eclipse.platform.runtime.bundles},${eclipse.platform.swt.bundles},${eclipse.platform.team.bundles},${eclipse.platform.text},${eclipse.platform.ua},${eclipse.platform.ui.bundles}" />
+		<property name="runtimeSearchPath" value="${rt.equinox.bundles.bundles},${rt.equinox.framework.bundles},${rt.equinox.p2.bundles}" />
+		<property name="searchPaths" value="${platformSearchPath},${runtimeSearchPath}" />
+
+		<record name="${basedir}/target/platformconvert.txt" loglevel="warn" action="start"/>
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ant}/org.eclipse.ant.core/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ant}/org.eclipse.ant.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.team.bundles}/org.eclipse.compare/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.runtime.bundles}/org.eclipse.core.contenttype/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.runtime.bundles}/org.eclipse.core.expressions/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.text}/org.eclipse.core.filebuffers/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.resources.bundles}/org.eclipse.core.filesystem/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.resources.bundles}/org.eclipse.core.resources/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.runtime.bundles}/org.eclipse.core.runtime/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.debug}/org.eclipse.core.variables/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.debug}/org.eclipse.debug.core/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.debug}/org.eclipse.debug.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.debug}/org.eclipse.unittest.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.workbench/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.bundles.bundles}/org.eclipse.equinox.preferences/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.artifact.repository/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.engine/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.bundles.bundles}/org.eclipse.equinox.app/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.bundles.bundles}/org.eclipse.equinox.bidi/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.bundles.bundles}/org.eclipse.equinox.http.registry/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.bundles.bundles}/org.eclipse.equinox.registry/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${rt.equinox.bundles.bundles}/org.eclipse.equinox.security/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.help/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.help.base/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.help.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.help.webapp/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.team.bundles}/org.eclipse.jsch.core/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.jdt.ui}/org.eclipse.ltk.core.refactoring/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.jdt.ui}/org.eclipse.ltk.ui.refactoring/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.text}/org.eclipse.search/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.team.bundles}/org.eclipse.team.core/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.team.bundles}/org.eclipse.team.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.css.swt.theme/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.browser/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<!--copy extra files linked to by generated extension point doc-->
+		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/cheatSheetContentFileSpec.html" todir="${dest}"/>
+		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/cheatSheetContentFileSpec.exsd" todir="${dest}"/>
+		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/compositeContentFile.html" todir="${dest}"/>
+		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/compositeContentFile.exsd" todir="${dest}"/>
+
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.debug}/org.eclipse.ui.console/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.text}/org.eclipse.ui.editors/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.debug}/org.eclipse.ui.externaltools/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.text}/org.eclipse.ui.genericeditor/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.ide/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.ui.intro/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<!--copy extra HTML file linked to by generated extension point doc-->
+		<copy file="${eclipse.platform.ua}/org.eclipse.ui.intro/schema/introContentFileSpec.html" todir="${dest}"/>
+
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ua}/org.eclipse.ui.intro.quicklinks/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.monitoring/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.navigator/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.views.properties.tabbed/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.platform.text}/org.eclipse.ui.workbench.texteditor/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<record name="${basedir}/target/platformconvert.txt" action="stop"/>
+	</target>
+
+	<target name="examplesDocCopy" >
+		<copy todir="samples">
+			<fileset dir="${eclipse.platform.team.examples}">
+				<include name="org.eclipse.compare.examples/doc-html/"/>
+				<include name="org.eclipse.compare.examples.xml/doc-html/"/>
+				<include name="org.eclipse.team.examples.filesystem/doc-html/"/>
+			</fileset>
+		</copy>
+		<copy todir="samples">
+			<fileset dir="${eclipse.platform.swt.examples}">
+				<include name="org.eclipse.swt.examples/doc-html/"/>
+				<include name="org.eclipse.swt.examples.views/doc-html/"/>
+				<include name="org.eclipse.swt.examples.launcher/doc-html/"/>
+				<include name="org.eclipse.swt.examples.ole.win32/doc-html/"/>
+			</fileset>
+		</copy>
+		<copy todir="samples">
+			<fileset dir="${eclipse.platform.ui.examples}">
+				<include name="org.eclipse.ui.examples.fieldassist/doc-html/"/>
+				<include name="org.eclipse.ui.examples.multipageeditor/doc-html/"/>
+				<include name="org.eclipse.ui.examples.propertysheet/doc-html/"/>
+				<include name="org.eclipse.ui.examples.readmetool/doc-html/"/>
+				<include name="org.eclipse.ui.examples.undo/doc-html/"/>
+			</fileset>
+		</copy>
+		<copy todir="samples">
+			<fileset dir="${eclipse.platform.text}">
+				<include name="org.eclipse.ui.examples.javaeditor/doc-html/"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="getJavadocPath" depends="getEclipseJavadocPath" unless="javadocExecutable">
+		<!-- WARNING: Ant bug: The <available> task overrides an already set property! https://bugs.eclipse.org/431236#c12 -->
+		<available file="${java.home}/../bin/javadoc.exe" property="javadocExecutable" value="${java.home}/../bin/javadoc.exe"/>
+		<available file="${java.home}/../bin/javadoc" property="javadocExecutable" value="${java.home}/../bin/javadoc" />
+
+		<available file="${java.home}/bin/javadoc.exe" property="javadocExecutable" value="${java.home}/bin/javadoc.exe"/>
+		<available file="${java.home}/bin/javadoc" property="javadocExecutable" value="${java.home}/bin/javadoc" />
+	</target>
+
+	<target name="getEclipseJavadocPath" unless="javadocExecutable">
+		<!-- Use custom javadoc executable if ${eclipse.javadoc} is set -->
+		<condition property="javadocExecutable" value="${eclipse.javadoc}">
+		  <and>
+		     <isset property="eclipse.javadoc"/>
+		     <available file="${eclipse.javadoc}" />
+		  </and>
+		</condition>
+	</target>
+
+	<target name="generateJavadoc" depends="getJavadocPath" if="javadocExecutable">
+		<!-- replace "\n;" with platform-dependent list entry delimiter -->
+		<property name="optionsFile" value="target/platformOptions.tmp.txt" />
+		<copy file="platformOptions.txt" tofile="${optionsFile}" overwrite="true">
+			<filterchain>
+				<expandproperties/>
+			</filterchain>
+		</copy>
+
+		<condition property="argsListDelimiter" value=":">
+			<os family="unix" />
+		</condition>
+		<condition property="argsListDelimiter" value=";">
+			<os family="windows" />
+		</condition>
+
+		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
+		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
+
+		<!-- expand _* to actual version -->
+			<!-- prepare ${replaceFile} with all files and folders from workspace -->
+		<fileset dir="${basedir}/${dependency.dir}" id="fileSet">
+			<include name="*"/>
+		</fileset>
+		<dirset dir="${basedir}/${dependency.dir}" id="dirSet">
+			<include name="*"/>
+		</dirset>
+		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
+		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
+		<property name="replaceFile" value="target/platformOptions.replace.txt" />
+		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
+
+<echo>org.eclipse.platform.doc.isv/buildDoc.xml - generateJavadoc:
+      Using javadocExecutable: ${javadocExecutable}</echo>
+<!--
+<echo>${basedir}/${replaceFile} before _* expansion:</echo>
+<concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
+-->
+
+			<!-- strip away leading path -->
+		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^.*/([^/]*)$$" replace="\1" />
+			<!-- remove lines without version pattern "[_-]\d+\.\d+\.\d+"; version pattern is a workaround for bug 402392 -->
+		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*[-_]\d+\.\d+(\.\d+)?.*)|(.*)$$" replace="\1" />
+			<!-- create "<aa>_*[.jar]=<aa><version>[.jar]" property for lines with a version -->
+		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*)[-_]\d+\.\d+(\.\d+)?.*?(.jar)?$$" replace="\1_*\3=\0" />
+
+<!--
+<echo>${basedir}/${replaceFile} after _* expansion:</echo>
+<concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
+-->
+
+		<!-- workaround for bug 402392, which can make the ${replaceFile} end up empty: -->
+		<echo file="${basedir}/${replaceFile}" append="true">dummyForBug402392=dummyForBug402392&#xA;</echo>
+
+		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
+
+<!--
+<echo>${basedir}/${optionsFile} after _* expansion:</echo>
+<concat><filelist files="${basedir}/${optionsFile}"></filelist></concat>
+-->
+
+		<!--scrub isv plugin directories of any preexisting api doc content-->
+		<delete dir="reference/api"/>
+		<mkdir dir="reference/api"/>
+
+	  <!-- if not pass in from environment, set this value to empty -->
+	  <property name="env.JAVA_DOC_PROXIES" value=""/>
+
+		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
+			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M ${env.JAVA_DOC_PROXIES}"  />
+		</exec>
+
+<!-- Debugging: Add a snapshot of the workspace contents:
+		<fileset dir="${basedir}/.." id="fileSet">
+			<include name="*"/>
+			<include name="*/*"/>
+		</fileset>
+		<dirset dir="${basedir}/.." id="dirSet">
+			<include name="*"/>
+			<include name="*/*"/>
+		</dirset>
+		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
+		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
+		<echo file="doc.bin.log" append="true">
+Content of ${basedir}/..:
+Files:
+${fileList}
+Directories:
+${dirList}
+</echo>
+-->
+
+		<!--workaround for bug 409511, bug 101048-->
+		<replace dir="reference/api" token="='/../misc/api-usage-rules.html" value="='./../misc/api-usage-rules.html">
+			<include name="*.htm*" />
+		</replace>
+
+	</target>
+
+	<target name="createDocZip">
+		<zip zipfile="${basedir}/doc.zip" basedir="${basedir}" includes="book.css, notices.html, about.html, concepts/**, gettingStarted/**, images/**, reference/**, porting/**, tasks/**,samples/**,guide/**,questions/**" />
+	</target>
+</project>
+

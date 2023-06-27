@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Open Files</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Associate and Open Files</h2>
+<p>
+An Eclipse based <b>product</b> is a stand-alone program built with the
+Eclipse platform.  In many cases such a program would like to be associated with
+particular file types or extensions.  For example, the Eclipse IDE  
+could be configured to open all Java files.  This would allow a user 
+to double click on a Java file and have it be opened in a running Eclipse
+IDE instance or start a new instance of the Eclipse IDE if it was not 
+previously running.  In order to support this coordination is needed 
+between the Eclipse native launcher, SWT, the workbench and the RCP
+application.
+</p>
+<p>
+New command line options have been added to support this scenario:
+</p>
+<ul>
+  <li><a href="../reference/misc/runtime-options.html#launcheropenfile">--launcher.openFile</a>
+      Specifies a file to be opened.
+  </li>
+  <li><a href="../reference/misc/runtime-options.html#launcherdefaultaction">--launcher.defaultAction</a>
+      Specifies an action to take when the launcher is started witout any &quot;-&quot; arguments on 
+      the command line.
+  </li>
+</ul>
+<p>
+The openFile argument opens the specified file in an instance of 
+Eclipse.  If an instance is not already running then a new instance will be started.
+</p>
+
+<pre>  eclipse --launcher.openFile myFile.txt</pre>
+
+<p>
+A second option is needed to configure the launcher to automatically perform the open file 
+request without requiring the user to always specify --launcher.openFile.  A new &quot;default action&quot; argument has been introduced to accomplish this.  This option
+can go in the launcher.ini (eclipse.ini) file, the value must be &quot;openFile&quot;:
+</p>
+
+<pre>  ...
+  -showsplash
+  org.eclipse.platform
+  --launcher.defaultAction
+  openFile
+  -vmargs
+  -Xms256m
+  -Xmx768m</pre>
+
+<p>
+This tells the launcher that if none of the command line arguments start with &quot;-&quot; then all command line arguments should be treated as if they
+followed the &quot;--launcher.openFile&quot; argument.
+</p>
+
+<pre>  eclipse myFile.txt</pre>
+
+<p>
+This option was added because without registry changes, this is the kind of command line the launcher will receive on windows when you double click a file that 
+is associated with eclipse, or you select files and choose &quot;Open With&quot; or &quot;Send To&quot; Eclipse.
+</p>
+
+<h3>Talking to SWT</h3>
+
+<p>
+The launcher talks to SWT through the use of a hidden window. The launcher and SWT both need to agree on 
+the name of this window. This allows the launcher to find an already running eclipse and tell it to open 
+the file. Any RCP application will need to ensure they get this right for things to work.
+</p>
+<p>
+The launcher bases this on its &quot;official name&quot;. The official name can be set with the -name argument.
+If -name is not set, then the official name is derived from the launcher executable, the extension is removed
+and the first letter is capitalized: rcp.exe becomes Rcp.
+</p>
+<p>
+SWT bases this on the value set with the Display.setAppName() function. Normally, this is set by the
+Workbench when it creates the display and the value is the "appName" taken from the product extension point.
+</p>
+
+<h3>Listening to SWT.OpenDocument events</h3>
+<p>
+The launcher communicates with SWT to inform SWT about a request to open one or more files.  SWT then
+can fire the SWT.OpenDocument event.  For an RCP application to take advantage of this it must register
+a listener for the SWT.OpenDocument event.  It should register this listener before calling
+PlatformUI.createAndRunWorkbench so that the listener is in place before the workbench starts running 
+the event loop.
+</p>
+<p>
+The event loop will start running while the splash screen is still up, so events may arrive before the 
+workbench is ready to actually open an editor for the file. This means that the listener should save 
+the file paths it gets from the OpenDocument events so they can be opened at some later time. 
+WorkbenchAdvisor.eventLoopIdle can be a good place to check for saved open file events.
+</p>
+
+<p>
+Here is an example RCP application that does this.  First is the IApplication implementation:
+</p>
+<pre>public class Application implements IApplication {	
+
+	public Object start(IApplicationContext context) {
+		OpenDocumentEventProcessor openDocProcessor = 
+			new OpenDocumentEventProcessor();
+
+		Display display = PlatformUI.createDisplay();
+		display.addListener(SWT.OpenDocument, openDocProcessor);
+
+		try {
+			int returnCode = PlatformUI.createAndRunWorkbench(display, new 
+				ApplicationWorkbenchAdvisor(openDocProcessor));
+			if (returnCode == PlatformUI.RETURN_RESTART) {
+				return IApplication.EXIT_RESTART;
+			}
+			return IApplication.EXIT_OK;
+		} finally {
+			display.dispose();
+		}
+	}
+	...
+}</pre>
+
+<p>
+Next is an example SWT Listener that listens to the SWT.OpenDocument event:
+</p>
+<pre>public class OpenDocumentEventProcessor implements Listener {
+	private ArrayList&lt;String&gt; filesToOpen = new ArrayList&lt;String&gt;(1);
+	
+	public void handleEvent(Event event) {
+		if (event.text != null)
+			filesToOpen.add(event.text);
+	}
+
+	public void openFiles() {
+		if (filesToOpen.isEmpty())
+			return;
+
+		String[] filePaths = filesToOpen.toArray(
+			new String[filesToOpen.size()]);
+		filesToOpen.clear();
+		
+		for (String path : filePaths) {
+			// open the file path
+		}
+	}
+}</pre>
+<p>
+Finally we need a WorkbenchAdvisor that will open the files durying eventLoopIdle:
+</p>
+<pre>public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
+	private OpenDocumentEventProcessor openDocProcessor;
+
+	public ApplicationWorkbenchAdvisor(
+			OpenDocumentEventProcessor openDocProcessor) {
+		this.openDocProcessor = openDocProcessor;
+	}
+
+	...
+
+	public void eventLoopIdle(Display display) {
+		openDocProcessor.openFiles();
+		super.eventLoopIdle(display);
+	}
+}</pre>
+</BODY>
+</HTML>

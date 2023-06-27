@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<HEAD>
+
+<meta name="copyright"
+	content="Copyright (c) Oakland Software and others 2008, 2014. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Common Navigator in an RCP Application</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h1>Using the Common Navigator in an RCP Application</h1>
+
+<p>
+To add the Common Navigator to an RCP application and have it manipulate the
+workspace resources, do the following:
+</p>
+
+<ol>
+<li>
+Add the following as dependent plug-ins:
+<ol type="a">
+<li>org.eclipse.ui.navigator</li>
+<li>org.eclipse.ui.navigator.resources</li>
+<li>org.eclipse.ui.ide</li>
+<li>org.eclipse.core.resources</li>
+</ol>
+</li>
+<li>Add a View extension (org.eclipse.ui.views) which uses the class org.eclipse.ui.navigator.CommonNavigator.
+<pre>
+   &lt;extension
+         point="org.eclipse.ui.views"&gt;
+      &lt;view
+            name="View"
+            class="org.eclipse.ui.navigator.CommonNavigator"
+            id="example.view"&gt;
+      &lt;/view&gt;
+   &lt;/extension&gt;
+</pre>
+</li>
+<li>Update your perspective factory (IPerspectiveFactory) code to show the new View (this is necessary when adding any View):
+
+<pre>
+	public void createInitialLayout(IPageLayout layout) {
+		String editorArea = layout.getEditorArea();
+		layout.setEditorAreaVisible(false);
+		layout.setFixed(true);
+		
+		layout.addStandaloneView("example.view",  true /* show title */, IPageLayout.LEFT, 1.0f, editorArea);
+	}
+</pre>
+
+<p>
+Note that for the moment you need to specify "true" to show title, otherwise the viewer will not render correctly
+(<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=235171" target="_blank">bug 235171</a>).</p>
+</li>
+<li>
+Add a org.eclipse.ui.navigator.viewer extension that has:
+<ul>
+<li>viewerActionBinding, point this to your View Id above (example.view)
+<ul>
+<li>includes of org.eclipse.ui.navigator.resources</li>
+</ul>
+</li>
+<li>viewerContentBinding, point this to your View Id above (example.view)
+<ul>
+<li>includes of:
+<ul>
+<li>org.eclipse.ui.navigator.resources</li>
+<li>org.eclipse.ui.navigator.resourceContent</li>
+<li>org.eclipse.ui.navigator.resources.filters</li>
+<li>org.eclipse.ui.navigator.resources.linkHelper</li>
+<li>org.eclipse.ui.navigator.resources.workingSets</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<pre>
+
+   &lt;extension
+         point="org.eclipse.ui.navigator.viewer"&gt;
+       &lt;viewerActionBinding
+            viewerId="example.view"&gt;
+         &lt;includes&gt;
+             &lt;actionExtension pattern="org.eclipse.ui.navigator.resources.*" /&gt;
+         &lt;/includes&gt;
+       &lt;/viewerActionBinding&gt;
+       &lt;viewerContentBinding 
+            viewerId="example.view"&gt;
+          &lt;includes&gt;
+       	     &lt;contentExtension pattern="org.eclipse.ui.navigator.resourceContent" /&gt;		       	      
+	     &lt;contentExtension pattern="org.eclipse.ui.navigator.resources.filters.*"/&gt;
+             &lt;contentExtension pattern="org.eclipse.ui.navigator.resources.linkHelper"/&gt;
+             &lt;contentExtension pattern="org.eclipse.ui.navigator.resources.workingSets"/&gt;
+          &lt;/includes&gt;
+       &lt;/viewerContentBinding&gt;
+   &lt;/extension&gt;
+</pre>
+</li>
+<li>Add the following to your WorkbenchAdvisor
+<ol type="a">
+<li>To get the resource workspace as input, override this method:
+
+<pre>
+	public IAdaptable getDefaultPageInput() {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		return workspace.getRoot();
+	}
+</pre>
+</li>
+<li>To get the correct adapters hooked up add this code to the initialize() method:
+
+<pre>
+	public void initialize(IWorkbenchConfigurer configurer) {
+		WorkbenchAdapterBuilder.registerAdapters();
+	}
+</pre>
+
+<blockquote><i>
+<b>Warning:</b> the WorkbenchAdapterBuilder.registerAdapters() is an internal method and not part 
+of the Eclipse API and is therefore subject to change in a subsequent release.  There is an open work 
+item to replace this with similar capability that is part of the API.
+</i></blockquote>
+</li>
+</ol>
+</li>
+</ol>
+</BODY>
+</HTML>

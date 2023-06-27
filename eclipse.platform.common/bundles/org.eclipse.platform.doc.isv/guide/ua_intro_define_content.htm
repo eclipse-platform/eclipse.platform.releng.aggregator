@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Defining intro content</title>
+</head>
+<body>
+
+<h2>Defining intro content</h2>
+
+<p>
+Now we can look at the content itself.  Content is described in terms of pages.  All pages have an <b>id</b> attribute.
+This is the id that is used when defining the home and standby pages, and other places where there is a reference
+to a page.  Otherwise, the relevant attributes depend on the kind of page that is defined.
+There are two basic types of pages:
+</p>
+<ul>
+<li><b>Static pages</b> are plain HTML files.  These pages use the normal HTML mechanisms to link to other
+pages.  Static pages need not be defined in the config content file, except for the home page.  Since the home
+page is specified by id (<b>home-page-id</b>) in the <b>presentation</b> element, there must be a page definition
+using that id in the content file.  This page need only define a <b>url</b>.  All other subelements will be ignored
+since the HTML page itself will describe the page content. All other HTML intro pages contributed by the plug-in
+must be included with the plug-in, but do not need to be specified in the content file. HTML files located in other
+plug-ins or on the web may be referenced also. </li>
+<li><b>Dynamic pages</b> are described in the XML content file using subelements that describe the content of the
+page.  The subelements are UI items often found in HTML-like pages.  Depending on the implementation, these pages
+will either be dynamically translated to HTML (when the implementation <b>kind</b> is html) or else dynamically
+created as SWT-based UI forms (when the implementation <b>kind</b> is swt).  The following subelements
+can be defined in a page: 
+<ul>
+<li>A <b>group</b> is used to group other subelements and define a consistent style across the group.</li>
+<li>A <b>link</b> defines a link that can be displayed using an image and text.  The link can navigate to another
+page and optionally run an intro action.  Actions are specified as commands in the URL.</li>
+<li>The <b>text</b> and <b>img</b> elements show text and image content.</li>
+<li>The <b>include</b> element includes a previously defined subelement.  The element is referred to by its id.  </li>
+<li>The <b>head</b> element defines additional HTML to be included in the head section of the page
+when the html implementation is used. </li>
+<li>The <b>html</b> element defines additional HTML to be included in the body of the page
+when the html implementation is used.</li>
+</ul>
+A <b>title</b> for a page may also be defined.  A page may also specify that
+its content is defined in a separate <b>content</b> file.  Breaking up pages into separate
+files may be useful when performance is a concern, since an intro page's contents won't be initialized until needed.
+</li>
+</ul>
+
+<p>
+The best way to get a feel for the content definition format is to browse the
+implementations in the Eclipse SDK. The snippet below shows an example of this:
+</p>
+
+<pre>
+   &lt;introContent&gt;
+      &lt;page alt-style="css/root_swt.properties" style="css/root.css" id="root" style-id="page"&gt;
+         &lt;title style-id="intro-header"&gt;Welcome to Eclipse Platform&lt;/title&gt;
+         &lt;group id="links-background"&gt;
+            &lt;group id="page-links"&gt;
+               &lt;link label="Overview" url="http://org.eclipse.ui.intro/showPage?id=overview" id="overview" style-id="left"&gt;
+                  &lt;text&gt;Find out what Eclipse is all about&lt;/text&gt;
+               &lt;/link&gt;
+               &lt;link label="Tutorials" url="http://org.eclipse.ui.intro/showPage?id=tutorials" id="tutorials" style-id="left"&gt;
+                  &lt;text&gt;Let us guide you through Eclipse end-to-end tutorials&lt;/text&gt;
+               &lt;/link&gt;
+               &lt;link label="Samples" url="http://org.eclipse.ui.intro/showPage?id=samples" id="samples" style-id="right"&gt;
+                  &lt;text&gt;Explore Eclipse development through code samples&lt;/text&gt;
+               &lt;/link&gt;
+               &lt;link label="Whats New" url="http://org.eclipse.ui.intro/showPage?id=news" id="news" style-id="right"&gt;
+                  &lt;text&gt;Find out what is new in this release&lt;/text&gt;
+               &lt;/link&gt;
+            &lt;/group&gt;
+         &lt;/group&gt;
+      ...
+</pre>
+
+<p>
+Elements on a page can also be <b>filteredFrom</b> a particular implementation.  This allows page designers
+to design with particular platforms in mind.  There are many more powerful attributes that 
+can be used when describing a page and its contents.  See the extension point documentation for 
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
+and its associated <a href="../reference/extension-points/introContentFileSpec.html">intro content file format specification</a> for a complete reference of 
+valid elements, subelements, and their attributes.
+</p>
+
+</body>
+</html>

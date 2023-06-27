@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Building p2 Repositories and Products</title>
+</head>
+<body>
+<h1>Building p2 Repositories and Products</h1>
+<p>PDE/Build has built in support for publishing p2 metadata using the new <a href="../../org.eclipse.platform.doc.isv/guide/p2_publisher.html">p2 Publisher</a>.  3.4-style <a href="pde_p2_integration.htm">integration</a> with the old metadata generator still works, but does not support newer features like the <a href="../../org.eclipse.platform.doc.isv/guide/p2_customizing_metadata.html">customization of metadata</a>.
+</p>
+<p>The new publisher integration gathers your features and bundles from source and publishes them directly to a p2 repository. To use the new functionality, the builder should define the property:</p>
+<div align="center"><tt><b>p2.gathering = true</b></tt></div>
+<br>
+<p>Setting this property will change the build in significant manner:</p>
+<ul>
+<li><a href="pde_p2_featurebuilds.htm">Feature builds</a> produce a single p2 repository that is a group of all the configurations being built.</li>
+<li><a href="pde_p2_productbuilds.htm">Product builds</a> produce a properly installed fully enabled p2 product.  (And optionally the corresponding repository.)</li>
+</ul>
+<p>See the separate feature and product build help pages for more detail on those types of builds.</p>
+
+
+<h2><a name="gathering_overview">Overview of the changes</a></h2>
+<h3>The build's local repository</h3>
+<p>During the build, all metadata and artifacts will be published into a build repository defined by the property <tt><b>p2.build.repo</b></tt>.  This property should specify a URI, the default value for this is <tt>file:${buildDirectory}/buildRepo</tt>.</p>
+<p>Once all the metadata and artifacts are published into this repository, the final assemble and packaging scripts will mirror and/or install from this repository into the locations that will become the archives produced by the build.  This final
+mirroring and installation can be skipped using <tt><b>skipMirroring</b></tt> and <tt><b>skipDirector</b></tt> properties, in which case the build results would all just be in the build repository.</p>
+
+<h3>Generated build.xml : gathering vs publishing</h3>
+<p>In the generated build.xml for features and plugins there is a target <tt>gather.bin.parts</tt> which was responsible for gathering the contents of the feature/plug-in and copying them to a final directory to be jared (or not) and included in the build results.
+When using <tt>p2.gathering=true</tt>, we instead publish the feature/plug-in directly into a p2 repository.  That is, we are using p2 to gather the binary artifacts directly from the source (this is where the name of the property comes from).</p>
+<p>This is done using a new target named <tt>publish.bin.parts</tt> which uses a new <a href="pde_p2_buildtasks.htm">ant tasks</a> contributed by PDE/Build.  In old style builds, calling <tt>gather.bin.parts</tt> was done by delegating through the feature structure.  Calling <tt>publish.bin.parts</tt> is instead
+done directly from a new assemble p2 script that is generated.</p>
+<h3>Rootfiles contributed by features</h3>
+<p>Old style integrations grouped all the rootfiles contributed by all the features in the build into a single root file installable unit and artifact (which may have been named for a product). With the new publishing support, root files are instead 
+associated with the feature that contributed them.  See the <a href="pde_p2_featuremetadata.htm">feature metadata layout</a> page for more details.</p>
+<h3>The assemble scripts</h3>
+<p>Old style integration was done by calling the metadata generator on the binary results during the assembly and packaging process.  When using <tt>p2.gathering=true</tt> there is a new <tt>assemble.&lt;feature&gt;.p2.xml</tt> script.</p>  
+<p>This script will invoke the publish.bin.parts for all features and bundles being built.  It will also publish metadata for all pre-existing binary features and plug-ins, as well as publishing metadata for products.</p>
+<p>At the end of the p2 assemble script, before the remaining assemble and package scripts are called, we have a complete repository with the full results of the build.  The remaining assemble and package scripts are simply
+slicing up the repository and/or performing installs using the <a href="../../org.eclipse.platform.doc.isv/guide/p2_director.html">p2 director</a> to create the final archives which are the results of the build.</p>
+</body>
+</html>

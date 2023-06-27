@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Implementing a structure viewer</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Implementing a structure viewer</H2>
+<p>
+A structure merge viewer performs a two-way or three-way compare of its inputs, presents the result
+in a hierarchical view, and lets the user merge between the inputs.&nbsp;
+Structure merge viewers are common for workspace resources or the members of
+an archive file.</p>
+<h3>Tree-like structure viewers</h3>
+<p>Because the implementation of many structure compare viewers is based
+on a tree, the compare plug-in provides a generic tree-based
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureDiffViewer.html"><b>StructureDiffViewer</b></a>.
+Your plug-in is responsible for supplying a <b>structure creator</b>  that breaks a single input object into a hierarchical structure.
+The <a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureDiffViewer.html"><b>StructureDiffViewer</b></a>
+performs the compare on the resulting structure and displays the result as a tree.</p>
+<p>You designate a structure creator for your plug-in using the <a href="../reference/extension-points/org_eclipse_compare_structureCreators.html"><b>org.eclipse.compare.structureCreators</b></a>
+extension.  Much like content viewers, a structure creator can be specified for a set of file <b>extensions</b>, or
+a <b>contentTypeBinding</b> can be used to associate a <a href="runtime_content.htm">content type</a> with a particular
+structure creator.  We won't review the markup here since it's so similar to content viewers.
+The JDT plug-in defines several contributions for 
+<a href="../reference/extension-points/org_eclipse_compare_structureCreators.html"><b>org.eclipse.compare.structureCreators</b></a>.</p>
+
+<h3>Other hierarchical structure viewers</h3>
+<p>In some cases, the tree-based <a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureDiffViewer.html"><b>StructureDiffViewer</b></a>
+may not be appropriate for your plug-in.&nbsp; The <a href="../reference/extension-points/org_eclipse_compare_structureMergeViewers.html"><b>org.eclipse.compare.structureMergeViewers</b></a>
+extension point allows you to define your own implementation for a structure
+merge viewer.  A structure merge viewer can be specified for file <b>extensions</b>, or
+a <b>contentTypeBinding</b> can be used to associate a <a href="runtime_content.htm">content type</a> with a particular
+structure merge viewer.  See the JDT plug-in for examples of
+<a href="../reference/extension-points/org_eclipse_compare_structureMergeViewers.html"><b>org.eclipse.compare.structureMergeViewers</b></a>
+contributions.</p>
+
+<h4>
+Differencer&nbsp;</h4>
+
+
+<p>
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/Differencer.html"><b>Differencer</b></a>
+is a differencing engine for hierarchically
+structured data. It takes two or three inputs and performs a two-way or
+three-way compare on them.</p>
+
+
+<p>
+
+If the input elements to the differencing engine implement the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>
+interface, the engine recursively applies itself to the children of
+the input element. Leaf elements must implement the
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+interface so that the differencer can perform a byte wise comparison on their contents.</p><p>There
+are several good examples of differencers included in the platform
+implementation:</p>
+<ul>
+  <li>
+<a href="../reference/api/org/eclipse/compare/ResourceNode.html"><b>ResourceNode</b></a>
+ implements both interfaces
+(and more) for platform workspace resources
+(<a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>org.eclipse.core.resources.IResource</b></a>).</li>
+  <li>
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DocumentRangeNode.html"><b>DocumentRangeNode</b></a>
+    is used to compare hierarchical structures
+that are superimposed on a document.&nbsp; Nodes and leaves correspond to ranges in a document
+(<a href="../reference/api/org/eclipse/compare/contentmergeviewer/IDocumentRange.html"><b>IDocumentRange</b></a>).&nbsp;
+    Typically, <a href="../reference/api/org/eclipse/compare/structuremergeviewer/DocumentRangeNode.html"><b>DocumentRangeNode</b></a>s
+are created while parsing a document and they represent
+the semantic entities of the document (e.g. a Java class, method or field).
+The two subclasses <b>JavaNode</b> (in <b>org.eclipse.jdt.internal.ui.compare</b>)
+and <b>PropertyNode</b> (in <b>org.eclipse.jdt.internal.ui.compare</b>) are good examples for this.</li>
+</ul>
+<p>
+
+By default the differencing engine returns the result of the compare operation
+as a tree of
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffNode.html"><b>DiffNode</b></a>
+objects.&nbsp; A
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffNode.html"><b>DiffNode</b></a>
+describes the changes among two or three inputs.&nbsp; The type of result nodes
+can be changed by overriding
+a single method of the engine.</p>
+<h4>Difference Viewers</h4>
+<p>
+
+A tree of
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffNode.html"><b>DiffNode</b></a>s
+can be displayed in a 
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffTreeViewer.html"><b>DiffTreeViewer</b></a>.
+The
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffTreeViewer.html"><b>DiffTreeViewer</b></a>
+requires that inner nodes of the tree implement
+the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IDiffContainer.html"><b>IDiffContainer</b></a>
+interface and leaves implement the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IDiffElement.html"><b>IDiffElement</b></a>
+interface.</p>
+<p>
+
+The typical steps to compare hierarchically structured data and to display
+the differences are as follows:</p>
+<ol>
+<li>
+Map the input data into a tree of objects implementing both the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>
+and
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+ interfaces</li>
+
+<li>
+Perform the compare operation by means of the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/Differencer.html"><b>Differencer</b></a></li>
+
+<li>
+Feed the differencing result into the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffTreeViewer.html"><b>DiffTreeViewer</b></a></li>
+
+</ol>
+<p>
+The
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureDiffViewer.html"><b>StructureDiffViewer</b></a>
+is a specialized
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/DiffTreeViewer.html"><b>DiffTreeViewer</b></a>
+that automates the three steps from above. It takes a single input object
+of type
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/ICompareInput.html"><b>ICompareInput</b></a>
+from which it retrieves the two or three
+input elements to compare.&nbsp; It uses an
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureCreator.html"><b>IStructureCreator</b></a>
+to extract a tree containing <a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>
+and
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+ objects from them.&nbsp; These trees are then compared with the differencing engine and
+the result is displayed in the tree viewer.
+</p>
+<p>
+The
+<a href="../reference/api/org/eclipse/compare/ZipFileStructureCreator.html"><b>ZipFileStructureCreator</b></a>
+is an implementation of the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureCreator.html"><b>IStructureCreator</b></a>
+interface and makes the contents of a zip archive available as a
+hierarchical structure of
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>s
+which can be easily compared
+by the differencing engine
+(<a href="../reference/api/org/eclipse/compare/structuremergeviewer/Differencer.html"><b>Differencer</b></a>).
+It is a good example for how to make structured files available to the hierarchical 
+compare functionality of the compare plug-in.</p>
+
+<a name="Text"></a>
+<p>
+For text based inputs, clients should subclass the <a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureCreator.html"><b>StructureCreator</b></a>
+class. This will enable the use of a shared document between multiple editors open on the same file. 
+Subclasses of
+StructureCreator that provide syntax highlighting must implement both the <code>getDocumentPartitioner()</code> and
+<code>getDocumentPartitioning90</code> methods to support shared documents.
+</p>
+</BODY>
+</HTML>

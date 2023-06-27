@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Implementing a property page
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Implementing a property page</h3>
+<P >
+When the workbench creates and launches a properties page, it sets the selected resource into the page. The page can use the
+<b> getElement()</b> method to obtain its element, an <b><a href="../reference/api/org/eclipse/core/runtime/IAdaptable.html">IAdaptable</a></b>. </P>
+<P >
+The pattern for creating property pages is similar to that of preference pages, so we will only focus on what is different. Property pages show information about their element. This information can be obtained
+by accessing the element in order to query or compute the relevant
+information.&nbsp; The information can also be stored and retrieved from the
+resource's properties.</P>
+<P >
+The <b> ReadmeFilePropertyPage</b> computes most of its information using its element. The following snippet shows how the number of sections is computed and displayed in a label.</P>
+<pre>
+   ...
+   IResource resource = (IResource) getElement();
+   ...
+   IAdaptable sections = getSections(resource);
+   if (sections instanceof AdaptableList) {
+      AdaptableList list = (AdaptableList)sections;
+      label = createLabel(panel, String.valueOf(list.size()));
+   ...
+</pre>
+<P >
+When a property is computed, there is no need for corresponding logic to save the value, since the user cannot update this value.</P>
+<P >
+Properties pages are commonly used for viewing and for setting the
+application-specific&nbsp; properties of a resource.
+(See <a HREF="resInt_properties.htm" CLASS="XRef">Resource properties</a>  for a
+discussion of session and persistent properties.)&nbsp;
+Since the property page knows its resource, the resources API can be used in the page to initialize control values or
+to set new property values based on user selections in the properties page.</P>
+<P >
+The following snippet shows a checkbox value being initialized from a property on a property page's element.</P>
+<pre>
+   private void initializeValues() {
+      ...
+      IResource resource = (IResource) getElement();
+      label.setText(resource.getPersistentProperty(&quot;MyProperty&quot;));
+      ...
+   }
+</pre>
+<P >
+The corresponding code for saving the checkbox value back into the property looks like this:</P>
+<pre>
+   private void storeValues() {
+      ...
+      IResource resource = (IResource) getElement();
+      resource.setPersistentProperty(&quot;MyProperty&quot;, label.getText());
+      ...
+   }
+</pre>
+
+
+
+</BODY>
+</HTML>

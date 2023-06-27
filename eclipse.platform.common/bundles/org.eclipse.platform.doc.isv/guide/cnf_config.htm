@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<HEAD>
+
+<meta name="copyright"
+	content="Copyright (c) Oakland Software and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Configuring the Common Navigator</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h1>Configuring the Common Navigator</h1>
+
+<p>This section defines the configuration at a conceptual level;
+some level of detail is omitted for clarity and conciseness. For the
+complete details see the extension point documentation or the <a
+	href="cnf_operation.htm">Operational Topics</a>
+section.</p>
+<ul>
+	<li><b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_viewer.html">org.eclipse.ui.navigator.viewer</a></b></li>
+	<li><b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent</a></b></li>
+	<li><b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_linkHelper.html">org.eclipse.ui.navigator.linkHelper</a></b></li>
+</ul>
+
+
+<h2>Viewer Configuration</h2>
+
+<p>As the CommonNavigator is a View, it is added using the <b><a
+	href="../reference/extension-points/org_eclipse_ui_views.html">org.eclipse.ui.views</a></b>
+extension point. The CNF configuration aspects of the view instance are
+specified with a corresponding <b><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_viewer.html">org.eclipse.ui.navigator.viewer</a></b>
+extension point.</p>
+
+<p>It is possible to use the CNF facilities for an arbitrary
+TreeViewer (??? could this be any StructuredViewer). In this case you
+still need to use this extension point, but it is used only to bind the
+CNF view information with the NCEs. You then programmatically (??? how)
+bind your Viewer with the NavigatorContentService.</p>
+<p>The view may be associated with <b><a
+	href="#contentExtension">Navigator Content Extensions</a></b> that define
+how its content is found and rendered. The entries here are used to look
+up NCEs, common filters and common wizards.</p>
+
+<p>The view may also be associated with <b><a
+	href="#actionProviders">Action Providers</a></b> that define code for
+programmatic updating and provision of actions or retargetable actions.
+The entries here are used to look up action providers.</p>
+
+<p>The view may also be associated with <b><a
+	href="#linkHelpers">Link Helpers</a></b> that define the relationship
+between the selection in the view and the active editor.</p>
+
+<p>Content extensions, common wizards, common filters, action
+providers and link helpers are bound to the view using an
+include/exclude mechanism and with the capability of pattern matching.
+This allows the actual content extensions (defined below) to be
+specified in a granular fashion such that views can select only those
+they actually need. The point of the exclude part of the mechanism is to
+exclude undesired items that were specified in the include statement.
+For example, the include statement could specify
+"com.mycompany.content.*" and exclude could remove the test content
+extensions by saying "com.mycompany.content.test.*".</p>
+
+<p>A view is always associated with a popup menu. One important part
+of the popup menu configuration at this level is the insertion points,
+which are the locations where menu items can be added depending on when
+and where the menu is shown. By default, a standard set of insertion
+points is provided (described in the extension point documentation).
+However, you can can define your insertion points directly using <b>popupMenus</b>.
+</p>
+
+<p>You can also direct the view to use a specific popup menu by id
+using <b>popupMenuId</b>, and you can indicate whether to ignore
+platform action contributions to the menu.</p>
+
+<p>In the startup case, it is necessary to call some content
+extensions on the root node of the tree of the view in order to get the
+initial set of children. This set of content extensions is specified by
+setting the isRoot() property on the viewerContentBinding.</p>
+
+
+<p>This defines:</p>
+<ol>
+	<li><b>viewerContentBinding</b> - bind a Content Extension or
+	Common Filter specified with the <b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/navigatorContent</a></b>
+	extension point;</li>
+	<li><b>viewerActionBinding</b> - bind action providers specified
+	with the <b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/actionProvider</a></b>
+	extension point;</li>
+	<li><b>popupMenus</b> - defines the insertion points (standard
+	places where menu items can be added) for the popup menu associated
+	with the viewer. Mutually exclusive with popupMenuId.</li>
+	<li><b>popupMenuId</b> - causes the view to use the menu defined
+	by the <b><a
+		href="../reference/extension-points/org_eclipse_ui_popupMenus.html">org.eclipse.ui.popupMenus</a></b>
+	extension point. Mutually exclusive with popupMenus.</li>
+	<li><b>dragAssistent</b> - points to code that may provide extra
+	transfer types to be used when starting a drag from the viewer.</li>
+	<li><b>options</b> - specifies options used to control the
+	presentation of the view. For example these allow hiding of menus and
+	buttons shown at the top of the view. Theses options are defined by <b><a
+		href="../reference/api/org/eclipse/ui/navigator/INavigatorViewerDescriptor.html">INavigatorViewerDescriptor
+	</a> </b></li>
+</ol>
+
+<a name="contentExtension"></a>
+<h2>Navigator Content Extension (NCE)</h2>
+
+<p>A navigator content extension, specified with <b><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/navigatorContent</a></b>
+defines a named collection of attributes (content provider class, label
+provider class, icon, etc) to be enabled under certain conditions
+(typically in response to selection in the navigator). An example of a
+content extension is that for a resource. Content extensions are useful
+to describe other model objects that might be included in the view.</p>
+
+<p>The definition of content extensions is separated from their
+association with a particular view instance allowing them to be shared
+and reused. Each content extension has an id, which is used to bind it
+with a view, and a display name which is presented to the user to allow
+the content extensions to be activated or deactivated by the user
+interface associated with the each view.</p>
+
+<p>Content extensions may be active or not. This can be controlled
+by the user using the Filters and Customization menu item of the navigator.
+Inactive content extensions are not considered when processing the view.</p>
+
+<p>The content extension defines the following:</p>
+<ol>
+	<li><b>triggerPoints</b> - specifies the conditions when this
+	content extension is enabled based on a given object. You can specify
+	tests with core expressions on the object for which the content
+	extension should be enabled.</li>
+	<li><b>possibleChildren</b> - like triggerPoints, but used for the
+	case where the parent of the desired content extension is known, like
+	in the drop case where we need to determine which content extension is
+	required to handle the drop based on the drop target which is the
+	parent of the eventual object that will be added to the tree.</li>
+	<li><b>enablement</b> - specifies an enablement that is both a <b>triggerPoints</b>
+	and <b>possibleChildren</b>.</li>
+	<li><b>labelProvider</b> - an <b><a
+		href="../reference/api/org/eclipse/jface/viewers/ILabelProvider.html">ILabelProvider</a></b>
+	provides the text to be shown in the view.</li>
+	<li><b>contentProvider</b> - an<b><a
+		href="../reference/api/org/eclipse/jface/viewers/ITreeContentProvider.html">ITreeContentProvider</a></b>
+	provides the means of getting the parent and child objects for the
+	viewer. Other interfaces are possible, see the extension point
+	documentation for these.</li>
+	<li><b>descriptionProvider</b> - <b><a
+		href="../reference/api/org/eclipse/ui/navigator/IDescriptionProvider.html">IDescriptionProvider</a></b>
+	provides a description that is shown in the status bar.</li>
+	<li><b>activeByDefault</b> - indicates this content extension
+	should be made active in the default configuration of the workbench
+	(e.g. a new workspace).</li>
+	<li><b>priority</b> - used to determine which content extension to
+	use in the event that multiple extensions are enabled (based on their
+	enablement conditions).</li>
+	<li><b>icon</b> - used to associate the object with a specific
+	icon.</li>
+	<li><b>providesSavables</b> - indicates the content provider
+	provides saveables. If true the content provider must adapt to
+	SavablesProvider.</li>
+</ol>
+
+<h3>Common Filter</h3>
+
+<p>A common filter, specified with <b><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/commonFilter</a></b>
+defines a filter that is controllable by the user in the view. The
+filter definition contains an id, a description that describes the
+filter, a description that describes what is filtered out, and the
+conditions (using core expressions) that identify objects the filter
+suppresses.</p>
+<p>The common filter is bound to the view using the <b>viewerContentBinding</b>
+element of the viewer configuration.</p>
+
+<h3>Common Wizard</h3>
+
+<p>A common filter, specified with <b><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/commonWizard</a></b>
+defines wizard that is to be shown in the new, import, or export menu.</p>
+<p>The common wizard is bound to the view using the <b>viewerContentBinding</b>
+element of the viewer configuration.</p>
+
+<h3>Action Providers</h3>
+<a name="actionProviders"></a>
+
+<p>An action provider, specified with <b><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/actionProvider</a></b>
+allows you to specify a class, subclassing <b><a
+	href="../reference/api/org/eclipse/ui/navigator/CommonActionProvider.html">org.eclipse.ui.navigator.CommonActionProvider</a></b>
+that is invoked at right-click and selection time to allow you to
+contribute to the popup menu or to the action bars.</p>
+
+<p>Action providers may be defined at the top level of the extension
+point, not associated with any content extension. These action providers
+are named and then bound to the CommonViewer using the <b>org.eclipse.ui.navigator.viewer/viewerActionBinding</b>.</p>
+
+<p>Action providers may also be associated with a content extension,
+in which case they are active with the content extension. This is done
+by including the action provider inside of the <b>org.eclipse.ui.navigator.navigatorContent/navigatorContent</b>
+extension point.</p>
+
+<h3>Link Helpers</h3>
+<a name="linkHelpers"></a>
+
+<p>A link helper, specified with <b><a
+	href="../reference/extension-points/org_eclipse_ui_navigator_linkHelper.html">org.eclipse.ui.navigator.linkHelper</a></b>
+allows you to control how the &quot;Link with Editor&quot; matches the
+selection in the navigator with an editor and matches an active editor
+with the selection in the navigator.</p>
+
+</BODY>
+</HTML>

@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Mirroring repositories with p2</title>
+</head>
+<body>
+<h1>Mirroring repositories with p2</h1>
+<p>p2 provides two applications that support copying (mirroring) the content of remote repositories to a local repository.
+There is also a <a href="p2_repositorytasks.htm#p2_mirror">p2.mirror ant task.</a></p>
+
+<h2>Mirroring an artifact repository</h2>
+<p>The artifact mirroring application supports duplicating a complete artifact repository into a target repository.
+To perform this operation you simply need an eclipse installation that contains the <tt>org.eclipse.equinox.p2.artifact.repository</tt> bundle.
+The following command will copy the complete contents of a source repository into the destination repository. If the destination
+repository does not already exist, the mirroring application will create a new repository with the same properties as the source.</p>
+<pre>
+<code>
+   &lt;eclipseInstall&gt;\eclipse.exe
+   -application org.eclipse.equinox.p2.artifact.repository.mirrorApplication
+   -source https://download.eclipse.org/releases/ganymede
+   -destination file:d:/artifactLocalRepository/
+</code>
+</pre>
+
+<h3>Arguments description</h3>
+<ul>
+<li><b>-application org.eclipse.equinox.p2.artifact.repository.mirrorApplication:</b> the application ID.</li>
+<li><b>-source &lt;source location&gt;</b>: the artifact repository to mirror from.</li>
+<li><b>-destination &lt;destination location&gt;</b>: the artifact repository to mirror to.</li>
+</ul>
+
+<h3>Additional arguments</h3>
+<ul>
+<li><b>-writeMode clean</b>: removes all artifacts from the destination repository before performing the mirroring process.</li>
+<li><b>-verbose</b>: enables error messages and error logging.</li>
+<li><b>-ignoreErrors</b>: ensures the mirroring application continues to run in the event of an error during the mirroring process.</li>
+<li><b>-raw</b>: instructs the mirroring application to copy the exact artifact descriptors from source into the destination instead of
+	initializing new artifact descriptors with properties from the source descriptors.</li>
+<li><b>-compare</b>: instructs the mirroring application to perform a comparison when a duplicate artifact descriptor is found.</li>
+<li><b>-comparator &lt;comparator ID&gt;</b>: specifies which comparator the mirroring application should use to compare
+	artifact descriptors. Uses the "MD5 Comparator" if no comparator is defined which compares the MD5 hash property of the artifact descriptors.</li>
+<li><b>-compareAgainst &lt;baseline location&gt;</b>: specifies the location of a known good repository.
+  When specified the mirror application will compare all artifacts from the source to the baseline with precedence given to artifacts found in the baseline.</li>
+<li><b>-destinationName &lt;destination name&gt;</b>: specifies what the destination repository should be named.
+  If no name is specified, the source repository's name will be used as the destination's name if no repository exists at the destination.</li>
+  <li><b>-references &lt;boolean&gt;</b>: enables or disables the mirroring of references. Default value is true.</li>
+</ul>
+
+<h2>Mirroring a metadata repository</h2>
+<p>The metadata mirroring application supports copying a complete metadata repository into a target repository.
+To perform this operation you simply need an eclipse installation that contains the <tt>org.eclipse.equinox.p2.metadata.repository</tt> bundle.
+The following command will copy the complete source repository into the destination repository. If the destination
+repository does not already exist, the mirroring application will create a new repository with the same properties as the source.</p>
+<pre>
+<code>
+    &lt;eclipseInstall&gt;\eclipse.exe
+   -application org.eclipse.equinox.p2.metadata.repository.mirrorApplication
+   -source https://download.eclipse.org/releases/ganymede
+   -destination file:d:/metadataLocalRepository/
+</code>
+</pre>
+
+<h3>Arguments description</h3>
+<ul>
+<li><b>-application
+org.eclipse.equinox.p2.metadata.repository.mirrorApplication:</b> the application ID.</li>
+<li><b>-source &lt;source location&gt;</b>: the metadata repository to mirror from.</li>
+<li><b>-destination &lt;destination location&gt;</b>: the metadata repository to mirror to.</li>
+</ul>
+
+<h3>Additional arguments</h3>
+<ul>
+<li><b>-writeMode clean:</b> removes all installable units from the destination repository before performing the mirroring process.</li>
+<li><b>-destinationName &lt;destination name&gt;</b>: specifies what the destination repository should be named.
+	If no name is specified, the source repository's name will be used as the destination's name if no repository exists at the destination.</li>
+<!-- Uncomment when this becomes useful <li><b>-roots: &lt;specified installable units&gt;</b> instructs mirroring application to only
+	mirror specified installable units. The installable units must be defined as Name/Version or Name/(Version Range) and separated by commas.</li> -->
+<!-- Uncomment when transitive is implemented <li><b>-transitive:</b> ensures all installable unit's dependencies are satisfied. Adds
+	dependent installable units when necessary. Combined with "-roots" this argument can be used to perform repository slicing.</li> -->
+</ul>
+</body>
+</html>

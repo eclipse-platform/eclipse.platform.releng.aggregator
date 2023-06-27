@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content="Copyright (c) IBM Corporation and others 2005, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link href="../../../book.css" rel="stylesheet" type=
+    "text/css" />
+    <title>
+      Access Rules
+    </title>
+    <script language="JavaScript" type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+    <style type="text/css">
+/*<![CDATA[*/
+    p.c1 {text-align: center}
+    /*]]>*/
+    </style>
+  </head>
+  <body>
+    <h1>
+      Access Rules
+    </h1>
+    <p>
+      The Eclipse 3.1 runtime gives the plug-in developer the
+      option to control plug-in code visibility to downstream
+      plug-ins on a per-package basis.
+    </p>
+
+    <p>
+      A package may be classified as one of the following:
+    </p>
+    <ol>
+      <li>Accessible
+      </li>
+      <li>Forbidden
+      </li>
+      <li>Internal
+      </li>
+      <li>Internal with friends
+      </li>
+
+    </ol>
+    <p>
+      PDE translates these runtime visibility rules into compiler
+      access restriction rules at compile time. As a result, a
+      violation of a visibility rule is flagged by the compiler as
+      a warning or an error - depending on the severity of that
+      violation.
+    </p>
+    <p>
+      With this type of support at compile time, one is never
+      caught by surprise by runtime class loading errors and is
+      always aware of internal type references.
+    </p>
+    <h2>
+      Accessible Packages
+    </h2>
+
+    <p>
+      Accessible packages are visible to downstream plug-ins
+      unconditionally.&nbsp;&nbsp; While API packages must clearly
+      fall in this category, it is completely up to the developer
+      to decide what other packages exported by the plug-in ought
+      to be given this level of visibility.
+    </p>
+    <p>
+      In order to declare a package as accessible, you must list it
+      in the <b>Exported Packages</b> section on the <b>Runtime</b>
+      of the plug-in manifest editor and leave the default
+      visibility setting as-is.
+    </p>
+
+    <p>
+      <img src="../../../images/access_restrictions/visible.png"
+      alt="Accessible Packages" />
+    </p>
+    <p class="c1">
+      &nbsp;
+    </p>
+    <h2>
+      Forbidden Packages
+    </h2>
+
+    <p>
+      You can hide a package from downstream plug-ins at all times
+      by <b>excluding</b> it from the list in the <b>Exported
+      Packages</b> section on the <b>Runtime</b> page of the
+      plug-in manifest editor.
+    </p>
+    <p>
+      References to types from a <em>forbidden</em> package result
+      in class loading errors at runtime.
+    </p>
+
+    <p>
+      To avoid such unpleasant situations:
+    </p>
+    <ol>
+      <li>The compiler will flag references to forbidden packages
+      with an error.
+      </li>
+      <li>Types from forbidden packages are NOT available as
+      proposals in the content assist.
+      </li>
+    </ol>
+    <p>
+
+      <em>Notes:</em>
+    </p>
+    <ol>
+      <li>All plug-ins in the Eclipse SDK enumerate all their
+      packages in the <strong>Exported Packages</strong> section;
+      therefore, none of the packages in the SDK have forbidden
+      access.
+      </li>
+      <li>The severity level for forbidden references is set on the
+      <a class="command-link" href=
+      'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'>
+        <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg"
+        alt="Open problem severities preference page" />
+
+        <strong>Java &gt; Compiler &gt; Errors/Warnings &gt;
+        Deprecated and restricted API</strong></a> preference page.
+        <p>
+          It is strongly recommended that the severity of a
+          forbidden reference is kept at error.
+        </p>
+      </li>
+
+    </ol>
+    <p>
+      <img src="../../../images/access_restrictions/forbidden.png"
+      alt="Forbidden preferences" border="0" />
+    </p>
+    <h2>
+      Internal Packages
+    </h2>
+    <p>
+      Internal packages are packages that are not intended for use
+      by downstream plug-ins. <em><strong>These packages are
+      visible to downstream plug-ins by</strong>
+
+      <strong>default</strong></em>.
+    </p>
+    <p>
+      Internal packages are hidden from downstream plug-ins only
+      when Eclipse is launched in <em><strong>strict</strong></em>
+      mode (i.e. when you launch with the
+      <em>-Dosgi.resolverMode=strict</em> VM argument).
+    </p>
+    <p>
+
+      Internal packages must be listed in the <b>Exported
+      Packages</b> section on the <b>Runtime</b> page of the
+      plug-in manifest editor with the <i><b>hidden</b></i> option
+      selected.
+    </p>
+    <p>
+      <img src="../../../images/access_restrictions/hidden.png"
+      alt="discouraged access" />
+    </p>
+
+    <p>
+      Two measures are taken to discourage downstream plug-ins from
+      referencing internal packages:
+    </p>
+    <ul>
+      <li>The compiler flags references to internal packages with a
+      <em>warning</em>.
+      </li>
+    </ul>
+    <p>
+      <img src="../../../images/access_restrictions/compiler.png"
+      alt="discouraged access" />
+
+    </p>
+    <ul>
+      <li>Types from discouraged packages are available as content
+      assist proposals; but, with a lower priority.
+      </li>
+    </ul>
+    <p>
+      <img src=
+      "../../../images/access_restrictions/content_assist.png" alt=
+      "discouraged content assist" />
+    </p>
+    <p>
+
+      The severity level for discouraged references can be set on
+      the <a class="command-link" href=
+      'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg"
+      alt="Open the problem severities preference page" />
+      <strong>Java &gt; Compiler &gt; Errors/Warnings &gt;
+      Deprecated and restricted API</strong></a> preference page.
+    </p>
+
+    <p>
+      <img src=
+      "../../../images/access_restrictions/discouraged.png" alt=
+      "Discouraged preferences" border="0" />
+    </p>
+    <h2>
+      Internal packages with friends
+    </h2>
+    <p>
+      It is important for a plug-in to be able to grant full access
+      to its internal packages to designated "friend" plug-ins. For
+      instance, the PDE code is split across multiple plug-ins, and
+      the <em>org.eclipse.pde.ui</em> plug-in should have full
+      access to <em>org.eclipse.pde.core</em>'s internal packages.
+    </p>
+
+    <p>
+      In the example below, the the <em>org.eclipse.pde.ui</em>
+      friend plug-in has full access to the
+      <em>org.eclipse.pde.internal.core.bundle</em> package from
+      the <em>org.eclipse.pde.core</em> plug-in.
+    </p>
+    <p>
+
+      <img src="../../../images/access_restrictions/friend.png"
+      alt="Friends" />
+    </p>
+    <p>
+      The friends are free to reference any type from the
+      <em>org.eclipse.pde.internal.core.bundle</em> package with
+      the compiler's blessing.
+    </p>
+    <p>
+      On the other hand, if any other plug-in references a type
+      from the <em>org.eclipse.pde.internal.core.bundle</em>
+
+      package, the compiler flags the reference as a discouraged
+      reference as described in the previous section.
+    </p>
+    <h2>
+      How to enable access restrictions
+    </h2>
+    <p>
+      To take advantage of the PDE access restriction support, the
+      only requirement is that the plug-ins in question contain an
+      OSGi bundle <em>MANIFEST.MF</em>. PDE will take care of the
+      rest including the management of the plug-in classpath.
+    </p>
+    <p>
+
+      If the plug-in does not contain a <em>MANIFEST.MF</em> file,
+      that file can be created as follows:
+    </p>
+    <ol>
+      <li>Open the <em>plugin.xml</em> in the plug-in manifest
+      editor.
+      </li>
+      <li>In the <strong>Plug-in Content</strong> section of the
+      <strong>Overview</strong> page, click on the '<strong>create
+      an OSGi bundle manifest</strong>' link.
+      </li>
+
+    </ol>
+    <p>
+      <img src="../../../images/access_restrictions/convert.PNG"
+      alt="convert to manifest.mf" />
+    </p>
+    <h2>
+      Inspecting access rules
+    </h2>
+    <p>
+      You can inspect the access restriction rules imposed on each
+      classpath entry by PDE on the <strong>Java Build
+      Path</strong> property page of your plug-in project.
+    </p>
+
+    <p>
+      <img src="../../../images/access_restrictions/properties.png"
+      alt="Java Build Path Properties" />
+    </p>
+    
+<h3 class="related">Related references</h3>
+<a href="./editor.htm">Plug-in Editor</a><br/>
+<a href="./overview.htm">Overview Page</a><br/>
+<a href="./dependencies.htm">Dependencies Page</a><br/>
+<a href="./runtime.htm">Runtime Page</a><br/>
+<a href="./extensions.htm">Extensions Page</a><br/>
+<a href="./extension_points.htm">Extension Points Page</a><br/>
+<a href="./build.htm">Build Page</a>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Building features</title>
+</head>
+<body>
+<h1>Building features</h1>
+<p>
+PDE Build comes with infrastructure to automate building features.
+Most of the setup necessary
+for such a build can be done through a few modifications to the
+template build.properties provided
+by PDE build. The following section focuses on setting up a simple
+build assuming that all plug-ins
+and features (both to-build and pre-built) referenced from the feature
+being built are already
+locally available on disk.
+</p>
+<h2>Basic Setup</h2>
+<h3>The Build Configuration Directory</h3>
+<p>The first step in setting up a build is to create the build configuration directory.  This is the directory in which the files that control and customize the headless build are kept.</p>
+<p>The main file for controlling the build is the top level build configuration build.properties file.  When setting up a new build, copy the template file from the org.eclipse.pde.build bundle in your eclipse install that you will be using to run your build.  The template file is located under org.eclipse.pde.build/templates/headless-build/build.properties.</p>
+<p>This directory is refered to by the <tt>builder</tt> properties which is normally set on the ant command line.</p>
+<h3>The buildDirectory</h3>
+<p>The <tt>buildDirectory</tt> property specifies the directory in which PDE/Build will generate scripts and perform the actual build.  Plug-ins and features that are being built should placed in <tt>${buildDirectory}/plugins</tt> and <tt>${buildDirectory}/features</tt> sub-directories.
+   If bundles and features are being fetch from a repository (See <a href="pde_fetch_phase.htm">Fetching From Repositories</a>), then they will be placed here as well.</p>
+<p>This directory may be the same as the build configuration directory, or it may be a different directory.  It may be desirable to use a separate directory, especially if the build configuration is kept in CVS and you don't want to pollute it with generated build artifacts.</p>
+<h3>Initial Properties</h3>
+<p>To set up a basic feature build, you need to edit the build configuration build.properties file and set the following properties:</p>
+<ul>
+  <li><span style="font-weight: bold;">topLevelElementId</span>: Set to the id of the feature you wish to build.</li>
+  <li><span style="font-weight: bold;">baseLocation</span>: the location of an eclipse install containing pre-built features and plug-ins in <tt>features/</tt> and <tt>plugins/</tt> subdirectories.  These are the binaries against which you will be compiling.  If you have no pre-requisite binaries and are building everything from scratch, this property can be left un-set.</li>
+  <li><span style="font-weight: bold;">buildDirectory</span>:&nbsp;the directory the build will take place in.</li>
+  <li><span style="font-weight: bold;">configs</span>: list the configurations for which you want your feature to be built. You can uncomment the configuration(s) provided (be careful of the line continuations). If the feature you are building is platform independent, this property does not need to be set or can be set to <tt>*,*,*</tt>.</li>
+  <li><span style="font-weight: bold;">archivePrefix</span>: the name of the directory in which your feature will be unzipped on disk.</li>
+</ul>
+<p>Previous version of PDE/Build also required an allElements.xml file, this is no longer necessary in 3.4.  The allElements.xml can still be used, but is only required if you wish to customize certain aspects of your build.  See <a href="pde_customization.htm">Customizing a Headless Build</a>.</p>
+
+<h2>Running the build</h2>
+<p>To run the build you will use the org.elipse.ant.core.antRunner application. When invoking eclipse with this application to perform a build you need to set two arguments on the command line:</p>
+<ul>
+  <li><code>-buildfile=&lt;/path/to/build.xml&gt;</code>:&nbsp; This is the path to the build.xml provided by pde build.&nbsp; It is located in the org.eclipse.pde.build/scripts directory.&nbsp; This is the build script that drives the whole build process.</li>
+  <li><code>-Dbuilder=&lt;/path/to/configuration folder&gt;</code>:&nbsp;This is the path to the build configuration folder.</li>
+</ul>
+<p>Run the antRunner application using the following command:</p>
+<br>
+<div style="margin-left: 40px;"><code>java -jar
+&lt;eclipseInstall&gt;/plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar
+-application org.eclipse.ant.core.antRunner -buildfile
+&lt;&lt;eclipseInstall&gt;/plugins/org.eclipse.pde.build_&lt;version&gt;/scripts/build.xml&gt;
+-Dbuilder=&lt;path to the build configuration folder&gt;</code><br>
+</div>
+<p>Once the build is complete, you can get the result in the build directory in the folder named I.TestBuild (this name can be configured by setting the buildLabel property).</p>
+<h2>Advanced scenarios</h2>
+<p>If you require more customization of the build, ie fetching from a repository, see the Advanced PDE Build topics for more information.</p>
+</body>
+</html>

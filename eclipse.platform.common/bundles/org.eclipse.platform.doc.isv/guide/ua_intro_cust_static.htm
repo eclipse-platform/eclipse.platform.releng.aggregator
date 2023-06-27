@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Displaying static HTML content in a CustomizableIntroPart</title>
+</head>
+<body>
+
+<h2>Displaying static HTML content in a CustomizableIntroPart</h2>
+
+<p>Just like any intro part implementation, to use a CustomizableIntroPart you need to follow the basic steps to bind it to a product. However, there is an extra step needed to use this intro part and it is binding a "configuration" with it. Just like you bind an intro to a product, you must bind an <em>introConfig </em> to a customizableIntroPart. Here is a sample configuration: </p>
+
+<pre>
+   &lt;extension point="org.eclipse.ui.intro.config"&gt;
+      &lt;config
+            id="static001_configId"
+            introId="org.eclipse.ui.intro.examples.static_introId"
+            content="introContent.xml"&gt;
+         &lt;presentation
+               home-page-id="homePageId" 
+               standby-page-id="standbyPageId"&gt;
+            &lt;implementation
+                  os="win32"
+                  kind="html"/&gt; 
+            &lt;implementation
+                  kind="swt"/&gt;
+         &lt;/presentation&gt;
+      &lt;/config&gt;
+   &lt;/extension&gt; 
+</pre>
+
+<p> In the above contribution a <em>configuration </em> is registered with an intro part with id <em>org.eclipse.ui.intro.examples.static_introId. </em>(It is assumed that this intro part is a customizable intro part instance that has already been registered with the workbench). This configuration defines the content to be presented in the intro part and dictates how it is presented to the user.&nbsp; The content is defined in an xml markup file, <em>introContent.xml, </em>while the presentation is dictated by two <em> implementation </em> elements in the markup.</p>
+<p>A config presentation can be either an SWT browser based or a UI forms based presentation. In the above contribution, the presentation will be&nbsp;"html", ie browser based on win32 platforms, while it will be "swt" ie: UI forms based on all other platforms. At runtime, when the workbench is trying to instantiate the CustomizableIntroPart, the operating system is determined and the correct implementation of the presentation is chosen. <br>
+  Also, a <em>home-page-id </em>or root page needs to be specified as it will be the first page displayed by the customizableIntroPart. If a <em>standby-page-id </em> is also specified, it will be displayed in the intro part when the intro part is put into standby mode.</p>
+<p>The details of what the content file can be found in the extension point documentation. For a simple example, and to contribute static content we will use the following as content: </p>
+
+<pre>
+   &lt;introContent&gt;
+      &lt;page
+            id="homePageId"
+            url="http://eclipse.org"/&gt;
+      &lt;page
+            id="standbyPageId"
+            url="./static001/standby.html"/&gt;
+   &lt;/introContent&gt; 
+</pre>
+
+<p> In the above contribution, a simple url is used as the root page, in this case is a url pointing to the eclipse.org web site. This was done for simplicity. The root page could have been any html file, for example, a local html file that loads a flash demo. There is also a standby page defined that will be displayed when the intro is placed into standby mode.
+</p>
+
+</body>
+</html>

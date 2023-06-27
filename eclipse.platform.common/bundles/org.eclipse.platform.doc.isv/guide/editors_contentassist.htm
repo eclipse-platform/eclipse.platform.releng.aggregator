@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Content assist
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Content assist</H2>
+<p>Content assist allows you to provide context sensitive content completion upon 
+  user request.&nbsp; This functionality is implemented by the platform text framework 
+  in <b><a href="../reference/api/org/eclipse/jface/text/contentassist/package-summary.html">org.eclipse.jface.text.contentassist</a></b>.&nbsp; 
+  Popup windows (infopops) are used to propose possible text choices to complete 
+  a phrase.&nbsp; The user can select these choices for insertion in the text.&nbsp; 
+  Content assist also supports contextual infopops for providing the user with 
+  information that is related to the current position in the document.&nbsp;</p>
+<p>Implementing content assist is
+optional.&nbsp; By default, <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>does not install a content assistant since it does not know the
+document model used for a particular editor, and has no generic behavior for
+content assist.&nbsp;</p>
+<p>In order to implement content assist, your editor's source
+viewer configuration must be <a href="editors_sourceviewers.htm">configured</a>
+to define a content assistant.&nbsp; This is done in the Java editor example
+inside the <b>JavaSourceViewerConfiguration</b>.</p>
+
+<pre>public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+
+	ContentAssistant assistant= new ContentAssistant();
+<b>	assistant.setContentAssistProcessor(new JavaCompletionProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
+	assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(), JavaPartitionScanner.JAVA_DOC);
+</b>
+	...
+	return assistant;
+}</pre>
+<p>Content assist behavior is defined in the interface <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>.&nbsp;
+Setting up a content assistant is somewhat similar to setting up syntax
+highlighting.&nbsp; The assistant should be configured with different phrase completion strategies for different
+document content types.&nbsp; The completion strategies are implemented
+using&nbsp; <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistProcessor.html"><b>IContentAssistProcessor</b></a>.&nbsp;
+A processor proposes completions and computes context information for an offset
+within particular content type.</p>
+<h3>Content assist processors</h3>
+<p>Not all content types need to have content assistance.&nbsp; In the Java example 
+  editor, content assist processors are provided for the default content type 
+  and javadoc, but not for multi-line comments.&nbsp; Let's look at each of these 
+  processors.</p>
+<p>The <b>JavaCompletionProcessor</b> is quite simple.&nbsp; It can only propose
+keywords as completion candidates.&nbsp; The keywords are defined in a field,
+<code>fgProposals</code>, and these keywords are always proposed as the
+candidates:</p>
+
+<pre>public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
+	ICompletionProposal[] result= new ICompletionProposal[fgProposals.length];
+	for (int i= 0; i &lt; fgProposals.length; i++) {
+		IContextInformation info= new ContextInformation(fgProposals[i], MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.Proposal.ContextInfo.pattern&quot;), new Object[] { fgProposals[i] })); //$NON-NLS-1$
+		result[i]= new CompletionProposal(fgProposals[i], documentOffset, 0, fgProposals[i].length(), null, fgProposals[i], info, MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.Proposal.hoverinfo.pattern&quot;), new Object[] { fgProposals[i]})); //$NON-NLS-1$
+	}
+	return result;
+}</pre>
+<p><img src="images/javacontentassist.png" alt="Keyword content assist" border="0"></p>
+
+<p>Completion can be triggered by user request or can be automatically triggered
+when the &quot;(&quot; or &quot;.&quot; character is typed:</p>
+
+<pre>public char[] getCompletionProposalAutoActivationCharacters() {
+	return new char[] { '.', '(' };
+}</pre>
+<p>In addition to proposing completions, the <b>JavaCompletionProcessor</b> 
+defines context information that can be requested by the user.&nbsp; Context
+information includes a description of the pieces of information available in a
+given context and the detailed information message.&nbsp;&nbsp;</p>
+<p>In the Java editor example, the information is not really contextual.&nbsp; 
+  An array containing five similar context information objects is computed for the 
+  current offset when the user requests context info.&nbsp;All of these context 
+  information objects define a context that contains the five characters in front 
+  of the offset and the five after the offset. If any one of these five proposals is 
+  selected, the detailed information will appear near the cursor and will stay 
+  as long as the cursor is within the context of the five characters around the offset. 
+</p>
+
+<pre>public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
+	IContextInformation[] result= new IContextInformation[5];
+	for (int i= 0; i &lt; result.length; i++)
+		result[i]= new ContextInformation(
+			MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.ContextInfo.display.pattern&quot;), new Object[] { new Integer(i), new Integer(documentOffset) }),
+			MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.ContextInfo.value.pattern&quot;), new Object[] { new Integer(i), new Integer(documentOffset - 5), new Integer(documentOffset + 5)}));
+	return result;
+}</pre>
+<p><img src="images/javacontextassist.png" alt="Java context assist" border="0"></p>
+<p>&nbsp;</p>
+<p>This context information is shown automatically when the &quot;#&quot; character 
+  is typed:</p>
+<pre>public char[] getContextInformationAutoActivationCharacters() {
+	return new char[] { '#' };
+}</pre>
+<h3>Content assist configuration</h3>
+<p>The appearance and behavior of content assist can be configured using <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>.&nbsp;
+For example, you can configure the auto activation time out, and the orientation
+and color of information popups.</p>
+
+<pre>public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+
+	ContentAssistant assistant= new ContentAssistant();
+	...
+	assistant.enableAutoActivation(true);
+	assistant.setAutoActivationDelay(500);
+	assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+	assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+	assistant.setContextInformationPopupBackground(JavaEditorEnvironment.getJavaColorProvider().getColor(new RGB(150, 150, 0)));
+
+	return assistant;
+}</pre>
+
+<h3>Show the content assist action in the menu</h3>
+<p>
+If the content assistant is correctly supplied as mentioned above then the key binding (<strong>Ctrl+Space</strong> per default) will work out of the box.
+To make the action appear in the main menu the editor action bar contributor has to be extended:</p>
+<pre>
+...
+private RetargetTextEditorAction fContentAssist;
+
+public MyEditorActionContributor() {
+	fContentAssist= new RetargetTextEditorAction();
+	String commandId= ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
+	fContentAssist.setActionDefinitionId(commandId);
+}
+
+public void contributeToMenu(IMenuManager menu) {
+	IMenuManager editMenu= menu.findMenuUsingPath(M_EDIT);
+	editMenu.appendToGroup(MB_ADDITIONS, fContentAssist);
+}
+
+public void setActiveEditor(IEditorPart part) {
+	IAction editorAction= getAction(part, ITextEditorActionConstants.CONTENT_ASSIST);
+	fContentAssist.setAction(editorAction);
+}
+...
+</pre>
+
+<p>&nbsp;</p>
+
+
+
+</BODY>
+</HTML>

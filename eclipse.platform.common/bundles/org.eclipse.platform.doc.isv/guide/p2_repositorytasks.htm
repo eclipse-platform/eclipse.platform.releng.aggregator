@@ -1,0 +1,1024 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2009, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type=
+    "text/css" />
+    <title>
+      Ant tasks for managing repositories
+    </title>
+    <style type="text/css">
+/*<![CDATA[*/
+    h3.c2 {font-weight: bold}
+    div.c1 {text-align: center}
+    /*]]>*/
+    </style>
+
+  </head>
+  <body>
+    <h1>
+      Ant tasks for managing repositories
+    </h1>
+    <table cellspacing="1" cellpadding="2" width="95%" align="center">
+      <tr>
+        <td>
+          <a name="source_repositories" id="source_repositories"><b>Specifying
+          source repositories</b></a>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Several p2 tasks accept "source" repositories. Source repositories
+            can be specified in several different ways:
+          </p>
+          <ul>
+            <li>A <b><tt>source</tt></b> attribute directly on the ant task.
+            The value is a URL to a location that contains both a metadata and
+            artifact repository. For example:
+              <div class="c1">
+
+                <tt>&lt;p2.mirror
+                source="https://download.eclipse.org/releases/helios" ....
+                /&gt;</tt>
+              </div>
+            </li>
+            <li>A <b><tt>&lt;source&gt;</tt></b> element nested in the ant
+            task. This element is an ant fileset, with additional
+            <i>location</i> and <i>kind</i> attributes.
+              <ul>
+
+                <li>
+                  <i>location</i> : A URL specifying the location of a
+                  repository. If this attribute is set, all fileset based
+                  attributes are ignored.
+                </li>
+                <li>
+                  <i>kind</i>: Either "<tt>metadata</tt>" or
+                  "<tt>artifact</tt>". If not set, the repository is both
+                  metadata and artifacts.
+                </li>
+
+              </ul>If no <i>location</i> attribute is set, all directories
+              matched by the fileset are added as repositories and all *.zip
+              files are treated as zipped repositories (accessed using a jar:
+              URL). For example:
+              <pre>
+&lt;source kind="metatata" dir="/build/input" includes="*.zip" /&gt;
+&lt;source location="https://download.eclipse.org/releases/helios" /&gt;
+</pre>
+            </li>
+            <li>A <b><tt>&lt;source&gt;</tt></b> element containing a list of
+            repositories. Each nested element is again a fileset with an
+            additional <i>kind</i> attribute. For example:
+              <pre>
+
+&lt;source&gt;
+   &lt;repository location="https://download.eclipse.org/releases/helios" /&gt;
+   &lt;repository kind="metadata" file="/build/repos/cdt-master-6.0.0-I200903161435.zip" /&gt;
+   &lt;repository kind="artifact" dir="/build/repos" includes="*repo" /&gt;
+&lt;/source&gt;
+</pre>
+            </li>
+          </ul>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a name="destination_repositories" id=
+          "destination_repositories"><b>Specifying destination
+          repositories</b></a>
+        </td>
+      </tr>
+      <tr>
+
+        <td>
+          <p>
+            Several p2 tasks accept "destination" repositories. Destination
+            repositories can be specified in several different ways:
+          </p>
+          <ul>
+            <li>A <b><tt>destination</tt></b> attribute directly on the ant
+            task. The value is a URL to a location for both a metadata and
+            artifact repository.
+            </li>
+            <li>A <b><tt>&lt;repository&gt;</tt></b> element nested in the ant
+            task. (<b><tt>&lt;destination&gt;</tt></b> may also be used.) This
+            element supports the following attributes:
+              <table border="5" cellspacing="0" cellpadding="1" width="95%"
+              align="center">
+
+                <tr>
+                  <td>
+                    <tt>location</tt>
+                  </td>
+                  <td>
+                    A URL to the location of the repository
+                  </td>
+                </tr>
+                <tr>
+
+                  <td>
+                    <tt>kind</tt>
+                  </td>
+                  <td>
+                    Either "<tt>metadata</tt>" or "<tt>artifact</tt>". Default
+                    is both if not specified.
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <tt>name</tt>
+                  </td>
+                  <td>
+                    A name to give the repository if the repository does not
+                    already exist.
+                  </td>
+                </tr>
+                <tr>
+
+                  <td>
+                    <tt>append</tt>
+                  </td>
+                  <td>
+                    Append to a repository that is already there. (Default is
+                    "true")
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+
+                    <tt>compressed</tt>
+                  </td>
+                  <td>
+                    Whether to compress the content/artifact xml into a jar
+                    (Default is "true")
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <tt>format</tt>
+
+                  </td>
+                  <td>
+                    A URL to another repository from which to copy the
+                    repository name and other properties.
+                  </td>
+                </tr>
+              </table>
+            </li>
+          </ul>
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          <a name="installable_units" id="installable_units"><b>Specifying
+          Installable Units</b></a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+
+          Some p2 tasks allow specifying installable units to work with. This
+          is done with nested <tt>&lt;iu&gt;</tt> elements which support the
+          following attributes:
+          <table border="5" cellspacing="0" cellpadding="1" width="95%" align=
+          "center">
+            <tr>
+              <td>
+                <tt>id</tt>
+              </td>
+              <td>
+
+                The id of the IU to match.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>version</tt>
+              </td>
+              <td>
+                The version of the IU to match. If not specified, the highest
+                versioned IU is returned. (requires <i>id</i> to be set)
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>query</tt>
+              </td>
+              <td>
+                Matches all IUs satisfying the query. Currently only "property"
+                queries are supported. The format of the query attribute is
+                intended to be "xpath-like". Eg:
+                <div class="c1">
+                  <tt>&lt;iu
+                  query="property[@name='org.eclipse.equinox.p2.type.category']"
+                  /&gt;</tt>
+
+                </div>
+                <div class="c1">
+                  <tt>&lt;iu query="property[@name='my.property.name'
+                  @value='specialValue']" /&gt;</tt>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+
+      </tr>
+    </table>
+    <h2>
+      Ant Tasks
+    </h2><br />
+    <table cellspacing="1" cellpadding="2" width="95%" align="center">
+      <tr>
+        <td>
+          <h3 class="c2">
+
+            <a name="p2_mirror" id="p2_mirror">p2.mirror</a>
+          </h3>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task mirrors artifacts and metadata from the given source
+            repositories to the destination. This task will traverse the source
+            repository and recursively include all IUs that match the
+            requirements of IUs being mirrored (this is called <em>slicing</em>
+
+            the repository).
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes and elements:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width="95%" align=
+          "center">
+
+            <tr>
+              <td>
+                <tt>source</tt>
+              </td>
+              <td>
+                Source repositories, as outlined <a href=
+                "#source_repositories">above</a>
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>destination</tt>
+              </td>
+              <td>
+                Destination repositories, as outlined <a href=
+                "#destination_repositories">above</a>
+
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;iu&gt;</tt>
+              </td>
+              <td>
+                Nested IU elements, as outlined <a href=
+                "#installable_units">above</a>. The installable units to
+                mirror. If none are specified, all IUs contained in the source
+                repositories are mirrored.
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>log</tt>
+              </td>
+              <td>
+                A file to use for logging the results.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>ignoreErrors</tt>
+              </td>
+              <td>
+                Whether or not to ignore errors. (Default is false)
+              </td>
+            </tr>
+            <tr>
+
+              <td>
+                <tt>raw</tt>
+              </td>
+              <td>
+                Copy the exact artifact descriptors from source into the
+                destination instead of initializing new artifact descriptors
+                with properties from the source descriptors. (Default is true)
+              </td>
+            </tr>
+            <tr>
+              <td>
+
+                <tt>verbose</tt>
+              </td>
+              <td>
+                Turn on verbose logging.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>validate</tt>
+
+              </td>
+              <td>
+                Validate that all all source descriptors are present in the
+                destination after mirroring is complete. (Default is false)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>references</tt>
+
+              </td>
+              <td>
+                 Enables or disables the mirroring of references. (Default value is true).
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;comparator&gt;</tt>
+              </td>
+
+              <td>
+                A nested comparator element for comparing against a baseline
+                repository. If IUs from the source repository already exist in
+                the baseline, then the artifacts will be mirrored from the
+                baseline instead of the source. This element supports the
+                following attributes:
+                <table border="5" cellspacing="0" cellpadding="1" width="95%"
+                align="center">
+                  <tr>
+                    <td>
+                      <tt>&lt;baseline&gt;</tt>
+                    </td>
+                    <td>
+                      A nested element specifying the baseline repository. See
+                      <a href="#destination_repositories"><i>destination
+                      repositories</i></a> above.
+                    </td>
+
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>&lt;exclude&gt;</tt>
+                    </td>
+                    <td>
+                      A nested element specifying artifacts to exclude from the
+                      comparison. Contains nested &lt;artifact&gt; elements
+                      which support the following attributes:
+                      <table border="5" cellspacing="0" cellpadding="1" width=
+                      "95%" align="center">
+
+                        <tr>
+                          <td>
+                            <tt>id</tt>
+                          </td>
+                          <td>
+                            The artifact id.
+                          </td>
+                        </tr>
+                        <tr>
+
+                          <td>
+                            <tt>classifier</tt>
+                          </td>
+                          <td>
+                            The artifact classifier
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+
+                            <tt>version</tt>
+                          </td>
+                          <td>
+                            The version to exclude.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <tt>range;</tt>
+
+                          </td>
+                          <td>
+                            A range of versions to exclude
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <tt>&lt;property&gt;</tt>
+                          </td>
+
+                          <td>
+                            Nested &lt;property&gt; elements specifying
+                            properties that the artifact descriptor must have.
+                          </td>
+                        </tr>
+                      </table><br />
+                      Example: Exclude all pack.gz artifacts:
+                      <pre>
+    &lt;exclude&gt;
+
+       &lt;artifact&gt;
+          &lt;property name="format" value="packed" /&gt;
+       &lt;/artifact&gt;
+    &lt;/exclude&gt;
+</pre>Exclude the specified documentation bundles:
+                      <pre>
+    &lt;exclude&gt;
+
+       &lt;artifact id="org.eclipse.jdt.doc.isv" classifier="osgi.bundle" /&gt;
+       &lt;artifact id="org.eclipse.jdt.doc.usr" classifier="osgi.bundle" /&gt;
+       &lt;artifact id="org.eclipse.pde.doc.isv" classifier="osgi.bundle" /&gt;
+    &lt;/exclude&gt;
+</pre>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <tt>comparator</tt>
+                    </td>
+                    <td>
+                      Id of a comparator to use if the baseline artifacts
+                      should be compared against the source artifacts. These
+                      are extensions to the
+                      <i>org.eclipse.equinox.p2.artifact.repository.artifactComparators</i>
+                      extension point. Comparators provided by p2 are:
+                      <ul>
+
+                        <li>
+                          <i>org.eclipse.equinox.p2.repository.tools.jar.comparator</i>:
+                          Compare jars. Class files are disassembled and
+                          compared for equivalence, properties and manifest
+                          files are compared as such, all other files are
+                          compared byte-for-byte.
+                        </li>
+                        <li>
+                          <i>org.eclipse.equinox.artifact.md5.comparator</i>:
+                          Compare the MD5 sums as recorded in the artifact
+                          repositories.
+                        </li>
+                      </ul>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <tt>comparatorLog</tt>
+                    </td>
+                    <td>
+                      A log file for the results of the comparison.
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;slicingOptions&gt;</tt>
+              </td>
+              <td>
+                A nested element for specifying how to slice the repositories
+                to bring in additional IUs. This element supports the following
+                attributes:
+                <table border="5" cellspacing="0" cellpadding="1" width="95%"
+                align="center">
+
+                  <tr>
+                    <td>
+                      <tt>followStrict</tt>
+                    </td>
+                    <td>
+                      Set to true if only strict dependencies should be
+                      followed. A strict dependency is defined by a version
+                      range only including one version (e.g. [1.0.0.v2009,
+                      1.0.0.v2009]). (Default is false)
+                    </td>
+                  </tr>
+                  <tr>
+
+                    <td>
+                      <tt>includeOptional</tt>
+                    </td>
+                    <td>
+                      Whether or not to follow optional requirements. (Default
+                      is true).
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+
+                      <tt>includeNonGreedy</tt>
+                    </td>
+                    <td>
+                      Whether or not to follow non-greedy requirements.
+                      (Default is true).
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>includeFeatures</tt>
+
+                    </td>
+                    <td>
+                      Whether or not to include features. (Default is true).
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>platformFilter</tt>
+                    </td>
+
+                    <td>
+                      An "os,ws,arch" triplet to set as the platform against
+                      which IU LDAP filters will be matched. IUs not matching
+                      the filter will not be mirrored.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>filter</tt>
+                    </td>
+                    <td>
+
+                      Set additional filter properties. Format is a comma
+                      separated list of "key=value" pairs.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>followOnlyFilteredRequirements</tt>
+                    </td>
+                    <td>
+                      Invert the filters, include only the IUs that
+                      <b>don't</b> match.
+                    </td>
+
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>latestVersionOnly</tt>
+                    </td>
+                    <td>
+                      Set to "true" to filter the resulting set of IUs to only
+                      included the latest version of each Installable Unit. By
+                      default, all versions satisfying dependencies are
+                      included.
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table><br />
+    Examples:
+    <p>
+
+      Creating a delta pack repository based on the contents of the platform,
+      rcp, jdt and equinox.executable features:
+    </p>
+    <pre>
+ &lt;p2.mirror source="file://${buildRepo}"&gt;
+    &lt;destination kind="metadata" location="file://${deltaTemp}" name="RCP Delta Pack Repo"  /&gt;
+    &lt;destination kind="artifact" location="file://${deltaTemp}" name="RCP Delta Pack Repo"  /&gt;
+    &lt;iu id="org.eclipse.platform.feature.group" version="" /&gt;
+
+    &lt;iu id="org.eclipse.rcp.feature.group" version="" /&gt;
+    &lt;iu id="org.eclipse.jdt.feature.group" version="" /&gt;
+    &lt;iu id="org.eclipse.equinox.executable" version="" /&gt;
+    &lt;slicingOptions includeOptional="false" includeNonGreedy="false" followStrict="true" followOnlyFilteredRequirements="true" /&gt;
+ &lt;/p2.mirror&gt;
+</pre>
+    <p>
+
+      Mirror the org.eclipse.equinox.p2.user.ui feature and other required
+      bundles locally (perhaps in preparation for a build).
+    </p>
+    <pre>
+ &lt;p2.mirror source="https://download.eclipse.org/releases/helios" destination="${p2Repo}"&gt;
+    &lt;slicingOptions followStrict="true" /&gt;
+    &lt;iu id="org.eclipse.equinox.p2.user.ui.feature.group" /&gt;
+    &lt;iu id="org.eclipse.ecf"/&gt;
+
+    &lt;iu id="org.eclipse.ecf.filetransfer"/&gt;
+    &lt;iu id="org.eclipse.ecf.identity"/&gt;
+    &lt;iu id="org.eclipse.ecf.provider.filetransfer"/&gt;
+    &lt;iu id="org.eclipse.ecf.provider.filetransfer.httpclient"/&gt;
+    &lt;iu id="org.eclipse.ecf.provider.filetransfer.httpclient.ssl" /&gt;
+    &lt;iu id="org.eclipse.ecf.provider.filetransfer.ssl"/&gt;
+
+    &lt;iu id="org.eclipse.ecf.ssl" /&gt;
+    &lt;iu id="org.apache.commons.codec"/&gt;
+    &lt;iu id="org.apache.commons.httpclient"/&gt;
+    &lt;iu id="org.apache.ant"/&gt;
+    &lt;iu id="org.eclipse.core.runtime.compatibility.registry"/&gt;
+ &lt;/p2.mirror&gt;
+
+</pre>
+    <p>
+      Mirror the results of a build into a public location, and compare against
+      the existing update site to ensure that artifacts haven't changed if
+      their versions haven't been updated.
+    </p>
+    <pre>
+ &lt;p2.mirror source="file:${buildRepo}" ignoreErrors="true" log="${buildlogs}/mirrorlog.txt"&gt;
+    &lt;destination compressed="true" name="${p2.repo.name}" location="file:${updateRepo}" append="true" /&gt;
+    &lt;comparator comparator="org.eclipse.equinox.p2.repository.tools.jar.comparator" comparatorLog="${buildlogs}/comparatorlog.txt"&gt;
+
+       &lt;repository location="file:${updateSite}" /&gt;
+    &lt;/comparator&gt;
+ &lt;/p2.mirror&gt;
+</pre>
+    <table cellspacing="1" cellpadding="2" width="95%" align="center">
+      <tr>
+        <td>
+          <h3 class="c2">
+
+            <a name="p2_repo2runnable" id=
+            "p2_repo2runnable">p2.repo2runnable</a>
+          </h3>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Transform IUs into their installed form and add them to the
+            destination repository. This allows compiling against folder shaped
+            bundles that contain nested jars. This task is the main mechanism
+            by which headless PDE/Builds can reuse metadata.
+          </p>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes and elements:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width="95%" align=
+          "center">
+            <tr>
+
+              <td>
+                <tt>source</tt>
+              </td>
+              <td>
+                Source repositories, as outlined <a href=
+                "#source_repositories">above</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>desination</tt>
+              </td>
+              <td>
+                Destination repositories, as outlined <a href=
+                "#destination_repositories">above</a>
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>failOnError</tt>
+              </td>
+              <td>
+                Default is true. Set to "false" to ignore errors and complete
+                the operation.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>&lt;iu&gt;</tt>
+              </td>
+              <td>
+                Nested IU elements, as outlined <a href=
+                "#installable_units">above</a>. The installable units to
+                transform. If none are specified, all IUs contained in the
+                source repositories are transformed.
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table><br />
+    <table cellspacing="1" cellpadding="2" width="95%" align="center">
+      <tr>
+        <td>
+          <h3 class="c2">
+            p2.process.artifacts
+          </h3>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Process a local, file-based artifact repository. This task will
+            (optionally) sign and pack artifacts, as well as update the MD5
+            sums in the repository to match the actual artifacts on disk (since
+            signing/conditioning will change the MD5 sums). This task will use
+            the jarProcessor, which in turn uses ant's SignJar task which
+            requires the <i>jarsigner</i> command line tool.
+          </p>
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes and elements:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width="95%" align=
+          "center">
+            <tr>
+              <td>
+
+                <tt>repositoryPath</tt>
+              </td>
+              <td>
+                A URL to an artifact repository to process. This must be a
+                local, file-based repository.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>pack</tt>
+
+              </td>
+              <td>
+                Whether or not to create pack.gz artifacts. (Default is false)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>normalize</tt>
+              </td>
+
+              <td>
+                Whether or not to do pack200(pack + unpack) conditioning on the
+                artifacts. (Default is false, however sign + pack will imply a
+                normalize.)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;sign&gt;</tt>
+              </td>
+              <td>
+
+                A nested element to enable signing. This element supports the
+                following attributes:
+                <table border="5" cellspacing="0" cellpadding="1" width="95%"
+                align="center">
+                  <tr>
+                    <td>
+                      <tt>alias</tt>
+                    </td>
+                    <td>
+                      The alias to sign with
+                    </td>
+
+                  </tr>
+                  <tr>
+                    <td>
+                      <tt>keystore</tt>
+                    </td>
+                    <td>
+                      The location of the keystore.
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td>
+                      <tt>keypass</tt>
+                    </td>
+                    <td>
+                      Password for the private key (if different).
+                    </td>
+                  </tr>
+                  <tr>
+
+                    <td>
+                      <tt>storepass</tt>
+                    </td>
+                    <td>
+                      Password for the key store.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+
+                      <tt>unsign</tt>
+                    </td>
+                    <td>
+                      Whether or not to strip any existing signatures before
+                      signing. (Default is false)
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>&lt;feature&gt;</tt>
+              </td>
+              <td>
+                Nested elements specifying features IUs to process (see
+                <a href="#installable_units">above</a>, the <i>query</i>
+
+                attribute is not supported here). If no features or plug-ins
+                are specified, the entire repository is processed.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;plugin&gt;</tt>
+              </td>
+              <td>
+                Nested elements specifying plugins IUs to process (see <a href=
+                "#installable_units">above</a>, the <i>query</i> attribute is
+                not supported here). If no features or plug-ins are specified,
+                the entire repository is processed.
+              </td>
+
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table><br />
+    <table cellspacing="1" cellpadding="2" width="95%" align="center">
+      <tr>
+        <td>
+          <h3 class="c2">
+
+            p2.remove.iu
+          </h3>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Remove Installable Units from the given metadata and artifact
+            repositories. The provided repositories must be modifiable.
+          </p>
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes and elements:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width="95%" align=
+          "center">
+            <tr>
+              <td>
+
+                <tt>&lt;repository&gt;</tt>
+              </td>
+              <td>
+                Nested elements specifying metadata and artifact repositories
+                to remove Installable Units from. See <a href=
+                "#destination_repositories">destination repositories</a> above.
+                A metadata repository is required, the artifact repository is
+                optional.
+              </td>
+            </tr>
+            <tr>
+
+              <td>
+                <tt>&lt;iu&gt;</tt>
+              </td>
+              <td>
+                Nested IU elements, as outlined <a href=
+                "#installable_units">above</a>. The installable units to
+                remove. Matching IUs are removed from the metadata repository,
+                and all associated artifacts are removed from the artifact
+                repository (if provided).
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table><br />
+    <table cellspacing="1" cellpadding="2" width="95%" align="center">
+      <tr>
+        <td>
+          <h3 class="c2">
+            p2.composite.repository
+          </h3>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Create a composite repository
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes and elements:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width="95%" align=
+          "center">
+            <tr>
+              <td>
+                <tt>failOnExists</tt>
+
+              </td>
+              <td>
+                Whether we should fail if the repository already exists.
+                (Default is false)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>validate</tt>
+              </td>
+
+              <td>
+                A comparator-id. Child repositories claiming to contain the
+                same artifact are compared using the given comparator. These
+                are extensions to the
+                <i>org.eclipse.equinox.p2.artifact.repository.artifactComparators</i>
+                extension point. Comparators provided by p2 are:
+                <ul>
+                  <li>
+                    <i>org.eclipse.equinox.p2.repository.tools.jar.comparator</i>:
+                    Compare jars. Class files are disassembled and compared for
+                    equivalence, properties and manifest files are compared as
+                    such, all other files are compared byte-for-byte.
+                  </li>
+                  <li>
+
+                    <i>org.eclipse.equinox.artifact.md5.comparator</i>: Compare
+                    the MD5 sums as recorded in the artifact repositories.
+                  </li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;add&gt;</tt>
+
+              </td>
+              <td>
+                A nested element containing a list of repositories to add to
+                the composite. See <a href="#source_repositories">source
+                repositories</a> above.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;remove&gt;</tt>
+
+              </td>
+              <td>
+                A nested element containing a list repositories to remove from
+                the composite. See <a href="#source_repositories">source
+                repositories</a> above.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+    </table>
+  </body>
+</html>

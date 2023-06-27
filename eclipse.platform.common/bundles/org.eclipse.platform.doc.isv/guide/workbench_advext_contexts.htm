@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Contexts</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h3>
+Contexts</h3>
+<P >
+A <b>context</b> can be used to influence what commands are available to the user at any given moment.
+Contexts are much more dynamic than activities.  While an activity represents a broad set of functionality that
+is available to the user most of the time, contexts describe a focus of the user at a specific point
+in time.  For example, the commands available to a user while editing text might be different than those
+available to a user while editing Java text or browsing packages in the package explorer.
+</P>
+<h4>Defining a context</h4>
+<p>
+Contexts are declared in the
+<b><a href="../reference/extension-points/org_eclipse_ui_contexts.html">org.eclipse.ui.contexts</a></b>
+extension point. Consider the following context which is defined for editing text:
+</p>
+<pre>&lt;extension
+	point="org.eclipse.ui.contexts"&gt;
+	&lt;context
+		name="%context.editingText.name"
+		description="%context.editingText.description"
+		id="org.eclipse.ui.textEditorScope"
+		parentId="org.eclipse.ui.contexts.window"&gt;
+	&lt;/context&gt;
+</pre>
+Contexts are assigned a name and description that are used when showing information about the context to the user.
+The id of the context is used when binding UI contributions such as commands to a particular context.
+<h4>Context hierarchies</h4>
+<p>
+Contexts are hierarchical in nature.  When a context is active, the commands available in the context and in its parent contexts
+are also available.  This is useful for defining levels of contexts that move from very general situations down to more
+specific contexts.  In the context definition above, note that there is an id of a parent assigned to the context:
+</p>
+<pre>	&lt;context
+		name="%context.editingText.name"
+		description="%context.editingText.description"
+		id="org.eclipse.ui.textEditorScope"
+		<b>parentId="org.eclipse.ui.contexts.window"</b>&gt;
+	&lt;/context&gt;
+</pre>
+The parent context defines the more general context of working within a window.  Its parent defines an even
+more general context of working within a window or a dialog.
+<pre>
+&lt;context
+	name="%context.window.name"
+	description="%context.window.description"
+	id="org.eclipse.ui.contexts.window"
+	<b>parentId="org.eclipse.ui.contexts.dialogAndWindow"</b>&gt;
+&lt;/context&gt;
+&lt;context
+	name="%context.dialogAndWindow.name"
+	description="%context.dialogAndWindow.description"
+	id="org.eclipse.ui.contexts.dialogAndWindow"&gt;
+&lt;/context&gt;
+</pre>
+<h4>Associating a contribution with a context</h4>
+<p>
+So far, all we've done is define a hierarchy of contexts.  The context becomes useful when it is referenced in the
+description of another UI contribution.  The most common use of contexts is in key bindings.  When a context is
+associated with a key binding, the key binding will only be active when the user is in that context.  For example,
+the following markup specifies the root dialog and window context as the context for a key binding:
+</p>
+<pre>&lt;extension
+         point="org.eclipse.ui.bindings"&gt;
+      &lt;key
+            sequence="M1+X"
+            <b>contextId="org.eclipse.ui.contexts.dialogAndWindow"</b>
+            commandId="org.eclipse.ui.edit.cut"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/&gt;
+&lt;/extension&gt;
+</pre>
+<h4>
+Using Context API</h4>
+<p>
+The workbench context support includes an API for working with the defined contexts and defining
+criteria under which a particular context should become enabled.  Most plug-ins need not be 
+concerned with this API, but it is useful when defining specialized views or editors that define
+new contexts.  
+</p>
+<p>
+The starting point for working with contexts in the workbench is 
+<a href="../reference/api/org/eclipse/ui/contexts/IContextService.html"><b>IContextService</b></a>.
+Plug-ins can obtain the global context support instance from the workbench.  
+</p>
+<pre>IContextService contextService = (IContextService)PlatformUI.getWorkbench()
+	.getService(IContextService.class);
+</pre>
+<p>
+Services like <a href="../reference/api/org/eclipse/ui/contexts/IContextService.html"><b>IContextService</b></a>,
+<a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html"><b>IHandlerService</b></a>,
+and <a href="../reference/api/org/eclipse/ui/keys/IBindingService.html"><b>IBindingService</b></a>
+can be retrieved using an
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html"><b>IServiceLocator</b></a>. 
+<a href="../reference/api/org/eclipse/ui/IWorkbench.html"><b>IWorkbench</b></a>,
+<a href="../reference/api/org/eclipse/ui/IWorkbenchWindow.html"><b>IWorkbenchWindow</b></a>,
+and <a href="../reference/api/org/eclipse/ui/IWorkbenchSite.html"><b>IWorkbenchSite</b></a>
+are all <a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html"><b>IServiceLocator</b></a>.
+</p>
+<p>
+<b>IContextService</b> defines 
+protocol for getting all defined or enabled context ids, and for getting the associated
+<a href="../reference/api/org/eclipse/core/commands/contexts/Context.html"><b>Context</b></a>
+for a particular id.
+These objects can be used to traverse the definition for a context in API, such as getting the
+id, name, or id of the parent context.
+Listeners can be registered on the context manager or on the contexts 
+themselves to detect changes in the definition of a particular context or in the context manager
+itself. 
+See the package <b><a href="../reference/api/org/eclipse/core/commands/contexts/package-summary.html">org.eclipse.core.commands.contexts</a></b>
+for more information.
+</p>
+
+<p><b>Contexts</b> can be enabled programmatically:</p>
+<pre>IContextActivation activation = contextService.activateContext(&quot;org.eclipse.ui.textEditorScope&quot;);
+</pre>
+<p>
+The <a href="../reference/api/org/eclipse/ui/contexts/IContextActivation.html"><b>IContextActivation</b></a>
+is a token that can be used to deactivate an active context.  You should ensure
+that you only activate defined <b>Context</b>s.
+</p>
+
+<p>
+If you are activating a more specific <b>Context</b> within your part (either 
+View or Editor) you can use the part site service locator to active your <b>Context</b>.
+The part's <b>IContextService</b> will take care of activating and deactivating the
+<b>Context</b> as your part is activated or deactivated.  It will also dispose the
+<b>Context</b> when the part is disposed.
+</p>
+
+</BODY>
+</HTML>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Team and linked resources</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Team and linked resources</h3>
+<p>A project may contain resources that are not located within the project's directory 
+  in the local file system. These resources are referred to as <a href="resInt_linked.htm">linked 
+  resources</a>. </p>
+<h4>Consequences for Repository Providers</h4>
+<p>Linked resources can pose particular challenges for repository providers which 
+  operate directly against the file system. This is a consequence of the fact 
+  that linked resources by design do not exist in the immediate project directory 
+  tree in the file system. </p>
+<p>Providers which exhibit the following characteristics may be affected by linked 
+  resources:</p>
+<ol>
+  <li>Those which call out to an external program that then operates directly 
+    against the file system.</li>
+  <li>Those which are implemented in terms of IResource but assume that all the 
+    files/folders in a project exist as direct descendents of that single rooted 
+    directory tree.</li>
+</ol>
+<p>In the first case, lets assume the user picks a linked resource and tries to perform
+  a provider operation on it.  Since the provider calls a command line client, we can assume that
+  the provider does something equivalent to first calling
+   <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>.getLocation().toOSString(),
+  feeding the resulting file system location as an argument to the command line program.  If the resource in question is
+  a linked resource, this will yield a file/folder outside of the project directory tree.  Not all
+  command line clients may expect and be able to handle this case.
+  In short, if your provider ever gets the file system location of a resource, it will likely require
+  extra work to handle linked resources.  
+</p>
+<p>The second case is quite similar in that there is an implicit assumption that the structure of
+  the project resources is 1:1 with that of the file system files/folders.  In general,
+  a provider could be in trouble if they mix IResource and java.io.File operations. 
+  For example, for links, the parent of 
+  <a href="../reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a>
+  is not the same
+  as the java.io.File's parent and code which assumes these to be the same will fail.
+</p>
+<h4>Backwards Compatibility</h4>
+<p>It was important that the introduction of linked resources did not inadvertently 
+  break existing providers. Specifically, the concern was for providers that reasonably 
+  assumed that the local file system structure mirrored the project structure. 
+  Consequently, by default linked resources can not be added to projects that 
+  are mapped to such a provider. Additionally, projects that contain linked resources 
+  can not by default be shared with that provider.</p>
+<h4>Strategies for Handling Linked Resources</h4>
+<p>In order to be &quot;link friendly&quot;, a provider should allow projects 
+  with linked resources to be version controlled, but can disallow the version 
+  controlling of linked resources themselves. </p>
+<p>A considerably more complex solution would be to allow the versioning of the 
+  actual linked resources, but this should be discouraged since it brings with 
+  it complex scenarios (e.g. the file may already be version controlled under 
+  a different project tree by another provider). Our recommendation therefore 
+  is to support version controlled projects which contain non-version controlled 
+  linked resources.</p>
+<h4>Technical Details for Being &quot;Link Friendly&quot;</h4>
+<p>Repository provider implementations can be upgraded to support linked resources 
+  by overriding the <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a>.canHandleLinkedResourceURI()</b> 
+  method to return <strong>true</strong>. Once this is done, linked resources 
+  will be allowed to exist in projects shared with that repository provider. However, 
+  the repository provider must take steps to ensure that linked resources are 
+  handled properly. As mentioned above, it is strongly suggested that repository 
+  providers ignore all linked resources. This means that linked resources (and 
+  their children) should be excluded from the actions supported by the repository 
+  provider. Furthermore, the repository provider should use the default move and 
+  delete behavior for linked resources if the repository provider implementation 
+  overrides the default <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>.</p>
+<p>Team providers can use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>.<b>isLinked(IResource.CHECK_ANCESTORS) 
+  </b>to determine if a resource is a link or is the descendant of a link.</p>
+<p>Repository providers should ignore any resource for which the above code evaluates 
+  to <strong>true</strong>.</p>
+
+</BODY>
+</HTML>

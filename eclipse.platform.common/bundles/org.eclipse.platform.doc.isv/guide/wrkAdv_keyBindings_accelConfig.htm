@@ -1,0 +1,113 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>
+Schemes
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Schemes</h3>
+
+
+<p><b>Schemes</b> are used to represent a general style or theme of 
+  bindings. For example, the Workbench provides a &quot;Default&quot; scheme and
+  an &quot;Emacs&quot; scheme.&nbsp; Only one scheme is active at any
+  given time.&nbsp; End users control which one 
+  is active using the
+  
+  <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Keys)")'>
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+  <b>General &gt; Keys</b>  </a>
+  
+  preference page.
+  </p>
+
+
+<p><img src="images/keybindings.png" alt="" border="0"></p>
+
+
+<p>From an implementation point of view, schemes are simply
+named groupings of bindings.&nbsp; A scheme won't
+accomplish anything on its own unless there are bindings associated with
+it.&nbsp;&nbsp;</p>
+
+
+<p>Let's look again at the workbench markup for <b><a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a>
+</b>to find the binding definitions and how a scheme gets
+associated with a binding.</p>
+
+
+<pre>...
+&lt;key
+       sequence=&quot;Ctrl+S&quot;
+       <b>commandId=&quot;org.eclipse.ui.file.save&quot;</b>
+       <b>schemeId=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;</b>
+&lt;/key&gt;
+...
+&lt;key
+       sequence=&quot;Ctrl+X Ctrl+S&quot;
+       <b>commandId=&quot;org.eclipse.ui.file.save&quot;</b>
+       <b>schemeId=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;</b>
+&lt;/key&gt;
+...
+</pre>
+
+
+<p>There are two different key bindings defined for the &quot;org.eclipse.ui.file.save&quot;
+command.&nbsp; Note that each one has a different <b>schemeId</b>
+defined.&nbsp; When the default scheme is active, the &quot;Ctrl+S&quot;
+key binding will invoke the command.&nbsp; When the emacs scheme is
+active, the sequence &quot;Ctrl+X Ctrl+S&quot; will invoke the command. </p>
+
+
+<h4>Defining new schemes</h4>
+
+
+<p>When your plug-in defines a binding, it will most likely assign it to an existing
+scheme.&nbsp; However, your plug-in may want to define a
+completely new style of scheme.&nbsp; If this is the case, you can define
+a new type of scheme inside the <b><a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a></b>
+definition.&nbsp; The workbench markup that defines the default and emacs key
+configurations are shown below:</p>
+
+
+<pre>...
+&lt;scheme
+       name=&quot;%keyConfiguration.default.name&quot;
+       description=&quot;%keyConfiguration.default.description&quot;
+       <b>id=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;</b>
+&lt;/scheme&gt;
+&lt;scheme
+       name=&quot;%keyConfiguration.emacs.name&quot;
+       parentId=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;
+       description=&quot;%keyConfiguration.emacs.description&quot;
+       <b>id=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;</b>
+&lt;/scheme&gt;
+...</pre>
+
+
+<p>Note that the <b>name</b>  defined here is the one used in the preferences page in the list of
+schemes.</p>
+
+
+<h4>Activating a scheme </h4>
+
+
+<p>The user controls the active scheme via the preferences page.&nbsp;
+However, you can define the default active scheme as a part of the 
+"plugin_customization.ini" file.  It is a preference:</p>
+<pre>
+org.eclipse.ui/KEY_CONFIGURATION_ID=org.eclipse.ui.defaultAcceleratorConfiguration
+</pre>
+
+</BODY>
+</HTML>

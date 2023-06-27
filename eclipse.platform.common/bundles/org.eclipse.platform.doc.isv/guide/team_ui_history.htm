@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Adding History support</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>
+   Adding History support
+</h2>
+<p>There are two parts to adding History support to your repository:</p>
+<ul>
+<li>Providing implementations for the core history interfaces; see the
+<b>Providing History</b> section.</li>
+<li>Creating the UI elements for the History Page which gets displayed in the
+History View; see the <b>Showing History</b> section.</li>
+</ul>
+
+<h3>Providing History</h3>
+<p>
+The core history interfaces allow users to access the history of an item by querying the 
+<a href="../reference/api/org/eclipse/team/core/history/IFileHistoryProvider.html">IFileHistoryProvider</a>
+returned by the RepositoryProvider.  To do this, you need to:
+</p>
+<ul>
+<li>Provide an implementation for <a href = "../reference/api/org/eclipse/team/core/history/IFileHistory.html">IFileHistory</a> 
+by extending <a href = "../reference/api/org/eclipse/team/core/history/provider/FileHistory.html">FileHistory</a>.</li>
+<li>Provide an implementation for <a href = "../reference/api/org/eclipse/team/core/history/IFileRevision.html">IFileRevision</a> by extending
+<a href = "../reference/api/org/eclipse/team/core/history/provider/FileRevision.html">FileRevision</a>.</li>
+<li>Provide an implementation for <a href = "../reference/api/org/eclipse/team/core/history/IFileHistoryProvider.html">IFileHistoryProvider</a> by
+extending <a href = "../reference/api/org/eclipse/team/core/history/provider/FileHistoryProvider.html">FileHistoryProvider</a>.</li>
+<li>Provide an implementation for <a HREF="../reference/api/org/eclipse/team/core/RepositoryProvider.html#getFileHistoryProvider()">getFileHistoryProvider</a> to
+allow users to fetch the IFileHistoryProvider from your RepositoryProvider.</li>
+</ul>
+
+<h3>Showing History</h3>
+<p>To display history for items in your repository, you can provide one or more HistoryPages which will be shown
+in the History view. To do this, you need to:</p>
+<ul>
+<li>Provide an implementation for <a href = "../reference/api/org/eclipse/team/ui/history/IHistoryPage.html">IHistoryPage</a> by extending
+<a href = "../reference/api/org/eclipse/team/ui/history/HistoryPage.html">HistoryPage.</a></li>
+<li>Provide an implementation for <a href = "../reference/api/org/eclipse/team/ui/history/IHistoryPageSource.html">IHistoryPageSource</a> by
+extending <a href = "../reference/api/org/eclipse/team/ui/history/HistoryPageSource.html">HistoryPageSource</a>. When a resource is selected to
+be shown in the History view it will try to adapt the FileHistoryProvider it gets from your repository provider to a HistoryPageSource. If 
+it doesn't succeed, it will then try to adapt the repository provider itself. For non-resource objects, the History view will
+try to adapt the object to a HistoryPageSource. The FileSystem History view example registers an adapter factory that adapts a FileHistoryProvider
+to an IHistoryPageSource.
+ </li>
+<li>Create a Show History Action, provide an object contribution for the Action. See <a href="../reference/extension-points/org_eclipse_ui_popupMenus.html"><b>org.eclipse.ui.popupMenus</b></a> for more
+info.</li>
+</ul>
+
+<h3>Showing History for Sub-file Elements</h3>
+<p>To display the history of a model element that is contained in a file, you can do the following:</p>
+<ul>
+<li>Implement a <a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureCreator.html"><b>StructureCreator</b></a>
+for the file.</li>
+<li>Subclass <a href="../reference/api/org/eclipse/team/ui/history/ElementLocalHistoryPageSource.html"><b>ElementLocalHistoryPageSource</b></a>
+and adapt your sub-file element(s) to an instance of the subclass.</li>
+<li>To show the history in the History View, pass your history page source and element to the <code>showHistoryFor</code>
+method of <a href="../reference/api/org/eclipse/team/ui/TeamUI.html"><b>TeamUI</b></a>.</li>
+<li>To show the history in a dialog, provide History actions (show, compare, replace) that make use of a 
+<a href="../reference/api/org/eclipse/team/ui/history/HistoryPageCompareEditorInput.html"><b>HistoryPageCompareEditorInput</b></a>
+to show the history.</li>
+</ul>
+
+<h3>FileSystem History example</h3>
+<p>The FileSystem example illustrates how you can provide history and a history page for repository items.
+Select a resource in a FileSystem managed project and choose <b>Team &gt; Show History</b>. The FileSystem History
+page will be displayed in the History view with all of the local revisions as well as the FileSystem revision
+ displayed. You can right click on any revision and select <i>Open</i> from the context menu to open the revision.</p>
+ 
+<h3>FileRevisionEditorInput</h3>
+<p>To support the <i>Open</i> functionality, the FileSystem history example had to create its own FileSystemRevisionEditorInput (see 
+org.eclipse.team.examples.filesystem.ui.FileSystemRevisionEditorInput). This class adapts to IFileRevision and to IFileState, which
+can be used to determine whether the editor contains remote contents (IFileRevision) or local history contents (IFileState).</p>
+
+<p>Likewise, the existing FileRevisionEditorInput's that come with the SDK and are used by the Local History page 
+all adapt to IFileRevision which can be used to determine if the revision contained in the editor is that of a remote revision.</p>
+
+</BODY>
+</HTML>

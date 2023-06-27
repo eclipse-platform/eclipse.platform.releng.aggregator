@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../../book.css" type="text/css">
+  <title>Generating Metadata</title>
+</head>
+<body>
+<h2>Platform URLs in Eclipse</h2>
+
+<p>Frequently people wonder how to &quot;locate&quot; files in Eclipse. In 80% of the cases, the
+conversation is about things like <code><a href="http://help.eclipse.org/stable/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html">IFile</a></code>
+and <code><a href="http://help.eclipse.org/stable/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IWorkspace.html">IWorkspace</a></code>. Sometimes it digresses
+to files available inside bundles and, rarely, it involves the &quot;state location&quot; of a bundle
+(see the <a href="http://help.eclipse.org/stable/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/runtime/Plugin.html#getStateLocation%28%29">Plugin.getStateLocation()</a>
+javadoc for more details). Obviously you can use <code><a href="http://help.eclipse.org/stable/topic/org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IResource.html">IResource</a></code> or <code>java.io.File</code>
+to work with files in these places. There is another way, though: platform URI.
+</p>
+
+<p>There are a few ways to work with the "platform" scheme:</p>
+
+<table border="1">
+<tbody>
+
+<tr><td valign="top">platform:/resource</td>
+<td>It is used to identify a resource located in the workspace. The next path
+segment after &quot;resource&quot; should be the name of a project, which can be
+followed by the folder and/or file we want to locate.</td></tr>
+
+<tr><td valign="top">platform:/plugin</td><td><p>It
+is used to locate a resource available in a plug-in/bundle. One really cool thing about this one is that it doesn't really
+matter if this resource is available in a directory or in a jar file.
+It also doesn't matter if the bundle is installed in a link folder or in the default directory.</p>
+<p>The path segment after &quot;plugin&quot; should be the identifier of the bundle,
+which can be followed by the path of the resource in the bundle.</p></td></tr>
+
+<tr><td valign="top">platform:/fragment</td><td>This
+one is quite similar to &quot;platform:/plugin&quot;, being used to locate
+fragment resources instead of bundle resources. As you are probably
+guessing, the segment after &quot;fragment&quot; should be the fragment's
+identifier.</td></tr>
+
+<tr><td valign="top">platform:/meta</td><td>We can
+use this to access a bundle's stage location. The path segment after
+&quot;meta&quot; should be the bundle's identifier, followed by the path of the
+resource we want to refer to.</td></tr>
+
+<tr><td valign="top">platform:/config</td><td>The &quot;config&quot; segment causes the
+platform URI to refer to the configuration area of the running Eclipse (usually the <i>eclipse/configuration</i> directory). This can
+be useful to read the <i>config.ini</i> file, for example.</td></tr>
+
+<tr><td valign="top">platform:/base</td><td>This always
+refers to the directory of the Eclipse being executed.<br><br>It is interesting to note that, for example,
+<code>platform:/base/plugins/org.eclipse.mybundle/plugin.xml</code> and <code>platform:/plugin/org.eclipse.mybundle/plugin.xml</code>
+don't necessarily refer to the same resource. The former is a &quot;pointer&quot; to a <i>plugin.xml</i> file located in a directory
+<i>plugins/org.eclipse.mybundle</i> under the directory that Eclipse is installed. The latter points to the <i>plugin.xml</i> of the
+&quot;org.eclipse.mybundle&quot; bundle regardless of where it is installed and whether it is jarred or not.</td></tr>
+</tbody>
+</table>
+
+<p>
+So what can we do with platform URIs? For one, read the contents of the
+resources pointed by them. We may also be able to write to such
+resources or even delete or create them.
+URIs can be a good fit for APIs that would normally use &quot;plain&quot; paths. Take as
+an example the <code>icon</code>
+attribute of the extension point below. Because its value is handled as
+a URI, we are allowed to refer to an image located in a different
+bundle.</p>
+
+<blockquote>
+<pre>
+&lt;extension point=&quot;org.eclipse.ui.editorActions&quot;&gt;
+  &lt;editorContribution ...&gt;
+    &lt;action
+          icon=&quot;platform:/plugin/com.myplugin/icons/me.gif&quot;
+          ...
+    /&gt;
+  &lt;/editorContribution&gt;
+&lt;/extension&gt;
+</pre>
+</blockquote>
+
+</body>
+</html>

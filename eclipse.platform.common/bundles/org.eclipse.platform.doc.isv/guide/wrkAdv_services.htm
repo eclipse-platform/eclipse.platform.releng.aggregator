@@ -1,0 +1,271 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Services
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Services</h2>
+<p>The workbench defines a number of services that can be retrieved from the
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>.
+Services provide a way for components to retrieve information about the workbench
+without always having to go to the global singleton: <code>PlatformUI.getWorkbench()</code>.
+For example:
+</p>
+<pre>
+		IHandlerService handlerService = (IHandlerService) getSite()
+				.getService(IHandlerService.class);
+</pre>
+<p>
+Some services provide 2 optional abilities, which are usually specified in the 
+service interface javadoc:</p>
+<ul>
+<li>Services that support listeners can clean up the listeners automatically
+when the component's 
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
+(used to get the service) is disposed.</li>
+<li>Services can provide more localized services depending on which component they
+are requested from.</li>
+</ul>
+<p>See <a href="workbench_cmd_handlers.htm" 
+   class="XRef">Associating a handler programmically with a command...</a>
+for an example of the activation localization provided by the 
+<a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html">org.eclipse.ui.handlers.IHandlerService</a>.
+</p>
+<h3>
+Services Provided by the Workbench
+</h3>
+<p>
+The services provided to by the workbench now includes some of the most
+common services that an
+<a href="../reference/api/org/eclipse/ui/IWorkbenchPart.html">org.eclipse.ui.IWorkbenchPart</a>
+would require.  Support for service related optional abilities are specified in the service javadoc.
+The availability of the service is at and below the level specified.</p>
+<table border="1">
+<tr>
+<th>Service</th>
+<th>Description</th>
+<th>Availability</th>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/keys/IBindingService.html">IBindingService</a>
+</td>
+<td>Provides services related to the binding architecture (e.g., keyboard
+shortcuts) within the workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/commands/ICommandService.html">ICommandService</a>
+</td>
+<td>Provides services related to the command architecture within the workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/commands/ICommandImageService.html">ICommandImageService</a>
+</td>
+<td>Provides a look-up facility for images associated with commands.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/contexts/IContextService.html">IContextService</a>
+</td>
+<td>Provides services related to contexts in the Eclipse workbench, like context
+activation and definitions.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/model/IContributionService.html">IContributionService</a>
+</td>
+<td>The IContributionService is a service provided at the workbench level that
+provides mechanisms that clients may use to work with user interface
+contributions. Currently, this is limited to providing sorters for particular
+contribution types but this may be expanded on in the future. An instance of
+this service is present for the entire lifetime of the workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/services/IEvaluationService.html">IEvaluationService</a>
+</td>
+<td>Evaluate a core expression against the workbench application context and
+report updates using a Boolean property.  Also provides the main source for
+the workbench application context.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/swt/IFocusService.html">IFocusService</a>
+</td>
+<td>Tracks focusGained and focusLost events for a Control registered with this
+service, and provides the control and its registered ID as variables to the
+application evaluation context for evaluation by the various services.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html">IHandlerService</a>
+</td>
+<td>Provides services related to activating and deactivating handlers within the
+workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/menus/IMenuService.html">IMenuService</a>
+</td>
+<td>Provides services related to the menu architecture within the workbench.  It
+can be used to populate MenuManagers and ToolBarManagers by components.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/IPageService.html">IPageService</a>
+</td>
+<td>A page service tracks the page and perspective lifecycle events
+ within a workbench window.</td>
+<td>Workbench Window</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/IPartService.html">IPartService</a>
+</td>
+<td>A part service tracks the creation and activation of parts within a
+ workbench window.</td>
+<td>Workbench Window</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/progress/IProgressService.html">IProgressService</a>
+</td>
+<td>The progress service is the primary interface to the workbench progress support.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/progress/IWorkbenchSiteProgressService.html">IWorkbenchSiteProgressService</a>
+</td>
+<td>The part progress service is an IProgressService that adds API for jobs
+that change the state in a IWorkbenchPartSite while they are being run.</td>
+<td>Part Site</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/ISaveablesLifecycleListener.html">ISaveablesLifecycleListener</a>
+</td>
+<td>Parts that implement 
+<a href="../reference/api/org/eclipse/ui/ISaveablesSource.html">org.eclipse.ui.ISaveablesSource</a>
+should notify their
+<code>ISaveablesLifecycleListener</code>, available as a service from their site, about
+<a href="../reference/api/org/eclipse/ui/Saveable.html">org.eclipse.ui.Saveable</a>
+objects that have been added to or removed from the
+part.  Implementations of <code>ISaveablesSource</code> that are
+not parts should retrieve this service from the
+<a href="../reference/api/org/eclipse/ui/IWorkbench.html">org.eclipse.ui.IWorkbench</a> 
+object.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/ISelectionService.html">ISelectionService</a>
+</td>
+<td>A selection service tracks the selection within an a workbench window.</td>
+<td>Workbench Window</td>
+</tr>
+
+</table>
+
+<h3>
+Contributing a Service
+</h3>
+<p>
+Plug-in developers providing a framework in eclipse may also want to provide a service.
+This can be done using the
+<a href="../reference/extension-points/org_eclipse_ui_services.html">org.eclipse.ui.services</a>
+extension point.  Define a service factory based on 
+<a href="../reference/api/org/eclipse/ui/services/AbstractServiceFactory.html">org.eclipse.ui.services.AbstractServiceFactory</a>
+and then specify what services the factory can return.
+A factory can create more than one type of service, but multiple factories cannot
+contribute to the same service type.
+</p>
+<pre>
+      &lt;serviceFactory
+            factoryClass="org.eclipse.ui.examples.contributions.model.PersonServiceFactory"&gt;
+         &lt;service
+               serviceClass="org.eclipse.ui.examples.contributions.model.IPersonService"/&gt;
+      &lt;/serviceFactory&gt;
+</pre>
+<p>
+The create method of the 
+<a href="../reference/api/org/eclipse/ui/services/AbstractServiceFactory.html">org.eclipse.ui.services.AbstractServiceFactory</a>
+passes in 3 parameters:</p>
+<ul>
+<li><code>serviceInterface</code> - the interface class that needs to be created</li>
+<li><code>parentLocator</code> - an
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
+that can be used to get the parent service for <code>serviceInterface</code></li>
+<li><code>locator</code> - the 
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
+that requested this service be created.  It can be used to retrieve dependent services.</li>
+</ul>
+<p>
+Workbench services are organized so there is a global service providing the 
+needed functionality, and a chain of children services.  The children services provide
+the listener cleanup and any data needed to localize the service request.
+</p>
+<p>A service
+factory should return the global service when the <code>parentLocator</code> returns
+<code>null</code> when asked for the <code>serviceInterface</code>.  The global service
+may be the implementation, or a proxy to a plugin provided manager or OSGi service.
+</p>
+<pre>
+		Object parentService = parentLocator.getService(IPersonService.class);
+		if (parentService == null) {
+			return new PersonService(locator);
+		}
+		return new PersonServiceSlave(locator, (IPersonService) parentService);
+		
+		// or ...
+		Object parentService = parentLocator.getService(IPersonService.class);
+		if (parentService == null) {
+			return Activator.getDefault().getPersonManager();
+		}
+		return new PersonServiceSlave(locator, (IPersonService) parentService);
+		
+		//
+		// or as a front to an OSGi service.
+		Object parentService = parentLocator.getService(IPersonService.class);
+		if (parentService == null) {
+			PersonServiceProxy proxy = new PersonServiceProxy(locator,
+			        Activator.getDefault().getBundle().getBundleContext(),
+			        0);
+			proxy.findService();
+			return proxy;
+		}
+		PersonServiceProxy proxy = new PersonServiceProxy(locator,
+		     Activator.getDefault().getBundle().getBundleContext(),
+		     ((PersonServiceProxy)parentService).getLevel()+1);
+		proxy.findService();
+		return proxy;
+</pre>
+<p>In the OSGi service snippet above, instead of having each child <code>IPersonService</code> know
+its parent, each <code>IPersonService</code> talks directly to the OSGi service and uses
+the parent to calculate its "level" which allows it to localize any functionality
+it provides.
+</p>
+
+</BODY>
+</HTML>

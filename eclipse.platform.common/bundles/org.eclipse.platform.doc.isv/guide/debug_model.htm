@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Platform debug model</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Platform debug model</h3>
+<p>The platform debug model defines generic debug interfaces that are intended 
+  to be implemented and extended in concrete, language-specific implementations.</p>
+<h4>Artifacts</h4>
+<p>The model includes classes that represent different artifacts in a program
+under debug.&nbsp; All of the artifacts implement <a href="../reference/api/org/eclipse/debug/core/model/IDebugElement.html"><b>IDebugElement</b></a>
+in addition to their own interfaces.&nbsp; The model includes definitions for
+the following artifacts:</p>
+<ul>
+  <li>Debug targets (<a href="../reference/api/org/eclipse/debug/core/model/IDebugTarget.html"><b>IDebugTarget</b></a>)
+    - a debuggable execution context, such as a process or virtual machine</li>
+  <li>Expressions (<a href="../reference/api/org/eclipse/debug/core/model/IExpression.html"><b>IExpression</b></a>)
+    - a snippet of code that can be evaluated to produce a value</li>
+  <li>Memory blocks (<a href="../reference/api/org/eclipse/debug/core/model/IMemoryBlock.html"><b>IMemoryBlock</b></a>)
+    - a contiguous segment of memory in an execution context</li>
+  <li>Registers (<a href="../reference/api/org/eclipse/debug/core/model/IRegister.html"><b>IRegister</b></a>)
+    - a named variable in a register group</li>
+  <li>Register groups (<a href="../reference/api/org/eclipse/debug/core/model/IRegisterGroup.html"><b>IRegisterGroup</b></a>)
+    - a group of registers assigned to a stack frame</li>
+  <li>Stack frames (<a href="../reference/api/org/eclipse/debug/core/model/IStackFrame.html"><b>IStackFrame</b></a>)
+    - an execution context in a suspended thread containing local variables and
+    arguments</li>
+  <li>Threads (<a href="../reference/api/org/eclipse/debug/core/model/IThread.html"><b>IThread</b></a>)
+    - a sequential flow of execution in a debug target containing stack frames</li>
+  <li>Values (<a href="../reference/api/org/eclipse/debug/core/model/IValue.html"><b>IValue</b></a>)
+    - the value of a variable</li>
+  <li>Variables (<a href="../reference/api/org/eclipse/debug/core/model/IVariable.html"><b>IVariable</b></a>)
+    - a visible data structure in a stack frame or value</li>
+  <li>Watch expressions (<a href="../reference/api/org/eclipse/debug/core/model/IWatchExpression.html"><b>IWatchExpression</b></a>)
+    - an expression that updates its value when provided with a particular context</li>
+</ul>
+<p>Plug-ins that implement language-specific debuggers typically extend these
+interfaces to include language-specific behavior.&nbsp; All debug elements can
+return the id of the plug-in that originated them.&nbsp; This is important for
+registering other classes that are associated with a debug model, such as UI
+classes.</p>
+<h4>Actions</h4>
+<p>The model also includes interfaces that define a set of debug actions that
+are common behaviors among debug artifacts.&nbsp; These interfaces are
+implemented by debug elements where appropriate.&nbsp; They include the
+following actions:</p>
+<ul>
+  <li>Disconnect (<a href="../reference/api/org/eclipse/debug/core/model/IDisconnect.html"><b>IDisconnect</b></a>) 
+    - the ability to end a debug session with a target program and allow the target 
+    to continue running</li>
+  <li>Step (<a href="../reference/api/org/eclipse/debug/core/model/IStep.html"><b>IStep</b></a>) 
+    - the ability to step into, over, and return from the current execution point</li>
+  <li>Step filters (<a href="../reference/api/org/eclipse/debug/core/model/IStepFilters.html"><b>IStepFilters</b></a>) 
+    - the ability to enable or disable filtering of step operations so that a debug target can apply filters to
+    steps when appropriate</li>
+  <li>Suspend and resume (<a href="../reference/api/org/eclipse/debug/core/model/ISuspendResume.html"><b>ISuspendResume</b></a>) 
+    - the ability to suspend and resume execution</li>
+  <li>Terminate (<a href="../reference/api/org/eclipse/debug/core/model/ITerminate.html"><b>ITerminate</b></a>) 
+    - the ability to terminate an execution context</li>
+  <li>Modify a value (<a href="../reference/api/org/eclipse/debug/core/model/IValueModification.html"><b>IValueModification</b></a>) 
+    - the ability to modify the value of a variable</li>
+</ul>
+<p>If you look at the definitions for the platform debug elements, you will see
+that different elements implement different debug actions.&nbsp; Standard
+interfaces for the elements and their behaviors allow the platform to provide
+abstract implementations of utility classes and UI support that can be extended
+for concrete implementations of debuggers.</p>
+<h4>Events</h4>
+<p>Debug events (<a href="../reference/api/org/eclipse/debug/core/DebugEvent.html"><b>DebugEvent</b></a>)
+are used to describe events that occur as a program is being debugged.&nbsp;
+Debug events include the debug element that is associated with the event.&nbsp;
+Each kind of debug element has a specific set of events that it supports as
+documented in <a href="../reference/api/org/eclipse/debug/core/DebugEvent.html"><b>DebugEvent</b></a>.
+Debugger implementations can add application specific debug events using a designation of
+<b>DebugEvent.MODEL_SPECIFIC</b> as the kind of event.  A client data field can be used in this case
+to add model-specific information about the event.</p>
+<p>Debugger UI classes typically listen to specific events for elements in order
+display information about changes that occur in the elements.&nbsp; Debug events
+arrive in groups called <b>debug event sets</b>.&nbsp; Events that occur at the
+same point of execution in a program arrive in the same set.&nbsp; Clients
+should implement an <a href="../reference/api/org/eclipse/debug/core/IDebugEventSetListener.html"><b>IDebugEventSetListener</b></a>
+and register the listener with the <a href="../reference/api/org/eclipse/debug/core/package-summary.html"><b>org.eclipse.debug.core</b></a>
+plug-in in order to receive debug events.</p>
+
+</BODY>
+</HTML>

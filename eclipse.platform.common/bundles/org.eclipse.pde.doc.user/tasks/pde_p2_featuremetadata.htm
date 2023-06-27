@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Layout of Feature Metadata</title>
+</head>
+<body>
+<h1>Layout of Feature Metadata</h1>
+<p>PDE Build has always used features as a kind of grouping mechanism specifying what exactly should be built.  With p2, this idea of a feature as a group has been extended, resulting a more than a single installable unit (IU) being generated per feature.</p>
+From build's perspective, a feature contributes three things:
+<ul>
+<li>A grouping of nested features and plug-ins.</li>
+<li>The (optional) feature jar itself that contains the feature.xml, license files, etc.</li>
+<li>A mechanism to <a href="pde_rootfiles.htm">contribute root files</a> to the install.</li>
+</ul>
+
+<p>When using the <a href="pde_p2_integration.htm">metadata generator</a> introduced in 3.4, we end up with the following structure for feature "<tt>org.example.platform</tt>":</p>
+	<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
+		<tr>
+			<td width="320"><tt>org.example.platform.feature.group</tt></td>
+			<td>This is the top level grouping IU for the feature, it will have requirements on all the features and plug-ins that were included and required by the feature.xml.  It also includes a requirement on the 
+			nested <tt>org.example.platform.feature.jar</tt></td>
+		</tr>
+		<tr><th colspan="2">
+		<table  border="1" cellspacing="0" align="right" style="width:98%">
+		<tr><td width="300"><tt>org.example.platform.feature.jar</tt></td>
+			<td>This is the IU representing the feature jar itself.  It has an LDAP filter <div align="center">"<tt>(org.eclipse.update.install.features=true)</tt>"</div>which causes the feature jar to only be installed if the profile defines that property.
+				This IU also has a requirement on the actual <tt>org.example.platform_1.0.0.jar</tt> artifact.
+				<p>If the feature does not define "<tt>bin.includes</tt>" in its build.properties file, then this feature jar IU will not be generated.</p></td></tr>
+		</table>
+		</th></tr>
+	</table>
+	
+<p>Notice this IU structure does not include anything for the root files contributed by the feature.  Instead a build using the metadata generation placed all rootfiles together into a single IU and artifact.</p>
+<p>New in 3.5 is the <a href="pde_p2_builds.htm">p2 publisher</a>.  If we use PDE Build's <a href="pde_p2_buildtasks.htm"><tt>eclipse.gatherFeature</tt></a> task to publish the feature from source, we instead get root file IUs corresponding to the feature that contributed them.  In this case, we end up with metadata as follows:</p>
+<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
+		<tr>
+			<td width="370"><tt>org.example.platform.feature.group</tt></td><td>The top level grouping IU for the feature</td>
+		</tr>
+		<tr><th colspan="2">
+		<table  border="1" cellspacing="0" align="right" style="width:98%">
+		<tr><td width="350"><tt>org.example.platform.feature.jar</tt></td><td>The feature jar IU.</td></tr>
+		<tr><td><tt>org.example.platform_root</tt><br>
+		       <tt>org.example.platform_root.&lt;ws&gt;.&lt;os&gt;.&lt;arch&gt;</tt></td>
+		    <td>These are the root file IUs.  The feature.group will include a root IU per platform for which the feature contributes files.  The root IU itself has a requirement on the actual binary artifact from a p2 artifact repository (eg <tt>binary/org.example.platform_root.gtk.linux.x86_1.0.0</tt>) that contains the files.</td></tr>
+		</table>
+		</th></tr>
+	</table>
+
+<p>The use of the new p2 publisher instead of the old metadata generator allows for much finer grain control over how root files are delivered for products.</p>
+</body>
+</html>

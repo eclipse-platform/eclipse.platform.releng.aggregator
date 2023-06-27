@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Error handling</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Error handling</H2>
+
+<P>SWT can trigger three types of exceptions:
+<strong>IllegalArgumentException</strong>,
+<strong><a href="../reference/api/org/eclipse/swt/SWTException.html">SWTException</a></strong>, and
+<strong><a href="../reference/api/org/eclipse/swt/SWTError.html">SWTError</a></strong>.
+Applications should not have to catch any other kind of exception or error
+when calling SWT.</P>
+
+<blockquote><em>Note: If any other exception besides these three is thrown
+from SWT, it should be considered a bug in the SWT implementation.</em></blockquote>
+
+<P>Where possible, exceptions are triggered consistently across platforms.
+However, some errors are specific to an SWT implementation on a particular
+platform.</P>
+
+
+<H3>IllegalArgumentException</H3>
+
+<P>The arguments passed in SWT API methods are checked for appropriate state
+and range before any other work is done. An <strong>IllegalArgumentException</strong>
+will be thrown when it is determined that an argument is invalid.</P>
+
+<P>Code that causes an <strong>IllegalArgumentException</strong> on one platform 
+will cause the same exception on a different platform.</P>
+
+
+<H3>SWTException</H3>
+
+<P><strong><a href="../reference/api/org/eclipse/swt/SWTException.html">SWTException</a></strong>
+is thrown when a recoverable error occurs internally in SWT. The error code and
+message text provide a further description of the problem.</P>
+
+<P>SWT remains in a known stable state after throwing the exception.
+For example, this exception is thrown when an SWT call is made from a non-UI
+thread.</P>
+
+
+<H3>SWTError</H3>
+
+<P><a href="../reference/api/org/eclipse/swt/SWTError.html"><strong>SWTError</strong></a>
+is thrown when an unrecoverable error occurs inside SWT.</P>
+
+<P>SWT will throw this error when an underlying platform call fails, leaving
+SWT in an unknown state, or when SWT is known to have an unrecoverable error,
+such as running out of platform graphics resources.</P>
+
+<P>Once an SWT error has occurred, there is little that an application can do
+to correct the problem. These errors should not be encountered during normal
+course of operation in an application, but high reliability applications
+should still catch and report the errors.</P>
+
+</BODY>
+</HTML>

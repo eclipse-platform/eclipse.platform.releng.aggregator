@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) GK Software AG and others 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Using external null annotations</title>
+</head>
+<body>
+<h1> Using external null annotations </h1>
+<p>
+<a href="task-using_null_annotations.htm">Null annotations</a>,
+or even better, <a href="task-using_null_type_annotations.htm">null type annotations</a>
+can significantly reduce (ideally: eliminate) the danger of <code>NullPointerException</code>
+thrown at program runtime.
+Unfortunately, the API of many libraries does not yet consistently specify
+where <code>null</code> is allowed and where it isn't.
+This can be a major source of incompleteness in this endeavor.
+In order to fill this gap, starting with Eclipse 4.5 (Mars),
+JDT supports the concept of <em>external annotations</em>,
+which means that null annotations can be specified in separate files &ndash; without modifying the original library.
+If you attach such external null annotations to a given library,
+JDT will then consider these annotations for its static null analysis.<br>
+This help page describes
+</p>
+<ul>
+<li><a href="#structure">the structure of external annotations</a></li>
+<li><a href="#configure">configuring a project to use external annotations</a></li>
+<li><a href="#create">interactively creating external annotations</a></li>
+<li><a href="#inspect">inspecting external annotations</a></li>
+<li><a href="#annotation_kind">differences between declaration annotations and type annotations</a></li>
+</ul>
+<h2 id="structure">Structure of external annotations</h2>
+<p>
+External annotations can be provided as a <em>directory tree</em>, 
+whose leaves are text files with extension <code>.eea</code> ("Eclipse External Annotations").
+In this structure, each directory corresponds to a Java package,
+and each <code>.eea</code> file corresponds to a Java type (class, interface etc.).
+</p>
+<p>
+Optionally, the above structure can be packed in a single zip file with extension <code>.zip</code>
+or <code>.jar</code>.
+</p>
+<p>
+The exact format of <code>.eea</code> text files has been designed with slight bias towards processing by tools.
+Still, these files are amenable to storing, comparing and merging using any version control system.
+The format is based on <em>signatures</em> as defined in 
+<a target="_blank" href="http://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.9.1"><img src="../images/external-link-ltr-icon.svg" alt="external link"> JVMS 4.7.9.1</a>.
+<!-- 
+the full definition is given in TODO: write a page for doc.isv: target audience: developers of converts to/from .eea.
+ -->
+</p>
+<h2 id="configure">Configuring a project to use external annotations</h2>
+<blockquote id="caveat-configure"><strong>Caveat:</strong>
+	When different projects referring to the same library have different configurations with respect 
+	to external annotations, the UI support described below (command Annotate and Javadoc hovers)
+	can easily get confused: When looking at a given library class, JDT may not know which
+	project the user is currently working on, producing unexpected results.
+	While hopefully this will be improved in a future version, for the time being users are advised
+	to use the same external annotation location for all projects referring to the same library.
+	A shared ("common") base project will typically be a good choice for hosting external annotations.
+</blockquote>
+Two different strategies exist for declaring locations where external annotations should be search:
+<ul>
+<li>Per build path entry: each build path entry has an attribute "External annotations:" that can be 
+set to the path where annotations regarding this particular build path entry should be searched.</li>
+<li>The compiler <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#external_annotations_from_all_locations">can be instructed</a> to search all
+build path locations for external annotations affecting any class files encountered during compilation.
+</ul>
+<h3>Java Runtime Environments</h3>
+<p>
+External annotations can be directly attached to each JRE configured in the current workspace.
+For this purpose, please use the <a href="./tasks-JREs.htm">Installed JREs</a>
+preference page and click <b>Edit</b> for details of the selected JRE.
+After selecting one or more Jar files contributed by the given JRE installation,
+click <b>External Annotations</b> to open a new dialog,
+where either a directory or a zip file can be selected as the external annotation location for the selected jar(s). 
+</p>
+<p>Alternatively, you may select the properties of a specific JRE bound in the 
+<a href="../concepts/concept-build-classpath.htm">Java Build Path</a> of a specific project.
+Please note, that attaching external annotations to individual jars of a JRE <em>always</em> affects the workspace preference,
+even if accessed via the project's build path.
+The only way to define a project-specific location for external annotation location for a JRE is via
+the direct child <b>External annotations:</b> of the top-level node called <b>JRE System Library</b>,
+<em>but note, that project specific locations are not recommended, see the <a href="#caveat-configure">"Caveat"</a> above.</em>
+</p>
+<h3>Other Classpath Containers</h3>
+<p>Depending on the build technology in use, projects may have additional classpath containers like
+<b>Plug-in Dependencies</b> or <b>Maven Dependencies</b>.
+For these containers, the only option currently is
+to specify the external annotation location via each projects build path.
+In this case users are advised to manually ensure that the same location is used
+for all projects of the workspace, <em>see the <a href="#caveat-configure">"Caveat"</a> above.</em>
+</p>
+<h3>Other Libraries</h3>
+<p>For any other libraries (jars) explicitly referenced from the Java Build Path of a project,
+external annotations can be attached separately in the <a href="../reference/ref-properties-build-path.htm#libraries">Libraries</a> page of the project's build path.
+</p> 
+<h2 id="create">Creating external annotations</h2>
+<p><u>Pre-requisites:</u>
+External annotations require a library with <a href="../reference/ref-properties-source-attachment.htm">source attachment</a>.
+Additionally, annotation based null analysis must be enabled for the current project,
+an external annotation location must be defined for the library and that location must be a directory (not a zip file) within the workspace.
+</p>
+<p>
+After navigating to the desired class, you may select the type (method parameter or method return type)
+that should be affected by an annotation,
+and invoke the new command <b>Annotate</b> (available via context menu and by default bound to <b>Ctrl-1</b>).
+Similar to quick assists in a Java source code editor,
+this command will offer proposals applicable at the current location.
+For external annotations, the three options are:
+</p>
+<ul>
+<li>Annotate as '@NonNull SomeType'</li>
+<li>Annotate as '@Nullable SomeType'</li>
+<li>Remove nullness annotation from type 'SomeType'</li>
+</ul>
+<p>
+For obvious reasons, exactly 2 of these three proposals are offered at any suitable location.
+Behind the scenes this command will create and/or update an <code>.eea</code> file corresponding to the current class.
+The new annotation will then be respected by the compiler:
+Errors and warnings in an open editor will be updated immediately;
+The <b>Problems</b> view will be updated when affected classes are re-compiled.
+</p>
+<blockquote><b>Be careful:</b>
+When attaching external annotations to a library, keep in mind that you are defining a new contract,
+that will then be used to check your program against.
+The compiler will, however, not check the library, whether it actually conforms to this contract.
+By carelessly marking, e.g., a return type as <code>@NonNull</code> you let the compiler
+advise you to remove null checks against return values from the given method.
+If the library <em>does</em> return null in any situation, this null will hit you unguarded.
+<br>
+Before adding an annotation, make sure it is backed by facts, like, e.g.:
+<ul>
+<li>explicit mention in Javadoc, e.g., when a <code>@return</code> specification says: "... or null when ...".</li>
+<li>an explicit null check of a method parameter, which does not throw an exception (implying that null is accepted &rarr; <code>@Nullable</code> parameter)</li>
+<li>uncheck dereference of a method parameter (implying that null is not accepted &rarr; <code>@NonNull</code> parameter)
+<li>an explicit <code>null</code> return (implying a <code>@Nullable</code> return type)</li>
+<li>explicitly created return values at each return statement (implying a <code>@NonNull</code> return type).</li>
+</ul>
+</blockquote>
+<h2 id="inspect">Inspecting external annotations</h2>
+<p>The immediate effect of external annotations can be observed via changes in compiler errors / warnings.
+For full transparency, annotated library signatures can be inspected using the <em>Javadoc hover</em> 
+or <a href="../reference/views/ref-view-javadoc.htm">Javadoc view</a>.<br>
+<em>Due to an implementation limitation, this feature currently only works for
+<a href="./task-using_null_type_annotations.htm">type annotations</a> (Java 8).</em>
+</p>
+
+<h2 id="annotation_kind">Declaration annotations vs type annotations</h2>
+<p>Generally, support for external annotations has been developed with regard to fully supporting
+all locations of <a href="task-using_null_type_annotations.htm">null type annotations</a> (Java 8).
+This means, you may refer to any detail of a type in a method signature and annotate, e.g., a type parameter, a type bound or an array dimension.
+When using declaration annotations, the relevant subset of location shares the same mechanisms for external annotations.
+</p>
+<p>
+In one situation the design for type annotations shines through even when using declaration annotations:
+annotating an array type is based on the new syntax of type annotations (see also <a href="task-using_null_type_annotations.htm#compatibility_syntax">Compatibility > Syntax</a>).
+For illustration consider the following method in type <code>Collection</code>:
+</p>
+<pre>    Object [] toArray();
+</pre>
+<p>
+Even when a project uses Java 7 or below, the return type of this method is annotated by
+placing the cursor before the array brackets.
+Invoking <b>Annotate</b> will create an external annotation that is internally interpreted
+as an annotation on the method (but still the meaning is: describing the return of this method).
+</p>
+<p>
+Other than this one exception, external annotations closely mimic how annotations directly within a source file would be handled,
+with a reduced set of locations for declaration annotations, and the full set of locations for type annotations.
+</p>
+</body>
+</html>

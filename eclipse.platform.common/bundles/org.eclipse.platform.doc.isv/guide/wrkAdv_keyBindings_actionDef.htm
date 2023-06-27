@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Commands
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Commands</h3>
+
+<p>See the <a href="workbench_cmd_commands.htm" class="XRef">org.eclipse.ui.commands</a>
+section for creating command definitions, hooking them up with keybindings, and placing
+them in menus.
+</p>
+
+<h4>Associating a legacy action with a command</h4>
+
+
+<p>When still using the old legacy action extension points, actions can be associated with a 
+command in code or in the <b>plugin.xml
+</b>for action sets.&nbsp;
+Your choice depends on where the action is defined.</p>
+
+<p>
+Instead of using an <b>IAction</b> you should prefer activating an 
+<a href="../reference/api/org/eclipse/core/commands/AbstractHandler.html"><b>AbstractHandler</b></a>.
+</p>
+<pre>
+    // IWorkbench, IWorkbenchWindow, and IWorkbenchPartSite are all IServiceLocators
+    IHandlerService handlerService = (IHandlerService) locator.getService(IHandlerService.class);
+    handlerService.activateHandler(org.eclipse.ui.IWorkbenchCommandConstants.FILE_SAVE, new MySaveHandler());
+</pre>
+
+
+
+<p>But when working with actions, actions that are instantiated in code can also be associated with an action
+definition using <a href="../reference/api/org/eclipse/jface/action/IAction.html"><b>IAction</b></a>
+protocol.&nbsp; This is typically done when the action is created.&nbsp; The <b>SaveAction</b>
+uses this technique when it initializes itself. </p>
+
+
+<pre>
+public SaveAction(IWorkbenchWindow window) {
+	...
+	setText...
+	setToolTipText...
+	setImageDescriptor...
+	<b>setActionDefinitionId(&quot;org.eclipse.ui.file.save&quot;)</b>; 
+}
+</pre>
+
+<p>(Note:&nbsp; The method name <b>setActionDefinitionID </b>could more
+appropriately be named <b>setCommandID</b>.&nbsp; The method name reflects the
+original implementation of key bindings and uses outdated terminology.)</p>
+
+
+<p>By invoking <b>setActionDefinitionID</b>, the implementation action (<b>SaveAction</b>) is associated with
+the command id that was used in the command definition markup. It is good practice to define constants for your action definitions so that
+they are easily referenced in code. </p>
+
+
+<p> If you define an
+action in an action set, then you typically do not need to
+instantiate an action yourself.&nbsp; The workbench will do it for you when the user
+invokes your action from a menu or the keyboard.&nbsp; In this case, you can
+associate your action with a command ID in your&nbsp; XML markup.&nbsp; The
+following shows a hypothetical markup for an action set:</p>
+
+<pre>
+&lt;extension point = &quot;org.eclipse.ui.actionSets&quot;&gt;
+	   &lt;actionSet id=&quot;com.example.actions.actionSet&quot;
+		   label=&quot;Example Actions&quot;
+		   visible=&quot;true&quot;&gt;
+		   &lt;action id=&quot;com.example.actions.action1&quot;
+			   menubarPath=&quot;additions&quot;
+			   label=&quot;Example Save Action&quot;
+			   class=&quot;org.example.actions.ExampleActionDelegate&quot;
+			   <b>definitionId=&quot;org.eclipse.ui.file.save&quot;</b>&gt;
+		   &lt;/action&gt;
+		   ...
+	   &lt;/actionSet&gt;
+   &lt;/extension&gt;</pre>
+<p>The <b>definitionId</b> attribute is used to declare a command ID for the action.</p>
+
+
+<p>Using either technique, associating your action with a command ID causes any key bindings that get defined for the
+command <b>org.eclipse.ui.file.save
+</b>to invoke your action when appropriate.&nbsp; </p>
+
+
+<p>Now let's look at how these key bindings get defined. </p>
+
+
+</BODY>
+</HTML>

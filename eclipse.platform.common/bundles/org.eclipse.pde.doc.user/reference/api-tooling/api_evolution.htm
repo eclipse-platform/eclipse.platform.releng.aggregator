@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright" content="Copyright (c) IBM Corporation and others 2017. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../../book.css" type="text/css">
+  <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
+  <title> API Evolution</title>
+  <!-- called from org.eclipse.pde.api.tools.ui.internal.markers.ProblemExplainIncompatibilityResolution -->
+</head>
+<body>
+<h1> API Evolution</h1>
+	<p>
+	</p>
+	
+	<p> API tooling is about controlling <a href="https://wiki.eclipse.org/Evolving_Java-based_APIs" target="_blank"> API Evolution</a> and  <a href="https://wiki.eclipse.org/Version_Numbering" target="_blank">Version Numbering</a>.  
+	</p>
+	
+	<p> Read <a href="https://wiki.eclipse.org/Evolving_Java-based_APIs_2" target="_blank">Achieving API Binary Compatibility</a> for understanding the various incompatibilities.
+	</p> 
+	
+	<p> The following API incompatibilities have been explained in more detail below :
+	</p>
+<ol>
+   <li><strong><a href="#fieldAdditionToClass">Field Addition to Class</a></strong></li>
+	<li><strong><a href="#fieldAddtionToInterface">Field Addition to Interface</a></strong> </li>
+	<li><strong><a href="#defaultMethodAddition">Default Method Addition to Interface</a></strong></li>
+		  
+</ol>
+	<h2><a name="fieldAdditionToClass"></a>Field Addition to Class</h2>
+	<p> Adding an API field to an API class that is extended by Clients is dangerous in two respects:
+	</p>
+	<ul><li> It may break API contract compatibility similar to <a href="https://wiki.eclipse.org/Evolving_Java-based_APIs#Example_4_-_Adding_an_API_method"  target="_blank" title="Evolving Java-based APIs">Evolving_Java-based_APIs#Example_4_-_Adding_an_API_method</a> in case of name clashes.</li>
+	<li> It may cause linkage errors in case an instance (respectively static) field hides a static (respectively instance) field, see <a rel="nofollow" class="external text" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.4.8" target="_blank">JLS8 13.4.8</a>.<br><br> 
+	
+	
+	<div ><p class="title"><b>Example - Adding a Field to Class</b></p>
+                  <div ><pre class="programlisting">
+
+
+public class Base {String h = "Base";}
+public class Derived extends Base { }
+
+public class Test {
+    public static void main(String[] args) {
+         String s = new Derived().h;
+         System.out.println(s);
+    }
+}
+</pre>
+ <p >This program produces the output:</p>
+	Base
+	
+ <p >Suppose that a public static field h is added to <code class="literal">Derived</code>:
+                     </p><pre class="programlisting">
+                     
+  public class Derived extends Base { public static String h = "humongous"; }
+</pre>
+
+	<p>If <code class="literal">Derived</code> is recompiled but not <code class="literal">Test</code>, then running the new binary with the existing binary for <code class="literal">Test</code> will cause an <b><code class="literal">IncompatibleClassChangeError</code></b>.
+                     </p> 
+     <p> Furthermore, if char type h is added to Derived instead, there would be compilation error. <p>                
+                  </div>
+               </div>	
+               
+	This can not happen if all field declarations follow the usual naming conventions from <a rel="nofollow" class="external text" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-6.html#jls-6.1" target="_blank">JLS8 6.1</a> and classes only have API fields that are either
+	<ul><li> "static final" (and hence have a name that doesn't contain any lowercase letters), or</li>
+	<li> non-static and non-final (and hence have a name that contains a least one lowercase letter)</li></ul></li></ul>
+	<p>Apart from the binary compatibility issues, it is generally good software engineering practice that API classes should not expose any non-constant fields.
+	</p>
+	
+	<h2><a name="fieldAddtionToInterface"></a>Field Addition to Interface</h2>
+	
+	 <p>Adding an API field to an API interface that is implemented by Clients is dangerous in two respects:
+	</p>
+		<ul><li> It may break API contract compatibility similar to <a href="https://wiki.eclipse.org/Evolving_Java-based_APIs#Example_4_-_Adding_an_API_method"  target="_blank" title="Evolving Java-based APIs">Evolving_Java-based_APIs#Example_4_-_Adding_an_API_method</a> in case of name clashes.</li>
+	<li> It may cause linkage errors in case an instance (respectively static) field hides a static (respectively instance) field, see <a rel="nofollow" class="external text" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.4.8" target="_blank">JLS8 13.4.8</a>. This can not happen if all field declarations follow the usual naming conventions from <a rel="nofollow" class="external text" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-6.html#jls-6.1" target="_blank">JLS8 6.1</a> and classes only have API fields that are either
+	<ul><li> "static final" (and hence have a name that doesn't contain any lowercase letters), or</li>
+	<li> non-static and non-final (and hence have a name that contains a least one lowercase letter)</li></ul></li></ul>
+
+	<h2><a name="defaultMethodAddition"></a>Default Method Addition to Interface</h2>
+	<p>Adding a default method will break an existing client type if it already implements another interface that declares a default method with a matching signature, and the client type already refers to the default method from the other interface (except when using the Interface.super.method() notation). The added default method will cause an IncompatibleClassChangeError at run time, see <a rel="nofollow" class="external text" href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-13.html#jls-13.5.6" target="_blank">JLS8 13.5.6</a>. Furthermore, re-compiling the type will result in a compile error.<br>
+	</p>
+	
+	<div><p class="title"><b>Example - Adding A Default Method</b></p>
+                  <div ><pre class="programlisting">
+
+<b><i>API</i></b>
+ public interface interfaceAPI {}
+
+<b><i>Client Code</i></b>
+ public interface clientInterface {
+    default void doSomething() {
+        System.out.println("Do something client...") ;
+    }
+}
+
+public class ClientCode implements clientInterface, interfaceAPI {
+    public static void main(String[] args) {
+        new ClientCode().doSomething();
+   }
+}
+</pre>
+ <p >This program produces the output:</p>
+	Do something client...
+	 <p >Suppose that a default method is added to <code class="literal">interfaceAPI</code>:
+                     </p><pre class="programlisting">
+public interface interfaceAPI {
+    default void doSomething() {
+        System.out.println("Do something API...");
+    }
+}
+</pre>
+ 	<p>If <code class="literal">interfaceAPI</code> is recompiled but not <code class="literal">ClientCode</code>, then running the new binary with the existing binary for <code class="literal">ClientCode</code> will cause an <b><code class="literal">IncompatibleClassChangeError</code></b>.
+                     </p>
+                  </div>
+               </div>
+</body>
+</html>

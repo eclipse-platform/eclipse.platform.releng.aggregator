@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) Red Hat Inc. and others 2019. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<meta http-equiv="Content-Style-Type" content="text/css"/>
+<link rel="stylesheet" href="../../../apache_style.css" type="text/css"/>
+<title>API Tools Analysis application</title>
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
+</head>
+<body>
+<h1> API Analysis Command Line Application</h1>
+<h2>Purpose</h2>
+<p>This application runs a complete API analysis of a Plugin project relative to a baseline - including API use, binary compatibility, and bundle version number validation. The profile is compared to an API baseline for binary compatibility (usually the previous release of a product). </p>
+
+<h2>Usage</h2>
+<h3>Description</h3>
+<p>The name of the application task is: <code>org.eclipse.pde.api.tools.apiAnalyzer</code>. To be used, the bundle file <code>org.eclipse.pde.api.tools</code> in version superior or equals to <code>1.1.800</code> has to be installed in the Eclipse Platform instance. Once the Platform is properly configured,
+the application can be started with commands like:</p>
+<p><code>eclipse -application org.eclipse.pde.api.tools -project /path/to/project -depednencies /path/to/list/of/dependencies.txt -baseline default -failOnError</code></p>
+<h3>Application Arguments</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+<tr>
+<td valign="top">project</td>
+<td valign="top">This attribute specifies the location of the project to analyze. The project must be the a valid Eclipse Plugin project,
+that is a project with typical <code>.project</code>, <code>MANIFEST.MF</code>... files. 
+</td>
+<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+<td valign="top">dependencyList</td>
+<td valign="top">This attribute specifies a path to a file containing a list of depenencies that will be used as default target platform.
+<br/><br/>
+The file must list the absolute path of dependencies (as jar files), either separated by new lines or colon (:). Tokens that are not
+absolute path to jar files are ignored.
+</td>
+<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+<td valign="top">baseline</td>
+<td valign="top">This attribute specifies the location of the reference baseline.
+<br/><br/>
+It can be the absolute path to a directory or a to a <code>.target</code> file, or <code>default</code>.
+If <code>default</code>, the current platform running the API Tools will be used as baseline.
+</td>
+<td align="center" valign="top">No. If omitted, similar to <code>default</code></td>
+</tr>
+<tr>
+<td valign="top">failOnError</td>
+<td valign="top">Report API compliance errors as a failure (non-<code>0</code> exit code)</td>
+<td align="center" valign="top">No</td>
+</tr>
+</table>
+
+<h3>Examples</h3>
+
+In a Tycho-enabled <code>pom.xml</code> file:
+<pre>
+&lt;project>
+  [...]  
+  &lt;build>
+  [...]
+    &lt;plugins>
+      [...]
+      &lt;plugin>
+        &lt;artifactId>maven-dependency-plugin&lt;/artifactId>
+        &lt;executions>
+          &lt;execution>
+            &lt;id>list-dependencies&lt;/id>
+            &lt;goals>
+              &lt;goal>list&lt;/goal>
+            &lt;/goals>
+            &lt;phase>verify&lt;/phase>
+            &lt;configuration>
+              &lt;outputAbsoluteArtifactFilename>true&lt;/outputAbsoluteArtifactFilename>
+              &lt;outputScope>false&lt;/outputScope>
+              &lt;outputFile>${project.build.directory}/dependencies.txt&lt;/outputFile>
+            &lt;/configuration>
+          &lt;/execution>
+        &lt;/executions>
+      &lt;/plugin>
+      &lt;plugin>
+        &lt;groupId>org.eclipse.tycho.extras&lt;/groupId>
+        &lt;artifactId>tycho-eclipserun-plugin&lt;/artifactId>
+        &lt;version>1.4.0&lt;/version>
+        &lt;executions>
+          &lt;execution>
+            &lt;id>api-analysis&lt;/id>
+            &lt;goals>
+              &lt;goal>eclipse-run&lt;/goal>
+            &lt;/goals>
+            &lt;phase>verify&lt;/phase>
+            &lt;configuration>
+              &lt;applicationsArgs>
+                &lt;!-- need to set workspace to a dir that's not a child of the project --> 
+                &lt;arg>-data&lt;/arg>
+                &lt;args>${project.basedir}/../target/${project.artifactId}-apiAnalyzer-workspace&lt;/args>
+                &lt;args>-application&lt;/args>
+                &lt;args>org.eclipse.pde.api.tools.apiAnalysis&lt;/args>
+                &lt;args>-project&lt;/args>
+                &lt;args>${project.basedir}&lt;/args>
+                &lt;args>-baseline&lt;/args>
+                &lt;args>default&lt;/args>
+                &lt;args>-dependencyList&lt;/args>
+                &lt;args>${project.build.directory}/dependencies.txt&lt;/args>
+                &lt;args>-failOnError&lt;/args>
+              &lt;/applicationsArgs>
+              &lt;repositories>
+                &lt;repository>
+                  &lt;id>eclipse-4.12&lt;/id>
+                  &lt;layout>p2&lt;/layout>
+                  &lt;url>https://download.eclipse.org/eclipse/updates/4.12-I-builds/&lt;/url>
+                &lt;/repository>
+              &lt;/repositories>
+              &lt;dependencies>
+                &lt;!-- This will constitute the default baseline -->
+                &lt;dependency>
+                  &lt;artifactId>org.eclipse.sdk.ide&lt;/artifactId>
+                  &lt;type>p2-installable-unit&lt;/type>
+                &lt;/dependency>
+              &lt;/dependencies>
+            &lt;/configuration>
+          &lt;/execution>
+        &lt;/executions>
+      &lt;/plugin>
+    &lt;/plugins>
+  &lt;/build>
+&lt;/project>
+</pre>
+<p>This will run API analysis and fail the build in case an error is found.</p> 
+
+<h3 class="related">Related references</h3>
+<a href="../ant-tasks/analysis-ant-task.htm">API Analysis Ant Task</a>
+</body>
+</html>

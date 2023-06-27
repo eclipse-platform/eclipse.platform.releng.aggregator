@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Resource modification hooks
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<body>
+<H2>
+Resource modification hooks</H2>
+<P >So far, we've assumed that resource API is being used to modify resources
+that are located in the user's file system.&nbsp; This is indeed the fundamental
+structure of the workspace, but it's also possible that a plug-in adds
+capabilities for manipulation of resources that are managed somewhere
+else.&nbsp; For example, the platform <a href="team.htm">Team support</a>
+plug-ins add the ability to work with resources that are under the management of
+a versioning repository.</P>
+
+<P > The resource API includes capabilities that have been added specifically 
+  to enable the team support plug-ins and plug-ins that implement repository providers 
+  using the team support.&nbsp; The following discussion covers the generic mechanism 
+  for registering resource hooks.&nbsp; See <a href="team_provider_repository.htm#hooks">Implementing 
+  a repository provider</a> for a discussion of how team uses these hooks.&nbsp;&nbsp;</P>
+
+<h3 >
+Resource move/delete hooks</h3>
+
+<P >
+This hook allows the team plug-in and its providers to control
+    how resource moves and deletes are implemented.&nbsp; The hook includes the ability to prevent
+these operations from
+    happening.&nbsp; Implementors can provide alternate implementations for
+    moving or deleting files, folders, and projects.&nbsp;</P>
+
+<P >
+The team plug-in uses the <a href="../reference/extension-points/org_eclipse_core_resources_moveDeleteHook.html"><b>org.eclipse.core.resources.moveDeleteHook</b></a>
+extension point to register its hook:</P>
+
+<pre >&lt;extension point=&quot;org.eclipse.core.resources.moveDeleteHook&quot; id=&quot;MoveDeleteHook&quot;&gt;
+	&lt;moveDeleteHook class=&quot;org.eclipse.team.internal.core.MoveDeleteManager&quot;/&gt;
+&lt;/extension&gt;
+</pre>
+
+<P >
+The supplied class must implement <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>,
+which is called by the platform whenever a resource is moved or deleted.&nbsp;
+The team plug-in installs a move delete hook manager that can determine which
+team provider is managing a resource and invoke its specific hook.</P>
+
+<h3 >
+File modification validators</h3>
+
+<p>It's also possible that team repository providers will need to prevent or
+intervene in the editing or saving of a file. The team plug-in
+accomplishes this by using the extension point <a href="../reference/extension-points/org_eclipse_core_resources_fileModificationValidator.html"><b>org.eclipse.core.resources.fileModificationValidator</b></a>
+to register a validator that is called whenever a resource is to be modified.</p>
+
+<pre >&lt;extension point=&quot;org.eclipse.core.resources.fileModificationValidator&quot; id=&quot;FileValidator&quot;&gt;
+	&lt;fileModificationValidator class=&quot;org.eclipse.team.internal.core.FileModificationValidatorManager&quot;/&gt;
+&lt;/extension&gt;</pre>
+
+<P >The supplied class must implement <a href="../reference/api/org/eclipse/core/resources/team/FileModificationValidator.html"><b>FileModificationValidator</b></a>,
+which is called by the platform whenever a resource is saved or
+opened. The team plug-in installs a file modification manager that
+can determine which team provider is managing a resource and invoke its specific
+validator.</P>
+
+<h3 >General team hook</h3>
+<p>
+Repository providers sometimes need to hook into additional workspace operations
+in order to impose extra restrictions or customize workspace behavior.  The
+<a href="../reference/extension-points/org_eclipse_core_resources_teamHook.html"><b>org.eclipse.core.resources.teamHook</b></a>
+extension point provides some other special functions for team providers.  In particular,
+this hook allows a team provider to decide whether linked folders and files should
+be allowed for a given project.  Some repository systems have strict rules about the
+physical layout of projects on disk, and are not able to handle resources linked to
+arbitrary locations.</p>
+<p>
+The team hook also allows a repository provider to supply a 
+<a href="runtime_jobs_rules.htm">scheduling rule</a>
+factory that will be used by all workspace operations.  Each time an API method is called
+that modifies the workspace in some way, a scheduling rule is obtained by the workspace.
+This scheduling rule prevents other threads from modifying those resources during
+the invocation of the API method.  If a repository provider is performing additional
+work inside a file modification validator or move/delete hook, the provider must
+also tell the workspace what additional scheduling rules it will need. See
+the section on <a href="resAdv_batching.htm">resource batching</a> for more
+details on how the workspace uses scheduling rules.
+</p>
+<P >The supplied class for the team hook must implement <a href="../reference/api/org/eclipse/core/resources/team/TeamHook.html"><b>TeamHook</b></a>.
+The team plug-in installs the single team hook that
+can determine which team provider is managing a resource and invoke its specific
+hook.</P>
+
+<blockquote>
+
+  <P ><i>Note:&nbsp; All three of these team hooks are designed specifically 
+    for use by the team core plug-in.&nbsp; They are not intended for general use.&nbsp; 
+    Team providers should not install hooks using these extension points, but 
+    instead implement their hooks in their Repository Provider class.&nbsp;&nbsp; 
+    See <a href="team_provider_repository.htm#hooks">Team resource modification 
+    hooks</a> for more information about using these hooks.</i></P>
+
+</blockquote>
+
+
+
+</BODY>
+</HTML>

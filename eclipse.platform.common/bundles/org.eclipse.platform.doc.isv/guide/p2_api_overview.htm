@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) Sonatype Inc and others 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+  <title>Overview of the p2 API</title>
+</head>
+<body>
+<H1>API overview</H1>
+<p>
+This section provides an overview of the p2 API and introduces some of the key concepts that should be understood to work with
+the p2 API.  The API can be generally thought of as three layers of API.  The top most layer requires understanding of very
+few concepts, and each successive layer provides more flexibility, but is a bit more complex.
+</p> 
+<ul> 
+<li>The User Interface API </li>
+<li>The Operations API </li>
+<li>The Core API</li>
+</ul>
+<p>
+This section provides a description of each of these categories and introduces some of the key concepts.
+</p>
+<h3>The User Interface API</h3>
+<p>The UI provides wizards for installing, updating, and uninstalling software in a system.  It also
+provides dialog pages for describing the installation and manipulating the repositories that are used
+to access software.  Most of these building blocks are private ("black box") implementations, not intended
+to be extended by clients.  A small package, 
+<a href="../reference/api/org/eclipse/equinox/p2/ui/package-summary.html">org.eclipse.equinox.p2.ui</a>,
+defines the API, which provides hooks for customizing the behaviour of the UI components, and class definitions that
+can be used in a plug-in's UI contributions.  </p>
+<p>Applications that simply want to provide their users a way to update or install additional software into the system
+need only include the relevant UI bundles.  No deep knowledge of the p2 API is required.  
+<a href="p2_ui.htm">Customizing the p2 UI</a> 
+describes this level of working with the p2 UI.  The The <a href="../reference/api/org/eclipse/equinox/p2/ui/Policy.html">Policy</a> class defines 
+aspects of the UI that can be customized.
+</p>
+<h3>Operations API</h3>
+<p>The <a href="../reference/api/org/eclipse/equinox/p2/operations/package-summary.html">operations API</a> provides high-level API for 
+installing, updating, and uninstalling software in a headless system.  The operations API is defined with "progressive disclosure" in mind.
+That is, the simplest and most common operations require little knowledge of underlying concepts.  
+</p>
+<p>Clients work with the operation in two passes.  The operation must first be <b>resolved</b>, which means that the requirements
+and dependencies are calculated to determine if the desired operation is compatible with what is already installed in the system.
+If the operation can be resolved, then the actual provisioning work (downloading of artifacts, updating the system) can be performed.
+The two-pass nature of an operation allows the resolution status to be reported to a client to determine whether the operation
+should proceed.  For example, the client can determine if the resolution is acceptable, or examine the detailed plan of what needs
+to be installed in order to continue with the operation.  The resolution and provisioning phases can be performed synchronously or 
+in the background as a job.</p>
+<p>A simple example can help demonstrate the simplicity of operations.
+A common operation in many applications is to simply update the application to get the latest version of everything.  This is
+possible with very little code.  The following snippet shows the sequence for updating everything in the running
+application.
+</p>
+<code>
+&nbsp;&nbsp;&nbsp;// create an operation.  We already have a provisioning agent (to be explained later)<br>
+&nbsp;&nbsp;&nbsp;UpdateOperation op = new UpdateOperation(new ProvisioningSession(agent)); <br>
+&nbsp;&nbsp;&nbsp;// resolve the operation to see if we can update<br>
+&nbsp;&nbsp;&nbsp;IStatus result = op.resolveModal(new NullProgressMonitor()); <br>
+&nbsp;&nbsp;&nbsp;if (result.isOK()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// get a job that will perform the actual work and schedule it<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;op.getProvisioningJob(monitor).schedule(); <br>
+&nbsp;&nbsp;&nbsp;}<br>
+</code>
+<p>If there is a problem resolving an operation, or the client code wants to do something slightly different, then a little more code might be needed.
+For example, an operation can be configured to update an application that is not the running application, or to consult a specific
+list of software repositories for the update.  
+</p>
+<p>Inside the operation, the 
+underlying p2 <a href="../reference/api/org/eclipse/equinox/p2/planner/IPlanner.html">IPlanner</a> is performing the resolution
+phase, and the underlying p2 <a href="../reference/api/org/eclipse/equinox/p2/engine/IEngine.html">IEngine</a> is performing the
+actual install.  However, these subsystems do not need to be understood by a client working with operations.
+</p>
+<p>For more information about operations, consult the javadoc for
+<a href="../reference/api/org/eclipse/equinox/p2/operations/ProfileChangeOperation.html">ProfileChangeOperation</a>. 
+Code snippets for working with operations can be found in the javadoc for
+<a href="../reference/api/org/eclipse/equinox/p2/operations/InstallOperation.html">InstallOperation</a>, 
+<a href="../reference/api/org/eclipse/equinox/p2/operations/UpdateOperation.html">UpdateOperation</a>, and
+<a href="../reference/api/org/eclipse/equinox/p2/operations/UninstallOperation.html">UninstallOperation</a>.
+</p>
+<h3>The Core API</h3>
+<p>The core API contains all the subsystems on which the Operation and UI APIs are built.  Some of these constructs
+feed into the other API layers.  For example, we saw above that an <b>agent</b> was needed in order to build an update
+operation.  Now we'll take a look at these core concepts.</p>
+<h4>The Provisioning Agent</h4>
+<p>
+All access to the p2 API happens through the agent, <a href="../reference/api/org/eclipse/equinox/p2/core/IProvisioningAgent.html">
+IProvisioningAgent</a>. The agent is the starting point of everything.  One way to think about 
+the <a href="../reference/api/org/eclipse/equinox/p2/core/IProvisioningAgent.html">IProvisioningAgent</a> 
+is that it is an "executable" representation of the p2 area (e.g. the p2 folder at the root of an eclipse installation).  
+Among other things, the agent can be used to 
+acquire p2 services for managing repositories, creating provisioning plans and perform installation requests. 
+</p>
+<p>
+The provisioning agent is acquired using the IProvisioningAgentProvider. 
+This is generally done in one place in the client code, with the rest of the code simply accessing
+the agent through some variable or helper code.  The following snippet shows how to acquire the provisioning agent.
+</p>
+<code>
+&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.getContext().getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgentProvider agentProvider = null;<br>
+&nbsp;&nbsp;&nbsp;if (sr == null)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.getContext().getService(sr);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse36/p2"));<br>
+</code>
+<p>Accessing all p2 services through an agent allows for multiple instances of p2
+to be running in isolation in the same VM.  Note that
+the client creating the agent is responsible for destroying it.
+</p>
+<h4>Metadata</h4>
+<p>
+The <b>Installable Unit</b> (IU) is a chunk of metadata describing something that is installable.  An IU is used
+throughout the API to describe something that is being installed, updated, or removed.  An IU describes something
+that can be installed, including the name, description, license, copyright information, installation 
+processing steps, and the requirements that must be satisfied.  The 
+<a href="../reference/api/org/eclipse/equinox/p2/metadata/IInstallableUnit.html">IInstallableUnit</a> javadoc describes all
+of the things one can do with an IU.  You will notice that you can't change the properties of an IU.  That is because
+an IU is immutable.  Once created, it should never change.
+</p>
+<p>An IU can be obtained either by querying a source of metadata (e.g. a repository) 
+or by creating one programmatically.  
+</p>
+<h4>Queries and Queriables</h4>
+<p>Every source of metadata is usually queryable
+(see <a href="../reference/api/org/eclipse/equinox/p2/query/IQueryable.html">org.eclipse.equinox.p2.query.IQueryable</a>). 
+To discover an IU, you can execute a query 
+(see <a href="../reference/api/org/eclipse/equinox/p2/query/IQuery.html">IQuery</a>) against a metadata source.  The result of
+a query is a collection of all of the IUs that meet the criteria of the query.  </p>
+<p>Queries can be created in multiple ways.
+The simplest way is to create a query using the QueryUtil.  The following snippet creates a query that
+searches for all IUs that have the ID <tt>"org.eclipse.jdt"</tt>:
+</p>
+<code>
+&nbsp;&nbsp;&nbsp;QueryUtil.createIUQuery("org.eclipse.jdt");
+</code>
+<p>
+Depending on the specificity of the query, there may be one or many IUs that satisfy the query.
+For example, you could query for a specific version of a specific IU, or you could use a wildcard to query
+for IUs that match a particular pattern.  <a href="../reference/api/org/eclipse/equinox/p2/query/QueryUtil.html">QueryUtil</a> has
+API for retrieving the most commonly used queries.  Additional queries that are OSGi specific can be found in the package
+<a href="../reference/api/org/eclipse/equinox/p2/touchpoint/eclipse/query/package-summary.html">org.eclipse.equinox.p2.eclipse.touchpoint</a>.
+Finally, should you need to write more complex queries, 
+p2 comes with a query language called <a href="http://wiki.eclipse.org/Query_Language_for_p2">p2 QL</a>
+</p>
+<h4>Repositories and Repository Managers</h4>
+<p>There are two main types of repositories, <b>Metadata Repositories</b> and <b>Artifact Repositories</b>.  Metadata repositories
+hold metadata (Installable Units), while artifact repositories hold "artifacts" (the actual downloadable bytes that make up an install).  
+Repositories can be remote or local.  They can be edited and queried.  The javadoc for
+<a href="../reference/api/org/eclipse/equinox/p2/repository/metadata/IMetadataRepository.html">IMetadataRepository</a> and
+<a href="../reference/api/org/eclipse/equinox/p2/repository/artifact/IArtifactRepository.html">IArtifactRepository</a> describe the
+repository API in more detail.
+</p>
+<p>Repositories are managed (created, loaded, removed, cached, etc...) using a 
+<a href="../reference/api/org/eclipse/equinox/p2/repository/IRepositoryManager.html">Repository Manager</a>.  The repository
+manager can be acquired using the provisioning agent.
+</p>
+<p>The following snippet shows how to acquire the metadata repository manager using the agent, and subsequently load the Helios repository.
+</p>
+<code>
+&nbsp;&nbsp;&nbsp;IMetadataRepositoryManager manager = (IMetadataRepositoryManager) agent.getService(IMetadataRepositoryManager.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IMetadataRepository repository = manager.loadRepository(new URI("https://download.eclipse.org/releases/helios"), new NullProgressMonitor());<br>
+</code>
+<h4>Profiles and Profile Registries</h4>
+<p>
+A p2 profile tracks the set of software that composes the executable application. For example,
+your Eclipse Install has a profile that contains all the IUs that that comprise Eclipse.
+When you attempt to install new IUs, p2 modifies your current profile.  If the new
+IUs conflict with your existing profile (or dependencies cannot be resolved), then p2 will report
+an error and the installation will not proceed.  See the <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfile.html">IProfile</a> 
+javadoc for a complete list of the Profile APIs.
+</p>
+<p>The profile is managed by a profile registry.  <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfileRegistry.html">IProfileRegistry</a>
+manages all the profiles for a given p2 agent. It can be acquired through the agent.
+</p>
+<h3>Putting it all together</h3>
+<p>
+The following snippet demonstrates everything that must be done to trigger the installation
+of an IU into the running application.  We use the operations API to perform the install, so we don't
+have to work with the profile, planner, or engine subsystems.  However, we do need to know enough 
+about the core API to obtain an agent, and get some
+IUs from a repository.  The operation manages the rest of the detail.
+</p>
+<br>
+<code>
+&nbsp;&nbsp;&nbsp;//get the agent<br>
+&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.getContext().getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgentProvider agentProvider = null;<br>
+&nbsp;&nbsp;&nbsp;if (sr == null)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.getContext().getService(sr);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse36/p2"));<br>
+<br>
+&nbsp;&nbsp;&nbsp;//get the repository managers and define our repositories<br>
+&nbsp;&nbsp;&nbsp;IMetadataRepositoryManager manager = (IMetadataRepositoryManager) agent.getService(IMetadataRepositoryManager.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IArtifactRepositoryManager artifactManager = (IArtifactRepositoryManager) agent.getService(IArtifactRepositoryManager.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;manager.addRepository(new URI("file:/Users/Pascal/tmp/demo/"));<br>
+&nbsp;&nbsp;&nbsp;artifactManager.addRepository(new URI("file:/Users/Pascal/tmp/demo/"));<br>
+<br>
+&nbsp;&nbsp;&nbsp;//Load and query the metadata<br>
+&nbsp;&nbsp;&nbsp;IMetadataRepository metadataRepo = manager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());<br>
+&nbsp;&nbsp;&nbsp;Collection toInstall = metadataRepo.query(QueryUtil.createIUQuery("org.eclipse.equinox.p2.demo.feature.group"), new NullProgressMonitor()).toUnmodifiableSet();<br>
+<br>
+&nbsp;&nbsp;&nbsp;//Creating an operation<br>
+&nbsp;&nbsp;&nbsp;InstallOperation installOperation = new InstallOperation(new ProvisioningSession(agent), toInstall);<br>
+&nbsp;&nbsp;&nbsp;if (installOperation.resolveModal(new NullProgressMonitor()).isOK()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Job job = installOperation.getProvisioningJob(new NullProgressMonitor());<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.addJobChangeListener(new JobChangeAdapter() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public void done(IJobChangeEvent event) {agent.stop()}});<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.schedule();<br>
+&nbsp;&nbsp;&nbsp;}<br>
+</code>
+</body>
+</html>

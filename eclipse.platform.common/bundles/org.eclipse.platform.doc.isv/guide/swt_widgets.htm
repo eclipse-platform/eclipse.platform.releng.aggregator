@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Widgets</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Widgets</H2>
+
+<P>SWT includes many rich features, but a basic knowledge of the system's core -
+<em>widgets</em>, <em>layouts</em>, and <em>events</em> - is all that is needed
+to implement useful and robust applications.</P>
+
+
+<H3>Widget application structure</H3>
+
+<P>When you are contributing UI elements using platform workbench extensions,
+the mechanics of starting up SWT are handled for you by the workbench.</P>
+
+<P>If you are writing an SWT application from scratch outside of the
+workbench, you must understand more about SWT's application structure.</P>
+
+<P>A typical stand-alone SWT application has the following structure:</P>
+
+<ul>
+  <li>Create a
+      <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+      which represents an SWT session.</li>
+  <li>Create one or more
+      <strong><a href="../reference/api/org/eclipse/swt/widgets/Shell.html"> Shell</a></strong>s
+      which serve as the main window(s) for the application.</li>
+  <li>Create any other widgets that are needed inside the shell.</li>
+  <li>Initialize the sizes and other necessary state for the widgets. Register
+      listeners for widget events that need to be handled.</li>
+  <li>Open the shell window.</li>
+  <li>Run the event dispatching loop until an exit condition occurs, which
+      is typically when the main shell window is closed by the user.</li>
+  <li>Dispose the display.</li>
+</ul>
+
+<P>The following code snippet is adapted from the
+<strong><a href="../samples/org.eclipse.swt.examples/doc-html/swt_helloworld_ex.html">org.eclipse.swt.examples.helloworld.HelloWorld2</a></strong>
+application. Since the application only displays the string &quot;Hello World,&quot;
+it does not need to register for any widget events.</P>
+
+<pre>
+   public static void main (String [] args) {
+      Display display = new Display ();
+      Shell shell = new Shell (display);
+      Label label = new Label (shell, SWT.CENTER);
+      label.setText (&quot;Hello_world&quot;);
+      label.setBounds (shell.getClientArea ());
+      shell.open ();
+      while (!shell.isDisposed ()) {
+         if (!display.readAndDispatch ()) display.sleep ();
+      }
+      display.dispose ();
+   }
+</pre>
+
+
+<H4>Display</H4>
+
+<P>The <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+represents the connection between SWT and the underlying platform's GUI system.
+Displays are primarily used to manage the platform event loop and control
+communication between the UI thread and other threads. (See
+<a HREF="swt_threading.htm" CLASS="XRef">Threading issues for clients</a> for
+a complete discussion of UI threading issues.)</P>
+
+<P>For most applications you can follow the pattern that is used above.  You
+must create a display before creating any windows, and you must dispose of
+the display when your shell is closed. You don't need to think about the
+display much more unless you are designing a multi-threaded application.</P>
+
+
+<H4>Shell</H4>
+
+<P>A <strong><a href="../reference/api/org/eclipse/swt/widgets/Shell.html">Shell</a></strong>
+is a &quot;window&quot; managed by the OS platform window manager. Top level
+shells are those that are created as a child of the display. These windows are
+the windows that users move, resize, minimize, and maximize while using the
+application. Secondary shells are those that are created as a child of another
+shell. These windows are typically used as dialog windows or other transient
+windows that only exist in the context of another window.</P>
+
+
+<H4>Parents and children</H4>
+
+<P>All widgets that are not top level shells must have a parent. Top level
+shells do not have a parent, but they are created in association with a
+particular
+<strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>.
+You can access this display using <strong>getDisplay()</strong>.
+All other widgets are created as descendants (direct or indirect) of top level
+shells.</P>
+
+<P><strong><a href="../reference/api/org/eclipse/swt/widgets/Composite.html">Composite</a></strong>
+widgets are widgets that can have children.</P>
+
+<P>When you see an application window, you can think of it as a widget tree, or
+hierarchy, whose root is the shell. Depending on the complexity of the
+application, there may be a single child of the shell, several children, or
+nested layers of composites with children.</P>
+
+
+<H4>Style bits</H4>
+
+<P>Some widget properties must be set at the time a widget is created and
+cannot be subsequently changed. For example, a list may be single or
+multi-selection, and may or may not have scroll bars.</P>
+
+<P>These properties, called <em>styles</em>, are set in the constructor.  All
+widget constructors take an <strong>int</strong> argument that specifies
+the bitwise <strong>OR</strong> of all desired styles. In some cases, a
+particular style is considered a hint, which means that it may not be
+available on all platforms, but will be gracefully ignored on platforms that
+do not support it.</P>
+
+<P>The style constants are located in the
+<strong><a href="../reference/api/org/eclipse/swt/SWT.html">SWT</a></strong>
+class as public static fields. A list of applicable constants for each
+widget class is contained in the API Reference for
+<strong><a href="../reference/api/org/eclipse/swt/SWT.html">SWT</a></strong>.</P>
+
+
+<H4>Resource disposal</H4>
+
+<P>The platforms underneath SWT require explicit allocation and freeing of
+OS resources.  In keeping with the SWT design philosophy of reflecting the
+platform application structure in the widget toolkit, SWT requires that you
+explicitly free any OS resources that you have allocated.  In SWT, the
+<strong>Widget.dispose()</strong> method is used to free resources associated
+with a particular toolkit object.</P>
+
+<P>The rule of thumb is that if you create the object, you must dispose of it.
+Here are some specific ground rules that further explain this philosophy:</P>
+
+<ul>
+  <li>If you create a graphic object or widget using a constructor, you must
+      explicitely dispose of it when you are finished using it.</li>
+  <li>When a
+      <a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>,
+      is disposed, the composite and all of its child widgets are recursively disposed. In this
+      case, you do not need to dispose of the widgets themselves. However, you
+      must free any graphics resources allocated in conjunction with those widgets.</li>
+  <li>If you get a graphic object or widget without using a constructor (e.g. Control.getBackground()),
+      do not dispose of it since you did not allocate it.</li>
+  <li>If you pass a reference to your widget or graphic object to another
+      object, you must take care not to dispose of it while it is still
+      being used.  (Similar to the rule described in
+      <a HREF="jface_resources.htm#jface_resources_patterns" CLASS="XRef">Plug-in
+      patterns for using images</a>.)</li>
+  <li>If you create a graphic object for use during the lifetime of one of your
+      widgets, you must dispose of the graphic object when the widget is
+      disposed. This can be done by registering a dispose listener for your
+      widget and freeing the graphic object when the <strong>dispose</strong>
+      event is received.</li>
+</ul>
+
+<p>There is one exception to these rules.  Simple data objects, such as
+<strong><a href="../reference/api/org/eclipse/swt/graphics/Rectangle.html">Rectangle</a></strong> and
+<strong><a href="../reference/api/org/eclipse/swt/graphics/Point.html">Point</a></strong>,
+do not use operating system resources. They do not have a
+<strong>dispose()</strong> method and you do not have to free them.  If in
+doubt, check the javadoc for a particular class.</p>
+
+<p>See <a href="http://www.eclipse.org/articles/swt-design-2/swt-design-2.html">Managing
+operating resources</a> for further discussion of this topic.</p>
+
+</BODY>
+</HTML>

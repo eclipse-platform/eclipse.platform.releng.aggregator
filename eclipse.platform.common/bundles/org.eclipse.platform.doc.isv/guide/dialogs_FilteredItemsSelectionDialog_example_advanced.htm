@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2007, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Advanced use of the filtered item selection dialog</title>
+</head>
+<body>
+
+<h2>Advanced use of the filtered items selection dialog</h2>
+
+In the <a href="dialogs_FilteredItemsSelectionDialog_example.htm">previous example</a>, 
+we saw how to create a simple subclass of FilteredItemsSelectionDialog. Now let's 
+explore some of the advanced capabilities provided by this dialog:
+<ul>
+<li><a href="#history">Adding selected items history</a></li>
+<li><a href="#filter">Adding custom filters</a></li>
+<li><a href="#checkbox">Adding an extra check-box to the dialog</a></li>
+</ul>
+
+<h3><a name="history">Adding selected items</a> history</h3>
+The dialog can be configured to save and restore the history of items that have
+been selected.
+<ol>
+	<li>In the <a href="dialogs_FilteredItemsSelectionDialog_example.htm">previous part</a> we created a subclass of <em>FilteredItemsSelectionDialog.SelectionHistory</em> but it do nothing.
+	Now, we should fill out methods responsible for saving and loading objects:
+	<pre>
+   private class ResourceSelectionHistory extends SelectionHistory {
+      /*
+       * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#restoreItemFromMemento(org.eclipse.ui.IMemento)
+       */
+      protected Object restoreItemFromMemento(IMemento element) {
+         return element.getString("resource"); //$NON-NLS-1$
+      }
+      /*
+       * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
+       *      org.eclipse.ui.IMemento)
+       */
+      protected void storeItemToMemento(Object item, IMemento element) {
+         element.putString("resource", item.toString()); //$NON-NLS-1$
+      }
+   }</pre>
+	</li>
+
+    <li>Open the dialog.
+    </li>
+    <li>Select listed elements and click OK:
+    	<ul>
+    		<li>
+    			<em>AbCdEfGh</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfGi</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfGj</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfHh</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfHi</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfHj</em>
+    		</li>
+    		<li>
+    			<em>abCd</em>
+    		</li>
+    		<li>
+    			<em>abCe</em>
+    		</li>
+    		<li>
+    			<em>abCf</em>
+    		</li>
+    		<li>
+    			<em>abDd</em>
+    		</li>
+    		<li>
+    			<em>abDe</em>
+    		</li>
+    	</ul>
+    </li>
+	<li>Our example dialog now looks like this:
+	<p><img
+		src="images/filteredResourcesSelectionDialogExampleAdvance1.png"
+		border="0" alt="Image of a simple search dialog"></p>
+	</li>
+</ol>
+
+<h3><a name="filter">Adding custom filters</a></h3>
+Next we will expand the filter to hide all strings that start with a lower case character.
+<ol>
+	<li>Create a subclass of <em>FilteredItemsSelectionDialog.ItemsFilter</em>, 
+	implement the necessary abstract methods and override <em>equalsFilter(ItemsFilter)</em>
+	and <em>isSubFilter(ItemsFilter)</em>. These two methods are used to optimize
+	filtering of the view.  If a new filter is added that is equal to the existing filter,
+	no further filtering is required.  If the new filter is a sub-filter of the existing filter, then
+	filtering is only done on the items that matched the existing filter.
+   <pre>
+   private boolean onlyLowerCase = true;
+  	
+   private class ResourceFilter extends ItemsFilter {
+   public final boolean onlyLowerCase = FilteredResourcesSelectionDialogExample.this.onlyLowerCase;
+
+      public boolean matchItem(Object item) {
+         String resource = item.toString();
+         if (onlyLowerCase &amp;&amp; Character.isUpperCase(resource.charAt(0)))
+            return false;
+         return matches(resource);
+      }
+      public boolean equalsFilter(ItemsFilter filter) {
+         ResourceFilter resourceFilter = (ResourceFilter) filter;
+         if (onlyLowerCase != resourceFilter.onlyLowerCase)
+            return false;
+         return super.equalsFilter(filter);
+      }
+      public boolean isSubFilter(ItemsFilter filter) {
+         ResourceFilter resourceFilter = (ResourceFilter) filter;
+         if (onlyLowerCase != resourceFilter.onlyLowerCase)
+            return false;
+         return super.isSubFilter(filter);
+      }
+      public boolean isConsistentItem(Object item) {
+         return true;
+      }
+   }</pre></li>
+	<li>On your subclass of FilteredItemsSelectionDialog, override the <i>createFilter()</i> method: 
+	<pre>
+   protected ItemsFilter createFilter() {
+      return new ResourceFilter();
+   }</pre></li>
+	<li>Now the dialog will only display strings that start with a lower case letter. 
+	<p><img src="images/filteredResourcesSelectionDialogExampleAdvance2.png"
+		border="0" alt="Image of a simple search dialog"></p>
+	</li>
+</ol>
+
+<h3><a name="checkbox">Adding an extra check-box to the dialog</a></h3>
+<p>We will use a check-box and a menu action to indicate whether
+to filter strings that start with a lower case character.</p>
+<ol>
+	<li>Extend the dialog's content area by implementing <em>createExtendedContentArea(Composite)</em>
+	method: <pre>
+   private Button checkButton;
+  	
+   protected Control createExtendedContentArea(Composite parent) {
+      checkButton = new Button(parent, SWT.CHECK);
+      checkButton.setText("Only Lower Case Strings"); //$NON-NLS-1$
+      checkButton.addSelectionListener(new SelectionListener() {
+         public void widgetDefaultSelected(SelectionEvent e) {
+         }
+         public void widgetSelected(SelectionEvent e) {
+            if (onlyLowerCase != ((Button) e.widget).getSelection()) {
+               onlyLowerCase = ((Button) e.widget).getSelection();
+               applyFilter();
+            }
+         }
+      });
+      return checkButton;
+   }</pre></li>
+	<li>Next, create a new action and add it to the menu by overriding <em>fillViewMenu(IMenuManager)</em>.
+	Eg.: <pre>
+   private Action showOnlyLowerCaseStringsAction = new ShowOnlyLowerCaseStringsAction();
+   
+   private class ShowOnlyLowerCaseStringsAction extends Action {
+      /**
+       * Creates a new instance of the action.
+       */
+      public ShowOnlyLowerCaseStringsAction() {
+         super("Only Lower Case String", //$NON-NLS-1$
+            IAction.AS_CHECK_BOX);
+      }
+      public void run() {
+         if (onlyLowerCase != isChecked()) {
+            onlyLowerCase = isChecked();
+            applyFilter();
+         }
+      }
+   }
+   
+   protected void fillViewMenu(IMenuManager menuManager) {
+      super.fillViewMenu(menuManager);
+      menuManager.add(showOnlyLowerCaseStringsAction);
+   }
+  </pre></li>
+  <li>At the end override <em>applyFilter()</em> as follows:<pre>
+   protected void applyFilter() {
+      super.applyFilter();
+      checkButton.setSelection(onlyLowerCase);
+      showOnlyLowerCaseStringsAction.setChecked(onlyLowerCase);
+   }</pre>
+  </li>
+
+	<li>Now open the dialog: 
+	<p><img src="images/filteredResourcesSelectionDialogExampleAdvance3.png"
+		border="0" alt="Image of a simple search dialog"></p>
+	</li>
+</ol>
+</body>
+</html>

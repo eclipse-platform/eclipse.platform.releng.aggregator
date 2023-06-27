@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Supporting bidirectional text</title>
+</head>
+<BODY BGCOLOR="#ffffff">
+<h1>Supporting bidirectional text</h1>
+<p>A bidirectional language is one that can write either right to left or left to
+right based on context. Bidirectional text is supported throughout the platform.
+Eclipse will recognize Hebrew, Arabic, Farsi and Urdu as bidirectional by default.</p>
+<h2>Enabling Bidirectional Support</h2>
+<p>The orientation of the workbench is determined in one of the following ways
+  (in order of priority):</p>
+<ul>
+  <li><strong>-dir command line parameter</strong>. If the -dir command line option
+    is used this will be the default orientation. Valid values are -dir rtl or -dir ltr.</li>
+  <li><strong>system properties</strong>. If the system property <tt>eclipse.orientation</tt>
+    is set this will be used. The recognized values of this property are the same as
+    the -dir command line argument.</li>
+  <li><strong>Presence of installed NLS packs</strong> for Hebrew, Arabic, Farsi or Urdu.</li>
+  <li><strong>-nl command line parameter</strong>. If the -nl option is used and
+    the language is Hebrew, Arabic, Farsi or Urdu the orientation will be right
+    to left.</li>
+  <li>Failing all of the above, the platform defaults to a left to right orientation.</li>
+</ul>
+<p>
+In JFace, the orientation can be determined by calling
+<b>org.eclipse.jface.Window#getDefaultOrientation()</b>.  Standalone JFace
+applications must set the default orientation by calling
+<b>org.eclipse.jface.Window#setDefaultOrientation()</b>, otherwise it
+will assume a default value of <b>SWT.NONE</b>. The default orientation is
+set automatically when running the Workbench.  All subclasses of <tt>org.eclipse.jface.Window</tt>
+inherit this default orientation.</p>
+<p>Views and editors inherit the window orientation from their
+  parent. Dialogs should inherit orientation by using the shell style of their
+  superclass by calling <b>super.getShellStyle()</b> when creating or configuring their shell.</p>
+<p><img src="bidi.png" alt="bidi image"></p>
+<p><strong>Figure 1 - Screen shot of right to left orientation of the resource
+  perspective in English</strong></p>
+<h2>Base Text Direction (BTD)</h2>
+<p>Base direction of text (a.k.a. "paragraph direction", "reading order") refers to the overall
+  progression of text in display and it should be controlled independently of the workbench
+  orientation.</p>
+<p>In the context of non-bidi scripts the preferred BTD is LTR. In the context of bidi scripts
+  the preferred BTD is RTL. And in case of mixed text content the preferred BTD is auto (a.k.a.
+  "contextual"). When this type of BTD is effective, the BTD is derived from the directionality
+  of the first strong bidi character.</p>
+<p>An appropriate base text direction is essential for text readability.</p>
+<h3>Default Base Text Direction</h3>
+<p>The default BTD of the workbench can be set with the
+  <b>-bidi "on=y;textDir=[ltr|rtl|auto]"</b> command line option:</p>
+<ul>
+  <li><strong>-bidi "on=y;textDir=ltr</strong> sets the default BTD to left-to-right.</li>
+  <li><strong>-bidi "on=y;textDir=rtl</strong> sets the default BTD to right-to-left.</li>
+  <li><strong>-bidi "on=y;textDir=auto</strong> sets the default BTD to auto (contextual).
+  </li>
+</ul>
+<p>If not specified on the command line, the default text direction is inherited from the workbench
+  orientation.</p>
+<p>In JFace, the default BTD can be retrieved by calling
+  <code>org.eclipse.jface.util.BidiUtils#getTextDirection()</code>. Standalone JFace applications can set
+  the default text direction by calling <code>org.eclipse.jface.util.BidiUtils#setTextDirection()</code>.
+  Then, to apply the default text direction, an application can call
+  <code>org.eclipse.jface.util.BidiUtils#applyBidiProcessing()</code>.</p>
+<p>Example:</p>
+<p><code>
+&nbsp;&nbsp;public static void main(String[] args) {<br><span style="color:blue;">
+&nbsp;&nbsp;&nbsp;&nbsp;BidiUtils.setBidiSupport(true);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BidiUtils.setTextDirection(BidiUtils.RIGHT_TO_LEFT);</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Display display = new Display();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shell shell = new Shell(display);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.setLayout(new RowLayout(SWT.VERTICAL));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Button button = new Button(shell, SWT.PUSH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;button.setText("RTL button!!!");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Text text = new Text(shell, SWT.NONE);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text.setText("RTL text!!!");<br><span style="color:blue;">
+&nbsp;&nbsp;&nbsp;&nbsp;BidiUtils.applyTextDirection(shell, BidiUtils.BTD_DEFAULT);<br></span>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.pack();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.open();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;while (!shell.isDisposed()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!display.readAndDispatch()) display.sleep();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display.dispose();<br>
+&nbsp;&nbsp;}</code>
+</p>
+<h3>Base text direction in individual controls</h3>
+<p>In SWT, base text direction can be set at a control (either leaf or composite) level.
+  Composites propagate the BTD to their children. The base text direction can be applied as follows:
+</p>
+<ul>
+  <li>upon control creation, by applying <code>org.eclipse.swt.SWT.FLIP_TEXT_DIRECTION</code>
+    style, which indicates that the base text direction should be opposite to the control
+    orientation.</li>
+  <li>on an existing control, by calling <code>org.eclipse.swt.widgets.Control#setTextDirection()</code>.
+    The valid argument values are
+    <code>org.eclipse.swt.SWT.LEFT_TO_RIGHT</code> and <code>org.eclipse.swt.SWT.RIGHT_TO_LEFT</code>.
+  </li>
+</ul>
+<p>Note that at present this is implemented on the win32 platform only.</p>
+<p>Example:</p>
+<p><code>
+&nbsp;&nbsp;public static void main(String[] args) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Display display = new Display();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shell shell = new Shell(display);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.setText("RTL shell!!!");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.setTextDirection(SWT.RIGHT_TO_LEFT);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.setLayout(new RowLayout(SWT.VERTICAL));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Button button = new Button(shell, SWT.PUSH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;button.setText("RTL button!!!");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;button.setTextDirection(SWT.RIGHT_TO_LEFT);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Text text = new Text(shell, SWT.NONE);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text.setText("LTR text!!!");<br><span style="color:blue;">
+&nbsp;&nbsp;&nbsp;&nbsp;text.setTextDirection(SWT.LEFT_TO_RIGHT);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Label label = new Label(shell, SWT.FLIP_TEXT_DIRECTION);<br></span>
+&nbsp;&nbsp;&nbsp;&nbsp;label.setText("RTL label!!!");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.pack();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.open();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;while (!shell.isDisposed()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(!display.readAndDispatch()) display.sleep();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display.dispose();<br>
+&nbsp;&nbsp;}</code>
+</p>
+<p>JFace applications can set the base text direction on an SWT control by calling
+  <code>org.eclipse.jface.util.BidiUtils#applyTextDirection()</code>, which for
+  <code>org.eclipse.swt.widgets.Text</code> and <code>org.eclipse.swt.custom.StyledText</code>
+  takes effect on win32 and gtk platforms through invocation of the
+  <code>org.eclipse.swt.events.SegmentListener</code> or
+  <code>org.eclipse.swt.custom.BidiSegmentListener</code> mechanism, and for other controls it
+  works on win32 platform, calling <code>org.eclipse.swt.widgets.Control#setTextDirection()</code>
+  API.</p>
+<p>Example:</p>
+<p><code>
+&nbsp;&nbsp;public static void main(String [] args) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Display display = new Display();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Shell shell = new Shell(display);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.setLayout(new RowLayout(SWT.VERTICAL));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Button button = new Button(shell, SWT.PUSH);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;button.setText("RTL button!!!");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Text text = new Text(shell, SWT.NONE);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;text.setText("Auto text!!!");<br><span style="color:blue;">
+&nbsp;&nbsp;&nbsp;&nbsp;BidiUtils.applyTextDirection(shell, BidiUtils.RIGHT_TO_LEFT);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BidiUtils.applyTextDirection(text, BidiUtils.AUTO);<br></span>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.pack();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;shell.open();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;while (!shell.isDisposed()) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!display.readAndDispatch()) display.sleep();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;display.dispose();<br>
+&nbsp;&nbsp;}</code>
+</p>
+<h2>Enabling Text Processing</h2>
+<p>The orientation of the workbench is also independent of the special case processing
+  for bidirectional languages. If the language of the current Locale is Hebrew,
+  Arabic, Farsi or Urdu text processing will be enabled. Text processing is used
+  to handle special case characters that should not be processed as bidirectional
+  text such as path separators. See <code>org.eclipse.osgi.util.TextProcessor</code>
+  for more details. </p>
+<h2>Enabling your plug-in for looking up alternate icons</h2>
+<p>In many cases your icons will not make any sense in right to left mode. In
+  particular any icon to do with editing will have this issue.To enable lookup
+  of images in a fragment, use $nl$ in your icon path and use
+  the <b>org.eclipse.core.runtime.FileLocator</b> class to find icons at runtime.
+</p>
+<p>For example</p>
+<pre>
+   String iconPath = &quot;$nl$/icons/myicon.gif&quot;;
+   URL url = FileLocator.find( Platform.getBundle(MyPluginId), new Path(iconPath), null);
+   Image Descriptor descriptor = ImageDescriptor.createFromURL(url);
+</pre>
+<p>
+  If the icon reference is in your <tt>plugin.xml</tt> file, make sure you have the $nl$
+  prefix on your path and the lookup will be handled for you. If you define your
+  own extension points that involve icons, be sure to load images in the same way.
+</p>
+<h3>How to choose icons to override</h3>
+<p>There are no hard and fast rules for determining what icons need to be overridden
+in a right to left language.  In general, focus on icons that imply a textual direction with a
+horizontal arrow.</p>
+
+</BODY></HTML>

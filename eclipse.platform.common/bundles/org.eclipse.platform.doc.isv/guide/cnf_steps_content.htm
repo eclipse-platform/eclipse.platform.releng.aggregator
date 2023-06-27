@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML lang="en">
+<HEAD>
+
+<meta name="copyright"
+	content="Copyright (c) Simon Zambrovski and others 2009, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Content and Action Binding</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h1>Content and Action Binding</h1>
+<p>The sections below define the set of steps for <a
+	href="#resource">usage of resource content</a> and <a
+	href="#definition">definition of own content</a> for the CNF-based
+viewer. Finally, the steps needed for <a href="#action">Action
+Binding</a> are described. As described <a href="cnf_config.htm">previously</a>,
+in order to render content the viewer selects the corresponding NCEs
+based on the evaluation of the expressions on the selected objects.</p>
+
+<h2><a name="resource">Usage of Resource Content</a></h2>
+<p>One of the use cases of usage of the Common Navigator is the
+manipulation of the workspace resources. The resources-related content
+is defined by the <code>org.eclipse.ui.navigator.resources</code>
+plugin. The example of the resource usage of CNF can be found in <code>org.eclipse.ui.examples.navigator.resources</code>.
+</p>
+<ol>
+	<li>Perform the general steps described in <a
+		href="cnf_steps_general.htm">Creation of Common Navigator Viewer</a></li>
+	<li>Add the following as dependent plug-ins:
+	<ul>
+		<li><code>org.eclipse.ui.navigator.resources</code></li>
+	</ul>
+	</li>
+	<li>Add a <code>org.eclipse.ui.navigator.viewer</code> extension
+	that has:
+	<ul>
+		<li><code>viewerContentBinding</code>, point this to Id of your
+		view (example.view)</li>
+		<li>includes of:
+		<ul>
+			<li>org.eclipse.ui.navigator.resourceContent</li>
+			<li>org.eclipse.ui.navigator.resources.*</li>
+		</ul>
+		</li>
+	</ul>
+	<pre>
+   &lt;extension
+         point="org.eclipse.ui.navigator.viewer"&gt;
+       &lt;viewerContentBinding 
+            viewerId="example.view"&gt;
+          &lt;includes&gt;
+       	     &lt;contentExtension pattern="org.eclipse.ui.navigator.resourceContent" /&gt;		       	      
+	     &lt;contentExtension pattern="org.eclipse.ui.navigator.resources.filters.*"/&gt;
+          &lt;/includes&gt;
+       &lt;/viewerContentBinding&gt;
+   &lt;/extension&gt;
+   </pre></li>
+</ol>
+<p>Please note, that using CNF inside of your own RCP requires three
+additional steps.</p>
+<ol>
+	<li>Add the <code>org.eclipse.ui.ide</code> as dependent plug-in</li>
+	<li>To get the resource workspace root (<code>IWorkspaceRoot</code>)
+	as default page input, override the <a
+		href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html#getDefaultPageInput"><code>WorkbenchAdvisor.getDefaultPageInput()</code></a>
+	method in your WorkbenchAdvisor: <pre>
+	public IAdaptable getDefaultPageInput() 
+	{
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+</pre></li>
+	<li>Hook the workbench adapters correctly before they are used, so
+	add this code to the <a
+		href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html#initialize"><code>WorkbenchAdvisor.initialize(IWorkbenchConfigurer)</code></a>
+	method: <pre>
+	public void initialize(IWorkbenchConfigurer configurer) 
+	{
+		IDE.registerAdapters();
+	}
+</pre></li>
+</ol>
+<h2><a name="definition">Own Content Definition</a></h2>
+<p>Along with resource content provided by the <code>org.eclipse.ui.navigator.resources</code>
+plugin, application-specific content can be defined and presented in the
+CNF-based viewer. In order to define and use application specific you
+need to:</p>
+<ol>
+	<li>Use extension <code>org.eclipse.ui.navigator.navigatorContent</code>
+	and declare the NCE, with it providers and trigger conditions for the
+	content: <pre>
+  &lt;extension
+         point="org.eclipse.ui.navigator.navigatorContent"&gt;
+      &lt;navigatorContent 
+            id="org.eclipse.ui.examples.navigator.propertiesContent" 
+            name="Properties File Contents"
+            contentProvider="org.eclipse.ui.examples.navigator.PropertiesContentProvider"
+            labelProvider="org.eclipse.ui.examples.navigator.PropertiesLabelProvider" 
+            activeByDefault="true"
+            icon="icons/prop_ps.gif"
+            priority="normal" &gt;
+         &lt;triggerPoints&gt;
+         	&lt;or&gt;
+	            &lt;and&gt;
+	               &lt;instanceof value="org.eclipse.core.resources.IResource"/&gt;
+	               &lt;test
+	                     forcePluginActivation="true"
+	                     property="org.eclipse.core.resources.extension"
+	                     value="properties"/&gt;
+	            &lt;/and&gt;
+				&lt;instanceof value="org.eclipse.ui.examples.navigator.PropertiesTreeData"/&gt;
+			&lt;/or&gt;
+         &lt;/triggerPoints&gt;
+         &lt;possibleChildren&gt;
+            &lt;or&gt;
+               &lt;instanceof value="org.eclipse.ui.examples.navigator.PropertiesTreeData"/&gt; 
+            &lt;/or&gt;
+         &lt;/possibleChildren&gt;
+      &lt;/navigatorContent&gt;
+   &lt;/extension&gt;
+</pre> For more details, please consult the <a href="cnf_config.htm">CNF
+	Configuration</a> and <a href="cnf_operation.htm">Operational Topics</a>.</li>
+	<li>Bind the content to the viewer using the <code>org.eclipse.ui.navigator.viewer</code>
+	extension. <pre>
+   &lt;extension
+         point="org.eclipse.ui.navigator.viewer"&gt;
+      &lt;viewerContentBinding viewerId="example.view"&gt;
+         &lt;includes&gt;
+            &lt;contentExtension pattern="org.eclipse.ui.examples.navigator.propertiesContent"/&gt;
+         &lt;/includes&gt;
+      &lt;/viewerContentBinding&gt;
+   &lt;/extension&gt;
+</pre> Note, that instead of using the exact Id of the content, the usage of
+	the regular expression is allowed in the <code>pattern</code>
+	attribute, so <code>org.eclipse.ui.examples.navigator.*</code> would
+	also work.</li>
+</ol>
+<h2><a name="action">Action Binding</a></h2>
+<p>The usage of actions in the viewer follows the same pattern as the content binding. For usage of existing 
+actions on resources defined in the <code>org.eclipse.ui.navigator.resources</code> plugin:</p>
+<ol>
+	<li>Add the following as dependent plug-ins:
+	<ul>
+		<li><code>org.eclipse.ui.navigator.resources</code></li>
+	</ul>
+	</li>
+	<li>Add a <code>org.eclipse.ui.navigator.viewer</code> extension
+	that has:
+	<ul>
+		<li><code>actionContentBinding</code>, point this to Id of your
+		view (example.view)</li>
+		<li>includes of:
+		<ul>
+			<li>org.eclipse.ui.navigator.resources.*</li>
+		</ul>
+		</li>
+	</ul>
+	<pre>
+   &lt;extension
+         point="org.eclipse.ui.navigator.viewer"&gt;
+       &lt;viewerActionBinding 
+            viewerId="example.view"&gt;
+          &lt;includes&gt;
+       	     &lt;actionExtension pattern="org.eclipse.ui.navigator.resources.*" /&gt;		       	      
+          &lt;/includes&gt;
+       &lt;/viewerActionBinding&gt;
+   &lt;/extension&gt;
+   </pre></li>
+</ol>
+</BODY>
+</HTML>

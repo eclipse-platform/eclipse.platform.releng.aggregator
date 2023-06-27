@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) Red Hat Inc. and others 2021. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+  <title>Using PGP signatures in p2</title>
+</head>
+<body>
+<h1>Using PGP signatures in p2</h1>
+<p>
+The p2 infrastructure analyzes the integrity and trustworthiness of artifacts during provisioning and installation, to guarantee artifact integrity,
+and also to help users decide whether or not to trust a particular artifact source.
+Until Eclipse 4.21, trustworthiness was based purely on signature files placed inside each artifact jar by Java's <code>jarsigner</code> utility, i.e., it was based purely on intrinsic signatures.
+This has the unfortunate implication that when consuming and redistributing an external, intrinsically-unsigned artifact one must alter the jar in order to insert the signature details.
+To avoid this problem, as of Eclipse 4.21, p2 provides support for extrinsic signatures, relying on industry-standard PGP (as is used by Maven for signing artifacts).
+</p>
+
+<h2>PGP signatures are published as artifact metadata</h2>
+
+<p>
+A PGP signature is stored as a property of an artifact's p2 metadata. Each artifact may specify a <code>pgp.signatures</code>
+property with a value representing a PGP armored block for one or more signatures that verify the integrity and origin of that artifact.
+</p>
+
+<p>
+Each PGP signature is verified via its corresponding PGP public key.
+For signature verification to complete, the PGP public key must be available.
+PGP keys can specified as a p2 artifact repository property or directly as a p2 artifact metadata property, i.e., in parallel with the <code>pgp.signatures</code> property.
+Both the artifact repository and the artifact metadata may specify a <code>pgp.publicKeys</code> property that represents a PGP armored block for one or more PGP public keys.
+The PGP public keys specified in the metadata are made available for further signature verification.
+It is recommended to store the keys on the p2 artifact metadata because in this manner the signature and the key will always follow the artifact from one artifact repository to the next,
+whereas properties stored on the overall artifact repository may be lost.
+</p>
+<p>
+A PGP signature can be produced for an artifact file using any PGP-capable software such as the <code>gpg</code> command-line tool and can then be incorporated into artifact metadata.
+Build technologies such as Eclipse Tycho have direct support for including signatures and keys on the artifact metadata and for including keys on the overall artifact repository metadata.
+</p>
+
+<h2>Invalid PGP signatures abort installation</h2>
+
+<p>
+During provisioning, each artifact that has one or more associated PGP signatures will be verified that it is in fact signed by each signature's corresponding PGP public key,
+thereby verifying both the integrity and the origin of each artifact
+As such, for installation to proceed to completion, all signatures are verified such that every artifact's integrity is ensured and its signing origin is known.
+For any given PGP signed artifact, at least one of its signatures must have a corresponding key that is verified as trusted.
+</p>
+
+<h2>Trust PGP keys to trust artifacts</h2>
+
+<p>
+Before PGP signature verification proceeds, each artifact with one or more PGP signatures is analyzed to determine the set PGP public keys corresponding to its set of PGP signatures.
+If that set of keys is empty, i.e., if no corresponding key for any of its signatures can be located, the artifact is treated the same as an unsigned artifact because verification is not possible without the public key.
+If any key in the set of PGP public keys is already considered trusted,
+verification will proceed as previously described.
+Otherwise, at least one of the PGP public keys must be explicitly trusted by the user.
+For all the artifacts to be installed, the overall set of such not-yet-trusted keys are presented to the user for verification and explicit manual validation.
+</p>
+
+<p>
+Trusting a PGP public key is an important decision that not should not be taken lightly.
+Moreover, the <em>user ID</em> displayed for any given key, while typically the issuer's name and email, cannot be considered trustworthy unless the key's fingerprint itself is verified.
+Depending on your context, there can be several strategies to verify that a key is trustworthy:
+you may for example check the key fingerprint against some trusted key server that took care of verifying the identity of the key issuer, 
+e.g., the PGP public keys of Eclipse Project are available <a href="https://keyserver.ubuntu.com">https://keyserver.ubuntu.com</a>,
+or you may ask some other trusted third-parties.
+</p>
+
+<p>
+In Eclipse applications, any plug-in can define some PGP public keys as trusted using the <a href="../reference/extension-points/org_eclipse_equinox_p2_engine_pgp.html">org.eclipse.equinox.p2.engine.pgp</a> extension-point. 
+Users can review and manage trusted keys in the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.equinox.internal.p2.ui.sdk.TrustPreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Trust preference page" style='margin-right:0.5em'><strong>Install/Update &gt; Trust</strong></a> preference page.
+</p>
+
+</body>
+</html>

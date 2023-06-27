@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Layouts</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Layouts</H2>
+
+<P>Often the best way to handle simple widget positioning is in a resize event
+listener.  However, there are common patterns used by applications when placing
+widgets.  These patterns can be structured as configurable layout algorithms
+that can be reused by many different applications.</P>
+
+<P>SWT defines <em>layouts</em> that provide general purpose positioning and
+sizing of child widgets in a composite.  Layouts are subclasses of the abstract
+class <strong><a href="../reference/api/org/eclipse/swt/widgets/Layout.html">Layout</a></strong>.
+The SWT standard layouts can be found in the
+<strong><a href="../reference/api/org/eclipse/swt/layout/package-summary.html">org.eclipse.swt.layout</a></strong>
+package.</P>
+
+<P>There are some general definitions used when resizing and positioning
+widgets:</P>
+
+<ul>
+  <li>The <em>location</em> of a widget is its x,y coordinate location within
+    its parent widget.</li>
+  <li>The <em>preferred size</em> of a widget is the minimum size needed to
+    show its content. This is computed differently for each kind of widget.</li>
+  <li>The <em>clientArea</em> is the area in which a child can be placed without
+    being clipped.</li>
+  <li>The <em>trim</em> is the distance between a widget's client area and its
+    actual border.  Trim is occupied by the widget's borders or extra space
+    at its edge.  The size and appearance of the trim is widget and platform
+    dependent.</li>
+</ul>
+
+<P>These concepts are relevant for applications regardless of whether a layout
+is used. You can think of a layout as a convenient way to package resize
+functionality for reuse.</P>
+
+<P>Some additional concepts are introduced by layouts:</P>
+
+<ul>
+  <li>Some layouts support <em>spacing</em> between widgets in the layout.</li>
+  <li>Some layouts support a <em>margin</em> between the edge of the layout and
+    the widget adjacent to the edge.</li>
+</ul>
+
+<P>See <a href="http://www.eclipse.org/articles/Article-Understanding-Layouts/Understanding-Layouts.htm">Understanding
+layouts in SWT</a> for further discussion and pictures demonstrating these concepts.</P>
+
+<P>The following code snippet shows the simple case of an application using a
+resize callback to size a label to the size of its parent shell:</P>
+
+<pre>
+   Display display = new Display ();
+   Shell shell = new Shell (display);
+   Label label = new Label (shell, SWT.CENTER);
+   shell.addControlListener (new ControlAdapter () {
+      public void controlResized (ControlEvent e) {
+         label.setBounds (shell.getClientArea ());
+      }
+   });
+</pre>
+
+<P>The next snippet uses a layout to achieve the same effect:</P>
+
+<pre>
+   Display display = new Display ();
+   Shell shell = new Shell (display);
+   Label label = new Label (shell, SWT.CENTER);
+   shell.setLayout (new FillLayout ());
+</pre>
+
+<P>Even for this simple example, using a layout reduces the application code.
+For more complex layouts, the simplification is much greater.</P>
+
+<p>The following table summarizes the standard layouts provided by SWT.</p>
+
+<table border="1" width="600">
+<colgroup>
+    <col width="34%">
+    <col width="66%">
+</colgroup>
+<tr>
+<th><div CLASS="CellHeading">Layout</div></th>
+<th><div CLASS="CellHeading">Purpose</div></th>
+</tr>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">FillLayout</a></strong></td>
+<td>Lays out controls in a single row or column, forcing them to be the same
+size.</td>
+</tr>
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/layout/FormLayout.html">FormLayout</a></strong></td>
+<td>Positions the children by using FormAttachments to optionally configure the
+left, top, right and bottom edges of each child.</td>
+</tr>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/layout/GridLayout.html">GridLayout</a></strong></td>
+<td>Positions the children by rows and columns.</td>
+</tr>
+
+<TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/layout/RowLayout.html">RowLayout</a></strong></td>
+<td>Places the children either in horizontal rows or vertical columns.</td>
+
+</tr>
+</table>
+
+</BODY>
+</HTML>

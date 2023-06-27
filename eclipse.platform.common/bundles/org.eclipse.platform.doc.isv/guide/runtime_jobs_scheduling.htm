@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Job scheduling</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H3>
+Job scheduling</H3>
+<p>
+Our examples so far have demonstrated simple job creation, scheduling, and progress reporting.  
+The job scheduling mechanism is actually more powerful than we've shown so far.  You can have more
+fine-grained control over the way your job is scheduled by using priorities, delays, and custom
+scheduling conditions.
+</p>
+<h4>
+Job priorities</h4>
+<p>
+A job <i>priority</i> can be used to establish the importance of a job relative to other jobs in the
+system.  Setting the priority of a job won't affect a job that is already running, but it will affect how
+a waiting job is scheduled relative to other jobs.  The priority of a job can be one of several pre-defined
+priority constants:</p>
+<ul>
+<li><b>INTERACTIVE</b> jobs generally have priority over other jobs.  They should be short-running or low
+on processor usage, so that they don't block other INTERACTIVE jobs from running.</li>
+<li><b>SHORT</b> jobs typically complete within a second, but may take a little longer.  They run in the
+background and have priority over all jobs except INTERACTIVE jobs. </li>
+<li><b>LONG</b> jobs are for longer running background jobs.  They run only after INTERACTIVE and
+SHORT jobs have been run. </li>
+<li><b>BUILD</b> jobs are for jobs associated with building tasks.  They are a lower priority than LONG.  BUILD jobs
+only run when all LONG jobs are complete.</li>
+<li><b>DECORATE</b> jobs are the lowest priority in the system.  They are used for tasks that provide information that
+may help supplement the UI, but that the user is not generally waiting for.</li>
+</ul>
+<p>The default priority for a job is LONG.  The following snippet creates the trivial job we used earlier, 
+but sets the priority to DECORATE to indicate that it is the lowest level priority:
+</p>
+<pre>   TrivialJob job = new TrivialJob();
+   <b>job.setPriority(Job.DECORATE);</b>
+   job.schedule();
+</pre>
+
+<h4>Scheduling with a delay</h4>
+
+<p>Another technique for controlling how a job is scheduled is to use a scheduling delay.  A scheduling delay
+can be specified when the job is scheduled.  The job will be delayed for the specified number of milliseconds
+before it is scheduled.
+</p>
+<pre>   TrivialJob job = new TrivialJob();
+   <b>job.schedule(1000);  // wait one second before scheduling</b>
+</pre>
+
+<h4>Rescheduling a job</h4>
+
+<p>Scheduling a job that is already waiting or is sleeping has no effect.  However, scheduling a job that is 
+already running will cause it to be rescheduled after it is finished.  This is a convenient mechanism for
+repetitive jobs such as background polling loops.  If the job is rescheduled multiple 
+times while it is running, it will only be rescheduled once with the most recently supplied delay.  The
+following snippet defines a job that reschedules itself to run 10 seconds after it finishes the
+current iteration.
+</p>
+<pre>   class RepetitiveTrivialJob extends Job {
+      public RepetitiveTrivialJob() {
+         super("Repetitive Trivial Job");
+      }
+      public IStatus run(IProgressMonitor monitor) {
+         System.out.println("Running the job.");
+         // reschedule after 10 seconds
+         <b>schedule(10000);</b>
+         return Status.OK_STATUS;
+      }
+   }
+</pre>
+
+<h4>Custom scheduling conditions</h4>
+
+<p>Additional protocol in the <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> class
+allows a job to check for preconditions just before it is scheduled or run.  This is best demonstrated by example:
+</p>
+<pre>class JobWithPreconditions extends Job {
+	...
+	public boolean <b>shouldSchedule()</b> {
+		return super.shouldSchedule() &amp;&amp; checkJobPreconditions();
+	}
+	public boolean <b>shouldRun()</b> {
+		return super.shouldRun() &amp;&amp; checkJobPreconditions();
+	}
+	...
+}
+</pre>
+<p>The <b>shouldSchedule</b> method is called just before the job manager places the job in the queue.  This allows the job
+to cancel itself if basic preconditions for scheduling are not met.  The job should return <tt>false</tt> it
+is inappropriate to schedule it.  Likewise, the <b>shouldRun</b> method is called just before the job manager 
+runs the job.  Any additional conditions that must be met before the job is run must be checked at this time.  
+</p>
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+File encoding and content types
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+File encoding and content types</H2>
+<P >
+The platform runtime plug-in defines infrastructure for defining and discovering <b>content types</b> for data
+streams.  (See <a href="runtime_content.htm">Content types</a> for an overview of the content framework.)  
+An important part of the content type system is the ability to specify different encodings (character sets)
+for different kinds of content.  The resources API further allows default character sets to be established for 
+projects, folders, and files.  These default character sets are consulted if the content of the file itself
+does not define a particular encoding inside its data stream.
+</P>
+<h3>
+Setting a character set
+</h3>
+<p>
+We've seen in <a href="runtime_content.htm">Content types</a> that default file encodings can be established
+for content types.  More fine-grained control is provided by the resources API.
+</p>
+<p>
+<b><a href="../reference/api/org/eclipse/core/resources/IContainer.html">IContainer</a></b> 
+defines protocol for setting the default character set for a particular project or folder.  This gives 
+plug-ins (and ultimately the user) more freedom in determining an appropriate character set for a set of files when
+the default character sets from the content type may not be appropriate.</p>
+<p>
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b> defines API for setting
+the default character set for a particular file.  If no encoding is specified inside the file contents,
+then this character set will be used.  The file's default character set takes precedence over any default
+character set specified in the file's folder, project, or content type.
+</p>
+<p>
+Both of these features are available to the end-user in the properties page for a resource.
+</p>
+<h3>Querying the character set</h3>
+
+<p><b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b> also defines API for
+querying the character set of a file.  A boolean flag specifies whether only the character set explicitly 
+defined for the file should be returned, or whether an implied character set should be returned.  For example:
+</p>
+<pre>	String charset = myFile.getCharset(false);
+</pre>
+<p>returns null if no character set was set explicitly on myFile.  However, 
+</p>
+<pre>	String charset = myFile.getCharset(true);
+</pre>
+<p>will first check for a character set that was set explicitly on the file.  If none is found, then the content of the file
+will be checked for a description of the character set.  If none is found, then the file's containing folders and projects 
+will be checked for a default character set.  If none is found, the default character set defined for the content type 
+itself will be checked.  And finally, the platform default character set will be returned if there is no other designation
+of a default character set.  The convenience method <b>getCharset()</b> is the same as using <b>getCharset(true)</b>.
+</p>
+<h3>Content types for files in the workspace</h3>
+<p>For files in the workspace, <a href="../reference/api/org/eclipse/core/resources/IFile.html"><strong>IFile</strong></a> provides API for obtaining 
+  the file content description:</p>
+<pre>IFile file = ...;
+IContentDescription description = file.getDescription();</pre>
+<p>This API should be used even when clients are only interested in determining 
+  the content type - the content type can be easily obtained from the content 
+  description. It is possible to detect the content type or describe files in 
+  the workspace by obtaining the contents and name and using the API described 
+  in <a href="runtime_content_using.htm">Using content types</a>, but that is not recommended. Content type determination 
+  using <strong>IFile.getContentDescription()</strong> takes into account <a href="resAdv_natures.htm">project 
+  natures</a> and project-specific settings. If you go directly to the content 
+  type manager, you are ignoring that. But more importantly, because reading the 
+  contents of files from disk is very expensive. The Resources plug-in maintains 
+  a cache of content descriptions for files in the workspace. This reduces the 
+  cost of content description to an acceptable level.</p>
+</BODY>
+</HTML>

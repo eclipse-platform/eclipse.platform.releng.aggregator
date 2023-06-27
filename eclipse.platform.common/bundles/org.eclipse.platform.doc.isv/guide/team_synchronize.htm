@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
+  <title>Synchronization Support</title>
+  <link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h2>Synchronization Support</h2>
+<p>Eclipse includes APIs for managing and displaying synchronization state 
+  between workspace resources and resources in another location. We refer to a 
+  resource outside of the workspace as a variant. Synchronizing is the act of 
+  displaying the changes between resources in different locations and optionally 
+  allowing the user to affect the synchronization state by performing an action. 
+  The synchronize APIs are orthogonal to the RepositoryProvider APIs and can be 
+  used without a repository provider. The purpose of the synchronization API is 
+  to ease the task of implementing different ways of presenting the synchronization 
+  state of resources. As such, the API requires a means to query the synchronization 
+  state of resources but does not require a means to affect the state. The means 
+  of affecting the state is left to the implementer (although the UI does provide 
+  hooks for adding provider specific menu items to menus).</p>
+<h3>Terminology </h3>
+<p>Before the synchronization API is described, it is helpful to
+present some of the terminology and concepts that apply when discussing
+workspace synchronization.</p>
+<blockquote>
+  <p><em>Resource Variant</em>: A local resource that is mapped to a resource 
+    that exists at another location can be referred to as a variant of that resource. 
+    That is, the resources are usually very similar but may differ slightly (either 
+    due to modifications to the local resource or changes made the remote copy 
+    by other users). We take a local workspace centric view of this, referring 
+    to the local copy as the resource and any remote copy as resource variants.</p>
+  <p><em>Synchronize</em>: We refer to synchronize as the action of displaying 
+    to the user the differences between resource variants. Synchronizing doesn't 
+    affect the state of the variants, but instead provides a view to help the 
+    user understand the differences between different sets of variants. It is 
+    common however to allow users to affect the states of the variants (e.g. allowing 
+    to check-in, or revert) while synchronizing.</p>
+  <p><em>Two-way vs. Three-way Synchronization</em>: There are two basic types 
+    of synchronization state determination: two-way and three-way. A two-way comparison 
+    only considers the local resource and a single resource variant, referred 
+    to as the remote resource variant. This type of comparison can only show the 
+    differences between the two resources but cannot offer hints as to how the 
+    changes interrelate. Most code repository systems support a three-way comparison 
+    for synchronization state determination. This type of comparison involves 
+    the local resource, a remote resource variant and a base resource variant. 
+    The base resource variant represents a common ancestor for the local and remote 
+    resources. This allows for more sophisticated synchronization states that 
+    indicate the direction of the change.<br>
+  </p>
+  <p>Table 1: The synchronization states<br>
+  </p>
+  <table style="text-align: left; width: 90%;" border="1"
+ cellspacing="2" cellpadding="2">
+    <tbody>
+      <tr>
+        <td style="vertical-align: top;"><span
+ style="font-weight: bold;">Two-Way</span></td>
+        <td style="vertical-align: top;"><span
+ style="font-weight: bold;">Three-Way</span></td>
+      </tr>
+      <tr>
+        <td style="vertical-align: top;">Changed<br>
+Deleted<br>
+Added</td>
+        <td style="vertical-align: top;">Outgoing Change<br>
+Incoming Change<br>
+Outgoing Deletion<br>
+Incoming Deletion<br>
+Outgoing Addition<br>
+Incoming Addition<br>
+Conflicting Change<br>
+Conflicting Deletion<br>
+Conflicting Addition</td>
+      </tr>
+    </tbody>
+  </table>
+</blockquote>
+<h3>The Basics - SyncInfo</h3>
+<p>
+The classes in the <a
+ href="../reference/api/org/eclipse/team/core/synchronize/package-summary.html">org.eclipse.team.core.synchronize</a>
+are used to describe the synchronization state. The most important
+class is <a
+ href="../reference/api/org/eclipse/team/core/synchronize/SyncInfo.html">SyncInfo</a>
+because it is the class that actually defines the synchronization
+state. It can be used as follows:
+</p>
+<pre><span style="color: rgb(68, 68, 204);">SyncInfo info = getSyncInfo(resource); // this is a simulated method of obtaining the sync info for a resource<br>int changekind = info.getKind();<br>if(info.getResourceComparator().isThreeWay()) {<br>  if((changeKind &amp; SyncInfo.DIRECTION_MASK) == SyncInfo.INCOMING) {<br>    // do something<br>  }<br>} else if(changeKind == SyncInfo.CHANGE) {<br>    // do something else<br>}</span></pre>
+<p>
+The SyncInfo class provides both the two-way and three-way comparison algorithms, 
+a client must provide the resources and a class that can compare the resources 
+(<a
+ href="../reference/api/org/eclipse/team/core/variants/IResourceVariantComparator.html">IResourceVariantComparator</a>). 
+Here is an example variant comparator:
+</p>
+<pre style="color: rgb(68, 68, 204);">public class TimestampVariantComparator implements IResourceVariantComparator {	<br>  protected boolean compare(IResourceVariant e1, IResourceVariant e2) {<br>    if(e1.isContainer()) {<br>      if(e2.isContainer()) {<br>        return true;<br>      }<br>      return false;<br>    }<br>    if(e1 instanceof MyResourceVariant &amp;&amp; e2 instanceof MyResourceVariant) {<br>      MyResourceVariant myE1 = (MyResourceVariant)e1; <br>      MyResourceVariant myE2 = (MyResourceVariant)e2; <br>      return myE1.getTimestamp().equals(myE2.getTimestamp());<br>    }<br>    return false;<br>  }<br>  protected boolean compare(IResource e1, IResourceVariant e2) {<br>      <br>  }<br>  public boolean isThreeWay() {<br>    return true;<br>  }<br>}<br><br>SyncInfo info = new SyncInfo(resource, variant1, variant2, new TimestampComparator());<br>info.init(); // calculate the sync info</pre>
+<p>This package also contains collections specifically designed to contain
+SyncInfo and filters that can be applied to SyncInfo instances.
+</p>
+<h3>Managing the synchronization state</h3>
+<p>
+As we have seen in the examples above, <a
+ href="../reference/api/org/eclipse/team/core/synchronize/SyncInfo.html">SyncInfo
+</a>and
+<a
+ href="../reference/api/org/eclipse/team/core/variants/IResourceVariantComparator.html">IResourceVariantComparator</a>
+ classes provide access to the
+synchronization state of resources. But what we haven't seen yet is how
+the state is managed. A <a
+ href="../reference/api/org/eclipse/team/core/subscribers/Subscriber.html">Subscriber</a>
+provides access to the synchronization state between the resources in
+the local workspace and a set of resource variants for these resources
+using either a two-way or three-way comparison, depending on the nature
+of the subscriber. A subscriber provides the following capabilities:
+</p>
+
+<ul>
+  <li><span style="font-weight: bold;">local workspace traversal</span>: a subscriber 
+    supports the traversal of the local workspace resources that are <em>supervised</em> 
+    by the subscriber. As such, the subscriber has a set of <em>root</em> resources 
+    that define the workspace subtrees under the subscriber's control, as well 
+    as a <em>members</em> method that returns the supervised members of a workspace 
+    resource. This traversal differs from the usual workspace resource traversal 
+    in that the resources being traversed may include resources that do not exist 
+    locally, either because they have been deleted by the user locally or created 
+    by a 3rd party. <br>
+  </li>
+  <li><span style="font-weight: bold;">resource synchronization state determination</span>: 
+    For supervised resources, the subscriber provides access to the synchronization 
+    state of the resource, including access to the variants of the resource. For 
+    each supervised resource, the subscriber provides a <em>SyncInfo</em> object 
+    that contains the synchronization state and the <em>variants</em> used to 
+    determine the state.The subscriber also provides an <em>IResourceVariantComparator</em> 
+    which determines whether two-way or three-way comparison is to be used and 
+    provides the logic used by the SyncInfo to comparing resource variants when 
+    determining the synchronization state. <br>
+  </li>
+  <li><span style="font-weight: bold;">refresh of synchronization state and change 
+    notification</span>: Clients can react to changes that happen to local resources 
+    by listening to the Core resource deltas. When a local resource is changed, 
+    the synchronization state of the resource can then be re-obtained from the 
+    subscriber. However, clients must explicitly query the server to know if there 
+    are changes to the resource variants. For subscribers, this process is broken 
+    up into two parts. A client can explicitly <em>refresh</em> a subscriber. 
+    In response the subscriber will obtain the latest state of the resource variants 
+    from the remote location and fire <em>synchronization state change</em> events 
+    for any resource variants that have changed. The change notification is separate 
+    from the refresh since there may be other operations that contact the remote 
+    location and obtain the latest remote state.&nbsp;</li>
+</ul>
+<p> The APIs do not not define how a Subscriber is created, this is left to the 
+  specific implementations. </p>
+<p>
+So let's revisit our first example of using SyncInfo and see how a
+Subscriber could be used to access SyncInfo.</p>
+
+<pre><span style="color: rgb(68, 68, 204);">// Create a file system subscriber and specify that the<br>// subscriber will synchronize with the provided file system location<br>Subscriber subscriber = new FileSystemSubscriber("c:\temp\repo");<br><br>// Allow the subscriber to refresh its state<br>subscriber.refresh(subscriber.roots(), IResource.DEPTH_INFINITE, monitor);<br><br>// Collect all the synchronization states and print<br>IResource[] children = subscriber.roots();<br>for(int i=0; i &lt; children.length; i++) {<br>  printSyncState(children[i]);<br>}<br><br>...<br><br>void printSyncState(Subscriber subscriber, IResource resource) {<br>  System.out.println(subscriber.getSyncInfo(resource).toString());<br></span><span
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">  IResource[] children = subscriber.members(resource);<br>  for(int i=0; i &lt; children.length; i++) {<br>    IResource child = children[i];<br>    if(! child.exists()) {<br>      System.out.println(resource.getFullPath() + " doesn't exist in the workspace");<br>    }<br>    printSyncState(subscriber, children[i]);<br>  }<br>}<br></span></span></pre>
+<p>
+The important point to remember is that the Subscriber knows about
+resources that do not exist in the workspace and non-existing resources
+can be returned from the <a
+ href="../reference/api/org/eclipse/team/core/subscribers/Subscriber.html#members(org.eclipse.core.resources.IResource)">Subscriber#members()</a>
+and <a
+ href="../reference/api/org/eclipse/team/core/synchronize/SyncInfo.html#getLocal()">SyncInfo#getLocal()</a>.
+ </p>
+<h3>Displaying the synchronizations state in the UI</h3>
+<p>
+We could spend more time explaining how to manage synchronization state
+but instead let's see how to actually get the state shown to the user.
+A <a
+ href="../reference/api/org/eclipse/team/ui/synchronize/ISynchronizeParticipant.html">ISynchronizeParticipant
+</a>is the user interface component that displays synchronization state
+and allows the user to affect its state. The Synchronize View displays
+synchronize participants, but it is also possible to show these in
+dialogs and wizards. In order to provide support for users to show any
+type of synchronization state to the user, even those not based on
+SyncInfo and Subscribers, a participant is a very generic component.</p>
+<p>
+There is also an extension point called <a
+ href="../reference/extension-points/org_eclipse_team_ui_synchronizeWizards.html">org.eclipse.team.ui.synchronizeWizards</a>
+to add a synchronization creation wizard. This will put your wizard in
+the global synchronize action and in the Synchronize View, so that
+users can easily create a synchronization of your type.
+</p>
+<p>
+However, if you have implemented a Subscriber you can benefit from a
+concrete participant called <a
+ href="../reference/api/org/eclipse/team/ui/synchronize/SubscriberParticipant.html">SubscriberParticipant
+</a>which will provide
+the following functionality:
+</p>
+
+<ul>
+  <li>Collects SyncInfo from a Subscriber in the background.</li>
+  <li>Listens to changes in the workspace and those found when a
+Subscriber is refreshed and keeps the synchronization state updated
+dynamically.</li>
+  <li>Provides the user interface that support modes for filtering the
+changes, and layouts.</li>
+  <li>Support scheduling a refresh with the Subscriber so that the
+synchronization states are kept up-to-date.</li>
+  <li>Supports refreshing a Subscriber in the background.</li>
+  <li>Supports navigation of the changes and showing the differences
+between the files.</li>
+  <li>Supports configuration of the actions, toolbars, and decorators
+by subclasses.<br>
+  </li>
+</ul>
+<p>The best way to explain these concepts are to see them used in the context 
+  of a simple example. Go to the <a
+ href="team_synchronize_localhistory_example.htm">local history synchronization</a> 
+  example to see how all of these pieces can be used together. Or if you want 
+  pointers on how to use the more advanced APIs, go to <a
+ href="team_synchronize_beyond_basics.htm">Beyond The Basics</a>.<br>
+</p>
+
+</body>
+</html>
