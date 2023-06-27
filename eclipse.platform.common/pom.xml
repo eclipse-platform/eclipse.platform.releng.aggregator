@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2012, 2017 Eclipse Foundation and others.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Distribution License v1.0
+  which accompanies this distribution, and is available at
+  http://www.eclipse.org/org/documents/edl-v10.php
+
+  Contributors:
+     Igor Fedorenko - initial implementation
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse</groupId>
+    <artifactId>eclipse-platform-parent</artifactId>
+    <version>4.29.0-SNAPSHOT</version>
+    <relativePath>../eclipse-platform-parent</relativePath>
+  </parent>
+
+  <groupId>eclipse.platform.common</groupId>
+  <artifactId>eclipse.platform.common</artifactId>
+  <packaging>pom</packaging>
+
+   <properties>
+     <tycho.scmUrl>scm:git:https://github.com/eclipse-platform/eclipse.platform.common.git</tycho.scmUrl>
+  </properties>
+
+  <!--
+    To build individual bundles, we specify a repository where to find parent pom,
+    in case it is not in local maven cache already
+    and that parent pom also has fuller individual-bundle profile
+    defined that is combined with this one. -->
+  <profiles>
+    <profile>
+      <id>build-individual-bundles</id>
+      <repositories>
+        <repository>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+          <id>eclipse-hosted</id>
+          <url>https://repo.eclipse.org/content/repositories/eclipse/</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>copy</id>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <overwriteReleases>true</overwriteReleases>
+                <overwriteSnapshots>true</overwriteSnapshots>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+			<groupId>org.eclipse.tycho.extras</groupId>
+			<artifactId>tycho-document-bundle-plugin</artifactId>
+			<version>${tycho.version}</version>
+			<executions>
+				<execution>
+					<id>index</id>
+					<goals>
+						<goal>build-help-index</goal>
+					</goals>
+					<configuration>
+						<outputDirectory>${project.basedir}</outputDirectory>
+					</configuration>
+				</execution>
+			</executions>
+		</plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <modules>
+    <module>bundles/org.eclipse.platform.doc.isv</module>
+    <module>bundles/org.eclipse.platform.doc.user</module>
+    <module>bundles/org.eclipse.platform.doc.tips</module>
+    <module>bundles/org.eclipse.jdt.doc.isv</module>
+    <module>bundles/org.eclipse.jdt.doc.user</module>
+    <module>bundles/org.eclipse.pde.doc.user</module>
+  </modules>
+
+</project>
+
