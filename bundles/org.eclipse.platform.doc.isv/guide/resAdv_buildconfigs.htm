@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) Broadcom Corporation and others 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Project Build Configurations</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Project Build Configurations</H2>
+<P>
+The platform provides <b>Build Configurations</b> to allow integrations to build a project in multiple orthogonal ways.
+All the functionality provided to an <a href="resAdv_builders.htm">Incremental Project Builder</a> is provided per 
+Build Configuration.  
+</P>
+<p> Build configurations are very useful when a project's files can be built in more than one way.
+In statically compiled C/C++, for example, the preprocessor is used to re-write or conditionally compile a single source file to 
+multiple object files. Users can build a project in a 'debug' configuration: including asserts, debug information, etc; or in a 
+'release' configuration which is optimised at compile time.  When building these two (or more) configurations, the project builder
+needs to know which source files have changed since it was last invoked on the specific configuration.
+</p>
+<p>
+Build configurations provide a mechanism to represent the different variants of the build.  Build commands are run in the order defined
+on the Project, and the build resource delta is maintained between builds of the configuration.  Build configurations
+allow the Incremental Project Builder to build only what needs to be built (based on the delta) when the builder is invoked.
+</p>
+<p>
+Builders which don't care about build configurations work as before.
+</p>
+<p>
+Build Configurations are simply a tuple: (<i><a href="../reference/api/org/eclipse/core/resources/IBuildConfiguration.html#getProject()">project</a></i>, 
+<i><a href="../reference/api/org/eclipse/core/resources/IBuildConfiguration.html#getName()">build-config name</a></i>).  Names are domain/application specific strings.  They
+should be human-readable as they may be displayed by the UI, for example: "<i>Debug</i>".  Integrations should respect
+configurations created by other platform integrations.
+By default each project has one build configuration. 
+</p>
+<p>See 
+<a href="../reference/api/org/eclipse/core/resources/IBuildConfiguration.html">IBuildConfiguration</a> for more information.
+</p>
+<p>
+<b>API is provided:</b></p>
+<ul>
+<li> to create build configuration(s) on a Project</li>
+<li> set the active configuration on the Project </li>
+<li> to build particular build configuration(s)</li>
+<li> to create reference between build configurations</li>
+<li> for a builder to discover which build configuration is currently being built</li>
+</ul>
+<p>
+We distinguish between client API and builder API.</p> 
+
+<h3>Client API</h3>
+
+<h4>Creating and setting build configurations </h4>
+
+<p>
+Each project has one <i>default</i> build configuration with name equal to the empty string.  Build configurations are set on the
+Project description:
+</p>
+<pre>
+  <a href="../reference/api/org/eclipse/core/resources/IProject.html">IProject</a> project = ...
+  <a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html">IProjectDescription</a> projDesc = project.getDescription();
+
+  // Get the build configurations for a project
+  <a href="../reference/api/org/eclipse/core/resources/IBuildConfiguration.html">IBuildConfiguration</a>[] buildConfigs = project.<a href="../reference/api/org/eclipse/core/resources/IProject.html#getBuildConfigs()">getBuildConfigs</a>();
+  
+  ... 
+  // Creating a build configuration
+  <a href="../reference/api/org/eclipse/core/resources/IWorkspace.html#newBuildConfig(java.lang.String, java.lang.String)">ResourcesPlugin().getWorkspace().newBuildConfig</a>(project.getName(), "myNewBuildConfig");
+  ...
+  // Set new build configurations on a project
+  projDesc.<a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html#setBuildConfigs(java.lang.String[])">setBuildConfigs</a>(buildConfigs);
+
+  // Set the description
+  project.setDescription(projDesc, null);
+</pre>
+<p>
+As each project must have at least one build configuration, it's not possible to remove all configurations from a project.
+Doing so automatically re-adds the <i><a href="../reference/api/org/eclipse/core/resources/IBuildConfiguration.html#DEFAULT_CONFIG_NAME">default</a></i> build configuration, with name: &quot;&quot;.
+</p>
+<h4>Active configuration</h4>
+<p>By default one configuration on the project is defined as '<b>active</b>'. The active configuration is the one that is built 
+when a build configurations isn't specified (e.g. when: <a href="../reference/api/org/eclipse/core/resources/IProject.html#build(int, org.eclipse.core.runtime.IProgressMonitor)">
+IProject#build(kind, monitor)</a> is called on the project).  To set the active build configuration:
+</p>
+
+<pre>
+   projDesc.<a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html#setActiveBuildConfig(java.lang.String)">setActiveBuildConfig</a>(String buildConfigName);
+</pre>
+
+<h4> Creating references between build configurations </h4>
+<p>
+Build Configurations can reference each other. Much like project level references, this can be used to ensure that prerequisite build configurations
+are built before referencing build configurations.
+</p>
+
+<pre>
+  projDesc.<a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html#setBuildConfigReferences(java.lang.String,%20org.eclipse.core.resources.IBuildConfiguration[])">setBuildConfigReferences</a>(String configName, IBuildConfiguration[] references);
+</pre>
+
+<p>causes the named build configuration to reference the passed in build configurations.</p>
+
+<p>
+<b>Note:</b> A referenced build configurations may have a <i>null</i> name.  Such references map to the <i>active</i> build configuration
+of the referenced project when the project is built.  Therefore a project level reference can be thought of as a build configuration reference to 
+the active build configuration.
+</p>
+
+
+<h4> Building Project Build Configurations </h4>
+
+New API exists on the workspace to allow building a build configuration and its references (if required):
+
+<pre>
+  ResourcesPlugin.getWorkspace().<a href="../reference/api/org/eclipse/core/resources/IWorkspace.html#build(org.eclipse.core.resources.IBuildConfiguration[],%20int,%20boolean,%20org.eclipse.core.runtime.IProgressMonitor)">build</a>(IBuildConfiguration[] buildConfigs, int kind, boolean buildReferences, IProgressMonitor monitor);
+</pre>
+
+API also exists on IProject to build a specific build configuration:
+
+<pre>
+  project.<a href="../reference/api/org/eclipse/core/resources/IProject.html#build(org.eclipse.core.resources.IBuildConfiguration,%20int,%20org.eclipse.core.runtime.IProgressMonitor)">build</a>(IBuildConfiguration config, int kind, IProgressMonitor monitor);
+</pre>
+
+<h3>Builder API</h3>
+
+<p> 
+From the point of view of an <a href="resAdv_builders.htm">Incremental Project Builder</a> the platform now builds build configurations,
+rather than projects.  In simple cases the build configuration will be the default configuration, and the project will only have one configuration.
+</p>
+
+<h4>Which build configuration is being built</h4>
+
+<p>A builder can discover which configuration is being built via:</p>
+<pre>
+  	protected IProject[] build(int kind, Map&lt;String,String&gt; args, IProgressMonitor monitor) throws CoreException {
+  	    IBuildConfiguration thisBuildConfig = <a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#getBuildConfig()">getBuildConfig</a>();
+  	    ...
+  	}
+</pre>
+
+<p>
+Note builders needn't necessarily care about build configurations. IncrementalProjectBuilder#<a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#getDelta(org.eclipse.core.resources.IProject)">getDelta</a>(IProject) will continue to return the resource changes since the builder 
+was last run for the current build configuration.
+</p>
+
+</BODY>
+</HTML>

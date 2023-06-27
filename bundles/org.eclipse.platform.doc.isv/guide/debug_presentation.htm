@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Debug model presentation</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Debug model presentation</h3>
+<p>Since there is a generic, uniform model for debug elements in the platform,
+it's possible to provide a starting point for implementing a debugger UI.
+The heart of the debugger UI support is the <b>debug model
+presentation</b> (<a href="../reference/api/org/eclipse/debug/ui/IDebugModelPresentation.html"><b>IDebugModelPresentation</b></a>).
+The debug model presentation is responsible for providing labels, images, and
+editors associated with specific debug elements.</p>
+<p>Plug-ins that define their own debug model typically provide a debug model
+presentation for displaying debug elements in the model. This is
+accomplished using the 
+<a href="../reference/extension-points/org_eclipse_debug_ui_debugModelPresentations.html"><b>org.eclipse.debug.ui.debugModelPresentations</b></a>
+extension point. This extension point allows an implementation of <a href="../reference/api/org/eclipse/debug/ui/IDebugModelPresentation.html"><b>IDebugModelPresentation</b></a>
+to be associated with the identifier of a particular debug model.</p>
+<p>Recall that <a href="debug_model.htm">debug model elements</a> know the id of
+their originating debug model. This means that given any debug element,
+the debug platform can obtain the id of the debug model and then query the
+extension registry for any corresponding debug model presentations.</p>
+<p>The markup for adding a debug model presentation looks like this:</p>
+<pre>&lt;extension point = &quot;org.eclipse.debug.ui.debugModelPresentations&quot;&gt; 
+         &lt;debugModelPresentation
+             class = &quot;org.eclipse.jdt.internal.debug.ui.JDIModelPresentation&quot;
+             id = &quot;org.eclipse.jdt.debug&quot;
+             detailsViewerConfiguration = &quot;org.eclipse.jdt.internal.debug.ui.display.DetailsViewerConfiguration&quot;&gt;
+          &lt;/debugModelPresentation&gt; 
+&lt;/extension&gt;</pre>
+<p>An optional <b>detailsViewerConfiguration</b> can be specified in addition to
+the debug model presentation. The details viewer must extend the JFace 
+<a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html"><b>SourceViewerConfiguration</b></a>
+class. The meaning of &quot;details&quot; is interpreted by the debug
+model. The details are computed by the debug model presentation and passed
+to the details viewer. For example, the Java debugger uses the details
+viewer to show code assist in the variables view when expressions are evaluated.</p>
+<p>Implementors of <a href="../reference/api/org/eclipse/debug/ui/IDebugModelPresentation.html"><b>IDebugModelPresentation</b></a> may
+also implement <a href="../reference/api/org/eclipse/debug/ui/IDebugEditorPresentation.html"><b>IDebugEditorPresentation</b></a> when
+more control is needed over the editor that is displaying source code for a stack frame.  Implementors may control the
+editor's position or the annotations in the source.</p>
+
+</BODY>
+</HTML>

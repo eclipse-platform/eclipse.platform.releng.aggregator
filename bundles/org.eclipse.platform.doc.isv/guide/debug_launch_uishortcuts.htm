@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Launch shortcuts</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Launch shortcuts</h3>
+<p>Once a launch configuration has been defined using the dialog, it can be
+shown directly in the appropriate menu, rather than having to open the launch configuration
+dialog again.  When a launch configuration is shown directly in a menu, we refer to it as a
+<b>launch shortcut</b>.  The <a href="../reference/extension-points/org_eclipse_debug_ui_launchShortcuts.html"><b>org.eclipse.debug.ui.launchShortcuts</b></a>
+extension point is used to register these shortcuts.  In the extension
+definition, you can specify in which modes the shortcuts are shown. For each shortcut, you must specify
+an implementation of <a href="../reference/api/org/eclipse/debug/ui/ILaunchShortcut.html"><b>ILaunchShortcut</b></a>.
+This class is used to launch a program given a particular selection in a view or
+editor.</p>
+<p>
+You may also specify when the shortcut should be shown.  The <b>contexttualLaunch</b> element allows you to describe
+applicable modes and enabling conditions for the shortcut.  This is best demonstrated by example.  The following
+markup registers shortcuts for launching a Java application:</p>
+<pre>
+  &lt;extension
+         point="org.eclipse.debug.ui.launchShortcuts"&gt;
+      &lt;shortcut
+            label="%JavaApplicationShortcut.label"
+            icon="icons/full/etool16/java_app.png"
+            helpContextId="org.eclipse.jdt.debug.ui.shortcut_local_java_application"
+            modes="run, debug"
+            class="org.eclipse.jdt.internal.debug.ui.launcher.JavaApplicationLaunchShortcut"
+            id="org.eclipse.jdt.debug.ui.localJavaShortcut"&gt;
+         &lt;contextualLaunch&gt;
+           &lt;enablement&gt;
+             &lt;with variable="selection"&gt;
+               &lt;count value="1"/&gt;
+               &lt;iterate&gt;
+                 &lt;or&gt;
+                   &lt;test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/&gt;
+                   &lt;test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/&gt;
+                   &lt;instanceof value="org.eclipse.jdt.core.IJavaElement"/&gt;
+                 &lt;/or&gt;
+                 &lt;test property="org.eclipse.jdt.debug.ui.hasMainType"/&gt;
+               &lt;/iterate&gt;
+             &lt;/with&gt;
+           &lt;/enablement&gt;
+  		 &lt;/contextualLaunch&gt;
+         ...
+      &lt;/shortcut&gt;
+      ...
+</pre>
+<p>See <a href="workbench_cmd_expressions.htm">Workbench Command Expressions</a> for an explanation of the XML syntax for 
+enabling conditions.  The complete syntax is described in the documentation for 
+<a href="../reference/extension-points/org_eclipse_debug_ui_launchShortcuts.html"><b>org.eclipse.debug.ui.launchShortcuts</b></a>.</p>
+
+</BODY>
+</HTML>

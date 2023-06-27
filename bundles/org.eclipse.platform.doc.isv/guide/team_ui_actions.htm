@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Adding team actions</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>
+   Adding team actions
+</h3>
+<p>The team UI plug-in defines a popup menu extension in order to consolidate
+all team-related actions in one place.&nbsp; The team menu includes many
+subgroup slots so that team provider plug-ins can contribute actions and have
+some amount of control over the order of items in the menu.&nbsp; The following
+markup is from the team UI's plug-in manifest:</p>
+<pre>&lt;extension
+     point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
+	&lt;objectContribution
+       	   id=&quot;org.eclipse.team.ui.ResourceContributions&quot;
+           objectClass=&quot;org.eclipse.core.resources.IResource&quot; adaptable=&quot;true&quot;&gt;
+		&lt;menu
+			id=&quot;<b>team.main</b>&quot;
+			path=&quot;additions&quot;
+			label=&quot;%TeamGroupMenu.label&quot;&gt;
+			<b>&lt;separator name=&quot;group1&quot;/&gt;
+			&lt;separator name=&quot;group2&quot;/&gt;
+			&lt;separator name=&quot;group3&quot;/&gt;
+			&lt;separator name=&quot;group4&quot;/&gt;
+			&lt;separator name=&quot;group5&quot;/&gt;
+			&lt;separator name=&quot;group6&quot;/&gt;
+			&lt;separator name=&quot;group7&quot;/&gt;
+			&lt;separator name=&quot;group8&quot;/&gt;
+			&lt;separator name=&quot;group9&quot;/&gt;
+			&lt;separator name=&quot;group10&quot;/&gt;</b>
+			&lt;separator name=&quot;targetGroup&quot;/&gt;
+			&lt;separator name=&quot;projectGroup&quot;/&gt;
+		&lt;/menu&gt;
+	... 
+&lt;/extension&gt;</pre>
+<p>A team menu is added to the popup menu of all views that show resources (or
+objects that adapt to resources.)&nbsp; Your plug-in can use the id of this menu
+and the separator groups in order to add your own menu items.&nbsp; There is
+nothing to keep you from defining your own popup menus, action sets, or view and
+editor actions.&nbsp; However, adding your actions to the predefined team menu
+makes it easier for the end user to find your actions.</p>
+<p>Let's look at a CVS action that demonstrates some interesting points:</p>
+<pre>&lt;extension
+    point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
+     &lt;objectContribution
+           objectClass=&quot;org.eclipse.core.resources.IFile&quot;
+           adaptable=&quot;true&quot;
+           id=&quot;org.eclipse.team.ccvs.ui.IFileContributions&quot;&gt;
+        &lt;filter
+              <b>name=&quot;projectPersistentProperty&quot;</b>
+              <b>value=&quot;org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature&quot;&gt;</b>
+        &lt;/filter&gt;
+        &lt;action
+              label=&quot;%IgnoreAction.label&quot;
+              tooltip=&quot;%IgnoreAction.tooltip&quot;
+              class=&quot;org.eclipse.team.internal.ccvs.ui.actions.IgnoreAction&quot;
+              menubarPath=&quot;<b>team.main/group3</b>&quot;
+              helpContextId=&quot;org.eclipse.team.cvs.ui.team_ignore_action_context&quot;
+              id=&quot;org.eclipse.team.ccvs.ui.ignore&quot;&gt;
+        &lt;/action&gt;
+	...</pre>
+<p>Note that the action is contributed using the <a href="../reference/extension-points/org_eclipse_ui_popupMenus.html"><b>org.eclipse.ui.popupMenus
+</b>
+</a>workbench extension point.&nbsp; Here are some team-specific things
+happening in the markup:</p>
+<ul>
+  <li>the action is filtered by a project persistent property which identifies
+    team providers.&nbsp; The value of the property must be of the format <b>&quot;org.eclipse.team.core.repository=&lt;your
+    repository id&gt;&quot;</b> where <b>&lt;your repository id&gt;</b> is the <b>id</b>
+    provided in the <a href="../reference/extension-points/org_eclipse_team_core_repository.html"> <b> org.eclipse.team.core.repository</b></a> 
+    markup.&nbsp; This filter ensures that the CVS popup menu items only appear for
+    files that appear in projects that have been mapped to the CVS repository
+    id.</li>
+  <li>the action is added to a group in the menu that was specified above in the
+    team UI plug-in</li>
+</ul>
+<p>The implementation of an action is largely dependent on your specific
+provider.</p>
+<p>Commands can be contributed in a similar way:</p>
+<pre>
+   &lt;extension point="org.eclipse.core.expressions.definitions"&gt;
+      &lt;definition id="org.eclipse.ui.example.ccvs.ui.IFileContributions"&gt;
+         &lt;iterate ifEmpty="false"&gt;
+            &lt;adapt type="org.eclipse.core.resources.IFile"&gt;
+               &lt;test <b>property="org.eclipse.core.resources.projectPersistentProperty"</b>
+                     <b>value="org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature"</b>/&gt;
+            &lt;/adapt&gt;
+         &lt;/iterate&gt;
+      &lt;/definition&gt;
+   &lt;/extension&gt;
+   &lt;extension point="org.eclipse.ui.menus"&gt;
+      &lt;menuContribution locationURI="popup:<b>team.main?after=group3</b>"&gt;
+         &lt;command commandId="org.eclipse.team.ccvs.ui.ignore"
+               id="org.eclipse.ui.example.ccvs.ui.ignore"
+               style="push"&gt;
+            &lt;visibleWhen checkEnabled="false"&gt;
+               &lt;or&gt;
+                  &lt;with variable="activeMenuSelection"&gt;
+                     &lt;reference definitionId="org.eclipse.ui.example.ccvs.ui.IFileContributions"/&gt;
+                  &lt;/with&gt;
+                  &lt;with variable="activeMenuEditorInput"&gt;
+                     &lt;reference definitionId="org.eclipse.ui.example.ccvs.ui.IFileContributions"/&gt;
+                  &lt;/with&gt;
+               &lt;/or&gt;
+            &lt;/visibleWhen&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+   &lt;/extension&gt;
+</pre>
+<p>
+   &nbsp;
+</p>
+
+
+
+
+
+</BODY>
+</HTML>

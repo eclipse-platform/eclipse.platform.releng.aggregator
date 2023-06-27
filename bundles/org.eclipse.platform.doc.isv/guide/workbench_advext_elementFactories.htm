@@ -1,0 +1,123 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Element factories</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<H3>Element factories</H3>
+<P >
+Element factories are used to recreate workbench model objects from data that was saved during workbench shutdown.</P>
+<P >
+Before we look closely at the element factory extension, we need to review a general technique
+that is used throughout the platform to add plug-in specific behavior to common platform model objects.</P>
+
+<H4>
+<a name="workbench_advext_adaptables">
+IAdaptables and workbench adapters</a></H4>
+<P >
+When browsing the various workbench classes, you will notice that many of the workbench interfaces extend the
+<b><a href="../reference/api/org/eclipse/core/runtime/IAdaptable.html"> IAdaptable</a></b> interface.</P>
+<P >
+Plug-ins use adapters to add specific behavior to pre-existing types in the system. For example, the workbench may want
+resources to answer a label and an image for display purposes. We know that it's not good design to add UI specific 
+behavior to low-level objects, so how can we add this behavior to the resource types?</P>
+<P >
+ Plug-ins can register adapters that add behavior to pre-existing types.
+Application code can then query an object for a particular adapter. If there is one registered for it,
+the application can obtain the adapter and use the new behaviors defined in the adapter.</P>
+<P >
+By providing a facility to dynamically query an adapter for an object, we can improve the flexibility of the system 
+as it evolves. New adapters can be registered for platform types by new plug-ins without having to change the 
+definitions of the original types. The pattern to ask an object for a particular
+adapter is as follows: </P>
+<pre>
+   //given an object o, we want to do &quot;workbench&quot; things with it.
+   if (!(o instanceof IAdaptable)) {
+      return null;
+   }
+   IWorkbenchAdapter adapter = (IWorkbenchAdapter)o.getAdapter(IWorkbenchAdapter.class);
+   if (adapter == null)
+      return null;
+   // now I can treat o as an IWorkbenchAdapter
+   ...
+</pre>
+<P >
+If there is no adapter registered for the object in hand, null will be returned as the adapter. Clients must be 
+prepared to handle this case.  There may be times when an expected adapter has not been registered.</P>
+<P >
+The workbench uses adapters to obtain UI information from the base platform types, such as
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>.
+Adapters shield the base types from UI-specific knowledge and allow the workbench to evolve its interfaces 
+without changing the definitions of the base. </P>
+<P >
+Without adapters, any class that might be passed around in the workbench API would have to implement the UI
+interfaces, which would increase the number of class definitions, introduces tight
+coupling, and create circular dependencies between the core and UI classes. With adapters, each class implements
+<b><a href="../reference/api/org/eclipse/core/runtime/IAdaptable.html"> IAdaptable</a></b>
+and uses the adapter registry to allow plug-ins to extend the behavior of the base types.</P>
+<P >
+Throughout the workbench code, you'll see cases where a platform core type is queried for an adapter.
+The query is used to obtain an object that knows how to answer UI oriented information about
+the type.</P>
+
+
+<H4>
+Element factories</H4>
+<P >
+When the workbench is shut down by the user, it must save the current state of the
+<b><a href="../reference/api/org/eclipse/core/runtime/IAdaptable.html"> IAdaptable</a></b>
+objects that are shown in the workbench. An object's state is stored by saving
+the primitive data parameters of the object in a special format, an
+<a href="../reference/api/org/eclipse/ui/IMemento.html"><b>IMemento</b></a>. The id of a factory that can recreate 
+the object from an <a href="../reference/api/org/eclipse/ui/IMemento.html"><b>IMemento</b></a>
+is also stored and the data is saved in the file system.</P>
+<P >
+When the platform is restarted, the workbench finds the element factory associated with the
+<a href="../reference/api/org/eclipse/ui/IMemento.html"><b>IMemento</b></a>'s
+factory id. It finds the factory by checking the plug-in registry for contributions to the
+<a href="../reference/extension-points/org_eclipse_ui_elementFactories.html"><b> org.eclipse.ui.elementFactories</b></a>
+extension.</P>
+<P >
+The markup is pretty simple. We just have to specify the id of the factory and the corresponding class that 
+implements the factory.</P>
+<P >
+The following code snippet is from the workbench <b>plugin.xml</b>.</P>
+<pre>
+&lt;extension
+         point=&quot;org.eclipse.ui.elementFactories&quot;&gt;
+      &lt;factory
+            class=&quot;org.eclipse.ui.internal.model.ResourceFactory&quot;
+            id=&quot;org.eclipse.ui.internal.model.ResourceFactory&quot;&gt;
+      &lt;/factory&gt;
+      &lt;factory
+            class=&quot;org.eclipse.ui.internal.model.WorkspaceFactory&quot;
+            id=&quot;org.eclipse.ui.internal.model.WorkspaceFactory&quot;&gt;
+      &lt;/factory&gt;
+      &lt;factory
+            class=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot;
+            id=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot;&gt;
+      &lt;/factory&gt;
+      &lt;factory
+            class=&quot;org.eclipse.ui.internal.dialogs.WelcomeEditorInputFactory&quot;
+            id=&quot;org.eclipse.ui.internal.dialogs.WelcomeEditorInputFactory&quot;&gt;
+      &lt;/factory&gt;
+      &lt;factory
+            class=&quot;org.eclipse.ui.internal.WorkingSetFactory&quot;
+            id=&quot;org.eclipse.ui.internal.WorkingSetFactory&quot;&gt;
+      &lt;/factory&gt;
+&lt;/extension&gt;
+
+</pre>
+
+</BODY>
+</HTML>

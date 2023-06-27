@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Process factories</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h4>Process factories</h4>
+<p>When a launch configuration launches its program, it is responsible for invoking the executable
+program in the requested mode.  The implementation for a launch will depend on the specifics of
+each launch configuration, but most plug-ins will build a command line and call a runtime exec to start
+the program.  The <a href="../reference/api/org/eclipse/debug/core/DebugPlugin.html"><b>DebugPlugin</b></a>
+class implements a convenience method for invoking a runtime exec and handling the possible exceptions.
+Clients can specify the command line and working directory for the exec.
+</p>
+<pre>
+Process p = DebugPlugin.exec(cmdLine, workingDirectory);
+</pre>
+<p>Once the <b>java.lang.Process</b> for the executing program has been created, it needs to be managed by the
+debug plug-in.  For starters, the process needs to be associated with the
+<a href="../reference/api/org/eclipse/debug/core/ILaunch.html"><b>ILaunch</b></a>
+that represents the launched program.  The debug plug-in defines a wrapper for a system process,
+<a href="../reference/api/org/eclipse/debug/core/model/IProcess.html"><b>IProcess</b></a>,
+that allows clients to access the associated <a href="../reference/api/org/eclipse/debug/core/ILaunch.html"><b>ILaunch</b></a>
+and assign their own named attributes to the process.  In addition, 
+<a href="../reference/api/org/eclipse/debug/core/model/IProcess.html"><b>IProcess</b></a>,
+defines a label for the process and associates an <a href="../reference/api/org/eclipse/debug/core/model/IStreamsProxy.html"><b>IStreamsProxy</b></a>
+with the process that gives clients access to the input, output, and error streams of the system process.  This process wrapper
+can also be created using a utility method in
+<a href="../reference/api/org/eclipse/debug/core/DebugPlugin.html"><b>DebugPlugin</b></a>.
+</p>
+<pre>
+IProcess process= DebugPlugin.newProcess(launch, p, "My Process);
+</pre>
+<p>
+A map of named attributes can also be supplied.
+</p>
+<p>
+Many plug-ins can simply rely on the utility methods in <a href="../reference/api/org/eclipse/debug/core/DebugPlugin.html"><b>DebugPlugin</b></a>
+for launching the system process and wrapping it in an <a href="../reference/api/org/eclipse/debug/core/model/IProcess.html"><b>IProcess</b></a>.
+For those plug-ins that need more control in the creation of the wrapper, a <b>process factory</b> can be associated with a launch
+configuration.  The process factory is used to create an <a href="../reference/api/org/eclipse/debug/core/model/IProcess.html"><b>IProcess</b></a> 
+that meets the special needs of the plug-in.   The process factory is referenced by id, and should be stored in the
+<b>DebugPlugin.ATTR_PROCESS_FACTORY_ID</b> attribute of the launch configuration.</p>
+<p>The association between the process factory id and the class that implements it is made using the
+<a href="../reference/extension-points/org_eclipse_debug_core_processFactories.html"><b>org.eclipse.debug.core.processFactories</b></a>
+extension point.</p>
+<p>The following example shows how the Ant plug-in sets up a process factory for its launches:</p>
+<pre>
+&lt;extension point=&quot;org.eclipse.debug.core.processFactories&quot;&gt;
+	&lt;processFactory
+		class=&quot;org.eclipse.ant.internal.ui.launchConfigurations.RemoteAntProcessFactory&quot;
+		id=&quot;org.eclipse.ant.ui.remoteAntProcessFactory&quot;&gt;
+	&lt;/processFactory&gt;
+&lt;/extension&gt;
+</pre>
+<p>
+It is the responsibility of the registering plug-in to store the process factory id in the proper launch configuration attribute.
+</p>
+
+
+</BODY>
+</HTML>

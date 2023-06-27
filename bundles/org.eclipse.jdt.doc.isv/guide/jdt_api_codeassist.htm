@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="copyright" content=
+"Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
+<title>Performing code assist on Java code</title>
+<link rel="stylesheet" type="text/css" href="../book.css" />
+</head>
+<body>
+<h2>Performing code assist on Java code</h2>
+<p>The JDT API allows other plug-ins to perform code assist or code select on some Java elements.
+Elements that allow this manipulation should implement <b><a href=
+"../reference/api/org/eclipse/jdt/core/ICodeAssist.html">ICodeAssist</a></b>.</p>
+
+<p>There are two kinds of manipulation:</p>
+<ul>
+<li>Code completion - compute the completion of a Java token.</li>
+<li>Code selection - answer the Java element indicated by the selected text of a given offset and
+length.</li>
+</ul>
+<p>In the Java model there are two elements that implement this interface: <b><a href=
+"../reference/api/org/eclipse/jdt/core/IClassFile.html">IClassFile</a></b> and <b><a href=
+"../reference/api/org/eclipse/jdt/core/ICompilationUnit.html">ICompilationUnit</a></b>.&nbsp; Code
+completion and code selection only answer results for a class file if it has attached source.</p>
+
+<h3>Code completion</h3>
+<h4>Performing a code completion</h4>
+<p>One way to programmatically perform code completion is to invoke <b><a href=
+"../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeComplete(int,%20org.eclipse.jdt.core.CompletionRequestor)">
+ICodeAssist.codeComplete</a></b>. You specify the offset in the compilation unit after which the
+code completion is desired.&nbsp; You must also supply an instance of <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionRequestor.html">CompletionRequestor</a></b> to
+accept the possible completions.</p>
+<p>The method in <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionRequestor.html#accept(org.eclipse.jdt.core.CompletionProposal)">
+CompletionRequestor.accept(CompletionProposal)</a></b> accepts all kinds of proposals for code
+completion.&nbsp; The methods of <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html">CompletionProposal</a></b> give
+information that describes the proposed element (its name, declaring type, etc.), its proposed
+position for insertion in the compilation unit, and its relevance.&nbsp;&nbsp;</p>
+
+<p>A completion requestor can accept many different kinds of completions. This kind is given by
+<b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#getKind()">CompletionProposal.getKind</a></b>.</p>
+<p>Some of the possible completion kinds are (The complete list of possible completion kinds can be
+seen on <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html">CompletionProposal</a></b>):</p>
+<ul>
+<li>annotation attribute - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#ANNOTATION_ATTRIBUTE_REF">ANNOTATION_ATTRIBUTE_REF</a></b></li>
+<li>anonymous type - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#ANONYMOUS_CLASS_DECLARATION">ANONYMOUS_CLASS_DECLARATION</a></b></li>
+<li>type reference - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#TYPE_REF">TYPE_REF</a></b></li>
+
+<li>field reference- <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#FIELD_REF">FIELD_REF</a></b></li>
+<li>keyword - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#KEYWORD">KEYWORD</a></b></li>
+<li>label reference - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#LABEL_REF">LABEL_REF</a></b></li>
+<li>local variable reference - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#LOCAL_VARIABLE_REF">LOCAL_VARIABLE_REF</a></b></li>
+<li>method reference - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#METHOD_REF">METHOD_REF</a></b></li>
+<li>method declaration - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#METHOD_DECLARATION">METHOD_DECLARATION</a></b></li>
+
+<li>package import or reference - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#PACKAGE_REF">PACKAGE_REF</a></b></li>
+<li>variable name - <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionProposal.html#VARIABLE_DECLARATION">VARIABLE_DECLARATION</a></b></li>
+</ul>
+<p>The completion requestor must also be able to accept compilation errors.&nbsp;&nbsp;</p>
+<h4>Completion relevance</h4>
+<p>Because there may be many different possible completions, the notion of relevance is used to
+compare the relevance of a suggested completion to other proposals.&nbsp; Relevance is represented
+by a positive integer.&nbsp; The value has no implicit meaning except to be used relative to the
+value for other proposals.&nbsp; The relevance of a code completion candidate can be affected by
+the expected type of the expression, as it relates to the types in the surrounding code, such as
+variable types, cast types, return types, etc.&nbsp; The presence of an expected prefix or suffix
+in a completion also affects its relevance.</p>
+
+<h4>Completion context</h4>
+<p>An instance of <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionRequestor.html">CompletionRequestor</a></b> can
+also accept a completion context. This context is given by the method <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionRequestor.html#acceptContext(org.eclipse.jdt.core.CompletionContext)">
+CompletionRequestor.acceptContext(CompletionContext)</a></b> and does not depend on a specific
+completion proposal. The methods of <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionContext.html">CompletionContext</a></b> give
+information that describe the general context like the offset of completion, the completed token,
+the completed token kind (name or string literal) and its position.<br /></p>
+<p>A <b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionContext.html">CompletionContext</a></b> can also
+give some information about elements (<b><a href=
+"../reference/api/org/eclipse/jdt/core/IJavaElement.html">IJavaElement</a></b>) which are related
+to the completion location. These elements are based on the content of the completed compilation
+unit's buffer and are not the result of the last reconcile operation.<br /></p>
+
+<p>Some of these methods are:</p>
+<ul>
+<li><b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionContext.html#getEnclosingElement()">getEnclosingElement()</a></b>
+- This method returns the innermost enclosing element which contains the completion location</li>
+<li><b><a href=
+"../reference/api/org/eclipse/jdt/core/CompletionContext.html#getVisibleElements(java.lang.String)">
+getVisibleElements(String)</a></b> - This method returns the elements which are visible from the
+completion location and which can be assigned to the given type</li>
+</ul>
+<h4>Code completion options</h4>
+<p>The JDT Core plug-in defines options that control the behavior of code completion.&nbsp; These
+options can be changed by other plug-ins.&nbsp;&nbsp;</p>
+
+<ul>
+<li>Activate Visibility Sensitive Completion<br />
+When this option is active, code completion will not answer elements that are not visible in the
+current context.&nbsp; (For example, it will not answer private methods of a super class.)</li>
+<li>Automatic Qualification of Implicit Members<br />
+When this option is active, completion automatically qualifies completion on implicit field
+references and message expressions.</li>
+</ul>
+<p>Additional options allow you to specify prefixes and suffixes for the proposed completion names
+for fields, static fields, local variables, and method arguments.&nbsp;&nbsp;</p>
+<p>See&nbsp; <a href="jdt_api_options.htm#codeassist">JDT Core Code Assist Options</a> for more
+information about the code assist options and their defaults.</p>
+
+<h3>Code selection</h3>
+<h4>Performing a code selection</h4>
+<p>Code selection is used to find the Java element represented by a range of text (typically the
+selected text) in a compilation unit.&nbsp; To programmatically perform code selection, you must
+invoke <b><a href=
+"../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeSelect(int,%20int)">ICodeAssist.codeSelect</a></b>.
+You must supply the starting index location of the selection and its length. The result is an array
+of Java elements. Most of the time there is only one element in the array, but if the selection is
+ambiguous then all the possible elements are returned.</p>
+<p>In the following example, code select is invoked for a compilation unit.</p>
+<pre class="color1">
+   // Get the compilation unit
+   ICompilationUnit unit = ...;
+   
+   // Get the offset and length
+   int offset = ...;
+   int length = ...;
+   
+   // perform selection
+   IJavaElement[] elements = unit.codeSelect(offset, length);
+   System.out.println("the selected element is " + element[0].getElementName());
+</pre>
+<h4>Selection at cursor location</h4>
+
+<p>When the selection length is specified as 0, a selection will be computed by finding the
+complete token that encloses the specified offset.&nbsp; Consider the following example method:</p>
+<p><code>&nbsp;&nbsp; public void fooMethod(Object) {<br />
+&nbsp;&nbsp; }<br /></code></p>
+If you specify an offset after the first character of <i>fooMethod</i>, and you specify a length of
+0,&nbsp; then the selection will be computed to include the entire token <i>fooMethod</i>. If
+instead, you specify a length of 5, the selection will considered as <i>ooMet</i>.
+
+</body>
+</html>

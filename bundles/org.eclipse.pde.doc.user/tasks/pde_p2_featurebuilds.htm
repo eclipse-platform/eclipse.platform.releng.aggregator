@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Feature Builds with p2</title>
+</head>
+<body>
+<h1>Feature Builds with p2</h1>
+<p>Defining the new property:</p>
+<div align="center"><tt><b>p2.gathering = true</b></tt></div>
+<p>will cause a <a href="pde_p2_builds.htm#gathering_overview">few changes</a> for feature builds.  See also the page for <a href="pde_p2_featuremetadata.htm">feature metadata layout</a>.</p>
+<p>In particular, instead of producing per-platform archives, the build will produce a single p2 repository which is a group of all the platforms.  Effectively this is forcing an implicit <tt><b>groupConfigurations=true</b></tt>.</p>
+<p>The following is a list of related properties (old and new):</p>
+<table border="5" cellspacing="0" cellpadding="2">
+	<tr><td><tt><b>p2.gathering</b></tt></td><td>Set to <tt><b>true</b></tt> to turn on p2 publisher based builds.</td></tr>
+	<tr><td><tt>p2.build.repo</tt></td><td>A URI to the local build time p2 repository, default is <tt>file:${buildDirectory}/buildRepo</tt>.  Results will be mirrored from here to the final archive location.</td></tr>
+	<tr><td><tt>groupConfigurations</tt></td><td><tt>p2.gathering=true</tt> has the implicit effect of setting <tt>groupConfigurations=true</tt>.  To control the <a href="pde_controlling_output.htm">output format</a> of the archive use the <tt>group.group.group</tt> configuration.</td></tr>
+	<tr><td><tt>generate.p2.metadata</tt></td><td>This is property for the old <a href="pde_p2_integration.htm">metadata generator integration</a>.  It has no effect when <tt>p2.gathering=true</tt>.</td></tr>
+	<tr><td><tt>p2.metadata.repo<br>p2.artifact.repo</tt></td>
+		<td>These properties were associated with <tt>generate.p2.metadata</tt> and have no effect on feature builds when <tt>p2.gathering=true</tt> because the default behaviour in this case is to create a p2 repository.  (However, these properties do affect <a href="pde_p2_productbuilds.htm">product builds</a>).</td>
+	</tr>
+	<tr><td><tt>p2.metadata.repo.name<br>p2.artifact.repo.name</tt></td><td>Optional, these properties will be used to name the final feature repository.</td></tr>
+	<tr><td><tt>p2.compress</tt></td><td>Set to <tt>true</tt> to compress the final feature repository xml into a jar.</td></tr>
+	<tr><td><tt>p2.flavor</tt></td><td>No effect for feature builds, but does affect <a href="pde_p2_productbuilds.htm">product builds</a>.</td></tr>
+	<tr><td><tt>p2.publish.artifacts</tt></td><td>No effect when <tt>p2.gathering=true</tt> (Old property)</td></tr>
+	<tr><td><tt>p2.root.name<br>p2.root.version</tt></td><td>No effect when <tt>p2.gathering=true</tt> (Old property)</td></tr>
+	<tr><td><tt>p2.context.repos</tt></td><td>Define context repositories.  See <a href="pde_p2_reusingmetadata.htm">reusing metadata</a>.</td></tr>
+	<tr><td><tt>repoBaseLocation</tt></td><td>A folder containing repositories to transform using <tt><a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_repo2runnable">&lt;p2.repo2runnable&gt;</a></tt>.  See also <a href="pde_p2_reusingmetadata.htm">reusing metadata</a>.</td></tr>
+	<tr><td><tt>transformedRepoLocation</tt></td><td>The folder containing the output of <tt><a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_repo2runnable">&lt;p2.repo2runnable&gt;</a></tt>.  See also <a href="pde_p2_reusingmetadata.htm">reusing metadata</a>.</td></tr>
+	<tr><td><tt>p2.category.site</tt></td><td>A URL to a site.xml file used to define categories.</td></tr>
+	<tr><td><tt>p2.category.definition</tt></td><td>A URL to a category.xml file used to define categories.</td></tr>
+	<tr><td><tt>p2.category.prefix</tt></td><td>Define a prefix to ensure unique ids for category IUs generated from site/category files that don't use unique names.</td></tr>
+	<tr><td><tt>skipMirroring</tt></td><td>Skip the mirroring step, no final archive is created.  Build results are found in <tt>${p2.build.repo}</tt>.</td></tr>
+</table>
+
+</body>
+</html>

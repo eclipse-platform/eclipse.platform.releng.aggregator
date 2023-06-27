@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Locks</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H3>
+Locks</H3>
+<p>
+It's possible that multiple jobs in the system need to access and manipulate the same object.
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/ILock.html">ILock</a></b> defines protocol
+for granting exclusive access to a shared object.  When a job needs access to the shared object, it <i>acquires</i> a lock
+for that object.  When it is finished manipulating the object, it <i>releases</i> the lock. 
+</p>
+<p>A lock is typically created when the shared object is created or first accessed by a plug-in.  That is, code that
+has a reference to the shared object also has a reference to its lock.  We'll start by creating a lock, <b>myLock</b>, that
+will be used to control access to <b>myObject</b>:
+</p>
+<pre>   ...
+   myObject = initializeImportantObject();
+   IJobManager jobMan = Job.getJobManager();
+   <b>myLock = jobMan.newLock();</b>
+   ...
+</pre>
+<p>A robust implementation of  <b><a href="../reference/api/org/eclipse/core/runtime/jobs/ILock.html">ILock</a></b> 
+is provided by the platform.  The job manager provides instances of this lock for use by clients.  These locks
+are aware of each other and can avoid circular deadlock.(We'll explain more about that statement in a moment.)
+</p>
+<p>Whenever code in a job requires access to <b>myObject</b>, it must first acquire 
+the lock on it.  The following snippet shows a common idiom for working with a lock:
+</p>
+<pre>...
+// I need to manipulate myObject, so I get its lock first.
+try {		
+	<b>myLock.acquire();</b>
+	updateState(myObject);  // manipulate the object
+} finally {
+	<b>lock.release();</b>
+}
+...
+</pre>
+<p>The <b>acquire()</b> method will not return until the calling job can be granted exclusive access to the lock.  
+In other words, if some other job has already acquired the lock, then this code will be blocked until the lock 
+is available.  Note that the code that acquires the lock and manipulates <b>myObject</b> is wrapped in 
+a <tt>try</tt> block, so that the lock can be released if any exceptions occur while working with the object.  
+</p>
+<p>Seems simple enough, right?  Fortunately, locks are pretty straightforward to use.  They are also reentrant, which
+means you don't have to worry about your job acquiring the same lock multiple times.  Each lock keeps a count of the
+number of acquires and releases for a particular thread, and will only release from a job when the number of 
+releases equals the number of acquires.
+</p>
+<h4>Deadlock</h4>
+<p>Earlier we noted that locks provided by the job manager are aware of each other and can avoid circular deadlock. 
+To understand how deadlock occurs, let's look at a simple scenario.  Suppose &quot;Job A&quot; acquires &quot;Lock A&quot; and 
+subsequently tries to acquire &quot;Lock B.&quot; Meanwhile, &quot;Lock B&quot; is held by &quot;Job B&quot; 
+which is now blocked waiting on &quot;Lock A.&quot;  This kind of deadlock indicates an underlying design problem
+with the use of the locks between the jobs.  While this simple case can be avoided easily enough, the chances
+of accidentally introducing deadlock increase as the number of jobs and locks used in your design increase.  
+</p> 
+<p>Fortunately, the platform will help you in identifying deadlocks.  When the job manager detects a deadlock 
+condition, it prints diagnostic information to the log describing the deadlock condition.  Then it breaks the 
+deadlock by temporarily granting access to the locks owned by a blocked job to other jobs that are waiting on them.  
+It is important to carefully test any implementation involving multiple locks and fix any deadlock conditions that
+are reported by the platform.
+</P>
+
+
+</BODY>
+</HTML>

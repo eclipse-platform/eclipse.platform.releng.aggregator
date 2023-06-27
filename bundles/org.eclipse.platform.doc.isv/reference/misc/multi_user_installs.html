@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Eclipse Multi-user Installs</title>
+</head>
+<body text="#000000" bgcolor="#ffffff">
+<h1>Eclipse multi-user installs</h1>
+<p>
+  Eclipse provides a number of strategies for supporting multi-user installs.
+  Each strategy satisfies a specific scenario. This document covers these strategies,
+  describing when each one should be used. The intended readers are product engineers
+  configuring an Eclipse-based product for distribution, system administrators
+  setting up Eclipse-based products to be used through a network and developers
+  interested in creating plug-ins that are good citizens in such setups.</p>
+<p>Last Modified: June 17th, 2005</p>
+<h2>Basic concepts</h2>
+<h3>Locations</h3>
+<p>As described in the <a href="runtime-options.html#locations">Eclipse Runtime
+  options</a> article, there are three different locations that are important
+  in the context of deploying Eclipse in a multi-user setup:</p>
+<ul>
+  <li> <strong>install area</strong> - the location where the Eclipse Platform
+    is installed. This location can be read-only, since neither the Eclipse runtime
+    nor plug-ins are supposed to write there. However, in a single user scenario,
+    the configuration area, which is typically writable, defaults to a directory
+    called &quot;configuration&quot; stored under the install area.</li>
+  <li> <strong>configuration area</strong> - the location where Eclipse stores
+    essential runtime metadata (such as information about the set of plug-ins
+    installed and the dependencies between them) and cached data in general. Eclipse
+    cannot run without a configuration area. Plug-ins may choose to store data
+    here that should be available regardless the workspace in use (for instance,
+    help index files). User settings shared across workspaces are also stored
+    under this location.</li>
+  <li><strong>instance area</strong> - the location where user files are stored,
+    commonly called the <em>workspace</em>. It is optional, however most Eclipse-based
+    products require an instance area to work. The instance area cannot be shared,
+    although a single user might maintain multiple instance areas. Inside the
+    instance area there is a special directory called .metadata, where plug-ins
+    store their own workspace-specific metadata and user settings.</li>
+</ul>
+<h3>Configuration initialization</h3>
+<p>Before Eclipse has been run for the first time, the configuration area is basically
+  an empty directory. This location is gradually populated by the Eclipse runtime,
+  and other plug-ins, across Eclipse sessions. Most of the metadata kept by the
+  Eclipse runtime (e.g. plug-in dependencies, the extension registry) is written
+  during the shutdown of the first session. If no changes are made to the set
+  of installed plug-ins, no data has to be written during subsequent sessions.
+  We say the configuration is <em>initialized</em>. When the configuration is
+  in this state, it is even possible to make the configuration area read-only.
+  Making the configuration area read-only is useful in scenarios such as shared
+  configurations (more on this later).</p>
+<p>The <code>-initialize</code> command-line option allows one to initialize the
+  configuration area without requiring an Eclipse application to run. The initialization
+  procedure forces the creation of any metadata that is written out to the configuration
+  location during the first Eclipse session. However, there are other files kept
+  in the configuration area that are created only when needed. Examples are:</p>
+<ul>
+  <li>Help indexes - only created for the first time the Eclipse Help system is
+    opened. After it is created, provided the user locale does not change, no
+    files are ever written again.</li>
+  <li>files extracted out of plug-in JARs - plug-ins shipped as JARs often need
+    to access embedded files as plain files on the file system. For that, plug-ins
+    call the Eclipse Runtime API <code><a href="../api/org/eclipse/core/runtime/Platform.html#asLocalURL(java.net.URL)">
+	Platform.asLocalURL(URL)</a></code>. The result is that
+    if the URL refers to a file inside a JAR, that file will be extracted to the
+    file system under the configuration area. Once a file is extracted, subsequent
+    calls to <code>Platform.asLocalURL()</code> will be able to find it, so no additional extractions
+    will occur <em>for that file</em>. A similar (actually, the original) scenario
+    where <code>Platform.asLocalURL</code> is used that has the same consequences relates to
+    making sure remote contents (for instance, a file accessible via a http URL)
+    are available locally.</li>
+</ul>
+<p>For these cases (and others that 3rd-party plug-ins might introduce), the initialization
+  procedure is not sufficient to fully initialize the configuration area. There
+  will still be need to write to the configuration area although this need tends
+  to disappear as all the execution paths in the application that cause files
+  to be created in the configuration area are visited. Only after that it can
+  be said the configuration area is fully initialized and no write access to it
+  will ever be required in order for Eclipse to run.</p>
+<h2>Scenario #1 - private install</h2>
+<p>This is actually a single-user scenario. The Eclipse install is used by a single
+  user, and the user has full access privileges to it. The configuration area
+  location defaults to the configuration directory under the install location.</p>
+<p>The procedure to set up this scenario requires just making sure the user has
+  full rights to the install location.</p>
+<h2>Scenario #2 - shared install</h2>
+<p>In this scenario, a single install area is shared by many users. The &quot;configuration&quot;
+  directory under the install area is home only to the config.ini as shipped with
+  the product (it is not initialized). Every user has their own local standalone
+  configuration location.</p>
+<p>The set up for this scenario requires making the install area read-only for
+  regular users. When users start Eclipse, this causes the configuration area
+  to automatically default to a directory under the user home dir. If this measure
+  is not taken, all users will end up using the same location for their configuration
+  area, which is not supported.</p>
+<h2>Scenario #3 - shared configuration</h2>
+<p>Here users share not only an install area but also a master configuration area.
+  Users still have, by default, their own private writable configuration areas.
+  A user's private configuration area is cascaded to the master configuration
+  and will not contain any interesting data if the master configuration has been
+  fully initialized and no changes to the set of plug-ins to be installed has
+  occurred.</p>
+<p>In this scenario, the system administrator initializes the master configuration
+  (typically under the install location), and ensures the whole install and configuration
+  areas are read-only to users. When users run the Eclipse-based product from
+  the shared install location, since they do not have write access privileges
+  to the configuration area under the install area, a local configuration area
+  will be automatically computed and initialized.</p>
+<p>The more fully initialized the shared configuration is, the less need there
+  is for files to be created under the local configuration.</p>
+<h3>Setting the private configuration area location</h3>
+<p>The default location for a private configuration area is:</p>
+<p><code>&lt;user-home-dir&gt;/.eclipse/&lt;product-id&gt;_&lt;product-version&gt;/configuration</code></p>
+<p>The user home dir is determined by the <code>user.home</code> Java system property.
+  The product id and version are obtained from the product marker file <code>.eclipseproduct</code>
+  under the Eclipse install.</p>
+<p>A non-default configuration area can be defined by setting the <a href="runtime-options.html#osgiconfigurationarea"><code>osgi.configuration.area</code></a>
+  system property. This property can be set by the end user, but it is more convenient
+  to set it either in the <a href="runtime-options.html#launcher">launcher .ini
+  file</a> or in the config.ini file at the base configuration location.</p>
+<h3>Updating</h3>
+<h4>Shared configuration</h4>
+<p>Plug-ins can be installed in/removed from the shared configuration. Users will
+  catch up with those changes the next time Eclipse runs. It is necessary to make
+  sure users having the shared configuration as their master configuration are
+  not running Eclipse.</p>
+<h4>Private configuration</h4>
+<p>Users can modify their local configuration areas by installing additional plug-ins.
+  This does not cause any changes to the shared configuration, so other users
+  will not see the changes. Note that plug-ins configured at the shared configuration
+  <em>cannot</em> be removed. If they are, they will be reinstalled the next time
+  the platform starts.</p>
+</body>
+</html>

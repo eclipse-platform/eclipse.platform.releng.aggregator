@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Information center customization</title>
+
+</head>
+<body>
+
+<h2>Information center customization</h2>
+
+<p>All of the customizations which can apply to the Eclipse help system can also be applied to an Eclipse information center including
+product specific branding, style sheets, banner and ordering of books. The easiest way to do this is to 
+create a plug-in which implements
+the org.eclipse.core.runtime.products extension point and place all the customization in that plugin.
+</p>
+<p>The Help system itself is divided up into a number of separate
+plug-ins.
+These tables shows available preferences, and which plug-in
+defines them.
+</p>
+
+<h3>Creating a product plug-in</h3>
+<p>A product plugin can be created using the menu item File/New/Project and selecting Plug-in Project. 
+Uncheck the check box titled "Create Java Project", give the project a name, hit "next" and "finish" to 
+exit the wizard. In the extensions tab of the plug-in manifest editor add the extension 
+"org.eclipse.core.runtime.products" and give it a name. Create a product element beneath that and give it a name. 
+Beneath the product element add a property element and 
+set "preferenceCustomization" to "plugin_customization.ini".  plugin.xml will now contain entries similar to 
+the following.</p>
+<pre>
+ &lt;extension
+         id="custom"
+         point="org.eclipse.core.runtime.products"&gt;
+      &lt;product
+            application="org.eclipse.ui.ide.workbench"
+            description="This is my custom product"
+            name="Custom Product"&gt;
+         &lt;property
+               name="preferenceCustomization"
+               value="plugin_customization.ini"&gt;
+         &lt;/property&gt;
+      &lt;/product&gt;
+   &lt;/extension&gt;
+</pre>
+
+
+<h3>Installing the product plug-in</h3>
+<p>
+    Export the product plug-in as a deployable plug-in. Copy the jar file for the exported plug-in 
+    to the "dropins" folder in the eclipse installation which will be used to start the information center.
+    Start the information center with an additional argument to specify the product. For example if the 
+    product plugin is called help.product and its product id is "custom" add the argument 
+    "-product help.product.custom". Open the information center, the title will now show the customized product name.
+</p>
+<h3>Additional customization</h3>
+<p>
+Modify plugin_customization.ini in the product plugin to add more customizations, see <a href = "ua_help_setup_preferences.htm">
+Help system customization</a>, re-export and replace the plug-in in the dropins folder. To modify the banner
+a line like this could be added to plugin_custiomization.ini.</p>
+<pre>
+org.eclipse.help.base/banner=/org.eclipse.help.webapp/advanced/banner.html
+</pre>
+
+
+</body>
+</html>

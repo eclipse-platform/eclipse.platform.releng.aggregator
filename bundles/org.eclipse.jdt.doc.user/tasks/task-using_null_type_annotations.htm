@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) GK Software AG and others 2014, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Using null type annotations</title>
+</head>
+<body>
+<h1> Using null type annotations </h1>
+<p>
+Starting with Java 8, null annotations can be used in a new and more powerful way,
+because the new concept of "type annotations" (JSR 308) supports the use of 
+annotations as an extension to the type system.
+</p>
+<p>
+Technically, this is determined by two new elements in
+the enum <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/annotation/ElementType.html"
+    ><code>java.lang.annotation.ElementType</code></a>: <code>TYPE_USE</code> and
+<code>TYPE_PARAMETER</code>. Notably, when saying <code>@Target(ElementType.TYPE_USE)</code>
+the annotation thus marked can be attached basically to all usages of a type. 
+</p>
+<p>
+By interpreting null annotations as part of the type system we interpret each
+class or interface <code>Cn</code> in the system as introducing two distinct types: 
+"<code>@NonNull Cn</code>" and "<code>@Nullable Cn</code>".
+The former type contains all instances of <code>Cn</code> whereas the latter type
+additionally contains the value <code>null</code>.
+This implies that <code>@NonNull Cn</code> is a subtype of <code>@Nullable Cn</code>
+with all regular consequences regarding assignability.
+So ideally for every value in a program we will know if it can be null 
+(and must be checked before dereference) or not.
+The un-annotated type will be considered a legacy type just like raw types are legacy
+types since the introduction of generics: a way for interfacing with old code,
+to be flagged with warnings about unchecked conversions.
+If we systematically avoid such legacy types, then the compiler can rigorously
+flag <em>every</em> unsafe usage.
+</p>
+<p>
+In order to achieve completeness of null analysis, checks regarding null type annotations
+have been integrated with all type checking tasks of the compiler (active if null annotations
+are enabled).
+</p>
+<p>
+Users <em>migrating</em> from null annotations in previous versions to Java-8-style
+null type annotations are advised to check the section about <a href="#compatibility">compatibility</a>.
+</p>
+<p>
+Note, that the actual qualified names of null type annotations are 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_annotation_names">configurable</a>,
+but by default the ones shown here are used (from the package <code>org.eclipse.jdt.annotation</code>).
+When using 3rd party null annotation types, please ensure that those are properly defined using at least a <code>@Target</code>
+meta annotation, because otherwise the compiler can not distinguish between declaration annotations (Java 5)
+and type annotations (Java 8). Furthermore, some <a href="#compatibility_semantics">details of <code>@NonNullByDefault</code></a>
+are not supported when using 3rd party annotation types. 
+</p>
+
+
+<h2 id="generics">Generics</h2>
+Perhaps the main advantage of type annotations for null analysis is the ability to annotate
+the parameters and arguments of generic classes and interfaces.
+Programmers only <em>using</em> generic classes may directly skip to the section on
+<a href="#typeArguments">type arguments</a> but designers of generic classes should
+take the time to understand the different implications of annotating these elements:
+<ul>
+<li><a href="#typeParameters">type parameters</a></li>
+<li><a href="#typeVariables">type variables</a></li>
+<li><a href="#typeArguments">type arguments</a></li>
+</ul>
+<h3 id="typeParameters">Type parameters</h3>
+<p>
+A generic class, interface or method may <em>declare</em> one or more type parameters.
+Technically these are declarations, and hence it was a mere oversight that these cannot
+be annotated in Java 5. 
+In Java 8 an annotation can declare <code>@Target(ElementType.TYPE_PARAMETER)</code>
+to be applicable in this position. JDT's null type annotations
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNull.html"><code>@NonNull</code></a> and
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/Nullable.html"><code>@Nullable</code></a>
+are declared with
+<code>@Target({ TYPE_USE })</code>, which includes usage on type parameter declarations.
+</p>
+<p>
+With respect to null type annotations, each type parameter can be specified at one
+of these levels:
+</p>
+<dl>
+<dt><strong>unconstrained</strong></dt>
+<dd>the type parameter does not impose any nullness-constraints on the arguments that
+  a client my substitute for the type parameter.</dd>
+<dt><strong>constrained by an upper bound</strong></dt>
+<dd>the type parameter has an <code>extends</code> clause that specifies
+  minimal nullness-requirements on type arguments provided by clients</dd>
+<dt><strong>exactly specified</strong></dt>
+<dd>the type parameter restricts usage to types of exactly one particular nullness</dd>
+</dl>
+<p>
+Constraining a type parameter via an <strong>upper bound</strong> relies on the fact that each type
+'<code>@NonNull Cn</code>' is a subtype of the corresponding type '<code>@Nullable Cn</code>'.
+Hence, a <code>@Nullable</code> upper bound does not impose any restriction, whereas a
+<code>@NonNull</code> upper bound prohibits the substitution by a <code>@Nullable</code>
+type argument:
+<pre>    // declarations:
+    class C0&lt;T0 extends @Nullable Object&gt; {} // meaningless, no constraint imposed
+    class C1&lt;T1 extends @NonNull Object&gt; {}
+    ...
+    // usage:
+    C1&lt;@NonNull String&gt; c1String;  // legal
+    C1&lt;@Nullable String&gt; c1String; // illegal
+</pre>
+<p>
+For <strong>exact specification</strong> a null annotation may be attached to the type parameter
+declaration itself, which is interpreted as defining both an upper and a lower bound.
+In other words, only types with the exact same null type annotation are legal as type arguments:
+</p>
+<pre>    // declaration:
+    class C2&lt;@Nullable T2&gt; {}
+    ...
+    // usage:
+    C2&lt;@NonNull String&gt; c2String;  // illegal
+    C2&lt;@Nullable String&gt; c2String; // legal
+</pre>
+<p>
+Given the asymmetry, that in Java a type parameter may declare only upper bounds but
+no lower bounds, the following three styles can be recommended:
+<ul>
+<li>Use a <code>@NonNull</code> upper bound for constraining type arguments to nonnull types.</li>
+<li>Directly specify a type parameter as <code>@Nullable</code> for constraining type arguments to nullable types.</li>
+<li>Use an unconstrained type parameter to support type arguments of either nullness.</li>
+</ul>
+<h3 id="typeVariables">Type variables</h3>
+<p>
+Within the scope of a generic declaration (class, interface or method), the name of a
+type parameter can be used as a <em>type variable</em>, i.e., a placeholder for a type
+that is not known at this point.
+</p>
+<p>
+A type variable will typically be used without (further) null annotations, which implies
+that the annotations from the type parameter declaration will apply as detailed below.
+In some situations, however, it is useful to annotate an individual use of a type variable.
+As an example consider the library method <code>java.util.Map.get(Object)</code>,
+which should actually be annotated like this:
+</p>
+<pre>    @Nullable V get(Object key)</pre>
+<p>
+By this declaration we would indicate that the return type is <strong>the nullable variant
+of whatever type V may represent</strong>. In other words, a null annotation on the use
+of a type variable <em>overrides</em> any other null information that would otherwise
+apply to this type. In particular any null annotation on the corresponding type parameter
+declaration (or its bound) is overridden by a null annotation in this position.
+</p>
+<p>
+On the other hand, when using a type variable without immediate null annotations the following rules apply
+depending on the declaration of the corresponding type parameter:
+</p>
+<p>
+A type variable corresponding to a type parameter with a <strong><code>@NonNull</code> upper bound</strong>
+denotes a type that is <em>known to be nonnull</em>.
+</p>
+<pre>    class C1&lt;T1 extends @NonNull Number&gt; {
+        int consume(T1 t) {
+            return t.intValue(); // OK since T1 is known to be nonnull
+        }
+        T1 provide() {
+            return null;         // NOT OK since T1 requires nonnull
+        }
+    }
+</pre>
+<p>
+A type variable corresponding to a type parameter <strong>specified as <code>@Nullable</code></strong>
+denotes a type that is <em>known to be nullable</em>.
+</p>
+<pre>    class C2&lt;@Nullable T2 extends Number&gt; {
+        int consume(T2 t) {
+            return t.intValue(); // NOT OK since T2 is known to be nullable
+        }
+        T2 provide() {
+            return null;         // OK: returning null is legal
+        }
+    }
+</pre>
+<p id="pessimistic_analysis">
+A type variable corresponding to an <strong>unconstrained</strong> type parameter requires <strong>pessimistic
+checking</strong> in order to guarantee safety with all legal substitutions: this type can
+neither be assumed to be nullable nor nonnull.
+</p>
+<pre>    class C&lt;T extends Number&gt; {
+        int consume(T t) {
+            return t.intValue(); // NOT OK since T could be nullable
+        }
+        T provide() {
+            return null;         // NOT OK since T could require nonnull
+        }
+    }
+</pre>
+<p>
+The last point may look surprising at first, but please see that an unconstrained type parameter
+implies that we may not assume anything about the nullness of the type represented by
+the corresponding type variable. Even more: we must actively support nullable <em>and</em>
+nonnull types. On the other hand this simply extends the existing rule that the only
+type being compatible with an unbounded type variable is the type variable itself.
+To explain this situation in the context of null analysis, the compiler will raise the 
+following error against the return in <code>provide()</code>:
+</p>
+<blockquote>
+Null type mismatch (type annotations): 'null' is not compatible to the free type variable 'T'
+</blockquote>
+<p>The severity of problems detected by this pessimistic analysis is controlled by a dedicated <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#pessimistic_analysis">preference option</a>.
+<p>
+By enforcing this defensive strategy regarding unconstrained type parameters we obtain the benefit
+of allowing clients to freely choose the rules for a particular generic instantiation,
+as will be shown next.
+</p>
+<h3 id="typeArguments">Type arguments</h3>
+<p>
+When instantiating a generic type or when invoking a generic method, the constraints put
+forward by the type parameter must be observed. Hence, when a provider of a generic type or method
+specified the required nullness, this must be obeyed and the compiler will flag any violations.
+</p>
+<p>
+When, on the other hand, a type parameter does not impose any restrictions, a client may
+freely choose the nullness of his type arguments:
+<pre>
+    int processWithoutNulls (@NonNull List&lt;<strong>@NonNull Integer</strong>&gt; ints) {
+        int result = 0;
+        for (int i = 0; i &lt; ints.size(); i++) {
+            Integer element = ints.get(i);
+            result += element.intValue(); // OK: list element is known to be nonnull
+            ints.set(i, null);            // NOT OK: list does not accept null value
+        }
+        return result;
+    }
+    int processWithNulls (@NonNull List&lt;<strong>@Nullable Integer</strong>&gt; ints) {
+        int result = 0;
+        for (int i = 0; i &lt; ints.size(); i++) {
+            Integer element = ints.get(i);
+            result += element.intValue(); // NOT OK: list element can be null
+            ints.set(i, null);            // OK: list accepts null value
+        }
+        return result;
+    }
+</pre>
+<h3 id="substitution">Substitution</h3>
+<p>
+The intention behind combining null type annotations with generics is to propagate a constraint defined for a type argument
+into all occurrences of the corresponding type variable. For example, if you declare a variable of type <code>List&lt;@NonNull String&gt;</code>
+and invoke any method from <code>List&lt;T&gt;</code> on this variable, all method signatures will see type <code>T</code> substituted by <code>@NonNull String</code>.
+This is how inserting a <code>null</code> value into this list is made impossible, and allows to safely regard elements extracted from this list as nonnull. 
+The previous section gave examples of exactly this idea.
+</p>
+<p>
+Unfortunately, this idea introduces a new risk when applied to generic library classes that are <em>not designed with null annotations in mind.</em>
+A prominent example is method <code>java.util.Map.get(K)</code>, which declares to return <code>V</code>.
+In this particular case, the javadoc of said method explicitly states that <code>null</code> is a possible return value,
+which is in conflict with substituting <code>V</code> by any nonnull type.
+So, if this specific method <code>get()</code> is invoked on a variable of type <code>Map&lt;Y,@NonNull X&gt;</code>, 
+it is <em>unsafe</em> to assume that the return value is nonnull.
+This dilemma is a combination of two factors:
+</p>
+<ol>
+<li>The library lacks null annotations (it should be considered as "legacy" in terms of null annotations)</li>
+<li>The compiler cannot know whether an unannotated type variable is by intention (as to support arbitrary substitution) or an unsafe omission (legacy).
+</ol>
+<p>
+To alert users about this risk, a specific warning is raised by the compiler:
+</p>
+<blockquote>
+Unsafe interpretation of method return type as '@NonNull X' based on the receiver type 'Map&lt;Y,@NonNull X&gt;'. Type 'Map' doesn't seem to be designed with null type annotations in mind
+</blockquote> 
+<p>The severity of this problem is controlled by a dedicated <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#unsafe_interpretation_generic_legacy">preference option</a>.
+<p>In response to this warning, the resolution of the dilemma is to add null annotations to the generic class in question. 
+For the likely case that the current user is not the owner of the legacy library, 
+<a href="task-using_external_null_annotations.htm">external null annotations</a> should be used.
+Then there are two options:</p>
+<ol>
+<li>For the given example, method <code>get(K)</code> should be declared to return <code>@Nullable V</code>.
+	</li>
+<li>For the opposite case as exemplified by <code>List.get()</code>, the return type should be left unannotated.
+	In order to signal to the compiler that types are left <em>unannotated by intention</em>, 
+	a stub external annotation file (.eea) should be created without inserting actual external annotations.
+	This will tell the compiler that this class is no longer to be considered as legacy,
+	and hence all signatures of this class should be interpreted verbatim according to the rules given above
+	(care must be taken that this is safe for all method in that class).
+	</li>
+</ol>
+<p>If an external annotation file is found, the specific warning about unsafe interpretation is not issued.
+Finally, if a project is not yet configured for using external annotations for the given library,
+the problem is softened to "info" severity.
+</p> 
+
+<h2 id="inference">Inference</h2>
+<p>
+With null type annotations affecting type arguments, the language features one
+more location amenable to inference: during type inference for the invocation
+of a generic method (lambda expression etc.), type inference shyly attempts to
+also infer the appropriate null type annotations. Example:
+</p>
+<pre>    &lt;T&gt; T check(T in) { return in; }
+    void test(@NonNull List&lt;@Nullable String&gt; someStrings) {
+        @NonNull List&lt;@Nullable String&gt; checked;
+        checked = check(someStrings); // inferring types for this invocation
+        ...
+    }
+</pre>
+<p>
+In this trivial example, inference will indeed instantiate the generic parameter <code>&lt;T&gt;</code>
+to <code>@NonNull List&lt;@Nullable String&gt;</code>. More complex scenarios are inferred, too,
+but no guarantee is made, that a possible solution will always be found. In case inference fails
+to infer suitable null type annotations, users are advised to revert to explicitly specify 
+type arguments even of a generic method invocation.
+</p>
+
+<h2 id="more_locations">More locations</h2>
+<h3>Cast and instanceof</h3>
+<p>
+Syntactically, type annotations can be used also in casts and instanceof expressions.
+For null annotations, however, this has limited value.
+</p>
+<p>
+<strong>Casting</strong> to a null-annotated type is always an <em>unchecked cast</em> because the
+compiler is not allowed to insert runtime checks that would make the cast meaningful.
+If a runtime check is desired, please consider using a small helper function like:
+</p>
+<pre>    static @NonNull &lt;T&gt; T castToNonNull(@Nullable T value, @Nullable String msg) {
+        if (value == null) throw new NullPointerException(msg);
+        return value;
+    }
+</pre>
+<p>
+Casts affecting the type arguments of a generic type will always be unchecked casts due to erasure.
+</p>
+<p>
+<strong>instanceof</strong> checks with null type annotations are not meaningful.
+Hence the compiler flags this as illegal usage of a null type annotation.
+</p>
+<h3>Locations that are nonnull by definition</h3>
+<p>
+Syntactically, type annotations can also be used for
+</p>
+<ul>
+<li>allocation expressions</li>
+<li>method receiver (pseudo argument by the name of <strong>this</strong>)</li>
+<li>catch parameter</li>
+</ul>
+<p>
+In each of these constructs, the type is nonnull by definition.
+Hence a null type annotation in one of these positions is flagged as illegal use.
+This doesn't, however, restrict the use of null type annotations on type arguments
+of the given type.
+</p>
+
+<h2 id="compatibility">Compatibility</h2>
+<p>
+Migrating from declaration annotations to type annotations has a few unavoidable
+implications, regarding the syntax, regarding project configuration and regarding
+the semantics.
+</p>
+<h3 id="compatibility_syntax">Syntax</h3>
+<p>
+For two constructs the JLS introduces a syntactic change:
+</p>
+<table border="1" cellspacing="0" cellpadding="5" summary="Syntax Changes">
+<tr><th>Declaration Annotations (Java 7 or below)</th><th>Type Annotation (Java 8)</th></tr>
+<tr><td><code>@NonNull String[]</code></td><td><code>String @NonNull[]</code></td></tr>
+<tr><td><code>@NonNull java.lang.String</code></td><td><code>java.lang.@NonNull String</code></td></tr>
+</table>
+<p>
+In both cases the new syntax has been introduced to provide more options.
+</p>
+<p>
+For <strong>arrays</strong> a type annotation before the leaf element type will now denote
+an array whose individual cells have the given nullness - here: cells cannot be null.
+In Java 7 and below the same syntax expressed a property of the corresponding variable
+and hence captured the nullness of the array itself.
+To express the same using Java-8 type annotations, viz. that the array itself can or cannot be null,
+the type annotation is placed before the square brackets denoting the array dimensions.
+This implies that the old syntax is still valid, but its meaning has changed:
+</p>
+<pre>
+    // annotated leaf type:
+    @NonNull Object [] o1;
+    o1 = null;          // OK
+    o1 = new Object[1];
+    o1[0] = null;       // NOT OK
+    ...
+    // annotated array type:
+    Object @NonNull[] o2;
+    o2 = null;          // NOT OK
+    o2 = new Object[1];
+    o2[0] = null;       // OK
+    ...
+    // multi-dimensional array:
+    Object @NonNull[] @Nullable[] o3;
+    o3 = null;          // NOT OK, outer array is nonnull
+    o3 = new Object[1] @Nullable[];
+    o3[0] = null;       // OK, inner array is nullable
+</pre>
+<p>
+Unfortunately, checking proper initialization of an array with nonnull content
+is beyond the capabilities of JDT's static analysis.
+</p>
+<p>
+For <strong>qualified type names</strong> the type annotation must be placed directly preceding the
+actual type name. This way it is possible to give different type annotations for
+inner classes and their enclosing like in <code>org.project.@Immutable Outer.@Nullable Inner</code>.
+This distinction, however, is not useful for null annotations, because the enclosing
+of a non-static inner class is by definition always non-null. Users of null type
+annotations only need to understand that the old syntax for this case is illegal
+for type annotations and how to convert this into legal Java 8 code (see the table above).
+</p>
+<h3 id="compatibility_configuration">Project configuration</h3>
+<p>
+Properly designed annotation types can be distinguished by looking at their <code>@Target</code>
+declaration (the use of null annotations lacking a <code>@Target</code> declaration is discouraged).
+To support both styles of annotations, JDT has published a major update of the annotation
+bundle <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/package-summary.html"><code>org.eclipse.jdt.annotation</code></a>: 
+Versions 1.1.x are old style declaration annotations; versions 2.0.0 and onward are type annotations.
+By increasing the major version an incompatibility is signaled. Users are advised to
+reference this library with an explicit version range, either <code>[1.1.0,2.0.0)</code>
+for declaration annotations or <code>[2.0.0,3.0.0)</code> for type annotations.
+</p>
+<p>
+The exact configuration depends of course on the flavor of project:
+<dl>
+<dt>Plain Java</dt>
+<dd>JDT continues to offer a quickfix for copying the annotation library into the
+project. The version will be determined by the compliance settings of the project.</dd>
+<dt>Maven</dt>
+<dd>Both versions of the annotation bundle will be published to <code>repo.eclipse.org</code>,
+from where they can be consumed using the regular maven mechanisms: be sure to specify
+the correct version; specifying <code>&lt;scope&gt;compile&lt;/scope&gt;</code> is recommended
+for this dependency.</dd>
+<dt>OSGi / Eclipse</dt>
+<dd>When developing OSGi bundles / Eclipse plugins the version range should be specified as
+mentioned above. Unfortunately, OSGi doesn't support a concept of compile time dependencies.
+The PDE specific mechanism in file <code>build.properties</code> is problematic because
+it doesn't support specifying a version range. Thus the best approximation of the desired
+semantics is to use a <code>Require-Bundle</code> dependency. 
+qualified with <code>resolution:=optional</code> in order to avoid forcing this dependency
+on the runtime:
+<pre>
+Require-Bundle: ...,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+</pre></dd>
+</dl>
+<h3 id="compatibility_semantics">Semantics &ndash; NonNullByDefault</h3>
+<p>
+While the fundamental semantics of null annotation remains unchanged,
+the annotation <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a> has been changed slightly:
+</p>
+<ul>
+<li>This annotation can now affect more locations.</li>
+<li>The locations to be affected can be fine tuned using the 
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html#value--"
+	><code>value</code></a> property of the annotation
+	(see also the enum <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/DefaultLocation.html"
+	><code>DefaultLocation</code></a>).</li>
+<li>As a consequence, the notation for canceling a default from an outer scope has been changed, too:
+<table border="1" cellspacing="0" cellpadding="5" summary="Cancelling a default">
+<tr><th>Declaration Annotations (Java 7 or below)</th><th>Type Annotation (Java 8)</th></tr>
+<tr><td><code>@NonNullByDefault(false)</code></td><td><code>@NonNullByDefault({})</code></td></tr>
+</table>
+</li>
+</ul>
+<p>
+Note, that the <code>value</code> property described here is only supported when using the annotation type
+<code>org.eclipse.jdt.annotation.NonNullByDefault</code> supplied by Eclipse.
+</p>
+<p>
+Although the Java 8 variant of
+	 <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a> affects more locations, two noteworthy exceptions exist
+	(as specified in <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/DefaultLocation.html"
+	><code>DefaultLocation</code></a>):
+<blockquote>
+	<strong>
+	Wildcards and the use of type variables are always excluded from 
+	<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a>.
+	</strong>
+</blockquote>
+<p>
+By this rule, type variables and wildcards retain their intended properties as "unknowns" also in terms of nullness,
+even when they appear in the context of 
+	<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a>.
+</p>
+
+<h2 id="compiler_messages_explained">Compiler messages explained</h2>
+<p>
+In addition to
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/tasks/task-using_null_annotations.htm#compiler_messages_explained"
+>compiler messages of the previous version</a> the following messages may be issued,
+if null type annotations are enabled for analysis:
+</p>
+
+<h3>General null type mismatch</h3>
+<dl>
+<dt><font color="SaddleBrown">Null type mismatch (type annotations): required 'X' but this expression has type 'Y'</font></dt>
+<dd>In an assignment context null type annotations don't match.
+	Note that the mismatch may relate to any detail of the type (type argument, array element), not necessarily to the main type.</dd>
+</dl>
+<p>
+All mismatches detected based on type annotations are prefixed with "<code>Null type mismatch (type annotations)</code>".
+</p>
+	
+<h3>Various expressions</h3>
+<dl>
+<dt><font color="SaddleBrown">Potential null pointer access: array element may be null</font></dt>
+<dd>An array element is dereferenced, where the array type declares its elements as <code>@Nullable</code>.</dd>
+<dt><font color="SaddleBrown">Potential null pointer access: this expression has a '@Nullable' type</font></dt>
+<dd>Any expression at the left hand side of a dot has a type that is declared to be nullable.</dd>
+<dt><font color="SaddleBrown">Redundant null check: comparing '@NonNull X' against null</font></dt>
+<dd>An arbitrary expression known to have a @NonNull type is unnecessarily being compared against null.</dd>
+</dl>
+
+<h3>Unchecked conversions</h3>
+<dl>
+<dt><font color="SaddleBrown">Null type safety (type annotations): The expression of type 'X' needs unchecked conversion to conform to '@NonNull X'</font></dt>
+<dd>A value of an un-annotated type is being assigned to a variable of an annotated type.
+	Note that the mismatch may relate to any detail of the type (type argument, array element), not necessarily to the main type.</dd>
+<dt><font color="SaddleBrown">Null type safety: Unchecked cast from X to '@N Y'</font></dt>
+<dd>A value is casted to a null-annotated type, where the nullness is not checked at runtime by the cast.</dd>
+</dl>
+
+<h3>Problems specific to generics</h3>
+<dl>
+<dt><font color="SaddleBrown">Null constraint mismatch: The type 'X' is not a valid substitute for the type parameter 'T'</font></dt>
+<dd>Here the type parameter <code>&lt;T&gt;</code> has a constraint in one of the forms mentioned <a href="#typeParameters">above</a>.
+	The actual type argument <code>X</code>, however, doesn't conform to this constraint.</dd>
+<dt><font color="SaddleBrown">This nullness annotation conflicts with a '@N' annotation which is effective on the same type parameter</font></dt>
+<dd>A null annotation on a bound of a type parameter conflicts with another null annotation on another bound or on the type parameter itself.</dd>
+<dt><font color="SaddleBrown">Contradictory null annotations: method was inferred as 'T foo(X)', but only one of '@NonNull' and '@Nullable' can be effective at any location</font></dt>
+<dd>Type inference for a generic method invocation has produced a signature in which contradictory null annotations clash on the same element.<dd>
+<dt><font color="SaddleBrown">Null type mismatch (type annotations): 'null' is not compatible to the free type variable 'T'</font></dt>
+<dt><font color="SaddleBrown">Null type mismatch (type annotations): required 'T' but this expression has type '@Nullable T', where 'T' is a free type variable</font></dt>
+<dt><font color="SaddleBrown">Null type safety: required '@NonNull' but this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
+<dt><font color="SaddleBrown">The field 'f' may not have been initialized, whereas its type 'T' is a free type variable that may represent a '@NonNull' type</font></dt>
+<dt><font color="SaddleBrown">Potential null pointer access: this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
+<dd>These problems are specifically detected by <a href="#pessimistic_analysis">pessimistic analysis for free type variables</a>.</dd>
+<dt><font color="SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on the receiver type 'Map&lt;Y,@NonNull X&gt;'. Type 'Map' doesn't seem to be designed with null type annotations in mind</font></dt>
+<dt><font color="SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on substitution 'V=@NonNull X'. Declaring type 'Map&lt;K,V&gt;' doesn't seem to be designed with null type annotations in mind</font></dt>
+<dd>This signals a particular dilemma regarding <a href="#substitution">substitution of type variables from a legacy library</a>.
+</dl>
+
+
+<h3>Lambda expressions and method references</h3>
+For any mismatches in null annotations affecting lambda expressions or method references the corresponding
+"descriptor" is mentioned (the single abstract method being implemented by the lambda / method reference).
+This is useful for finding the origin of a null annotation that is not explicit at the current expression.
+
+
+</body>
+</html>

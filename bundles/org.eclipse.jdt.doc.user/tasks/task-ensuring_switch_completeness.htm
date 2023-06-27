@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) GK Software AG and others 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<style type="text/css">
+	div.recommendation { margin-left:10px;margin-right:10px; background-color:#f0f0f0; padding:10px; }
+	div.recommendation strong { color:green; }
+</style>
+<title>Ensuring completeness of switch statements</title>
+</head>
+<body>
+<h1> Ensuring completeness of switch statements </h1>
+<p>
+It is good practice to ensure that each <code>switch</code> statement should be complete
+in the sense that each execution at run time will find a suitable branch.
+This is actually a non-trivial task when taking all of the following into consideration:
+</p>
+<ul>
+<li>Different rules apply for switches over an <b>enum</b> value vs. int or even String.</li>
+<li>Depending on the context, using a <b>default</b> label may appear undesirable or good practice or even mandatory.</li>
+<li>In some contexts <b>program evolution</b> should be safe guarded by flagging inconsistent extension as an error,
+	while in other contexts a more forgiving strategy is desirable.</li>  
+</ul>
+<p>
+Additionally, the JLS mandates a flow analysis for enum switch statements which can lead to unexpected
+compile time errors:
+<pre id="missing_return">    enum Colors { RED, GREEN, BLUE }
+    String colorString(Color c) {
+        switch(c) {
+            case RED: return "red";
+            case GREEN: return "green";
+            case BLUE: return "blue";
+        }
+    }
+</pre>
+<p>
+The compiler will answer:</p>
+<blockquote>"This method must return a result of type String.
+ Note that a problem regarding missing 'default:' on 'switch' has been suppressed, which is perhaps related to this problem".</blockquote>
+<p>
+This message has been designed to alert users of the different notions of completeness:
+	the flow analysis mandated by the JLS considers <em>each</em> enum switch statement without a default case as incomplete,
+	even if it lists all (currently known) enum constants. This concerns return statements as well as definite assignment
+	of local variables or blank final fields.
+	However, if you follow all recommendations below, the above error message will never occur.
+</p>
+<p>Please consult the <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#switch">compiler preferences</a> regarding the individual configuration options
+	for reporting various levels of incompleteness. In the sequel we discuss different design goals and policies
+	and how they can be checked using the Eclipse Java compiler.
+</p>
+<h2>On using "default:"</h2>
+<p>Optimally, each switch statement should have a <b>meaningful default branch</b>,
+	which handles all cases that are not explicitly listed using an "always-reasonable" strategy.
+	Obviously, such a strategy is difficult or even impossible to find in many cases,
+	but if you can find a meaningful default implementation, that's certainly the best solution.
+</p>
+<div class="recommendation">
+	<strong>Recommendation:</strong> By letting the compiler warn you about each switch statement lacking a default case
+	you are reminded to search for a good default implementation for every switch statement.
+</div>
+<p>If the compiler warns you about a missing default case, but the reasonable thing to do by default
+	is just <b>do nothing</b>, this might as well be worth documenting.
+</p>
+<div class="recommendation">
+	<strong>Recommendation:</strong> If "do nothing" is a reasonable default strategy you should
+	add a <code>default:</code> label whose action is only a comment explaining that (and why)
+	doing nothing is OK in this switch. By doing so you also tell the compiler that you did not
+	simply <em>forget</em> about a default case.
+</div>
+<p>If definitely no reasonable default implementation can be found, as a <b>last resort</b> you
+	may want to prevent an unexpected value to be the root cause for other errors further downstream,
+	i.e., you may want to <b>fail early</b> at runtime.
+</p>
+<div class="recommendation">
+	<strong>Recommendation:</strong> If neither a reasonable default implementation can be found
+	nor "do nothing" appears to be a good strategy, add a <code>default:</code> case that throws
+	an exception and/or logs the problem.
+</div>
+<p>Each switch statement should be assignable to one of the three above categories.
+	This means letting the compiler <b>warn you about each missing default case</b>
+	is a universally valid strategy. 
+</p>
+<h2>Handling all enum constants</h2>
+<p>When performing a switch over an enum value, it may be desirable to explicitly cover
+	each enum constant by a corresponding case statement.
+</p>
+<div class="recommendation">
+	<strong>Recommendation:</strong> If you want to be warned about enum switch statements
+	that lack a case statement for any of the enum constants, please consider enabling the option
+	<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#missing_case_despite_default">Signal even if 'default' case exists</a>.
+</div>
+<p>If you don't like the option that <em>all</em> enum switches should mention all enum constants,
+	but still want to get the warning about missing case labels for <em>some</em> enum switch statements,
+	you'll need to select the strategy for each individual enum switch statement.
+</p>
+<div class="recommendation">
+	<strong>Recommendation:</strong> If the above warning is desirable for some switch statements,
+	consider to globally enable the warning, and identify those switch statements where it is OK
+	to <em>omit</em> cases for some enum constants, because those are suitably handled by the default case. 
+	For these switch statements use the '//$CASES-OMITTED$' tag comment to document your decision:
+</div>
+<pre>    String colorString2(Color c) {
+        switch(c) {
+        case RED: return "red";
+        case GREEN: return "green";
+            //$CASES-OMITTED$
+        default:
+        	return "unknown color";
+        }
+    }</pre>
+<p><strong>Hint:</strong> If the compiler reports something like 
+	"The enum constant BLUE should have a corresponding case label in this enum switch on Color"
+	a quick fix will be offered for inserting the tag comment.
+</p>
+<h2>Summary</h2>
+<p>The above considerations have shown that you get most help from the compiler if you <b>enable all optional warnings</b>
+	regarding incomplete switch statements, and use empty documented default cases plus <code>//$CASES-OMITTED$</code> tag comments
+	to mark those switch statements where incompleteness is OK by design.
+	If you follow these recommendations, you will get all relevant warnings (or errors if you like)
+	when branches are accidentally omitted, including the situation of late addition of one or more enum constants.
+	All exceptions from this maximum completeness will be documented in the code and no longer flagged with a warning.
+</p>
+<p>Still the compiler cannot prevent the use of inconsistent class versions at runtime,
+	so a class may be compiled against an old version of an enum type, but in the running
+	application the enum type may have more enum constants.
+	For these and similar situations an appropriate "catch-all" default implementations
+	can raise runtime exceptions to alert of this inconsistency and prevent the error from
+	propagating further into the application. 
+</p>
+<p>As an added value of the strict compiler settings recommended above, the dubious error message
+	about a missing return statement <a href="#missing_return">shown above</a> 
+	(or similar messages about uninitialized variables) will no longer occur.
+</p>
+</body>
+</html>

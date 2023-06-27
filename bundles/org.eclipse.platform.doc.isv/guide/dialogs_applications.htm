@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+<TITLE>
+Application dialogs
+</TITLE>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<h2>
+Application dialogs</h2>
+<P >
+When a standard dialog is too simple for your plug-in, you can build your own dialog using the
+<a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b> Dialog</b></a> class. Earlier, we saw how the readme tool contributed an &quot;Open Readme Browser&quot;
+action in an action set.&nbsp; This action set is shown in the workbench tool bar
+and <b>Window-&gt;Readme File Editor</b> menu.&nbsp;&nbsp;</P>
+
+<P >
+Now we are ready to look at the implementation of this action in the readme
+tool's <b>WindowActionDelegate</b>.</P>
+
+<pre>
+   public void run(IAction action) {
+      SectionsDialog dialog = new SectionsDialog(window.getShell(),
+         ReadmeModelFactory.getInstance().getSections(selection));
+      dialog.open();
+   }
+</pre>
+
+<P >
+The window action delegate for the action set uses the current selection in the resource navigator view (the
+<b> .readme</b> file) to get a list of sections in the readme file. This list and the
+workbench window's shell are passed to the
+<b>SectionsDialog</b>.&nbsp;</P>
+
+<P >
+When the user selects the action, the <b>SectionsDialog</b>
+is opened.</P>
+
+<img src="images/readmedialog.png" alt="" border="0" >
+
+
+<P >
+ The <b> SectionsDialog</b> is implemented in the readme tool plug-in by subclassing the
+<b><a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"> Dialog</a>
+</b> class in the <b><a href="../reference/api/org/eclipse/jface/dialogs/package-summary.html"> org.eclipse.jface.dialogs</a>
+package.</b></P>
+<P >
+The <a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b> Dialog</b></a> class provides basic support for building a dialog shell window, creating the common dialog buttons, and launching the dialog. The subclasses are responsible for handling the content of the dialog itself:</P>
+<ul>
+  <li><b>createDialogArea</b> creates the SWT controls that represent the dialog contents. This is similar to creating the controls for a view or
+    editor.
+<P>
+The <b> SectionsDialog</b> creates an SWT list to display the list of sections. It uses a JFace viewer to populate the list. (We'll look at JFace viewers in
+<a HREF="jface_viewers.htm" CLASS="XRef"> Viewers</a>.) Note that our dialog does not have to create any of the buttons for the dialog since this is done by our
+superclass.</P>
+<pre>
+   protected Control createDialogArea(Composite parent) {
+      Composite composite = (Composite)super.createDialogArea(parent);
+      List list = new List(composite, SWT.BORDER);
+      ...
+      ListViewer viewer = new ListViewer(list);
+      ...
+      return composite;
+   }
+</pre>
+<br>
+  </li>
+  <li><b>configureShell</b> is overridden to set an appropriate title for the shell window.
+<pre>
+   protected void configureShell(Shell newShell) {
+      super.configureShell(newShell);
+      newShell.setText(MessageUtil.getString(&quot;Readme Sections&quot;));
+      ...
+   }
+</pre>
+<br>
+  </li>
+  <li>
+<b>
+okButtonPressed</b> is overridden to perform whatever action is necessary when the user presses the OK button. (You can also override
+<b> cancelButtonPressed</b> or <b> buttonPressed(int)</b> depending on the design of your dialog.)&nbsp;&nbsp;
+  </li>
+</ul>
+<b>SectionsDialog</b> does not implement an <b> okButtonPressed</b> method. It inherits the &quot;do-nothing&quot; implementation from
+<a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b>Dialog</b></a>. This is not typical. Your dialog usually performs some processing in response to one of the dialog buttons being pressed.
+<P >
+Dialogs can be as simple or as complicated as necessary. When you implement a dialog, most of your dialog code is concerned with creating the SWT controls that represent its content area and handling any events necessary while the dialog is up. Once a button is pressed by the user, the dialog can query the state of the various controls (or viewers) that make up the dialog to determine what to do.</P>
+
+<h3> Popup dialogs</h3>
+<p>
+In some cases, you might want to show information about something in a dialog, but in a way that is more &quot;lightweight&quot; than
+launching a regular dialog.  For example, a dialog may be intended to provide transient information that can be easily dismissed, without taking the
+focus away from the user's work.  If this is the case, you can use the
+<a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> class to implement the dialog.  The look and feel of
+a <a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> is different than a regular 
+<a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b>Dialog</b></a> in several ways.  It does not have any buttons across the bottom,
+it does not have the standard window title bar, and its borders, spacing, and fonts are smaller and more compact.  
+</p>
+<p>
+Although a <a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> looks very different than
+a regular dialog, the code in your plug-in's subclass that defines the dialog content is almost the same.  You still implement the <b>createDialogArea</b> method
+to create the SWT controls for the dialog.  The main difference in the application code is that the constructor that creates the dialog has many
+more parameters than the regular <a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b>Dialog</b></a> class.  For example, the <b>SectionsDialog</b>
+could be turned into a <a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> by simply changing the superclass
+of the dialog and configuring the dialog in the constructor:
+</p>
+<pre>
+   public class SectionsDialog extends <b>PopupDialog</b> {
+      protected IAdaptable input;
+
+      /**
+      * Creates a new SectionsDialog.
+      */
+      public SectionsDialog(Shell parentShell, IAdaptable input) {
+        <b>super(parentShell, SWT.DEFAULT, false, // do not take focus when opened
+        	false, // do not persist the bounds
+        	false, // do not show a resize menu
+        	false, // do not show a menu item for persisting bounds
+        	null, //  no title
+        	null); // no info text</b>
+        this.input = input;
+      }
+      ...
+</pre>
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en"><head>
+   <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+   <title>Eclipse Launcher</title>
+</head>
+<body>
+<h1>Eclipse Launcher<br>
+</h1>
+<h2>Description</h2>
+<p>Eclipse contains a native executable launcher that is used to start
+Eclipse.&nbsp; There is more to the launcher than just the eclipse
+executable in the root of the install.<br>
+</p>
+<h3>The launcher and its shared library</h3>
+<p>The launcher executable comes in 2 pieces:
+the executable (eclipse.exe), and a shared library (eclipse_1017.dll). The
+executable lives in the root of the eclipse install. The shared library
+is in a platform specific fragment,
+<tt>org.eclipse.equinox.launcher.[config]</tt>, in the plugins directory.
+</p>
+<p>Having the majority of the launcher code in a shared library
+that lives in a fragment means that that portion of the launch code can
+now be updated from an update site. Also, when starting from java, the
+shared library can be loaded via JNI in order to display the splash
+screen.
+</p>
+<h3>The launcher bundle</h3>
+<p>Previous versions of Eclipse had a startup.jar JAR file in the root
+of the install.&nbsp; In 3.3, this code has been moved to a plug-in <tt>org.eclipse.equinox.launcher</tt> in
+the plugins directory. Eclipse can still be started directly with java
+using, for example:
+</p>
+<div style="text-align: center;">
+<pre>java -jar plugins/org.eclipse.equinox.launcher_1.0.0.v20070606.jar</pre>
+</div>
+<p>Launching Eclipse involves 3 main pieces: the native executable, the
+launcher platform specific fragment and the launcher jar. In the
+example below, notice that the launcher fragment is in folder form,
+this is necessary so that the native eclipse.exe can load the shared
+library:
+</p>
+<div style="text-align: left; margin-left: 50px;">
+<pre>eclipse/ <br>	eclipse.exe<br>	plugins/<br>		org.eclipse.equinox.launcher_1.0.0.v20070606.jar<br>		org.eclipse.equinox.launcher.win32.win32.x86_1.0.0.v20070523/<br>			eclipse_1017a.dll<br></pre>
+</div>
+<p>
+The version numbers above are for illustration purposes only (e.g. 1.0.0.v20070606).  The actual version
+numbers may vary depending on the version of Eclipse you are using.
+</p>
+<h3>Finding a VM and using the JNI Invocation API</h3>
+<p>The Eclipse launcher is capable of loading the Java VM in the
+eclipse process using the Java Native Interface Invocation API.&nbsp;
+The launcher is still capable of starting the Java VM in a separate
+process the same as previous version of Eclipse did.&nbsp; Which method
+is used depends on how the VM was found.<br>
+</p>
+<h4>No -vm specified</h4>
+<div style="margin-left: 40px;">
+<p>When no -vm is specified, the launcher looks for a virtual machine
+first in a jre directory in the root of eclipse and then on the search
+path. If java is found in either location, then the launcher looks for a jvm
+shared library (jvm.dll on Windows, libjvm.so on *nix platforms)
+relative to that java executable. </p>
+<ul>
+<li>If a jvm shared library is found the launcher loads it and uses the JNI invocation API to start the vm.
+</li><li>If no jvm shared library is found, the launcher executes the java launcher to start the vm in a new process.</li>
+</ul>
+</div>
+<h4>-vm specified on the command line or in eclipse.ini</h4>
+<p style="margin-left: 40px;">Eclipse can be started with "-vm &lt;location&gt;" to indicate a
+virtual machine to use. There are several possibilities for the value
+of &lt;location&gt;:
+</p>
+<ol style="margin-left: 40px;">
+<li><span style="font-weight: bold;">directory</span>:&nbsp;  &lt;location&gt; is a directory. We look in that
+directory for: (1) a java launcher or (2) the
+jvm shared library. If we find the jvm shared library, we use JNI
+invocation. If we find a launcher, we attempt to find a jvm library in
+known locations relative to the launcher. If we find one, we use JNI
+invocation. If no jvm library is found, we exec java in a new process.<br>
+    </li><li><span style="font-weight: bold;"> java.exe/javaw.exe</span>: &lt;location&gt; is a path to a java
+launcher. We exec that java launcher to start the vm in a new process.
+  </li>
+<li><span style="font-weight: bold;">jvm dll or so</span>: &lt;location&gt; is a path to a jvm
+shared library. We attempt to load that library and use the JNI
+Invocation API to start the vm in the current process.
+</li>
+</ol>
+
+<h4>Exceptions</h4>
+<ul>
+  <li><span style="font-weight: bold;">linux.ppc, linux.x86_64, aix.ppc</span>:&nbsp;
+The launcher is not able to load some older vms using the JNI
+invocation API.&nbsp; By default on these platforms the launcher will
+prefer to execute java in a separate process.&nbsp; To force the
+launcher to load the vm using JNI, specify a -vm option pointing
+directly to the vm's shared library (libjvm.so).</li>
+  <li><span style="font-weight: bold;">MacOSX</span>:&nbsp; The launcher uses the system JavaVM framework and will always load the vm in-process using the JNI invocation API.<br>
+  </li>
+</ul>
+</body></html>

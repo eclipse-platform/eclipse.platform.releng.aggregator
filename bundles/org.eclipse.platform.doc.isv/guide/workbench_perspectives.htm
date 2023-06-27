@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>Perspectives</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2>
+Perspectives</h2>
+<P >
+We've already seen some ways the workbench allows the user to control the appearance of plug-in functionality. Views can be hidden or shown using the
+<b>Window &gt;Show View</b> menu. Action sets can be hidden or shown using the
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.customizePerspective")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>Window &gt; Customize Perspective...</b></a>
+
+menu. These features help the user organize the workbench. </P>
+
+<P >
+<b>
+Perspectives</b> provide an additional layer of organization inside a workbench
+window. Users can switch between perspectives as they move across tasks. A perspective defines
+a collection of views, a layout for the views, and the visible action sets that
+should be used when the user first opens the perspective.</P>
+<P >
+Perspectives are implemented using&nbsp; <b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a>.&nbsp;
+</b>Implementors of
+<b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>
+are expected to configure an <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b> with information that describes the
+perspective and its perspective page layout.</P>
+
+
+<h3>
+Workbench part layout</h3>
+<P >
+One of the main jobs of an <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b>
+is to describe the placement of the editor and the views in the workbench window. Note that these layouts are different than the
+<a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a> class in SWT. Although
+<b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b>
+and <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a>
+solve a similar problem (sizing and positioning widgets within a larger area), you do not have to understand SWT layouts in order to supply a
+perspective page layout.</P>
+<P >
+A perspective page layout is initialized with one area for displaying an editor. The perspective factory is responsible for adding additional views relative to the
+editor. Views are added to the layout relative to (top, bottom, left, right) another part. Placeholders (empty space) can also be added for
+items that are not initially shown.</P>
+<P >
+To organize related views and reduce clutter, you can use <a href="../reference/api/org/eclipse/ui/IFolderLayout.html"><b>IFolderLayout</b></a> to group views into tabbed folders. For example, the Resource perspective
+places the Project Explorer inside a folder at the top left corner of the
+workbench.&nbsp; Placeholders are commonly used with folder layouts.
+The Resource perspective defines a placeholder for the Bookmarks view in the
+same folder as the Project Explorer. If the user shows the Bookmarks view, it will appear in the same folder with the
+Project Explorer, with a tab for each view.</P>
+<P >
+ <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b>
+also allows you to define the available actions and shortcuts inside a
+perspective.&nbsp;&nbsp; </P>
+
+
+
+<ul>
+  <li><b>addActionSet</b> is used to add action sets to a perspective.&nbsp;&nbsp;</li>
+  <li><b>addNewWizardShortcut</b> adds a new entry to the <b>File &gt;New</b> menu for a perspective.</li>
+  <li><b>addShowViewShortcut</b> adds the names of
+ views that should appear in the <b>Window &gt;Show View</b>  menu when the
+ perspective is active.&nbsp;&nbsp;</li>
+  <li><b>addPerspectiveShortcut</b> adds the names of
+ perspectives that should appear in the <b>Window &gt;Open Perspective</b> menu when
+ the perspective is active.</li>
+</ul>
+
+
+
+<h3>
+<a name="showin">
+Linking views and editors</a> with &quot;show-in&quot;</h3>
+
+
+
+<p>
+Another valuable service provided by perspectives and the <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a>
+</b>
+is to aid in navigation between an editor and its related views.&nbsp; We
+typically think of views as helping the user find the objects to work with in
+editors.&nbsp; However, the converse operation is also useful:&nbsp; a user
+working with an object in an editor may need to navigate to that object inside a
+view.&nbsp; This can be accomplished using the workbench <b>Navigate &gt; Show
+In</b> menu.&nbsp; This command allows the user to jump to one of any number of
+related views in the context of the currently edited (or selected) object.&nbsp;
+For example, a user editing a file may want to jump over to that file in the
+Project Explorer.</p>
+
+
+
+<p>
+The plug-in architecture of the workbench allows developers to contribute views
+and editors in different plug-ins that are not even aware of each other.&nbsp;
+By implementing support for &quot;show in,&quot; your view or editor can support
+convenient navigation to or from the views and editors contributed by other
+plug-ins.&nbsp; </p>
+
+
+
+<p>
+This navigation allows users to move quickly between views and to easily open a
+view that is not usually shown in a particular perspective.&nbsp; For example, a
+user working in the Java perspective can use <b>Navigate &gt; Show
+In</b>  to view the currently edited Java file in the Navigator view. </p>
+
+
+
+<h4>
+Show-in source</h4>
+<p>If you want to allow users to use <b>Navigate &gt; Show In</b> from your
+editor or view to jump to another view, you must implement <a href="../reference/api/org/eclipse/ui/part/IShowInSource.html"><b>IShowInSource</b></a>.&nbsp;
+Your part can supply its <a href="../reference/api/org/eclipse/ui/part/IShowInSource.html"><b>IShowInSource</b></a>
+directly using protocol (<b>getShowInSource()</b>) or as an adapter.&nbsp; <a href="../reference/api/org/eclipse/ui/part/IShowInSource.html"><b>IShowInSource</b></a>
+allows your part to supply a context (<a href="../reference/api/org/eclipse/ui/part/ShowInContext.html"><b>ShowInContext</b></a>)
+which is used by the target to decide how to show the source.&nbsp; The show in
+context for an editor is typically its input element.&nbsp; For a view, the
+context is typically its selection.&nbsp; Both a selection and an input element
+are provided in a <a href="../reference/api/org/eclipse/ui/part/ShowInContext.html"><b>ShowInContext</b></a>
+to give the target flexibility in determining how to show the source.&nbsp;</p>
+
+
+
+<p>A default context for editors is provided, so that your editor can
+participate in &quot;show-in&quot; without any special coding.&nbsp; For
+editors, the input element and selection are used to create an appropriate
+context.&nbsp;</p>
+
+
+
+<p>For views, <a href="../reference/api/org/eclipse/ui/part/IShowInSource.html"><b>IShowInSource</b></a>
+must be implemented by the view in order to offer <b>Navigate &gt; Show In</b>
+functionality.</p>
+
+
+
+<h4>
+Show-in target</h4>
+
+
+
+<p>You must implement <a href="../reference/api/org/eclipse/ui/part/IShowInTarget.html"><b>IShowInTarget</b></a>
+if you want your view to be a valid target for a &quot;show in&quot;
+operation.&nbsp; The target is responsible for showing a given context in a
+manner appropriate for its presentation.&nbsp; For example, the Navigator view
+expands its tree to select and reveal a resource specified in the
+context.&nbsp;&nbsp;</p>
+<p>A target should check the selection in the <a href="../reference/api/org/eclipse/ui/part/ShowInContext.html"><b>ShowInContext</b></a>
+first in deciding what to show, since this is the more specific
+information.&nbsp; It should show the input element only if no selection is
+indicated.</p>
+<h4>Presenting appropriate targets</h4>
+
+
+
+<p>How is the list of available targets determined?&nbsp; You can specify the
+available targets for your perspective by using the <b>showInPart</b> element of the <b><a href="../reference/extension-points/org_eclipse_ui_perspectiveExtensions.html">Perspective Extensions</a></b>
+extension point.
+Recall that a &quot;Show In&quot; navigation may open a view that is not already present in the perspective.</p>
+
+
+
+
+
+</BODY>
+</HTML>

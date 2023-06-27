@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Contributing tasks and types
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>
+Contributing tasks and types</h2>
+<p>When your plug-in contributes Ant tasks and types, the tasks and types have access to all
+of the classes inside the contributing plug-in. For example, the <b>eclipse.refreshLocal</b> task 
+contributed by <b>org.eclipse.core.resources</b> plug-in is 
+a wrapper for the
+<a href="../reference/api/org/eclipse/core/resources/IResource.html#refreshLocal(int, org.eclipse.core.runtime.IProgressMonitor)">
+<b>
+IResource.refreshLocal()</b></a> method.</p>
+
+
+<p>Tasks and types contributed by plug-ins must not be placed in any of the 
+plug-in libraries. They have to be in a separate JAR. This means that the
+plug-in classes do not have access to the tasks and types provided by the 
+plug-in.&nbsp; (See 
+<a href="#jar">Why a separate JAR for tasks and types</a>?
+for more information.)</p>
+
+
+<p> The <b><a href="../reference/extension-points/org_eclipse_ant_core_antTasks.html">org.eclipse.ant.core.antTasks</a></b> extension point provides an example of how to specify
+a new task 
+in the <b>plugin.xml</b> file.</p>
+
+
+<A NAME="monitor"></A><h3>
+Progress Monitors</h3>
+<P >
+The Eclipse Ant support provides access to an <a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">
+<b>
+IProgressMonitor</b></a> if one is passed when invoking the AntRunner. One of the advantages of having access to a progress
+monitor is that a long-running task can check to see if the user has requested its cancellation. The progress
+monitor object is obtained from the Ant project's references.&nbsp; Note that a monitor is only made available if
+the method <a href="../reference/api/org/eclipse/ant/core/AntRunner.html#run(org.eclipse.core.runtime.IProgressMonitor)">
+<b>
+AntRunner.run(IProgressMonitor)</b></a> was called with a valid progress monitor. The following code snippet
+shows how to obtain a progress monitor from the task's project:
+</P>
+<pre>import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+import org.eclipse.ant.core.AntCorePlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+public class CoolTask extends Task {
+
+public void execute() throws BuildException {
+<b>	IProgressMonitor monitor = 
+		(IProgressMonitor) getProject().getReferences().get(AntCorePlugin.ECLIPSE_PROGRESS_MONITOR);
+</b>	if (monitor == null) {
+		...
+	} else {
+		...
+	}
+}
+}
+</pre>
+
+
+<h3 >
+Important rules when contributing tasks and types</h3>
+
+
+<p>
+The following should work as a checklist for plug-in developers:</p>
+<ul>
+  <li>The JAR containing the tasks must not be a plug-in library (declared in 
+  &lt;library&gt;&lt;/library&gt;).</li>
+  <li>The task or type can reference any class available for the plug-in but 
+  plug-in classes must not access the tasks or types.</li>
+  <li>Native libraries should be loaded by the plug-in library classes and not tasks or types.</li>
+</ul>
+
+
+<A NAME="jar"></A>
+<h3>Why a separate JAR for tasks and types?</h3>
+<p>
+There are basically two requirements for running Ant in Eclipse that do not fit
+the plug-in model very well:</p>
+<ul>
+  <li>Change the Ant classpath at runtime</li>
+  <li>Change the Ant version at runtime</li>
+</ul>
+<p>
+During runtime plug-in classloaders cannot have their classpaths expanded and
+plug-ins cannot change their dependencies. At the same time having separate
+JARs for the tasks and types is a good isolation from the plug-in classloading
+mechanism. Having these extra JARs declared by a plug-in permits adding the
+contributing plug-in to the Ant classpath as well.
+</p>
+</BODY></HTML>

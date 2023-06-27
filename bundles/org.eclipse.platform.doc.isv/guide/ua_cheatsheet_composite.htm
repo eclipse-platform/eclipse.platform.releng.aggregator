@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type=
+    "text/css" />
+    <script language="JavaScript" src=
+    "PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript">
+</script>
+    <title>
+      Composite cheat sheets
+    </title>
+
+    <style type="text/css">
+/*<![CDATA[*/
+    table.c1 {border-collapse: collapse}
+    /*]]>*/
+    </style>
+  </head>
+  <body>
+    <h2>
+      Composite cheat sheets
+    </h2>
+    <p>
+      <a href=
+      "../../org.eclipse.platform.doc.user/reference/ref-composite-cheatsheets.htm">
+      Composite cheat sheets</a> provide guidance through complex problems by
+      breaking the problem into a set of smaller tasks. Composite cheat sheets
+      are registered using the&nbsp; the <b><a href=
+      "../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetContent.html">
+
+      org.eclipse.ui.cheatsheets.cheatSheetContent</a></b> extension point.
+    </p>
+    <h3>
+      Content file format
+    </h3>
+    <p>
+      The composite cheat sheet content itself is defined in a separate file
+      which conforms to the&nbsp; <a href=
+      "ua_cheatsheet_composite_content.htm">composite cheat sheet content file
+      specification</a>. The content file is&nbsp; an XML file and consists
+      of&nbsp; a set of tasks organized in groups into a tree structure.
+    </p>
+
+    <p>
+      &lt;compositeCheatsheet&gt; is the root element of a composite cheat
+      sheet. It will have a single root task which may be a &lt;task&gt; or
+      &lt;taskGroup&gt;. &lt;taskGroup&gt; elements may have one or more
+      children each of which can be a &lt;task&gt; or &lt;taskGroup&gt;. A
+      &lt;task&gt; does not have child tasks.
+    </p>
+
+    <p>
+      Tasks and task groups may contain &lt;intro&gt; elements which contain
+      the text to be displayed before the task has been started and
+      &lt;onCompletion&gt; elements which contain the text to be displayed once
+      the task is completed. Both the &lt;intro&gt; and &lt;onCompletion&gt;
+      elements may contain form text markup, in the example below the tags
+      &lt;b&gt; and &lt;/b&gt; are used to make text bold.
+    </p>
+
+    <p>
+      Tasks may also contain &lt;param&gt; elements. A cheat sheet task may
+      have any of the following parameters: "id" is the id of a registered
+      cheatsheet, "path" is the relative path or URL of the cheat sheet content
+      file and "skipIntro" is&nbsp; a boolean parameter which if true
+      causes&nbsp; the cheat sheet to start at the first step rather than at
+      the introduction. Either "id" or "path" but not both must be specified.
+    </p>
+    <p>
+      A &lt;dependency&gt; node from task "B" to task "A" represents a
+      requirement that task A is completed before task B can be started.
+    </p>
+
+    <h3>
+      Cheat sheet task parameters
+    </h3>
+    <p>
+      If a task has kind = "cheatsheet" a cheat sheet will be opened when that
+      task is started, There are three possible parameters to a cheat sheet
+      task.
+    </p>
+    <table border="1" cellpadding="0" cellspacing="0" class="c1">
+      <tr>
+        <td width="10%">
+          Parameter name
+        </td>
+
+        <td width="29%">
+          &nbsp;Description
+        </td>
+      </tr>
+      <tr>
+        <td width="10%">
+          id
+        </td>
+        <td width="29%">
+          The id of a cheat sheet which has been registered using the extension
+          point org.eclipse.ui.cheatsheets.cheatSheetContent. This identifies
+          the cheatsheet which will be associated with this task. Either the id
+          or the path parameter (but not both) should be specified.
+        </td>
+
+      </tr>
+      <tr>
+        <td width="10%">
+          path
+        </td>
+        <td width="29%">
+          The URL of a cheat sheet content file. This may be an absolute URL,
+          or relative to the content file for the composite cheat sheet. If
+          both id and path are specified the path will be used to locate the
+          content file and the id parameter will be ignored.
+        </td>
+      </tr>
+      <tr>
+
+        <td width="10%">
+          showIntro
+        </td>
+        <td width="29%">
+          A boolean parameter with default value of true. If "false" the cheat
+          sheet when started will initially show the first step rather than the
+          introduction..
+        </td>
+      </tr>
+    </table>
+    <h3>
+      Example of a composite cheat sheet
+    </h3>
+
+    <p>
+      The file below is an example of how to create a composite cheat sheet
+      from existing cheat sheets. It shows how to create task groups and make
+      tasks skippable.
+    </p>
+    <pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;compositeCheatsheet name="Composite cheat sheet example"&gt;
+    &lt;taskGroup name= "Composite cheat sheet example"&gt;
+         &lt;intro&gt; This is an example of a &lt;b&gt;composite cheat sheet&lt;/b&gt; built from existing cheat sheets.
+                 &lt;br/&gt;&lt;br/&gt;You can select a task to work on either by following the hyperlinks or by
+                 selecting a task in the tree. 
+         &lt;/intro&gt;  
+         &lt;onCompletion&gt;Congratulations you have completed all the tasks.&lt;/onCompletion&gt;             
+         &lt;task kind="cheatsheet" name= "Branching and merging using CVS" skip="true"&gt;
+
+              &lt;param name = "id" value = "org.eclipse.platform.cvs_1" /&gt;
+              &lt;intro&gt;This cheat sheet is intended for CVS users. If you are not using CVS or do
+              not intend to branch and merge you may skip this task.
+              &lt;/intro&gt;
+               &lt;onCompletion&gt;Congratulations you now know how to branch and merge.&lt;/onCompletion&gt;                  
+         &lt;/task&gt;
+         &lt;taskGroup name= "Create Java Projects" kind = "sequence"&gt;
+
+             &lt;intro&gt; First you will learn how to create a simple java project, then you will create 
+             an java project which uses SWT. 
+             &lt;br/&gt;&lt;br/&gt;This task group is a sequence which means that
+             if you click on the subtask "Standalone SWT Application" it will not let that task be started 
+             until "Create a java project" has been completed.
+             &lt;/intro&gt;
+              &lt;onCompletion&gt;Congratulations you have built both Java applications.&lt;/onCompletion&gt;
+             &lt;task kind="cheatsheet" name= "Create a java project" id = "createJavaProject"&gt;
+
+                 &lt;param name="id" value = "org.eclipse.jdt.helloworld"/&gt;
+                 &lt;param name="showIntro" value = "false"/&gt;
+                 &lt;intro&gt;This cheat sheet walks through the process of creating a simple hello world application. 
+                        The cheat sheet can launch wizards to create a new project and a new class. 
+                 &lt;/intro&gt;
+                 &lt;onCompletion&gt;Congratulations you have succeeded in creating a hello world application&lt;/onCompletion&gt;
+             &lt;/task&gt;
+
+             &lt;task kind="cheatsheet" name= "Standalone SWT Application"&gt;
+                 &lt;intro&gt;Eclipse plugins which contribute to the user interface use The Standard Widget Toolkit (SWT). 
+                    This task guide can be used to learn more about SWT. 
+                 &lt;/intro&gt;
+                 &lt;param name = "id" value = "org.eclipse.jdt.helloworld.swt" /&gt;
+                  &lt;onCompletion&gt;Congratulations you have succeeded in creating an SWT application.&lt;/onCompletion&gt;           
+             &lt;/task&gt;      
+         &lt;/taskGroup&gt;
+
+    &lt;/taskGroup&gt;
+&lt;/compositeCheatsheet&gt;
+</pre>
+    <h3>
+      Composite Cheat Sheet Extensibility - Provisional in Eclipse 3.2
+    </h3>
+    <p>
+      Composite cheat sheets are extensible, however in Eclipse 3.2 this
+      extensibility is provisional and the classes could change before they
+      become API. Composite cheat sheet support can be extended by using the
+      extension point org.eclipse.ui.cheatsheets.cheatSheetContent which has
+      two new elements taskEditor and taskExplorer which allow for contribution
+      of task editors and task explorers.
+    </p>
+    <p>
+
+      Contributing a task editor defines a new kind of task which displays in
+      the task detail section. To contribute a task editor implement a concrete
+      subclass of&nbsp; TaskEditor, then&nbsp; add a taskEditor element to
+      plugin.xml.
+    </p>
+    <p>
+      The representation of the task explorer is also configurable with an
+      extension point,&nbsp; a tree explorer&nbsp; is included with the Eclipse
+      platform. By default the explorer for a composite cheat sheet when first
+      opened is a tree, an attribute on the &lt;compositeCheatSheet&gt; element
+      will allow that default to be overridden. If more than one explorer is
+      registered the view menu will contain a menu item to switch between
+      explorers. To contribute a task explorer first implement a concrete
+      subclass of&nbsp; TaskExplorer, then&nbsp; add a taskExplorer element to
+      plugin.xml.
+    </p>
+
+    <h3>
+      Related links
+    </h3>
+    <p>
+      <a href=
+      "../../org.eclipse.platform.doc.user/reference/ref-cheatsheets.htm">Working
+      with cheat sheets</a><br />
+      <a href=
+      "../../org.eclipse.platform.doc.user/reference/ref-composite-cheatsheets.htm">
+      Working with composite cheat sheets</a><br />
+      <a href="ua_cheatsheet_simple.htm">Creating cheat sheets</a><br />
+
+      <a href="ua_cheatsheet_guidelines.htm">Authoring guidelines</a><br />
+      <a href="ua_cheatsheet_composite_content.htm">Composite cheat sheet
+      content file specification</a><br />
+      <a href=
+      "../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetContent.html">
+      org.eclipse.ui.cheatsheets.cheatSheetContent extension point</a><br />
+    </p>
+  </body>
+</html>

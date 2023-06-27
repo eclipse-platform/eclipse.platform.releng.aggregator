@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="copyright" content=
+"Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
+<title>Programmatically Writing a Jar file</title>
+<link rel="stylesheet" type="text/css" href="../book.css" />
+
+</head>
+<body>
+<h2>Programmatically Writing a Jar file</h2>
+<p>The <a href=
+"../reference/api/org/eclipse/jdt/ui/jarpackager/package-summary.html"><b>org.eclipse.ui.jarpackager</b></a>
+
+package provides utility classes to programmatically export files to a Jar file. Below is a code
+snippet that outlines the use of the <a href=
+"../reference/api/org/eclipse/jdt/ui/jarpackager/JarPackageData.html"><b>JarPackageData</b></a>
+class:</p>
+<pre class="color1">
+    void createJar(IType mainType, IFile[] filestoExport) {
+        Shell parentShell= ...;
+        JarPackageData description= new JarPackageData();
+        IPath location= new Path("C:/tmp/myjar.jar");
+        description.setJarLocation(location);
+        description.setSaveManifest(true);
+        description.setManifestMainClass(mainType);
+        description.setElements(filestoExport);
+        IJarExportRunnable runnable= description.createJarExportRunnable(parentShell);
+        try {
+            new ProgressMonitorDialog(parentShell).run(true,true, runnable);
+        } catch (InvocationTargetException e) {
+            // An error has occurred while executing the operation
+        } catch (InterruptedException e) {
+            // operation has been canceled.
+        }
+    }
+</pre>
+<p>Additional API is provided to create a plug-in specific subclass of <a href=
+"../reference/api/org/eclipse/jdt/ui/jarpackager/JarPackageData.html"><b>JarPackageData</b></a>.
+This allows other plug-ins to implement their own Jar export/import wizards and to save the content
+of the <a href=
+"../reference/api/org/eclipse/jdt/ui/jarpackager/JarPackageData.html"><b>JarPackageData</b></a>
+object to a corresponding Jar description file.</p>
+<p>Once the JAR is described by a <a href=
+"../reference/api/org/eclipse/jdt/ui/jarpackager/JarPackageData.html"><b>JarPackageData</b></a>, it
+can be programmatically written using a <a href=
+"../reference/api/org/eclipse/jdt/ui/jarpackager/JarWriter3.html"><b>JarWriter3</b></a>.</p>
+
+</body>
+</html>

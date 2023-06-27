@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) GK Software AG and others 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Avoiding resource leaks</title>
+</head>
+<body>
+<h1> Avoiding resource leaks </h1>
+<p>
+Classes implementing the interface <code>java.io.Closeable</code> (since JDK 1.5) and
+<code>java.lang.AutoCloseable</code> (since JDK 1.7) are considered to represent external
+resources, which should be closed using method <code>close()</code>, when they are 
+no longer needed.
+</p>
+<p>
+The Eclipse Java compiler is able to analyze whether code using such types adheres
+to this policy. E.g., the following snippet represents an obvious resource leak:
+</p>
+<pre>    int len(File f) throws IOException {
+        InputStream stream = new FileInputStream(f);
+        return stream.available();
+    }
+</pre>
+<p>
+The compiler will flag this with <b>"Resource leak: 'stream' is never closed".</b>
+<h2>Basic flow analysis for resource leaks</h2>
+<p>
+Flow analysis detects the following situations:
+</p>
+<ul>
+<li>A resource is definitely not closed</li>
+<li>A resource is not closed on all control flows (flagged as "may not be closed")</li>
+<li>A resource is not closed at a method exit point (return statement or when an exception is raised) (definitely or on some control flow)</li>
+<li>In a Java 7 program a resource is closed but the code could still be improved by using a try-with-resources statement.</li>
+</ul>
+<p>
+Additionally, flow analysis tries to follow resource values through variable assignments.
+However, if different resources may be assigned to the same variable (on different control flows or in sequence),
+the analysis can become less accurate.
+</p>
+<p>Not all the analysis is enabled by default. Please consult the <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#resource-leak">compiler preferences</a> 
+regarding the individual configuration options.
+</p>
+<p><strong>Hints:</strong> Code will generally be easier to analyze (and easier to understand by human readers)
+if resource-type variables are not reused for different purposes.
+Ideally, in Java 7 programs all resources should be managed with a try-with-resources statement.
+</p>
+<h2>Ownership / responsibility</h2>
+<p>
+The above diagnostics basically assume that a method that creates an instance of a resource type
+is also responsible for closing this resource.
+However, some resources will be shared among several methods. Here the analysis makes the following assumptions:
+</p>
+<ul>
+<li>If a method returns a resource to its caller, it is not responsible for closing; no problem is reported.</li>
+<li>If a resource is stored in a field, no single method is considered as responsible for closing; no problem is reported.</li>
+<li>If a method obtains a resource via a method call rather than by a <code>new</code> expression, it may or may not
+ be responsible; any problems are only flagged as potential resource leaks.</li>
+<li>If a resource is passed as an argument in a method call or constructor call, the current method
+may or may not be responsible; any problems are only flagged as potential resource leaks.</li>
+</ul>
+<h2>Resource wrappers and resource-free closeables</h2>
+<p>
+The JDK defines a few classes which implement <code>Closeable</code> but do not directly represent
+a resource at the level of the operating system.
+</p>
+<p><code>java.io.StringReader</code> is an example of a closeable that doesn't require calling <code>close()</code>
+because <b>no operating system resources</b> are held that would require clean-up.
+The analysis uses an explicit white list to detect classes from <code>java.io</code> that fall in this category.
+No resource leak warnings are issued regarding these classes.
+</p>
+<p>Instances of classes like <code>java.io.BufferedInputStream</code> are <b>wrappers</b> around another resource
+(where wrappers can be applied at multiple levels).
+Also these objects do not directly represent an operating system resource.
+If the wrapped resource is closed, the wrapper doesn't need closing.
+Conversely, if a wrapper is closed this will include closing of the wrapped resource.
+The analysis has a second white list for detecting wrapper resources, and will recognize whether
+the underlying actual resource will be closed directly or indirectly via the wrapper.
+Either one suffices to silence warnings regarding resource leaks.
+The white list contains classes from <code>java.io</code>, <code>java.util.zip</code>, <code>java.security</code>, <code>java.beans</code>
+and <code>java.sound.sampled</code>.
+</p>
+<p><strong>Hint:</strong> It is generally preferable/safest to close the outermost wrapper, not a wrapped resource.
+</body>
+</html>

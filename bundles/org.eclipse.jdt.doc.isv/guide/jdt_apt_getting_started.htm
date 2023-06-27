@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+   <meta name="copyright" content="Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+   <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
+   <title>Getting started with APT in Eclipse</title>
+</head>
+
+<body>
+<h1>Getting Started</h1>
+<h2>APT in Eclipse</h2>
+
+<p>
+A Java annotation processor is a compiler plug-in that can gather information about source code as 
+it is being compiled, generate additional Java types or other resource files, and post warnings 
+and errors. Eclipse 3.2 provided support for annotation processors using the 
+<a href="http://download.oracle.com/javase/6/docs/jdk/api/apt/mirror/overview-summary.html">Java 5 Mirror APIs</a>,
+and Eclipse 3.3 added support for processors using the 
+<a href="http://download.oracle.com/javase/6/docs/api/javax/annotation/processing/package-summary.html">
+Java 6 annotation processing APIs</a>.</p>
+<p>
+Both Java 5 and Java 6 annotation processors can be called during a build. Errors and warnings 
+produced by the processors will be reported in the Problems view, and build artifacts will
+be created just as if you were running Sun's apt tool (for Java 5) or javac compiler (for Java 6)
+from the command line.</p>
+<p>
+Java 5 processors can also be executed as you are typing in the editor. This permits processors
+to report errors during editing, which may be helpful. This feature can
+be enabled or disabled via the annotation processor properties dialog. 
+In addition to reporting errors, Java 5 processors can also generate files as you are typing in the editor.
+This feature is only enabled if the processor includes &quot;enableTypeGenerationInEditor&quot; in
+the set of strings it returns from its implementation of 
+<a href="http://download.oracle.com/javase/6/docs/jdk/api/apt/mirror/com/sun/mirror/apt/AnnotationProcessorFactory.html#supportedOptions()">
+<code>AnnotationProcessorFactory.supportedOptions()</code></a>. This string is defined in
+the class <code>org.eclipse.jdt.apt.core.AptPreferenceConstants</code>.</p>
+<p>
+Eclipse does not support executing Java 6 processors while typing in the editor; you must save and build
+in order for Java 6 processors to report errors or generate files.</p>
+
+<p>
+For more detailed information about how the APT plugins work and how to write annotation
+processors of your own, you can view the 
+<a href="http://www.eclipse.org/jdt/apt/index.html">JDT-APT project web site</a>.
+</p>
+
+<h3>Batch Compilation</h3>
+The Eclipse Java compiler is available outside of the Eclipse IDE by using the
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/tasks/task-using_batch_compiler.htm">batch mode compiler</a>, via ecj.jar or the Java 6
+<a href="http://download.oracle.com/javase/6/docs/api/javax/tools/JavaCompiler.html">
+<code>javax.tools.JavaCompiler</code></a> interface. Java 5 annotation processors 
+are not available in this way, but Java 6 annotation processors are fully supported.
+
+<h3>Turning on Annotation Processing</h3>
+You must have your project's compiler configured to use Java 5.0 or higher compliance
+in the preferences, under Java-&gt;Compiler:
+<p>
+<img src="images/compiler_dialog.png" alt="Screenshot of Compiler preference page"/></p>
+<p>
+Java 6 processors will only be run if the project's Java 
+compiler compliance level is set to Java 6 or higher, and Eclipse is running on
+a Java 1.6 or higher JVM.</p>  
+<p>Next you need to enable annotation processing under 
+Java-&gt;Compiler-&gt;Annotation Processing:</p>
+<p>
+<img src="images/annotation_processing.png" alt="Screenshot of Annotation Processing properties page"/></p>
+<p>
+In this dialog you can also specify the generated source directory if desired,
+and provide any processor options that are necessary.</p>
+<p>
+For details, see the documentation on the
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/reference/ref-apt-config.htm">annotation processing preferences</a>.</p>
+
+<h3>Adding Annotation Processors</h3>
+You can add annotation processors to your project under Java-&gt;Compiler-&gt;Annotation Processing-&gt;Factory Path:
+
+<p>
+<img src="images/factory_path.png" alt="Screenshot of Factory Path properties page"/></p>
+<p>
+Processors can be contained in jar files or in Eclipse plug-ins. The Factory Path list includes 
+both Java 5 and Java 6 processors.</p>
+
+<h3>Working On Annotation Processors</h3>
+<p>The annotation processors used in a project must exist in binary form (as jar files or plug-ins)
+before the project is built. Therefore it is not possible to include both processor code and
+code to be processed within the same project. Developers of annotation processors are advised
+to keep annotation processor projects separate from the projects containing the target code that
+is to be processed. Indeed it may be preferable to keep them in separate workspaces, to facilitate 
+debugging.</p>
+
+<h3>Factory Path and Source Control</h3>
+
+<p>The factory path is stored in a file named &quot;.factorypath&quot; at the project root,
+similar to the classpath, and should be treated the same way as the classpath with regard to
+version control. In order to avoid hard-coding paths to factory jars, you can either use project-relative jars
+via the "Add Jars..." button, or use a 
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-classpath-variables.htm">classpath variable</a> via the "Add Variable..." button.</p>
+
+<h3>Processor Options and Source Control</h3>
+
+<p>
+Processor options are stored in the .settings folder within each project, which is also
+where other compiler options are stored. All files within the .settings folder are typically
+managed with source control. You may need to use paths as some of the options passed to your annotation processors.
+Again, by avoiding hard-coding of absolute paths you'll be able to share your configuration
+in source control. To permit this, Eclipse supports using variables in processor options. For details, see the 
+<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/reference/ref-apt-processorOptionsInput.htm">processor options documentation</a>.
+</p>
+</body>
+</html>

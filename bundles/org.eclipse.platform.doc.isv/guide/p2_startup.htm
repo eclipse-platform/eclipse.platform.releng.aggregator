@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008, 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Forced update on startup</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Forced update on startup</H2>
+<p>
+Sometimes the simplest UI is no UI.  In a highly-managed product installation, it may be desirable to 
+automatically update the application each time it is started, with no intervention from the user.  
+In this case, the update is not truly "headless," since a progress indicator is shown while searching for updates.  
+The user may cancel the update, but otherwise cannot intervene with the update.  If no updates are found, the user is notified.
+</p>
+<p><img border="0" src="images/p2forcedupdate.png" alt="Progress Indicator showing update search" >
+</p>
+<p>
+In this configuration, the p2 UI class libraries bundle (<b>org.eclipse.equinox.p2.ui</b>) is not needed at all.  
+Only the p2 core code is used to achieve the update. An example RCP application that uses this approach can be
+found <a href="http://git.eclipse.org/c/equinox/rt.equinox.p2.git/tree/examples/org.eclipse.equinox.p2.examples.rcp.prestartupdate/">here</a>.  
+</p>
+<p>In this kind of scenario, you need to ensure that all of the p2 services are available at startup time, when the update check is
+to be performed.  The example bundle itself must be started.  Less obvious is that the <b>org.eclipse.equinox.ds</b> bundle must be 
+started so that all of the declared services will be found.  This can be accomplished in a number of ways, depending on how you are 
+running the example:</p>
+<ul>
+<li>set the bundle start level in the Configuration tab of the product editor (the .product file for your build)</li>
+<li>force a start of the bundle in the config.ini of the already built app</li>
+<li>set the bundle start level in the launch configuration if you are simply launching the example in Eclipse</li>
+</ul>
+
+<p>The update check is performed in the <b>postWindowOpen()</b> method of the example's <b>ApplicationWorkbenchWindowAdvisor</b> 
+class.  This method sets up the progress monitoring, invokes the update search, and handles any errors or notifications.  It uses a 
+preference to remember if it is restarting after an update, so that the update search is not repeated when the application
+is restarted after updating.
+</p>
+<p>The update check method itself is rather simple, because it does not attempt to involve the user in making any choices about the updates.
+It uses the <b><a href="../reference/api/org/eclipse/equinox/p2/operations/package-summary.html">p2 Operations API</a></b> (new in Eclipse 3.6) to 
+search for updates and perform the update.
+</p>
+<pre>
+public class P2Util {
+	// XXX Check for updates to this application and return a status.
+	static IStatus checkForUpdates(IProvisioningAgent agent, IProgressMonitor monitor) throws OperationCanceledException {
+		ProvisioningSession session = new ProvisioningSession(agent);
+		// the default update operation looks for updates to the currently
+		// running profile, using the default profile root marker. To change
+		// which installable units are being updated, use the more detailed
+		// constructors.
+		UpdateOperation operation = new UpdateOperation(session);
+		SubMonitor sub = SubMonitor.convert(monitor,
+				"Checking for application updates...", 200);
+		IStatus status = operation.resolveModal(sub.newChild(100));
+		if (status.getCode() == UpdateOperation.STATUS_NOTHING_TO_UPDATE) {
+			return status;
+		}
+		if (status.getSeverity() == IStatus.CANCEL)
+			throw new OperationCanceledException();
+		
+		if (status.getSeverity() != IStatus.ERROR) {
+			// More complex status handling might include showing the user what updates
+			// are available if there are multiples, differentiating patches vs. updates, etc.
+			// In this example, we simply update as suggested by the operation.
+			ProvisioningJob job = operation.getProvisioningJob(null);
+			status = job.runModal(sub.newChild(100));
+			if (status.getSeverity() == IStatus.CANCEL)
+				throw new OperationCanceledException();
+		}
+		return status;
+	}
+}
+</pre>
+</BODY>
+</HTML>

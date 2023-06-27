@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>org.eclipse.ui.menus</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>org.eclipse.ui.menus</h3>
+
+<p>
+Commands can be implemented using 
+<a href="../reference/extension-points/org_eclipse_ui_handlers.html">org.eclipse.ui.handlers</a>
+and bound to keys using
+<a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a>.
+With the 
+<a href="../reference/extension-points/org_eclipse_ui_menus.html">org.eclipse.ui.menus</a>
+extension point they can be placed in the main menu, view dropdown menus, context
+menus.  They can also be added to the main toolbar, view toolbars, and various
+trim locations.
+</p>
+
+<h4>Contribution location</h4>
+<p>
+The <b>org.eclipse.ui.menus</b>
+extension point requires the id of a menu, toolbar, or trim area and an insertion
+point.  This is the <b>locationURI</b> of a &lt;menuContribution/&gt; element.
+Some examples of <b>locationURIs</b>:</p>
+<ul>
+<li>menu:org.eclipse.ui.main.menu?after=window - insert this contribution in the
+main menu after the <b>Window</b> menu.</li>
+<li>menu:file?after=additions - insert this contribution in the <b>File</b> menu
+after the additions group.  Equivalent to the old menubarPath="file/additions".</li>
+<li>menu:org.eclipse.ui.views.ContentOutline?after=additions - insert this
+contribution in the Content Outline view dropdown menu after the additions group.</li>
+<li>toolbar:org.eclipse.ui.views.ContentOutline?after=additions - insert this
+contribution in the Content Outline view toolbar, after the additions group.</li>
+<li>popup:org.eclipse.ui.examples.propertysheet.outline?after=additions - insert
+this contribution in the Property Sheet outline page context menu after
+the additions group.</li>
+</ul>
+
+<p>
+A word about popup: locationURIs.  In <code>popup:id</code>, the id refers to
+the id that comes from registering the context menu when the <code>registerContextMenu(*)</code>
+method is called.  If an no id is specified in the call, it defaults to the id of
+the view or editor registering the context menu.
+</p>
+<p>
+The workbench defines all of its group slot names in the classes 
+<b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>
+and <b><a href="../reference/api/org/eclipse/ui/ide/IIDEActionConstants.html">IIDEActionConstants</a></b>.
+These ids, like the <b>file</b> example above, are available to menu contributions.
+</p>
+<p>
+After the <b>locationURI</b> specifies the insertion point, the &lt;menuContribution/&gt;
+elements are turned into IContributionItems and inserted in order.  Another
+difference between menu contributions and action contributions is that the menu
+contributions can be defined in the XML in the same kind of containing relationship
+that one would would see in a menu or toolbar.
+</p>
+<p>
+Let's start with a simple example from our Info example, adding some commands
+to the InfoView.</p>
+<pre>
+   &lt;extension
+         point=&quot;org.eclipse.ui.menus&quot;&gt;
+      &lt;menuContribution
+            locationURI=&quot;menu:org.eclipse.ui.examples.contributions.view?after=additions&quot;&gt;
+         &lt;command
+               commandId=&quot;org.eclipse.ui.examples.contributions.view.count&quot;
+               mnemonic=&quot;%contributions.view.count.mnemonic&quot;&gt;
+         &lt;/command&gt;
+         &lt;command
+               commandId=&quot;org.eclipse.ui.examples.contributions.view.edit&quot;
+               mnemonic=&quot;%contributions.view.edit.mnemonic&quot;&gt;
+         &lt;/command&gt;
+         &lt;command
+               commandId=&quot;org.eclipse.ui.file.refresh&quot;
+               mnemonic=&quot;%contributions.view.refresh.mnemonic&quot;&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+      ...
+</pre>
+
+<p>
+Our <b>locationURI</b> marks this contribution for the org.eclipse.ui.examples.contributions.view
+view. Here we are adding 3 commands to the InfoView dropdown menu: Count Entries,
+Edit, and Refresh.
+</p>
+<img src="images/contributions_view_dropdown.png" alt="Picture of the Info View's view menu">
+<p>Although you can specify a <b>label</b> in the menu
+contribution &lt;command/&gt; element, if you don't we will use the <b>name</b>
+attribute from the 
+<a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a>
+command definition.  Now clicking on the menu element will execute that command.
+</p>
+<p>
+We've also placed a command in the InfoView toolbar:</p>
+<pre>
+      &lt;menuContribution
+            locationURI=&quot;toolbar:org.eclipse.ui.examples.contributions.view?after=additions&quot;&gt;
+         &lt;command
+               commandId=&quot;org.eclipse.ui.examples.contributions.view.swap&quot;
+               label=&quot;%contributions.view.swap.name&quot;
+               tooltip=&quot;%contributions.view.swap.tooltip&quot;&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+</pre>
+
+<p>
+<b>Note:</b> this command will appear in the view's toolbar.  To place the same command in the
+main toolbar, you have to create the toolbar as well by including a &lt;toolbar/&gt; element
+in the &lt;menuContribution/&gt; to contain the command.
+</p>
+
+<p>
+The &quot;Swap Entries&quot; button on the toolbar will be
+disabled until 2 Person entries are selected in the
+info view because we defined an &lt;enabledWhen&gt; expression
+in the handler definition:</p>
+<pre>
+         &lt;enabledWhen&gt;
+            &lt;count
+                  value=&quot;2&quot;&gt;
+            &lt;/count&gt;
+         &lt;/enabledWhen&gt;
+</pre>
+
+<h4>Contribution visibility</h4>
+
+<p>
+A command's enabled state is controlled by a combination of the command
+is handled and if so, the handler's enabled state.  Menu contributions
+can use core expressions to control the command's visibility in menus and
+toolbars.
+</p>
+<p>
+As an example, menu contributions can still be tied to an existing action
+set while being contributed to the main menu or main toolbar, as action sets
+are converted into contexts.  In this example
+we  place our command in the main menu and main toolbar.</p>
+<pre>
+   &lt;extension
+         point=&quot;org.eclipse.ui.actionSets&quot;&gt;
+      &lt;actionSet
+            id=&quot;org.eclipse.ui.examples.contributions.globalActionSet&quot;
+            label=&quot;%contributions.globalActionSet.label&quot;
+            visible=&quot;false&quot;&gt;
+      &lt;/actionSet&gt;
+   &lt;/extension&gt;
+   &lt;extension
+         point=&quot;org.eclipse.core.expressions.definitions&quot;&gt;
+      &lt;definition
+            id=&quot;org.eclipse.ui.examples.contributions.inGlobalActionSet&quot;&gt;
+         &lt;with
+               variable=&quot;activeContexts&quot;&gt;
+            &lt;iterate
+                  operator=&quot;or&quot;&gt;
+               &lt;equals
+                     value=&quot;org.eclipse.ui.examples.contributions.globalActionSet&quot;&gt;
+               &lt;/equals&gt;
+            &lt;/iterate&gt;
+         &lt;/with&gt;
+      &lt;/definition&gt;
+      ...
+</pre>
+
+<p>
+The above XML defines the action set to use, and a definition for a core expression
+that checks contexts to see if the action set is active.  See the <a href="workbench_cmd_handlers.htm"
+class="XRef">org.eclipse.ui.handlers</a> section for other examples of core
+expressions. 
+</p>
+<img src="images/contributions_global.png" alt="Picture of 'Global Menu' main menu">
+<p>
+Now we can add our command to the main menu:</p>
+<pre>
+      &lt;menuContribution
+            locationURI=&quot;menu:org.eclipse.ui.main.menu?after=additions&quot;&gt;
+         &lt;menu
+               label=&quot;%contributions.menus.globalMenu.label&quot;
+               mnemonic=&quot;%contributions.menus.globalMenu.label&quot;
+               id=&quot;org.eclipse.ui.examples.contributions.menus.globalMenu&quot;&gt;
+            &lt;command
+                  commandId=&quot;org.eclipse.ui.examples.contributions.commands.globalCommand&quot;
+                  mnemonic=&quot;%contributions.menus.globalCommand.mnemonic&quot;
+                  id=&quot;org.eclipse.ui.examples.contributions.menus.globalCommand&quot;&gt;
+               &lt;visibleWhen&gt;
+                  &lt;reference
+                        definitionId=&quot;org.eclipse.ui.examples.contributions.inGlobalActionSet&quot;&gt;
+                  &lt;/reference&gt;
+               &lt;/visibleWhen&gt;
+            &lt;/command&gt;
+            &lt;separator
+                  name=&quot;additions&quot;
+                  visible=&quot;false&quot;&gt;
+            &lt;/separator&gt;
+         &lt;/menu&gt;
+      &lt;/menuContribution&gt;
+      &lt;menuContribution
+            locationURI=&quot;toolbar:org.eclipse.ui.main.toolbar?after=additions&quot;&gt;
+         &lt;toolbar
+               id=&quot;org.eclipse.ui.examples.contributions.toolbars.sampleToolbar&quot;&gt;
+            &lt;command
+                  commandId=&quot;org.eclipse.ui.examples.contributions.commands.globalCommand&quot;
+                  icon=&quot;icons/sample.gif&quot;
+                  tooltip=&quot;%contributions.toolbars.globalCommand.tooltip&quot;
+                  id=&quot;org.eclipse.ui.examples.contributions.toolbars.globalCommand&quot;&gt;
+               &lt;visibleWhen&gt;
+                  &lt;reference
+                        definitionId=&quot;org.eclipse.ui.examples.contributions.inGlobalActionSet&quot;&gt;
+                  &lt;/reference&gt;
+               &lt;/visibleWhen&gt;
+            &lt;/command&gt;
+            &lt;separator
+                  name=&quot;additions&quot;
+                  visible=&quot;false&quot;&gt;
+            &lt;/separator&gt;
+         &lt;/toolbar&gt;
+      &lt;/menuContribution&gt;
+      ...
+</pre>
+
+<p>
+In the above XML, we are adding the menu &quot;Global Menu&quot; to the main menu,
+and then placing the &quot;Global Command&quot; in it.  The &lt;visibleWhen/&gt;
+element will evaluate the body of the previously defined inGlobalActionSet
+core expression.  The &lt;separator/&gt; element adds and additions group
+that can be used by other contributions.  We are also creating a toolbar
+in the main coolbar (org.eclipse.ui.main.toolbar) and placing a our command
+in it with the sample.gif <img src="images/sample.gif" alt="sample.gif icon"> icon.
+</p>
+<p>
+Other contributions can now contribute to the &quot;Global Menu&quot;
+menu by specifying its id as a contribution <b>locationURI</b>: 
+menu:org.eclipse.ui.examples.contributions.menus.globalMenu?after=additions.
+</p>
+<p>
+Currently, commands contributed to action sets don't show up in the 
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.customizePerspective")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>Window &gt; Customize Perspective...</b></a> dialog.
+</p>
+
+<p>
+You can add menu contributions that work similar to <b>org.eclipse.ui.editorActions (Deprecated)</b>.
+First you define your editor command and handler, like Reset.  Then you can
+add them in an editor menu like &quot;Info&quot; to the main menu:</p>
+<pre>
+      ... org.eclipse.core.expressions.definitions
+      &lt;definition
+            id=&quot;org.eclipse.ui.examples.contributions.view.activeEditor&quot;&gt;
+         &lt;with
+               variable=&quot;activeEditorId&quot;&gt;
+            &lt;equals
+                  value=&quot;org.eclipse.ui.examples.contributions.editor&quot;&gt;
+            &lt;/equals&gt;
+         &lt;/with&gt;
+      &lt;/definition&gt;
+      ... org.eclipse.ui.menus
+      &lt;menuContribution
+            locationURI=&quot;menu:org.eclipse.ui.main.menu?after=additions&quot;&gt;
+         &lt;menu
+               id=&quot;org.eclipse.ui.examples.contributions.editor.menu&quot;
+               label=&quot;%contributions.editor.menu.label&quot;
+               mnemonic=&quot;%contributions.editor.menu.mnemonic&quot;&gt;
+            &lt;command
+                  commandId=&quot;org.eclipse.ui.examples.contributions.editor.reset&quot;
+                  mnemonic=&quot;%contributions.editor.reset.mnemonic&quot;&gt;
+               &lt;visibleWhen&gt;
+                  &lt;reference
+                        definitionId=&quot;org.eclipse.ui.examples.contributions.view.activeEditor&quot;&gt;
+                  &lt;/reference&gt;
+               &lt;/visibleWhen&gt;
+            &lt;/command&gt;
+         &lt;/menu&gt;
+      &lt;/menuContribution&gt;
+</pre>
+
+<p>
+This is similar to adding to the main menu with our global action example.
+Here our core expression
+will make this element visible as long as the active editor id variable
+matches our editor.  You can check out
+<a href="../reference/api/org/eclipse/ui/ISources.html">org.eclipse.ui.ISources</a>
+for a list of supported variables names.
+</p>
+<p>
+<b>Note:</b> updating the main menu and especially the main toolbar are expensive
+operations.  You generally want to confine them to actionSet equivalent contexts
+and active editor type.  Although you can update the main toolbar on each
+selection change using the default variable or a &lt;with variable=&quot;selection&quot;/&gt;
+expression, it's not a good idea.  The common practice is to leave your command
+visibility at the action set or active editor level, and have your handler
+enabled state track the current selection.
+</p>
+
+<h4>Contributing to popup menus</h4>
+
+<p>
+Commands can be contributed to a specific context menu by the context menu's id, or to any
+context menu where it can satisfy its &lt;visibleWhen&gt; clause.  For example, we can add
+our Refresh command to the Info View popup as a convenience.  Because we didn't call
+<code>registerContextMenu(*)</code> with a specific id it defaults to the view id.</p>
+<pre>
+      &lt;menuContribution
+            locationURI=&quot;popup:org.eclipse.ui.examples.contributions.view?after=additions&quot;&gt;
+         &lt;command
+               commandId=&quot;org.eclipse.ui.file.refresh&quot;
+               mnemonic=&quot;%contributions.view.refresh.mnemonic&quot;&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+</pre>
+
+<p>
+To contribute a command to a popup if its selection matches a particular object type you
+can use the default variable, or for behaviour closest to <b>org.eclipse.ui.popupMenus</b>
+target a specific popup selection variable.  Here's an example using the context menu
+selection provider.  This just affects the popup menu visibility, not the command
+enabled state.</p>
+<pre>
+      &lt;menuContribution
+            locationURI=&quot;popup:org.eclipse.ui.popup.any?after=additions&quot;&gt;
+         &lt;command
+               commandId=&quot;org.eclipse.ui.examples.contributions.view.edit&quot;
+               mnemonic=&quot;%contributions.view.edit.mnemonic&quot;&gt;
+            &lt;visibleWhen&gt;
+               &lt;with
+                     variable=&quot;activeMenuSelection&quot;&gt;
+                  &lt;iterate&gt;
+                     &lt;adapt
+                           type=&quot;org.eclipse.ui.examples.contributions.model.Person&quot;&gt;
+                     &lt;/adapt&gt;
+                  &lt;/iterate&gt;
+               &lt;/with&gt;
+            &lt;/visibleWhen&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+</pre>
+
+<img src="images/contributions_popup.png" alt="Picture of context menu contribution">
+<p>
+Using &lt;iterate&gt;&lt;adapt type=&quot;Person&quot;/&gt;&lt;/iterate&gt; is
+the core expression equivalent of the old <b>objectClass</b> attribute.
+</p>
+
+
+<h4>Adding toolbars to trim areas</h4>
+<p>
+A 'trim' widget is a control that gets sited into a location (called a 'Trim Area') on the outer boundary of the Workbench Window. The
+most common example is the generic 'status line' which almost all GUI's place along the bottom of the window.
+The extension point <b><a href="../reference/extension-points/org_eclipse_ui_menus.html">org.eclipse.ui.menus</a></b>
+allows plug-ins to add elements to the workbench trim by contributing <i>toolbars</i> into trim areas and populating the toolbar with
+one or more controls (using the same mechanism as contributing controls into the main toolbar).
+</p>
+<p>
+Controls contributed to the trim must be a subclass of 
+<b><a href="../reference/api/org/eclipse/ui/menus/WorkbenchWindowControlContribution.html">WorkbenchWindowControlContribution</a></b>.
+This class will manage the life-cycle of the contribution, disposing and re-creating the contribution as necessary 
+(such as when the user moves the control to another trim area). Note that the <code>getCurSide()</code> and <code>getOrientation()</code> methods
+allow the implementation of <code>createControl(parent)</code> to adjust the created control to its current location in the trim.
+</p>
+<p>
+For this example we've contributed a simple trim widget that simply displays a string 
+and an indication of which side the trim is currently docked on.
+</p>
+<p>
+<img src="images/readmetrim.png" border="0" alt="Picture of trim contribution">
+</p>
+<p>
+Let's take a look at the extension point definition used to contribute this piece of trim:
+</p>
+<pre>
+      &lt;menuContribution
+            locationURI=&quot;toolbar:org.eclipse.ui.trim.status&quot;&gt;
+         &lt;toolbar
+               id=&quot;org.eclipse.ui.examples.contributions.contributedTrim&quot;&gt;
+            &lt;command
+                  commandId=&quot;org.eclipse.ui.examples.contributions.item2&quot;
+                  icon=&quot;icons/editor.gif&quot;
+                  id=&quot;contributions.trimItem&quot;
+                  label=&quot;%Trim.item&quot;
+                  tooltip=&quot;%TrimItem.toolTip&quot;&gt;
+            &lt;/command&gt;
+            &lt;control
+                  class=&quot;org.eclipse.ui.examples.contributions.ExampleControlContribution&quot;
+                  id=&quot;contributions.controlContrib1&quot;&gt;
+            &lt;/control&gt;
+            &lt;command
+                  commandId=&quot;org.eclipse.ui.examples.contributions.item2&quot;
+                  icon=&quot;icons/editor.gif&quot;
+                  id=&quot;contributions.trimItem2&quot;
+                  label=&quot;%Trim2.item&quot;
+                  tooltip=&quot;%TrimItem2.toolTip&quot;&gt;
+            &lt;/command&gt;
+         &lt;/toolbar&gt;
+      &lt;/menuContribution&gt;
+</pre>
+<p>
+This extension defines the 'locationURI' for this extension; identifying it as being at the start of the 'status' trim area (i.e. at the beginning of the bottom). We then define a <i>toolbar</i> contribution at that location, adding a <i>control</i>
+contribution bracketed by two <i>command</i> contributions directly into its definition.
+</p>
+<p>
+One thing that is not reflected in this sample's code is the reliance of the trim layout manager on the trim control's proper implementation of the widget control's <code>computeSize</code> method. The widget must be capable of calculating and returning its 'preferred' size since this is used throughout the layout management implementation to determine, for example, how much space is needed for a particular trim area.
+</p>
+<p>
+For example, if you want to contribute a Text input control to the trim (i.e. a 'Search Bar') and you want to control the width it has you'll need to wrap the Text control in a Composite whose Layout's 'computeSize' returns the correct values.
+</p>
+<p>
+See the SWT documentation for notes on how to correctly implement '<code>computeSize</code>' correctly.
+</p>
+
+
+</BODY>
+</HTML>

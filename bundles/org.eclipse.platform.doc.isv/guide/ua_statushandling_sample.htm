@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2017. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Contributing a sample handler</title>
+</head>
+<body>
+
+<h2>Contributing a sample handler</h2>
+
+<p>
+We will now contribute a very basic status handler just to illustrate the steps 
+needed to contribute a status handler implementation to the Workbench. To do this:</p>
+
+<ol>
+  <li>use the <em>org.eclipse.ui.statusHandlers</em> extension point to register 
+    a status handler implementation and bind it to your product</li>
+  <li>extend the <em>org.eclipse.ui.statushandlers.AbstractStatusHandler</em> 
+    class and use as the <b>class</b> attribute in the above extension point contribution</li>
+  <li>run your Eclipse based product with the correct product id</li>
+</ol>
+
+
+<p> 
+Here is the <em>org.eclipse.ui.statusHandlers</em> extension point markup:</p>
+
+<pre>
+   &lt;extension point="org.eclipse.ui.statusHandlers"&gt; 
+      &lt;statusHandler
+            class="org.eclipse.ui.statushandlers.SampleStatusHandler"
+            id="sampleStatusHandler"/&gt;
+      &lt;statusHandlerProductBinding
+            handlerId="sampleStatusHandler"
+            productId="productId"&gt;
+      &lt;/statusHandlerProductBinding&gt;
+   &lt;/extension&gt; 
+</pre>
+
+
+<p> 
+A <em>statusHandler</em> is registered with the Workbench. The <em>statusHandlerProductBinding</em> 
+contribution tells the Workbench that the status handler we just defined is 
+bound to our product with the id "productId". The status handling facility 
+uses lazy initialization, so the handler will be instantiated during first access 
+to the facility in the product. 
+</p>
+
+<p> 
+The class defined by the class attribute extends <code>org.eclipse.ui.statushandlers.AbstractStatusHandler</code>. 
+The following is sample code that simply writes to the console the message set in the status adapter. 
+</p>
+<pre>
+   public void handle(final StatusAdapter statusAdapter, int style) {
+        System.out.println(statusAdapter.getStatus().getMessage());
+   }
+</pre>
+
+
+<p> 
+When you run the product with the id defined in the statusHandlerProductBinding 
+you will start to use your product handler. For example, if you are self hosting, 
+create a new runtime-workbench launch configuration, choose the "Run a product" 
+option, and select <em>productId</em> from the dropdown.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+  <head>
+	<meta name="copyright" content="Copyright (c) GK Software SE and others 2018. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+
+    <title>Modularity Details</title>
+    <link rel="stylesheet" href="../../book.css" charset="ISO-8859-1" type="text/css">
+  </head>
+
+  <body>
+    <h1>Modularity Details</h1>
+    	This dialog is <b>deprecated</b>, please use the <a href="../ref-properties-build-path.htm#module-dependencies">Module Dependencies</a> tab
+    	of the Java Build Path page.
+    	<hr>
+    	<p>
+	    This dialog allows to configure details of a given build path entry - details, which influence 
+	    how the modules of an application are wired.
+	    </p>
+	    <p>Every entry on the Projects and Libraries tabs of the <a href="../ref-properties-build-path.htm">Java Build Path</a>
+	    	contains a node <img alt="module properties icon" src="../../images/org.eclipse.jdt.ui/obj16/module_attrib.svg"> <strong>Is modular</strong> or
+			<img alt="module properties icon" src="../../images/org.eclipse.jdt.ui/obj16/module_attrib.svg"> <strong>Is not modular</strong>.
+	    	You can open the dialog for modularity details by selecting this node and pressing <strong>Edit...</strong> or simply 
+	    	by double-clicking.
+	   	</p>
+	   	<p>At the top of the dialog you will find a check box <strong>Defines one or more modules</strong>,
+	   		which toggles whether or not the current build path entry will be interpreted using the rules
+	   		of the Java Platform Module System (JPMS) or as a pre-Java-9 library.
+	   		Clicking this checkbox has the same effect as moving the build path entry from Classpath to
+	   		Modulepath or vice versa.
+	   	</p>
+	   	<p>The options configured via this dialog essentially correspond to the command line options
+	   		specified by <a href="http://openjdk.java.net/jeps/261">JEP 261</a>,
+	   		but no claim is made that options in this dialog have the exact same structure as JEP 261 options.
+	   	</p> 
+    <h2>Contents tab</h2>
+    	This tab is relevant only if a build path entry contains several modules,
+    	as it is the case specifically for the JRE System Library.
+    	The purpose of this tab is to select which contained modules
+    	should be observable (see <a href="https://docs.oracle.com/javase/specs/jls/se9/html/jls-7.html#jls-7.7.6">JLS §7.7.6</a>)
+    	when building the current project.
+    	<p>The upper right part of this tab lists all modules that selected for inclusion.
+    		The lower right part lists additional modules that are included because they are
+    		required by an included module. The upper left part lists those modules that are
+    		available in the current build path entry, but not observable for the current project.
+   		</p>
+   		<p>Modules can be moved from one box to another by</p>
+   			<ul>
+   			<li>double-click, which will move the module to an adjacent box.
+   				When performed in the upper right box, the module is moved to the lower right box
+   				if it is still required by another included module, or to the upper left box, otherwise.</li>
+   			<li>clicking one of the arrow buttons between the boxes with the obvious meaning.</li>
+   			</ul>
+   		<p>If a module is moved from available to explicitly included, any required modules
+   			will be moved to implicitly included as needed.</p>
+   		<blockquote><em>Regarding JEP 261, this tab combines the <code>--limit-modules</code> and the <code>--add-modules</code>
+   			options. When the current project is not modular, then the dialog for JRE System Library is pre-filled
+   			with the contents corresponding to the "Root modules" as specified in JEP 261.</em></blockquote>
+   	<h2>Details tab</h2>
+   		This tab groups additional options that influence the wiring between modules in the build.
+   		Throughout this tab, text fields offer content assist (<kbd>Ctrl+Space</kbd>).
+   		<p>At the top, a checkbox labeled <strong>Patches an existing module</strong> allows to
+   			define the current project as patching another module on the build path.
+   			The effect is that classes in this project will be compiled as part of the module being patched.
+   			If the current build path entry defines several modules, the adjacent text field is used to
+   			select which module should be patched.</p>
+   			<blockquote><em>This option corresponds to the <code>--patch-module</code> option from JEP 261.</em></blockquote>
+   		<p>Below, you will find a list of <strong>Added exports</strong>.
+   			Use the buttons <strong>Add...</strong>, <strong>Edit...</strong> and <strong>Remove</strong> to modify the list.
+   			The effect of an entry in this list is, that the given <strong>Source module</strong> will export the 
+   			specified <strong>Package</strong> the the <strong>Target module</strong>.
+   			The module defined by the current project will always be used as the target module,
+   			while the source module must be contained in the current build path entry.
+   			In other words, by this option the current project acquires access to a not-exported package from another module.</p>
+   			<blockquote><em>This option corresponds to the <code>--add-exports</code> option from JEP 261.</em></blockquote>
+   		<p>At the bottom, you see a list of <strong>Added read modules</strong>.
+   			Use the buttons <strong>Add...</strong>, <strong>Edit...</strong> and <strong>Remove</strong> to modify the list.
+			The effect of an entry in this list is the same as if a <code>requires</code> directive
+			would be added to <code>module-info.java</code> of the referenced source module,
+			which must be one of the modules of the current build path entry.
+			In other words: the source module will be made to "read" the target module.</p>
+   			<blockquote><em>This option corresponds to the <code>--add-reads</code> option from JEP 261.</em></blockquote>
+  </body>
+</html>

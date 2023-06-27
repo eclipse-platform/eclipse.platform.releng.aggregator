@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML lang="en">
+<HEAD>
+
+<meta name="copyright"
+	content="Copyright (c) Oakland Software and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Migrating from the ResourceNavigator</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h1>Migrating from the ResourceNavigator</h1>
+
+<p>
+First follow the steps to <a href="cnf_steps_general.htm">add the Common Navigator</a> and check that the 
+steps required for usage of <a href="cnf_steps_content.htm">resource content</a> are applied.
+</p>
+
+<p>The following steps discuss the migration component for each part of the ResourceNavigator</p>
+
+<ol>
+<li>
+<code>org.eclipse.ui.ide.resourceFilters</code>
+<p>
+Add the corresponding 
+<b><a href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/commonFilter</a></b>
+extensions.
+</p>
+</li>
+
+<li>
+<code>FrameList</code> support <code>get/setFrameList()</code>
+<p>
+The FrameList support is used for the Go Into functionality.  Support for this 
+is included in the ProjectExplorer subclass of CommonNavigator.  You should subclass ProjectExplorer
+instead of CommonNavigator. 
+</p>
+</li>
+
+
+<li>
+
+<code>ResourcePatternFilter</code> support <code>get/setPatternFilter()</code>
+<p>
+Configure the ResourcePatternFilter using the 
+<b><a href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent/commonFilter</a></b>
+extension.  Then you can access the instance of the filter using the following code (where <code>yourViewer</code> is the instance
+of the CommonViewer and <code>yourFilterId</code> is the string of the Id of your common filter configured above):</p>
+<pre>
+INavigatorContentService contentService = yourViewer.getNavigatorContentService();
+INavigatorFilterService filterService = contentService.getFilterService();
+ICommonFilterDescriptor[] fds = filterService.getVisibleFilterDescriptors();
+for (int i = i; i &lt; fds.length; i++) {
+	if (fds[i].getId().equals(yourFilterId))
+		return filterService.getViewerFilter(filterDescriptor);
+}
+</pre>
+
+</li>
+
+<li>
+<code>IWorkingSet</code> support <code>get/setWorkingSet()</code>
+<p>
+Working sets are not directly supported by the Common Navigator.  The Project Explorer however does support
+working sets.  There is however no current API in the Project Explorer to manipulate working sets.  The
+Project Explorer provides a UI to work with working sets.  If this sort of API is required, please file
+an enhancement request explaining the requirement.
+</p>
+</li>
+
+<li>
+<code>ResourceSorter</code> support <code>get/setResourceSorter()</code>
+<p>
+Use the sorting facility in the Common Navigator.
+</p>
+</li>
+
+<li>
+<code>ResourceComparator</code> support <code>get/setResourceComparator()</code>
+<p>
+Use ResourceSorter instead for now as the Common Navigator does not directly support
+ResourceComparators.
+</p>
+</li>
+
+</ol>
+
+</BODY>
+</HTML>

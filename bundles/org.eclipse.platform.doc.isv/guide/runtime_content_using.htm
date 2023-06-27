@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Using content types</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2>Using content types</h2>
+<blockquote><i> Note:&nbsp; For this discussion, we specifically avoid the use 
+  of the word <b>file</b> when talking about content. The runtime content engine 
+  does not assume that content is contained in a file in the file system. However, 
+  it does include protocol that allows content types to be associated with file-naming 
+  patterns. In practice, these file names represent files in the file system, 
+  but nothing in the implementation of the content system assumes that the content 
+  is located in the file system. <a HREF="resInt_content.htm">File encoding and 
+  content types</a> discusses the file-oriented content type capabilities contributed 
+  by the platform resources plug-in and is a must-read for developers interested 
+  in using the content type API in that context.</i></blockquote>
+<h3>Finding out about content types</h3>
+<p>Content types are represented by <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentType.html">IContentType</a></b>. 
+  This interface represents a unique content type that knows how to read a data 
+  stream and interpret content type-specific information. Content types are hierarchical 
+  in nature. For example, a content type for XML data is considered a child of 
+  the text content type. This allows new content types to leverage the attributes 
+  or behavior of more general content types. </p>
+<p>The <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b> 
+  is the entry point that gives access to most of the content type related API 
+  provided by the platform runtime. To obtain a reference to the platform <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b>, 
+  clients can use the <b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> 
+  API:</p>
+<pre>IContentTypeManager contentTypeManager = Platform.getContentTypeManager();</pre>
+<p> Clients can use the platform <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b> 
+  to find out about the content types in the system. </p>
+<ul>
+  <li><b>getAllContentTypes</b> allows clients to get all of the content types 
+    defined in the platform. </li>
+  <li><b>getContentType</b> allows clients to obtain a content type by its unique 
+    identifier.</li>
+</ul>
+<h3>Detecting the content type for a data stream</h3>
+<p>Given a stream of bytes, it is possible to determine its content type by calling 
+  the <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b> 
+  API as follows:</p>
+<pre>
+InputStream stream = ...;
+IContentType contentType = contentTypeManager.findContentTypeFor(stream, &quot;file.xml&quot;);
+stream.close();
+</pre>
+<p>This will return the most appropriate <a href="../reference/api/org/eclipse/core/runtime/content/IContentType.html"><strong>IContentType</strong></a> 
+  given the input provided, or <code>null</code> if none can be found. Multiple 
+  content types might be deemed appropriate for a given data stream. In that case, 
+  the platform uses some heuristics to determine which one should be selected. 
+  The file name is the first criterion by which content types are selected. It 
+  can be omitted, but this has two issues: the results might not be as correct 
+  because many unrelated content types might accept the same input; there is also 
+  a big performance hit, since all content types in the platform have to be given 
+  a chance of analysing the stream. So, unless it is not available, clients should 
+  always provide a file name along with the stream.</p>
+<h3>Describing a data stream</h3>
+<p>Another interesting feature of the content type support in the platform is 
+  the ability of <em>describing the contents</em> of a binary or character stream. 
+  The following code snippet shows how to do that:</p>
+<pre>InputStream stream = ...; 
+IContentDescription description = contentTypeManager.getDescriptionFor(stream, &quot;file.xml&quot;);
+stream.close();</pre>
+<p>The returned <strong><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescription.html">IContentDescription</a></strong> 
+  instance describes the content type and additional relevant information extracted 
+  from the contents provided. The content description stores content-specific 
+  properties in form of key/value pairs. The platform itself is able to describe 
+  properties such as the character set and the byte order of text-based streams, 
+  but others can be defined by content type providers.</p>
+<h3>Providing content-sensitive features</h3>
+<p>New content types are often defined as specialization of existing ones. This 
+  hierarchy establishes a &quot;is a&quot; relationship between a derived content 
+  type and its base type. Plug-in developers must honor this when implementing 
+  content sensitive features. If a given feature is applicable to a given content 
+  type, the feature must be applicable to any derived content types as well. The 
+  <strong>IContentType.isKindOf(IContentType superType) </strong>method allows 
+  determining whether two <a href="../reference/api/org/eclipse/core/runtime/content/IContentType.html"><strong>IContentType</strong></a>s 
+  are related. The method <strong>IContentType.getBaseType()</strong> allows determining 
+  the base type of a given <a href="../reference/api/org/eclipse/core/runtime/content/IContentType.html"><strong>IContentType</strong></a>.</p>
+</BODY>
+</HTML>

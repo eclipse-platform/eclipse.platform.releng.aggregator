@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>
+Source viewers and annotations
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Source viewers and annotations</H2>
+<p>The editor and its corresponding text viewer are largely responsible for the
+implementation of the document's presentation and the configuration of any needed
+helper classes.&nbsp; (See <a href="jface_viewers.htm">Viewers</a> if you are not familiar with the
+concept of a viewer.)&nbsp;&nbsp;</p>
+<p>A <b><a href="../reference/api/org/eclipse/jface/text/TextViewer.html">TextViewer</a></b>
+handles all of the low level details of mapping the document model and its
+partitions into the colored and formatted text that a user sees.&nbsp; For source code style editors, a <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+is provided.&nbsp; A source viewer introduces the notion of source code
+annotations.&nbsp; These annotations can be shown in a vertical ruler on the left side of
+the text, an overview ruler on the right side of the text,&nbsp;or as colored
+squigglies underneath text.</p>
+<p><b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+and its helper classes are used
+throughout the <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>
+hierarchy.&nbsp; The package <b><a href="../reference/api/org/eclipse/jface/text/source/package-summary.html">org.eclipse.jface.text.source</a></b>
+defines this viewer and the other classes supporting annotation presentation.</p>
+<h3>Annotations and rulers</h3>
+<p>Annotations, like partitions, are largely dependent on the kind of document being edited.
+The <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
+for a document is what holds the annotations, enumerates them on request, and listens for text
+changes in order to keep the annotations up to date with the text.  Annotation models are registered
+in the <b><a href="../reference/extension-points/org_eclipse_core_filebuffers_annotationModelCreation.html">org.eclipse.core.filebuffers.annotationModelCreation</a></b> 
+extension.  This extension point allows plug-ins to register a class that will create an annotation model
+appropriate for a given file extension.  The Java Editor example does not use this extension point, so it
+inherits the annotation model defined by the platform.</p>
+<pre>&lt;extension
+	point="org.eclipse.core.filebuffers.annotationModelCreation"&gt;
+	&lt;factory
+		extensions="*"
+		<b>class="org.eclipse.ui.texteditor.ResourceMarkerAnnotationModelFactory"</b>&gt;
+	&lt;/factory&gt;
+&lt;/extension&gt;
+</pre>
+<p>
+The supplied factory class will create a
+<b><a href="../reference/api/org/eclipse/ui/texteditor/ResourceMarkerAnnotationModel.html">ResourceMarkerAnnotationModel</a></b>
+for files with any extension.  This class displays annotations that represent a marker on a resource in the
+workspace.&nbsp; (See <a href="resAdv_markers.htm">Resource markers</a> for more
+information on markers.)&nbsp; It assigns an image and description to each marker and monitors its resource for changes in the markers.</p>
+<p>To see how an annotation model is displayed in a text editor, we'll examine
+the platform text editor and its use of rulers and annotations.&nbsp; The
+specifics of how different annotations are shown in the rulers and text can be
+controlled by the user in the
+
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.editors.preferencePages.Annotations)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+<b>General &gt; Editors &gt; Text Editors &gt; Annotations</b></a>
+
+preferences.</p>
+<h4>Vertical ruler</h4>
+<p>A vertical ruler to the left of the editing area is used by platform text
+editors to show text ranges and line-based annotations adjacent to their text line.</p>
+
+<p><img src="images/javaeditorverticalruler.png" alt="Vertical ruler" border="0"></p>
+
+<p>These annotations are described in the supplied <b><a href="../reference/api/org/eclipse/ui/texteditor/ResourceMarkerAnnotationModel.html">ResourceMarkerAnnotationModel</a></b>.&nbsp; 
+  This model is set into the <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b> 
+  when the source viewer is initialized by the editor.&nbsp; The following snippet 
+  from <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a> 
+  shows how the document and the annotation model are associated with 
+  the viewer.</p>
+
+<pre>private void initializeSourceViewer(IEditorInput input) {
+		
+	IAnnotationModel model= getDocumentProvider().getAnnotationModel(input);
+	IDocument document= getDocumentProvider().getDocument(input);
+		
+	if (document != null) {
+		<b>fSourceViewer.setDocument(document, model)</b>;
+		...</pre>
+<p>Once the source viewer is configured with the proper document and annotation
+model, it has enough information to present the document and ensure the correct
+annotations are shown in the vertical ruler to the left.&nbsp; The model is
+associated with the ruler when the document is set.&nbsp; The following snippet
+shows what happens when a document is set into the source viewer.&nbsp; It has
+been simplified from the actual code in <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+for clarity:</p>
+
+<pre>public void setDocument(IDocument document, IAnnotationModel annotationModel) {
+	...
+	// create visual annotation model from the supplied model and store 
+	// in fVisualAnnotationModel
+	...
+	if (fVerticalRuler != null)
+		<b>fVerticalRuler.setModel(fVisualAnnotationModel)</b>;
+</pre>
+
+<p>In this way, the ruler is associated with the appropriate annotation
+model.&nbsp;&nbsp;</p>
+
+<p>Let's look at the ruler itself.&nbsp; It is created by the text editor and 
+  then connected with the editor's viewer.&nbsp; Since the Java editor example 
+  does not define any special behavior for rulers, it inherits the ruler as defined 
+  in <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a>.</p>
+
+<pre>protected IVerticalRuler createVerticalRuler() {
+	CompositeRuler ruler= new CompositeRuler();
+	ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
+	if (isLineNumberRulerVisible())
+		ruler.addDecorator(1, createLineNumberRulerColumn());
+	return ruler;
+}</pre>
+<p>The text editor uses a CompositeRuler. This ruler does not have a visual presentation 
+  of its own.&nbsp; The presentation is provided by a list of decorators that 
+  show columns (<b><a href="../reference/api/org/eclipse/jface/text/source/IVerticalRulerColumn.html">IVerticalRulerColumn</a></b>) 
+  in the ruler.&nbsp; In this example, a ruler column that shows annotations (<b><a href="../reference/api/org/eclipse/jface/text/source/AnnotationRulerColumn.html">AnnotationRulerColumn</a></b>) 
+  is always added, and a line number ruler column is added based on user preferences. 
+  The annotation ruler column handles the particulars of displaying the annotation 
+  images in the proper locations.</p>
+<p>Despite all the classes involved in showing a ruler, note that the example
+editor needed only to subclass framework classes to get ruler
+behavior.&nbsp;&nbsp; <b>JavaDocumentProvider</b>&nbsp;inherits an appropriate
+marker annotation model from <b><a href="../reference/api/org/eclipse/ui/editors/text/FileDocumentProvider.html">FileDocumentProvider</a></b>.&nbsp;
+The JavaTextEditor inherits the ruler presentation from <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a>.</p>
+<h4>Overview ruler</h4>
+<p>An overview ruler on the right hand side of the editing area is used to show 
+  annotations concerning the entire document.&nbsp; These annotations are shown 
+  relative to their position in the document and do not move as the user scrolls 
+  the document.&nbsp;&nbsp;There usually is a corresponding annotation on the 
+  vertical ruler when that portion of the document is visible.&nbsp;&nbsp;</p>
+<p>The vertical ruler below shows that there are two tasks in the document and
+one bookmark.&nbsp; Since the bookmarked text is visible, its annotation is also
+shown on the left.</p>
+<p><img src="images/javaeditoroverviewruler.png" alt="Vertical overview ruler in Java Editor" border="0" ></p>
+<p>The user can navigate to the location of the annotation in the code by
+clicking on the annotation itself.</p>
+<p>The types of annotations shown in the overview ruler are determined by adding 
+  annotation types to the ruler.&nbsp; In the following snippet from <a href="../reference/api/org/eclipse/ui/texteditor/SourceViewerDecorationSupport.html"><b>SourceViewerDecorationSupport</b></a>, 
+  annotation types are dynamically added to the ruler. (See next section for more 
+  information about <a href="../reference/api/org/eclipse/ui/texteditor/SourceViewerDecorationSupport.html"><b>SourceViewerDecorationSupport</b></a>.)</p>
+
+<pre>private void showAnnotationOverview(Object annotationType) {<br>	if (fOverviewRuler != null) {
+		Color c= getAnnotationTypeColor(annotationType);<br>		fOverviewRuler.setAnnotationTypeColor(annotationType, c);
+		int l= getAnnotationTypeLayer(annotationType);<br>		fOverviewRuler.setAnnotationTypeLayer(annotationType, l);<br>		fOverviewRuler.addAnnotationType(annotationType);<br>		fOverviewRuler.update();<br>	}
+}</pre>
+<p>The overview ruler is also supplied with an <b><a href="../reference/api/org/eclipse/jface/text/source/IAnnotationAccess.html">IAnnotationAccess</a></b>
+that is used to provide information about a particular annotation, such as its
+type and how it is to be displayed.&nbsp; The <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a>
+uses a <a href="../reference/api/org/eclipse/ui/texteditor/DefaultMarkerAnnotationAccess.html"><b>DefaultMarkerAnnotationAccess</b></a>
+which interprets annotations according to their marker types and consults the
+user preferences to see which marker types should be shown in the overview
+ruler. </p>
+
+<pre>protected IAnnotationAccess createAnnotationAccess() {
+	return new DefaultMarkerAnnotationAccess(fAnnotationPreferences);
+}</pre>
+<p>Consult the implementation of <a href="../reference/api/org/eclipse/ui/texteditor/DefaultMarkerAnnotationAccess.html"><b>DefaultMarkerAnnotationAccess</b></a>
+and <a href="../reference/api/org/eclipse/ui/texteditor/MarkerAnnotation.html"><b>MarkerAnnotation</b></a>
+for more detail about presenting markers in the overview ruler. </p>
+<h4>Text annotations </h4>
+<p>In addition to showing annotations in the rulers, a source viewer can show
+annotations as colored squiggly marks in the text.&nbsp;&nbsp;</p>
+<p><img src="images/javaeditorsquiggly.png" alt="Squiggly mark in Java Editor" border="0"></p>
+<p>We'll look again at the creation of the source viewer in <a href="../reference/api/org/eclipse/ui/texteditor/AbstractDecoratedTextEditor.html"><b>AbstractDecoratedTextEditor</b></a>.</p>
+
+<pre>protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		
+	... 
+	ISourceViewer sourceViewer= new SourceViewer(parent, ruler, fOverviewRuler, isOverviewRulerVisible(), styles);
+	<b>fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(sourceViewer, fOverviewRuler, fAnnotationAccess, sharedColors);
+	configureSourceViewerDecorationSupport();</b>
+		
+	return sourceViewer;
+}</pre>
+<p>The class <a href="../reference/api/org/eclipse/ui/texteditor/SourceViewerDecorationSupport.html"><b>SourceViewerDecorationSupport</b></a>
+handles many of the decorations shown in a source viewer, including text
+annotations, colored margins, colored cursor lines, and the like.&nbsp; It is
+configured with the user preferences so that it can respond to dynamic updates
+of user preference changes.&nbsp; Most editors need not be concerned with the
+details of how these decorations are painted.&nbsp; (See <a href="../reference/api/org/eclipse/ui/texteditor/SourceViewerDecorationSupport.html"><b>SourceViewerDecorationSupport</b></a>
+and related classes such as <a href="../reference/api/org/eclipse/jface/text/source/AnnotationPainter.html"><b>AnnotationPainter</b></a>
+if you must!).&nbsp; The important thing to know is what decorations are
+available so that the <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+and its supporting <a href="../reference/api/org/eclipse/ui/texteditor/SourceViewerDecorationSupport.html"><b>SourceViewerDecorationSupport</b></a>
+are configured correctly.</p>
+<h4>Configuring a SourceViewerDecorationSupport</h4>
+<p>Let's look at the configuration used by <a href="../reference/api/org/eclipse/ui/texteditor/AbstractDecoratedTextEditor.html"><b>AbstractDecoratedTextEditor</b></a>
+for the decoration support.</p>
+
+<pre>protected void configureSourceViewerDecorationSupport() {
+
+	<b>Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
+	while (e.hasNext())
+		fSourceViewerDecorationSupport.setAnnotationPreference((AnnotationPreference) e.next());</b>
+	fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(DefaultMarkerAnnotationAccess.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
+		
+	fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
+	fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
+	fSourceViewerDecorationSupport.setSymbolicFontName(getFontPropertyPreferenceKey());
+}</pre>
+<p>Note that the annotation preferences are used to define annotation types for 
+  all of the annotations shown in the user preferences.&nbsp; This includes annotations 
+  contributed by any plug-in and is not limited to the workbench-supplied annotations.&nbsp; 
+  If you do not wish to show all available annotations in your editor, you should 
+  override this method and set up the <a href="../reference/api/org/eclipse/ui/texteditor/SourceViewerDecorationSupport.html"><b>SourceViewerDecorationSupport</b></a> with only those types you want to show.</p>
+
+
+</BODY>
+</HTML>

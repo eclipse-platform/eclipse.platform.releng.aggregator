@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Controlling the output format of the build</title>
+</head>
+<body>
+<h1>Controlling the output format of the build</h1>
+<p>
+This section describes how to control the output of a feature or
+product build.</p>
+<h3>Controlling the output format</h3>
+<p>
+The <tt>archivesFormat</tt> property allows specifying the output format (zip,
+tar, and folder) of the build on a configuration basis. The format of
+the property is &lt;configuration&gt; - &lt;format&gt;, where
+configuration is the same value as specified in the <tt>configs</tt>
+property and format is one of the following. </p>
+<ul>
+  <li><tt>folder</tt> - the output will be stored in a folder located
+in <tt>${buildDirectory}/tmp/${archivePrefix}</tt>. The targets
+specified in the <tt>allElements.xml</tt> are not used in this case.
+Due to current restrictions, only one configuration can be build at a
+time when using folder as output format.</li>
+  <li><tt>zip</tt> - the output will be stored in a zip file. The zip
+file will be created by the zip.exe found on the machine running the
+build. This is useful if you have non jar'ed plug-ins that contains
+files requiring specific permissions (mostly on UNIX based systems).
+The property <tt>zipargs</tt> allows passing additional options to the
+zip command.</li>
+  <li><tt>antZip</tt> - the output will be stored in a zip file. The
+zip file will be created by Ant's implementation of zip. This is the
+default value when nothing is specified.</li>
+  <li><tt>tar</tt> - the output will be stored in a gzip'ed tar file.
+The OS implementation of tar and gzip will be used. The property <tt>tarargs</tt>
+allows passing additional options to the tar command.</li>
+</ul>
+Note that changing the format of the output will not change the name of
+the created file. It needs to be changed in the allElements.xml file.
+<h3>Generating JNLP manifests</h3>
+<p>
+To enable the generation of JNLP manifests at build time, set <tt>generateJnlp</tt>
+to <tt>true</tt>, set <tt>jnlp.codebase</tt> to be the value where
+the
+jnlp file will be served from (see codebase attribute in jnlp tag), and set <tt>jnlp.j2se</tt>.
+Note that this will not package your plug-ins and features for an
+update site, see the "preparing the output for an update site or jnlp
+site" below.
+Due to current restrictions, the creation of the jnlp manifest only
+works when producing folders as an output format.
+</p>
+<h3>Preparing the output for an update site or jnlp site</h3>
+<p>
+When put on an update site or a java web start site, plug-ins and
+features need to be packaged properly. To do this, simply set the <tt>outputUpdateJars</tt>
+property to true. Note that this will not generate the site.xml for the
+eclipse update site and it will not generate jnlp files (see generating
+jnlp files).
+</p>
+<h3>Grouping multiple configurations in one archive</h3>
+In order to produce an output that contains the plug-ins and features
+of multiple configurations, set <tt>groupConfigurations</tt> to true.
+This will create an archive that contains all the plug-ins and features
+that match the configurations listed in the <tt>configs</tt> property.
+When using this, don't forget to add a target named <tt>&lt;feature.id&gt;.group.group.group</tt>
+in the <tt>allElements.xml</tt> file.
+Due to current restrictions, the usage of this option will cause the
+value specified in archivesFormat to be ignored and <tt>antZip</tt>
+will be used by default.
+<h3>Signing jars</h3>
+<p>
+In order to sign jars during the build, set the property <tt>signJars</tt>
+to true and set values for the properties <tt>sign.alias</tt>, <tt>sign.keystore</tt>,
+and <tt>sign.storepass</tt>.
+</p>
+</body>
+</html>

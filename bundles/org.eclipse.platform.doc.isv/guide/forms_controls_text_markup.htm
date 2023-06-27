@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Parsing formatting markup
+</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H1>
+Parsing formatting markup</H1>
+<p align="left">The most powerful use of the <code>FormText</code> control is 
+when formatting tags are added to the text. The expected root tag is <code>form</code>. 
+It can have one or more children that can either be <code>&lt;p&gt;</code> or <code>&lt;li&gt;</code>. 
+Either of these can have normal text, text between <code>&lt;b&gt;</code> or <code>
+&lt;span&gt;</code> tags, images, links and <code>SWT</code> controls. Images are 
+declared using <code>&lt;img href=&quot;<i>image key</i>&quot;/&gt;</code> (no content), while 
+links are expressed using <code>&lt;a href=&quot;<i>href</i>&quot;&gt;text&lt;/a&gt;</code>.</p>
+<p align="left">Some of the tags mentioned above have additional attributes. Tag
+<code>&lt;a&gt;</code> can accept <code>nowrap=&quot;true&quot;</code> to block the link from 
+being wrapped into the new line. Tag <code>&lt;p&gt;</code> can have attribute <code>
+vspace=&quot;false&quot;</code> (<code>true</code> by default) that adds additional space 
+between paragraphs. Tag <code>&lt;li&gt;</code> has more attributes:</p>
+<ul>
+	<li>
+	<p align="left"><b>style</b> - can be <code>text</code>, <code>bullet</code> 
+	and <code>image</code> (default is <code>bullet</code>)</p></li>
+	<li>
+	<p align="left"><b>value</b> - not used for <code>bullet</code>; if style is
+	<code>text</code>, the value will be rendered instead in place of a bullet; 
+	if style is <code>image</code>, value represents a key in the image table of 
+	an image to be rendered in place of a bullet</p></li>
+	<li>
+	<p align="left"><b>vspace</b> - the same as for the '<code>p</code>' tag.</p>
+	</li>
+	<li>
+	<p align="left"><b>indent</b> - the number of pixels to indent text</p></li>
+	<li>
+	<p align="left"><b>bindent</b> - the number of pixels to indent the bullet 
+	(this number is independent from 'indent' - be careful not to overlap them)</p>
+	</li>
+</ul>
+<p>Tags that affect appearance of the normal text are <code>&lt;b&gt;</code> (works as 
+expected), and <code>&lt;span&gt;</code>. The later allows you to change font and/or 
+color of the text within the tag. Soft line breaks can be added using
+<code>&lt;br/&gt;</code> tag. The text is parsed as XML, this means that there 
+must be an end tag for each element so you cannot use open <code>&lt;br&gt;</code> 
+as in HTML). The XML entity &amp;amp; is recognized and replaced with &amp;, and it is required that ampersand (&amp;)
+characters which are not part of an entity declaration be represented as &amp;amp;. 
+Numeric entities may also be used in formatted text.</p>
+<p>Since release 3.1, <code>FormText</code> can be used to mix SWT widgets 
+inside text, hyperlinks and images. SWT controls are created as children of
+<code>FormText</code>, which makes <code>FormText</code> a layout manager of a 
+sort, with instruction on where to place the control relative to text embedded 
+directly in the XML.</p>
+<p>One common theme that can be observed is that <code>FormText</code> is not 
+responsible for loading images, fonts, resolving links or colors. This is not a 
+browser and it is much better to separate concerns and simply assign images and 
+colors managed elsewhere. Both links and images simply have '<code>href</code>' 
+attribute to reference them. For links, the value of this attribute will be 
+provided in the hyperlink event when listeners are notified. Images need to be 
+registered with the text control using the matching 'href' key. This way, the 
+control does not need to worry about loading the images - it has them in the 
+hash table and can render them immediately.</p>
+<p>Similar approach has been used for colors and fonts. Colors are already 
+handled by the toolkit, so you can allocate as many as you want using a unique 
+key and RGB values by calling <code>toolkit.getColors().createColor()</code>. 
+What is left is to set all the colors referenced in the '<code>span</code>' tag 
+so that the control will be able to use them during rendering.</p>
+</BODY>
+</HTML>

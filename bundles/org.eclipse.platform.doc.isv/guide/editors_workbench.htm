@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Workbench editors
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Workbench editors</H2>
+<P >
+Although the implementation of a workbench editor will be specific to your plug-in and the 
+content that you want to edit, the workbench provides a general structure for building an 
+editor.  The following concepts apply to all workbench editors.</P>
+
+<h3 >
+Editor parts and their inputs</h3>
+
+<P >
+An editor must implement <a href="../reference/api/org/eclipse/ui/IEditorPart.html"><b>IEditorPart</b></a>
+and is often built by extending the <a href="../reference/api/org/eclipse/ui/part/EditorPart.html"><b>EditorPart</b></a>
+class.&nbsp; An editor implements its user interface in the <b>createPartControl</b>
+method.&nbsp; This method is used to assemble the SWT widgets or JFace viewers
+that present the editor contents.&nbsp;</P>
+
+<P >
+An <b> editor input</b> is a description of something to be edited. You can think of
+an editor input as a file name, though it is more general.
+<a href="../reference/api/org/eclipse/ui/IEditorInput.html"> <b> IEditorInput</b></a> defines the protocol for an editor input, including the name of the input and the image that should be used to represent it in
+the labels at the top of the editor.</P>
+
+<P >
+<img src="images/editorInputLabel.png" alt="Editor input label" border="0"></P>
+<P >
+Three generic editor inputs are provided in the platform. <a href="../reference/api/org/eclipse/ui/IFileEditorInput.html"><b> IFileEditorInput</b></a> represents an input
+that is a file in the file system, and <a href="../reference/api/org/eclipse/ui/IURIEditorInput.html"><b> IURIEditorInput</b></a> represents an input based on a URI.&nbsp;
+<a href="../reference/api/org/eclipse/ui/IStorageEditorInput.html"><b>IStorageEditorInput</b></a> represents an input
+that is a stream of bytes. These bytes may come from sources other than the file system.</P>
+
+
+<h3 >
+Resetting the editor input</h3>
+
+
+<P >If your editor can support the replacement of the
+editor's input object on the fly, you should implement&nbsp; <a href="../reference/api/org/eclipse/ui/IReusableEditor.html"><b>IReusableEditor</b></a>.
+Implementing this interface allows the workbench to &quot;recycle&quot; your
+editor.&nbsp; Workbench user preferences allow the user to dictate that editors
+should be reused after a certain number of them are open.</P>
+
+
+<h3 >
+Navigating the editor input&nbsp;</h3>
+
+
+<p>If you want to implement a navigation history in your editor, you should
+implement <a href="../reference/api/org/eclipse/ui/INavigationLocationProvider.html"><b>INavigationLocationProvider</b></a>.&nbsp;
+This provides a mechanism for the workbench to request a current navigation
+location (<a href="../reference/api/org/eclipse/ui/INavigationLocation.html"><b>INavigationLocation</b></a>)
+as needed to keep a navigation history.&nbsp; The workbench handles the
+mechanics of the navigation user interface.&nbsp; Your <a href="../reference/api/org/eclipse/ui/INavigationLocation.html"><b>INavigationLocation</b></a>
+will be notified when it needs to restore the editor to the location that it represents.</p>
+
+
+<P >The rest of your editor's implementation depends on the content that you are
+trying to present.&nbsp; We'll look next at the most common type of editor - the
+text editor.</P>
+
+
+
+
+</BODY>
+</HTML>

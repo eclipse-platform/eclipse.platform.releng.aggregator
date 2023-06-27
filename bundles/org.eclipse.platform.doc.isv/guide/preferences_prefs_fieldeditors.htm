@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Field editors
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H3>
+Field editors</H3>
+<P >
+The implementation of a preference page is primarily SWT code.&nbsp; SWT code is
+used to create the preference page controls, set the values of the controls, and
+retrieve the values of the controls. The
+<b><a href="../reference/api/org/eclipse/jface/preference/package-summary.html">org.eclipse.jface.preference</a></b> 
+package provides helper classes, called <b> field editors</b>, that create the widgets and implement the value setting 
+and retrieval code for the most common preference types. The platform provides field editors for displaying and updating 
+many value types, including booleans, colors, strings, integers, fonts, and file names.</P>
+<P >
+ <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> implements a
+page that uses these field editors to display and store the preference values on the page.&nbsp;
+ Instead of creating SWT controls to fill its contents, a <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> 
+subclass creates field editors to display the contents.&nbsp; All of the fields
+ on the page must be implemented as field editors.&nbsp; The following is a
+snippet from the debug UI preferences page:</P>
+<pre>protected void createFieldEditors() {
+	addField(new BooleanFieldEditor(IDebugUIConstants.PREF_BUILD_BEFORE_LAUNCH, 
+		DebugPreferencesMessages.getString(&quot;DebugPreferencePage.auto_build_before_launch&quot;), 
+		SWT.NONE, getFieldEditorParent())); 
+	...	
+	String[][] perspectiveNamesAndIds = getPerspectiveNamesAndIds();
+	addField(new ComboFieldEditor(IDebugUIConstants.PREF_SHOW_DEBUG_PERSPECTIVE_DEFAULT,
+		DebugPreferencesMessages.getString(&quot;DebugPreferencePage.Default_perspective_for_Debug_2&quot;), //$NON-NLS-1$
+		perspectiveNamesAndIds,
+		getFieldEditorParent()));
+	...
+}</pre>
+<P >
+Each field editor is assigned the name of its corresponding preference key and the text label for the SWT
+control that it will create. The kind of control created depends on the type of field editor. For example, a boolean field editor creates a checkbox.</P>
+<P >
+Since the preference page is associated with a preference store (specified in the
+<b> doGetPreferenceStore</b> method), the code for storing the current values,
+for initializing the control values from the preference store, and for restoring the controls to
+their default values can all be implemented in the
+<b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html">FieldEditorPreferencePage</a></b>.</P>
+<P >
+The <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> 
+will use a grid layout with one column as the default layout for field editor
+widgets.&nbsp; For special layout requirements, you can override the <b>createContents</b> method.</P>
+
+
+
+</BODY>
+</HTML>

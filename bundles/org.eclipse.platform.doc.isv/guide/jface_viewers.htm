@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Viewers
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Viewers</H2>
+<P >
+Why would you ever want to use a viewer when we have already seen that workbench
+UI contributions like views, editors, wizards, and dialogs can be implemented
+directly with SWT widgets?&nbsp;&nbsp;</P>
+<P >Viewers allow you to create widgets while still using your model
+objects.&nbsp; If you use an SWT widget directly, you have to convert your
+objects into the strings and images expected by SWT.&nbsp; Viewers act as
+adapters on SWT widgets, handling the common code for handling widget events
+that you would otherwise have to implement yourself.&nbsp;</P>
+<P > We first saw a viewer in the readme tool's view contribution, inside the
+<b>ReadmeSectionsView</b>.</P>
+<pre>
+   public void createPartControl(Composite parent) {
+      viewer = new ListViewer(parent);
+      ...
+   }
+</pre>
+<blockquote><i>
+Note:&nbsp; Viewers can be used to provide the implementation for both workbench views and editors. The term viewer does not imply that they are only useful for implementing views. For example, the
+<b> TextViewer</b> is used in the implementation in many of the workbench and plug-in editors.</i></blockquote>
+
+<H3>
+Standard viewers</H3>
+<P >JFace provides viewers for most of the non-trivial widgets in SWT. Viewers are most commonly used for
+list, tree, table, and text widgets.&nbsp;</P>
+<P >
+Each viewer has an associated SWT widget. This widget can be created implicitly by supplying the parent
+<b> Composite</b> in a convenience viewer constructor, or explicitly by creating it first and supplying it to the viewer in its constructor.</P>
+<h4 ><a name="listviewer">List-oriented viewers</a></h4>
+<P > Lists, trees, and tables share many common capabilities from a user's point of view, such as population with objects, selection, sorting, and filtering.&nbsp;</P>
+<P >These viewers keep
+a list of domain objects (called <b>elements</b>) and display them in their
+corresponding SWT widget. A list viewer knows how to get a text label from any
+element in the list.&nbsp; It obtains the label from an <a href="../reference/api/org/eclipse/jface/viewers/ILabelProvider.html"><b>ILabelProvider</b></a>
+which can be set on the viewer.&nbsp; List viewers know how to map from the widget callbacks back into the
+world of elements known by the viewer client.</P>
+<P >
+Clients that use a plain SWT widget have to operate
+at the SWT level - where items are strings and events often relate to an index within the list of strings. Viewers provide higher level semantics. Clients are notified of selections and changes to the list
+using the elements they provided to the viewer. The viewer handles all the grunt work for mapping indexes back to
+elements, adjusting for a filtered view of the objects, and re-sorting when necessary.</P>
+<P >
+Filtering and sorting capability is handled by designating a viewer sorter (<a href="../reference/api/org/eclipse/jface/viewers/ViewerSorter.html"><b>ViewerSorter</b></a>)
+and/or viewer filter (<a href="../reference/api/org/eclipse/jface/viewers/ViewerFilter.html"><b>ViewerFilter</b></a>)
+for the viewer. (These can be specified for tree and table viewers in addition to
+list viewers.) The client need only provide a class that can compare or filter the objects in the list. The viewer handles the details of populating the list according to the specified order and
+filter, and maintaining the order and filter as elements are added and removed.</P>
+
+
+<P >
+Viewers are not intended to be extended by clients.&nbsp; To customize a viewer,
+you can configure it with your own content and label providers.</P>
+
+
+<P >A <b><a href="../reference/api/org/eclipse/jface/viewers/ListViewer.html">ListViewer</a></b>
+maps elements in a list to an SWT <b><a href="../reference/api/org/eclipse/swt/widgets/List.html">List</a></b>
+control.</P>
+
+<P >
+A <a href="../reference/api/org/eclipse/jface/viewers/TreeViewer.html"><b> TreeViewer</b></a> displays hierarchical objects in an SWT
+<a href="../reference/api/org/eclipse/swt/widgets/Tree.html"><b> Tree</b></a> widget. It handles the
+details for expanding and collapsing items. There are several different kinds of tree viewers for different SWT tree controls (plain tree, table tree, checkbox tree).</P>
+<P >A <a href="../reference/api/org/eclipse/jface/viewers/TableViewer.html"><b>TableViewer</b></a> 
+  is very similar to a list viewer, but adds the ability to view multiple columns 
+  of information for each element in the table.&nbsp; Table viewers significantly 
+  extend the function of the SWT table widget by introducing the concept of editing 
+  a cell. Special cell editors can be used to allow the user to edit a table cell 
+  using a combo box, dialog, or text widget. The table viewer handles the creation 
+  and placement of these widgets when needed for user editing.&nbsp; This is done 
+  using the <b><a href="../reference/api/org/eclipse/jface/viewers/CellEditor.html">CellEditor</a></b> 
+  classes, such as <b><a href="../reference/api/org/eclipse/jface/viewers/TextCellEditor.html">TextCellEditor</a></b> 
+  and <b><a href="../reference/api/org/eclipse/jface/viewers/CheckboxCellEditor.html">CheckboxCellEditor</a></b>. 
+  A virtual table, only populated when viewed, the table viewer only runs a designated 
+  number of results regardless of what is actually created. The database &quot;lazily&quot; 
+  requests JIT and will only query a predetermined number at a time.</P>
+
+
+<H4>
+Text viewer</H4>
+<P >
+ Text widgets have many common semantics such as double click behavior, undo, coloring, and navigating by index or line.&nbsp;
+A <b><a href="../reference/api/org/eclipse/jface/text/TextViewer.html">TextViewer</a></b>
+is an adapter for an SWT <a href="../reference/api/org/eclipse/swt/custom/StyledText.html"><b>StyledText</b></a>
+widget. Text viewers provide a document model to the client and manage the conversion of the document to the styled text information provided by the text widget.</P>
+<P >
+Text viewers are covered in more detail in <a HREF="editors.htm" CLASS="XRef">Workbench
+Editors</a>.</P>
+
+
+
+<H3>
+Viewer architecture</H3>
+<P >
+To understand a viewer, you must become familiar with the relationship between a viewer's input element, its contents, its selection, and the information actually displayed in the widget that it is manipulating.</P>
+
+<H4>
+Input elements</H4>
+<P >
+An <b> input element</b> is the main object that the viewer is displaying (or editing). From the viewer's point of view, an input element can be any object at all. It does not assume any particular interface is implemented by the input element. (We'll see why in a moment when we look at content providers.)</P>
+<P >
+A viewer must be able to handle a change of input element. If a new input element is set into a viewer, it must repopulate its widget according to the new element, and disassociate itself from the previous input element. The semantics
+for registering as a listener on an input element and populating the widget
+based on the element are different for each kind of viewer.</P>
+
+
+<H4>
+Content viewers</H4>
+<P >
+A <b> content viewer</b> is a viewer that has a well defined protocol for obtaining information from its input element. Content viewers use two specialized helper classes, the
+<b><a href="../reference/api/org/eclipse/jface/viewers/IContentProvider.html">IContentProvider</a></b> and
+<b><a href="../reference/api/org/eclipse/jface/viewers/ILabelProvider.html">ILabelProvider</a></b>, to populate their widget and display information about the input element.</P>
+<P >
+<b><a href="../reference/api/org/eclipse/jface/viewers/IContentProvider.html">
+IContentProvider</a></b> provides basic lifecycle protocol for associating a content provider with an input element and handling a change of input element. More specialized content providers are implemented for different kinds of viewers. The most common content provider is
+<b><a href="../reference/api/org/eclipse/jface/viewers/IStructuredContentProvider.html">IStructuredContentProvider</a></b>, which can provide a list of objects given an input element. It is used in list-like viewers, such as lists, tables, or trees. In general, the content provider knows how to map between the input element and the expected viewer content.</P>
+<P >
+<b><a href="../reference/api/org/eclipse/jface/viewers/ILabelProvider.html">
+ILabelProvider</a></b> goes a step further. Given the content of a viewer (derived from the input element and content provider), it can produce the specific UI elements, such as names and icons, that are needed to display the content in the viewer. Label providers can aid in saving icon resources since they can ensure the same instance of the icon is used for all like types in a viewer.</P>
+<blockquote><i>
+Note:&nbsp; Instances of particular content and label providers are not intended to be shared across multiple viewers. Even if all your viewers use the same type of content or label provider, each viewer should be initialized with
+its own instance of the provider class. The provider life cycle protocol is
+designed for a 1-to-1 relationship between a provider and its
+viewer.</i></blockquote>
+<P > Input elements, content providers, and label providers allow viewers to hide 
+  most of the implementation details for populating widgets. Clients of a viewer 
+  need only worry about populating a viewer with the right kind of input and content 
+  provider. The label provider must know how to derive the UI information from 
+  the viewer content.</P>
+<P >A label provider can show more than just text and an image. JFace provides 
+  several classes and interfaces to support extra functionality. 
+  The following classes are supported by the TableViewer, AbstractTreeViewer and 
+  TableTreeViewer. </P>
+<ul>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IColorProvider.html">
+IColorProvider</a></b>. Make your label provider implement this interface
+to set a different foreground or background color for an item.   Unless system colors 
+are used, these colors should be cached to minimize the amount of system resources used.
+Be sure to dispose of any colors you create when your label provider is disposed.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IFontProvider.html">
+IFontProvider</a></b> . Implement this interface in your label provider to set the font of 
+items in the view.  Fonts should also be cached, and disposed when your label provider
+is disposed. <b>Control.getFont()</b> should be called as little as possible because
+it will create a new instance of <b>Font</b> whenever it is called.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/ILabelDecorator.html">
+ILabelDecorator</a></b>  An ILabelDecorator is an object that can take an image or 
+    text and add adornments to it.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/DecoratingLabelProvider.html">
+DecoratingLabelProvider</a></b>  The DecoratingLabelProvider is a compound object 
+    that takes both a label provider and an ILabelDecorator. This allows a label 
+    provider to hook into a decorator mechanism such as the one provided in the 
+    Workbench.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IViewerLabelProvider.html">
+IViewerLabelProvider</a></b>  The IViewerLabelProvider is a label provider that allows 
+    for building of labels by an external object such as a decorator. The DecoratingLabelProvider 
+    is an IViewerLabelProvider.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IDelayedLabelDecorator.html">
+IDelayedLabelDecorator</a></b>  The IDelayedLabelDecorator is an ILabelDecorator 
+    that supports decoration that is delayed (such as an IDecoratorManager that 
+    decorates in a Thread). IDecoratorManagers are IDelayedLabelDecorators. You 
+    can get the Workbench <b><a href="../reference/api/org/eclipse/ui/IDecoratorManager.html">
+IDecoratorManager</a></b> by calling <b><a href="../reference/api/org/eclipse/ui/IWorkbench.html">
+IWorkbench</a>.getDecoratorManager()</b>.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IColorDecorator.html">
+IColorDecorator</a></b>  An IColorDecorator is an object that can support decorating 
+    foreground and background colors. </li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IFontDecorator.html">
+IFontDecorator</a></b>  An IFontDecorator is an object that can support decorating 
+    fonts.</li>
+</ul>
+<P >It is possible to affect the color of items in a view either from within the
+view's label provider, or via a decorator. Generally it is better to use the color and 
+font support in label providers, since decorators affect every view that shows a 
+particular type. If you do use a color or font decorator make sure its values can be 
+set in the Colors and Fonts preference page.</P>
+
+<H3>
+Viewers and the workbench</H3>
+<P >
+The flexibility provided by viewers, content providers, and label providers can be demonstrated by looking at how the workbench uses them.</P>
+<P >
+The <b><a href="../reference/api/org/eclipse/ui/model/WorkbenchContentProvider.html"> WorkbenchContentProvider</a></b> is a structured content provider that obtains contents from an input element by asking for its children. The concept of adapters is used again in order to implement generic function. When asked for the list of elements from its input element, the
+<b><a href="../reference/api/org/eclipse/ui/model/WorkbenchContentProvider.html"> WorkbenchContentProvider</a></b> obtains an
+<b><a href="../reference/api/org/eclipse/ui/model/IWorkbenchAdapter.html">IWorkbenchAdapter</a></b> for the input element. If an
+<b><a href="../reference/api/org/eclipse/ui/model/IWorkbenchAdapter.html">IWorkbenchAdapter</a></b> has been registered for the input element, then the content provider can safely assume that the element can be queried for its
+children.&nbsp; <b><a href="../reference/api/org/eclipse/ui/model/WorkbenchContentProvider.html">WorkbenchContentProvider</a>
+</b>also does the work needed to keep its viewer up to date when the
+workspace changes.&nbsp;</P>
+<P >
+The <b><a href="../reference/api/org/eclipse/ui/model/WorkbenchLabelProvider.html">WorkbenchLabelProvider</a></b>
+is a label provider that obtains an <b><a href="../reference/api/org/eclipse/ui/model/IWorkbenchAdapter.html">IWorkbenchAdapter</a></b> from an object in order to find its text and image. The concept of a label provider is particularly helpful for workbench objects because it allows a single label provider to cache images that are commonly used in a viewer. For example, once the
+<b><a href="../reference/api/org/eclipse/ui/model/WorkbenchLabelProvider.html">WorkbenchLabelProvider</a></b> obtains an image to use for an
+<b><a href="../reference/api/org/eclipse/core/resources/IProject.html">IProject</a></b>, it can cache that image and use it for all
+<b><a href="../reference/api/org/eclipse/core/resources/IProject.html"> IProject</a></b> objects shown in the viewer.</P>
+<P > By defining a common adapter, <b><a href="../reference/api/org/eclipse/ui/model/IWorkbenchAdapter.html">IWorkbenchAdapter</a></b>, 
+  and registering it for many of the platform types, we make it possible for these 
+  types to be represented correctly in many of the common viewers and the workbench 
+  views that contain them. </P>
+<P >&nbsp;</P>
+
+</BODY>
+</HTML>

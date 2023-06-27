@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Managing links</title>
+</head>
+<body>
+
+<h2>Managing links</h2>
+
+<p>
+Most of the extensions coming into the main Welcome pages offer links to open 
+further pages contributed by the extensions themselves. It is recommended to 
+create these pages in such a way as to continue with the shared Welcome visual 
+design. The main requirement is to show the appropriate navigator at the top of 
+the page.
+</p>
+
+<p>
+It is fairly easy to do that using the 'include' element. The idea is to 
+include the navigation content at the beginning of contributed page. Unlike the 
+current Welcome implementation, shared Welcome main pages have navigation 
+section that is different for each page. For this reason, pages that branch off 
+these pages should include the navigation from the parent page. For example:
+</p>
+
+<pre>
+   &lt;introContent&gt;
+      &lt;extensionContent id="extra" name="Extra" alt-style="css/swt.properties" style="css/overview.css" path="overview/@"&gt;
+         &lt;link
+               label="Extra Overview link"
+               url="http://org.eclipse.ui.intro/showPage?id=extraOverview" 
+               id="extra-overview"&gt;
+            &lt;text&gt;Showing the third-level extra page for overview&lt;/text&gt;
+         &lt;/link&gt;
+      &lt;/extensionContent&gt;
+      &lt;page id="extraOverview" <b>style="$theme$/html/overview.css"</b> style-id="page"&gt;
+         <b>&lt;title style-id="intro-header"&gt;$introTitle$&lt;/title&gt;</b>
+         <b>&lt;group id="extra-group1" filteredFrom="swt"/&gt;</b>
+         <b>&lt;include path="overview/navigation-links"/&gt;</b>
+         &lt;group id="page-content"&gt;
+            &lt;group id="content-header" label="EXTRA OVERVIEW" filteredFrom="swt"&gt;
+            &lt;/group&gt;
+            &lt;text style-id="page-title" id="page-title" filteredFrom="html"&gt;EXTRA OVERVIEW&lt;/text&gt;
+            &lt;text style-id="page-description" id="page-description"&gt;Extra overview page description.&lt;/text&gt;
+            &lt;!-- Add content here --&gt;
+         &lt;/group&gt;
+      &lt;/page&gt;
+   &lt;/introContent&gt;
+</pre>
+
+<p>
+The extension above contributed into the overview page contributes a
+link that shows another page whose definition is part of the extension.
+Note how we define the title element using substitution variable (the
+variable will be resolved based on the product property). We also
+include the group 'navigation-links' that belongs to the 'overview'
+page at the beginning of the page content definition. We also add the
+'extra-group1' div because it is can be used by some themes for adding
+additional page decoration (indeed, it is used in 'Purple Mesh' theme
+for that exact purpose).
+</p>
+
+</body>
+</html>

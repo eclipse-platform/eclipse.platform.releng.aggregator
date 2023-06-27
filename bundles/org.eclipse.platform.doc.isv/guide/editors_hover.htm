@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Text and ruler hover
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Text and ruler hover</H2>
+<p>Hover support is provided in the platform text framework, allowing you to implement 
+  informational hovers (or infopops) over the text and the rulers shown in your 
+  editor.</p>
+<p>Hover support is optional.&nbsp; By default, <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>does not install hover behavior since there is no useful general information
+to show.&nbsp; In order to provide text or ruler hover, your editor's source
+viewer configuration must be <a href="editors_sourceviewers.htm">configured</a>
+to define a pluggable hover object.</p>
+<p>Let's look again at <b>JavaSourceViewerConfiguration</b>
+ to see which methods define the hover behavior:</p>
+
+<pre>public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+	return new JavaTextHover();
+}
+public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+	return new JavaAnnotationHover();
+}
+</pre>
+<p>Hover helper classes can also be installed dynamically using <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+ protocol (<b>setTextHover</b> and <b>setAnnotationHover</b>).&nbsp; There is no
+particular runtime benefit to doing it either way, but putting all of the
+pluggable behavior overrides in a subclass of <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>provides the advantage of consolidating all of the definitions in one place.</p>
+<p>Let's look at the specifics of providing both kinds of hover.</p>
+<h3>Text hover</h3>
+<p>Text hover allows you to provide informational text about text shown in the 
+  editor.&nbsp; This is done using the <b><a href="../reference/api/org/eclipse/jface/text/ITextHover.html">ITextHover</a></b> 
+  interface.&nbsp; A text hover is responsible for computing the region that should 
+  be used as the source of hover information, given an offset into the document.&nbsp; 
+  It is also responsible for providing the informational text about a specific 
+  region.&nbsp; <b>JavaTextHover</b> is pretty simple.&nbsp; It checks to see 
+  if the supplied offset for hover is contained inside the text selection.&nbsp;&nbsp;&nbsp; 
+  If so, it supplies the selection range as hover region.&nbsp;</p>
+
+<pre>public class JavaTextHover implements ITextHover {
+
+	...
+	
+	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
+		Point selection= textViewer.getSelectedRange();
+		if (selection.x &lt;= offset &amp;&amp; offset &lt; selection.x + selection.y)
+			return new Region(selection.x, selection.y);
+		return new Region(offset, 0);
+	}
+}</pre>
+<p>Given its own computed hover region, it obtains the selected text from its
+document and returns that as the hover info.</p>
+
+<pre>public class JavaTextHover implements ITextHover {
+
+	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		if (hoverRegion != null) {
+			try {
+				if (hoverRegion.getLength() &gt; -1)
+					return textViewer.getDocument().get(hoverRegion.getOffset(), hoverRegion.getLength());
+			} catch (BadLocationException x) {
+			}
+		}
+		return JavaEditorMessages.getString(&quot;JavaTextHover.emptySelection&quot;); 
+	}
+	...
+}</pre>
+<p>Sure enough, we can see that if we hover over a selection in the editor, the
+hover text shows the selection.</p>
+<p><img src="images/javatexthover.png" alt="Hover information on selected region" border="0"></p>
+<p>More complicated contextual information can be used to compute useful hover
+information.&nbsp; Examples of this can be found in the <b>JavaTextHover</b>
+implemented with the JDT editor.</p>
+<h3>Ruler hover</h3>
+<p>Hover on the vertical ruler is useful for showing show line-oriented information.&nbsp;
+The hover class is configured as described above.&nbsp; <b><a href="../reference/api/org/eclipse/jface/text/source/IAnnotationHover.html">IAnnotationHover</a></b>
+is the interface for ruler hover objects.&nbsp; Although the name implies that
+the hover is designed for annotations in the ruler, it is really up to an
+individual editor to detemine what is appropriate.&nbsp; A ruler hover is responsible for returning the info string associated with a
+particular line number, regardless of the presence of markers on that line.&nbsp;&nbsp;&nbsp;</p>
+<p>The Java example editor's <b>JavaAnnotationHover</b>  implements hover for
+all lines.&nbsp; It uses the line number to
+obtain all of the text on the hover line and returning it as the info string.</p>
+
+<pre>public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
+	IDocument document= sourceViewer.getDocument();
+
+	try {
+		IRegion info= document.getLineInformation(lineNumber);
+		return document.get(info.getOffset(), info.getLength());
+	} catch (BadLocationException x) {
+	}
+	return null;
+}</pre>
+<p><img src="images/javarulerhover.png" alt="Hover information on ruler" border="0"></p>
+<p>Since the hover has access to the document and the
+source viewer, it has all the context needed to make more complicated contextual
+decisions about the info that should be shown.&nbsp; For example, the annotation
+model could be retrieved from the source viewer in order to provide hover info
+for any annotations shown in the vertical ruler.&nbsp; The <b>JavaAnnotationHover</b>
+provided by the JDT editor provides this capability.
+</p>
+
+
+</BODY>
+</HTML>

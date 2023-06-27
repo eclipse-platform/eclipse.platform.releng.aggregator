@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright" content=
+  "Copyright (c) IBM Corporation and others 2000, 2014. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Running Eclipse</title>
+</head>
+<body bgcolor="#FFFFFF">
+  <h1>Running Eclipse</h1><!-- ************* BEGIN SECTION COPIED FROM README FILE **************** -->
+  <p>After installing the Eclipse SDK in a directory, you can start the Workbench by running the Eclipse executable
+  included with the release (you also need at least a JDK 8 or JRE 8, not included with the Eclipse SDK). On Windows,
+  the executable file is called <samp>eclipse.exe</samp>, and is located in the <code>eclipse</code> sub-directory of
+  the install. If installed at <code>c:\eclipse-SDK-4.7-win32</code>, the executable is
+  <code>c:\eclipse-SDK-4.7-win32\eclipse\eclipse.exe</code>. <b>Note:</b> Set-up on most other operating environments
+  is analogous. Special instructions for macOS are listed <a href="#macosx">below</a>.</p>
+  <h3>Allocating enough memory and solving OutOfMemoryErrors</h3>
+  <p>By default, Eclipse will allocate up to 384 megabytes of Java heap memory. This should be ample for all typical
+  development tasks. However, depending on the JRE that you are running, the number of additional plug-ins you are
+  using, and the number of files you will be working with, you could conceivably have to increase this amount. Eclipse
+  allows you to pass arguments directly to the Java VM using the <code>-vmargs</code> command line argument, which must
+  follow all other Eclipse specific arguments. Thus, to increase the available heap memory, you would typically
+  use:</p>
+  <blockquote>
+    <p><code>eclipse -vmargs -Xmx&lt;memory size&gt;</code></p>
+  </blockquote>
+  <p>with the <code>&lt;memory size&gt;</code> value set to greater than "384M" (384 megabytes -- the default).</p>
+  <p>When using an Oracle JRE, you may also need to increase the size of the permanent generation memory. The default
+  maximum is 64 megabytes, but more may be needed depending on your plug-in configuration and use. When the VM runs out
+  of permanent generation memory, it may crash or hang during class loading. The maximum permanent generation size is
+  increased using the -XX:MaxPermSize=&lt;memory size&gt; argument:</p>
+  <blockquote>
+    <p><code>eclipse -vmargs -XX:MaxPermSize=&lt;memory size&gt;</code></p>
+  </blockquote>
+  <p>This argument may not be available for all VM versions and platforms; consult your VM documentation for more
+  details.</p>
+  <p>Note that setting memory sizes to be larger than the amount of available physical memory on your machine will
+  cause Java to "thrash" as it copies objects back and forth to virtual memory, which will severely degrade your
+  performance.</p>
+  <h3>Selecting a workspace</h3>
+  <p>When the Workbench is launched, the first thing you see is a dialog that allows you to select where the workspace
+  will be located. The workspace is the directory where your work will be stored. If you do not specify otherwise,
+  Eclipse creates the workspace in your user directory. This workspace directory is used as the default content area
+  for your projects as well as for holding any required metadata. For shared or multi-workspace installs you must
+  explicitly specify the location for your workspace using the dialog (or via the "<code>-data</code>" command line
+  argument).</p>
+  <h3>Specifying the Java virtual machine</h3>
+  <p>Here is a typical Eclipse command line:</p>
+  <blockquote>
+    <p><code>eclipse -vm c:\jdk7u45\jre\bin\javaw</code></p>
+  </blockquote>
+  <p><i>Tip:</i> It's generally a good idea to explicitly specify which Java VM to use when running Eclipse. This is
+  achieved with the "<code>-vm</code>" command line argument as illustrated above. If you don't use "<code>-vm</code>",
+  Eclipse will look on the O/S path. When you install other Java-based products, they may change your path and could
+  result in a different Java VM being used when you next launch Eclipse.</p>
+  <p>To create a Windows shortcut to an installed Eclipse:</p>
+  <ol>
+    <li>Navigate to <code>eclipse.exe</code> in Windows Explorer and use Create Shortcut on the content menu.</li>
+    <li>Select the shortcut and edit its Properties. In the Target: field append the command line arguments.</li>
+  </ol>
+  <p>Opening this shortcut launches Eclipse. (You can drag the shortcut to the Windows Desktop if you want to keep it
+  in easy reach.)</p>
+  <h3><a name="macosx" id="macosx">macOS</a></h3>
+  <p>On macOS, you start Eclipse by double clicking the Eclipse application. If you need to pass arguments to Eclipse,
+  you'll have to edit the <code>eclipse.ini</code> file inside the Eclipse application bundle: select the Eclipse
+  application bundle icon while holding down the Control Key. This will present you with a popup menu. Select "Show
+  Package Contents" in the popup menu. Locate <code>eclipse.ini</code> file in the <code>Contents/MacOS</code>
+  sub-folder and open it with your favorite text editor to edit the command line options.</p>
+  <p>On macOS you can only launch a UI program more than once if you have separate copies of the program on disk. The
+  reason for this behavior is that every UI application on macOS can open multiple documents, so typically there is no
+  need to open a program twice. Since Eclipse cannot open more than one workspace, this means you have to make a copy
+  of the Eclipse install if you want to open more then one workspace at the same time (bug <a href=
+  "https://bugs.eclipse.org/bugs/show_bug.cgi?id=139319" target="_blank">139319</a>).</p>
+  <p>If you need to launch Eclipse from the command line, you can use the symbolic link "eclipse" in the top-level
+  eclipse folder. It refers to the eclipse executable inside the application bundle and takes the same arguments as
+  "eclipse.exe" on other platforms.</p>
+  <p>On macOS 10.4 and later, you may notice a slow down when working with significant numbers of resources if you
+  allow Spotlight to index your workspace. To prevent this, start System Preferences, select the Spotlight icon, then
+  the Privacy tab, then click the Add button ("+") and find your workspace directory in the dialog that appears.</p>
+  <h3><a name="SharedInstall" id="SharedInstall">Shared Install</a></h3>
+  <p>The startup speed of a shared install can be improved if proper cache information is stored in the shared install
+  area. To achieve this, after unzipping Eclipse distribution, run Eclipse once with the "-initialize" option from an
+  account that has a write access to the install directory.</p>
+  <!-- ************* END SECTION COPIED FROM README FILE **************** -->
+  <h1>Advanced Topics in Running Eclipse</h1>
+  <p>The Eclipse executable and the platform itself offer a number of execution options of interest to people
+  developing or debugging parts of Eclipse. This is a list of the commonly used options, for a full list see the
+  Eclipse runtime options page in the Platform Plug-in Developer Guide. The general form of running the Eclipse
+  executable is:</p>
+  <blockquote>
+    <pre>eclipse [platform options] [-vmargs [Java VM arguments]]</pre>
+  </blockquote>
+  <table width="95%" border="1">
+    <caption>
+      <b>Eclipse Startup Parameters</b>
+    </caption>
+    <tbody>
+      <tr>
+        <th width="31%"><b>Command</b></th>
+        <th width="65%"><b>Description</b></th>
+        <td width="4%"><b>Since</b></td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-arch</b> <var>architecture</var></pre>
+        </td>
+        <td width="65%">Defines the processor architecture on which the Eclipse platform is running. The Eclipse
+        platform ordinarily computes the optimal setting using the prevailing value of Java <code>os.arch</code>
+        property. If specified here, this is the value that the Eclipse platform uses. The value specified here is
+        available to plug-ins as Platform.getOSArch(). Example values: "x86", "sparc", "PA-RISC", "ppc".</td>
+        <td width="4%">2.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-application</b> <var>applicationId</var></pre>
+        </td>
+        <td width="65%">The application to run. Applications are declared by plug-ins supplying extensions to the
+        org.eclipse.core.runtime.applications extension point. This argument is typically not needed. If specified, the
+        value overrides the value supplied by the configuration. If not specified, the Eclipse Workbench is run.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-clean</b></pre>
+        </td>
+        <td width="65%">Cleans cached data used by the OSGi framework and Eclipse runtime. Try to run Eclipse once with
+        this option if you observe startup errors after install, update, or using a shared configuration.</td>
+        <td width="4%">3.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-configuration</b> <var>configURL</var></pre>
+        </td>
+        <td width="65%">The location for the Eclipse Platform configuration file, expressed as a URL. The configuration
+        file determines the location of the Eclipse platform, the set of available plug-ins, and the primary feature.
+        Note that relative URLs are not allowed. The configuration file is written to this location when the Eclipse
+        platform is installed or updated.</td>
+        <td width="4%">2.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-consolelog</b></pre>
+        </td>
+        <td width="65%">Mirrors the Eclipse platform's error log to the console used to run Eclipse. Handy when
+        combined with <code>-debug</code>.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-data</b> <var>workspacePath</var></pre>
+        </td>
+        <td width="65%">The path of the workspace on which to run the Eclipse platform. The workspace location is also
+        the default location for projects. Relative paths are interpreted relative to the directory that Eclipse was
+        started from.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-debug</b> [<var>optionsFile</var>]</pre>
+        </td>
+        <td width="65%">Puts the platform in debug mode and loads the debug options from the file at the given
+        location, if specified. This file indicates which debug points are available for a plug-in and whether or not
+        they are enabled. If a file location is not given, the platform looks in the directory that eclipse was started
+        from for a file called ".options". Both URLs and file system paths are allowed as file locations.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td width="31%" height="133" valign="top">
+          <pre><b>-dev</b> [<var>classpathEntries</var>]</pre>
+        </td>
+        <td width="65%">Puts the platform in development mode. The optional classpath entries (a comma separated list)
+        are added to the runtime classpath of each plug-in. For example, when the workspace contains plug-ins being
+        developed, specifying <code>-dev bin</code> adds a classpath entry for each plug-in project's directory named
+        <code>bin</code>, allowing freshly generated class files to be found there. Redundant or non-existent classpath
+        entries are eliminated.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-initialize</b></pre>
+        </td>
+        <td width="65%">Initializes the configuration being run. All runtime related data structures and caches are
+        refreshed. Handy with shared installs: running Eclipse once with this option from an account with write
+        privileges will improve startup performance.</td>
+        <td width="4%">3.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-keyring</b> <var>keyringFilePath</var></pre>
+        </td>
+        <td width="65%">The location of the authorization database (or "key ring" file) on disk. This argument must be
+        used in conjunction with the <code>-password</code> option. Relative paths are interpreted relative to the
+        directory that Eclipse was started from.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-nl</b> <var>locale</var></pre>
+        </td>
+        <td width="65%">Defines the name of the locale on which the Eclipse platform is running. The Eclipse platform
+        ordinarily computes the optimal setting automatically. If specified here, this is the value that the Eclipse
+        platform uses. The value specified here is available to plug-ins as Platform.getNL(). Example values: "en_US"
+        and "fr_FR_EURO".</td>
+        <td width="4%">2.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-nosplash</b></pre>
+        </td>
+        <td width="65%">Runs the platform without putting up the splash screen.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-os</b> <var>operatingSystem</var></pre>
+        </td>
+        <td width="65%">Defines the operating system on which the Eclipse platform is running. The Eclipse platform
+        ordinarily computes the optimal setting using the prevailing value of Java <code>os.name</code> property. If
+        specified here, this is the value that the Eclipse platform uses. The value specified here is available to
+        plug-ins as Platform.getOS(), and used to resolve occurrences of the <code>$os$</code> variable in paths
+        mentioned in the plug-in manifest file. Example values: "win32", "linux", "hpux", "solaris", "aix".</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-password</b> <var>password</var></pre>
+        </td>
+        <td width="65%">The password for the authorization database. Used in conjunction with the <code>-keyring</code>
+        option.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-perspective</b> <var>perspectiveId</var></pre>
+        </td>
+        <td width="65%">The perspective to open in the active workbench window on startup. If this parameter is not
+        specified, the perspective that was active on shutdown will be opened.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-plugincustomization</b>
+          <var>propertiesFile</var></pre>
+        </td>
+        <td width="65%">The location of a properties file containing default settings for plug-in preferences. These
+        default settings override default settings specified in the primary feature. Relative paths are interpreted
+        relative to the directory that eclipse was started from.</td>
+        <td width="4%">2.0</td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <pre><b>-product</b> <em>productId</em><br></pre>
+        </td>
+        <td height="16">The ID of the product to run. The product gives the launched instance of Eclipse its
+        personality, and determines the product customization information used. This replaces -feature, which is still
+        supported for compatibility.</td>
+        <td height="16">3.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%" height="16">
+          <pre><b>-refresh</b> </pre>
+        </td>
+        <td width="65%" height="16">Option for performing a global refresh of the workspace on startup. This will
+        reconcile any changes that were made in the file system since the platform was last run.</td>
+        <td width="4%" height="16">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%" height="16">
+          <pre><b>-showlocation</b> [<var>workspaceName</var>]</pre>
+        </td>
+        <td width="65%" height="16">Option for displaying the location of the workspace in the window title bar. In
+        release 2.0 this option only worked in conjunction with the -data command line argument. In 3.2, an optional
+        workspace name argument was added that displays the provided name in the window title bar instead of the
+        location of the workspace.</td>
+        <td width="4%" height="16">2.0</td>
+      </tr>
+      <tr>
+        <td valign="top" width="31%">
+          <pre><b>-vm</b> <var>vmPath</var></pre>
+        </td>
+        <td width="65%">The location of Java Runtime Environment (JRE) to use to run the Eclipse platform. If not
+        specified, the launcher will attempt to find a JRE. It will first look for a directory called <code>jre</code>
+        as a sibling of the Eclipse executable, and then look on the operating system path. Relative paths are
+        interpreted relative to the directory that eclipse was started from.</td>
+        <td width="4%">1.0</td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <pre><b>-vm</b><strong>args</strong> <em>args</em></pre>
+        </td>
+        <td>When passed to the Eclipse, this option is used to customize the operation of the Java VM used to run
+        Eclipse. If specified, this option must come at the end of the command line. The given arguments are dependent
+        on VM that is being run.</td>
+        <td>1.0</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>All arguments following (but not including) the -vmargs entry are passed directly through to the indicated Java VM
+  as virtual machine arguments (that is, before the class to run). <b>Note:</b> If an Eclipse startup argument, such as
+  -data, is provided after the Java vm arguments (-vmargs), Eclipse will not start and you will receive a "JVM
+  terminated. Exit code=1" error.</p>
+</body>
+</html>

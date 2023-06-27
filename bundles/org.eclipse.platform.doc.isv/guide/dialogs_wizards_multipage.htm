@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Multi-page wizards
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<h2>
+Multi-page wizards</h2>
+<P >
+If your wizard implements a complex task, you may want to use more than one page to obtain information from the user.</P>
+<P >
+In general, the implementation pattern is the same as for a single page wizard.</P>
+<ul>
+  <li>
+    
+Create a <a href="../reference/api/org/eclipse/jface/wizard/WizardPage.html"> <b> WizardPage</b></a> subclass for each page in your wizard. Each wizard page should use
+<b>setPageComplete(true)</b> when it has enough information.</li>
+  <li>
+    
+Create a <a href="../reference/api/org/eclipse/jface/wizard/Wizard.html"> <b> Wizard</b></a> subclass which adds each page to the wizard.</li>
+  <li>
+    
+Implement a <b> performFinish</b> method to perform the finish logic.</li>
+</ul>
+<P >
+When you design a wizard, it's good practice to put all the required information on the first page if possible. This way, the user does not have to traverse the entire set of pages in order to finish the task.&nbsp;
+Optional information can go on subsequent pages. </P>
+<P >
+When a page requires input from the user before it can be considered complete, use
+<b>setPageComplete(false)</b> to signify that it is not complete. As the page receives events from its controls, it rechecks to see if the page is complete. Once the required input is provided,
+<b>setPageComplete(true)</b> signals completion.</P>
+<P >
+The <a href="../reference/api/org/eclipse/jface/wizard/Wizard.html"> <b> Wizard</b></a> class handles the
+logic required to enable and disable the <b> Finish</b>  button according to the
+completion state of the pages.&nbsp; The
+<b> Finish</b> button is only enabled for a wizard when each of its pages have set its completion state to true.</P>
+
+<h3>
+Validation and page control</h3>
+<P >
+The classes <a href="../reference/api/org/eclipse/ui/dialogs/WizardNewFileCreationPage.html"> <b> WizardNewFileCreationPage</b></a> and
+<b> CreateReadme1</b> show a common pattern for implementing page validation.</P>
+<P >
+<a href="../reference/api/org/eclipse/ui/dialogs/WizardNewFileCreationPage.html">
+<b>
+WizardNewFileCreationPage</b></a> defines a common event handler for all SWT events which validates the page. This means the page will be validated whenever an event is received from a widget to which the page added a listener.</P>
+<pre>
+   public void handleEvent(Event event) {
+      setPageComplete(validatePage());
+   }
+</pre>
+<P >
+Once the <b>ReadmeCreationPage</b> creates its controls, it sets the state of the page using
+<b>validatePage</b>.</P>
+<pre>
+   public void createControl(Composite parent) {
+      super.createControl(parent);
+      // create controls, add listeners, and layout the page
+      ...
+      // sample section generation checkboxes
+      sectionCheckbox = new Button(group,SWT.CHECK);
+      sectionCheckbox.setText(MessageUtil.getString(&quot;Generate_sample_section_titles&quot;));
+      sectionCheckbox.setSelection(true);
+      sectionCheckbox.<b>addListener</b>(SWT.Selection,this);
+
+      subsectionCheckbox = new Button(group,SWT.CHECK);
+      subsectionCheckbox.setText(MessageUtil.getString(&quot;Generate_sample_subsection_titles&quot;));
+      subsectionCheckbox.setSelection(true);
+      subsectionCheckbox.<b>addListener</b>(SWT.Selection,this);
+      ...
+      <b>setPageComplete(validatePage());</b>
+   }
+</pre>
+<P >
+Using this pattern, a wizard page can put all of its page validation code in one method,
+<b>validatePage()</b>. This method determines the initial state of the page and recalculates the state any time it receives an event from a widget on its page.</P>
+<P >
+Since we added a listener to the section checkbox, we will recompute the valid state of the page whenever that checkbox receives a selection event.
+Note that the page's
+<b> handleEvent</b> method must call super to ensure that the
+inherited page validation behavior occurs in addition to any specific event handling for this
+page.</P>
+<pre>
+   public void handleEvent(Event e) {
+      Widget source = e.widget;
+      if (source == sectionCheckbox) {
+         if (!sectionCheckbox.getSelection())
+            subsectionCheckbox.setSelection(false);
+         subsectionCheckbox.setEnabled(sectionCheckbox.getSelection());
+      }
+      super.handleEvent(e);
+   }
+</pre>
+
+
+
+
+</BODY>
+</HTML>

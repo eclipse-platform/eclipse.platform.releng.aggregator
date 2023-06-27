@@ -1,0 +1,288 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Handlers
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Handlers</h3>
+
+
+<p>
+A <b>handler</b> is the implementation of a command's behaviour.  Any plugin can
+contribute a handler implementation for any command.  The workbench uses core
+expressions and programmatic scoping rules to determine which handler is active
+at any time.  There can either be one handler active for the command, or no handlers
+active for the command (the command is effectively disabled).  When the
+command has an active handler, we say the command is handled.
+</p>
+
+<h4>Associating a default handler with a command</h4>
+
+<p>
+While there is a shortcut for a default handler, most handlers are associated
+with their command using the 
+<a href="../reference/extension-points/org_eclipse_ui_handlers.html">org.eclipse.ui.handlers</a>
+extension point.
+</p>
+
+<p>
+A command that has default behaviour (it works as long as the workbench is up)
+can have the default implementation associated in the command definition.  The
+Info example &quot;Global Command&quot; does this:</p>
+<pre>
+      &lt;command
+            categoryId=&quot;org.eclipse.ui.examples.contributions.commands.category&quot;
+            <b>defaultHandler=&quot;org.eclipse.ui.examples.contributions.handlers.GlobalMenuHandler&quot;</b>
+            id=&quot;org.eclipse.ui.examples.contributions.commands.globalCommand&quot;
+            name=&quot;%contributions.commands.globalCommand.name&quot;&gt;
+      &lt;/command&gt;
+</pre>
+
+<p>
+<b>defaultHandler</b> points to the IHandler class that implements the default
+behaviour for this command.  The default handler will always be available unless
+overriden by a handler association in a more specific scope.  This is a shortcut
+for the equivalent <b>org.eclipse.ui.handlers</b> entry:</p>
+<pre>
+      ...
+      &lt;handler
+            class=&quot;org.eclipse.ui.examples.contributions.handlers.GlobalMenuHandler&quot;
+            commandId=&quot;org.eclipse.ui.examples.contributions.commands.globalCommand&quot;&gt;
+      &lt;/handler&gt;
+      ...
+</pre>
+
+
+<h4>Associating a handler with a command while a part type is active</h4>
+
+<p>
+The &lt;activeWhen/&gt; expressions in the plugin.xml and programmatic core
+expressions are used to help determine the scope of a handlers activation.
+For example,  a specific window, a specific <b>Shell</b>, an active part type
+or active part.
+</p>
+<p>
+Here is an example where we are adding some commands to the Info view,
+<b>org.eclipse.ui.examples.contributions.view</b>.  Count to count the number
+of model elements in the view and swap to swap the 2 selected elements.
+The command definitions are in the global space as always:</p>
+<pre>
+   &lt;extension
+         point=&quot;org.eclipse.ui.commands&quot;&gt;
+      &lt;command
+            categoryId=&quot;org.eclipse.ui.examples.contributions.commands.category&quot;
+            id=&quot;org.eclipse.ui.examples.contributions.view.count&quot;
+            description=&quot;%contributions.view.count.desc&quot;
+            name=&quot;%contributions.view.count.name&quot;&gt;
+      &lt;/command&gt;
+      &lt;command
+            categoryId=&quot;org.eclipse.ui.examples.contributions.commands.category&quot;
+            id=&quot;org.eclipse.ui.examples.contributions.view.swap&quot;
+            name=&quot;%contributions.view.swap.name&quot;&gt;
+      &lt;/command&gt;
+      ...
+</pre>
+
+<p>
+We declaratively associate the swap command with a handler that is active
+while a view with the correct ID is active.  When declaring a handler, you
+can also provide a core expression for declarative enablement.  The extension
+point description for
+<a href="../reference/extension-points/org_eclipse_ui_handlers.html">org.eclipse.ui.handlers</a>
+lists valid elements for the core expression.
+</p>
+<pre>
+   &lt;extension
+         point=&quot;org.eclipse.core.expressions.definitions&quot;&gt;
+      ...
+      &lt;definition
+            id=&quot;org.eclipse.ui.examples.contributions.view.inView&quot;&gt;
+         &lt;with
+               variable=&quot;activePartId&quot;&gt;
+            &lt;equals
+                  value=&quot;org.eclipse.ui.examples.contributions.view&quot;&gt;
+            &lt;/equals&gt;
+         &lt;/with&gt;
+      &lt;/definition&gt;
+      ...
+   &lt;/extension&gt;
+   &lt;extension
+         point=&quot;org.eclipse.ui.handlers&quot;&gt;
+      ...
+      &lt;handler
+            class=&quot;org.eclipse.ui.examples.contributions.view.SwapInfoHandler&quot;
+            commandId=&quot;org.eclipse.ui.examples.contributions.view.swap&quot;&gt;
+         <b>&lt;activeWhen&gt;
+            &lt;reference
+                  definitionId=&quot;org.eclipse.ui.examples.contributions.view.inView&quot;&gt;
+            &lt;/reference&gt;
+         &lt;/activeWhen&gt;</b>
+         &lt;enabledWhen&gt;
+            &lt;count
+                  value=&quot;2&quot;&gt;
+            &lt;/count&gt;
+         &lt;/enabledWhen&gt;
+      &lt;/handler&gt;
+      ...
+</pre>
+
+<p>
+Here we are using another extension point
+<a href="../reference/extension-points/org_eclipse_core_expressions_definitions.html">org.eclipse.core.expressions.definitions</a>
+so we can reuse the same expression in multiple places.  The definition's id is
+<b>org.eclipse.ui.examples.contributions.view.inView</b> and the expression it
+defines is &lt;with variable=&quot;activePartId&quot;&gt;...&lt;/with&gt;.
+Whenever another core expression uses &lt;reference 
+definitionId=&quot;org.eclipse.ui.examples.contributions.view.inView&quot;/&gt;
+the &lt;with...&gt; expression will be evaluated.
+</p>
+<p>
+The &lt;activeWhen/&gt; clause here says the this handler will be active
+when the <b>activePartId</b> equals our Info view id.  The priorities defined in
+<a href="../reference/api/org/eclipse/ui/ISources.html">org.eclipse.ui.ISources</a>
+can give you an idea of the relative importance of different variables, although
+the priorities alone do not determine a variable's relative importance.
+</p>
+<p>
+Our handler definition also includes an &lt;enabledWhen&gt; clause.  In this
+case the handler will be enabled when the default variable (the current
+selection converted into a <b>java.util.Collection</b> of objects) has 2 elements.
+A core expression that does not include a &lt;with/&gt; element is evaluated
+against the default variable.
+</p>
+
+<h4>Associating a handler programmically with a command while a specific part is active</h4>
+
+<p>
+Sometimes it is desirable to instantiate your handlers when your part is
+created.  You can use the 
+<a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html">org.eclipse.ui.handlers.IHandlerService</a>
+to activate your handler for your part.  Here is the code that activates
+a handler for the count command.
+</p>
+<pre>
+	private static final String VIEW_COUNT_ID = &quot;org.eclipse.ui.examples.contributions.view.count&quot;; //$NON-NLS-1$
+	...
+	/**
+	 * Instantiate any handlers specific to this view and activate them.
+	 */
+	private void createHandlers() {
+		// 1 - get the handler service from the view site
+		IHandlerService handlerService = (IHandlerService) getSite()
+				.getService(IHandlerService.class);
+		// 2 - create the handler instance
+		countHandler = new AbstractHandler() {
+			public Object execute(ExecutionEvent event)
+					throws ExecutionException {
+				// viewer is an instance variable of InfoView
+				List elements = (List) viewer.getInput();
+				MessageDialog.openInformation(getSite().getShell(),
+						ContributionMessages.SampleHandler_plugin_name,
+						NLS.bind(ContributionMessages.InfoView_countElements,
+								new Integer(elements.size())));
+				return null;
+			}
+		};
+		// 3 - activate this handler instance for the count command
+		handlerService.activateHandler(VIEW_COUNT_ID, countHandler);
+	}
+</pre>
+<p>
+In the InfoView,  createHandlers() is called from the end of the
+createPartControl(Composite) method.
+<a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html">org.eclipse.ui.handlers.IHandlerService</a>
+and
+<a href="../reference/api/org/eclipse/ui/contexts/IContextService.html">org.eclipse.ui.context.IContextService</a>
+provide scoping of their activations depending on where you get the service.</p>
+<ol>
+<li><b>IHandlerService</b> from the workbench is the global handler service.
+it provides no special activation scoping or lifecycle.</li>
+<li><b>IHandlerService</b> from the workbench window is the window handler service.
+Any handlers activated through the window handler service will be active when
+that window is active.  Any listeners added to the window handler service
+will be removed when the window is disposed, and any active handlers will be deactivated
+(but not disposed).</li>
+<li><b>IHandlerService</b> from the workbench part site is the part handler service.
+Any handlers activated through the part handlers service will only be active
+when that part is active. Any listeners added to the part handler service
+will be removed when the part is disposed, and any active handlers will be deactivated
+(but not disposed).</li>
+</ol>
+
+
+<h4>Implementing the handler</h4>
+<p>
+A handler must implement 
+<a href="../reference/api/org/eclipse/core/commands/IHandler.html">org.eclipse.core.commands.IHandler</a>
+although in most cases it is easier to subclass
+<a href="../reference/api/org/eclipse/core/commands/AbstractHandler.html">org.eclipse.core.commands.AbstractHandler</a>.
+</p>
+<p>
+The bulk of the work is done in the <b>execute(ExecutionEvent)</b> method.  From the
+<a href="../reference/api/org/eclipse/core/commands/ExecutionEvent.html">org.eclipse.core.commands.ExecutionEvent</a>
+you can get any parameters from the calling command object as well as the application context
+the command was executed in.
+</p>
+
+<pre>
+		Object object = event.getApplicationContext();
+		if (object instanceof IEvaluationContext) {
+			IEvaluationContext appContext = (IEvaluationContext) object;
+			...
+		}
+</pre>
+
+<p>
+The application context provides access to much of the workbench current state.
+For example, the active workbench window, active shell, active part, active editor,
+and current selection to name a few.
+See 
+<a href="../reference/api/org/eclipse/ui/handlers/HandlerUtil.html">org.eclipse.ui.handlers.HandlerUtil</a>
+for an example of extracting variables from the application context and
+<a href="../reference/api/org/eclipse/ui/ISources.html">org.eclipse.ui.ISources</a>
+for a list of variables that are currently supported.
+</p>
+<p>
+The <b>GlobalMenuHandler</b> is an example of a simple handler that just
+opens an information popup with a message.  The example execute:</p>
+<pre>
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IWorkbenchWindow window = HandlerUtil
+				.getActiveWorkbenchWindowChecked(event);
+		MessageDialog.openInformation(window.getShell(),
+				ContributionMessages.SampleHandler_plugin_name,
+				ContributionMessages.SampleHandler_hello_msg);
+		return null;
+	}
+</pre>
+<p>
+Handlers subclassing
+<a href="../reference/api/org/eclipse/core/commands/AbstractHandler.html">org.eclipse.core.commands.AbstractHandler</a>
+or implementing
+<a href="../reference/api/org/eclipse/core/commands/IHandler2.html">org.eclipse.core.commands.IHandler2</a>
+can implement <code>setEnabled(Object evaluationContext)</code>.  Before the workbench framework
+asks a handler for its enabled state, it will call <code>setEnabled</code> with an
+<a href="../reference/api/org/eclipse/core/expressions/IEvaluationContext.html">org.eclipse.core.expressions.IEvaluationContext</a>
+to allow the handler to update its state.
+</p>
+<p>
+Without getting into to many details, this uses a <b>HandlerUtil</b> convenience
+method to extract the active workbench window.  Then it opens an information
+dialog with a &quot;hello world&quot; message.  <b>ContributionMessages</b> is an
+<a href="../reference/api/org/eclipse/osgi/util/NLS.html">org.eclipse.osgi.util.NLS</a>
+subclass to help externalize our message strings.
+</p>
+
+
+</BODY>
+</HTML>

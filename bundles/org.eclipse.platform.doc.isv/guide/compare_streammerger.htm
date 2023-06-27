@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Merging multiple files</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Merging multiple files</H2>
+<p>
+In some cases, the ability to merge files without the assist of a user
+is desirable.  The extension point
+<a href="../reference/extension-points/org_eclipse_team_core_storageMergers.html"><b>org.eclipse.team.core.storageMergers</b></a>
+allows you to contribute a class that merges three different files (or storage units) into a single output stream. Storage mergers
+can be associated with file extensions or bound to a particular content type.  The Platform defines a storage
+merger for merging three files of plain text:</p>
+<pre>&lt;extension
+	point="org.eclipse.team.core.storageMergers"&gt;
+	&lt;storageMerger
+		extensions="txt"
+		class="org.eclipse.team.internal.ui.mapping.TextStorageMerger"
+		id="org.eclipse.team.ui.textStorageMerger"&gt;
+	&lt;/storageMerger&gt;
+	&lt;contentTypeBinding
+		contentTypeId="org.eclipse.core.runtime.text"
+		streamMergerId="org.eclipse.team.ui.textStorageMerger"&gt;
+	&lt;/contentTypeBinding&gt;
+&lt;/extension&gt;
+</pre>
+<p>The storage merger itself is described in the <b>storageMerger</b> element.  You must specify the <b>id </b>of the 
+merger and the <b>class</b> that implements it.  You may also specify any file <b>extensions</b> for which the 
+the storage merger should be used.</p>
+<p>You may also use the <b>contentTypeBinding</b> element to associate a <a href="runtime_content.htm">content type</a> 
+with a storage merger.
+</p>
+<p>
+Storage mergers must implement 
+<a href="../reference/api/org/eclipse/team/core/mapping/IStorageMerger.html"><b>IStorageMerger</b></a>.
+This simple interface merges the contents from three different storage units into a single output stream.
+The not-so-simple implementation depends upon your plug-in and its content types.
+</p>
+
+</BODY>
+</HTML>

@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Adding launchers to the platform</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Adding launchers to the platform</h3>
+<p>Your plug-in can add launch configuration types to the platform using the <a href="../reference/extension-points/org_eclipse_debug_core_launchConfigurationTypes.html"><b>org.eclipse.debug.core.launchConfigurationTypes</b></a>
+extension point.&nbsp; This extension point allows you to declare a
+configuration type using a unique id.&nbsp; You must provide a corresponding
+implementation of <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate.html"><b>ILaunchConfigurationDelegate</b></a>.
+The delegate is responsible for launching its launch configuration in a specified mode.  
+Optionally, you can implement <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate2.html"><b>ILaunchConfigurationDelegate2</b></a>,
+which enhances the delegate interface to allow your delegate to abort a launch, build relevant projects in the workspace
+before a launch, and control the creation of the launch object that is used in a launch.
+</p>
+<p>
+In addition to defining the delegate, you can specify which launch modes are supported
+by your delegate, and a name that should be used when showing launchers
+of this type to the user.</p>
+<p>The following markup shows how the Java tools declare a Java launch
+configuration for launching local Java programs:</p>
+<pre>&lt;extension point = &quot;org.eclipse.debug.core.launchConfigurationTypes&quot;&gt;
+   &lt;launchConfigurationType
+   	   id=&quot;org.eclipse.jdt.launching.localJavaApplication&quot;
+	   <b>name=&quot;%localJavaApplication&quot;
+	   delegate=&quot;org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate&quot;
+	   modes= &quot;run, debug&quot;</b>
+	   sourceLocatorId=&quot;org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector&quot;
+       sourcePathComputerId=&quot;org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer&quot;&gt;
+   &lt;/launchConfigurationType&gt;
+&lt;/extension&gt;</pre>
+<p>This extension defines a launch configuration delegate that can be used to run or debug programs that
+are launched using the local Java launch configuration.</p>
+<h4>Defining new launch modes</h4>
+<p>We mentioned previously that the platform defines launch modes for running, debugging, or profiling
+a program.  These modes are defined using the <a href="../reference/extension-points/org_eclipse_debug_core_launchModes.html"><b>org.eclipse.debug.core.launchModes</b></a>
+extension point. This extension point allows you to declare a launch mode by defining its string mode
+name and the label that should be shown to the user to describe the mode.  The following markup shows 
+the definition of the platform's three standard launch modes:</p>
+<pre>
+&lt;extension point="org.eclipse.debug.core.launchModes"&gt;
+	&lt;launchMode
+		label="%run"
+		mode="run"&gt;
+	&lt;/launchMode&gt;
+	&lt;launchMode
+		label="%debug"
+		mode="debug"&gt;
+	&lt;/launchMode&gt;
+	&lt;launchMode
+		label="%profile"
+		mode="profile"&gt;
+	&lt;/launchMode&gt;
+&lt;/extension&gt;
+</pre>
+<p>Note that the mode is not associated with any particular launch configuration type.  As shown earlier, that association
+occurs when a launch delegate is specified for a configuration type.  </p>
+<h4>Defining launch delegates</h4>
+<p>Since launch modes can be specified independently of launch configuration types, it's possible that new modes
+are defined that are not implemented by the original delegate for a launch configuration.  In this case, a plug-in
+may define a launch delegate that implements a particular mode for a particular launch configuration type.
+This can be done using the <a href="../reference/extension-points/org_eclipse_debug_core_launchDelegates.html"><b>org.eclipse.debug.core.launchDelegates</b></a>
+extension point. This extension point allows you to define a launch delegate that implements the specified modes
+for a given configuration type.  The following markup shows how you could define a delegate for profiling
+a local Java application:</p>
+<pre>
+&lt;extension point="org.eclipse.debug.core.launchDelegates"&gt;
+  &lt;launchDelegate
+   id=&quot;com.example.MyJavaProfileDelegate&quot;
+   delegate=&quot;com.example.MyJavaProfileDelegate&quot;
+   type=&quot;org.eclipse.jdt.launching.localJavaApplication&quot;
+   modes=&quot;profile&quot;&gt;
+  &lt;/launchDelegate&gt;
+ &lt;/extension&gt;
+</pre>
+<p>The specification of the delegate is similar to the way it is done when defining a launch configuration
+type, except that in this case the type of launch configuration is specified along with the supported
+modes.  As seen previously, the delegate must implement <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate.html"><b>ILaunchConfigurationDelegate</b></a>,
+and can optionally implement <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate2.html"><b>ILaunchConfigurationDelegate2</b></a> for
+more control over the launch sequence.</p>
+<h4>Other references</h4>
+<p><a href="http://www.eclipse.org/articles/Article-Launch-Framework/launch.html">We Have Lift-off: The Launching Framework in Eclipse</a> 
+provides a start to finish example for defining your own launch type.</p>
+
+</BODY>
+</HTML>

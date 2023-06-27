@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Implementing a preference page
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Implementing a preference page</h3>
+
+<h4>
+Defining the page</h4>
+<p>
+The JFace plug-in provides a framework for implementing wizards, preference pages, 
+and dialogs.  The implementation for these dialogs follows a common pattern.
+The contents of a page or dialog is defined by implementing a <b>createContents</b> 
+method that creates the SWT controls representing the page content.  This method
+should also add listeners for any events of interest. The page is responsible for 
+creating and returning the composite that will parent all of the controls in the page.
+The following snippet shows the highlights:</p>
+<pre>
+protected Control createContents(Composite parent)
+{
+	...
+	//composite_textField &lt;&lt; parent
+	Composite composite_textField = createComposite(parent, 2);
+	Label label_textField = createLabel(composite_textField, MessageUtil.getString(&quot;Text_Field&quot;));	 
+	textField = createTextField(composite_textField);
+	pushButton_textField = createPushButton(composite_textField, MessageUtil.getString(&quot;Change&quot;)); 
+
+	//composite_tab &lt;&lt; parent
+	Composite composite_tab = createComposite(parent, 2);
+	Label label1 = createLabel(composite_tab, MessageUtil.getString(&quot;Radio_Button_Options&quot;)); 
+
+	//
+	tabForward(composite_tab);
+	//radio button composite &lt;&lt; tab composite
+	Composite composite_radioButton = createComposite(composite_tab, 1);
+	radioButton1 = createRadioButton(composite_radioButton, MessageUtil.getString(&quot;Radio_button_1&quot;)); 
+	radioButton2 = createRadioButton(composite_radioButton, MessageUtil.getString(&quot;Radio_button_2&quot;)); 
+	radioButton3 = createRadioButton(composite_radioButton, MessageUtil.getString(&quot;Radio_button_3&quot;)); 
+
+
+	//composite_tab2 &lt;&lt; parent
+	Composite composite_tab2 = createComposite(parent, 2);
+	Label label2 = createLabel(composite_tab2, MessageUtil.getString(&quot;Check_Box_Options&quot;)); //$NON-NLS-1$
+
+	//
+	tabForward(composite_tab2);
+	//composite_checkBox &lt;&lt; composite_tab2
+	Composite composite_checkBox = createComposite(composite_tab2, 1);
+	checkBox1 = createCheckBox(composite_checkBox, MessageUtil.getString(&quot;Check_box_1&quot;)); 
+	checkBox2 = createCheckBox(composite_checkBox, MessageUtil.getString(&quot;Check_box_2&quot;)); 
+	checkBox3 = createCheckBox(composite_checkBox, MessageUtil.getString(&quot;Check_box_3&quot;)); 
+
+	initializeValues();
+
+	return new Composite(parent, SWT.NULL);
+}</pre>
+<p>
+Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.
+Here is what the corresponding page looks like:</p>
+<p>
+<img src="images/readmepreferences.png" alt="Readme tool preferences page" border="0"></p>
+<p>
+The other primary responsibility of a preference page is to react to the <b> performOk</b> message. Typically, this 
+method updates and stores the user preferences and, if necessary, updates any other plug-in objects to reflect the 
+change in preferences.  The <b>performDefaults</b> method is used to restore preferences to their
+default state when the user presses <b>Restore Defaults</b>.</p>
+<p>
+You may override <b>performApply</b> if you have additional processing when the
+user selects <b>Apply</b>. The default implementation is to call <b>performOk</b>.</p>
+<p>
+Preference pages should override the <b> doGetPreferenceStore()</b> method to return a preference store for 
+storing their values. </p>
+
+
+<h4>
+Plug-in preference store</h4>
+<p>Preference stores are a convenience mechanism for accessing and storing preference values in a
+plug-in class.  They provide plug-in level access to preferences that are actually stored using 
+the runtime preferences service.  <a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"><b>AbstractUIPlugin</b></a> 
+defines a plug-in wide preference store that is maintained during the lifetime of the plug-in.  Your plug-in
+can add entries to this preference store and update the values as the user changes the settings in your preferences page.   
+Since preference stores use the platform preferences service, they will take care of saving preference values at the 
+appropriate scope and location, and initializing the preference store using the appropriate mechanisms.</p>
+<p>
+The following code in the <b> ReadmePreferencePage</b> obtains the preference store for the
+<b>ReadmePlugin</b>.</p>
+<pre>
+   protected IPreferenceStore doGetPreferenceStore() {
+      return ReadmePlugin.getDefault().getPreferenceStore();
+   }
+</pre>
+<blockquote><i>
+Note: If there are no preferences saved anywhere for a plug-in, the plug-in will get an empty preference
+store.</i></blockquote>
+<p>
+The preference store is initialized with default values in <b>ReadmePreferenceInitializer</b>.  The preference initializer
+is contributed to the preferences service using the <b>org.eclipse.core.runtime.preferences</b> extension point. These values 
+are used the first time the preference page is shown or when the user presses <b>Restore Defaults</b> in the preferences 
+page.</p>
+<pre>
+public void initializeDefaultPreferences() {
+	// These settings will show up when the Readme preference page
+	// is shown for the first time.
+	store.setDefault(IReadmeConstants.PRE_CHECK1, true);
+	store.setDefault(IReadmeConstants.PRE_CHECK2, true);
+	store.setDefault(IReadmeConstants.PRE_CHECK3, false);
+	store.setDefault(IReadmeConstants.PRE_RADIO_CHOICE, 2);
+	store.setDefault(IReadmeConstants.PRE_TEXT, MessageUtil.getString(&quot;Default_text&quot;)); //$NON-NLS-1$
+}</pre>
+
+<h4>
+Retrieving and saving preferences</h4>
+<p>
+Once you've associated your plug-in's preference store with your preference page, you can implement the logic for retrieving and saving the preferences.</p>
+<p>
+Preference pages are responsible for initializing the values of their controls using the preferences settings from the preference store. This
+process is similar to initializing dialog control values from dialog settings. The
+<b> ReadmePreferencePage</b> initializes all of its controls in a single method,
+<b>initializeValues</b>, which is called from its <b> createContents</b> method.</p>
+<pre>private void initializeValues() {
+	IPreferenceStore store = getPreferenceStore();
+	checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));
+	checkBox2.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK2));
+	checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));
+	...
+}</pre>
+<p>
+When <b>OK</b> or <b>Apply</b> is pressed, the current values of the controls on the preference page should be stored back into the
+preference store. The
+<b> ReadmePreferencePage</b> implements this logic in a separate method,
+<b>storeValues</b>.</p>
+<pre>
+private void storeValues() {
+	IPreferenceStore store = getPreferenceStore();
+	store.setValue(IReadmeConstants.PRE_CHECK1, checkBox1.getSelection());
+	store.setValue(IReadmeConstants.PRE_CHECK2, checkBox2.getSelection());
+	store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());
+	...
+}</pre>
+<p>
+When the user presses <b>Restore Defaults</b>, the current values of the controls on the preference page should be
+reset to the default values in the preference store. The default values are defined using a preference initializer,
+<b>ReadmePreferenceInitializer</b>. The <b>ReadmePreferencePage</b> implements this logic in a separate method,
+<b>initializeDefaults</b>.</p>
+<pre>
+   private void initializeDefaults() {
+      IPreferenceStore store = getPreferenceStore();
+      checkBox1.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK1));
+      checkBox2.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK2));
+      checkBox3.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK3));
+      ...
+   }</pre>
+
+</BODY>
+</HTML>

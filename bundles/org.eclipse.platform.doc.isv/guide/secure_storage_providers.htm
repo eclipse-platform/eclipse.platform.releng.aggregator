@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Creating Password Providers</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Creating Password Providers</H2>
+
+<h4>Extending Password Providers</h4>
+
+<p>When storing information (such as a password) in the secure storage, the information 
+gets encrypted with a master password. The interesting question about this process is how to store 
+the master password?</p> 
+
+<p>The answer is in the password provider implementations. In a logical sense, password provider modules 
+represent a trusted 3rd party, an external black box, which we trust to store our master password. That black 
+box can be an operating system, some piece of hardware, or the user himself.</p>
+
+<p>Several password provider modules are supplied with the SDK. They provide a basic &quot;fallback&quot; support 
+and an improved support for some specific operating systems. For the most part you won't need to create 
+a password provider - unless you'd like to add (or improve) integration with an operating system or add interaction 
+with some specific hardware. In this case the set of password providers can be easily extended.</p>
+
+<h4>Declaring a Password Provider</h4>
+
+<p>The password provider modules have to be described as an extension to the extension point 
+<a href="../reference/extension-points/org_eclipse_equinox_security_secureStorage.html"><b>org.eclipse.equinox.security.secureStorage</b></a>. 
+The extension must specify an ID; the qualified ID of the extension will be used as an ID of the provider  
+module and must not be changed between releases. The optional name and description of the password provider 
+show up in the 
+   <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.equinox.security.ui.storage)")'>
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+  <strong>General &gt; Security &gt; Secure Storage</strong></a> 
+preferences page and are visible to the end user.</p>
+
+<p>Provider declaration includes the fully qualified class name that implements the provider, the numerical 
+priority value, and a set of hints.</p> 
+
+<p>The priority is used to select a password provider when new data is added to the secure storage. 
+The enabled provider with the highest priority is used by default. (Note that this can be overridden 
+programmatically using 
+<a href="../reference/api/org/eclipse/equinox/security/storage/provider/IProviderHints.html#REQUIRED_MODULE_ID">
+<b>IProviderHints#REQUIRED_MODULE_ID</b></a> or by using the runtime option 
+&quot;-eclipse.password&quot;.)</p>
+
+<p>The priority is an integer number from 0 to 10, with 10 being the highest priority. Consider adding your 
+providers in the mid-range of priorities, 2 to 7, reserving top and bottom values.</p>
+
+<p>An end user can disable a password provider via Secure Storage preferences page. Disabled providers are 
+not considered when new data is added to the secure storage, but can be called on data retrieval if 
+the data was originally encrypted with this provider.</p>
+
+<p>Provider declaration can also specify a set of hints to help optimize interaction between the secure 
+storage framework and the provider. The set of hints is open and can be extended in future. At the time 
+of this writing the only expected hint is <b>&quot;AutomaticPasswordGeneration&quot;</b>. This hint 
+informs the framework that the password provider creates a master password without user interaction.</p>
+
+<h4>Implementing a Password Provider</h4>
+
+<p>The class implementing the password provider must extend the 
+<a href="../reference/api/org/eclipse/equinox/security/storage/provider/PasswordProvider.html">
+<b>PasswordProvider</b></a> class. The central point of that class is the 
+
+<a href="../reference/api/org/eclipse/equinox/security/storage/provider/PasswordProvider.html#getPassword(org.eclipse.equinox.security.storage.provider.IPreferencesContainer, int)">
+<b>getPassword()</b></a> method that returns the master password for the provider for the current user. The method 
+receives hints when a new password is expected to be created (as opposing to retrieving previously generated 
+master password).</p>
+
+<p>If your password provider has user interaction or has alternative paths to obtain the master password, you might 
+consider overriding the 
+<a href="../reference/api/org/eclipse/equinox/security/storage/provider/PasswordProvider.html#retryOnError(java.lang.Exception, org.eclipse.equinox.security.storage.provider.IPreferencesContainer)">
+<b>PasswordProvider#retryOnError()</b></a> method to inform the secure storage that the provider might 
+be able to obtain a &quot;better&quot; password. For example, consider a password provider with the master password 
+entered by the user. If the password entered was invalid, then the 
+<a href="../reference/api/org/eclipse/equinox/security/storage/provider/PasswordProvider.html#retryOnError(java.lang.Exception, org.eclipse.equinox.security.storage.provider.IPreferencesContainer)">
+<b>PasswordProvider#retryOnError()</b></a> method will be consulted to see if the password provider can 
+obtain a correct password.</p>
+
+</BODY>
+</HTML>

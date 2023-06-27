@@ -1,0 +1,267 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
+  <title>Workbench concurrency support</title>
+  <link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h2>
+Workbench concurrency support</h2>
+<p>
+We've seen that the JFace UI framework provides basic support for
+showing task progress in a dialog (see <a href="jface_operations.htm">Long
+running operations</a> for details). In <a href="runtime_jobs.htm">Concurrency
+infrastructure</a>, we reviewed the platform runtime support for
+concurrency and long running operations. Now we will look at how
+the platform UI enhances this infrastructure in the <b><a href="../reference/api/org/eclipse/ui/progress/package-summary.html">
+org.eclipse.ui.progress</a></b> package. This package supplies the UI
+for showing job progress in the workbench and defines additional
+support for jobs that run in the UI thread.<br>
+</p>
+<p>First, let's look at the different kinds of background operations that may be running
+and how they are shown in the workbench UI:</p>
+<ul>
+  <li>
+    <p><i>User initiated</i> jobs are those that the user has triggered. 
+The workbench will automatically show user jobs in a modal progress
+dialog with a button to allow the user to run the operation in the
+background and continue working. A global preference is used to indicate whether user
+jobs should always run in the background.  User jobs are distinguished as such
+in the Job API using (<a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html#setUser(boolean)">Job#setUser</a>).
+Examples of user jobs include building, checking out a project, synchronizing
+with the repository, exporting a plug-in, and searching. </p>
+  </li>
+  <li>
+    <p><i>Automatically triggered</i> jobs have a meaning for users but are not initiated by the 
+user. These jobs are shown in the progress view and in the
+status line, but a modal progress dialog won't be shown when they are run.  
+Examples include autobuild and scheduled synchronization.</p>
+  </li>
+  <li>
+    <p><i>System operations</i> are not triggered by the user and can be considered a platform
+implementation detail. These jobs are created by setting the system
+flag using(<a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html#setSystem(boolean)">Job#setSystem</a>).
+Examples of system jobs include jobs that lazily populate widgets or compute decorations and annotations for views.
+ </p>
+  </li>
+</ul>
+<p><br>
+Given an environment where several things may be happening at the same
+time, a user needs the following:</p>
+<ul>
+  <li>
+    <p>Indication that a long running operation has started.</p>
+    <p><br>
+User jobs are shown to the user in a progress dialog giving immediate
+feedback, whereas automatically triggered jobs are shown in the status
+line and progress view. Jobs that affect a part should
+be <a href="#site_service">scheduled or registered with the part</a>
+so that the workbench can provide hints to the user that something is running
+that affects the part.</p>
+    <p><br>
+    </p>
+  </li>
+  <li>
+    <p>Indication that an operation has ended.</p>
+    <p><br>
+The user can easily know when a user job ends because the progress
+dialog closes. For non-user jobs, there are a couple of feedback mechanisms
+available. If the job is <a href="#site_service">scheduled or
+registered with a part</a> then the part's progress hint will show when
+it is complete. If a job returns an error, an error indicator will
+appear in the bottom right of the status line showing a hint that an
+error has occured.</p>
+    <p><br>
+    </p>
+  </li>
+  <li>
+    <p>Indication of interesting new results, or new information, 
+    without stealing focus by using a dialog.</p>
+    <p><br>
+A user job can directly show the results to the user when the operation
+completes. For non-user jobs, it is recommended to use something other than a
+dialog to show results, so that the user is not interrupted.  For example, a view could be opened
+when the job starts and the results shown in this view without disrupting the
+user's workflow.  In addition, <a href="#job_properties">job properties</a> can be
+added to the job to indicate that it
+should be kept in the progress view and that it provides an action that will show
+the results. In this case, a warning indication will appear in the bottom right
+corner of the status line when a job remains in the progress view and
+has results to show the user.</p>
+    <p><br>
+    </p>
+  </li>
+  <li>
+    <p>A general feeling of being in control of what is running, with
+    the ability to monitor and cancel background operations.</p>
+    <p><br>
+User jobs provide the best control for the user since they are easily
+cancelled and provide strong indication of blocking or conccurent operations running
+via the <b>Details</b> tab of the progress dialog. Note that the enhanced
+progress dialog that provides the <b>Details</b> area is only shown when plug-ins use
+<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressService.html#busyCursorWhile(org.eclipse.jface.operation.IRunnableWithProgress)">IProgressService#busyCursorWhile</a>
+or <a
+ href="../reference/api/org/eclipse/ui/progress/IProgressService.html#runInUI(org.eclipse.jface.operation.IRunnableContext, org.eclipse.jface.operation.IRunnableWithProgress, org.eclipse.core.runtime.jobs.ISchedulingRule)">IProgressService#runInUI</a>.
+In addition, the progress view provides access to jobs that are running.</p>
+    <p><br>
+    </p>
+  </li>
+  <li>
+    <p>Consistent reporting of progress by all installed plug-ins.</p>
+    <p><br>
+The advantage of using the progress service API is that users get a consistent progress experience. </p>
+    <p><br>
+    </p>
+  </li>
+</ul>
+<h3>Progress service</h3>
+<p>
+The workbench progress service (<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressService.html">IProgressService</a>)
+is the primary interface to the workbench progress support. It can be
+obtained from the workbench and then used to show progress
+for both background operations and operations that run in the UI
+thread. The main purpose of this class is to provide one-stop shopping
+for running operations, removing the need for plug-in developers to 
+decide what mechanism should be used for showing progress in a given situation.
+Another advantage is that the progress dialog shown
+with these methods provides good support for indicating when an operation is
+blocked by another and gives the user control to resolve the conflict.
+Where possible, long running operations should be run using
+<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressService.html#busyCursorWhile(org.eclipse.jface.operation.IRunnableWithProgress)">IProgressService#busyCursorWhile</a>:
+</p>
+<pre>
+   IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+   progressService.<b>busyCursorWhile</b>(new IRunnableWithProgress(){
+      public void run(IProgressMonitor monitor) {
+         //do non-UI work
+      }
+   });
+</pre>
+<p>This method will initially put up a busy cursor, and replace it with
+a progress dialog if the operation
+lasts longer than a specified time threshhold. The advantage of this
+method over using a progress dialog is that the progress dialog won't be shown
+if the operation is short
+running . If your operation must
+update the UI, you can always use <a
+ href="../reference/api/org/eclipse/swt/widgets/Display.html#asyncExec(java.lang.Runnable)">Display.asyncExec</a>
+or <a
+ href="../reference/api/org/eclipse/swt/widgets/Display.html#syncExec(java.lang.Runnable)">Display.syncExec</a>
+to run the code that modifies the UI.</p>
+<p> If an operation must be run in
+its entirety in the UI thread, then <a
+ href="../reference/api/org/eclipse/ui/progress/IProgressService.html#runInUI(org.eclipse.jface.operation.IRunnableContext, org.eclipse.jface.operation.IRunnableWithProgress, org.eclipse.core.runtime.jobs.ISchedulingRule)">IProgressService#runInUI</a>
+ should be used.  This method will also display a progress
+dialog if the operation is blocked and give the user control.</p>
+<pre>
+   progressService.<b>runInUI</b>(
+      PlatformUI.getWorkbench().getProgressService(),
+      new IRunnableWithProgress() {
+         public void run(IProgressMonitor monitor) {
+            //do UI work
+         }
+      },
+      Platform.getWorkspace().getRoot());
+</pre>
+<p>The third parameter can be null, or a scheduling rule for the
+operation. In this example, we are specifying the workspace root which will
+essentially lock the workspace while this UI operation is run.</p>
+<p>
+You can also register an icon for a job family with the progress service
+so that the progress view can show the icon next to the running
+job. Here is an example that shows how the auto-build job family is associated with its
+icon:</p>
+<pre>
+   IProgressService service = PlatformUI.getWorkbench().getProgressService();
+   ImageDescriptor newImage = IDEInternalWorkbenchImages.getImageDescriptor(
+      IDEInternalWorkbenchImages.IMG_ETOOL_BUILD_EXEC);
+   service.<b>registerIconForFamily</b>(newImage, ResourcesPlugin.FAMILY_MANUAL_BUILD);
+   service.registerIconForFamily(newImage, ResourcesPlugin.FAMILY_AUTO_BUILD);
+</pre>
+<h3><a name="site_service"></a>Showing that a part is busy</h3>
+<p>
+<a
+ href="../reference/api/org/eclipse/ui/progress/IWorkbenchSiteProgressService.html"><b>IWorkbenchSiteProgressService</b></a>
+includes API for scheduling jobs that change the appearance of a workbench
+part while the job is running. If your plug-in is running background
+operations that affect the state of a part, you can schedule the job via
+the part and the user will get feedback that the part is busy. Here is
+an example:</p>
+<pre>
+   IWorkbenchSiteProgressService siteService =
+      (IWorkbenchSiteProgressService)view.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+   siteService.<b>schedule</b>(job, 0 /* now */, true /* use the half-busy cursor in the part */);
+</pre>
+<h3><a name="job_properties"></a>Progress Properties for Jobs</h3>
+<p>The workbench defines progress-related properties for jobs in <a
+ href="../reference/api/org/eclipse/ui/progress/IProgressConstants.html">IProgressConstants
+</a>.  These can be used to control how a job is shown in the progress
+view. These can be used to tell the progress view to keep (<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressConstants.html#KEEP_PROPERTY">IProgressConstants#KEEP_PROPERTY</a>)
+your job in the view after it has finished, or only keep one (<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressConstants.html#KEEPONE_PROPERTY">IProgressConstants#KEEPONE_PROPERTY</a>)
+job at a time in the view. You can also associate an action (<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressConstants.html#ACTION_PROPERTY">IProgressConstants#ACTION_PROPERTY</a>)
+with a job. When a job has an associated action, the progress view
+shows a hyperlink so that a user can run the action. You can also find
+out if a user job is currently being shown in a progress dialog (<a
+ href="../reference/api/org/eclipse/ui/progress/IProgressConstants.html#PROPERTY_IN_DIALOG">IProgressConstants#PROPERTY_IN_DIALOG</a>).
+A hint is provided in the bottom right of the status line when an
+action is available. The following example uses these properties:</p>
+<pre>
+   Job job = new Job("Do Work") {
+      public IStatus run(IProgressMonitor monitor) {
+         // do some work.  
+         // Keep the finished job in the progress view only if it is not running in the progress dialog
+         Boolean inDialog = (Boolean)getProperty(IProgressConstants.PROPERTY_IN_DIALOG);
+         if(!inDialog.booleanValue())
+            <b>setProperty</b>(IProgressConstants.KEEP_PROPERTY, Boolean.TRUE);
+      }
+   };
+   job.<b>setProperty</b>(IProgressConstants.ICON_PROPERTY, Plugin.getImageDescriptor(WORK_IMAGE));
+   IAction gotoAction = new Action("Results") {
+      public void run() {
+         // show the results
+      }
+   };
+   job.<b>setProperty</b>(IProgressConstants.ACTION_PROPERTY, gotoAction);
+   job.setUser(true);
+   job.schedule();
+</pre>
+<h3>Workbench jobs</h3>
+<p>
+Where possible, long running operations should be performed outside of
+the UI thread. However, this cannot always be
+avoided when the operation's purpose is to update the UI. <a
+ href="swt_threading.htm">SWT threading issues</a> explains
+how this can be done using the SWT <b><a
+ href="../reference/api/org/eclipse/swt/widgets/Display.html"> Display</a></b>.
+The workbench defines a special job, <a
+ href="../reference/api/org/eclipse/ui/progress/UIJob.html"><b>UIJob</b></a>,
+whose run method runs inside an SWT <tt>asyncExec</tt>. Subclasses of <a
+ href="../reference/api/org/eclipse/ui/progress/UIJob.html"><b>UIJob</b></a>
+should implement the method <b>runInUIThread</b> instead of the <b>run</b>
+method.
+</p>
+<p>
+<a href="../reference/api/org/eclipse/ui/progress/WorkbenchJob.html"><b>WorkbenchJob</b></a>
+extends
+<a href="../reference/api/org/eclipse/ui/progress/UIJob.html"><b>UIJob</b></a>
+so that the job can only be scheduled or run when the workbench is running.
+As always, you should avoid excessive work in the UI thread because the UI will
+not refresh for the duration of the UI Job.
+</p>
+
+</body>
+</html>

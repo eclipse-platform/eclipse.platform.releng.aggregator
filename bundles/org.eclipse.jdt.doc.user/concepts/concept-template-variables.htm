@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+  
+  <head>
+    <meta name="copyright" content="Copyright (c) IBM Corporation and others 2006, 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>Java Editor Template Variables</title>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+    <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+  </head>
+  
+  <body>
+    <h1>Java Editor Template Variables</h1>
+    <ul>
+      <li><a href="#general_vars">General Template Variables</a></li>
+      <li><a href="#java_vars">Java Specific Template Variables</a></li>
+    </ul>
+
+    <p>
+      Template variables may be used in the template pattern. Variables are resolved
+      to their concrete value when the template is evaluated in its context. Variables may be specified
+      using <i>simple</i> or <i>full</i> syntax:</p> 
+      <ul>
+        <li><strong>Simple</strong> variables take the following form:
+          <p><strong><code>${array}</code></strong></p>
+          <p>This defines a variable with name <code>array</code> that will resolve to an array. It can be referenced multiple times as is.</p>
+        </li>
+        <li><strong>Full</strong> variables take the following form:
+          <p><strong><code>${it:var(java.util.Iterator)}</code></strong></p>
+          <p>This defines a variable with name <code>it</code> that will resolve to a local variable of type <code>java.util.Iterator</code>. It can be referenced multiple times by simply giving its name without the type: <code>${it}</code>.
+          <br>Arguments to a full variable can be written verbatim if they are qualified names or integers. If an argument includes other characters or spaces, then it has to be enclosed in single quotes <code>''</code>.</p>
+        </li>
+      </ul>
+    <p>If there are several possible matches for a variable, they may be presented as proposals to the user.</p>
+    
+    <h3><a name="general_vars">General Template Variables</a></h3>
+    <p>Both Java and Javadoc context define the following variables:</p>
+    <table border="1" cellspacing="0" cellpadding="5" width="100%" summary="General Template Variables">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody valign="baseline">
+        <tr>
+          <td><strong>${cursor}</strong></td>
+          <td>Specifies the cursor position when the template edit mode is left. This is useful when the cursor should jump to another place than to the end of the template on
+              leaving template edit mode.</td>
+        </tr>
+        <tr>
+          <td><strong>${date}<br>
+                      ${<i>id</i>:date(<i>format[, locale]</i>)}</strong></td>
+          <td>Evaluates to the current date in the specified format and locale. <code>format</code> and <code>locale</code> are
+          optional parameters. <code>format</code> is a pattern compatible with
+          <code><a href="https://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html">java.text.SimpleDateFormat</a></code>.
+          <code>locale</code> is an RFC 3066 locale ID, typically in the form <code>en_US</code> for
+          <a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">language</a> <code>en</code> and
+          <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">country</a> <code>US</code>.
+            <p>Examples:<br>
+              <code>${date}</code><br>
+              <code>${iso:date('yyyy-MM-dd HH:mm:ss Z')}</code><br>
+              <code>${d:date('EEEE dd MM yyyy', 'fr_CH')}</code>
+            </p>
+          </td>
+        <tr>
+          <td><strong>${dollar}</strong></td>
+          <td>Evaluates to the dollar symbol <code>$</code>. Alternatively, two dollars can be used: <code>$$</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>${enclosing_method}</strong></td>
+          <td>Evaluates to the name of the enclosing method.</td>
+        </tr>
+        <tr>
+          <td><strong>${enclosing_method_arguments}</strong></td>
+          <td>Evaluates to a comma separated list of argument names of the enclosing method. This variable can be useful when generating log statements for many methods.</td>
+        </tr>
+        <tr>
+          <td><strong>${enclosing_package}</strong></td>
+          <td>Evaluates to the name of the enclosing package.</td>
+        </tr>
+        <tr>
+          <td><strong>${enclosing_project}</strong></td>
+          <td>Evaluates to the name of the enclosing project.</td>
+        </tr>
+        <tr>
+          <td><strong>${enclosing_type}</strong></td>
+          <td>Evaluates to the name of the enclosing type.</td>
+        </tr>
+        <tr>
+          <td><strong>${file}</strong></td>
+          <td>Evaluates to the name of the file.</td>
+        </tr>
+        <tr>
+          <td><strong>${id:line_selection[(default)]}</strong></td>
+          <td>
+          Evaluates to the selected text for multiple lines. 'default' is an optional parameter, which specifies the text if the selected text is empty. 
+          <br><br>
+          Examples:
+          <br>
+          <code>${line_selection}</code>
+          <br>
+          <code>${currentLine:line_selection(myStringVariable)}</code>
+          <br>
+          <code>${currentLine:line_selection('"A default text"')}</code><br>
+		</td>
+        </tr>
+        <tr>
+          <td><strong>${primary_type_name}</strong></td>
+          <td>Evaluates to the name primary type of the current compilation unit.</td>
+        </tr>
+        <tr>
+          <td><strong>${return_type}</strong></td>
+          <td>Evaluates to the return type of the enclosing method.</td>
+        </tr>
+        <tr>
+          <td><strong>${time}</strong></td>
+          <td>Evaluates to the current time. Use the 'date' variable if you want to specify the format.</td>
+        </tr>
+        <tr>
+          <td><strong>${user}</strong></td>
+          <td>Evaluates to the user name.</td>
+        </tr>
+        <tr>
+          <td><strong>${id:word_selection[(default)]}</strong></td>
+          <td>Evaluates to the selected text. 'default' is an optional parameter, which specifies the text if the selected text is empty.
+              <br><br>
+              Examples:
+              <br>
+              <code>${word_selection}</code>
+              <br>
+              <code>${currentWord:word_selection(myStringVariable)}</code>
+              <br>
+              <code>${currentWord:word_selection('"Press me"')}</code>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${year}</strong></td>
+          <td>Evaluates to the current year.</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <h3><a name="java_vars">Java Specific Template Variables</a></h3>
+    <p>The Java context additionally defines the following variables.
+    	<b>Note:</b> In the table below, <i>id</i> is a user-chosen name of a new variable.</p>
+    <table border="1" cellspacing="0" cellpadding="5" width="100%" summary="Specific Template Variables">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody valign="baseline">
+        <tr>
+          <td><strong>${<i>id</i>:field(<i>type[,type]*</i>)}</strong></td>
+          <td>Evaluates to a field in the current scope that is a subtype of any of the given types. If no type is specified, any non-primitive field matches.
+              <p>Example:<br>
+              <code>${count:field(int)}</code>
+            </p>
+          
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:var(<i>type[,type]*</i>)}</strong></td>
+          <td>Evaluates to a field, local variable or parameter visible in the current scope that is a subtype of any of the given types. If no type is specified, any non-primitive variable matches.
+              <p>Example:<br>
+              <code>${container:var(java.util.List, 'java.lang.Object[]')}</code>
+            </p>
+          
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:localVar(<i>type[,type]*</i>)}</strong></td>
+          <td>Evaluates to a local variable or parameter visible in the current scope that is a subtype of any of the given type. If no type is specified, any non-primitive local variable matches.
+              <p>
+	              <strong>${array}</strong> is a shortcut for <strong>${array:localVar('java.lang.Object[]')}</strong>, but also matches arrays of primitive types.<br>
+    	          <strong>${collection}</strong> is a shortcut for <strong>${collection:localVar(java.util.Collection)}</strong>.<br>
+        	      <strong>${iterable}</strong> is a shortcut for <strong>${iterable:localVar(java.lang.Iterable)}</strong>, but also matches arrays.
+              </p>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:argType(<i>variable,&nbsp;n</i>)}</strong></td>
+          <td>
+            Evaluates to the <i>nth</i> type argument of the referenced template variable. The reference should be the name of another
+            template variable. Resolves to <code>java.lang.Object</code> if the referenced variable cannot be found or is not
+            a parameterized type.
+            <p>Example:<br>
+              <code>${type:argType(vector, 0)}&nbsp;${first:name(type)}&nbsp;=&nbsp;${vector:var(java.util.Vector)}.get(0)</code>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:elemType(<i>variable</i>)}</strong></td>
+          <td>Evaluates to the element type of the referenced template variable. 
+              The reference should be the name of another
+              template variable that resolves to an array or an instance of <code>java.lang.Iterable</code>.
+              The <strong>elemType</strong> variable type is similar to <strong><code>${<i>id</i>:argType(<i>reference</i>,0)}</code></strong>, the difference
+              being that it also resolves the element type of an array.
+              <p>
+	              <strong>${array_type}</strong> is a shortcut for <strong>${array_type:elemType(array)}</strong>.<br>
+	              <strong>${iterable_type}</strong> is a shortcut for <strong>${iterable_type:elemType(iterable)}</strong>.
+              </p>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:newName(<i>reference</i>)}</strong></td>
+          <td>Evaluates to a non-conflicting name for a new local variable of the type specified
+              by the reference. The reference may either be a Java type name or the name of another
+              template variable. The generated name respects the code style settings.
+              <p>
+	              <strong>${index}</strong> is a shortcut for <strong>${index:newName(int)}</strong>.<br>
+	              <strong>${iterator}</strong> is a shortcut for <strong>${iterator:newName(java.util.Iterator)}</strong>.<br>
+	              <strong>${array_element}</strong> is a shortcut for <strong>${array_element:newName(array)}</strong>.<br>
+	              <strong>${iterable_element}</strong> is a shortcut for <strong>${iterable_element:newName(iterable)}</strong>.
+              </p>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:newType(<i>qualifiedTypeName</i>)}</strong></td>
+          <td>Evaluates to a type name given the fully qualified Java type name.
+          	Evaluates to a simple type name and an import if no conflicting type
+          	exists. Evaluates to a fully qualified type name otherwise.
+          	  <p>Example:<br>
+                   <code>${type:newType(java.util.Iterator)}</code>
+        	  </p>
+          </td>
+        </tr>
+        <tr>
+        	<td><strong>${:import(<i>type[,type]*</i>)}</strong></td>
+        	<td>
+        		Adds an import statement for each type. Does nothing if the import already exists. Does nothing if a conflicting import exists.
+        		Evaluates to nothing.
+        		<p>Example:<br>
+        			<code>${:import(java.util.List, java.util.Collection)}</code>
+        		</p>
+        	</td>
+        </tr>
+        <tr>
+        	<td><strong>${:importStatic(<i>[qualifiedName[,qualifiedName]*]</i>)}</strong></td>
+        	<td>
+        		Adds a static import statement for each qualified name that is not already imported. 
+        		The <code>qualifiedName</code> is the fully qualified name of a static field or method, 
+        		or it is the qualified name of a type plus a <code>.*</code> suffix, enclosed in single quotes <code>''</code>.
+        		Does nothing if a conflicting import exists. 
+        		Evaluates to nothing.
+        		<p>Example:<br>
+        			<code>${is:importStatic(java.util.Collections.EMPTY_SET, 'java.lang.System.*')}</code>
+        		</p>
+        	</td>
+        </tr>
+        <tr>
+        	<td><strong>${<i>id</i>:link(<i>proposal[,proposal]*</i>)}</strong></td>
+        	<td>
+        		Evaluates to <i>id</i> if the list of proposals is empty, evaluates to the first proposal otherwise. 
+        		The evaluated value is put into linked mode. 
+        		A proposal window shows all the given proposals.
+        		<p>Example:<br>
+        			<code>java.util.Collections.${kind:link(EMPTY_SET, EMPTY_LIST, EMPTY_MAP)}</code>
+        		</p>
+        	</td>
+        </tr>
+        <tr>
+          <td><strong>${array}</strong></td>
+          <td>Evaluates to a proposal for an array visible in the current scope.</td>
+        </tr>
+        <tr>
+          <td><strong>${array_element}</strong></td>
+          <td>Evaluates to a name for a new local variable for an element of the <strong>${array}</strong> variable match.</td>
+        </tr>
+        <tr>
+          <td><strong>${array_type}</strong></td>
+          <td>Evaluates to the element type of the <strong>${array}</strong> variable match.</td>
+        </tr>
+        <tr>
+          <td><strong>${collection}</strong></td>
+          <td>Evaluates to a proposal for a collection visible in the current scope.</td>
+        </tr>
+        <tr>
+          <td><strong>${exception_variable_name}</strong></td>
+          <td>Exception variable name in catch blocks.</td>
+        </tr>
+        <tr>
+          <td><strong>${index}</strong></td>
+          <td>Evaluates to a proposal for an undeclared array index.</td>
+        </tr>
+        <tr>
+          <td><strong>${iterator}</strong></td>
+          <td>Evaluates to an unused name for a new local variable of type <code>java.util.Iterator</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>${iterable}</strong></td>
+          <td>Evaluates to a proposal for an iterable or array visible in the current scope.</td>
+        </tr>
+        <tr>
+          <td><strong>${iterable_element}</strong></td>
+          <td>Evaluates to a name for a new local variable for an element of the <strong>${iterable}</strong> variable match.</td>
+        </tr>
+        <tr>
+          <td><strong>${iterable_type}</strong></td>
+          <td>Evaluates to the element type of the <strong>${iterable}</strong> variable match.</td>
+        </tr>
+        <tr>
+          <td><strong>${todo}</strong></td>
+          <td>Evaluates to a proposal for the currently specified default task tag.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 class="related">Related concepts</h3>
+    <a href="concept-editor-templates.htm">Templates</a><br>
+    <h3 class="related">Related references</h3>
+      <a href="../reference/preferences/java/editor/ref-preferences-edit-template-dialog.htm">Editing templates</a><br>
+      <a href="../reference/preferences/java/editor/ref-preferences-templates.htm">Templates preference page</a><br>
+      <a href="../reference/ref-java-editor-code-assist.htm">Java content assist</a><br>
+      <a href="../reference/preferences/java/compiler/ref-preferences-task-tags.htm">Task tag preferences</a><br>
+      <a href="../reference/preferences/java/codestyle/ref-preferences-code-templates.htm">Code templates preferences</a><br>
+      <a href="../reference/preferences/java/ref-preferences-code-style.htm">Code style preferences</a>
+  </body>
+</html>
+

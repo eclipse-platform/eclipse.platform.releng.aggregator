@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Threading issues</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Threading issues</H2>
+
+<p>When working with a widget toolkit, it is important to understand the
+underlying thread model that is used for reading and dispatching platform
+GUI events.  The implementation of the UI thread affects the rules that
+applications must follow when using Java threads in their code.</p>
+
+
+<h3>Native event dispatching</h3>
+
+<p>Underneath any GUI application, regardless of its language or UI toolkit,
+the OS platform detects GUI events and places them in application event queues.
+Although the mechanics are slightly different on different OS platforms, the
+basics are similar. As the user clicks the mouse, types characters, or surfaces
+windows, the OS generates application GUI events, such as mouse clicks,
+keystrokes, or window paint events. It determines which window and application
+should receive each event and places it in the application's event queue.</p>
+
+<p>The underlying structure for any windowed GUI application is an event loop.
+Applications initialize and then start a loop which simply reads the GUI events
+from the queue and reacts accordingly. Any work that is done while handling one
+of these events must happen quickly in order to keep the GUI system responsive
+to the user.</p>
+
+<p>Long operations triggered by UI events should be performed in a separate
+thread in order to allow the event loop thread to return quickly and fetch the
+next event from the application's queue. However, access to the widgets and
+platform API from other threads must be controlled with explicit locking and
+serialization.  An application that fails to follow the rules can cause an OS
+call to fail, or worse, lock up the entire GUI system.</p>
+
+
+<H3>SWT UI thread</H3>
+
+<P>SWT follows the threading model supported directly by the platforms.  The
+application program runs the event loop in its main thread and dispatches
+events directly from this thread.  The UI thread is the thread in which the
+<strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+was created.  All other widgets must be created in the UI thread.</p>
+
+<P>Since all event code is triggered from the application's UI thread,
+application code that handles events can freely access the widgets and
+make graphics calls without any special techniques.  However, the application
+is responsible for forking computational threads when performing long
+operations in response to an event.</P>
+
+<blockquote><em>Note:  SWT will trigger an 
+<strong><a href="../reference/api/org/eclipse/swt/SWTException.html">SWTException</a></strong>
+for any calls made from a non-UI thread that must be made from the UI
+thread.</em></blockquote>
+
+<P>The main thread, including the event loop, for an SWT application has
+the following structure:</p>
+
+<pre>
+   public static void main (String [] args) {
+      Display display = new Display ();
+      Shell shell = new Shell (display);
+      shell.open ();
+      // start the event loop. We stop when the user has done
+      // something to dispose our window.
+      while (!shell.isDisposed ()) {
+         if (!display.readAndDispatch ())
+            display.sleep ();
+      }
+      display.dispose ();
+   }
+</pre>
+
+<P>Once the widgets are created and the shell is opened, the application
+reads and dispatches events from the OS queue until the shell window is
+disposed. If there are no events available for us in the queue, we tell the
+display to sleep to give other applications a chance to run.</P>
+
+<P>SWT provides special access methods for calling widget and graphics code
+from a background thread.</P>
+
+
+<H3><a name="syncExec">Executing code from a non-UI thread</a></H3>
+
+<P>Applications that wish to call UI code from a non-UI thread must provide a
+<strong>Runnable</strong> that calls the UI code. The methods
+<strong>syncExec(Runnable)</strong> and <strong>asyncExec(Runnable)</strong>
+in the <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+class are used to execute these runnables in the UI thread during the event
+loop.</p>
+
+<ul>
+  <li><strong>syncExec(Runnable)</strong> should be used when the application
+      code in the non-UI thread depends on the return value from the UI code
+      or otherwise needs to ensure that the runnable is run to completion
+      before returning to the thread. SWT will block the calling thread until
+      the runnable has been run from the application's UI thread. For example,
+      a background thread that is computing something based on a window's
+      current size would want to synchronously run the code to get the window's
+      size and then continue with its computations.</li>
+  <li><strong>asyncExec(Runnable)</strong> should be used when the application
+      needs to perform some UI operations, but is not dependent upon the
+      operations being completed before continuing. For example, a background
+      thread that updates a progress indicator or redraws a window could
+      request the update asynchronously and continue with its processing.  In
+      this case, there is no guaranteed relationship between the timing of the
+      background thread and the execution of the runnable.</li>
+</ul>
+
+<P>The following code snippet demonstrates the pattern for using these methods:</P>
+
+<pre>
+   // do time-intensive computations
+   ...
+   // now update the UI. We don't depend on the result,
+   // so use async.
+   display.asyncExec (new Runnable () {
+      public void run () {
+         if (!myWindow.isDisposed())
+            myWindow.redraw ();
+      }
+   });
+   // now do more computations
+   ...
+</pre>
+
+<p>It is good practice to check if your widget is disposed from within the runnable
+when using asyncExec.  Since other things can happen in the UI thread between
+the call to <code>asyncExec</code> and the execution of your runnable,
+you can never be sure what state your widgets are in by the time your runnable
+executes.</p>
+
+
+<H3><a name="workbench_threads">The workbench and threads</a></H3>
+
+<p>The threading rules are very clear when you are implementing an SWT
+application from the ground up since you control the creation of the event
+loop and the decision to fork computational threads in your application.</P>
+
+<P>Things get a bit more complicated when you are contributing plug-in code
+to the workbench.  The following rules can be considered "rules of engagement"
+when using platform UI classes, although from release to release there may be
+exceptions to these rules:</P>
+
+<ul>
+  <li>In general, any workbench UI extensions you add to the platform will be
+  executing in the workbench's UI thread, unless they are specifically related
+  to threads or background jobs (such as background job progress indication).</li>
+  <li>If you receive an event from the workbench, it is not guaranteed that it is
+  executing in the UI thread of the workbench.  Consult the javadoc for the particular
+  class that defines the listener or event.  If there is no specific documentation
+  discussing threading, and the class is clearly a UI-related class, you may expect that
+  the event arrives in the UI thread of the workbench.</li>
+  <li>Likewise, a platform UI library should not be considered thread-safe unless it is
+  specifically documented as such.  Note that most platform UI classes dispatch listeners
+  from the calling thread that triggered the event.  Workbench and JFace API calls do not 
+  check that the caller is executing in the UI thread.This means that your plug-in may
+  introduce a problem if you call a method that triggers an event from a non-UI thread.
+  SWT triggers an <strong><a href="../reference/api/org/eclipse/swt/SWTException.html">SWTException</a></strong>
+  for all API calls made from a non-UI thread. In general, avoid calling platform UI code from 
+  another thread unless the javadoc specifically allows it.</li>
+   <li>If your plug-in forks a computational thread or uses a workbench Job, it must use the
+      <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+      <strong>asyncExec(Runnable)</strong> or <strong>syncExec(Runnable)</strong>
+      methods when calling any API for the workbench, JFace, or SWT, unless the API specifically
+      allows call-in from a background thread.</li>
+  <li>If your plug-in uses the JFace
+      <a href="../reference/api/org/eclipse/jface/operation/IRunnableContext.html"><strong>IRunnableContext</strong></a>
+      interface to invoke a progress monitor and run an operation, it supplies
+      an argument to specify whether a computational thread is forked for
+      running the operation.</li>
+</ul>
+
+</BODY>
+</HTML>

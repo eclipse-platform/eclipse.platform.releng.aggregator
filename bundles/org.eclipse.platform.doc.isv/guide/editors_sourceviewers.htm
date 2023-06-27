@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Configuring a source viewer
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Configuring a source viewer</H2>
+<p>So far we've looked at <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+ in the context of managing source code annotations.</p>
+<p>The <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b> 
+  is also the central hub for configuring your editor with pluggable behavior 
+  such as text hovering and syntax highlighting.&nbsp; &nbsp;For these features, the editor 
+  supplies a <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a> 
+  </b>that is used to configure the <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b> 
+  when it is created.&nbsp; The Java example editor need only to supply a <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a> 
+  </b>appropriate for its needs.&nbsp; The following snippet shows how the <b>JavaTextEditor</b> 
+  creates its configuration:</p>
+<pre>
+protected void initializeEditor() {
+	super.initializeEditor();
+	<b>setSourceViewerConfiguration(new JavaSourceViewerConfiguration());</b>
+	...
+</pre>
+<p>What does the <b>JavaSourceViewerConfiguration</b> do?&nbsp; Much of its
+behavior is inherited from <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a></b>,
+which defines default strategies for pluggable editor behaviors such as auto
+indenting, undo behavior, double-click behavior, text hover, syntax
+highlighting, and formatting.&nbsp; Public methods in <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>provide the helper objects that implement these behaviors.
+ </p>
+<p>If the default behavior defined in <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a></b>
+does not suit your editor, you should override <b>initializeEditor() </b>as
+shown above and set your own source viewer configuration into the editor.&nbsp;
+Your configuration can override methods in <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a></b>
+to supply customized helper objects that implement behavior for your
+editor.&nbsp; The following snippet shows two of the ways the <b>JavaSourceViewerConfiguration</b>
+supplies customized helper objects for the Java editor example:
+ </p>
+
+<pre>public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+	return new JavaAnnotationHover();
+}
+	
+public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType) {
+	return (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType) ? new JavaAutoIndentStrategy() : new DefaultAutoIndentStrategy());
+}</pre>
+<p>In the first method, a customized helper class is provided for implementing 
+  annotation hovering.&nbsp; In the second method, the default content type of 
+  the document is queried to determine whether a customized auto-indent strategy 
+  or the default strategy should be used. </p>
+<p>See the API reference for <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a></b>
+for all the ways you can configure a source viewer by overriding methods.
+ </p>
+
+
+</BODY>
+</HTML>

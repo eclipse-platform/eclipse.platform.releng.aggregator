@@ -1,0 +1,523 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>How to write an Eclipse installer</title>
+</head>
+
+<body>
+
+<h1>How to write an Eclipse installer</h1>
+<p>Last modified 15:20 Friday June 18, 2004</p>
+<p>Eclipse-based products need to be correctly installed on the end user's
+computer. Special-purpose packaging tools, such as <a href="http://www.installshield.com/">InstallShield</a>
+and <a href="http://www.rpm.org/">RPM</a>, are often used to build executable
+installers that automate installing, updating, and uninstalling. This note
+describes how to write an installer for an Eclipse-based product, and for
+separately-installable extensions to Eclipse-based products.</p>
+<p>We assume that a product development team is responsible for providing the
+raw ingredients that will need to find their way to end users' computers
+packaged as an executable installer. The creation of executable installers is
+scripted, as are the install time actions needed to interact with the end user
+and deposit files on their computer. This note described in detail what these
+installers need to do and how they should work.&nbsp;</p>
+<p>This note should be treated as a recipe for the person responsible for
+writing an installer for an Eclipse-based products. Two good reasons why we
+recommend all installers writers follow our recipe:</p>
+<ul>
+  <li><b>Product and extension interoperability.</b> By behaving in standard
+    ways, an installer for one Eclipse-based product or extension automatically
+    works with products and extensions laid down by other installers. Otherwise
+    the idiosyncrasies of one product's installer would require matching quirks
+    in all extension installers that expected to work with that product.</li>
+  <li><b>Uniformity of install time user interaction.</b> All installers for
+    Eclipse-based products and extension should interact with the user in the
+    same manner. There is nothing to having gratuitous variety in this matter.</li>
+</ul>
+
+<h2>Product installer creation script</h2>
+
+<p>A product installer should be self-contained - the kind of thing that could
+be distributed on a CD and installed on any machine with a suitable operating
+system.</p>
+<p>Eclipse requires a Java2 Java Runtime Environment (JRE) to run Java code.
+JREs are licensed software, obtained from Java vendors. With a license to
+redistribute a JRE from a JRE vendor, a company can include a JRE with its
+product, and install it on the end user's computer at the same time as the
+product. The alternative is to require that a JRE be pre-installed on the end
+user's computer, and associated with at product install time. One way or the
+other, an Eclipse-based product requires a suitable JRE, and the product
+installer must play a role in either installing a JRE or locating and linking to
+a pre-existing JRE.&nbsp;</p>
+<p>Assume that a JRE is to be installed with the product. A directory containing
+the JRE is one input to the installer creation script. Denote this directory
+&lt;<i>JRE</i>&gt;. This directory must have a standard JRE directory structure,
+with the Java executable is located at <code>jre/bin/java.exe</code> and the class
+library at <code>jre/lib/rt.jar</code> below the &lt;<i>JRE</i>&gt; directory.
+For reference, the skeletal structure of this directory looks like:</p>
+<p><code>&lt;<i>JRE</i>&gt;/<br>
+&nbsp; jre/<br>
+&nbsp;&nbsp;&nbsp; bin/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; java.exe<br>
+&nbsp;&nbsp;&nbsp; lib/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; rt.jar
+</code></p>
+<p>There are additional files (and subdirectories) in these directories; we've
+only shown a sample to give the general structure. Italicized names in italics
+are product-specific.</p>
+<p>The second input to the installer creation script is a directory, &lt;<code><i>product
+head</i></code>&gt;,
+containing the product-specific executable launcher and any files unrelated to
+Eclipse. For reference, the skeletal
+structure of this directory would look like (italics indicate file names that
+will vary from product to product):</p>
+<p><code>&lt;<i>product head</i>&gt;/<br>
+<i>&nbsp; acmeproduct.exe<br>
+</i>
+<br>
+</code>The third input to the installer creation script is a directory, &lt;<code><i>product
+body</i></code>&gt;,
+containing the features and plug-ins developed for the product. For reference, the skeletal
+structure of this directory would look like:</p>
+<p><code>&lt;<i>product body</i>&gt;/<br>
+&nbsp; eclipse/<br>
+&nbsp;&nbsp;&nbsp; features/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.acme.acmefeature</i>_<i>1.0.0</i>/<br>
+&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; feature.xml<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.acme.otherfeature</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; feature.xml<br>
+&nbsp;&nbsp;&nbsp; plugins/<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.acme.acmefeature</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin.xml<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.ini<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.properties<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.mappings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin_customization.ini<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; splash.bmp<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.acme.otherfeature</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin.xml<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.ini<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.properties<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.mappings<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.acme.myplugin</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin.xml<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>myplugin</i>.jar<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.acme.otherplugin</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plugin.xml<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>otherplugin</i>.jar
+</code></p>
+<p>The fourth input to the installer creation script is a directory, &lt;<code><i>platform</i></code>&gt;,
+containing the features and plug-ins for the Eclipse platform itself and any third-party tools being included.
+This directory also includes the standard Eclipse executable launcher, <code>eclipse.exe</code>,
+(named <code>eclipse</code> on Unix operating environment), and any other Eclipse platform files
+required to be at the root of the install. For reference, the skeletal
+structure of this directory would look like:</p>
+<p><code>
+&lt;<i>platform</i>&gt;<br>
+&nbsp; eclipse/<br>
+&nbsp; &nbsp; eclipse.exe<br>
+&nbsp;&nbsp;&nbsp; features/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.platform_2.0.0/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.platform.win32_2.0.0/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.jdt_2.0.0/<br>
+&nbsp; &nbsp;&nbsp;&nbsp; org.eclipse.pde_2.0.0/<br>
+&nbsp;&nbsp;&nbsp; plugins/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.equinox.launcher_1.0.0.v20070530.jar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.equinox.launcher.win32.win32.x86_1.0.0.v20070523/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.platform_2.0.0/<br>
+&nbsp; &nbsp;&nbsp;&nbsp; org.eclipse.core.runtime_2.0.0/<br>
+&nbsp;&nbsp;&nbsp; &nbsp; org.eclipse.core.boot_2.0.0/<br>
+&nbsp; &nbsp;&nbsp;&nbsp; org.eclipse.core.resources_2.0.0/<br>
+&nbsp;&nbsp;&nbsp; &nbsp; org.eclipse.ui_2.0.0/<br>
+&nbsp; &nbsp;&nbsp;&nbsp; org.eclipse.jdt_2.0.0/<br>
+&nbsp;&nbsp;&nbsp; &nbsp; org.eclipse.jdt.core_2.0.0/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.jdt.ui_2.0.0/<br>
+&nbsp; &nbsp;&nbsp;&nbsp; org.eclipse.pde_2.0.0/<br>
+&nbsp;&nbsp;&nbsp; &nbsp; org.eclipse.pde.core_2.0.0/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; org.eclipse.pde.ui_2.0.0/<br>
+&nbsp; &nbsp;&nbsp;&nbsp; (more org.eclipse.* plug-in directories)<br>
+<br>
+</code>The exact contents of the &lt;<i><code>JRE</code></i>&gt;, &lt;<i><code>product
+head</code></i>&gt;, &lt;<i><code>product body</code></i>&gt;,
+and &lt;<code><i>platform</i></code>&gt; input directories determine what files
+will eventually be installed on the end user's computer.</p>
+<p>The final inputs to the installer creation script are the id and version
+strings for the product's primary feature; e.g., &quot;<code><i>com.example.acme.acmefeature&quot;</i></code>,
+and &quot;<code><i>1.0.0</i></code>&quot;;
+and the name of the product executable; e.g., &quot;<code><i>acmeproduct</i></code><code>.exe</code>&quot;.
+For products that do not require their own product executable, this would be the
+path of the standard Eclipse executable launcher &quot;<code>eclipse/eclipse.exe</code>&quot;.
+These strings have special significance to the installer, appearing in file and
+directory names, and in the contents of marker files created at install time.</p>
+<p>At install time, the installer should behave in the standard manner (further
+details follow the list of steps):</p>
+<ol>
+  <li>warn user to exit all programs</li>
+  <li>introduce the product to be installed</li>
+  <li>if appropriate, ask the user for the name of the registered owner and for
+    the license key</li>
+  <li>display the product's licensing agreement and ask the user to accept</li>
+  <li>recommend a location on the disk to install the product (but allow user to
+    override this default)</li>
+  <li>check that a product or extension is not already stored at the specified
+    location</li>
+  <li>ask user to confirm all details of the install</li>
+  <li>create marker file to mark root of product install</li>
+  <li>copy files to disk&nbsp; (see below)</li>
+  <li>if appropriate, insert name of registered owner and license key into the &quot;about
+    &quot; description</li>
+  <li>create a desktop shortcut to run the product executable</li>
+  <li>create an appropriate entry to allow the user to uninstall the product</li>
+  <li>launch the product executable with -initialize option to perform all
+    first-time processing</li>
+  <li>offer to show the product release notes (&quot;readme&quot; file)</li>
+</ol>
+<p>If the location specified in step 5 is &lt;<code><i>install</i></code>&gt;,
+the installer copies all the files in the &lt;<i><code>JRE</code></i>&gt;, <code>&lt;<i>platform</i>&gt;, </code> &lt;<i><code>product</code></i>&gt;,&nbsp;
+and <code>&lt;<i>product plug-ins</i>&gt;</code> directories into &lt;<code><i>install</i></code>&gt;.</p>
+<table border="1" width="50%">
+  <tr>
+    <td width="50%">Input file</td>
+    <td width="50%">Installed file</td>
+  </tr>
+  <tr>
+    <td width="50%"><code>&lt;<i>JRE</i>&gt;/*</code></td>
+    <td width="50%"><code>&lt;<i>install</i>&gt;/eclipse/*</code></td>
+  </tr>
+  <tr>
+    <td width="50%"><code>&lt;<i>product head</i>&gt;/*</code></td>
+    <td width="50%"><code>&lt;<i>install</i>&gt;/*</code></td>
+  </tr>
+  <tr>
+    <td width="50%"><code>&lt;<i>product body</i>&gt;/*</code></td>
+    <td width="50%"><code>&lt;<i>install</i>&gt;/*</code></td>
+  </tr>
+  <tr>
+    <td width="50%"><code>&lt;<i>platform</i>&gt;/*</code></td>
+    <td width="50%"><code>&lt;<i>install</i>&gt;/*</code></td>
+  </tr>
+</table>
+<p>The marker file created in step 8 is <code>&lt;<i>install</i>&gt;/eclipse/.eclipseproduct</code>
+ is used to mark a directory into which an Eclipse-based product has been
+installed, primarily for extension installers to locate. This marker file is a <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html">java.util.Properties</a>
+format file (ISO 8859-1 character encoding with &quot;\&quot; escaping) and
+contains the following information that identifies the product to the user and distinguishes
+one Eclipse-based product from one another:</p>
+<blockquote>
+<p><code>name=<i>Acme Visual Tools Pro</i><br>
+id=<i>com.example.acme.acmefeature<br>
+</i>version=<i>1.0.0</i></code></p>
+</blockquote>
+<p>The values of the &quot;id&quot; and &quot;version&quot; property are inputs
+to the installer creation script; the name of the product is presumably known
+and hard-wired. (Products would not ordinarily access this marker file; only
+product and extension installers write or read it.)</p>
+<p>Step 6 requires checking for an existing <code>&lt;<i>install</i>&gt;/eclipse/.eclipseproduct</code>
+or <code>&lt;<i>install</i>&gt;/eclipse/.eclipseextension</code> file. A
+product cannot be installed in exactly the same place as another product or extension.</p>
+<p>After installing all files, the top-level structure of the install directory
+would contain the following files and subdirectories (and perhaps others):</p>
+<p><code>&lt;<i>install</i>&gt;/<br>
+&nbsp; <i>acmeproduct</i>.exe<br>
+&nbsp; eclipse/<br>
+&nbsp;&nbsp;&nbsp; .eclipseproduct<br>
+&nbsp; &nbsp; eclipse.exe<br>
+&nbsp;&nbsp;&nbsp; features/<br>
+&nbsp;&nbsp;&nbsp; plugins/<br>
+&nbsp;&nbsp;&nbsp; jre/<br>
+<br>
+</code>If a product installer solicits license information from the user, such as
+the name of the registered owner and the license key, this information should
+make it into the product &quot;about&quot; dialog (step 10).</p>
+<p>This is done by recording the user responses in the &quot;<code>about.mapping</code>&quot;
+file in the primary feature's plug-in. For example, at <code>&lt;<i>install</i>&gt;/plugins/<i>com.example.acme.acmefeature</i>_<i>1.0.0</i>/about.mapping</code>.
+The &quot;<code>about.mapping</code>&quot; file may be pre-existing in the &lt;<i><code>product
+head</code></i>&gt;
+input, or may need to be created by the installer at install time.
+The keys are numbers; the value of the &quot;<i>n</i>&quot; key is substituted
+for the substring &quot;<code>{<i>n</i>}</code>&quot; in the &quot;<code>aboutText</code>&quot; property.
+For example, if a license key was field number 0, an &quot;<code>about.mapping</code>&quot;
+file containing a line like &quot;<code>0=T42-24T-ME4U-U4ME</code>&quot; should
+be created.</p>
+<p>N.B.
+The &quot;<code>about.mapping</code>&quot; file is a&nbsp; <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html">java.util.Properties</a>
+format file (ISO 8859-1 character encoding with "\" escaping).
+When the native character encoding at install time is different from ISO 8859-1,
+the installer is responsible for converting the native character encoding to
+Unicode and for adding &quot;\&quot; escapes where required. Escaping is required
+when the strings contain special characters (such as &quot;\&quot;) or non-Latin characters. For example, field number 1 containing the first 3 letters of the Greek
+alphabet would be written &quot;<code>1=\u03B1\u03B2\u03B3</code>&quot;.</p>
+<p>At step 12, the product installer launches the product executable,<code>&nbsp;&lt;<i>install</i>&gt;/<i>acmeproduct</i>.exe</code>,
+with the special -initialize option [exact details TBD]. This causes the Eclipse platform to quietly
+perform all time-consuming first-time processing and cache the results, so that
+when the user starts the product it comes up promptly in an open-for-business
+state.</p>
+<h3>Uninstaller behavior</h3>
+<p>At uninstall time, the uninstaller should behave in the standard manner:</p>
+<ol>
+  <li>warn user to exit all programs, especially the product being uninstalled</li>
+  <li>ask user to confirm that the product is to be uninstalled</li>
+  <li>remove all installed files from the &lt;<i><code>install</code></i>&gt;
+    directory, and <b>all</b> files in &lt;<i><code>install</code></i>&gt;<code>/eclipse/features</code>
+    and &lt;<i><code>install</code></i>&gt;<code>/eclipse/plugins</code> including ones put there by parties other than
+    this installer (e.g., by the Eclipse update manager)</li>
+  <li>remove desktop shortcut for the product executable</li>
+  <li>remove entry for product uninstaller</li>
+  <li>inform user of any files that were not removed</li>
+</ol>
+<p>When the product is uninstalled, files deposited at
+install time should be deleted, along with updated features and plug-ins created
+by the Eclipse update manager. <b>Important:</b> At uninstall time, there may be
+other directories and files in the <code>&lt;<i>install</i>&gt;</code>
+directory, notably <code>&lt;<i>install</i>&gt;/eclipse/workspace/</code>,
+<code>&lt;<i>install</i>&gt;/eclipse/links/</code>, and <code>&lt;<i>install</i>&gt;/eclipse/configuration/</code>,
+that contain important data
+which must be retained when the product is uninstalled. The user must be able to
+uninstall and reinstall a product at the same location without losing important
+data.</p>
+<h3>Installer behavior when product already installed</h3>
+<p>When the product is already installed on the user's computer, the installer
+should allow a service update or version upgrade to be applied to the installed
+product.</p>
+<p>At install time, the installer should behave in the standard manner:</p>
+<ol>
+  <li>warn user to exit all programs, especially the product being updated</li>
+  <li>locate the installed product to be updated, if necessary by searching the
+    disk for an existing product install or by allowing the user to locate it</li>
+  <li> determine where this installer is a compatible update</li>
+  <li>if appropriate, ask the user for the name of the registered owner and for
+    the license key</li>
+  <li>display the product's updated licensing agreement and ask the user to accept</li>
+  <li>ask user to confirm all details of the update</li>
+  <li>update files to disk&nbsp; (see below)</li>
+  <li>if required, alter the desktop shortcut to run the product executable</li>
+  <li>should add modified or newly added files to the list of ones to be removed at uninstall
+    time (where feasible)</li>
+  <li>offer to show the product release notes (&quot;readme&quot; file)</li>
+</ol>
+<p>In step 2, an installed product can be recognized by the presence of an &quot;<code>eclipse</code>&quot;
+directory immediately containing a file named &quot;<code>.eclipseproduct</code>&quot;.
+The parent of the &quot;<code>eclipse</code>&quot; directory is a product's install
+directory; i.e., <code>&lt;<i>install</i>&gt;/eclipse/.eclipseproduct</code>.
+The information contained within this marker file should be shown to the user for
+confirmation that the correct product is being updated (there may be several
+Eclipse-based product on the user's computer).</p>
+<p>The installer should perform compatibility checks in step 3 by simple pattern
+matching against subdirectories in the <code>&lt;<i>install</i>&gt;/eclipse/features</code>
+directory. For example, the presence of a folder matching &quot;<code><i>com.example.acme.otherfeature</i>_<i>1.0.1</i></code>&quot;
+would ensure that a certain service update had been applied to the installed
+product.</p>
+<p>For step 7, the installer may delete or replace any of the files that it
+originally installed, and add more files. <b>Important:</b> Several files and directories,
+including <code>&lt;<i>install</i>&gt;/eclipse/workspace/</code>, <code>&lt;<i>install</i>&gt;/eclipse/configuration</code>,
+may be co-located with the install and contain important data files
+which need to be retained
+when the product is upgraded.&nbsp;</p>
+<p>In upgrade situations, there is a good chance that most of the files below <code>&lt;<i>install</i>&gt;/eclipse/plugins/</code>
+are the same (likewise for <code>&lt;<i>install</i>&gt;/eclipse/features/</code>).
+There is significant opportunity for optimization in <code>&lt;<i>install</i>&gt;/eclipse/plugins/</code>
+since the sub-directory name, which embeds the plug-in (or fragment) version
+number, changes if and only iff any of the files below it change. In other
+words, there is no need to touch any files in <code>&lt;<i>install</i>&gt;/eclipse/plugins/org.eclipse.ui_2.0.0</code>/
+if this sub-directory should also exist after the upgrade; if any of the plug-in's
+files were to change, the plug-in's version number is revised, causing the files
+for the upgraded plug-in to be installed in a parallel directory <code>&lt;<i>install</i>&gt;/eclipse/plugins/org.eclipse.ui_2.0.1</code>/.&nbsp;</p>
+<h3>Associating a JRE installed elsewhere</h3>
+<p>The JRE is expected to be located at <code>&lt;<i>install</i>&gt;/eclipse/jre/bin/javaw.exe</code>.
+If it is located elsewhere, the absolute path should be specified using the <code>-vm</code>
+option on the command line; e.g.,<code>   -vm C:\j2jre1.3.0\jre\bin\javaw.exe</code>.
+In which case, the installer should add this option to the command line of the desktop shortcut
+it creates.</p>
+<h2>Extension installer creation script</h2>
+
+<p>By extension we mean a separately installable set of features and their plug-ins that
+can be associated with, and used from, one ore more Eclipse-based products installed on the
+same computer. In contrast to a product, an extension is not self-contained; an extension does not include
+a product executable, the Eclipse platform, a JRE.</p>
+<p>Without loss of generality, assume that an extension consists of a single
+feature. The first input to the installer creation script is a directory, &lt;<code><i>extension</i></code>&gt;,
+containing its feature and plug-ins. We are assuming that an extension has no
+files that are related to Eclipse; if it did, they would go in <code>&lt;<i>extension</i>&gt;/</code>,
+and not in <code>&lt;<i>extension</i>&gt;/eclipse/</code>. For reference, the skeletal
+structure of this directory would look like:</p>
+<p><code>&lt;<i>extension</i>&gt;/<br>
+&nbsp; eclipse/<br>
+&nbsp; &nbsp; features/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.wiley.anvilfeature</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; feature.xml<br>
+&nbsp; &nbsp; plugins/<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.wiley.anvilfeature</i>_<i>1.0.0</i>/<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; plugin.xml<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.ini<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.properties<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; about.mappings<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.wiley.mainplugin</i>_<i>1.0.0</i>/<br>
+</code>&nbsp; <code>&nbsp;&nbsp;&nbsp;&nbsp; <i>com.example.wiley.otherplugin</i>_<i>1.0.0</i>/
+</code></p>
+<p>The exact contents of the &lt;<i><code>extension</code></i>&gt; input
+directory determines what files
+will eventually be installed on the end user's computer.</p>
+<p>The final inputs to the installer creation script are the id and version
+strings for the extension's feature; e.g., &quot;<i><code>com.example.wiley.anvil</code></i>&quot;
+and &quot;<code><i>1.0.0</i></code>&quot;. These strings have special
+significance to the installer, appearing in file and directory names, and in the
+contents of marker files created at install time.</p>
+<p>An extension installer is similar to a product installer in most respects.
+The areas where it differs are highlighted below:</p>
+<p>At install time, the installer behaves in the standard manner:</p>
+<ol>
+  <li>warn user to exit all programs</li>
+  <li>introduce the extension to be installed</li>
+  <li>if appropriate, ask the user for the name of the registered owner and for
+    the license key</li>
+  <li>display the extension's licensing agreement and ask the user to accept</li>
+  <li>recommend a location on the disk to install the extension (but allow user to
+    override this default)</li>
+  <li>check that a product or a different extension is not already stored at the specified
+    location</li>
+  <li> ask user which product(s) to are to use this extension (search disk;
+    browse; or skip)
+  </li>
+  <li>optionally, determine if extension is compatible with selected products</li>
+  <li>ask user to confirm all details of the install</li>
+  <li>create marker file to mark root of extension install</li>
+  <li>copy files to disk&nbsp; (see below)</li>
+  <li>insert name of registered owner and license key into the &quot;about
+    &quot; description</li>
+  <li>create an appropriate entry to allow the user to uninstall the extension</li>
+  <li>write link file in each of the selected products to associate extension
+    with product</li>
+  <li>offer to show the extension release notes (&quot;readme&quot; file)</li>
+</ol>
+<p>If the location specified in step 5 is &lt;<code><i>install</i></code>&gt;,
+the installer copies all the files in the <code>&lt;<i>extension</i>&gt; </code>directory
+into &lt;<code><i>install</i></code>&gt; in step 11.</p>
+<table border="1" width="50%">
+  <tr>
+    <td width="50%">Input file</td>
+    <td width="50%">Installed file</td>
+  </tr>
+  <tr>
+    <td width="50%"><code>&lt;<i>extension</i>&gt;/*</code></td>
+    <td width="50%"><code>&lt;<i>install</i>&gt;/*</code></td>
+  </tr>
+</table>
+<p>For step 7, any Eclipse product might be a candidate. Eclipse-based product
+can be recognized by the presence of a <code>&lt;<i>product install</i>&gt;/eclipse/.eclipseproduct</code>
+file; the user should be able to request a limited disk search for installed
+products (a &quot;search for installed products&quot; button), or would navigate
+to a directory containing a product (i.e., a &quot;browse&quot; button).</p>
+<p>The installer should perform compatibility checks in step 8 by simple pattern
+matching against subdirectories in the <code>&lt;<i>product install</i>&gt;/eclipse/features</code>
+directory. For example, the presence of a folder matching &quot;<code>org.eclipse.jdt_2.*</code>&quot;
+means that JDT is included in the installed product.&nbsp;</p>
+<p>The marker file created in step 10 is <code>&lt;<i>install</i>&gt;/eclipse/.eclipseextension</code>
+ is used to mark a directory into which an Eclipse-based extension has been
+installed, primarily for extension installers to locate
+(analogous to a product's <code>.eclipseproduct</code> marker file). This
+marker file is a <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html">java.util.Properties</a>
+format file (ISO 8859-1 character encoding with &quot;\&quot; escaping) and
+contains the following information that identifies the extension to the user and distinguishes
+one Eclipse-based extension from one another:</p>
+<blockquote>
+<p><code>name=<i>Wiley Anvil Enterprise Edition</i><br>
+id=<i>com.example.wiley.anvilfeature<br>
+</i>version=<i>1.0.0</i></code></p>
+</blockquote>
+<p>The values of the &quot;id&quot; and &quot;version&quot; property are inputs
+to the installer creation script; the name of the extension is presumably known
+and hard-wired. (Products would not ordinarily access this marker file; only
+product and extension installers write or read it.)</p>
+<p>After installing all files, the top-level structure of the install directory
+would contain the following files and subdirectories:</p>
+<p><code>&lt;<i>install</i>&gt;/<br>
+&nbsp; eclipse/<br>
+&nbsp; &nbsp; .eclipseextension<br>
+&nbsp;&nbsp;&nbsp; features/<br>
+&nbsp;&nbsp;&nbsp; plugins/</code></p>
+<p>The only significant difference from a product installer is that an extension
+installer also creates link files in other Eclipse-based products already
+installed on the user's computer. (This saves the user from having to manually
+associate the new extension from within each product using the Eclipse update
+manager.)&nbsp;</p>
+<p>The link file created in step 14 is <code>&lt;<i>product install</i>&gt;/eclipse/links/<i>com.example.wiley.anvilfeature.</i>link</code>;
+that is, the file has the same name of as the extension's feature directory less
+the version number suffix. A link file is a <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Properties.html">java.util.Properties</a>
+format file (ISO 8859-1 character encoding with "\" escaping).
+The key is &quot;path&quot; and the value is the absolute path of the installed
+extension, <code>&lt;<i>install</i>&gt;</code>; e.g., an entry might looks like &quot;<code>path=C:\\Program
+ Files\\Wiley\\Anvil</code>&quot;<code>.</code> The installer is responsible for converting
+from native character
+encoding to Unicode and adding &quot;\&quot; escapes where required. Escaping is
+usually required since <code>&lt;<i>install</i>&gt;</code>
+ typically contains special characters (such as &quot;\&quot;)
+and may mention directories with non-Latin characters in their names. The product reads
+link files when it starts up. The installer keeps a record of any link
+files it creates so that they can be located when the extension is updated or
+uninstalled.</p>
+<h3>Uninstaller behavior</h3>
+<p>At un install time, the un installer should behave in the standard manner:</p>
+<ol>
+  <li>warn user to exit all programs, especially products using the extension
+    being uninstalled</li>
+  <li>ask user to confirm that the extension is to be un installed</li>
+  <li>remove all installed files from the &lt;<i><code>install</code></i>&gt;
+    directory, and <b>all</b> files in &lt;<i><code>install</code></i>&gt;<code>/eclipse/features</code>
+    and &lt;<i><code>install</code></i>&gt;<code>/eclipse/plugins</code> including ones put there by parties other than
+    this installer (e.g., by the Eclipse update manager)</li>
+  <li>if feasible, remove the link file from any products to which it had been
+    added&nbsp;</li>
+  <li>remove entry for extension uninstaller</li>
+  <li>inform user of any files that were not removed</li>
+</ol>
+<p>When an extension is uninstalled, all plug-in and feature files should be deleted; there are no
+important data files to be kept in these subdirectories. This allows the user to uninstall an extension
+completely, including any updates applied by the Eclipse update manager.</p>
+<h3>Installer behavior when extension already installed</h3>
+<p>When the extension is already installed on the user's computer, the installer
+should allow a service update or version upgrade to be applied to the installed
+extension.</p>
+<p>At install time, the installer should behave in the standard manner:</p>
+<ol>
+  <li>warn user to exit all programs, especially products using the extension
+    being updated</li>
+  <li>locate the installed extension to be updated, if necessary by searching
+    the disk for an existing extension install or by allowing the user to locate
+    it</li>
+  <li> determine where this installer is a compatible update</li>
+  <li>if appropriate, ask the user for the name of the registered owner and for
+    the license key</li>
+  <li>display the product's updated licensing agreement and ask the user to accept</li>
+  <li>ask user to confirm all details of the update</li>
+  <li>update files on disk&nbsp; (see below)</li>
+  <li>should add modified or newly added files to the list of ones to be removed at uninstall
+    time (where feasible)</li>
+  <li>offer to show the extension release notes (&quot;readme&quot; file)</li>
+</ol>
+<p>In step 2, an installed extension can be recognized by the presence of an &quot;<code>eclipse</code>&quot;
+directory immediately containing a file named &quot;<code>.eclipseextension</code>&quot;.
+The parent of the &quot;<code>eclipse</code>&quot; directory is an extension's install
+directory; i.e., <code>&lt;<i>install</i>&gt;/eclipse/.eclipseextension</code>.
+The information contained within this marker file should be shown to the user for
+confirmation that the correct extension is being updated (there may be several
+Eclipse-based extension on the user's computer).</p>
+<p>For step 7, the installer should not delete or overwrite any of the files
+that it originally installed; rather, it should only add the files for new
+versions of features and plug-in, and possibly rewrite the marker file <code>&lt;<i>install</i>&gt;/eclipse/.eclipseextension</code>. Leaving the old versions around gives the user
+the option to back out of the update. As with upgrading a product install, there
+is no need to touch any files in <code>&lt;<i>install</i>&gt;/eclipse/plugins/<i>com.example.wiley.otherplugin</i>_<i>1.0.0</i></code>/
+if this sub-directory should also exist after the upgrade; if any of the plug-in's
+files were to change, the plug-in's version number is revised, causing the files
+for the upgraded plug-in to be installed in a parallel directory <code>&lt;<i>install</i>&gt;/eclipse/plugins/<i>com.example.wiley.otherplugin</i>_<i>1.0.1</i></code>/.&nbsp;</p>
+
+
+
+</body>
+
+</html>

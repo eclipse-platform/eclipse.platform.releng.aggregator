@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>
+Text file encoding
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Text file encoding</h3>
+<p>If your plug-in reads text files, it should honor the <b>text file encoding</b>
+preference in the workbench.&nbsp; </p>
+
+
+<p><img src="images/textencoding.png" alt="text file encoding" border="0"></p>
+
+
+<p>Text files are encoded differently depending on the platform and the
+locale.&nbsp; Most of the time, using the default text file encoding for the
+locale of the host operating system is good enough.&nbsp; However, a user may
+want to work with text files that originate from another source.&nbsp; Given the
+ability to use the platform in a networked team environment, it's certainly possible
+that users will want to work with text files that use a different encoding
+scheme than their native encoding scheme so that they can easily interchange
+files with another team.</p>
+
+
+<p>For this reason, the workbench defines its own encoding profile that is specified 
+  by the user in the <b>Preferences</b> dialog.&nbsp; Users may choose from the 
+  available encoding choices in the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Editors)")'> 
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link"> <b>General &gt; Workspace</b></a> 
+  preference page or type in their own encoding.&nbsp; Plug-ins that interpret 
+  text files, such as editors and builders, should consult the workbench encoding 
+  preference rather than assume that the installed operating system encoding is 
+  in use.</p>
+
+
+<p>You can obtain the encoding preference using <b><a href="../reference/api/org/eclipse/core/resources/ResourcesPlugin.html">ResourcesPlugin</a>.getEncoding().&nbsp;
+</b>This encoding should be passed to <b>java.io </b>readers instead of using
+the default system encoding.&nbsp; If you need to track changes to this preference, you can hook a listener on
+the <b><a href="../reference/api/org/eclipse/core/resources/ResourcesPlugin.html">ResourcesPlugin</a>
+</b>preferences and react to changes in <b>ResourcesPlugin.PREF_ENCODING.&nbsp; </b>The
+following example comes from the default text editor: </p>
+
+
+<pre>public void initialize(StatusTextEditor textEditor) {
+	
+	fTextEditor= textEditor;
+	
+	fPropertyChangeListener= new Preferences.IPropertyChangeListener() {
+		public void propertyChange(Preferences.PropertyChangeEvent e) {
+			if (ResourcesPlugin.PREF_ENCODING.equals(e.getProperty()))
+				setEncoding(null, false);
+		}
+	};
+		
+	Preferences p= ResourcesPlugin.getPlugin().getPluginPreferences();
+	p.addPropertyChangeListener(fPropertyChangeListener);
+	
+	fEncodingActionGroup= new EncodingActionGroup(fTextEditor);
+	fEncodingActionGroup.update();
+}</pre>
+<p>Users may also change the encoding for a particular file in the <b>Edit &gt;
+Encoding</b> menu of an editor.&nbsp; If you are manipulating text inside an
+open editor, you should use <b><a href="../reference/api/org/eclipse/ui/editors/text/IEncodingSupport.html">IEncodingSupport</a>.getEncoding()</b>
+instead in order to get the encoding for the particular editor.&nbsp; The
+following example shows how to obtain this information from an editor:</p>
+<pre>IEncodingSupport encodingSupport = (IEncodingSupport) editor.getAdapter(IEncodingSupport.class);
+String encoding = encodingSupport.getEncoding();
+</pre>
+
+</BODY>
+</HTML>

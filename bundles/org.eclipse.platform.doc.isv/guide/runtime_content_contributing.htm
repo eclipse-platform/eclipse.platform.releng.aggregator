@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Contributing content types</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2>Contributing content types</h2>
+<h3>Providing a new content type</h3>
+<p>The platform defines some fundamental content types, such as plain text and 
+  XML. These content types are defined the same way as those contributed by any 
+  other plug-ins. We will look at how the platform defines some of its content 
+  types in order to better understand the content type framework.</p>
+<p>Plug-ins define content types by contributing an extension for the extension 
+  point <b><a href="../reference/extension-points/org_eclipse_core_runtime_contentTypes.html">org.eclipse.core.runtime.contentTypes</a></b>. 
+  In this extension, a plug-in specifies a simple id and name for the content 
+  type (the full id is always the simple id prefixed by the current namespace). 
+  The following snippet shows a trimmed down version of the <code>org.eclipse.core.runtime.text</code> 
+  content type contribution:</p>
+<pre>
+	&lt;extension point="org.eclipse.core.runtime.contentTypes"&gt;
+		&lt;content-type 
+			id="text"
+			name="%textContentTypeName"&gt;
+			file-extensions="txt"&gt;
+			&lt;describer class=&quot;org.eclipse.core.internal.content.TextContentDescriber&quot;/&gt;
+		&lt;/content-type&gt;
+		...</pre>
+<p>The <code>file-extensions</code> attribute defines what file extensions are 
+  associated with the content type (in this example, &quot;.txt&quot;). The <code>file-names</code> 
+  attribute (not used in this case) allows associating full names. Both attributes 
+  are taken into account by the platform when performing content type detection 
+  and description (if the client provides a file name).</p>
+<p>The <code>describer</code> element is used to define a <em>content describer</em> 
+  for the content type.</p>
+<h3>Detecting and describing content</h3>
+<p>A content type should provide a content describer if there are any identifiable 
+  characteristics that allow automatic content type detection, or any interesting 
+  properties in data belonging to the content type. In the case of <code>org.eclipse.core.runtime.text</code>, 
+  it is not possible to figure out the content type by just looking at the contents. 
+  However, text streams might be prepended by a <em>byte order mark</em>, which 
+  is a property clients might be interested in knowing about, so this warrants 
+  a content describer.</p>
+<p>The describer is an implementation of <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescriber.html">IContentDescriber</a></b> 
+  or <b><a href="../reference/api/org/eclipse/core/runtime/content/ITextContentDescriber.html">ITextContentDescriber</a></b>. 
+  The latter is a specialization of the former that must be implemented by describers 
+  of text-oriented content types. Regardless the nature of the content type, the 
+  describer has two responsibilities: helping determining whether its content 
+  type is appropriate for a given data stream, and extracting interesting properties 
+  from a data stream that supposedly belongs to its content type.</p>
+<p>The method <b>describe(stream, description)</b> is called whenever the platform 
+  is trying to determine the content type for a particular data stream or describe 
+  its contents. The description is <code>null</code> when only detection is requested. 
+  Otherwise, the describer should try to fill the content description with any 
+  properties that could be found <em>by reading the stream</em>, and only those. 
+  The content type markup should be used to declare any properties that have default 
+  values (for example, <code>org.eclipse.core.runtime.xml</code> declares UTF-8 
+  as the default charset).</p>
+<p>When performing its duty, the content describer is expected to execute as quickly 
+  as possible. The less the data stream has to be read, the better. Also, <em>it 
+  is expected that the content describer implementation be declared in a package 
+  that is exempt from plug-in activation (see the <a href="../reference/misc/bundle_manifest.html">Eclipse-AutoStart</a> 
+  bundle manifest header). Since all describers are instantiated when the content 
+  type framework is initialized, failure in complying with this requirement causes 
+  premature activation, which must be avoided. Future implementations of the platform 
+  might refuse to instantiate describers if doing so would trigger activation 
+  of the corresponding plug-in.</em></p>
+<h3>Extending an existing content type</h3>
+
+<p>Content types are hierarchical in nature. This allows new content types to 
+  leverage the attributes or behavior of more general content types. For example, 
+  a content type for XML data is considered a child of the text content type: 
+</p>
+<pre>&lt;content-type 
+	id=&quot;xml&quot;
+	name=&quot;%xmlContentTypeName&quot;
+	base-type=&quot;org.eclipse.core.runtime.text&quot;
+	file-extensions=&quot;xml&quot;&gt;
+	&lt;describer class=&quot;org.eclipse.core.internal.content.XMLContentDescriber&quot;/&gt;
+	&lt;property name=&quot;charset&quot; default=&quot;UTF-8&quot;/&gt;
+&lt;/content-type&gt;</pre>
+<p>A XML file is deemed a kind of text file, so any features applicable to the 
+  latter should be applicable to the former as well.</p>
+<p>Note that the XML content type overrides several content type attributes originally 
+  defined in the Text content type such as the file associations and the describer 
+  implementation. Also, this content type declares a default property value for 
+  <code>charset</code> property. That means that during content description for 
+  a data stream considered as belonging to the XML content type, if the describer 
+  does not fill in the charset property, the platform will set it to be &quot;UTF-8&quot;.</p>
+<p>As another example, the <code>org.eclipse.ant.core.antBuildFile</code> content 
+  type (for Ant Build Scripts) extends the XML content type:</p>
+<pre>&lt;content-type  <br>	id=&quot;antBuildFile&quot; <br>	name=&quot;%antBuildFileContentType.name&quot; <br>	base-type=&quot;org.eclipse.core.runtime.xml&quot;<br>	file-names=&quot;build.xml&quot;<br>	file-extensions=&quot;macrodef,ent,xml&quot;&gt; <br>	&lt;describer <br>		class=&quot;org.eclipse.ant.internal.core.contentDescriber.AntBuildfileContentDescriber&quot;&gt;<br>	&lt;/describer&gt; <br>&lt;/content-type&gt;</pre>
+<p>Note that the default value for the charset property is inherited. It is possible 
+  to cancel an inherited property or describer by redeclaring them with the empty 
+  string as value.</p>
+<h4>Additional file associations</h4>
+<p>New file associations can be added to existing content types. For instance, 
+  the Resources plug-in associates the <code>org.eclipse.core.runtime.xml</code> 
+  to &quot;.project&quot; files:</p>
+<pre>&lt;extension point="org.eclipse.core.runtime.contentTypes"&gt;
+	&lt;file-association content-type=&quot;org.eclipse.core.runtime.xml&quot; file-names=&quot;.project&quot;/&gt;
+	...
+</pre>
+<h4>Content type aliasing</h4>
+<p>Due to the extensible nature of Eclipse, a content type a plug-in rely on may 
+  not be available in a given product configuration. This can be worked around 
+  by using content type aliasing. A <em>content type alias</em> is a placeholder 
+  for another preferred content type whose availability is not guaranteed. For 
+  instance, the Runtime declares an alias (<code>org.eclipse.core.runtime.properties</code>) 
+  for the Java properties content type provided by the Java development tools (JDT) 
+  (<code>org.eclipse.jdt.core.javaProperties</code>):</p>
+<pre>&lt;!-- a placeholder for setups where JDT's official type is not available --&gt;			<br>&lt;content-type 
+	id=&quot;properties&quot; 
+	name=&quot;%propertiesContentTypeName&quot; <br>	base-type=&quot;org.eclipse.core.runtime.text&quot;<br>	alias-for=&quot;org.eclipse.jdt.core.javaProperties&quot;<br>	file-extensions=&quot;properties&quot;&gt;<br>	&lt;property name=&quot;charset&quot; default=&quot;ISO-8859-1&quot;/&gt;<br>&lt;/content-type&gt;		</pre>
+
+
+
+<p>This provides plug-ins with a placeholder they can refer to regardless the 
+  preferred content type is available or not. If it is, the alias content type 
+  is supressed from the content type catalog and any references to it are interpreted 
+  as references to the target content type. If it is not, the alias will be used 
+  as an ordinary content type.</p>
+</BODY>
+</HTML>

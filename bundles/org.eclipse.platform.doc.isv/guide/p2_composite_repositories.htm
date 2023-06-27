@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Composite repositories</title>
+</head>
+<body>
+
+<h1>Composite repositories</h1>
+<p>
+As repositories continually grow in size they become harder to manage. The goal of composite repositories is to make this task easier 
+by allowing site maintainers to have a parent repository which refers to multiple child repositories. Users are then able to reference the parent repository
+and the content of all the child repositories will be transparently available to them. 
+</p>
+
+<h2>How it works</h2>
+<p>
+With the built-in repository types defined by p2, when a user connects to a server, p2 checks to see if there are any files that are recognized. 
+In particular for metadata repositories it searches for a <code>content.xml</code> file or a <code>content.jar</code> and in the case of 
+artifact repositories it looks for an <code>artifacts.xml</code> or <code>artifacts.jar</code> file.
+</p>
+<p>
+So in order to create a composite repository, all one needs to do is create a new &quot;index&quot; file for the metadata and/or artifact
+repository and p2 will recognize that a composite repository has been defined and it will load it and its children. Composite repositories use
+a different index file name to help p2 recognize them as composite repositories.
+</p>
+
+<h2>Sample composite metadata repository</h2>
+
+<p>
+File: <code>compositeContent.xml</code>
+<pre>
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;?compositeMetadataRepository version='1.0.0'?&gt;
+&lt;repository name='&quot;Eclipse Project Test Site&quot;'
+    type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository'
+    version='1.0.0'&gt;
+  &lt;properties size='1'&gt;
+    &lt;property name='p2.timestamp' value='1243822502499'/&gt;
+  &lt;/properties&gt;
+  &lt;children size='2'&gt;
+    &lt;child location='http://example.eclipse.org/childOne'/&gt;
+    &lt;child location='http://example.eclipse.org/childTwo'/&gt;
+  &lt;/children&gt;
+&lt;/repository&gt;
+</pre>
+</p>
+
+<h2>Sample composite artifact repository</h2>
+
+<p>
+File: <code>compositeArtifacts.xml</code>
+
+<pre>
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+&lt;?compositeArtifactRepository version='1.0.0'?&gt;
+&lt;repository name='&quot;Eclipse Project Test Site&quot;'
+    type='org.eclipse.equinox.internal.p2.artifact.repository.CompositeArtifactRepository' 
+    version='1.0.0'&gt;
+  &lt;properties size='1'&gt;
+    &lt;property name='p2.timestamp' value='1243822502440'/&gt;
+  &lt;/properties&gt;
+  &lt;children size='2'&gt;
+    &lt;child location='http://example.eclipse.org/childOne'/&gt;
+    &lt;child location='http://example.eclipse.org/childTwo'/&gt;
+  &lt;/children&gt;
+&lt;/repository&gt;
+</pre>
+</p>
+
+<h2>Composite repositories as part of the build</h2>
+
+<p>
+In order to automate composite repository actions in release engineering builds, Ant tasks have been provided which can be called to create and 
+modify composite repositories. The tasks are defined in the <code>org.eclipse.equinox.p2.repository.tools</code> bundle.
+</p>
+
+<h3>p2.composite.repository</h3>
+<h4>Attributes</h4>
+<ul>
+<li><code>failOnExists</code> - Whether it should fail if the repository already exists. (Default is <i>false</i>)</li>
+<li><code>validate</code> - A comparator-id. Child repositories claiming to contain the same artifact are compared using the given 
+comparator. These are extensions to the <code>org.eclipse.equinox.p2.artifact.repository.artifactComparators</code> extension 
+point. Comparators provided by p2 are:
+<ul>
+      <li><code>org.eclipse.equinox.p2.repository.tools.jar.comparator</code>: Compare jars. Class files are disassembled and compared for equivalence, 
+      properties and manifest files are compared as such, all other files are compared byte-for-byte.</li>
+      <li><code>org.eclipse.equinox.artifact.md5.comparator</code>: Compare the MD5 sums as recorded in the artifact repositories.</li>
+</ul>
+</li> 
+</ul>
+
+<h4>Sub-elements</h4>
+<ul>
+<li><code>add</code> - A nested element containing a list of repositories to add to the composite.</li>
+<li><code>remove</code> - A nested element containing a list repositories to remove from the composite.</li> 
+</ul>
+
+<h4>Examples</h4>
+
+Some example Ant tasks for composite repositories and further explanation can be found on the <a href="p2_repositorytasks.htm">p2 Ant tasks</a> page.
+
+</body>
+</html>
+

@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Field assist
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Field assist</H2>
+<P >
+Often, a user is expected to provide textual information
+in a simple field such as a text field or combo box.  Although the application
+code that populates these fields is generally much simpler than code that populates a complex
+widget such as a table or tree, these &quot;simple&quot; fields usually place more
+burden on the user.  The user must identify which fields require content, whether a
+field contains valid content, and what choices are expected.  The JFace <b>field assist</b> 
+support provides classes that help guide the user through input tasks.</P>
+<P >The <b><a href="../reference/api/org/eclipse/jface/fieldassist/package-summary.html">org.eclipse.jface.fieldassist</a></b> package 
+provides assistance in two ways.  <b>Control decorations</b> allow you to place
+image decorations adjacent to a control in order to cue the user about the status of a 
+particular field.  <b>Content proposal</b> support allows you to provide a content assist popup that 
+provides content choices for the user.</P>
+<h3>Control decorations</h3>
+<p>A control decoration is a rendered image that can be placed adjacent to a field
+in a window or dialog.  Decorations may be placed adjacent to a control in one of
+six positions (top, center, or bottom to the left or right of the control).  One or 
+more control decorations may be defined for a control.  The
+API for <b><a href="../reference/api/org/eclipse/jface/fieldassist/ControlDecoration.html">
+ControlDecoration</a></b> allows you to hide and show the decoration, assign descriptive
+text to the decoration, and listen to events associated with the decoration.
+</p>
+<h4>Creating a control decoration</h4>
+<p>Creating a control decoration is straightforward.  Clients simply specify the control to
+be decorated and SWT constants describing the position of the decoration relative to the
+control.  Consider this snippet, in
+which an application creates a text control inside one of its dialogs:</p>
+<pre>
+...
+// Create a text field
+Text text = new Text(parent, SWT.BORDER);
+text.setText("some text"); 
+...
+</pre>
+<p>
+A decoration can then be created for the control.
+</p>
+<pre>
+...
+// Create a control decoration for the control.
+ControlDecoration dec = new ControlDecoration(text, SWT.TOP | SWT.LEFT);
+...
+</pre>
+<p>Once the decoration is created, its image and text can be specified.
+</p>
+<pre>
+...
+// Specify the decoration image and description
+Image image = JFaceResources.getImage("myplugin.specialimage");
+dec.setImage(image);
+dec.setDescriptionText("This field is special");
+</pre>
+<p>
+Clients can use the <b>setShowOnlyOnFocus</b> method to specify whether the decoration 
+should be shown only when the control has focus, or whether it should be shown at all times.  
+The <b>setShowHover</b> method allows clients to configure whether the description text is
+shown in a hover when the mouse hovers over the decoration.
+</p>
+<h4>Laying out decorated controls</h4>
+<p>
+When adding decorations to controls that appear inside a dialog or window, you should 
+make sure there is enough space adjacent to the control to render the decoration without
+overlapping other controls.  For example, when using a grid layout in a dialog, there should
+be enough margin space between the cells in the grid so that a decoration can be shown adjacent to
+controls in the cells. 
+</p>
+<pre>
+...
+// Set the layout data to ensure there is enough space for the decoration
+GridData data = new GridData(IDialogConstants.ENTRY_FIELD_WIDTH, SWT.DEFAULT);
+<b>data.horizontalIndent = image.getBounds().width;</b>
+text.setLayoutData(data);
+...
+</pre>
+<p>
+The width of a decoration is simply the width of its image.  However,
+layout can get more complicated if you are using decorations with different widths.
+If this is the case, you can simplify things by first creating field decorations to represent
+all of your control decorations.</p>  
+<h4>Field decorations</h4>
+<p>A <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecoration.html">
+FieldDecoration</a></b> is simply a data object that combines the image and text used to
+show a decoration.  Once created, these field decorations can be registered in the
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
+FieldDecorationRegistry</a></b>.  
+</p>
+<h4>Field decoration registry</h4>
+<p>The field decoration registry allows you to register and access field decorations 
+using a string id.  This provides a convenient way for you to refer to decorations used throughout your
+application.  You may choose to define API that exposes your decoration ids if you wish to
+make them available to other plug-ins.  Note that registering a decoration does not manage
+the life-cycle of the images inside those decorations.  Your application can decide how to manage
+these images.  For example, the JFace image registry may be used to register and manage the
+image's life-cycle.  Alternatively, your application may wish to create the image on demand
+and dispose of it when it is no longer needed.  The javadoc for the registration methods in
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
+FieldDecorationRegistry</a></b> explains the different ways that images can be specified when
+registering a decoration. To determine the margin width needed for decorations, you can use 
+the <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
+FieldDecorationRegistry</a></b> protocol to access the width of the largest decoration and create
+the necessary indent.
+</p>
+<pre>
+...
+// Set the layout data
+GridData data = new GridData(IDialogConstants.ENTRY_FIELD_WIDTH, SWT.DEFAULT);
+<b>data.horizontalIndent = FieldDecorationRegistry.getDefault().getMaximumDecorationWidth();</b> 
+text.setLayoutData(data);
+...
+</pre>
+<p>Although the field assist support does not dictate how decorations should be used,
+the registry does define standard decorations that can be used by applications to show certain
+states for a field.  For example, the following snippet uses a standard
+decoration for indicating an error in a field:</p>
+<pre>
+...
+// Create a control decoration to indicate an error.
+ControlDecoration dec = new ControlDecoration(text, SWT.TOP | SWT.LEFT);
+FieldDecoration errorFieldIndicator = FieldDecorationRegistry.getDefault().
+   getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
+dec.setImage(errorFieldIndicator.getImage());
+dec.setDescriptionText(errorFieldIndicator.getDescription());
+...
+</pre>
+<h3>Content proposals</h3>
+<p>In addition to annotating fields with decorations, applications may provide a 
+content proposal assistant that activates a proposal popup for a field.  You may install a
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/ContentProposalAdapter.html">
+ContentProposalAdapter</a></b> on an arbitrary control in order to provide this behavior.
+The following snippet installs a content proposal adapter on a text control.  Note that
+this text control could be a control created directly by the application or one obtained
+from a decorated field.
+</p>
+<pre>
+...
+autoActivationCharacters = new char[] { '#', '(' };
+keyStroke = KeyStroke.getInstance("Ctrl+Space");
+// assume that myTextControl has already been created in some way
+ContentProposalAdapter adapter = new ContentProposalAdapter(
+	myTextControl, new TextContentAdapter(), 
+	new SimpleContentProposalProvider(new String [] {"ProposalOne", "ProposalTwo", "ProposalThree"}),
+	keyStroke, autoActivationCharacters);
+</pre>
+<p>In order to get and set the content of the control when the user chooses a proposal
+in the popup, the adapter must be supplied with an instance of
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/IControlContentAdapter.html">
+IControlContentAdapter</a></b>, which can retrieve and set the contents of a particular
+kind of control.  For text fields, you can use the class
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/TextContentAdapter.html">
+TextContentAdapter</a></b>.  However, you have the flexibility
+to implement <b><a href="../reference/api/org/eclipse/jface/fieldassist/IControlContentAdapter.html">
+IControlContentAdapter</a></b> to use the content proposal adapter with any other kind of control.</p>
+<p>When creating a content proposal adapter, you must also specify an instance of
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/IContentProposalProvider.html">
+IContentProposalProvider</a></b>, from which the proposals themselves are retrieved.
+This provider is responsible for returning an array of content proposals.  The proposals
+themselves are specified as instances of <b><a href="../reference/api/org/eclipse/jface/fieldassist/IContentProposal.html">
+IContentProposal</a></b>, from which the label and content of the proposal can be obtained, in addition
+to other information, such as a detailed description of the proposal.
+</p>
+<p>
+In the example above, the <b><a href="../reference/api/org/eclipse/jface/fieldassist/SimpleContentProposalProvider.html">
+SimpleContentProposalProvider</a></b> is used.  This provider is defined by specifying a simple array of Strings as the
+content proposals.  The simple provider implements the necessary protocol to map each string into
+the expected <b><a href="../reference/api/org/eclipse/jface/fieldassist/IContentProposal.html">
+IContentProposal</a></b>.  The flexibility of <b><a href="../reference/api/org/eclipse/jface/fieldassist/IContentProposalProvider.html">
+IContentProposalProvider</a></b> allows you to implement a proposal provider with advanced features, such as filtering
+the proposals based on the control's content, providing explanatory labels in the popup instead of the actual
+content that will be inserted, and specifying the expected cursor position after a proposal is inserted.
+See the <b>Field Assist Example</b> and search for implementors of 
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/IContentProposalProvider.html">
+IContentProposalProvider</a></b> for advanced usage.
+</p>
+<h4>Configuring a content proposal adapter</h4>
+<p>We've seen that the basic definition for a content proposal adapter includes the control for which the proposals
+are provided, the content adapter used to alter the content of the control, and the proposal provider that defines
+the list of proposals in the popup.  In addition to these basics, there are many ways that the content proposal
+adapter can be configured: </p>
+<ul>
+<li><b>setAutoActivationCharacters</b> allows you to specify an array of characters that
+will automatically trigger the content proposal popup when typed into the control.</li>
+<li><b>setAutoActivationDelay</b> defines the delay in milliseconds
+between the time the user types an autoactivation character and the popup is opened.</li>
+<li><b>setFilterStyle</b> allows you to control whether any automatic filtering of proposals
+is done, based on the keystrokes typed while the popup is active.</li>
+<li><b>setLabelProvider</b> allows you to specify a label provider which will provide an
+image and string for each proposal.</li>
+<li><b>setPopupSize</b> allows you to specify the desired size of the proposal popup
+when it is activated.</li>
+<li><b>setPropagateKeys</b> controls whether keys typed into an open proposal popup
+should also be propagated back to the control.</li>
+<li><b>setProposalAcceptanceStyle</b> allows you to control how an accepted proposal
+affects the content of the control (insertion, replacement, custom implementation).</li>
+<li>the <b>keyStroke</b> parameter in the constructor can be used to activate the
+content proposal popup using an explicit key sequence that does not affect the content of the control.</li>
+</ul>
+<p>The <b>Field Assist Example</b> allows you to configure these various options in the example preferences
+and try out the different combinations.  For example, the adapter can be configured so that
+it is invoked explicitly with a keystroke and inserts the proposal content into the
+control, causing it to behave much like the text editor content assist.  
+See the javadoc for more specifics about each of these methods and how they interact with each other.
+</p>
+<h4>Auto complete fields</h4>
+<p>The content proposal adapter methods can be used to configure an adapter so that it behaves
+more like the type-ahead field completion used in web browser URL or search fields.  
+<b><a href="../reference/api/org/eclipse/jface/fieldassist/AutoCompleteField.html">
+AutoCompleteField</a></b> can be used when this style of interaction is desired.  Clients need
+only specify the list of completions when defining an auto complete field.  Configuration
+of the content proposal adapter and proposal provider will be handled internally.</p>
+<h3>Workbench field assist</h3>
+<p>Field assist support at the JFace level gives your application a lot of flexibility in determining
+how to decorate fields and show proposals for field content.  This is desirable for stand-alone
+JFace applications or stand-alone rich client applications.  However, if your application is intended to integrate
+with other plug-ins, such as the Eclipse SDK or third-party plug-ins, you will probably want to
+use the field assist support in a way that is consistent with other plug-ins.  The workbench 
+defines utility classes that use field assist for specific kinds of interactions.  </p>
+<p>For example,
+the class <b><a href="../reference/api/org/eclipse/ui/fieldassist/ContentAssistCommandAdapter.html">
+ContentAssistCommandAdapter</a></b> configures a content proposal adapter for
+content-assist style insertion.  It provides a handler for the workbench-level content assist
+command, so that the content proposal popup is opened when the user invokes the keystroke or 
+trigger sequence that has been specified in the workbench key bindings.  It can optionally
+provide a control decoration with the content assist light bulb image.  See the 
+<b><a href="../reference/api/org/eclipse/ui/fieldassist/package-summary.html">org.eclipse.ui.fieldassist</a></b> package 
+for more detail about workbench-level field assist.
+</p>
+<p>This package is expected to evolve as the workbench expands its use of field assist and
+standardizes the use of decorations for certain field states.
+</p>
+</BODY>
+</HTML>

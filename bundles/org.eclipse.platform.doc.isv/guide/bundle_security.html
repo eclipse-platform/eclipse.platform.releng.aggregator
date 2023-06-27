@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Security: Protecting against malicious code</title>
+</head>
+<BODY BGCOLOR="#ffffff">
+
+<h1>Signed bundles and protecting against malicious code</h1>
+
+<h2>Overview</h2>
+
+<p>The Eclipse platform faces a problem common to any program that can be extended by executable code: the potential that the extension code
+ may be malicious. To address this concern, Eclipse embraces and extends the facilities built into the Java runtime in order to do two things:</p>
+
+<ol>
+<li>Authenticate the source of executable code in bundles</li>
+<li>Authorize the installation and runtime behaviour of code</li>
+</ol>
+
+<h2>Authenticating code packaged in a bundle</h2>
+
+<p>The first step towards protecting the platform from malicious code is 'authentication', or proving the identity of the person who is distributing the code in a bundle. This is facilitated by the use of a Public Key Infrastructure (PKI), where users are issued public certificates and private keys that uniquely identify them. Another common and well know use of certificates is the SSL protocol by which secured web sites are accessed.</p>
+
+<p>The mechanism by which the authentication step is enabled is through the use of 'digital signatures' created by the code distributor, using a private key and a process called 'signing'. When consuming code and validating the identity of the code signer, the digital signatures are input - along with the signers public key - to an inverse process called 'verifying'.</p>
+
+<p>In the Java platform, digital signatures are built into the Jar packaging format. A signed jar contains additional files alongside the META-INF\MANIFEST.MF that contain the information required to verify the signature, specifically a signature file (&lt;SIGNERNAME&gt;.SF) containing cryptographic digests of the resources contained in the Jar, and a block file (&lt;SIGNERNAME&gt;.RSA or &lt;SIGNERNAME&gt;.DSA) containing the signature data and associated certificates.</p>
+
+<p>Using this information, one can verify that specific resources in a Jar file have not been tampered with and also establish the identity of the signer. The runtime then determines the 'trustedness' of the signer, the default behaviour being to check for the presence of the signer certificate (or one of its ancestor certificates) in the JRE's 'cacerts' file.</p>
+
+<p>For more general information on PKI, Certificates, Digests, and Signatures:</p>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Public_key">http://en.wikipedia.org/wiki/Public_key</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Digital_signature">http://en.wikipedia.org/wiki/Digital_signature</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Hash_algorithm">http://en.wikipedia.org/wiki/Hash_algorithm</a></li>
+</ul>
+
+<p>For more specific information on signing in the Java platform:</p>
+<ul>
+<li><a href="http://download.oracle.com/javase/tutorial/deployment/jar/signing.html">http://download.oracle.com/javase/tutorial/deployment/jar/signing.html</a></li>
+<li><a href="http://www.ibm.com/developerworks/library/j-jar/index.html">http://www.ibm.com/developerworks/library/j-jar/index.html</a></li>
+<li><a href="http://www.onjava.com/pub/a/onjava/2001/04/12/signing_jar.html?page=1">http://www.onjava.com/pub/a/onjava/2001/04/12/signing_jar.html?page=1</a></li>
+</ul>
+
+<h2>Signing code packaged in a bundle</h2>
+
+<p>In order to sign a bundle, an Eclipse developer has a handful of options:</p>
+
+<ol>
+<li>The Java command line tool, 'jarsigner'
+
+<p>Jarsigner is a tool that ships with the Java SDK, and can be used to generate signatures on Jar files. For more information see the SDK documentation at:</p>
+<p>
+<a href="http://download.oracle.com/javase/7/docs/technotes/tools/windows/jarsigner.html">http://download.oracle.com/javase/7/docs/technotes/tools/windows/jarsigner.html</a></p>
+</li>
+<li>A custom ant task, &lt;signjar&gt;
+
+<p>The 'Ant' build tool has a built-in task for automating the signing of code. For more information, see the related Ant documentation at:</p>
+<p>
+<a href="http://ant.apache.org/manual/Tasks/signjar.html">http://ant.apache.org/manual/Tasks/signjar.html</a></p>
+</li><li>The Eclipse 'export deployable plug-ins and fragments' functionality
+
+<p>Eclipse ships with the ability to export Eclipse plug-ins  and sign them at the same time. When exporting deployable plug-ins and fragments, there is a JAR Signing tab available. In the tab, the exporter can specify a KeyStore (a password-protected key storage) containing a private key to use for the signing.</p>
+</li>
+</ol>
+
+<h2>Verifying signed code packaged in a bundle</h2>
+
+<p>As with generation of signed bundles, verification of signed code can be done by an Eclipse developer in several ways:</p>
+
+<ol>
+<li>The command line, 'jarsigner'
+
+<p>The Jarsigner tool is also capable of verifying signatures when passed a -verify option. For more information, consult the Java SDK documentation.</p>
+
+</li>
+<li>Programmatically via the core Java APIs.
+
+<p>There are several APIs in the Java API which allow interaction with signed Jars. For example, the java.util.JarFile API can be passed a parameter which enables verification of signatures. Several consumers of this API, including the URLClassLoader, pass this parameter to cause verification to occur. Unfortunately, little detail beyond the success or failure of verification is available through the core APIs.</p>
+</li>
+<li>Programmatically via the Equinox 'signedcontent' APIs
+
+<p>In 3.4, several interfaces for inspecting the signer details of a bundle have been introduced into the Equinox bundle (org.eclipse.osgi). Starting with the SignedContentFactory, a developer can programmatically inspect the entries in a bundle to see signers, timestamps and whether a code signer is trusted or not. For more information see the javadoc for the org.eclipse.osgi.signedcontent package of the org.eclipse.osgi bundle.</p>
+</li>
+</ol>
+
+<h1>Authorization of signed code</h1>
+
+<p>Once the signer(s) of code packaged in a bundle is established via authentication, the next step to perform is 'authorization'. Authorization is the process by which the system decides whether a piece of code should be able to perform a specified action. Although the Java runtime supports a fine grained runtime permission model, Eclipse also supports two additional enforcement points with respect to signed code packaged in bundles. This gives Eclipse platform deployers a range of security solutions that allow tradeoffs to be made between flexibility and complexity versus manageability and performance. In Eclipse 3.4 or later, authorization based on signatures can be performed:</p>
+
+<ol>
+<li>When code is installed by the provisioning system
+
+<p>For several previous releases and in the P2 provisioning framework, Eclipse has the ability to check signatures as bundles are provisioned into the system. As the provisioning system encounters bundles, it automatically performs authentication of the code signer and will prompt if a signer is not trusted according to the system configuration. The end user will be presented with a list of untrusted signers, and choosing to trust will allow the bundles to be installed into the platform. Since version 4.23, <a href="p2_pgp.html">PGP signatures in P2 metadata</a> are supported, in addition to the signatures created with Java's jarsigner.</p>
+</li>
+<li>When code is loaded by the runtime
+
+<p>Since 3.4, the Equinox runtime has had the ability to check the signature of code as it is loaded. The benefit to this feature beyond checking signatures during provisioning is the ability to dynamically remove trust and disable code should an exploit be exposed in deployed code. In order to enable signature-based authorization at load time, the following VM argument must be passed:</p>
+<pre>
+	-Dosgi.signedcontent.support=authority
+</pre>
+<p>See the runtime options page for more information about the osgi.signedcontent.support runtime variable.</p>
+</li>
+</ol>
+
+<p>For more information on security topics related to Eclipse and Equinox, see the site:</p>
+
+<ul>
+<li><a href="http://www.eclipse.org/equinox/security">http://www.eclipse.org/equinox/security</a></li>
+</ul>
+
+
+
+</BODY></HTML>

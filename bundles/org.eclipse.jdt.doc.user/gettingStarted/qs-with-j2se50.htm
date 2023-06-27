@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+<title>Eclipse and J2SE 5.0</title>
+<script language="JavaScript" type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"> </script>
+</head>
+<body>
+<h1>Eclipse and J2SE 5.0</h1>
+<p>
+Since release 3.1, Eclipse includes full support for the new Java language features of J2SE 5.0.
+One of the most important consequences of this support is that you 
+may not notice it at all--everything you expect to work for J2SE 1.4, 
+including editing, compiling, debugging, quick fixes, refactorings, source
+actions, searching, etc., will
+work seamlessly with J2SE 5.0's new types and syntax.  In this document,
+we will introduce some of the more interesting capabilities Eclipse users
+will find when working with J2SE 5.0.
+</p>
+
+<p>Note that both version numbers '1.5' and '5.0' are used to identify the release of the Java 2 Platform Standard Edition. Version '5.0' is the product version, while '1.5' is the developer version and is also used for the compliance level.
+</p>
+
+
+
+<h2>Prerequisites</h2>
+
+<p>
+In order to develop code compliant with J2SE 5.0, you will need a J2SE 5.0 or J2SE 6.0 Java Runtime Environment (JRE).
+If you start Eclipse for the first time using a J2SE 5.0 JRE, then it will use it by default.
+Otherwise, you will need to use the
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.debug.ui.preferences.VMPreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Installed JRE preference page">
+<strong>Java &gt; Installed JREs</strong></a>
+preference page to register it with Eclipse.
+</p>
+
+<p>
+This document introduces some of the 
+new language features in J2SE 5.0 very briefly, but it is not a proper tutorial for these features. See <a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/" target="_blank">here</a> for more information.
+</p>
+
+<h3>Compiler Compliance Level</h3>
+
+<p>
+To use the new J2SE 5.0 features, you must be working on a project that has a 1.5 compliance level enabled and has a 5.0 JRE.
+New projects will automatically get 1.5-compliance when choosing a 5.0 JRE on the first page of the
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.newWizard(newWizardId=org.eclipse.jdt.ui.wizards.JavaProjectWizard)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the new Java project wizard">
+<strong>New Java Project wizard</strong></a>:
+</p>
+<p><img src="images/j2se50/wiz_new_java_project_myproject.png" alt="New Project Wizard"></p>
+To convert an existing J2SE 1.4 project to J2SE 5.0, you can simply:
+<ol>
+<li>Make sure you have a J2SE 5.0 JRE installed.</li>
+<li>Start using the 5.0 features in your code.</li>
+<li>When a compile error is flagged, use Quick Fix to update the project's compliance level:
+<p><img src="images/j2se50/quick-fix.png" alt="Quick fix to enable J2SE 5.0">
+</p>
+</li>
+<li>For more fine-tuned control, 
+the compiler compliance level can be set globally for a workspace
+(with the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CompliancePreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Java compiler preference page">
+<strong>Java &gt; Compiler</strong></a> preference page)
+or individually for each project (from the project's context menu, choose <strong>Properties &gt; Java Compiler</strong>).
+<p><img src="images/j2se50/compiler-property-page.png" alt="Compiler property page"></p>
+</li>
+</ol> 
+
+<p>
+Projects with different compliance levels can co-exist in the workspace, and depend on each other.
+You can also fine-tune the kinds of compile warnings and errors produced for each project 
+using <strong>Properties &gt; Java Compiler &gt; Errors/Warnings</strong>. The <strong>Generic Types</strong> and the <strong>Annotations</strong> section contain options added for J2SE 5.0.
+</p>
+
+
+<h2>Generic Types</h2>
+
+<p>
+Generic types allow objects of the same class to safely operate on objects of different types.
+For example, they allow compile-time assurances that a 
+<code>List&lt;String&gt;</code> always contains <code>String</code>s, and a <code>List&lt;Integer&gt;</code> always contains <code>Integer</code>s.
+</p>
+
+
+Anywhere that Eclipse handles a non-generic type, it can handle a generic type:
+<ul>
+<li> Generic types can be safely renamed.</li>
+<li> Type variables can be safely renamed.</li>
+<li> Generic methods can be safely extracted from / inlined into generic code.</li>
+<li> Code assist can automatically insert appropriate type parameters in parameterized types.</li>
+</ul>
+
+
+In addition, a new refactoring has been added: <strong>Infer Generic Type Arguments</strong> can infer
+type parameters for every type reference in a class, a package, or an entire project.
+
+<p><img src="images/j2se50/infer-generic.png" alt="Invoking Infer Generic Type Arguments"></p>
+
+Invoking the refactoring produces:
+
+<p><img src="images/j2se50/inferred-generic.png" alt="Invoked Infer Generic Type Arguments">
+</p>
+
+
+<p>
+Eclipse provides new options when searching for references to generic types. Consider this example:
+</p>
+<p><img src="images/j2se50/view_search_listInteger.png" alt="Example with four different parameterized instantiations of List"></p>
+
+Selecting the reference to <code>List&lt;Integer&gt;</code> and using 
+<strong>Search &gt; References &gt; Project</strong> from the context menu
+will highlight the List types on all four lines:
+
+<p><img src="images/j2se50/view_search_listInteger_unfiltered.png" alt="Search with no filters"></p>
+
+Using the Search View menu, the results can be filtered:
+
+<p>
+Filter <strong>Incompatible Type Arguments</strong> leaves only references to types that are assignment-compatible with
+the selected type:</p>
+<p><img src="images/j2se50/view_search_listInteger_incompatible.png" alt="Filter incompatible">
+</p>
+
+
+<p>Filter <strong>Inexact Type Arguments</strong> leaves only type references with the exact same signature:</p>
+<p><img src="images/j2se50/view_search_listInteger_inexact.png" alt="Filter inexact"></p>
+
+<h2>Annotations</h2>
+
+<p>
+Annotations attach metadata about how Java types and methods are used 
+and documented to the Java source and can then affect compilation or 
+be queried at run-time.  For example, <code>@Override</code> will trigger
+a compile warning if the annotated method does not override a method in
+a superclass:
+</p>
+
+<p><img src="images/j2se50/editor_override_annotation_hover.png" alt="Override annotation"></p>
+
+Everything you can do with a Java type, you can do with an annotation:
+<ul>
+<li> Create new annotations using <strong>New &gt; Annotation</strong></li>
+<li> Refactor: rename, move, change signatures of members, etc.</li>
+<li> Search for occurrences</li>
+<li> Use code assist to fill in names and values</li>
+</ul>
+
+
+<p>
+A very useful annotation with full support in Eclipse is <code>@SuppressWarnings</code>.
+For example, consider a private method that is currently unused, but you'd rather not delete:</p>
+<p><img src="images/j2se50/unused-warning.png" alt="Warning: unused private method"></p>
+
+Invoking quick fix on the warning proposes adding a <code>@SuppressWarnings</code> annotation:
+<p><img src="images/j2se50/suppress-proposed.png" alt="SuppressWarnings proposed"></p>
+
+Selecting the quick fix adds the annotation.  The Eclipse compiler honors the annotation by
+removing the warning on <code>foo</code>:
+<p><img src="images/j2se50/suppress-applied.png" alt="SuppressWarnings inserted"></p>
+
+<h2>Enumerations</h2>
+
+<p>
+Enumerations are types that are instantiated at runtime by a known, finite set of objects:</p>
+<p><img src="images/j2se50/enum.png" alt="enum type"></p>
+
+
+Again, anything you can do to a Java class can be done to an enumeration:
+
+<ul>
+<li> Create new enumerations using <strong>New &gt; Enum</strong></li>
+<li> Refactor: rename, move, rename constants, etc.</li>
+<li> Search for occurrences</li>
+<li> Use code assist to fill in constants</li>
+</ul>
+
+<h2>Autoboxing</h2>
+
+<p>
+Autoboxing and auto unboxing allow for elegant syntax when primitive types are assigned
+to or retrieved from Object references:
+</p>
+<p><img src="images/j2se50/autobox.png" alt="autoboxing highlighted"></p>
+
+<p>
+Eclipse's source manipulation features handle autoboxing seamlessly, 
+giving the correct types to new local variables and correct code assists.
+For code understanding, it is also possible to flag instances of 
+autoboxing or autounboxing conversions:</p>
+
+<ul>
+<li>
+mark them as compile warnings or errors (<strong>Boxing and unboxing conversions</strong> in the <strong>Potential Programming Problems</strong> section of the
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'><img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Errors/Warnings preference page">
+<strong>Java &gt; Compiler &gt; Errors/Warnings</strong></a> preference page)
+</li>
+<li>
+highlight them using syntax coloring
+(via the
+<strong>Java &gt; Auto(un)boxed expressions</strong> section of the
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Syntax coloring preference page">
+<strong>Java &gt; Editor &gt; Syntax Coloring</strong></a> preference page):
+<p><img src="images/j2se50/autobox-coloring.png" alt="Enabling highlighting for autoboxing"></p>
+</li>
+</ul>
+
+<h2>Enhanced for loop</h2>
+
+<p>
+For the common case of operating on each element of an array or collection in turn, 
+J2SE 5.0 allows a new, cleaner syntax.  
+Eclipse provides a "foreach" code template that can automatically guess 
+the collection to be iterated:
+</p>
+<p><img src="images/j2se50/foreach-proposal.png" alt="foreach template proposed"></p>
+
+Choosing the template produces:
+
+<p><img src="images/j2se50/foreach-inserted.png" alt="foreach template inserted"></p>
+
+<p>
+Eclipse also provides a "Convert to enhanced for loop" quick-assist to
+upgrade 1.4-style <code>for</code> loops where possible.
+</p>
+
+<h2>Static Imports</h2>
+
+<p>Static imports allow you to use static fields and methods from other classes without qualification.</p>
+<p>Content assist in the Java editor can suggest such static members and adds a static import when required. To get
+such proposals, configure the static import favorites on the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CodeAssistPreferenceFavorites)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="Opens the Content Assist Favorites preference page">
+<strong>Java &gt; Editor &gt; Content Assist &gt; Favorites</strong></a> preference page.
+</p>
+
+
+<h2>Converting J2SE 1.4 code to 5.0</h2>
+
+Eclipse offers the following tools to help you bring J2SE 1.4 code to 5.0:
+
+<ul>
+<li><strong>Clean Up</strong> action
+<ul>
+  <li>Add missing <code>@Override</code> and <code>@Deprecated</code> annotations</li>
+  <li>Convert <code>for</code> loops to enhanced</li>
+</ul>
+</li>
+<li><strong>Infer Generic Type Arguments</strong> refactoring</li>
+</ul>
+
+Happy coding!
+</body>
+</html>

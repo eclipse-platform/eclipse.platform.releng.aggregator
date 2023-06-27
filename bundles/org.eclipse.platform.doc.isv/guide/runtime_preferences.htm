@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Runtime preferences</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Runtime preferences</H2>
+<p> The <b><a href="../reference/api/org/eclipse/core/runtime/preferences/package-summary.html">org.eclipse.core.runtime.preferences</a></b> 
+  package provides infrastructure for storing a plug-in's preferences. Preferences 
+  typically map to settings controlled by the user on the <b>Preferences</b> page, 
+  although this is not required by the underlying infrastructure. Plug-in preferences 
+  are key/value pairs, where the key describes the name of the preference, and 
+  the value is one of several different types (boolean, double, float, int, long, 
+  or string). Preferences can be stored and retrieved by the platform from the 
+  file system. The exact location of the saved preferences depends upon the <b>scope</b> 
+  of the preference. </P>
+<h3>
+Preference scopes
+</h3>
+The <b>scope</b> of a preference is closely related to where the preference is stored.  Plug-in
+developers can decide which of the standard scopes apply for their preferences, or can define 
+new scopes that make sense for their plug-in.  Let's look first at the scopes defined by
+the platform runtime:
+<ul>
+<li><b>Instance</b> scoped preferences are stored per workspace, or per running instance of the platform.</li>
+<li><b>Configuration</b> scoped preferences are stored per installation of the platform.  They are shared between
+workspaces.  For example, if a user has a single installation of the platform, but runs several different workspaces, 
+preferences scoped at the configuration level will be shared between the workspaces.</li>
+<li><b>Default</b> scoped preferences represent the default values for preferences.  These are not changed or stored
+by the platform.  However, the values originate from files stored with the plug-in's product
+or primary feature. (See <a href="product_def.htm">What is a product?</a> for an explanation of products and
+primary features, and their related files.)</li>
+</ul>
+<p>
+You can think of the overall preference store as a hierarchy of nodes, where each main branch of the hierarchy
+represents a particular scope.  The children of any particular node depend upon how that scope is defined.
+For the instance and configuration scopes, the child nodes are the preferences for a particular plug-in as specified
+by a preference <b>qualifier</b>, usually the plug-in's <b>id</b>.
+</p>
+<p>
+If all of this sounds confusing, don't worry.  If you don't care about scopes and nodes,
+you need not worry about any particular scope or about which node of the tree actually contains your preference value.
+The preferences API will automatically traverse the nodes in the proper order (instance, configuration, default)
+when you query a preference value and use the supplied qualifier and preference name to find the node that actually
+contains the value.
+</p>
+<p>Preferences are accessed using <b><a href="../reference/api/org/eclipse/core/runtime/preferences/IPreferencesService.html">
+IPreferencesService</a></b> protocol.  The platform's default preference service can be accessed using the
+<b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> class.
+</p>
+<pre>
+	...
+	IPreferencesService service = <b>Platform.getPreferencesService()</b>;
+	...
+</pre>
+<p>
+Once the preference service is obtained, preference values can be queried by name using any of
+<b>get...</b> methods provided in <b><a href="../reference/api/org/eclipse/core/runtime/preferences/IPreferencesService.html">IPreferencesService</a></b>.
+For example, the following snippet queries the value of the &quot;MyPreference&quot; preference in the plug-in
+&quot;com.example.myplugin&quot;.
+</p>
+<pre>
+	...
+	IPreferencesService service = Platform.getPreferencesService();
+	boolean value = service.getBoolean(&quot;com.example.myplugin&quot;, &quot;MyPreference&quot;, true, <b>null</b>);
+	//do something with the value.
+	...
+</pre>
+<p>The last parameter in the query method is an array of scope contexts to use when searching for the
+preference node. If the 
+array is <b>null</b>, then the platform assumes that the default scope search order should be used and guesses
+the appropriate preference node.  If an array of scopes contexts is passed, then this determines
+the scope lookup order that should be used to find the preference node.  The default scope lookup order
+is always consulted if no node can be found using the specified scopes.
+</p>
+<h3>
+Using scopes and nodes
+</h3>
+<p>
+If a plug-in needs finer control over the scope search order, classes that represent the scopes can be used
+to access the actual node that represents the preference at a particular scope.  In this way, an array of 
+nodes can be created that specifies the particular search order required.  The following snippet queries the
+preferences service for the same preference used above, but searches the configuration scope for the plug-in, 
+followed by the instance scope for the plug-in. When nodes are specified for the search order, the default
+scoping is not considered.  That is, the platform will only search the exact nodes that have been provided.</p>
+<pre>
+	...
+	IPreferencesService service = Platform.getPreferencesService();
+	Preferences configurationNode = new ConfigurationScope().getNode(&quot;com.example.myplugin&quot;);
+	Preferences instanceNode = new InstanceScope().getNode(&quot;com.example.myplugin&quot;);
+	Preferences[] nodes = new Preferences[] {configurationNode, instanceNode};
+	stringValue = service.get(&quot;MyPreference&quot;, &quot;true&quot;, nodes);
+	//do something with the value.
+	...
+</pre>
+<p>
+A plug-in may also implement its own traversal through the preference tree nodes. The root node of the preference tree
+can be obtained from the preferences service.  The scope classes can be used to further traverse the tree.
+The following snippet traverses to a specific node and retrieves the preference value from the node itself.
+</p>
+<pre>
+	...
+	IPreferencesService service = Platform.getPreferencesService();
+	Preferences root = service.getRootNode();
+	Preferences myInstanceNode = root.node(InstanceScope.SCOPE).node(&quot;com.example.myplugin&quot;);
+	if (myInstanceNode != null) {
+		value = node.getBoolean(&quot;MyPreference&quot;, &quot;true&quot;);
+		//do something with the value.
+	}
+	...
+</pre>
+<h3>
+Extending the scopes
+</h3>
+<p>
+Plug-ins may define their own specialized scopes using the 
+<a href="../reference/extension-points/org_eclipse_core_runtime_preferences.html"><b>org.eclipse.core.runtime.preferences</b></a> 
+extension.  In this extension, the plug-in defines the name of the new scope, as well a class that can create
+preference nodes for the new scope.  Optionally, it can specify the name of a class that initializes the default
+preference values at that scope.  When a plug-in defines a new scope, it is up to that plug-in to implement the 
+traversal order for any new scope relative to the platform traversal order.  We'll look at this capability in more 
+detail using the specific example of <a href="resInt_preferences.htm">Project-scoped preferences</a>.
+</p>
+ 
+
+</BODY>
+</HTML>

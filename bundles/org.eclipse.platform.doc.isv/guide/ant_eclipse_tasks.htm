@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Ant tasks provided by the platform
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>
+Ant tasks provided by the platform</h2>
+<p>The platform provides some useful Ant tasks and properties that 
+interact with the workspace. They can be used with buildfiles that are set to build within the same JRE as the workspace.</p>
+
+
+<A NAME="monitor"></A><h3>
+eclipse.refreshLocal</h3>
+<p>
+This task is a wrapper to the <a href="../reference/api/org/eclipse/core/resources/IResource.html#refreshLocal(int, org.eclipse.core.runtime.IProgressMonitor)">
+<b>
+IResource.refreshLocal()</b></a> method. Example:</p>
+<pre>&lt;eclipse.refreshLocal resource=&quot;MyProject/MyFolder&quot; depth=&quot;infinite&quot;/&gt;</pre>
+<ul>
+  <li> <b>resource</b> is a resource path relative to the workspace&nbsp;</li>
+  <li> 
+<b>depth</b> can be one of the following: <b>zero</b>, <b> one</b> or <b>infinite</b></li>
+</ul>
+<h3 >
+eclipse.incrementalBuild</h3>
+
+<p>
+When the <b>project</b> attribute is supplied, this task is a wrapper to<b>
+<a href="../reference/api/org/eclipse/core/resources/IProject.html#build(int, org.eclipse.core.runtime.IProgressMonitor)">
+IProject.build()</a></b>.  Otherwise, this task is a wrapper to the method:<b>
+<a href="../reference/api/org/eclipse/core/resources/IWorkspace.html#build(int, org.eclipse.core.runtime.IProgressMonitor)">
+IWorkspace.build()</a></b>.
+</p>
+<p>
+Examples:
+</p>
+<pre>&lt;eclipse.incrementalBuild/&gt;</pre>
+
+<pre>
+&lt;eclipse.incrementalBuild project=&quot;MyProject&quot; kind=&quot;incremental&quot;/&gt;
+</pre>
+
+<ul>
+  <li> <b>project</b> the name of the project to be built</li>
+  <li> <b>kind</b> the kind of build to perform. Possible values include:
+  <ul>
+  	<li><b>"incremental"</b> to perform an incremental build</li>
+  	<li><b>"full"</b> to discard existing builder state and rebuild everything from scratch</li>
+  	<li><b>"clean"</b> to discard existing builder state but not rebuild</li>
+  </ul>
+  </li>
+  <li> <b>builder</b> the name of the builder to run; If this value is not specified
+	  all builders are run</li>
+</ul>
+
+<h3>eclipse.convertPath</h3>
+
+<p>
+Converts a file system path to a resource path or vice-versa. The resulting value is
+assigned to the given property. The <b>property</b> attribute must be specified, as well as
+either the <b>fileSystemPath</b> or <b>resourcePath</b> attribute.  When 
+a file system path is supplied, this task is a wrapper to
+<b>
+<a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html#getContainerForLocation(org.eclipse.core.runtime.IPath)">
+IWorkspaceRoot.getContainerForLocation(IPath)</a></b>.  When a resource path
+is supplied, this task is a wrapper to
+<b>
+<a href="../reference/api/org/eclipse/core/resources/IResource.html#getLocation()">IResource.getLocation()</a></b>.
+</p>
+<p>
+Examples:</p>
+
+<pre>&lt;eclipse.convertPath fileSystemPath=&quot;${basedir}&quot; property=&quot;myPath&quot;/&gt;</pre>
+
+<pre>&lt;eclipse.convertPath resourcePath=&quot;MyProject/MyFile&quot; property=&quot;myPath&quot;/&gt;</pre>
+
+<br>
+
+</BODY></HTML>

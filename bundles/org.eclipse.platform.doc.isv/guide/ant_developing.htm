@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Developing tasks and types
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>
+Developing Ant tasks and types within Eclipse</h2>
+<p>
+  Ant tasks and types must be loaded by an Ant classloader instead of a plug-in
+  classloader. This can cause problems when developing and testing new tasks and types
+  to be run in the same VM as Eclipse. To avoid these issues, it is necessary
+  to store the tasks and types in a location that is not visible to any plug-in
+  classloader.</p>
+<p>
+  The following guidelines should be followed when developing and 
+  debugging new tasks and types to be run within the same VM as Eclipse.</p>
+<ul>
+  <li> Contributed Ant tasks or types should be defined in their own source folder 
+    within a plug-in (i.e. separate from the source folders containing regular 
+    plug-in classes)</li>
+  <li>Each source folder containing the Ant tasks and types should have its own 
+    output location that does not overlap with the output location of the regular 
+    plug-in classes.</li>
+  <li>When testing/debugging the new Ant tasks or types using PDE Launch,
+  additional configuration is required:
+  <ul>
+  <li>the project contributing
+    the Ant tasks or types must be configured to <b>exclude</b> the output folders 
+    containing the Ant tasks and types. Use the <b>Properties</b> dialog for the project to
+    correctly configure the <b>Plug-in Development &gt; Runtime Classpath</b> by removing the Ant output 
+    directories from the plug-ins classpath.</li>
+  <li>The JAR file containing the Ant tasks and types and specified
+  in the org.eclipse.ant.core.extraClasspathEntries extension,
+  must be built manually, or using an external tool builder.
+  </li>
+  </ul>
+  </li>
+</ul>
+<p>
+  The <code>org.eclipse.ant.core</code> plugin can be used as an example of how to set up a plugin that contributes tasks within Eclipse. 
+ For development and testing of this plugin within Eclipse, an external tool builder
+ explictly generates the tasks JAR when triggered on specific resource changes.
+</p>  
+
+<p>Also see <a href="ant_contributing_task.htm">Contributing tasks and types</a>.</p>
+
+</BODY></HTML>

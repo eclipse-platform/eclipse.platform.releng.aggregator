@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<TITLE>
+Contributing a preference page
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Contributing a preference page</h3>
+<P > The <b><a href="../reference/extension-points/org_eclipse_ui_preferencePages.html"> 
+  org.eclipse.ui.preferencePages</a></b> extension point allows you to contribute 
+  pages to the general preferences
+  
+  (<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences")'><img src="PLUGINS_ROOT/org.eclipse.help/command_link.svg" alt="command link">
+  <b>Window &gt; Preferences</b></a>)
+  
+  dialog. The preferences dialog presents a hierarchical list of user preference
+  entries. Each entry displays a corresponding preference page when selected.</P>
+<P >
+The readme tool uses this extension point to add the Readme Example preferences page.</P>
+<pre>   &lt;extension
+      point = &quot;org.eclipse.ui.preferencePages&quot;&gt;
+       &lt;page id=&quot;org.eclipse.ui.examples.readmetool.Page1&quot;
+	    class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;
+            name=&quot;%PreferencePage.name&quot;&gt;
+       &lt;/page&gt;
+   &lt;/extension&gt;</pre>
+<P >
+This markup defines a preference page named &quot;Readme Example&quot; which is implemented by the class
+<b>ReadmePreferencePage</b>. The class must implement the
+<b><a href="../reference/api/org/eclipse/ui/IWorkbenchPreferencePage.html"> IWorkbenchPreferencePage</a></b> interface.</P>
+<P > The workbench uses the core runtime's preference mechanisms to access all nodes in the preference tree 
+and their corresponding pages. This list can be initialized from information in the preferences service
+without running any plug-in code.</P>
+<P >
+<img src="images/preferences.png" alt="Workbench preferences page" border="0"></P>
+<P >
+The &quot;Readme Example&quot; preference is added to the top level of the
+preference tree on the left.&nbsp; Why? Because a preference page contribution will be added as a root of the tree unless a
+<b> category</b> attribute is specified. (The name <b> category</b> is somewhat misleading.
+Perhaps a better name is
+<b>path</b>.) The <b> category</b> attribute
+specifies the id (or a sequence of ids from the root) of the parent page. For example, the following markup would create a second readme tool preference page, &quot;Readme Example Child Page,&quot; as a child of the original page.</P>
+<pre>
+   &lt;extension
+      point = &quot;org.eclipse.ui.preferencePages&quot;&gt;
+      &lt;page
+         id=&quot;org.eclipse.ui.examples.readmetool.Page1&quot;
+         class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;
+         name=&quot;%PreferencePage.name&quot;&gt;
+      &lt;/page&gt;
+      &lt;page
+         id=&quot;org.eclipse.ui.examples.readmetool.Page2&quot;
+         class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage2&quot;
+         name=&quot;Readme Example Child Page&quot;
+         category=&quot;org.eclipse.ui.examples.readmetool.Page1&gt;
+      &lt;/page&gt;
+   &lt;/extension&gt;
+</pre>
+
+
+<P >
+Once the user selects the entry for a preference page in the tree on the left,
+the workbench will create and display a preference page using the <b> class</b> specified in the
+extension definition.&nbsp; This action is what activates the plug-in (if it
+wasn't already activated due to another user operation).</P>
+
+
+
+
+</BODY>
+</HTML>

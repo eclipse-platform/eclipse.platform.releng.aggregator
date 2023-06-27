@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Dynamic content</title>
+
+<style type="text/css">
+	.highlight {
+		color: blue;
+	}
+</style>
+</head>
+<body>
+
+<h2>Dynamic content</h2>
+
+<h3>What is dynamic content?</h3>
+
+<p>
+Several user assistance components allow you to provide dynamic content. This
+means the content can change depending on the user's environment or context. For
+example, you may want a section of your help document or welcome page to only
+appear if the user has a certain functionality enabled.
+</p>
+
+<p>
+There are two basic ways to create dynamic content. One is to add tags and attributes
+(annotations) to your XML markup instructing the system to filter out sections or
+documents, include sections from other documents, or extend documents by contributing
+into anchors or replacing elements.
+</p>
+
+<p>
+The other method is to write your own content producer by plugging in some
+Java code that will write the content from scratch or process existing static
+documents on-the-fly. Let's examine both approaches.
+</p>
+
+<h3>XML Annotations</h3>
+
+The simplest way to create dynamic content is to use the XML markup annotations.
+You simply add some special attributes and tags to your XML markup and the system
+will process the instructions. You can use this markup to:
+
+<ul>
+<li><a href="ua_dynamic_filters.htm">Filter</a> out documents or parts of documents</li>
+<li><a href="ua_dynamic_includes.htm">Include</a> sections from other documents, and</li>
+<li><a href="ua_dynamic_extensions.htm">Extend</a> documents using anchors, contributions, and
+   replacements.</li>
+</ul>
+
+<p>
+To learn more about each aspect of the markup, follow the links above or find the
+topics in the table of contents.
+</p>
+
+<p>
+This is demonstrated in the XHTML fragment shown below:
+</p>
+
+<hr>
+<pre>
+&lt;p&gt;
+This is a static paragraph.
+&lt;/p&gt;
+
+&lt;!-- This tag will be replaced with the referenced tag --&gt;
+<span class="highlight">&lt;include path="my.plugin.id/path/my_other_document.xhtml/element_id"/&gt;</span>
+
+&lt;ul&gt;
+   &lt;li&gt;
+      This is a static list item.
+   &lt;/li&gt;
+   &lt;li&gt;
+      This only shows when running on Windows and plugin com.myplugin is not installed.
+      <span class="highlight">&lt;enablement&gt;
+         &lt;systemTest property=&quot;osgi.os&quot; value=&quot;win32&quot;/&gt;
+         &lt;not&gt;
+            &lt;with variable=&quot;platform&quot;&gt;
+               &lt;test property=&quot;org.eclipse.core.runtime.isBundleInstalled&quot; args=&quot;com.myplugin&quot;/&gt;
+            &lt;/with&gt;
+         &lt;/not&gt;
+      &lt;/enablement&gt;</span>
+   &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- An element with an id that can be replaced by another element --&gt;
+<span class="highlight">&lt;p id="my.paragraph"&gt;
+   This paragraph can be replaced because it has an id.
+&lt;/p&gt;</span>
+
+&lt;!-- A place where others can add content --&gt;
+<span class="highlight">&lt;anchor id="my.anchor.id"/&gt;</span>
+</pre>
+<hr>
+
+<h3>Content producers</h3>
+
+<p>
+A content producer is a mechanism for plugging-in Java code to produce the document
+content on-the-fly. Content producers are more powerful than XML annotations, but
+are more complex to use.
+</p>
+
+<p>
+Content producers are supported in the following areas of user assistance:
+</p>
+
+<ul>
+   <li>Welcome XML/XHTML</li>
+   <li>Help topics (any format)</li>
+   <li>Help table of contents</li>
+   <li>Help keyword index</li>
+   <li>Context-sensitive help</li>
+</ul>
+
+</body>
+</html>

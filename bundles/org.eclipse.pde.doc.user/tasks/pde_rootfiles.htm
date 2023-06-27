@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+ <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+
+<title>Adding Files to the Root of a Build</title>
+</head>
+<body>
+
+	<h1>Adding Files to the Root of a Build</h1>
+	<p>
+	Root files are files that must be packaged with an Eclipse install but are not features or plug-ins.  Common examples are the eclipse executable and ini files as well as licensing files.<br>Root files are contributed to a build by features containing the appropriate root properties.</p>
+	
+	<h2>Root file Properties</h2>
+	<table border="5" cellspacing="0" cellpadding="1">
+		<tr>
+			<td><pre>root</pre></td>
+			<td>Specify a list comma separated list of files or folders to be included in all configurations being built.  <br>Relative paths are relative to the containing feature.  Use &quot;file:&quot; to specify a file and &quot;absolute:&quot; to use an absolute path.<br>
+			Examples:
+				<ul>	
+					<li><b><tt>root=rootfiles</tt></b>: A relative path to a folder, the contents of the folder are included</li>
+					<li><tt><b>root=file:license.html,licenses</b></tt>: A relative path to a "license.html" file, and a relative path to a "licenses" folder</li>
+					<li><tt><b>root=absolute:/eclipse/rootfiles</b></tt>: An absolute path to a folder, the contents of the folder are included</li>
+					<li><tt><b>root=absolute:file:/eclipse/about.html,file:lib/*.so*</b></tt>: An absolute path to include &quot;about.html&quot;, as well as a relative path to include all the *.so* files under the lib folder.</li>
+				</ul>
+			<p>Each comma separated entry becomes an ant fileset.  If the entry refers to a folder, then that folder is the "dir" parameter of the fileset and a "**" is used as the "includes" parameter.  If the entry is a file, then the containing directory of the file becomes the "dir" parameter and the file is specified in the "includes" parameter.</p>
+			<p>For all relative files, the property <tt>${baseDir}</tt> will be used in the directory.  This <tt>${baseDir}</tt> property will be feature's root directory where the generated build.xml file will be located.</p>
+			
+			</td>
+		</tr>
+		<tr>
+			<td><pre>root.&lt;config&gt;</pre></td>
+			<td>Specify a list of files or folders to be included for the given configuration.  Configurations specified here should correspond to configurations in the <tt>configs</tt> property for the build.
+			   Relative paths are relative to the containing feature.  The same "file:" and "absolute:" prefixes used in the "root" property also apply here.<br>
+			Examples:
+				<ul>	
+					<li><tt><b>root.win32.win32.x86=rootfiles</b></tt>: A relative path to a folder, the contents of the folder are included in the win32.win32.x86 configuration</li>
+					<li><tt><b>root.linux.gtk.x86=absolute:file:about.html</b></tt>: An absolute path to a file to include in the linux.gtk.x86 configuration.</li>
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<td><pre>root.folder.&lt;subfolder&gt;</pre><br><pre>root.&lt;config&gt;.folder.&lt;subfolder&gt;</pre></td>
+			<td>Similar to the &quot;<tt>root</tt>&quot; and &quot;<tt>root.&lt;config&gt;</tt>&quot; properties, except that instead of being copied into the root of the eclipse install, files and folders are instea copied into the given subfolder.
+			<br>  Relative paths are relative to the containing feature.  The same "<tt>file:</tt>" and "<tt>absolute:</tt>" prefixes used in the "<tt>root</tt>" property also apply here.<br>
+			Examples:
+				<ul>	
+					<li><tt><b>root.folder.docs/html=html_files</b></tt>: The contents of the feature's &quot;html_files&quot; folder are copied into the docs/html folder in the eclipse install.</li>
+					<li><tt><b>root.linux.gtk.x86.folder.jre=absolute:/build/jres/linux</b></tt>: An absolute path,  the contents of the /build/jres/linux folder are copied into the jre folder of the eclipse install.</li>
+				</ul>
+				
+				These properties are used by PDE/UI when a JRE is specified in a .product file for export.  PDE/Build does not currently support including a JRE using the .product file, and these properties would need to be specified in a feature in to include a JRE in a headless product build.
+			</td>
+		</tr>
+		<tr>
+			<td><pre>root.permissions.<tt>&lt;rights&gt;</tt></pre><br><pre>root.&lt;config&gt;.permissions.&lt;rights&gt;</pre></td>
+			<td>Specify a list of files to on which to run the ant chmod task.  The value of this property will be passed to the ant chmod task as the &quot;includes&quot; parameter.  This means that ant wildcard patterns can be used.<br>
+			Examples:
+				<ul>	
+					<li><tt><b>root.permissions.755=eclipse</b></tt>: Set the 'eclipse' file to have executable permissions.</li>
+					<li><tt><b>root.linux.gtk.x86.permissions.755=lib/**</b></tt>: Set all files under the lib directory to be executable</li>
+				</ul>
+				<br>The 
+			<tt>&lt;rights&gt;</tt> portion of the property is actually passed to the ant chmod task as the &quot;perm&quot; parameter.  If the final archive format for the configuration is antTar, then the <tt>&lt;rights&gt;</tt> format is also passed to an  ant tarfileset as the &quot;filemode&quot; parameter.   Similarly, for antZip and  zipfileset.  While the ant chmod task supports permissions such as &quot;og-rwx&quot; (make non-owners unable to touch the file), the tar  and zip filesets only support 3 digit octal strings.</td>
+		</tr>
+		<tr>
+			<td><pre>root.link</pre><br><pre>root.&lt;config&gt;.link</pre></td>
+			<td>List by pairs (separated by comma) the files and folders that need to be symbolically linked.  The first entry of the pair is the target and the second entry is the link name..<br>
+			Example:
+				<ul>	
+					<li><tt><b>root.macosx.carbon.ppc.link=Eclipse.app/Contents/MacOS/eclipse,eclipse</b></tt>:  In the macosx.carbon.ppc configuration create a softlink in the root named &quot;eclipse&quot; that points to the &quot;Eclipse.app/Contents/MacOS/eclipse&quot; file.</li>
+				</ul>
+				<br>This results in an ant exec task that executes an &quot;<tt>ln -sf</tt>&quot; command.  Given a value of  &quot;targetA, nameA, targetB, nameB, targetC, nameC&quot;, a set of &quot;ln&quot; commands will be executed in the folder where the eclipse rootfiles are collected:
+				<pre>		ln -sf targetA nameA
+ln -sf targetB nameB
+ln -sf targetC nameC</pre>
+			</td>
+		</tr>
+	</table>
+	<h1>Including Root Files in a Product Build</h1>	
+	<p>
+	When using a .product file based on features, then rootfiles can be added to the product simply by specifying the above rootfile properties in any of the included features.  
+</p><p>
+It is possible to include a feature solely for the purpose of contributing rootfiles.  If this "rootfile" feature does not specify a "bin.includes" property in its build.properties file, then it will not be included in the final build results, but its contributed rootfiles will be.
+ </p> 
+ 
+ <p>When a .product file is based on plug-ins instead of features, rootfiles can still be added to the build.  In a product build, PDE/Build automatically generates a container feature which includes all the plug-ins specified in the .product file (See the <a
+ href="pde_feature_generating_antcommandline.htm">eclipse.generateFeature</a> task).  There are two ways to add rootfiles to this product build:</p>
+ <ul>
+ <li>Create a feature that contributes rootfiles, but does not specify a bin.includes property.  Add this feature to the automatically generated container feature by setting the <tt>featureList</tt> property:
+ <pre>
+     ${buildDirectory}/features/org.foo.rootfile.feature/rootfiles/*
+                                                        /build.properties    : root = rootfiles
+     ${buildDirectory}/build.properties: featureList = org.foo.rootfile.feature
+ </pre>
+ </li>
+ <li> Add a build.properties file containing absolute root properties to the automatically generated container feature:
+ <pre>
+     ${buildDirectory}/build.properties:  generatedBuildProperties = ${buildDirectory}/root.properties
+     ${buildDirectory/root.properties:    root = absolute:${buildDirectory}/rootfiles
+     ${buildDirectory}/rootfiles/*
+ </pre>
+ </li>
+</ul>
+ 
+
+</body>
+</html>

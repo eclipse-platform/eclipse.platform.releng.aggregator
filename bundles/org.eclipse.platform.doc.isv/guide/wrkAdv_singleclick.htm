@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Honoring single click support
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Honoring single click support</h2>
+<p>The General <b>Preferences</b> allow users to specify whether views should 
+  open their objects on single or double click. </p>
+
+
+<p><img src="images/singleclick.png" alt="General &quot;Open mode&quot; preferences with disclaimer that the preference may not take effect in all views" border="0"></p>
+
+
+<p>Why the disclaimer about this preference not working for all views?&nbsp;
+Because views contributed by plug-ins must explicitly support this preference in
+their implementation.</p>
+
+
+<p>Recall that a view can be implemented by creating SWT controls and writing
+standard SWT code, or by using <a href="jface_viewers.htm"> JFace viewers</a> 
+to handle the low level details.&nbsp; Honoring
+the single click preference can be done at either level.&nbsp; Most views that
+open other objects present them in a structured, list-like view.&nbsp; We'll
+focus on that kind of view for now.&nbsp; If your view displays objects in a
+different manner, you'll likely use the SWT-level concepts to support single
+click.</p>
+
+
+<h3>Single click in JFace viewers</h3>
+
+
+<p>If you are using a <a href="jface_viewers.htm#listviewer">JFace list-oriented
+viewer</a> to present your objects, supporting single click is
+straightforward.&nbsp; Instead of using <b>addDoubleClickListener</b> to trigger
+opening the items in your view, use <b>addOpenListener</b>.&nbsp; The open
+listener honors the current workbench preference, firing the open event when the
+specified mouse event occurs.</p>
+
+
+<p>You may still wish to use <b>addDoubleClickListener</b> for non-open actions,
+such as expanding the items in a tree on double-click.</p>
+
+
+<h3>Single click in SWT controls</h3>
+
+
+<p>JFace provides a utility class, <a href="../reference/api/org/eclipse/jface/util/OpenStrategy.html"><b>OpenStrategy</b></a>, 
+  to handle the logistics of single and double click at the SWT control level.&nbsp; 
+  The <a href="../reference/api/org/eclipse/jface/util/OpenStrategy.html"><b>OpenStrategy</b></a> 
+  is configured by the General <b>Preferences</b> dialog so that it honors the 
+  current workbench open preference. In fact, the JFace viewers use this class 
+  to implement the open listener.&nbsp; </p>
+
+
+<p>You must create an <a href="../reference/api/org/eclipse/jface/util/OpenStrategy.html"><b>OpenStrategy</b></a>
+and associate it with your SWT control.&nbsp; The <a href="../reference/api/org/eclipse/jface/util/OpenStrategy.html"><b>OpenStrategy</b></a>
+will hook the appropriate events and interpret them based on the user
+preferences.&nbsp; Your job is to add an open listener to the strategy that
+implements the code for open.&nbsp; In this way, you are shielded from knowledge
+about which widget event triggered the open event.</p>
+
+
+<pre>OpenStrategy openHandler = new OpenStrategy(control);
+openHandler.addOpenListener(new IOpenEventListener() {
+	public void handleOpen(SelectionEvent e) {
+	// code to handle the open event.
+	...
+	}
+}</pre>
+<p>The other workbench preferences for open (select on hover,
+open using arrow keys) are also handled by <a href="../reference/api/org/eclipse/jface/util/OpenStrategy.html"><b>OpenStrategy</b></a>.&nbsp;
+This means that the &quot;right thing&quot; will happen if you use JFace viewers
+or the <a href="../reference/api/org/eclipse/jface/util/OpenStrategy.html"><b>OpenStrategy</b></a>
+class to implement open behavior.</p>
+<h3>Activating editors on open</h3>
+<p>When handling an open event, you should use <b>OpenStrategy.activateOnOpen() </b>to
+determine whether an opened editor should be activated by default.&nbsp;
+Activating an editor switches the focus from the view to the editor, which can
+be particularly confusing and undesirable in single click mode. </p>
+
+
+
+</BODY>
+</HTML>

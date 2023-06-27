@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>org.eclipse.ui.editors</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H3>
+org.eclipse.ui.editors</H3>
+
+<P >
+An editor is a workbench part that allows a user to edit an object (often a
+file). Editors operate in a manner similar to file system editing tools, except that they are tightly integrated into the platform workbench UI. An editor is always associated with an input object
+(<a href="../reference/api/org/eclipse/ui/IEditorInput.html"><b>IEditorInput</b></a>). You can think of the input object as
+the document or file that is being edited. Changes made in an editor are not
+committed until the user saves them. </P>
+<P >
+Only one editor can be open for any particular editor input in a workbench page. For example, if the user is editing
+<b> readme.txt</b> in the workbench, opening it again
+in the same perspective will activate the same editor. (You can open another
+editor on the same file from a different workbench window or perspective).&nbsp;
+Unlike views, however, the same editor type, such as a text editor, may be open
+many times
+within one workbench page for different inputs.  The editor input can also be a path
+to an in memory model, as in the InfoEditor example.</P>
+<P >
+The workbench extension point <b><a href="../reference/extension-points/org_eclipse_ui_editors.html">org.eclipse.ui.editors</a></b>
+is used by plug-ins to add editors to the workbench. Plug-ins that contribute an editor must register the editor
+extension in their <b>plugin.xml </b> file, along with configuration information
+for the editor. Some
+of the editor information, such as the implementation <b> class</b> and the
+<b> name</b> and the <b>icon</b>  to be used in the workbench menus and
+labels, is similar to the view information. In addition, editor extensions specify the file extensions or file name patterns of the file types that the editor understands. 
+Editors also use <a href="workbench_cmd_commands.htm" class="XRef">org.eclipse.ui.commands</a> and <a href="workbench_cmd_menus.htm" class="XRef">org.eclipse.ui.menus</a>
+to contribute to the workbench menus and toolbars when that editor is active.</P>
+<P >
+The interface for editors is defined in <b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>, but plug-ins
+can choose to extend the
+<b><a href="../reference/api/org/eclipse/ui/part/EditorPart.html"> EditorPart</a></b> class rather than implement an
+<b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>
+from scratch.</P>
+<blockquote><i>
+Note:&nbsp; An editor extension can also be configured to launch an external program
+or to call pre-existing java code. In this discussion, we are focusing on those editors that are actually tightly integrated with the workbench and
+are implemented using
+<b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>.</i></blockquote> 
+<P >
+The editor can contribute its own content outliner page to the
+workbench outline view.&nbsp;&nbsp;</P>
+<P >
+ The configuration for the editor extension is defined as follows.</P>
+<pre>
+&lt;extension
+    point = &quot;org.eclipse.ui.editors&quot;&gt;
+      &lt;editor
+            class="org.eclipse.ui.examples.contributions.editor.InfoEditor"
+            icon="icons/editor.gif"
+            id="org.eclipse.ui.examples.contributions.editor"
+            name="%contributions.editor.name"&gt;
+      &lt;/editor&gt;
+&lt;/extension&gt;</pre>
+<P >
+We see the familiar configuration markup for <b>id</b>,
+<b>name</b>,
+<b>icon</b> (which must be specified when specifying <b>class</b>),
+and <b>class</b>.&nbsp;&nbsp; You could use the <b>extensions</b> attribute
+describes the file types that the editor understands, like <b>extensions=&quot;person&quot;</b>,
+although this example doesn't need it.
+(You could also
+specify <b>filenames</b> if you need to be more specific.)&nbsp; The <b>class</b>
+implements the editor.</P>
+
+<P >
+Editor menus and editor toolbars are placed in the main menu and main toolbar.  See 
+<a href="workbench_cmd_menus.htm" class="XRef">org.eclipse.ui.menus</a> for how to use the
+<b>locationURI</b> to place the commands correctly.</P>
+<img src="images/contributions_global.png" alt="Showing a global menu additions" border="0" >
+<P>
+These menu and tool bar items can be shown only when the editor is active using core expressions.
+To define a re-usable core expression for your editor, use
+<b><a href="../reference/extension-points/org_eclipse_core_expressions_definitions.html">org.eclipse.core.expressions.definitions</a></b></P>
+<pre>
+&lt;extension
+    point = &quot;org.eclipse.core.expressions.definitions&quot;&gt;
+      &lt;definition id="org.eclipse.ui.examples.contributions.view.activeEditor"&gt;    
+         &lt;with variable="activeEditorId"&gt;
+            &lt;equals value="org.eclipse.ui.examples.contributions.editor"/&gt;
+         &lt;/with&gt;
+      &lt;/definition&gt;
+&lt;/extension&gt;</pre>
+
+<H4>
+Editors and content outliners
+</h4>
+<P >
+Although the Info Editor does not, editors often have corresponding content outliners 
+that provide a structured
+view of the editor's contents and assist the user in navigating through the
+contents of the editor.&nbsp; See <a href="editors_workbench_outliner.htm">Content
+outliners</a> for more detail. </P>
+
+
+<P >
+We'll look at the implementation of text editors in <a href="editors_jface.htm">Text
+editors and platform text</a>. </P>
+
+
+</BODY>
+</HTML>

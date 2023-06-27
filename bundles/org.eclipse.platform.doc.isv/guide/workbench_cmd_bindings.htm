@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Key bindings
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Key bindings</h3>
+
+
+<p>The association between a command and the key combinations that should
+invoke the command is called a <b>key binding</b> Plug-ins can define key
+bindings along with commands in the
+<a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a>
+extension point. From our InfoView example:</p>
+
+<pre>
+   &lt;extension
+         point=&quot;org.eclipse.ui.bindings&quot;&gt;
+      &lt;key
+            commandId=&quot;org.eclipse.ui.examples.contributions.view.edit&quot;
+            contextId=&quot;org.eclipse.ui.examples.contributions.view.context&quot;
+            sequence=&quot;M1+O&quot;
+            schemeId=&quot;org.eclipse.ui.examples.contributions.scheme&quot;&gt;
+      &lt;/key&gt;
+   &lt;/extension&gt;
+</pre>
+
+
+<p>The <b>sequence</b> attribute for a key binding defines the key
+combination that is used to invoke a command. As long as our InfoView
+context is active, we will try and execute the InfoView edit command when the
+user chooses <b>CTRL+O</b> and the scheme is set to
+<b>org.eclipse.ui.examples.contributions.scheme</b>.  The mapping of <b>M1</b> to <b>CTRL</b>
+is described in the extension point description for
+<a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a>.
+</p>
+<p>
+The <b>contextId</b> indicates what active context this key binding will
+be active in.  More information on defining contexts declaratively and
+activating them programmatically can be found in 
+<a href="workbench_advext_contexts.htm" 
+   class="XRef">Contexts</a>.  In this case, this key binding will be active
+when the <b>org.eclipse.ui.examples.contributions.view.context</b> context
+is active.
+</p>
+<p>
+In our InfoView we have code called from the end of createPartControl(Composite):</p>
+<pre>
+	private static final String VIEW_CONTEXT_ID = &quot;org.eclipse.ui.examples.contributions.view.context&quot;; //$NON-NLS-1$
+	...
+	/**
+	 * Activate a context that this view uses. It will be tied to this view
+	 * activation events and will be removed when the view is disposed.
+	 */
+	private void activateContext() {
+		IContextService contextService = (IContextService) getSite()
+				.getService(IContextService.class);
+		contextService.activateContext(VIEW_CONTEXT_ID);
+	}
+</pre>
+
+<p>
+As mentioned in <a href="workbench_cmd_handlers.htm" 
+   class="XRef">org.eclipse.ui.handlers</a> this context will be active
+only when the InfoView part is active.  It will also be deactivated when
+the InfoView part is disposed.
+</p>
+
+</BODY>
+</HTML>

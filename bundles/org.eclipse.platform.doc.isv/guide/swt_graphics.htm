@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Graphics</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Graphics</H2>
+
+<P>SWT provides a graphics engine for drawing graphics and displaying
+images in widgets. You can get pretty far without ever programming to the
+graphics interface, since widgets handle the painting of icons, text, and other
+data for you. However, if your application displays custom graphics, or if
+you are implementing a custom drawn widget, then you will need to understand
+some basic drawing objects in SWT.</P>
+
+
+<H3>Graphics context</H3>
+
+<P>The graphics context,
+<strong><a href="../reference/api/org/eclipse/swt/graphics/GC.html">GC</a></strong>,
+is the focal point for SWT graphics support. Its API describes all of the
+drawing capabilities in SWT.</P>
+
+<P>A GC can be used for drawing on a control (the most common case), on an image,
+on a display, or to a printer. When drawing on a control, you use the GC
+supplied to you in the control's paint event. When drawing on an image,
+display, or printer, you must create a GC configured for it, and dispose of the
+GC when you are finished using it.</P>
+
+<P>Once you've got a GC, you can set its attributes, such as color, line width, and font, which control
+the appearance of the graphics drawn in the GC.</P>
+
+<P>The API Reference for
+<strong><a href="../reference/api/org/eclipse/swt/graphics/GC.html">GC</a></strong>
+describes the complete set of graphics functions.</P>
+
+
+<H3>Fonts</H3>
+
+<P>The <strong><a href="../reference/api/org/eclipse/swt/graphics/Font.html">Font</a></strong> and
+<strong><a href="../reference/api/org/eclipse/swt/graphics/FontData.html">FontData</a></strong>
+classes are used when manipulating fonts in SWT.</P>
+
+<P>FontData describes the characteristics of a font. You can create a FontData
+by specifying a font name, style, and size.  FontData includes API for querying 
+these attributes. Since FontData does not allocate any OS resources, you do not
+need to dispose of it.</P>
+
+<P>The Font is the actual graphic object representing a font that is used in the
+drawing API. You create a Font for a 
+<strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+by specifying the Display and the FontData of the font that you want. You can 
+also query a Font for its FontData.</P>
+
+<P>You must dispose of an allocated Font when you are finished using it.</P>
+
+
+<H3>Colors</H3>
+
+<P>Colors are similar to fonts. You create a
+<strong><a href="../reference/api/org/eclipse/swt/graphics/Color.html">Color</a></strong>
+for a Display by specifying the RGB values for the desired color. You must dispose of an
+allocated color when you are finished using it.</P>
+
+<P>The Display method <code>getSystemColor(int)</code> allows you to query the predefined
+system colors for the OS platform. You should not free colors obtained using
+this technique.</P>
+
+
+<P >The color model is discussed in detail in the article 
+<a href="http://www.eclipse.org/articles/Article-SWT-Color-Model/swt-color-model.htm">SWT color model</a>.</P>
+
+
+<H3>Images</H3>
+
+<P>The <strong><a href="../reference/api/org/eclipse/swt/graphics/Image.html">Image</a></strong>,
+<strong><a href="../reference/api/org/eclipse/swt/graphics/ImageData.html">ImageData</a></strong>, and
+<strong><a href="../reference/api/org/eclipse/swt/graphics/ImageLoader.html">ImageLoader</a></strong>
+classes are used when manipulating Images in SWT.</P>
+
+<P>ImageData describes the actual pixels in the image, using the
+<a href="../reference/api/org/eclipse/swt/graphics/PaletteData.html"><strong>PaletteData</strong></a>
+class to describe the utilized color values.  ImageData is a device- and 
+platform-independent description of an image.</P>
+
+<P>ImageLoader loads and saves ImageData in different file formats. SWT 
+currently supports loading and saving of image formats including <em>BMP</em> 
+(Windows Bitmap), <em>ICO</em> (Windows Icon), <em>JPEG</em>, <em>GIF</em>, and 
+<em>PNG</em>.</P>
+
+<P>The Image is the actual graphic object representing the image that is used 
+in the drawing API.  You create an image for a particular Display.  Images can 
+be created in several ways:</P>
+
+<ul>
+  <li>use an ImageData to initialize the image's contents</li>
+  <li>copy an existing Image</li>
+  <li>load an Image from a file</li>
+</ul>
+
+<p>Regardless of how you create the Image, you are responsible for disposing
+it.</p>
+
+
+<H3>Graphics object lifecycle</H3>
+
+<P>Most of the graphics objects used for drawing in SWT allocate resources in
+the underlying OS and must be explicitly freed. The same rule discussed earlier
+applies here. If you create it using a constructor, you should free it. If you
+get access to it from somewhere else, do not free it.</P>
+
+
+<H4>Creation</H4>
+
+<P>Graphics objects such as graphics contexts, fonts, colors, and images are
+allocated in the OS as soon as the object is created. How you plan to use your
+graphics objects determines when you should create them.</P>
+
+<P>For graphics objects that are used heavily throughout the application, you
+can create them at the time that you create your widgets. This is commonly
+done for colors and fonts. In other cases, it is more appropriate to create
+your graphics objects on the fly. For example, you might create a graphics
+context in one of your widget event handlers in order to perform some
+calculations.</P>
+
+<P>If you are implementing a custom widget, you typically allocate graphics
+objects in the constructor if you always make use of them. You might allocate
+them on the fly if you do not always use them or if they are dependent upon
+the state of some attribute.</P>
+
+
+<H4>Painting</H4>
+
+<P>Once you have allocated your graphics objects, you are ready to paint.
+<em>You should always do your painting inside of a paint listener.</em>  There
+are rare cases, particularly when implementing custom widgets, when you paint
+while responding to some other event. However this is generally discouraged.
+If you think you need to paint while handling some other event, you should
+first try to use the <strong> redraw()</strong> method, which will generate
+another paint event in the OS.  Drawing outside of the paint method defeats
+platform optimizations and can cause bugs depending upon the number of pending
+paints in the event queue.</P>
+
+<P>When you receive a paint event, you will be supplied with a
+<strong><a href="../reference/api/org/eclipse/swt/graphics/GC.html">GC</a></strong>
+pre-configured for drawing in the widget. <em>Do not free this</em>
+<strong><a href="../reference/api/org/eclipse/swt/graphics/GC.html">GC</a></strong>!
+You did not create it.</P>
+
+<P>Any other graphics objects must be allocated while handling the event (or
+beforehand). Below is a snippet based on the
+<strong>org.eclipse.swt.examples.HelloWorld5</strong> sample. The color red was
+previously allocated when creating the widget, so it can be used here.</P>
+
+<pre>
+   shell.addPaintListener (new PaintListener () {
+      public void paintControl (PaintEvent event) {
+         GC gc = event.gc;
+         gc.setForeground (red);
+         Rectangle rect = event.widget.getClientArea ();
+         gc.drawRectangle (rect.x + 10, rect.y + 10, rect.width - 20, rect.height - 20);
+         gc.drawString (resHello.getString(&quot;Hello_world&quot;), rect.x + 20, rect.y + 20);
+      }
+   });
+</pre>
+
+
+<H4>Disposal</H4>
+
+<P>Every graphics object that you allocate must be freed when you are finished
+using it.</P>
+
+<P>The timing of the disposal depends upon when you created the object. If you
+create a graphics object while creating your widget, you should generally add
+a dispose listener onto the widget and dispose of the graphics when the widget
+is disposed. If you create an object on the fly while painting, you should
+dispose of it when finished painting.</P>
+
+<P>The next code snippet shows a slightly modified version of our paint listener.
+In this example, it allocates and frees the color red while painting.</P>
+
+<pre>
+   shell.addPaintListener (new PaintListener () {
+      public void paintControl (PaintEvent event) {
+         GC gc = event.gc;
+         Color red = new Color (event.widget.getDisplay (), 0xFF, 0, 0);
+         gc.setForeground (red);
+         Rectangle rect = event.widget.getClientArea ();
+         gc.drawRectangle (rect.x + 10, rect.y + 10, rect.width - 20, rect.height - 20);
+         gc.drawString (resHello.getString (&quot;Hello_world&quot;), rect.x + 20, rect.y + 20);
+         red.dispose ();
+      }
+   });
+</pre>
+
+<a name="swtreportNonDisposed"><H4>Non-disposed Resource Handler</H4></a>
+
+<P>If a resource is detected to not have been disposed then
+<a href="PLUGINS_ROOT/org.eclipse.platform.doc.isv/reference/api/org/eclipse/swt/graphics/Resource.html#setNonDisposeHandler(java.util.function.Consumer)"><code>Resource.setNonDisposeHandler</code></a>
+can be used to have custom logging or error handling of that case. A default
+non-disposed handler which prints the error to <code>System.err</code> can be
+enabled with the <code>org.eclipse.swt.graphics.Resource.reportNonDisposed</code>
+property set to <code>true</code>. When the Eclipse IDE is run, this is logged
+to the workbench log instead of <code>System.err</code>.</P>
+
+</BODY>
+</HTML>

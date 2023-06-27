@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Security: Login based on JAAS</title>
+</head>
+<BODY BGCOLOR="#ffffff">
+
+<h1>Login based on JAAS</h1>
+
+<h2>Overview</h2>
+
+<p>The Java Authentication and Authorization Service (or JAAS) is a login framework available in the Java runtime since version 1.4. It allows developers to write security-agnostic code that allows for pluggable backends for authentication (consider LDAP vs Smartcard vs Operating system, etc). There are several implementations of login backends that ship with the various JREs.</p>
+<p>For more information on JAAS:</p>
+<ul>
+<li><a href="http://download.oracle.com/javase/7/docs/technotes/guides/security/jaas/JAASRefGuide.html">http://download.oracle.com/javase/7/docs/technotes/guides/security/jaas/JAASRefGuide.html</a></li>
+</ul>
+
+<h2>Extension-point based contribution</h2>
+<p>JAAS has specific expectations of where the classes that are used to build a LoginContext should be found - typically the extension classloader. In order to get around these limitations and bridge into the Eclipse environment, there are several extension points available for bundles to contribute JAAS artifacts into the system. Specifically, the following artifacts have corresponding extension points in the org.eclipse.equinox.security bundle:</p>
+<ul>
+<li>javax.security.auth.Configuration</li>
+<li>javax.security.auth.spi.LoginModule</li>
+<li>javax.security.auth.callback.CallbackHandler</li>
+</ul>
+<p>In order to evolve the API but still embrace the model, there is an org.eclipse.equinox.security.auth.ILoginContext interface which maps to the LoginContext class in JAAS. Additional features are available on this interface, but most functionality still speaks in terms of core JAAS artifacts (Subjects, Principals, etc).</p>
+
+<h2>Declarative wiring via LoginContextFactory</h2>
+<p>Another limitation of the JAAS framework is that there is a strong coupling between the backend login Configuration and the CallbackHandler (UI) which will service the login execution. There is an extension to create the mapping from a configuration name to a specific CallbackHandler, and a factory (org.eclipse.equinox.security.auth.LoginContextFactory) which can generate an ILoginContext without knowledge required of specific CallbackHandlers.</p>
+
+<h2>Notifications through ILoginContextListener</h2>
+<p>Another use case which is implemented is the ability to monitor the execution of an applications login lifecycle via an event listener model. This functionality is available through the org.eclipse.equinox.security.auth.ILoginContextListener interface.</p>
+
+<h2>Future work</h2>
+<p><i>Feedback surrounding this functionality is greatly appreciated.</i> Potential future direction involves integrating login into the RCP lifecycle, Jobs framework, etc and using the user context to affect the behaviour of the runtime system (filter, etc).</p>
+</BODY></HTML>

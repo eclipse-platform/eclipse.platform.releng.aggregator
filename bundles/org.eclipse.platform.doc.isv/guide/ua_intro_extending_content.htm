@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Extending the content of an intro config</title>
+</head>
+<body>
+
+<h2>Extending the content of an intro config</h2>
+
+<p>
+Plug-ins can contribute intro content to a page defined elsewhere.  However, the defining page must define an
+<b>anchor</b> attribute that acts as a location placeholder for new content.  The SDK overview page defines
+two anchors for adding JDT and PDE related elements on the overview page.
+</p>
+
+<pre>
+   &lt;group id="page-content"&gt;
+      &lt;text style-id="page-title" id="page-title"&gt;OVERVIEW&lt;/text&gt;
+      &lt;text style-id="page-description" id="page-description"&gt;Eclipse is a kind of universal tool platform - an open extensible IDE for anything and nothing in particular. It provides a feature-rich development environment that allows the developer to efficiently create tools that integrate seamlessly into the Eclipse Platform.&lt;/text&gt;
+      &lt;group id="overview-links"&gt;
+         &lt;link label="Workbench basics" url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.platform.doc.user/concepts/concepts-2.htm" id="basics"&gt;
+            &lt;text&gt;Learn about basic Eclipse workbench concepts&lt;/text&gt;
+         &lt;/link&gt;
+         <b>&lt;anchor id="jdtAnchor"/&gt;
+         &lt;anchor id="pdeAnchor"/&gt;</b>
+      &lt;/group&gt;
+   &lt;/group&gt;
+</pre>
+
+<p>
+These anchors can be referenced by plug-ins that add content to the page.  Content is added using the
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
+extension.  In addition to extending page content, this extension point also allows one to contribute standby content
+parts and custom actions.
+</p>
+
+<p>
+To extend an existing intro config, you can use the <b>configExtension</b> element.  In this element,
+you specify the <b>configId</b> of the intro config being extended and the <b>content</b> file that describes the new
+content.
+</p>
+
+<pre>
+   &lt;extension
+         point="org.eclipse.ui.intro.configExtension"&gt;
+      &lt;configExtension
+            configId="org.eclipse.platform.introConfig"
+            content="$nl$/overviewExtensionContent.xml"/&gt;  
+            ...
+   &lt;/extension&gt;
+</pre>
+
+<p>
+The format of the content file is similar to that of the intro config content, except that it must
+contain an <b>extensionContent</b> element that defines the path to the anchor where the extension content
+should be inserted.
+</p>
+
+<pre>
+   &lt;introContent&gt;
+      &lt;extensionContent
+            alt-style="css/swt.properties"
+            style="css/overview.css"
+            <b>path="overview/page-content/overview-links/jdtAnchor"</b>&gt;
+         &lt;link label="Java development" url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.jdt.doc.user/gettingStarted/qs-BasicTutorial.htm" id="java"&gt;
+            &lt;text&gt;Get familiar with developing Java programs using Eclipse&lt;/text&gt;
+         &lt;/link&gt;
+      &lt;/extensionContent&gt;
+   &lt;/introContent&gt;
+</pre>
+After contributing custom content to an intro's predefined anchor points, a given product can bind itself to that
+intro using the <b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org.eclipse.ui.intro</a></b>
+discussed above.  When the product is run, the intro that was extended will be shown with the additional
+content.  This allows the product to have its own branding and other product-specific information, while reusing
+a closely related product's intro along with key content of its own.
+<p>A given intro could also selectively include pieces of a related product's intro.  In this case, the product could define its
+own intro and intro config, and then reference important elements defined in another intro's config
+using an <b>include</b> in the content file.  This mechanism is valuable in situations where related products
+are built on top of one another and it is necessary to introduce users to key concepts in the higher level
+products.</p>
+
+</body>
+</html>

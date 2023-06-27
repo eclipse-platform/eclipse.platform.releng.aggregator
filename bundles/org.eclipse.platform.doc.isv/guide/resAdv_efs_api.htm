@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Using the file system API
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Using the file system API</h3>
+<p>
+The <tt>org.eclipse.core.filesystem</tt> plug-in provides a generic API for 
+interacting with an arbitrary file system.  This API is similar to <tt>java.io.File</tt>,
+with a few key differences:
+</p>
+<ul>
+<li>Plug-ins can install providers for different types of file systems.</li>
+<li>All methods integrate support for reporting progress and responding to cancelation,
+making it easier to integrate into a graphical user interface.</li>
+<li>There is support for some additional functionality not available in <tt>java.io.File</tt>,
+such as getting and setting file permissions.</li>
+<li>There are more convenience methods, such as copy, move, and recursive deletion.</li>
+</ul>
+<p>
+In the file system API, the path for any given file is represented as a hierarchical
+<tt>java.net.URI</tt>.  The URI scheme represents the kind of file system,
+and the URI path component represents the location of the file within the file
+system tree.  Thus any given hierarchical URI represents a potential file or
+directory in some arbitrary file system.
+</p>
+<p>
+The API for working with files and file systems is found in the 
+<b><a href="../reference/api/org/eclipse/core/filesystem/package-summary.html">org.eclipse.core.filesystem</a></b>)
+package. The central API type is 
+<b><a href="../reference/api/org/eclipse/core/filesystem/IFileStore.html">IFileStore</a></b>
+Each instance of <tt>IFileStore</tt> represents
+a single file in the file system.  As with <tt>IResource</tt>, the existence of
+an <tt>IFileStore</tt> instance does not mean that such a file exists on disk. You
+can use an <tt>IFileStore</tt> instance to create, delete, copy, move, or open
+streams on files.  For a given <tt>URI</tt>, you can get your hands on an <tt>IFileStore</tt>
+instance using the static method <tt>EFS.getStore(URI)</tt>
+</p>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/filesystem/IFileSystem.html">IFileSystem</a></b>
+interface can be used to find out things about the file system as a whole.  Each
+<tt>IFileSystem</tt> instance represents a single URI scheme, such as "file:",
+"ftp:", etc.  You can use this type to ask questions such as what file attributes
+are supported, or whether the file system is case-sensitive.  You can also use
+this type to obtain an <tt>IFileStore</tt> for a given <tt>URI</tt>.
+</p>
+<p>
+Most methods on <tt>IFileStore</tt> have a flag parameter that allows
+extra options to be supplied. The flag values can be found
+in the <b><a href="../reference/api/org/eclipse/core/filesystem/EFS.html">EFS</a></b>
+class.  For example, to open an output stream for appending to a file, use:
+</p>
+<pre>
+	IFileStore store = ...//some file store
+	store.openOutputStream(EFS.APPEND, null);
+</pre>
+<p>
+If you want the default behaviour for a method, use <b>EFS.NONE</b>.
+</p>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/filesystem/IFileInfo.html">IFileInfo</a></b>
+interface represents the state of a file at a particular moment in time. In particular,
+you can find out if the file exists, whether it is a directory, what its attributes are,
+and so on.  This information can be modified and then set back into the file.  For
+example, here is a snippet that sets the read only attribute on a directory:
+</p>
+<pre>
+	IFileStore store = ...//some file store
+	IFileInfo info = store.fetchInfo();
+	if (info.exists() &amp;&amp; info.isDirectory()) {
+		info.setAttribute(EFS.ATTRIBUTE_READ_ONLY, true);
+		store.putInfo(info, EFS.SET_ATTRIBUTES, null);
+	}
+</pre>
+<p>
+This style of API allows you to obtain and change file information with
+a single call to the file system. In the above example, there is only
+one file system call to fetch the info, and then you can perform as many
+operations as you want on the <tt>IFileInfo</tt> object without hitting
+the disk again.
+</p>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/filesystem/EFS.html">EFS</a></b>
+class has static factory methods for obtaining <tt>IFileStore</tt> and <tt>IFileSystem</tt>
+instances, as well as various option constants and error codes.
+</p>
+</BODY>
+</HTML>

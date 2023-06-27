@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Expandable composite and Section controls
+</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H1>
+Expandable composite and Section controls</H1>
+<p><code>ExpandableComposite</code> acts similar to <code>Group</code> control 
+with the ability to collapse a portion of a page a toggle control:</p>
+<div align="left">
+	<pre>	ExpandableComposite ec = toolkit.createExpandableComposite(form.getBody(), 
+					ExpandableComposite.TREE_NODE|
+					ExpandableComposite.CLIENT_INDENT);
+	ec.setText(&quot;Expandable Composite title&quot;);
+	String ctext = &quot;We will now create a somewhat long text so that &quot;+
+	&quot;we can use it as content for the expandable composite. &quot;+
+	&quot;Expandable composite is used to hide or show the text using the &quot;+
+	&quot;toggle control&quot;;
+	Label client = toolkit.createLabel(ec, ctext, SWT.WRAP);
+	ec.setClient(client);
+	ec.addExpansionListener(new ExpansionAdapter() {
+		public void expansionStateChanged(ExpansionEvent e) {
+			form.reflow(true);
+		}
+	});</pre>
+</div>
+<p>The <code>ExpandableComposite</code> control accepts a number of styles that 
+affect its appearance and behavior. Style <code>TREE_NODE</code> will create the 
+toggle control used in a tree widget for expanding and collapsing nodes, while
+<code>TWISTIE</code> will create a triangle-style toggle. Using <code>EXPANDED</code> 
+will create the control in the initial expanded state. If style <code>COMPACT</code> 
+is used, control will report width in the collapsed state enough to fit in the 
+title line only (i.e. when collapsed, it will be as compact horizontally as 
+possible). Finally, <code>CLIENT_INDENT</code> will indent the client to align 
+with the title (otherwise, client will be aligned with the toggle control).</p>
+<p>Expandable composite itself is responsible for rendering the toggle control 
+and the title. The control to expand or collapse is set as a client. Note the 
+requirement that the client is a direct child of the expandable composite.</p>
+<p>Expandable composite fires <code>ExpansionEvent</code> objects when expansion 
+state changes. Adding an expansion listener to the control is needed in order to 
+reflow the form on state change. This is because expansion causes changes in 
+expandable composite size, but the change will not take effect until the next 
+time the parent is laid out (hence we need to force it).</p>
+<p><code>Section</code> is a subclass of the expandable composite that adds 
+additional capabilities. It is typically used to partition a form into a number 
+of sections, each with its own title and optional description. When <code>
+Section.TITLE_BAR</code> or <code>Section.SHORT_TITLE_BAR</code> styles are 
+used, decoration around the title area further enhances the grouping.</p>
+<p>Unlike <code>ExpandableComposite</code>, <code>Section</code> automatically 
+handles reflows on expansion state change. Other interesting uses of the 
+expansion state notification are lazy creation of the Section content that is 
+delayed until the section is expaned.</p>
+</BODY>
+</HTML>

@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type=
+    "text/css" />
+    <script language="JavaScript" src=
+    "PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript">
+</script>
+    <title>
+      Content extensions
+    </title>
+
+    <style type="text/css">
+/*<![CDATA[*/
+    span.c1 {color: blue}
+    /*]]>*/
+    </style>
+  </head>
+  <body>
+    <h2>
+      Content extensions
+    </h2>
+    <p>
+      A content extension is either a contribution of content into a known
+      anchor (similar to an extension into an extension point), or the
+      replacement of an existing element in a document.
+    </p>
+
+    <h3>
+      Contributing into anchors
+    </h3>
+    <p>
+      Anchor elements (e.g. <code>&lt;anchor id="my_anchor"/&gt;</code>) can be
+      specified in any user assistance XML document, and represent places at
+      which other components are allowed to extend this document. Specifying an
+      anchor is as simple as adding the element in your markup.
+    </p>
+    <p>
+      To contribute content into an anchor, you must write the content to be
+      added in a separate XML file and hook it into the platform using one of
+      two extension points. For <a href="ua_help.htm">help</a> or <a href=
+      "ua_cheatsheet.htm">cheat sheet</a> content, you must use the <a href=
+      "../reference/extension-points/org_eclipse_help_contentExtension.html"><code>
+
+      org.eclipse.help.contentExtension</code></a> extension point. For
+      <a href="ua_intro.htm">welcome (intro)</a> extensions, use <a href=
+      "../reference/extension-points/org_eclipse_ui_intro_configExtension.html">
+      <code>org.eclipse.ui.intro.configExtension</code></a>. The table of
+      contents markup also allows the special constructs <a href=
+      "ua_help_content_nested.htm"><code>link</code></a> and <a href=
+      "ua_help_content_nested.htm"><code>link_to</code></a> which perform a
+      similar function to includes and contributions, but perform the
+      additional operation of merging extra documents to index for searching.
+    </p>
+
+    <p>
+      For example, let's say component A's documentation provides a listing of
+      file formats it supports. If component B extends A's support to several
+      more formats, you can place an anchor in A's list, and extend the list
+      from B. For example:
+    </p>
+    <pre>
+   &lt;p&gt;The following list shows the supported formats:&lt;/p&gt;
+   &lt;ul&gt;
+      &lt;li&gt;Portable Network Graphics (.png)&lt;/li&gt;
+
+      &lt;li&gt;Joint Photographic Experts Group (.jpeg)&lt;/li&gt;
+      &lt;li&gt;Graphical Interchange Format (.gif)&lt;/li&gt;
+      
+      &lt;!-- Extra formats go here --&gt;
+      <span class="c1">&lt;anchor id="image_format_list"/&gt;</span>
+   &lt;/ul&gt;
+
+</pre>
+    <p>
+      Then component B can make a contribution to the anchor to add more
+      formats to the list by specifying the following extension:
+    </p>
+    <pre>
+   &lt;extension point="org.eclipse.help.contentExtension"&gt; 
+      &lt;contentExtension
+            file="path/to/extension.xml"/&gt;
+   &lt;/extension&gt;
+</pre>
+
+    <p>
+      Where the file <code>path/to/extension.xml</code> might contain:
+    </p>
+    <pre>
+   &lt;contentExtension&gt;
+      &lt;contribution
+            content="docs/mydoc.xhtml#mycontent"
+            path="/component_a_plugin/docs/doc_with_anchor.xhtml#anchorId"&gt;
+      &lt;/contribution&gt;
+
+   &lt;/contentExtension&gt;
+</pre>
+    <p>
+      The element with the <code>id</code> attribute <code>mycontent</code> in
+      document <code>docs/mydoc.xhtml</code> would contain the content you wish
+      to contribute into the anchor. The result will be that when the user
+      views the document, the extra content will appear at the anchor as though
+      it was explicitly added into the original document.
+    </p>
+
+    <h3>
+      Replacing content
+    </h3>
+    <p>
+      Any XML element in a user assistance document that has an <code>id</code>
+      attribute that is unique to that document can be replaced with any other
+      element.
+    </p>
+    <p>
+      As with contributions into anchors, to replace an element, you must write
+      the new element to replace with in a separate XML file and hook it into
+      the platform using one of two extension points. For <a href=
+      "ua_help.htm">help</a> or <a href="ua_cheatsheet.htm">cheat sheet</a>
+
+      content, you must use the <a href=
+      "../reference/extension-points/org_eclipse_help_contentExtension.html"><code>
+      org.eclipse.help.contentExtension</code></a> extension point. For
+      <a href="ua_intro.htm">welcome (intro)</a> extensions, use <a href=
+      "../reference/extension-points/org_eclipse_ui_intro_configExtension.html">
+      <code>org.eclipse.ui.intro.configExtension</code></a>.
+    </p>
+    <p>
+
+      The only difference with replacements as opposed to contributions into
+      anchors is the name of the XML element used in the markup; use the
+      <code>replacement</code> element instead of <code>contribution</code> (or
+      <code>replacementContent</code> in the case of welcome). For example:
+    </p>
+    <pre>
+   &lt;contentExtension&gt;
+
+      &lt;replacement
+            content="docs/mydoc.xml#myelement"
+            path="/plugin.id/path/doc.xml#elementId"&gt;
+      &lt;/replacement&gt;
+   &lt;/contentExtension&gt;
+</pre>
+    <p>
+      (Note the markup is different for welcome, as specified in the <a href=
+      "../reference/extension-points/org_eclipse_ui_intro_configExtension.html">
+      <code>org.eclipse.ui.intro.configExtension</code></a> extension point)
+    </p>
+
+    <h3>
+      Path format
+    </h3>
+    <p>
+      The format of the <code>path</code> attribute is
+      <code>/pluginId/path/file.xml#elementId</code>, except welcome where it
+      is <code>pageId/path/to/elementId</code> where the pageId is the welcome
+      page id, and all other path segments are ids of container elements like
+      groups, leading to the target element.
+    </p>
+
+  </body>
+</html>

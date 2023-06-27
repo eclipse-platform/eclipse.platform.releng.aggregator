@@ -1,0 +1,522 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Filters</title>
+
+<style type="text/css">
+	.deprecated {
+		color: #444444;
+	}
+	.warning {
+		color: red;
+	}
+	.highlight {
+		color: blue;
+	}
+</style>
+</head>
+<body>
+
+<h2>Filters</h2>
+
+<p>
+If some sections of a document (e.g. a list item in a XHTML help topic) should only be displayed
+to the user if certain conditions are met, you can specify an enablement expression declaring the
+criteria that must be met in order to display the element.
+</p>
+
+<p>
+Filters are specified by adding an <code>&lt;enablement&gt;</code> element as a <em>child</em>
+of the element that should conditionally be filtered. The syntax used is
+<a href="../reference/api/org/eclipse/core/expressions/package-summary.html#package_description">
+core expressions</a>, which is the same syntax used to filter menu contributions, etc from the UI.
+</p>
+
+<h3>System tests</h3>
+
+<p>
+Expressions check criteria by performing tests. One type of test is a system test, which tests
+a system property against an expected value. Some common system properties to test by are listed
+below:
+</p>
+
+<table border="1">
+   <tr>
+      <td>
+         <strong>Property</strong>
+      </td>
+      <td>
+         <strong>Meaning</strong>
+      </td>
+      <td>
+         <strong>Possible values</strong>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>osgi.os</code>
+      </td>
+      <td>
+         operating system
+      </td>
+      <td>
+         <code>win32, win32, linux, macosx, aix, solaris, hpux, qnx</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>osgi.ws</code>
+      </td>
+      <td>
+         windowing system
+      </td>
+      <td>
+         <code>win32, motif, gtk, photon, carbon</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>osgi.arch</code>
+      </td>
+      <td>
+         processor architecture
+      </td>
+      <td>
+         <code>x86, x86_64, ia64, ia64_32, ppc, PA_RISC, sparc</code>
+      </td>
+   </tr>
+</table>
+
+<p>
+Here are a few examples of system tests:
+</p>
+<pre>&lt;p&gt;
+   This paragraph should only be displayed on Windows.
+   <span class="highlight">&lt;enablement&gt;
+      &lt;systemTest property=&quot;osgi.os&quot; value=&quot;win32&quot;/&gt;
+   &lt;/enablement&gt;</span>
+&lt;/p&gt;
+
+&lt;p&gt;
+   This paragraph should *not* be displayed on GTK.
+   <span class="highlight">&lt;enablement&gt;
+      &lt;not&gt;
+         &lt;systemTest property=&quot;osgi.ws&quot; value=&quot;gtk&quot;/&gt;
+      &lt;/not&gt;
+   &lt;/enablement&gt;</span>
+&lt;/p&gt;
+
+&lt;p&gt;
+   This paragraph should only be displayed on PowerPC Macs.
+   <span class="highlight">&lt;enablement&gt;
+      &lt;systemTest property=&quot;osgi.os&quot; value=&quot;macosx&quot;/&gt;
+      &lt;systemTest property=&quot;osgi.arch&quot; value=&quot;ppc&quot;/&gt;
+   &lt;/enablement&gt;</span>
+&lt;/p&gt;
+</pre>
+
+
+<p>
+<em>Note: When several sub-expressions are listed with no boolean operator, they are
+by default ANDed together. See the complete
+<a href="../reference/api/org/eclipse/core/expressions/package-summary.html#package_description">
+expressions syntax</a> specification for more details.</em>
+</p>
+
+<h3>Property tests</h3>
+
+<p>
+In addition to system tests, you can test any property of an available object as long as
+there is a <a href="../reference/extension-points/org_eclipse_core_expressions_propertyTesters.html">
+property tester</a> available for it.
+</p>
+
+<p>
+Tests always perform their test on a property of some object, and each object has different
+properties you can test. User assistance provides two variables that are used to select
+the object to test on:
+</p>
+
+<ul>
+   <li><code>platform</code> - The underlying platform you're running on</li>
+   <li><code>workbench</code> - The UI workbench</li>
+</ul>
+
+<p>
+You can perform a test on one of these by using the <code>&lt;with&gt;</code> element,
+as shown below:
+</p>
+
+<pre>&lt;enablement&gt;
+   <span class="highlight">&lt;with variable=&quot;platform&quot;&gt;</span>
+      &lt;test property=&quot;<em>x</em>&quot; value=&quot;<em>y</em>&quot;/&gt;
+   <span class="highlight">&lt;/with&gt;</span>
+&lt;/enablement&gt;
+</pre>
+
+<p>
+Each property has a namespace, which is a prefix such as <code>org.eclipse.ui</code>
+that is used to minimize the chances of duplicate properties being defined by two
+components. The table below shows some common properties you can test by:
+</p>
+
+<table border="1">
+   <tr>
+      <td>
+         <strong>Property</strong>
+      </td>
+      <td>
+         <strong>Object (variable)</strong>
+      </td>
+      <td>
+         <strong>Meaning</strong>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>org.eclipse.core.runtime.product</code>
+      </td>
+      <td>
+         <code>platform</code>
+      </td>
+      <td>
+         tests if the expected value matches the currently active product's unique id
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>org.eclipse.core.runtime.isBundleInstalled</code>
+      </td>
+      <td>
+         <code>platform</code>
+      </td>
+      <td>
+         tests if the bundle with the symbolic name (e.g. <code>org.eclipse.help</code>)
+         specified as a single argument is installed on the platform
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>org.eclipse.ui.isActivityEnabled</code>
+      </td>
+      <td>
+         <code>workbench</code>
+      </td>
+      <td>
+         tests if the activity with the id specified as a single argument exists and
+         is currently enabled in the workbench
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>org.eclipse.ui.isCategoryEnabled</code>
+      </td>
+      <td>
+         <code>workbench</code>
+      </td>
+      <td>
+         tests if the category of activities with the id specified as a single argument
+         exists and is currently enabled in the workbench. A category is enabled if all its
+         activities are enabled
+      </td>
+   </tr>
+</table>
+
+<p>
+Here are a few examples using these properties:
+</p>
+
+<pre>&lt;p&gt;
+   This paragraph should only be displayed when running the Eclipse SDK.
+   <span class="highlight">&lt;enablement&gt;
+      &lt;with variable=&quot;platform&quot;&gt;
+         &lt;test property=&quot;org.eclipse.core.runtime.product&quot; value=&quot;org.eclipse.sdk.ide&quot;/&gt;
+      &lt;/with&gt;
+   &lt;/enablement&gt;</span>
+&lt;/p&gt;
+
+&lt;p&gt;
+   This paragraph should only be displayed when either the <code>com.myactivity.a</code> or
+   <code>com.myactivity.b</code> activity (or both) is enabled in the workbench.
+   <span class="highlight">&lt;enablement&gt;
+      &lt;with variable=&quot;workbench&quot;&gt;
+         &lt;or&gt;
+            &lt;test property=&quot;org.eclipse.ui.isActivityEnabled&quot; args=&quot;com.myactivity.a&quot;/&gt;
+            &lt;test property=&quot;org.eclipse.ui.isActivityEnabled&quot; args=&quot;com.myactivity.b&quot;/&gt;
+         &lt;or&gt;
+      &lt;/with&gt;
+   &lt;/enablement&gt;</span>
+&lt;/p&gt;
+
+&lt;p&gt;
+   This paragraph should only be displayed when the <code>com.mycategory</code> category
+   is enabled and the <code>com.mybundle</code> bundle is not installed.
+   <span class="highlight">&lt;enablement&gt;
+      &lt;with variable=&quot;workbench&quot;&gt;
+         &lt;test property=&quot;org.eclipse.ui.isCategoryEnabled&quot; args=&quot;com.mycategory&quot;/&gt;
+      &lt;/with&gt;
+      &lt;with variable=&quot;platform&quot;&gt;
+         &lt;not&gt;
+            &lt;test property=&quot;org.eclipse.core.runtime.isBundleInstalled&quot; args=&quot;com.mybundle&quot;/&gt;
+         &lt;/not&gt;
+      &lt;/with&gt;
+   &lt;/enablement&gt;</span>
+&lt;/p&gt;
+</pre>
+
+<p>
+<em>Note: Make sure you use the <code>value</code> and <code>args</code> attributes for the appropriate
+tests. In general, string properties like product will use <code>value</code> where boolean
+tests (<code>isSomethingTrue</code>) will use <code>args</code>. See the complete
+<a href="../reference/api/org/eclipse/core/expressions/package-summary.html#package_description">
+expressions syntax</a> specification for more details on how to write expressions.</em>
+</p>
+
+<h3>Defining your own test</h3>
+
+The core expressions framework allows you define your own test that can test
+on any arbitrary property of any object that is accessible through the variables defined for
+the context you're in. You do this by defining a
+<a href="../reference/extension-points/org_eclipse_core_expressions_propertyTesters.html">
+property tester</a>.
+
+<p>
+Note: The variables <code>platform</code> and <code>workbench</code> resolve to the
+<code>org.eclipse.core.runtime.Platform Class</code> object (we use the class object for
+&quot;static&quot; tests) and the singleton <code>org.eclipse.ui.IWorkbench</code> instance,
+respectively. Your property tester must declare one of these two classes for its type.
+</p>
+
+<h3>
+Using Filters in Table of Contents (TOC) Files</h3>
+
+<p>
+Filters can be used in Table of Contents files to filter out content that does 
+not apply to the current installation. The example below is a topic which is 
+only included in the TOC if plugin x.y.z is running.</p>
+
+<pre class="highlight">    &lt;topic href=&quot;html/subtopic.html&quot; label=&quot;This topic is shown only if plugin x,y.z is running&quot;&gt;
+      &lt;enablement&gt;
+      &lt;with variable=&quot;platform&quot;&gt;
+          &lt;test property=&quot;org.eclipse.core.runtime.isBundleInstalled&quot; args=&quot;x.y.z&quot;/&gt;
+      &lt;/with&gt;
+      &lt;/enablement&gt;
+    &lt;/topic&gt;</pre>
+
+<h3>Filter attributes/elements <span class="warning">(deprecated)</span></h3>
+
+<p>
+Prior to the 3.3, filters were specified using <code>filter</code> attributes or elements.
+The use of these filters is now deprecated, and you should use expressions (described
+above) instead.
+</p>
+
+<p>The table below contains a complete list of all the filter properties and
+their possible values for use with filter elements and attributes.</p>
+
+<span class="warning">(deprecated)</span>
+<table class="deprecated" border="1">
+   <tr>
+      <td>
+         <b>Property</b>
+      </td>
+      <td>
+         <b>Meaning</b>
+      </td>
+      <td>
+         <b>Possible Values</b>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>os</code>
+      </td>
+      <td>
+         operating system
+      </td>
+      <td>
+         <code>win32, win32, linux, macosx, aix, solaris, hpux, qnx</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>ws</code>
+      </td>
+      <td>
+         windowing system
+      </td>
+      <td>
+         <code>win32, motif, gtk, photon, carbon</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>arch</code>
+      </td>
+      <td>
+         processor architecture
+      </td>
+      <td>
+         <code>x86, x86_64, ia64, ia64_32, ppc, PA_RISC, sparc</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>product</code>
+      </td>
+      <td>
+         eclipse product identifier
+      </td>
+      <td>
+         Any product identifier (e.g., for SDK, <code>org.eclipse.sdk.ide</code>)
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>plugin</code>
+      </td>
+      <td>
+         plug-in presence
+      </td>
+      <td>
+         Any plug-in identifier (e.g. <code>org.eclipse.help</code>)
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>category</code>
+      </td>
+      <td>
+         category of activities
+      </td>
+      <td>
+         Any activity category identifier (e.g. for Team category,
+         <code>org.eclipse.categories.teamCategory</code>)
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>activity</code>
+      </td>
+      <td>
+         activity (capability)
+      </td>
+      <td>
+         Any activity identifier
+      </td>
+   </tr>
+</table>
+
+<p>If the name does not match any pre-defined property, the help system will
+use the JVM's system property of that name. For example, you can pass in any
+user-defined property at launch, such as <code>-Dlocation=paris,france</code>
+and filter by that property.</p>
+
+<p>There are two ways to specify filters on an element; using attributes, or
+elements.</p>
+
+<h3>Filter Attribute <span class="warning">(deprecated)</span></h3>
+
+<p>The first form is to add a <span class="highlight"><code>filter</code></span> attribute
+to the element. The general form is:</p>
+
+<pre>   &lt;element <span class="highlight">filter="[name][operator][value]"</span>&gt;
+      Some text.
+   &lt;/element&gt;
+</pre>
+
+<p>The <span class="highlight"><code>name</code></span> is the name of the property
+by which to filter, for example, <code>os</code> for operating system. The
+<span class="highlight"><code>operator</code></span> is either <code>=</code> to denote
+a <i>match</i> (exact match, case sensitive), or <code>!=</code> to denote <i>does
+not match</i>. The <span class="highlight"><code>value</code></span> is what the property
+should (or shouldn't) match. For example, for <code>os</code>, one of the possible
+values is <code>win32</code> (Windows). A complete list of filter properties and their
+values is available in a table below.</p>
+
+<p>The example below shows how to display a paragraph of text in an XHTML document
+when running on Linux only.</p>
+
+<pre>   &lt;p filter="os=linux"&gt;
+      This message will only appear when viewed on Linux.
+   &lt;/p&gt;
+</pre>
+
+<p>In this second example, the link will only appear when plugin
+<code>com.my.plugin</code> is not installed:</p>
+
+<pre>   &lt;a href="..." filter="plugin!=com.my.plugin"&gt;
+      Click here to download plugin com.my.plugin.
+   &lt;/a&gt;
+</pre>
+
+<h3>Filter Element <span class="warning">(deprecated)</span></h3>
+
+<p>The second form is to use a <code>filter</code> element as a <i>child</i> of
+the element you wish to filter. This form is slightly longer than the attribute
+form, but it is more powerful because you can specify any number of filters on an
+element. The general form is:</p>
+
+<pre>   &lt;element attribute="value"&gt;
+      <span class="highlight"><code>&lt;filter name="[name]" value="[modifier][value]"/&gt;</code></span>
+   &lt;/element&gt;
+</pre>
+
+<p>The <span class="highlight"><code>name</code></span> and <span class="highlight"><code>
+value</code></span> here are the same as with the attribute. However, since they
+are separated, we need another way to specify whether or not it should match. By
+default, if you do not provide a <span class="highlight"><code>modifier</code></span>,
+match is assumed. If it should <i>not</i> match, set the modifier to "<code>!</code>
+"</p>
+
+<p>Here is the first example shown above in the second form:</p>
+
+<pre>   &lt;p&gt;
+      &lt;filter name="os" value="linux"/&gt;
+      This message will only appear when viewed on Linux.
+   &lt;/p&gt;
+</pre>
+
+<p>And the second example:</p>
+
+<pre>   &lt;a href="..."&gt;
+      &lt;filter name="plugin" value="!com.my.plugin"/&gt;
+      Click here to download plugin com.my.plugin.
+   &lt;/a&gt;
+</pre>
+
+<h3>Information Center</h3>
+
+<p>
+Filtering support is turned <strong>off</strong> by default when running help in
+<a href="ua_help_setup_infocenter.htm">information center</a> mode, causing all content,
+including filtered content, to be visible. If you intend to host your
+documentation in both workbench and information center modes, you should use filters in
+a way that makes sense even if filtering is turned off. If you wish to turn on filtering
+in an information center set the customization preference <code>filterInfocenter</code> to true,
+see <a href="ua_help_setup_preferences.htm">help system customization</a>. 
+</p>
+
+<h3>Where can I use filters?</h3>
+
+<p>
+Filtering can be used in any XML-based user assistance document, such as help XHTML topics,
+help table of contents, welcome pages, cheat sheets, etc. You cannot use filtering in
+HTML documents.
+</p>
+
+<p>
+In any case, you <b>must not</b> place filters on any element where removing that
+element would result in <i>invalid</i> XML. For example, you should not place a
+filter on the <code>html</code> element in XHTML, because without that element it
+is no longer valid
+XHTML.
+</p>
+
+</body>
+</html>

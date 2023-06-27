@@ -1,0 +1,474 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2000, 2016. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type">
+<meta content="text/css" http-equiv="Content-Style-Type">
+<link type="text/css" charset="ISO-8859-1" href="../book.css"
+	rel="STYLESHEET">
+<title>Model Roadmap for Logical Model Integration</title>
+<link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+
+<body bgcolor="#ffffff">
+<h1>Model Roadmap for Logical Model Integration</h1>
+
+<p>Here is a list of what model providers can do to take advantage
+of the Team logical model support:</p>
+
+<ol>
+	<li>Adapt model elements in model views to <a
+		href="#ResourceMapping">ResourceMapping</a> in order to allow resource
+	based operations to appear on your model elements.</li>
+	<li>Register a <a href="#ModelProvider">ModelProvider</a> to
+	ensure that your model is consulted when operations are performed on
+	the resources related to your model.</li>
+	<li>Use the <a href="#ChangeValidation">ResourceChangeValidator</a>
+	when performing operations on resources in order to ensure that any
+	potential side effects on the model elements related to those resources
+	are made known to the user.</li>
+	<li>Implement an <a href="#AutoMerge">IResourceMappingMerger</a>
+	in order to participate in headless merges that involve the resources
+	related to your model.</li>
+	<li>Register a <a href="#TeamContent">teamContentProvider</a> in
+	order to participate in Team viewers such as merge previews.</li>
+	<li>Provide an <a href="#History">IHistoryPageSource</a> to show
+	logical model history in the Team history view.</li>
+	<li>Use the <a href="#RemoteBrowsing">Eclipse File System</a> API
+	to access the remote state of model projects.</li>
+	<li>Use the <a href="#Decoration">SynchronizationStateTester</a>
+	API to ensure proper decoration of model elements that do not have a
+	one-to-one mapping to resources.</li>
+	<li>Use the <a href="#Saveable">Saveable</a>
+	API to manage the save life cycle of model elements.</li>
+    <li>Use the <a href="#ElementHistory">ElementLocalHistoryPageSource</a>
+	API to show local history for sub-file model elements (e.g. Java methods)</li>
+	<li>Use the <a href="#ChangeTracker">ChangeTracker</a>
+	API to group related changes together.</li>
+</ol>
+
+<p>The following sections describe each of these points in more
+detail. The <a
+ href="http://git.eclipse.org/c/www.eclipse.org/eclipse.git/tree/platform-ui/plugins/org.eclipse.ui.examples.filesystem/">org.eclipse.ui.examples.filesystem</a> 
+  plug-in contain an example that illustrate several of these points.
+  You can check the project out from the Git repository and use it as 
+  a reference while you are reading this tutorial. <em>Disclaimer</em>: The source 
+  code in the example plug-ins may change over time. To get a copy that matches 
+  what is used in this example, you can check out the project using the 3.3 version 
+  tag (most likely R3_3) or a date tag of June 30, 2007.
+</p>
+
+<h2><a name="ResourceMapping"></a>Resource Mappings</h2>
+
+<h3>The Basic Resource Mapping API</h3>
+<p>The resource mapping API is purposely simple with logical model
+manipulations omitted. A client can't use this interface to display
+logical models or gain any interesting additional knowledge about it.
+It's purpose is simply to map one or more model elements to workspace
+resources.</p>
+<p>The API consists of the following classes:</p>
+<ul>
+	<li><strong>ResouceMapping</strong>: 
+	<a href="../reference/api/org/eclipse/core/resources/mapping/ResourceMapping.html">ResourceMapping</a>
+	is the Class to which logical model elements adapt to indicate that the
+	model corresponds to a set of resources in the workspace. The methods
+	of interest are:
+	<ul>
+		<li><code>Object getModelObject()</code>: The model object from
+		which the mapping was derived (or adapted).</li>
+		<li><code>ResourceTraversal[]
+		getTraversals(ResourceMappingContext, IProgressMonitor)</code>: The resource
+		traversal that cover the resources that constitute the model object.</li>
+	</ul>
+	</li>
+	<li><strong>ResourceTraversal</strong>: A <a
+		href="../reference/api/org/eclipse/core/resources/mapping/ResourceTraversal.html"><code>ResourceTraversal</code></a>
+	contains a set of resources and a depth flag that indicates the depth
+	to which the resources in the traversal are associated with the
+	originating model object. Resource traversals are provided to a client
+	by a resource mapping in order to describe the contents of a model in
+	such a way that the client (e.g. a repository provider) can perform its
+	operations in as efficient a means as possible. Methods of interest
+	are:
+	<ul>
+		<li><code>getResources()</code></li>
+		<li><code>getDepth()</code></li>
+	</ul>
+	</li>
+	<li><strong>ResourceMappingContext</strong>: A context that is
+	provided to the resource mapping by the client when obtaining
+	traversals. This context allows the logical model to determine what the
+	remote state of the model is so that the proper resources can be
+	covered by the resource traversals returned by the resource mapping.
+	The use of the<code> <a
+		href="../reference/api/org/eclipse/core/resources/mapping/ResourceMappingContext.html">ResourceMappingContext</a></code>
+	and<code> <a
+		href="../reference/api/org/eclipse/core/resources/mapping/RemoteResourceMappingContext.html">RemoteResourceMappingContext</a></code>
+	is a bit more complicated and is described in the <a
+		href="#ResourceMappingContext">Resource Mapping Context</a> section.</li>
+</ul>
+<p>There are two types of plugins that should be interested in
+resource mappings. Those who provide a model that consists of, or is
+persisted in, resources in the workspace and those that want to perform
+operations on resources. The former is covered in the next section while
+the later is covered in the <a href="team_model_repo.htm">Repository
+Roadmap for Logical Model Integration</a>.</p>
+
+<h3>Adapting a Model to a ResourceMapping</h3>
+
+<p>Plug-ins that adapted their model objects to <code>IResource</code>
+in order to get resource specific actions shown in the context menu can
+now adapt to <code>ResourceMapping</code> if a richer description of how
+the object adapts to resources is beneficial. However, they are not
+required to do so if there is no benefit. For instance a Java
+compilation unit (i.e. *.java file shown in a JDT view) that now
+currently adapts to <code>IFile</code> need not adapt to <code>ResourceMapping</code>
+since nothing is gained. However, a Java package should adapt to <code>ResourceMapping</code>
+in order to indicate that the package consists of only the files in the
+corresponding folder and not the subfolders.</p>
+<p>The preferred way to adapt model elements to a resource mapping
+is to use an adapter factory. The following is the XML markup for
+contributing an adapter factory in a plug-in manifest.</p>
+<pre style="background-color: rgb(204, 204, 255);">   &lt;extension<br>         point="org.eclipse.core.runtime.adapters"&gt;<br>      &lt;factory<br>            class="org.eclipse.example.library.logical.AdapterFactory"<br>            adaptableType="org.eclipse.example.library.Book"&gt;<br>         &lt;adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/&gt;<br>      &lt;/factory&gt;<br>      &lt;factory<br>            class="org.eclipse.example.library.logical.AdapterFactory"<br>            adaptableType="org.eclipse.example.library.Library"&gt;<br>         &lt;adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/&gt;<br>      &lt;/factory&gt;<br>      ...<br>   &lt;/extension&gt;</pre>
+<p>The adapter factory implementation would look something like
+this:</p>
+<pre style="background-color: rgb(204, 204, 255);">public class AdapterFactory implements IAdapterFactory {<br>   public Object getAdapter(Object adaptableObject, Class adapterType) {<br>      if((adaptableObject instanceof EObject) &amp;&amp; adapterType == ResourceMapping.class) {<br>         return new EObjectResourceMapping((EObject)adaptableObject);<br>      }<br>      return null;<br>   }<br><br>   public Class[] getAdapterList() {<br>      return new Class[] {ResourceMapping.class};<br>   }<br>}</pre>
+<p>Model objects can implement the <code>IAdaptable</code>
+interface. When they do so, they must ensure that the Platform adapter
+manager is consulted. This can be done by either subclassing <code>PlatformObject</code>
+or by using the following line of code:</p>
+<blockquote>
+<p><code>Platform.getAdapterManager().getAdapter(Object,
+Class)</code></p>
+</blockquote>
+<p>The above is the preferable approach. However, the model object
+can implement the IAdaptable interface and provide a <code>getAdapter(Class)</code>
+implementation that creates returns an instance of <code>ResourceMapping</code>
+explicitly when asked for one. This is a more straightforward approach
+but the least desirable as the model must have explicit knowledge of the
+adaptation to resources.</p>
+<p>In some cases, the provider of a logical model may not want their
+model to adapt to <code>IResource</code> in every context or may want
+the object to adapt differently for object contributions than for other
+contexts. The workbench UI provides a special intermediate adapter API,
+<code>IContributorResourceAdapter</code>, for this purpose. When objects
+are being adapted to <code>IResource</code> in the context of object
+contributions, the workbench first tries to adapt the resource to <code>IContributorResourceAdapter</code>
+before trying to adapt to <code>IResource</code> directly. A new
+sub-interface of this interface, <code>IContributorResourceAdapter2</code>,
+has been added which provides the same capability for <code>ResourceMapping</code>.
+The only difference is that the model provider should register a factory
+for<code> IContributorResourceAdapter</code> since the Workbench does an
+<em>instanceof</em> check to see if the contributed adapter is also an
+instance of <code>IContributorResourceAdapter2</code>.</p>
+<p>The implementation of the <code>ResourceMapping</code> subclass
+for a Java package would look something like this.</p>
+<pre style="background-color: rgb(204, 204, 255);">public class JavaPackageResourceMapping extends ResourceMapping {<br>   IPackageFragment package;<br>   ...<br>   public getModelObject() {<br>      return package;<br>   }<br>   public ResourceTraversals[] getTraversals(<br>             ResourceMappingContext context, <br>             IProgressMonitor monitor) {<br>      return new ResourceTraversal[] { <br>         new ResourceTraversal(<br>            new IResource[] { package.getCorrespondingResource() },<br>            IResource.DEPTH_ONE, IResource.NONE)<br>      }<br>   }<br>}</pre>
+<p>This is a fairly straightforward mapping so the implementation is
+not complex. The complexity of the resource mapping implementation will,
+of course, vary from model to model.</p>
+
+<h3><a name="ResourceMappingContext"></a>Resource Mapping Context</h3>
+<p>One of the advantages of a Resource Mapping API is that it allows
+plug-ins to implement any operations they desire in terms of resource
+mappings (e.g. Git pull, Git commit, Git tag, dirty decoration, etc.).
+However, the API that has been introduced so far deals only with the
+local state of the model. When working with a model that may be shared
+between developers, you end up in a situation where the remote state of
+the model (i.e. the state of the model that another user has checked-in
+to the repository) may differ from the state in the workspace. If you
+performed a Git pull, you would want the local state of the model to
+match the remote state even if it meant that additional files needed to
+be included or some files needed to be removed.</p>
+<p>This is not an issue for some logical models. For instance, a
+java package is a container visited to a depth of one, regardless of the
+remote state of the model. Given this, a repository provider can easily
+determine that outgoing deletions should be included when committing or
+that incoming additions should be included when updating. However, the
+resources that constitute some logical models may change over time. For
+instance, the resources that constitute a model element may depend of
+the contents of a manifest file (or some other similar mechanism). In
+order for the resource mapping to return the proper traversal, it must
+access the remote contents of the manifest file (if it differs from the
+local contents) in order to see if there are additional resources that
+need to be included. These additional resources may not exist in the
+workspace but the repository provider would know how to make sure they
+did when the selected action was performed.</p>
+<p>In order to support these more complex models, a <code>RemoteResourceMappingContext</code>
+can be passed to the <code>ResourceMapping#getTraversals</code> method.
+When a context is provided, the mapping can use it to ensure that all
+the necessary resources are included in the traversal. If a context is
+not provided, the mapping can assume that only the local state is of
+interest.</p>
+<h4>When does a ResourceMapping need to worry about the
+RemoteResourceMappingContext?</h4>
+<p>A <code>ResourceMapping</code> need only worry about a context
+supplied to the <code>getTraversals</code> method in cases were the
+resources that make up a model change over time and the relationship
+between the model and resources cannot be described by a simple
+traversal that is guaranteed to encompass those resources (and only
+those resources) that constitute the model. For example, although the
+resources of a Java package may change over time, the package can be
+described as a folder of depth of one so a resource mapping for java
+packages would not need to make use of the resource mapping context.</p>
+<p>As a more complicated example, consider an HTML file that
+contains several images. Let's make the assumption that any images
+references from an HTML file are part of the model of that file. When
+updating the local contents of the HTML file from a repository, the user
+would expect that any new images would be included. The <code>getTraversals</code>
+method for a <code>ResourceMapping</code> for the HTML file model would
+look something like this:</p>
+<pre style="background-color: rgb(204, 204, 255);">public class HTMLResourceMapping extends ResourceMapping {<br>	   private HTMLFile htmlFile;<br>	   public ResourceTraversal[] getTraversals(ResourceMappingContext context, <br>              IProgressMonitor monitor)<br>	      IResource[] resources = htmlFile.getResources();<br>	      if (context instanceof RemoteResourceMappingContext) {<br>	         // Look for any additional resources on the server<br>	         RemoteResourceMappingContext remoteContext = (RemoteResourceMappingContext)context;<br>	         IFile file = htmlFile.getFile();<br>	         if (remoteContext.hasRemoteChange(file, monitor)) {<br>	        	 IStorage storage = remoteContext.fetchRemoteContents(file, monitor);<br>	        	 IResource[] additionalResources = getReferences(storage.getContents());<br>	        	 resources = combine(resources, additionalResources);<br>	         }<br>	         if (remoteContext.isThreeWay() &amp;&amp; remoteContext.hasLocalChange(file, monitor)) {<br>        		 IStorage storage = remoteContext.fetchBaseContents(file, monitor);<br> 	             IResource[] additionalResources = getReferences(storage.getContents());<br>	             resources = combine(resources, additionalResources);<br>	         }<br>	      }<br>	      return new ResourceTraversal[] { <br>            new ResourceTraversal(resources, IResource.DEPTH_ZERO, IResource.NONE)};<br>	   }<br>}</pre>
+<p>Notice that there are two sets of resources included in the
+model: those derived from the local contents of the HTML file in the
+workspace and those obtained from the contents of the remote file and
+base file. In either of these two sets, there may be resources that do
+not exist in the workspace. For instance, the local HTML file may
+contain a relative link to an image that does not exist in the
+workspace. This resource should be included so that it will be fetched
+if it exists remotely. As for the remote file, it may contain a new copy
+that references additional images that should be fetched when the new
+remote contents are downloaded.</p>
+
+
+<h2><a name="ModelProvider"></a>Model Providers</h2>
+
+<p>Model providers are a means to group related resource mappings
+together. Here is a link to the <a
+	href="../reference/api/org/eclipse/core/resources/mapping/ModelProvider.html">ModelProvider</a>
+class. This class serves three main purposes:</p>
+<ol>
+	<li>From a model provider, clients can then obtain additional API
+	pieces for performing operations on a set of resource mappings using
+	the adaptable mechanism. For example, the <code>IResourceMappingMerger</code>
+	for the model is obtained by adapting the model provider.</li>
+	<li>Given a set of file-system resources, clients can query
+	whether a model provider has model elements persisted in those
+	resources and, if it does, obtain the set of resource mappings that
+	describe the relationship.</li>
+	<li>For operations on a set of resources, the resource change
+	validator will query the model providers in order to determine if there
+	are any potential side effects of an operation that users should be
+	made aware of. This is covered in a separate section on <a
+		href="#ChangeValidation">change validation</a>.</li>
+</ol>
+<p>The following is an example of a modelProvider extension
+definition.</p>
+<pre style="background-color: rgb(204, 204, 255);">   &lt;extension<br>         id="modelProvider"<br>         name="Library Example"<br>         point="org.eclipse.core.resources.modelProviders"&gt;<br>      &lt;modelProvider<br>            class="org.eclipse.team.examples.library.adapt.LibraryModelProvider"<br>            name="Library Example"/&gt;<br>      &lt;extends-model id="org.eclipse.core.resources.modelProvider"/&gt;<br>      &lt;enablement&gt;
+         &lt;test property="org.eclipse.core.resources.projectNature" 
+               value="org.eclipse.team.examples.library.view.nature" /&gt;<br>       &lt;/enablement&gt;<br>   &lt;/extension&gt;<br></pre>
+<p>The <code>LibraryModelProvider</code> is a subclass of <code>ModelProvider</code>.
+The enablement rule is used to match resources that the Library model
+persists its model in. In the above example, the model provider will
+match any resource in a project that has the library nature.</p>
+<p>Once the model provider is defined, the <code>ResourceMapping#getModelProviderId()</code>
+method should be overridden to return the id of the model provider.</p>
+<pre style="background-color: rgb(204, 204, 255);">   public String getModelProviderId() {<br>      return "org.eclipse.team.examples.library.adapt.modelProvider";<br>   }<br></pre>
+<p>To get the proper inverse mapping of resources to resource
+mapping for those resources that match your provider's enablement rule,
+you should also override one or both of the <code>getMapping</code>
+methods. The method that you need to override depends on whether your
+model has elements that contain multiple resources or not. If your model
+elements map to a single resource, you can override the method that
+accepts a single<code>IResource</code> argument. Otherwise, you will
+need to override the method that accepts an array of resources. Here's
+an example using the single resource case.</p>
+<p>The following example method wraps a library model file in an
+appropriate resource mapping. It also wraps folders that contain files
+that are of interest to the model provider.<br>
+</p>
+<pre style="background-color: rgb(204, 204, 255);">public class LibraryModelProvider extends ModelProvider {<br>	   public ResourceMapping[] getMappings(IResource resource, <br>              ResourceMappingContext context, IProgressMonitor monitor) {<br>          if (isModelFile(resource)) {<br>              // Return a resource mapping on the file<br>              return new LibraryResourceMapping(resource);<br>          } if (containsModelFiles(resource)) {<br>              // Create a deep resource mapping on the container<br>              return new LibraryContainerResourceMapping(resource);<br>          }<br>          // The resource is not of interest to this model provider<br>          return null;<br>	   }<br>}</pre>
+<p>Clients can then access the model provider to determine whether
+the model providers cares about the resources that are about to be
+operated on. The next section describes API that will be provided to
+team operations that use the model provider API to determine the
+complete set of resource mappings to be operated on when a team
+operation is performed on a set of selected resources or model elements.</p>
+
+
+<h2><a name="ChangeValidation"></a>Resource Change Validation</h2>
+
+<p>Operations performed on resources should be validated first to
+ensure that the user is aware of any potential side effects. Here are the
+steps required to validate a resource change.</p>
+<ol>
+	<li>Build up a description of the change using the <code><a
+		href="../reference/api/org/eclipse/core/resources/mapping/IResourceChangeDescriptionFactory.html">IResourceChangeDescriptionFactory</a></code>.
+	The factory produces an <code>IResourceDelta</code> that mirrors what
+	the resulting resource delta will look like once the operation is
+	performed.</li>
+	<li>Validate the change using the <code><a
+		href="../reference/api/org/eclipse/core/resources/mapping/ResourceChangeValidator.html">ResourceChangeValidator</a></code>.
+	The validator consults all the model providers that have registered an
+	interest in the affected resources. The result is one or more status
+	that contain the id of the originating model and a description of the
+	potential side effect of the operation on the model.</li>
+	<li>Make the user aware of any potential side effects from models
+	that are unknown to the originator of the operation. For instance, if a
+	Java refactoring has received a side effect from the Java model, it can
+	be ignored since the refactoring understands the semantics of the Java
+	model. However, if a side effect from the Library model is returned, it
+	should be made known to the user since Java has no knowledge of the
+	Library model.</li>
+</ol>
+
+<h2><a name="AutoMerge"></a>Model-based Merging</h2>
+
+<p>When a Team provider is attempting a headless merge, it will do
+the following:</p>
+<ol>
+	<li>Obtain the resource mappings from the selected elements</li>
+	<li>Determine the model providers involved using the
+	ResourceMapping#getModelProvider() method.</li>
+	<li>Expand the scope of the operation to include all necessary
+	resource mappings.</li>
+	<li>Build up a description of the synchronization state between
+	the local and remote. This description is provided to the models
+	through the <a
+		href="../reference/api/org/eclipse/team/core/mapping/IMergeContext.html">IMergeContext</a>
+	API.</li>
+	<li>Adapt the model providers to <a
+		href="../reference/api/org/eclipse/team/core/mapping/IResourceMappingMerger.html">IResourceMappingMerger</a>.
+	</li>
+	<li>Invoke the validateMerge method on each merger, passing in the
+	synchronization description, to ensure there is not some condition that
+	should prevent an attempted merge.</li>
+	<li>Delegate the merge to the model mergers to perform the merge.
+	</li>
+	<li>Model providers can delegate the merge of individual files
+	back to the Team provider if they only want to control the order of the
+	merge or may perform the merge themselves and signal to the team
+	provider when they are done.</li>
+</ol>
+
+<h2><a name="TeamContent"></a>Model Content in Team Operation Views</h2>
+
+<p>The display of model elements in the context of a Team operation
+is made possible by the Common Navigator framework.</p>
+<ul>
+	<li>Provide an extension of the <a
+		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent</a>
+	extension.</li>
+	<li>Provide an extension of the <a
+		href="../reference/extension-points/org_eclipse_team_ui_teamContentProviders.html">org.eclipse.team.ui.teamContentProviders</a>
+	extension point to associate the content provider with a model
+	provider.</li>
+	<li>Implement a content provider and label provider for the
+	navigatorContent extension. It is best to subclass <a
+		href="../reference/api/org/eclipse/team/ui/mapping/SynchronizationContentProvider.html">SynchronizationContentProvider</a>
+	and <a
+		href="../reference/api/org/eclipse/team/ui/mapping/SynchronizationLabelProvider.html">SynchronizationLabelProvider</a>
+	for this. They wrap existing content/label providers and handle
+	interactions with the team provider such as sync state decoration and
+	filtering based on sync state.</li>
+</ul>
+<p>The above steps will allow models to appear in dialogs used by
+team operations. There are additional steps required to integrate into a
+merge preview.</p>
+<ul>
+	<li>Adapt the model provider to <a
+		href="../reference/api/org/eclipse/team/ui/mapping/ISynchronizationCompareAdapter.html">ISynchronizationCompareAdapter</a>.
+	This is done to allow the model to open model specific compare editors
+	on model elements.</li>
+	<li>Implement an acti on provider for the navigatorContent
+	extension as a subclass of <a
+		href="../reference/api/org/eclipse/team/ui/mapping/SynchronizationActionProvider.html">SynchronizationActionProvider</a>.
+	This will allow the model to register merge handlers that will be
+	invoked when users perform merge operations on the model
+	provider's elements in the merge preview.</li>
+</ul>
+
+<h2><a name="History"></a>History View</h2>
+
+<p>The following improvements have been made in the area of file
+history and model element history:</p>
+<ul>
+	<li>The History view has been generalized to display the history of
+	any object that adapts to an <a
+		href="../reference/api/org/eclipse/team/ui/history/IHistoryPageSource.html">IHistoryPageSource</a>.
+	Thus, model providers can render the history for their logical model
+	elements.</li>
+	<li>An <a
+		href="../reference/api/org/eclipse/team/core/history/IFileHistoryProvider.html">IFileHistoryProvider</a>
+	API has been added for obtaining and querying the remote history of
+	workspace files. Logical models can obtain and interpret this history.</li>
+	<li>An <a
+		href="../reference/api/org/eclipse/team/ui/history/IHistoryCompareAdapter.html">IHistoryCompareAdapter</a>
+	is used to hook up the selection in an IHistoryPage to compare editors
+	so that history pages can be reused in the context of compare
+	operations.</li>
+</ul>
+
+<h2><a name="RemoteBrowsing"></a>Remote Browsing</h2>
+
+<p>The following has been provided to support remote browsing:</p>
+<ul>
+	<li>An Eclipse File System API has been introduced in the
+	org.eclipse.core.filesystem plug-in.</li>
+	<li>API has been added to the <a
+		href="../reference/api/org/eclipse/team/core/ProjectSetCapability.html">ProjectSetCapability</a> to obtain
+	the URI from project set entries. These URIs can be used to obtain a
+	FileSystem for the purposes of browsing remote contents.</li>
+	<li>Models that require an IResource base project can use the file
+	system to create a team-private project.</li>
+	<li>Methods have been added to the ProjectSetCapability for
+	loading a URI as a project.</li>
+</ul>
+
+<h2><a name="Decoration"></a>Decorating Model Elements with Team State</h2>
+
+<p>Team providers can decorate model elements by converting their
+lightweight decorators to work for resource mappings in the same way
+object contributions are converted to work for resource mappings.
+However, there is one aspect of logical model element decoration that is
+problematic. If a model element does not have a one-to-one mapping to a
+resource, the model element may not receive a label update when the
+underlying resources change.</p>
+
+<p>To address this issue, the <code><a
+		href="../reference/api/org/eclipse/team/ui/mapping/ITeamStateProvider.html">ITeamStateProvider</a></code> was introduced in order to give model
+providers access to state changes that may affect team decorations. In addition,
+model views can use a <code><a
+		href="../reference/api/org/eclipse/team/ui/mapping/SynchronizationStateTester.html">SynchronizationStateTester</a></code> to determine when the
+labels of logical model elements need to be updated. This API relies on
+the <code>ITeamStateProvider</code> interface to determine when the team state
+of resource has changed and can be passed to a team decorator as part of an <code><a
+		href="../reference/api/org/eclipse/jface/viewers/IDecorationContext.html">IDecorationContext</a></code>.</p>
+
+<h2><a name="Saveable"></a>Using the Saveable API</h2>
+
+<p>
+Logical model providers may use the <code>
+<a href="../reference/api/org/eclipse/ui/Saveable.html">Saveable</a></code> 
+API to manage the Save lifecycle of their model elements. If they do so,
+they should adapt their Saveable instances to a ResourceMapping to ensure that
+repository providers (and other tools) can determine which resources would be affected
+if the saveable was saved. For instance, this is important in the case where a repository
+provider wants to ensure that there are no open dirty editors on a set of resources before a repository
+operation is performed.</p>
+
+<h2><a name="ElementHistory"></a>Showing the history of sub-file elements</h2>
+
+<p>The <code><a href="../reference/api/org/eclipse/team/ui/history/ElementLocalHistoryPageSource.html">ElementLocalHistoryPageSource</a></code>
+class can be used by models to show the local history for a sub-file element such as a Java method. 
+History can be shown in the History view by calling the 
+<code><a href="../reference/api/org/eclipse/team/ui/TeamUI.html">TeamUI</a>#showHistory</code> method with the model element 
+and history page source as arguments. Models that call this also need to provide a subclass of
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureCreator.html"><code>StructureCreator</code></a>
+as described in the <a href="compare_beyond.htm#Patch">Advanced compare techniques</a> section.
+The history can also be shown in a dialog using the 
+<code><a href="../reference/api/org/eclipse/team/ui/history/HistoryPageCompareEditorInput.html">HistoryPageCompareEditorInput</a></code>
+class. Subclasses can control whether the dialog is to be used for comparison purposes or as a dialog that supports
+replacing the current element with an element from the history.
+</p>
+
+<h2><a name="ChangeTracker"></a>Grouping related changes</h2>
+
+Model providers that wish to ensure that changes to sets of resources are committed or checked-in to a repository together
+can subclass the 
+<code><a href="../reference/api/org/eclipse/team/core/mapping/ChangeTracker.html">ChangeTracker</a></code> class. This class
+is used to track local changes and issue requests to the repository provider to group related changes together.
+
+</body>
+</html>

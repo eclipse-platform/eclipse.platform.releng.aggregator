@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Project natures
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Project natures</H2>
+<P >
+Project natures allow a plug-in to tag a project as a specific kind of project. For example, the Java development tools (JDT) use a &quot;Java nature&quot; to add
+Java-specific behavior to projects.&nbsp; Project natures are defined by
+plug-ins, and are typically added or removed per-project when the user performs
+some action defined by the plug-in.</P>
+<P >A project can have more than one nature.&nbsp; However, when you define a
+project nature, you can define special constraints for the nature:</P>
+<ul>
+  <li><b>one-of-nature</b> - specifies that the nature is one of a named
+    set.&nbsp; Natures in a set are mutually exclusive; that is, only one nature
+    belonging to the set can exist for a project.</li>
+  <li><b>requires-nature</b> - specifies that the nature depends on another
+    nature and can only be added to a project that already has the required
+    nature.</li>
+</ul>
+<P >
+To implement your own nature, you need to define an extension and supply a class
+which implements <b><a href="../reference/api/org/eclipse/core/resources/IProjectNature.html">IProjectNature</a></b>.</P>
+
+<H3>
+Defining a nature</H3>
+<P >
+The <a href="../reference/extension-points/org_eclipse_core_resources_natures.html"> <b> org.eclipse.core.resources.natures</b></a> extension point is used to add a project nature definition. The following markup adds a nature for the hypothetical
+<b> com.example.natures</b> plug-in.</P>
+<pre>
+   &lt;extension
+      point=&quot;org.eclipse.core.resources.natures&quot;
+      id=&quot;mynature&quot;
+      name=&quot;My Nature&quot;&gt;
+      &lt;runtime&gt;
+         &lt;run class=&quot;com.example.natures.MyNature&quot;&gt;
+         &lt;/run&gt;
+      &lt;/runtime&gt;
+   &lt;/extension&gt;
+</pre>
+<P >
+The class identified in the extension must implement the platform interface
+<b><a href="../reference/api/org/eclipse/core/resources/IProjectNature.html">IProjectNature</a></b>. This class implements plug-in specific behavior for associating nature-specific information with a project when
+the nature is configured.</P>
+<pre>
+   public class MyNature implements IProjectNature {
+
+      private IProject project;
+
+      public void configure() throws CoreException {
+         // Add nature-specific information
+         // for the project, such as adding a builder
+         // to a project's build spec.
+      }
+      public void deconfigure() throws CoreException {
+         // Remove the nature-specific information here.
+      }
+      public IProject getProject() {
+         return project;
+      }
+      public void setProject(IProject value) {
+         project = value;
+      }
+   }
+</pre>
+<P >
+The <b> configure()</b> and <b> deconfigure()</b> methods are sent by the platform
+when natures are added and removed from a project.&nbsp; You can implement the
+<b> configure()</b> method to add a builder to a project as discussed in
+<a HREF="resAdv_builders.htm" CLASS="XRef">Builders</a>.</P>
+
+
+<H3>
+Associating the nature with a project</H3>
+<P >
+Defining the nature is not enough to associate it with a project.&nbsp; You must
+assign a nature to a project by updating the project's description to include
+your nature.&nbsp; This usually happens when the user creates a new project with a specialized new project wizard that assigns the
+nature.&nbsp; The following snippet
+shows how to assign our new nature to a given project.</P>
+<pre>
+   try {
+      IProjectDescription description = project.getDescription();
+      String[] natures = description.getNatureIds();
+      String[] newNatures = new String[natures.length + 1];
+      System.arraycopy(natures, 0, newNatures, 0, natures.length);
+      newNatures[natures.length] = &quot;com.example.natures.mynature&quot;;
+      description.setNatureIds(newNatures);
+      project.setDescription(description, null);
+   } catch (CoreException e) {
+      // Something went wrong
+   }
+</pre>
+<P>
+<b>NOTE:</b> The nature id is the fully qualified id
+of the nature extension. The fully qualified id of an extension is created by combining
+the plug-in id with the simple extension id in the plugin.xml file. For example, a nature with simple extension
+id &quot;mynature&quot; in the plug-in &quot;com.example.natures&quot; would have the
+name &quot;com.example.natures.mynature&quot;
+</p>
+<P>The natures are not actually assigned to (and configured) for the project
+until you set the project description into the project.&nbsp; Also note that the identifier used for the nature is the fully qualified name (plug-in id + extension id) of the nature extension. </P>
+<P>
+If the nature has been defined with constraints, then workspace API can be used
+to validate the new nature.&nbsp; For example, suppose a nature is defined with
+a prerequisite: </P>
+<pre>   &lt;extension
+      point=&quot;org.eclipse.core.resources.natures&quot;
+      <b>id=&quot;myOtherNature&quot;</b>
+      name=&quot;My Other Nature&quot;&gt;
+      &lt;runtime&gt;
+         &lt;run class=&quot;com.example.natures.MyOtherNature&quot;&gt;
+         &lt;/run&gt;
+      &lt;/runtime&gt;
+<b>   &lt;requires-nature id=&quot;com.example.natures.mynature&quot;/&gt;
+</b>   &lt;/extension&gt;
+</pre>
+<P >
+The new nature is not valid unless the first nature exists for the
+project.&nbsp; Depending on the design of your plug-in, you may want to check
+whether the prerequisite nature has been installed, or you may want to add the
+prerequisite nature yourself.&nbsp; Either way, you can check on the validity of
+proposed combinations of project natures using workspace API. </P>
+
+<pre>   try {
+      IProjectDescription description = project.getDescription();
+      String[] natures = description.getNatureIds();
+      String[] newNatures = new String[natures.length + 1];
+      System.arraycopy(natures, 0, newNatures, 0, natures.length);
+<b>      newNatures[natures.length] = &quot;com.example.natures.myOtherNature&quot;;
+</b>      IStatus status = <b>workspace.validateNatureSet(newNatures);
+</b>
+      // check the status and decide what to do
+      if (status.getCode() == IStatus.OK) {
+      	description.setNatureIds(newNatures);
+      	project.setDescription(description, null);
+      } else {
+      	// raise a user error
+	...
+      }
+   } catch (CoreException e) {
+      // Something went wrong
+   }
+</pre>
+
+
+<H3>Nature descriptors</H3>
+<p>In addition to working with natures by their id, you can obtain the
+descriptor (<a href="../reference/api/org/eclipse/core/resources/IProjectNatureDescriptor.html"><b>IProjectNatureDescriptor</b></a>)
+which describes a nature, its constraints, and its label.&nbsp; You can query a
+particular nature for its descriptor, or get descriptors from the
+workspace.&nbsp; The following snippet gets the project nature descriptor for
+our new nature:
+</p>
+<pre>      IProjectNatureDescriptor descriptor = workspace.getNatureDescriptor(&quot;com.example.natures.myOtherNature&quot;);
+</pre>
+<p>You can also get an array of descriptors for all installed natures:
+</p>
+<pre>      IProjectNatureDescriptor[] descriptors = workspace.getNatureDescriptors();
+</pre>
+
+</BODY>
+</HTML>

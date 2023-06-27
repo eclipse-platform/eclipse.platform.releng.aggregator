@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Project-scoped preferences
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Project-scoped preferences</H2>
+<P >
+In <a href="runtime_preferences.htm">Runtime preferences</a>, we looked at the infrastructure for defining and 
+storing preferences with different scopes.  We also saw that the
+<a href="../reference/extension-points/org_eclipse_core_runtime_preferences.html"><b>org.eclipse.core.runtime.preferences</b></a> 
+extension can be used to define additional scopes for preferences.  The platform resources plug-in defines its own
+preference scope, called &quot;Project,&quot; in order to define project-scoped preferences.  Project-scoped preferences are stored in a file located
+inside the project.  This makes it easy to store a set of preferences and exchange them with other users using 
+resource-oriented mechanisms such as a version control system.
+</p>
+<h3>Specifying the scope</h3>
+
+<p>The definition for new scopes is pretty simple.  The plug-in defines the name of the scope, as well as the class
+that implements it.  The resources plug-in defines the project scope 
+as follows:
+</p>
+<pre>	&lt;extension id="preferences" point="org.eclipse.core.runtime.preferences" name="preferences"&gt;
+		&lt;scope name="project" class="org.eclipse.core.internal.resources.ProjectPreferences"/&gt;
+	&lt;/extension&gt;
+</pre>
+<p>The specified class must implement the 
+<b><a href="../reference/api/org/eclipse/core/runtime/preferences/IScope.html">IScope</a></b> interface, which means
+it must be capable of creating preference nodes for the scope.
+</p>
+
+<h3>Project-scoped preference nodes</h3>
+
+<p>Since the project scope for preferences is not one of the standard runtime scopes, the node representing a project-level
+preference must be obtained specifically.  From the root preference node, you must navigate to the project-scoped
+preference.  This can be achieved using the <b>ProjectScope</b>:
+</p>
+<pre>	IScopeContext projectScope = new ProjectScope(MyProject);
+</pre>
+<p>Once the project scope for a particular is project is found, the preference values can
+be obtained using the same mechanisms seen earlier.  Preferences are named using the string name of the 
+preference.  The names are qualified with another string (often a plug-in id) that qualifies the namespace
+of the preference.  The following snippet gets a preference node from the project scope.  You'll notice that once
+the correct scope is obtained, working with the nodes is no different than with nodes from other scopes.
+</p>
+<pre>	...
+	Preferences projectNode = projectScope.getNode(&quot;com.example.myplugin&quot;);
+	if (projectNode != null) {
+		value = projectNode.getBoolean(&quot;MyPreference&quot;, &quot;true&quot;);
+		//do something with the value.
+	}
+	...
+</pre>
+<p>To save the value to a file in the project, the node is flushed.  The resources plug-in handles the logistics
+for managing the project-level preferences file.
+</p>
+<pre>	projectNode.flush();
+</pre>
+</BODY>
+</HTML>

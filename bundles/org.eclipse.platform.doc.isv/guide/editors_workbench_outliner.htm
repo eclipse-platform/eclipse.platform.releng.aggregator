@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Content outliners</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<h2>
+Content outliners</h2>
+<P >
+Editors often have corresponding <b>content outliners</b> that provide a
+structured view of the editor contents and assist the user in navigating through
+the contents of the editor.</P>
+<P >
+The workbench provides a standard <b>Outline</b> view for this purpose.&nbsp;
+The workbench user controls when this view is visible using the <b>Window &gt; Show
+View</b> menu.</P>
+<P >Since the generic
+<a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b> TextEditor</b></a> 
+doesn't know anything about the structure of its text, it cannot provide
+behavior for an interesting outline view.&nbsp; Therefore, the default <b>Outline</b> view,
+shown below, doesn't
+do much.</P>
+<P ><img src="images/genericoutliner.png" alt="Default content outliner" border="0"></P>
+<P >&nbsp;</P>
+<P >Editors in the text framework can supply their own content outliner page to the
+outline view.&nbsp; The outliner for an editor is specified when the workbench requests an
+adapter of type <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/IContentOutlinePage.html">IContentOutlinePage</a></b>.</P>
+<pre>
+public Object getAdapter(Class required) {
+	if (IContentOutlinePage.class.equals(required)) {
+		if (fOutlinePage == null) {
+			fOutlinePage= new <b>JavaContentOutlinePage</b>(getDocumentProvider(), this);
+			if (getEditorInput() != null)
+				fOutlinePage.setInput(getEditorInput());
+		}
+		return fOutlinePage;
+	}
+	return super.getAdapter(required);
+}
+</pre>
+
+
+<P >A content outliner page must implement <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/IContentOutlinePage.html">IContentOutlinePage</a></b>.&nbsp;
+This interface combines the ability to notify selection change listeners (<a href="../reference/api/org/eclipse/jface/viewers/ISelectionProvider.html"><b>ISelectionProvider</b></a>)
+with the behavior of being a page in a view (<a href="../reference/api/org/eclipse/ui/part/IPage.html"><b>IPage</b></a>).&nbsp;
+Content outliners are typically implemented using JFace viewers.&nbsp; The
+default implementation of a content outliner (<b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a></b>)
+uses a JFace tree viewer to display a hierarchical representation of the
+outline.&nbsp; This representation is suitable for many structured outliners, including
+<b>JavaContentOutlinePage</b>.</P>
+
+
+<P >Let's take a look at the implementation of the page. When the outline page 
+  is created by the editor in the snippet above, its input element is set to the 
+  editor's input element.&nbsp; This input can often be passed directly to the 
+  outline page's viewer, as is done below.</P>
+
+
+<pre>
+public void createControl(Composite parent) {
+
+	super.createControl(parent);
+
+	TreeViewer viewer= getTreeViewer();
+	viewer.setContentProvider(new ContentProvider());
+	viewer.setLabelProvider(new LabelProvider());
+	viewer.addSelectionChangedListener(this);
+
+	if (fInput != null)
+		viewer.setInput(fInput);
+}
+</pre>
+
+
+<P >The tree viewer creation is inherited from <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a></b>.&nbsp; 
+  The standard label provider is used.  The content provider is provided inside
+   <b>JavaContentOutlinePage</b> and is responsible for parsing the editor input into
+   individual segments whenever it changes.</P>
+
+
+<pre>
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			...
+			if (newInput != null) {
+				IDocument document= fDocumentProvider.getDocument(newInput);
+				if (document != null) {
+					document.addPositionCategory(SEGMENTS);
+					document.addPositionUpdater(fPositionUpdater);
+					parse(document);
+				}
+			}
+		}
+</pre>
+
+
+<P >The text is parsed into ranges, called segments, within the document.&nbsp;
+These segments are displayed by name in the outline view.</P>
+
+
+<P ><img src="images/javacontentoutline.png" alt="Java example outliner" border="0"></P>
+
+
+<P >When the selection changes, the selected segment is 
+  retrieved.&nbsp; Its offsets are used to set the highlight range in the editor.</P>
+
+
+<pre>
+public void selectionChanged(SelectionChangedEvent event) {
+
+	super.selectionChanged(event);
+
+	ISelection selection= event.getSelection();
+	if (selection.isEmpty())
+		fTextEditor.resetHighlightRange();
+	else {
+		Segment segment= (Segment) ((IStructuredSelection) selection).getFirstElement();
+		int start= segment.position.getOffset();
+		int length= segment.position.getLength();
+		try {
+			fTextEditor.setHighlightRange(start, length, true);
+		} catch (IllegalArgumentException x) {
+			fTextEditor.resetHighlightRange();
+		}
+	}
+}
+</pre>
+
+
+</BODY>
+</HTML>

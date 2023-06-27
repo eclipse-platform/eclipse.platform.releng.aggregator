@@ -1,0 +1,89 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Working sets
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Working sets</h2>
+<p>Users often find it necessary to filter views such as the navigator view in
+order to reduce clutter.&nbsp; Plug-ins can assist in filtering using different
+techniques.</p>
+
+
+<ul>
+  <li><a href="workbench_advext_resourceFilters.htm">Resource filters</a>
+    can be used to filter by file name.&nbsp; Plug-ins contribute resource
+    filters that the user can enable using a view's filter selection dialog.</li>
+  <li><b>Working sets</b> can be used to filter resources by only including
+    specified resources.&nbsp; Working sets are selected using the view's
+    working set dialog.</li>
+</ul>
+<p><img src="images/workingset.png" alt="Working set selection dialog" border="0"></p>
+<p>If your plug-in implements a view that shows resources (or objects that are
+adaptable to <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>),
+you should support working sets.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>provides API for manipulating working sets.&nbsp; You can obtain an <b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>using <b><a href="../reference/api/org/eclipse/ui/IWorkbench.html">IWorkbench</a></b>
+API.</p>
+<pre>IWorkingSetManager manager = workbench.getWorkingSetManager();</pre>
+<p><b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>allows you to manipulate and create working sets:</p>
+<ul>
+  <li><b>createWorkingSetSelectionDialog</b> - returns a working set dialog that shows the user the current working
+  sets. You can get the selected working sets from the dialog once it is
+  closed.</li>
+  <li><b>createWorkingSetEditWizard</b> - returns a working set edit wizard for editing the specified working
+  set</li>
+  <li><b>getWorkingSets()</b> - returns a list of all defined working sets</li>
+  <li><b>getWorkingSet(String name) </b>- returns a working set specified by
+    name</li>
+</ul>
+<p><b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>also provides property change notification as working sets are added,
+removed, or as they change.&nbsp; If your view or editor needs to respond to
+changes in the selected working set, it can add a listener for <b>CHANGE_WORKING_SET_CONTENT_CHANGE.</b></p>
+<h3>Adding new working set types</h3>
+
+
+<p>For many plug-ins, using <b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>to provide resource filtering is sufficient.&nbsp; If your plug-in needs to
+define working sets differently, it can register a new type of working set using
+<b><a href="../reference/extension-points/org_eclipse_ui_workingSets.html">org.eclipse.ui.workingSets</a></b>.&nbsp;
+The Java tooling uses this feature to define a Java working set type.&nbsp;
+Working set types are shown when the user decides to add a working set.</p>
+
+
+<p><img src="images/workingSetTypes.png" alt="Working set dialog showing list of available types" border="0"></p>
+
+
+<p>&nbsp;</p>
+
+
+<p>When you define your own type of working set, you can use <b><a href="../reference/api/org/eclipse/ui/IWorkingSet.html">IWorkingSet</a>.getId</b> protocol to ensure that the working set matches the type that you have
+defined.&nbsp; Any working sets that you create programmatically must have
+their id set to the id of a working set page that can display the working
+set elements.&nbsp; This id is used to ensure that the proper working set
+edit page is launched when the user edits the working set.&nbsp; A null
+id indicates that the working set should use the default resource working
+set type.</p>
+
+
+<p>See the
+<b><a href="../reference/extension-points/org_eclipse_ui_workingSets.html">org.eclipse.ui.workingSets</a>
+</b>extension point documentation and <b><a href="../reference/api/org/eclipse/ui/IWorkingSet.html">IWorkingSet</a></b>
+protocol for more detail.</p>
+
+
+
+</BODY>
+</HTML>

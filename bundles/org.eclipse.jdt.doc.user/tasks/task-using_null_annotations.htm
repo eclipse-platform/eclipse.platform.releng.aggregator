@@ -1,0 +1,552 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) GK Software AG and others 2012, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Using null annotations</title>
+</head>
+<body>
+<h1> Using null annotations </h1>
+<p><code>NullPointerException</code> is one of the most common causes for failure of Java programs.
+In the simplest cases the compiler can directly warn you when it sees code like this:
+</p>
+<pre>    Object o = null;
+    String s = o.toString();
+</pre>
+<p>
+With branching / looping and throwing exceptions quite sophisticated <strong>flow analysis</strong>
+becomes necessary in order to figure out if a variable being dereferenced has been assigned a 
+null / non-null value on some or all paths through the program.
+</p>
+<p>
+Due to the inherent complexity, flow analysis is best performed in small chunks.
+Analyzing one method at a time can be done with good tool performance - 
+whereas whole-system analysis is out of scope for the Eclipse Java compiler.
+The advantage is: analysis is fast and can be done incrementally
+such that the compiler can warn you directly as you type.
+The down-side: the analysis can not "see" which values (null or non-null) are
+flowing between methods (as parameters and return values).    
+</p>
+<h2 id="interprocedural_null_analysis">Inter-procedural null analysis</h2>
+<p>
+This is where null annotations come into play.
+By specifying a method parameter as <code>@NonNull</code> you can tell the compiler
+that you don't <em>want</em> a null value in this position.
+</p>
+<pre>    String capitalize(@NonNull String in) {
+        return in.toUpperCase();                // no null check required
+    }
+    void caller(String s) {
+        if (s != null)
+            System.out.println(capitalize(s));  // preceding null check is required
+    }
+</pre>
+<p>
+In the vein of <strong>Design-by-Contract</strong> this has two sides:
+</p>
+<ol>
+<li>It's the <b>caller's</b> <b>responsibility</b> to never pass a null value,
+	which is to be ensured, e.g., by an explicit null check.</li>
+<li>The <b>implementor</b> of method <code>capitalize</code> enjoys the
+	<b>guarantee</b> that the argument <code>in</code> shall not be null
+	and thus dereferencing without a null check is OK here.
+</ol>
+<p>
+For method return values the situation is symmetric:
+</p>
+<pre>    @NonNull String getString(String maybeString) {
+        if (maybeString != null)
+            return maybeString;                         // the above null check is required
+        else
+            return "&lt;n/a&gt;";
+    }
+    void caller(String s) {
+        System.out.println(getString(s).toUpperCase()); // no null check required
+    }
+</pre>
+<ol>
+<li>Now the implementor must ensure that null is never returned.</li>
+<li>Conversely the caller now enjoys the guarantee that dereferencing the 
+method result without checking is OK.
+</ol>
+<h2 id="available_annotations">Available annotations</h2>
+<p>
+The Eclipse Java compiler can be <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_analysis">configured</a> to use three distinct annotation types
+for its enhanced null analysis (which is disabled by default):
+</p> 
+<ul>
+<li><code>@NonNull</code>: null is not a legal value</li>
+<li><code>@Nullable</code>: null value is allowed and must be expected</li>
+<li><code>@NonNullByDefault</code>: types in method signatures and field declarations
+	that lack a null annotation are regarded as non-null.</li>
+</ul>
+<p>Annotations <code>@NonNull</code> and <code>@Nullable</code> are supported in these locations:</p>
+<ul>
+<li>Method parameter</li>
+<li>Method return (syntactically a method annotation is used here)</li>
+<li>Local variables</li>
+<li>Fields</li>
+<li>In Java 8, more locations can be annotated with <a href="task-using_null_type_annotations.htm">null type annotations</a></li>
+</ul>
+<p><code>@NonNullByDefault</code> is supported for</p>
+<ul>
+<li>Methods - to affect all types in this method's signature</li>
+<li>Types (classes, interfaces, enums) - to affect all methods and fields in the type body</li>
+<li>Package (via a file <code>package-info.java</code>) - to affect all types in the package</li>
+</ul>
+<p>
+Note, that even the actual qualified names of these annotations are 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_annotation_names">configurable</a>,
+but by default the ones given above are used (from the package <code>org.eclipse.jdt.annotation</code>).
+When using 3rd party null annotation types, please ensure that those are properly defined using at least a <code>@Target</code>
+meta annotation, because otherwise the compiler can not distinguish between declaration annotations (Java 5)
+and type annotations (Java 8). Furthermore, some <a href="#cancel_default">details of <code>@NonNullByDefault</code></a> are not supported when using
+3rd party annotation types (see <a href="task-using_null_type_annotations.htm#compatibility_semantics">here</a> for the Java 8 variant). 
+</p>
+
+<h2 id="buildpath_setup">Setup of the build path</h2>
+<p>
+A JAR with the default null annotations is shipped with Eclipse in eclipse/plugins/org.eclipse.jdt.annotation_*.jar.
+This JAR needs to be on the build path at compile time but it is not necessary at run time (so you don't have to ship this to users of your compiled code).
+</p>
+<p>
+Starting with Eclipse Luna, two versions of this jar exist, one with declaration annotations for use in Java 7 or below (version 1.1.x) and one with 
+<a href="task-using_null_type_annotations.htm">null type annotations</a> for use in Java 8 (version 2.0.x).
+</p>
+<p>
+<strong>For plain Java projects</strong> there is also a quick fix on unresolved references to <code>@NonNull</code>, <code>@Nullable</code>, or <code>@NonNullByDefault</code> 
+that adds the suitable version of the JAR to the build path:
+</p>
+<p><img src="images/task-null-annotations-qf-simple.png" alt="Copy library with default null annotations to build path"></p>
+<p><strong>For OSGi bundles / plug-ins</strong> please add one of the following entries to your MANIFEST.MF:
+<dl>
+<dt>When using null annotations in a Java 7 project or below:</dt>
+<dd><pre>
+Require-Bundle: ...,
+ org.eclipse.jdt.annotation;bundle-version="[1.1.0,2.0.0)";resolution:=optional
+</pre></dd>
+<dt>For null type annotations in a Java 8 project please use:</dt>
+<dd><pre>Require-Bundle: ...,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+</pre></dd>
+</dl>
+<p>
+See also the discussion in the corresponding section on <a href="task-using_null_type_annotations.htm#compatibility_configuration">compatibility</a>.
+</p>
+<h2 id="interpretation_of_null_annotations">Interpretation of null annotations</h2>
+<p>
+It should be clear now that null annotations add more information to your
+Java program (which can then be used by the compiler to give better warnings).
+But what exactly do we want these annotations to say?
+From a pragmatic point of view there are at least three levels of what we might
+want to express with null annotations:
+<ol>
+<li>Sporadic hints to the reader (human and compiler)</li>
+<li>Design by contract: API specification for some or all methods</li>
+<li>Full specification using an extended type system</li>
+</ol>
+<p>
+For (1) you may start using null annotations right away and without reading further,
+but you shouldn't expect more than a little hint every now and then.
+The other levels deserve some more explaining.
+</p>
+<h2 id="design_by_contract">Design by contract: API specification</h2>
+<p>
+At first sight using null annotations for API specifications in the vein of Design by Contract
+only means that the signatures of all API methods should be fully annotated,
+i.e., except for primitive types like <code>int</code> each parameter and each
+method return type should be marked as either <code>@NonNull</code> or <code>@Nullable</code>.
+Since this would mean to insert very many null annotations, it is good to know that in 
+well-designed code (especially API methods), <code>@NonNull</code> is significantly more
+frequent than <code>@Nullable</code>. Thus the number of annotations can be reduced by
+declaring <code>@NonNull</code> as the <b>default</b>, using a <code>@NonNullByDefault</code>
+annotation at the package level. 
+</p>
+<p>
+Note the significant difference between <code>@Nullable</code> and omitting a null annotation:
+This annotation explicitly states that null is OK and must be expected.
+By contrast, no annotation simply means, we don't know what's the intention.
+This is the old situation where sometimes both sides (caller and callee) redundantly check for null,
+and some times both sides wrongly assume that the other side will do the check.
+This is where NullPointerExceptions originate from.
+Without an annotation the compiler will not give specific advice, but with a 
+<code>@Nullable</code> annotation every unchecked dereference will be flagged.
+</p>
+<p>
+With these basics we can directly map all parameter annotations to <b>pre-conditions</b> and 
+interpret return annotations as <b>post-conditions</b> of the method.
+</p>
+<h3 id="override">Sub-typing and overriding</h3>
+<p>
+In object-oriented programming the concept of Design by Contract needs to address one more dimension:
+<b>sub-typing</b> and overriding (in the sequel the term "override" will be used in the sense of the
+<code>@Override</code> annotation in Java 6: methods overriding <em>or implementing</em> another method
+from a super-type). A client invoking a method like this one:
+</p>
+<pre>    @NonNull String checkedString(@Nullable String in)</pre>
+<p>
+should be allowed to assume that <em>all implementations</em> of this method fulfill the contract.
+So when the method declaration is found in an interface <code>I1</code>,
+we must rule out that any class <code>Cn</code> implementing <code>I1</code> provides
+an incompatible implementation. Specifically, it is illegal if any <code>Cn</code> tries
+to override this method with an implementation that declares the parameter as <code>@NonNull</code>.
+If we <em>would</em> allow this, a client module programmed against <code>I1</code> could legally
+pass null as the argument but the implementation would assume a non-null value -
+unchecked dereference inside the method implementation would be allowed but blow up at runtime.
+Hence, a <code>@Nullable</code> parameter specification <em>obliges all overrides</em> 
+to admit null as an expected, legal value.
+</p>
+<p>
+Conversely, a <code>@NonNull</code> return specification <em>obliges all overrides</em>
+to ensure that null will never be returned.
+</p>
+<p>Therefore, the compiler has to check that no override adds a <code>@NonNull</code>
+parameter annotation (or a <code>@Nullable</code> return annotation) that didn't exist in the super-type.
+</p>
+<p>
+Interestingly, the reverse redefinitions are legal: adding a <code>@Nullable</code> parameter annotation
+or a <code>@NonNull</code> return annotation (you may consider these as "improvements" of the method,
+it accepts more values and produces a more specific return value).
+</p>
+<p>By forcing sub-classes to repeat null annotations in any overriding methods, the null contract of
+each method can be understood without searching the inheritance hierarchy. However, in situations
+where an inheritance hierarchy mixes code of different provenance it may not be possible to add
+null annotations to all classes at once. In these situations the compiler can be told to treat
+methods with missing null annotations as if annotations from an overridden method were <strong>inherited</strong>.
+This is enabled using the compiler option 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#inherit_null_annotations">inherit null annotations</a>.
+It is possible that a method overrides two methods with different null contracts. Also a nullness default
+can be applicable at a method which is in conflict with an inherited null annotation.
+These cases are flagged as an error and the overriding method must use an explicit null annotation to resolve the conflict.
+</p>
+<h4>Relaxing a <code>@NonNull</code> parameter to unspecified?</h4> 
+<p>
+If <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#inherit_null_annotations">inheritance of null annotations</a>
+is <em>not</em> enabled, one particular situation is safe from a type theory point of view,
+but may still indicate a problem:
+Given a super method that declares a parameter as <code>@NonNull</code> and an overriding method
+that does not constrain the corresponding parameter (neither by an explicit null annotation, nor
+by an applicable @NonNullByDefault).</p>
+<p>
+This is <b>safe</b> because clients seeing the super-declaration will be forced to avoid <code>null</code>
+whereas the the overriding implementation simply cannot leverage this guarantee due to the
+lack of a specification in this specific method.</p>
+<p>
+Still this may lead to misconceptions because it may be <b>intended</b> that the declaration 
+in the super type should apply also to all overrides.</p>
+<p>
+For this reasons the compiler provides an option 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#nonnull_annotation_dropped">'@NonNull' parameter not annotated in overriding method</a>:
+<ul>
+<li>Enabling this warning/error is useful for forcing developers to be explicit about the contract of overriding methods.
+	If <code>null</code> should indeed be acceptable it is good practice to add a <code>@Nullable</code> annotation to
+	override the <code>@NonNull</code> from the super method.</li>
+<li>Disabling this warning/error is useful in scenarii of mixed code ownership: it facilitates the use of
+    legacy implementations (without null annotations) in combination with super types that have adopted
+    the approach of null annotations.</li>
+</ul>
+
+<h3>Legacy super-types</h3>
+<p>
+The previous considerations add a difficulty when annotated code is written as a sub-type
+of a "legacy" (i.e., un-annotated) type (which may be from a 3rd party library, thus cannot be changed).
+If you read the last section very carefully you might have noticed that we cannot admit
+that a "legacy" method is overridden by a method with a <code>@NonNull</code> parameter
+(since clients using the super-type don't "see" the <code>@NonNull</code> obligation). 
+</p>
+<p>
+In this situation you will be forced to omit null annotations 
+(<em>plans exist to support adding annotations to libraries after-the-fact, but no promise can be made yet,
+if and when such a feature will be available</em>).
+</p>
+<h3 id="cancel_default">Canceling a nullness default</h3>
+<p>The situation will get tricky, if a sub-type of a "legacy" type resides in a package for which 
+<code>@NonNullByDefault</code> has been specified. Now a type with an un-annotated super-type
+would need to mark all parameters in overriding methods as <code>@Nullable</code>:
+even omitting parameter annotations isn't allowed because that would be interpreted like a 
+<code>@NonNull</code> parameter, which is prohibited in that position. 
+That's why the Eclipse Java compiler supports cancellation
+of a nullness default: by annotating a method or type with <code>@NonNullByDefault(false)</code>
+an applicable default will be canceled for this element, and un-annotated parameters are again interpreted as
+unspecified. Now, sub-typing is legal again without adding unwanted <code>@Nullable</code>
+annotations:
+</p>
+<pre>class LegacyClass {
+    String enhance (String in) { // clients are not forced to pass nonnull.
+        return in.toUpperCase();
+    }
+}
+ 
+@NonNullByDefault
+class MyClass extends LegacyClass {
+	
+    // ... methods with @NonNull default ...
+ 
+    @Override
+    @NonNullByDefault(false)
+    String enhance(String in) { // would not be valid if @NonNullByDefault were effective here
+        return super.enhance(in);
+    }
+}
+</pre>
+<p>Canceling a nullness default may not be possible when using annotation types other than
+<code>org.eclipse.jdt.annotation.NonNullByDefault</code> supplied by Eclipse,
+because other annotation types may not declare the boolean property that is used here.</p>
+<h3 id="fields">The case of fields</h3>
+<p>Null annotations work best when applied in <b>method signatures</b> (<b>local variables</b>
+typically don't even need these, but may also leverage null annotations for bridging between
+annotated code and "legacy" code).
+In such usage null annotations connect the chunks of intra procedural analysis as to achieve 
+statements about global data flows. Starting with Eclipse Kepler null annotations can also be 
+applied to <b>fields</b>, but here the situation is slightly different.</p>
+<p>Consider a field marked with <b><code>@NonNull</code></b>: this obviously requires that any
+assignment to the field provides a value that is known not to be null.
+Additionally, the compiler must be able to verify that a non-null field can never be accessed
+in its <b>uninitialized state</b> (in which it still has the value <code>null</code>).
+If it can be verified that every <b>constructor</b> complies to this rule (similarly a static
+field must have an initializer), the program benefits from the safety that dereferencing
+the field can never cause a <code>NullPointerException</code>.</p>
+<p>The situation is more delicate when considering a field marked <b><code>@Nullable</code></b>.
+Such a field should always be considered as dangerous and the recommended way of working
+with nullable fields is: <b>always assign the value to a local variable before working with it</b>.
+Using a local variable the flow analysis can tell exactly, whether a dereference is 
+sufficiently protected by a null check. When following this general rule working with nullable
+fields poses no problems.</p>
+<p>Things get more involved when the code directly dereferences the value of a nullable field.
+The problem is that any null checks that the code may perform before the dereference can
+easily be invalidated by one of these:</p>
+<ul>
+<li>effects via aliased references</li>
+<li>side effects of another method</li>
+<li>concurrency</li>
+</ul>
+<p>One can easily see that without also analyzing thread synchronization (which is beyond
+the compiler's capabilities) no null-check against a nullable field will ever grant
+100% safety for a subsequent dereference. So if concurrent access to a nullable field
+is possible, the field's value should <em>never</em> be directly dereferenced,
+<em>always</em> a local variable should be used instead.
+Even if no concurrency is involved, the remaining issues pose a challenge to a
+complete analysis that is harder than what a compiler can typically handle.</p>
+<h4 id="syntactic_analysis">Flow analysis vs. syntactic analysis</h4>
+<p>Given the compiler cannot fully analyze the effects of aliasing, side effects and
+concurrency, <b>the Eclipse compiler does not perform any flow analysis for fields</b>
+(other than regarding their initialization). Since many developers will consider this
+limitation as too restrictive - requiring the use of local variables where developers
+<em>feel</em> that their code should actually be safe - a new option has been introduced
+as a tentative compromise:</p>
+<p>The compiler can be configured to perform some
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#syntactic_null_analysis_for_fields"><b>syntactic analysis</b></a>.
+This will detect the most obvious patterns like this:
+<pre>
+    @Nullable Object f;
+    void printChecked() {
+        if (this.f != null)
+            System.out.println(this.f.toString());
+    }
+</pre>
+<p>
+With the given option enabled the above code will not be flagged by the compiler.
+It is important to see that this syntactic analysis is not "smart" in any way.
+If any code appears between the check and the dereference the compiler will cowardly
+"forget" the information of the previous null check, without even trying to see if
+the intermediate code could perhaps be harmless according to some criteria.
+Thus <b>please be advised</b>: whenever the compiler flags a dereference of a nullable field
+as unsafe although the human eye may see that null should not occur, please either
+rewrite your code to closely follow the recognized pattern shown above, or, even better:
+use a local variable to leverage all the sophistication of flow analysis, which syntactic
+analysis will never attain.
+</p>
+<h3>Benefits of Design-by-Contract</h3>
+<p>
+Using null annotations in the style of Design-by-Contract as outlined above,
+helps to improve the <b>quality</b> of your Java code in several ways:
+At the interface between methods it is made explicit, which parameters / returns
+tolerate a null value and which ones don't. This captures design decisions,
+which are highly relevant to the developers, in a way that is also checkable by the compiler.
+</p>
+<p>
+Additionally, based on this interface specification the intra-procedural flow analysis can
+pick up available information and give much more precise errors/warnings.
+Without annotations any value flowing into or out of a method has unknown nullness
+and therefore null analysis remains silent about their usage.
+With API-level null annotations the nullness of most values is actually known,
+and significantly fewer NPEs will go unnoticed by the compiler.
+However, you should be aware that still some loopholes exist, where unspecified
+values flow into the analysis, preventing a complete statement whether NPEs can
+occur at runtime.
+</p>
+<h2 id="complete_specification">Complete specification using an extended type system</h2>
+<p>
+The support for null annotations had been designed in a way that should be compatible to
+a future extension. 
+This extension has become part of the Java language as <strong>type annotations (JSR 308)</strong>,
+which have been introduced in Java 8.
+JDT supports to leverage the new concept for 
+<a href="task-using_null_type_annotations.htm">null type annotations</a>.
+</p>
+<h2 id="compiler_messages_explained">Compiler messages explained</h2>
+<p>
+Semantic details of annotation based null analysis are presented here, by explaining the rules
+that the compiler checks and the messages it issues upon violation of a rule.
+</p>
+<p>
+On the corresponding <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm">preference page</a>
+the individual rules checked by the compiler are grouped under the following headings: 
+</p>
+<h3>Violation of null specification</h3>
+<p>As specification violation we handle any situation where a null annotation
+makes a claim that is violated by the actual implementation. The typical situation results
+from specifying a value (local, argument, method return) as <code>@NonNull</code> whereas
+the implementation actually provides a nullable value. Here an expression is considered as 
+nullable if either it is statically known to evaluate to the value null, or if it is declared
+with a <code>@Nullable</code> annotation.
+</p>
+<p>Secondly, this group also contains the rules for method overriding as discussed 
+<a href="#override">above</a>.
+Here a super method establishes a claim (e.g., that null is a legal argument)
+while an override tries to evade this claim (by assuming that null is <i>not</i> a legal argument).
+As mentioned even specializing an argument from un-annotated to <code>@NonNull</code>
+is a specification violation, because it introduces a contract that should bind the client
+(to not pass null), but a client using the super-type won't even see this contract,
+so he doesn't even know what is expected of him.
+</p>
+<p>
+The full list of situations regarded as specification violations is given 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_spec_violation">here</a>.
+It is important to understand that errors in this group <b>should never be ignored</b>,
+because otherwise the entire null analysis will be performed based on false assumptions.
+Specifically, whenever the compiler sees a value with a <code>@NonNull</code> annotation
+it takes it for granted that null will not occur at runtime.
+It's the rules about specification violations which ensure that this reasoning is sound.
+Therefore it is strongly recommended to leave this kind of problem configured as <b>errors</b>.
+</p>
+<h3>Conflict between null annotations and null inference</h3>
+<p>
+Also this group of rules watches over the adherence to null specifications.
+However, here we deal with values that are not <em>declared</em> as <code>@Nullable</code>
+(nor the value null itself), but values where the <b>intra-procedural flow analysis</b> 
+<i>infers</i> that null can possibly occur on some execution path.
+</p>
+<p>
+This situation arises from the fact that for un-annotated local variables
+the compiler will infer whether null is possible using its flow analysis.
+Assuming that this analysis is accurate, if it sees a problem this problem has the
+same severity as direct violations of a null specification.
+Therefore, it is again strongly recommended to leave these problems configured as <b>errors</b>
+and not to ignore these messages.
+</p>
+<p>
+Creating a separate group for these problems serves two purposes: to document that
+a given problem was raised with the help of the flow analysis, and: to account for
+the fact that this flow analysis <em>could</em> be at fault (because of a bug in the
+implementation).
+For the case of an acknowledged implementation bug it could in exceptional situations
+be OK to suppress an error message of this kind.
+</p>
+<p>
+Given the nature of any static analysis, the flow analysis may fail to see that a
+certain combination of execution paths and values is not possible. As an example
+consider <em>variable correlation</em>:
+</p>
+<pre>   String flatten(String[] inputs1, String[] inputs2) { 
+        StringBuffer sb1 = null, sb2 = null;
+        int len = Math.min(inputs1.length, inputs2.length);
+        for (int i=0; i&lt;len; i++) {
+            if (sb1 == null) {
+                sb1 = new StringBuffer();
+                sb2 = new StringBuffer();
+            }
+            sb1.append(inputs1[i]);
+            sb2.append(inputs2[i]); // warning here
+        }
+        if (sb1 != null) return sb1.append(sb2).toString();
+        return "";
+    }
+</pre>
+<p>
+The compiler will report a potential null pointer access at the invocation of <code>sb2.append(..)</code>.
+The human reader can see that there is no actual danger because <code>sb1</code> and <code>sb2</code>
+actually correlate in a way that either both variables are null or both are not null.
+At the line in question we know that <code>sb1</code> is not null, hence also <code>sb2</code>
+is not null. Without going into the details why such correlation analysis is beyond the capability
+of the Eclipse Java compiler, please just keep in mind that this analysis doesn't have the power of a 
+full theorem prover and therefore pessimistically reports some problems which a more capable
+analysis could possibly identify as false alarms.
+</p>
+<p>
+If you want to benefit from flow analysis, you are advised to give a little help to the compiler
+so it can "see" your conclusions. This help can be as simple as splitting the <code>if (sb1 == null)</code>
+into two separate ifs, one for each local variable, which is a very small price to pay for the
+gain that now the compiler can exactly see what happens and check your code accordingly.
+More discussion on this topic will follow <a href="#tips_analyzable">below</a>.
+</p>
+<h3>Unchecked conversion from non-annotated type to @NonNull type</h3>
+<p>
+This group of problems is based on the following analogy: in a program using Java 5 generics
+any calls to pre-Java-5 libraries may expose raw types, i.e., applications of a generic type
+which fail to specify concrete type arguments. To fit such values into a program using
+generics the compiler can add an <i>implicit conversion</i> by assuming that type arguments were
+specified in the way expected by the client part of the code.
+The compiler will issue a warning about the use of such a conversion and proceed its type checking
+assuming the library "does the right thing".
+In exactly the same way, an un-annotated return type of a library method can be considered
+as a "raw" or "legacy" type.
+Again an <i>implicit conversion</i> can optimistically assume the expected specification.
+Again a warning is issued and analysis continues assuming that the library "does the right thing".
+</p>
+<p>
+Theoretically speaking, also the need for such implicit conversions indicates a specification
+violation. However, in this case it may be 3rd party code that violates the specification which our
+code expects. Or, maybe (as we have convinced ourselves of) some 3rd party code does fulfill the
+contract, but only fails to declare so (because it doesn't use null annotations).
+In such situations we may not be able to exactly fix the problem for <em>organizational</em> reasons.
+</p>
+<pre>    @SuppressWarnings("null")
+    @NonNull Foo foo = Library.getFoo(); // implicit conversion
+    foo.bar(); 
+</pre>
+<p>
+The above code snippet assumes that <code>Library.getFoo()</code> returns a <code>Foo</code>
+without specifying a null annotation. We can integrate the return value into our annotated
+program by assignment to a <code>@NonNull</code> local variable, which triggers a warning
+regarding an unchecked conversion.
+By adding a corresponding <code>SuppressWarnings("null")</code> to this declaration
+we acknowledge the inherent danger and accept the responsibility of having verified that
+the library actually behaves as desired.
+</p>
+<h2 id="tips_analyzable">Tips for making code better analyzable</h2>
+<p>
+If flow analysis cannot see that a value is indeed not null, the simplest strategy is always
+to add a new scoped local variable annotated with <code>@NonNull</code>.
+Then, if you are convinced that the value assigned to this local will never be null at runtime you can use a helper methods like this:
+</p>
+<pre>    static @NonNull &lt;T&gt; T assertNonNull(@Nullable T value, @Nullable String msg) {
+        if (value == null) throw new AssertionError(msg);
+        return value;
+    }
+    @NonNull MyType foo() {
+        if (isInitialized()) {
+            MyType couldBeNull = getObjectOrNull();
+            @NonNull MyType theValue = assertNonNull(couldBeNull, 
+                    "value should not be null because application " +
+                    "is fully initialized at this point.");
+            return theValue;
+        }
+        return new MyTypeImpl();
+    }</pre>
+<p>
+Note that by using the above <code>assertNonNull()</code> method you are accepting the responsibility
+that this assertion will always hold at runtime.
+If that is not what you want, annotated local variables will still help to narrow down where and why the analysis
+sees a potential for null flowing into a certain location.
+</p>
+<h2 id="tips_adoption">Tips for adopting null annotations</h2>
+<p>
+At the time of releasing the JDT version 3.8.0, collecting advice for adopting null annotations is
+still work in progress. For that reason this information is currently maintained in the 
+<a href="http://wiki.eclipse.org/JDT_Core/Null_Analysis/Adopting_Null_Annotations">Eclipse wiki</a>.
+</p>
+</body>
+</html>

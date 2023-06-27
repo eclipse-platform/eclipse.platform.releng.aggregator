@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Adding preferences and properties</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Adding preferences and properties</h3>
+<p><a href="preferences_prefs.htm">Preferences</a> and <a href="preferences_prop_contribute.htm">properties</a>
+can be contributed by team UI plug-ins using the standard techniques.&nbsp; The
+only difference for a team plug-in is that preferences should be contributed
+using the team category, so that all team related preferences are grouped
+together.&nbsp; The CVS markup for the main preferences page looks like this:</p>
+<pre>&lt;extension
+      point=&quot;org.eclipse.ui.preferencePages&quot;&gt;
+   &lt;page
+         name=&quot;%PreferencePage.name&quot;
+         <b>category=&quot;org.eclipse.team.ui.TeamPreferences&quot;</b>
+         class=&quot;org.eclipse.team.internal.ccvs.ui.CVSPreferencesPage&quot;
+         id=&quot;org.eclipse.team.cvs.ui.CVSPreferences&quot;&gt;
+   &lt;/page&gt;
+&lt;/extension&gt;</pre>
+<p>The preferences dialog shows the CVS preferences underneath the team
+category.</p>
+<p><img src="images/teamprefs.png" alt="" border="0" ></p>
+<p>&nbsp;</p>
+<p>Properties are added as described by <a href="../reference/extension-points/org_eclipse_ui_propertyPages.html"><b>org.eclipse.ui.propertyPages</b></a>.&nbsp;
+There is no special team category for properties, since a resource can only be
+configured for one repository provider at a time.&nbsp; However, you must set up
+your property page to filter on the team project persistent property (similar to
+the way we filtered resources for popup menu actions.)</p>
+<pre>
+  &lt;extension
+    point=&quot;org.eclipse.ui.propertyPages&quot;&gt;
+     &lt;page
+           objectClass=&quot;org.eclipse.core.resources.IFile&quot;
+           adaptable=&quot;true&quot;
+           name=&quot;%CVS&quot;
+           class=&quot;org.eclipse.team.internal.ccvs.ui.CVSFilePropertiesPage&quot;
+           id=&quot;org.eclipse.team.ccvs.ui.propertyPages.CVSFilePropertiesPage&quot;&gt;
+        &lt;filter
+<b>              name=&quot;projectPersistentProperty&quot;
+              value=&quot;org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature&quot;&gt;
+</b>        &lt;/filter&gt;
+     &lt;/page&gt;
+     ...</pre>
+<p>
+   &nbsp;
+</p>
+
+
+
+
+
+</BODY>
+</HTML>

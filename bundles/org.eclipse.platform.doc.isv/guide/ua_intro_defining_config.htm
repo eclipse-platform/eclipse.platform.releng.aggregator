@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<title>Defining an intro config</title>
+</head>
+<body>
+
+<h2>Defining an intro config</h2>
+
+<p>
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
+describes the id of the intro config that is to show our content, and the name of the
+XML file that contains the specific definition for the intro content.  It is expected that only one
+intro config should be defined for a given <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>.
+(Only the first intro config found can be shown in a
+<a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>.)
+</p>
+
+<pre>
+   &lt;extension   
+         id="intro"
+         point="org.eclipse.ui.intro.config"&gt;
+      <b>&lt;config
+            introId="org.eclipse.platform.intro"
+            id="org.eclipse.platform.introConfig"
+            content="$nl$/introContent.xml"&gt;</b>
+         &lt;presentation
+               home-page-id="root"
+               standby-page-id="standby"&gt;
+            &lt;implementation
+                  ws="win32"
+                  style="css/shared.css"
+                  kind="html"
+                  os="win32"&gt;
+            &lt;/implementation&gt;
+            &lt;implementation
+                  kind="swt"&gt;
+            &lt;/implementation&gt;
+         &lt;/presentation&gt;
+      &lt;/config&gt;
+   &lt;/extension&gt;  
+</pre>
+
+The path for the file is relative to the plug-in's directory.  (Note
+the use of the <tt>$nl$</tt> variable in the directory name, which means the file will be located in a directory specific
+to the national language of the target environment.)
+<p>
+The config extension allows you to specify both the content and the presentation of the content.
+While the <b>content</b> element focuses on defining pages, the
+<b>presentation</b> element describes presentation-related attributes that describe how
+pages will be shown.  The page id for the intro home page (in <b>full mode</b>) must be specified,
+and the standby page id (in <b>standby mode</b>) is optional.  The home page is the page that is shown when the product is first started.
+A presentation can specify one or more <b>implementations</b> for showing the pages.  Implementations are specified
+per platform and windowing system, allowing you to take advantage of platform-specific features for showing
+page content. For example, the windows platform has a robust HTML browser widget, so an HTML-based implementation
+is used for intro content.  Other platforms without this capability use an SWT-based implementation that maps
+page descriptions to an SWT-based form.  An implementation that does not specify either a windowing system or operating system will be considered
+the generic implementation; to ensure an intro is shown on all platforms, it is important to define
+such an implementation.  The workbench will first look for an implementation that matches the current operating system and
+windowing system.  If one cannot be found, it will choose the generic implementation.  Most of these details
+are handled at the product configuration level, so we won't discuss them any further here.
+</p>
+
+</body>
+</html>
