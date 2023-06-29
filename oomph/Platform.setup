@@ -129,7 +129,7 @@
   <setupTask
       xsi:type="setup.targlets:TargletTask">
     <targlet
-        name="Platform"
+        name="Platform Root"
         activeRepositoryList="CBI+Orbit">
       <requirement
           name="org.eclipse.platform.feature.group"/>
@@ -158,7 +158,7 @@
         defaultEditorID="org.eclipse.ui.genericeditor.GenericEditor"/>
   </setupTask>
   <project name="platform"
-      label="Ant, Base, Runtime, Resources, Update, and Team">
+      label="Ant, Base, Debug, Runtime, Resources, Update, and Team">
     <setupTask
         xsi:type="git:GitCloneTask"
         id="github.clone.platform"
@@ -183,7 +183,7 @@
     <setupTask
         xsi:type="setup.targlets:TargletTask">
       <targlet
-          name="Platform Base, Update, and Ant"
+          name="Platform"
           activeRepositoryList="${eclipse.target.platform}">
         <requirement
             name="org.eclipse.test.performance"
@@ -234,13 +234,42 @@
         </predicate>
       </workingSet>
       <workingSet
-          name="Platform Update">
+          name="Platform Debug">
         <predicate
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.update.configurator"
-              relativePathPattern="update/.*"/>
+              project="org.eclipse.debug.core"
+              relativePathPattern="debug/.*"/>
+          <operand
+              xsi:type="workingsets:ExclusionPredicate"
+              excludedWorkingSet="//'platform.base.workingsets'/@workingSets[name='Platform%20Debug%20Examples'] //'platform.base.workingsets'/@workingSets[name='Platform%20Debug%20Tests']"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Debug Examples">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.debug.core"
+              relativePathPattern="debug/.*"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*\.examples\..*"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Debug Tests">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.debug.core"
+              relativePathPattern="debug/.*"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*\.tests.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -313,89 +342,20 @@
               relativePathPattern="team/tests/.*"/>
         </predicate>
       </workingSet>
-    </setupTask>
-    <stream
-        name="master"
-        label="Master"/>
-  </project>
-  <project name="debug"
-      label="Debug">
-    <setupTask
-        xsi:type="git:GitCloneTask"
-        id="github.clone.platform.debug"
-        remoteURI="eclipse-platform/eclipse.platform.debug">
-      <annotation
-          source="http://www.eclipse.org/oomph/setup/InducedChoices">
-        <detail
-            key="inherit">
-          <value>github.remoteURIs</value>
-        </detail>
-        <detail
-            key="label">
-          <value>Platform Debug Github Repository</value>
-        </detail>
-        <detail
-            key="target">
-          <value>remoteURI</value>
-        </detail>
-      </annotation>
-      <description>Platform Debug</description>
-    </setupTask>
-    <setupTask
-        xsi:type="setup.targlets:TargletTask">
-      <targlet
-          name="Platform Debug"
-          activeRepositoryList="${eclipse.target.platform}">
-        <requirement
-            name="*"/>
-        <sourceLocator
-            rootFolder="${github.clone.platform.debug.location}"/>
-      </targlet>
-    </setupTask>
-    <setupTask
-        xsi:type="setup.workingsets:WorkingSetTask"
-        id="platform.debug.workingsets">
       <workingSet
-          name="Platform Debug">
+          name="Platform Update">
         <predicate
             xsi:type="predicates:AndPredicate">
           <operand
               xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.debug.core"/>
-          <operand
-              xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//'platform.debug.workingsets'/@workingSets[name='Platform%20Debug%20Tests'] //'platform.debug.workingsets'/@workingSets[name='Platform%20Debug%20Examples']"/>
-        </predicate>
-      </workingSet>
-      <workingSet
-          name="Platform Debug Tests">
-        <predicate
-            xsi:type="predicates:AndPredicate">
-          <operand
-              xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.debug.tests"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*\.tests.*"/>
-        </predicate>
-      </workingSet>
-      <workingSet
-          name="Platform Debug Examples">
-        <predicate
-            xsi:type="predicates:AndPredicate">
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*\.examples\..*"/>
-          <operand
-              xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.debug.examples.core"/>
+              project="org.eclipse.update.configurator"
+              relativePathPattern="update/.*"/>
         </predicate>
       </workingSet>
     </setupTask>
     <stream
         name="master"
         label="Master"/>
-    <description>The Platform Debug support</description>
   </project>
   <project name="dependencies"
       label="Dependencies">
