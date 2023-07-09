@@ -51,13 +51,15 @@ pipeline {
 						export KEYRING="deadbeef"
 						export KEYRING_PASSPHRASE="none"
 					fi
+					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-Pbree-libs \
 						${MVN_ARGS} \
 						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
 						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
-						-Dproject.build.sourceEncoding=UTF-8
+						-Dproject.build.sourceEncoding=UTF-8 \
+						-Dcbi-ecj-version=99.99
 					'''
 				}
 
