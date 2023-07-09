@@ -42,6 +42,7 @@ pipeline {
 		stage('Build') {
 		    when { not { branch pattern: "prepare_R.*", comparator: "REGEXP" } }
 			steps {
+				sh 'mvn clean package -f org.eclipse.jdt.core.compiler.batch && mvn install:install-file -N -Dfile=$(ls org.eclipse.jdt.core.compiler.batch/target/org.eclipse.jdt.core.compiler.batch-*-SNAPSHOT.jar | head -n 1) -DgroupId=org.eclipse.jdt -DartifactId=ecj -Dversion=99.99.99.ecj_build_of_the_day -Dpackaging=jar'
 				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
 					sh '''
 					if [[ ${BRANCH_NAME} == master ]] || [[ ${BRANCH_NAME} =~ ^R[0-9]_[0-9]+_maintenance ]]; then
@@ -58,6 +59,7 @@ pipeline {
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
 						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
 						-Dproject.build.sourceEncoding=UTF-8
+						-Dcbi-ecj-version=99.99.99.ecj_build_of_the_day
 					'''
 				}
 
