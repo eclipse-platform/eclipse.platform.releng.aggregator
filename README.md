@@ -40,6 +40,19 @@ mvn clean verify  -DskipTests=true
 # eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products
 ```
 
+Build with custom compiler
+--------------------------
+
+To compile the build itself with a custom compiler perform the follwoing step after cloning the submodules:
+
+```
+# compile local version
+mvn clean install -f eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99
+
+# run build with local compiler
+mvn clean verify  -DskipTests=true -Dcbi-ecj-version=99.99
+```
+
 Build requirements
 ------------------
 
