@@ -31,6 +31,7 @@ else
 fi
 
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
+mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$LOCAL_REPO
 mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Dtycho.debug.artifactcomparator \
   -Dtycho.localArtifacts=ignore \
@@ -44,4 +45,5 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -DbuildId=$BUILD_ID \
   -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
   -Dgpg.passphrase=${KEYRING_PASSPHRASE} \
+  -Dcbi-ecj-version=99.99 \
   ${JAVA_DOC_TOOL}
