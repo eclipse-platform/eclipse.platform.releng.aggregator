@@ -325,13 +325,13 @@ spec:
         failure {
             emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
             subject: "${env.RELEASE_VER.trim()} P-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
-            to: "rahul.mohanan@ibm.com jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
+            to: "rahul.mohanan@ibm.com jarthana@in.ibm.com Sheena.Sheena@ibm.com alshama.m.s@ibm.com elsa.zacharia@ibm.com suby.surendran@ibm.com gpunathi@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
             from:"genie.releng@eclipse.org"
         }
         success {
             emailext body: "Software site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-P-builds'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-P-builds</a><br><br>Specific (simple) site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-P-builds/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-P-builds/${env.BUILD_IID.trim()}</a><br><br>", 
             subject: "${env.RELEASE_VER.trim()} P-Build: ${env.BUILD_IID.trim()}", 
-            to: "rahul.mohanan@ibm.com jarthana@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
+            to: "rahul.mohanan@ibm.com jarthana@in.ibm.com Sheena.Sheena@ibm.com alshama.m.s@ibm.com elsa.zacharia@ibm.com suby.surendran@ibm.com gpunathi@in.ibm.com sravankumarl@in.ibm.com kalyan_prasad@in.ibm.com lshanmug@in.ibm.com manoj.palat@in.ibm.com niraj.modi@in.ibm.com noopur_gupta@in.ibm.com sarika.sinha@in.ibm.com vikas.chandra@in.ibm.com",
             from:"genie.releng@eclipse.org"
         }
 	}
