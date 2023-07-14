@@ -628,82 +628,6 @@
         label="Master"/>
     <description>The Platform Images</description>
   </project>
-  <project name="releng"
-      label="Releng">
-    <setupTask
-        xsi:type="git:GitCloneTask"
-        id="github.clone.platform.releng"
-        remoteURI="eclipse-platform/eclipse.platform.releng">
-      <annotation
-          source="http://www.eclipse.org/oomph/setup/InducedChoices">
-        <detail
-            key="inherit">
-          <value>github.remoteURIs</value>
-        </detail>
-        <detail
-            key="label">
-          <value>Platform Releng Github Repository</value>
-        </detail>
-        <detail
-            key="target">
-          <value>remoteURI</value>
-        </detail>
-      </annotation>
-      <description>Platform Releng</description>
-    </setupTask>
-    <setupTask
-        xsi:type="setup.targlets:TargletTask">
-      <targlet
-          name="Platform Releng"
-          activeRepositoryList="EGit+JGit">
-        <requirement
-            name="*"/>
-        <requirement
-            name="org.eclipse.jgit"/>
-        <requirement
-            name="org.eclipse.egit.core"/>
-        <sourceLocator
-            rootFolder="${github.clone.platform.releng.location}"/>
-        <repositoryList
-            name="EGit+JGit">
-          <repository
-              url="https://download.eclipse.org/egit/updates"/>
-        </repositoryList>
-      </targlet>
-    </setupTask>
-    <setupTask
-        xsi:type="setup.workingsets:WorkingSetTask"
-        id="releng.workingsets">
-      <workingSet
-          name="Platform Releng">
-        <predicate
-            xsi:type="predicates:AndPredicate">
-          <operand
-              xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.rcp"/>
-          <operand
-              xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//'releng.workingsets'/@workingSets[name='Platform%20Releng%20Tests']"/>
-        </predicate>
-      </workingSet>
-      <workingSet
-          name="Platform Releng Tests">
-        <predicate
-            xsi:type="predicates:AndPredicate">
-          <operand
-              xsi:type="predicates:RepositoryPredicate"
-              project="org.eclipse.rcp"/>
-          <operand
-              xsi:type="predicates:NamePredicate"
-              pattern=".*tests?.*"/>
-        </predicate>
-      </workingSet>
-    </setupTask>
-    <stream
-        name="master"
-        label="Master"/>
-    <description>The Platform Releng components</description>
-  </project>
   <project name="releng.aggregator"
       label="Releng Aggregator">
     <setupTask
@@ -745,6 +669,38 @@
             name="org.eclipse.jdt.tips.user"/>
         <requirement
             name="org.eclipse.platform.doc.tips"/>
+        <requirement
+            name="org.eclipse.help.feature.group"/>
+        <requirement
+            name="org.eclipse.platform.feature.group"/>
+        <requirement
+            name="org.eclipse.rcp.feature.group"/>
+        <requirement
+            name="org.eclipse.sdk.examples.feature.group"/>
+        <requirement
+            name="org.eclipse.sdk.feature.group"/>
+        <requirement
+            name="org.eclipse.sdk.tests.feature.group"/>
+        <requirement
+            name="org.eclipse.test.feature.group"/>
+        <requirement
+            name="org.eclipse.ant.optional.junit"/>
+        <requirement
+            name="org.eclipse.rcp"/>
+        <requirement
+            name="org.eclipse.releng.tests"/>
+        <requirement
+            name="org.eclipse.sdk.examples"/>
+        <requirement
+            name="org.eclipse.sdk.tests"/>
+        <requirement
+            name="org.eclipse.test"/>
+        <requirement
+            name="org.eclipse.test.performance"/>
+        <requirement
+            name="org.eclipse.test.performance.win32"/>
+        <requirement
+            name="publish-to-maven-central.plain.project"/>
         <sourceLocator
             rootFolder="${github.clone.platform.releng.aggregator.location}"
             locateNestedProjects="true"/>
@@ -762,7 +718,7 @@
               project="org.eclipse.platform.releng.tychoeclipsebuilder"/>
           <operand
               xsi:type="workingsets:ExclusionPredicate"
-              excludedWorkingSet="//'releng.aggregator.workingsets'/@workingSets[name='Platform%20Documentation']"/>
+              excludedWorkingSet="//'releng.aggregator.workingsets'/@workingSets[name='Platform%20Documentation'] //'releng.aggregator.workingsets'/@workingSets[name='Platform%20Releng'] //'releng.aggregator.workingsets'/@workingSets[name='Platform%20Releng%20Tests']"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -773,6 +729,32 @@
               xsi:type="predicates:RepositoryPredicate"
               project="org.eclipse.platform.doc.user"
               relativePathPattern="eclipse.platform.common/.*"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Releng">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.rcp"
+              relativePathPattern="eclipse.platform.releng/.*"/>
+          <operand
+              xsi:type="workingsets:ExclusionPredicate"
+              excludedWorkingSet="//'releng.aggregator.workingsets'/@workingSets[name='Platform%20Releng%20Tests']"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Releng Tests">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.rcp"
+              relativePathPattern="eclipse.platform.releng/.*"/>
+          <operand
+              xsi:type="predicates:NamePredicate"
+              pattern=".*tests?.*"/>
         </predicate>
       </workingSet>
     </setupTask>
