@@ -6,13 +6,14 @@
     xmlns:git="http://www.eclipse.org/oomph/setup/git/1.0"
     xmlns:jdt="http://www.eclipse.org/oomph/setup/jdt/1.0"
     xmlns:predicates="http://www.eclipse.org/oomph/predicates/1.0"
+    xmlns:projects="http://www.eclipse.org/oomph/setup/projects/1.0"
     xmlns:setup="http://www.eclipse.org/oomph/setup/1.0"
     xmlns:setup.p2="http://www.eclipse.org/oomph/setup/p2/1.0"
     xmlns:setup.targlets="http://www.eclipse.org/oomph/setup/targlets/1.0"
     xmlns:setup.workingsets="http://www.eclipse.org/oomph/setup/workingsets/1.0"
     xmlns:workbench="http://www.eclipse.org/oomph/setup/workbench/1.0"
     xmlns:workingsets="http://www.eclipse.org/oomph/workingsets/1.0"
-    xsi:schemaLocation="http://www.eclipse.org/oomph/setup/git/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Git.ecore http://www.eclipse.org/oomph/setup/jdt/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/JDT.ecore http://www.eclipse.org/oomph/predicates/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Predicates.ecore http://www.eclipse.org/oomph/setup/targlets/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/SetupTarglets.ecore http://www.eclipse.org/oomph/setup/workingsets/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/SetupWorkingSets.ecore http://www.eclipse.org/oomph/setup/workbench/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Workbench.ecore http://www.eclipse.org/oomph/workingsets/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/WorkingSets.ecore"
+    xsi:schemaLocation="http://www.eclipse.org/oomph/setup/git/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Git.ecore http://www.eclipse.org/oomph/setup/jdt/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/JDT.ecore http://www.eclipse.org/oomph/predicates/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Predicates.ecore http://www.eclipse.org/oomph/setup/projects/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Projects.ecore http://www.eclipse.org/oomph/setup/targlets/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/SetupTarglets.ecore http://www.eclipse.org/oomph/setup/workingsets/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/SetupWorkingSets.ecore http://www.eclipse.org/oomph/setup/workbench/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/Workbench.ecore http://www.eclipse.org/oomph/workingsets/1.0 https://raw.githubusercontent.com/eclipse-oomph/oomph/master/setups/models/WorkingSets.ecore"
     name="platform"
     label="Platform">
   <annotation
@@ -652,7 +653,14 @@
       <description>Platform Releng Aggregator</description>
     </setupTask>
     <setupTask
-        xsi:type="setup.targlets:TargletTask">
+        xsi:type="projects:ProjectsImportTask"
+        id="import.project.eclipse.platform.prereqs.target">
+      <sourceLocator
+          rootFolder="${github.clone.platform.releng.aggregator.location}/eclipse.platform.releng.prereqs.sdk"/>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask"
+        predecessor="import.project.eclipse.platform.prereqs.target">
       <targlet
           name="Platform Releng Aggregator">
         <requirement
@@ -705,6 +713,7 @@
             rootFolder="${github.clone.platform.releng.aggregator.location}"
             locateNestedProjects="true"/>
       </targlet>
+      <composedTarget>eclipse-sdk-prereqs</composedTarget>
     </setupTask>
     <setupTask
         xsi:type="setup.workingsets:WorkingSetTask"
