@@ -1,0 +1,89 @@
+name: "CodeQLworkflow"
+on:
+  workflow_call:
+    inputs:
+      maven-goals:
+        description: maven goals to use, defaults to 'clean verify'
+        required: false
+        default: 'clean verify'
+        type: string
+      submodules:
+        description: |
+          Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
+          When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
+          The value is just passed as it is to the github/actions/checkout action: https://github.com/actions/checkout#usage
+        type: string
+        required: false
+        default: 'false'
+      mavenVersion: 
+        description: 'The version of Maven set up'
+        type: string
+        required: false
+        default: '3.9.2'
+
+jobs:
+  analyze:
+    name: Analyze
+    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+    #   - https://gh.io/supported-runners-and-hardware-resources
+    #   - https://gh.io/using-larger-runners
+    # Consider using larger runners for possible analysis time improvements.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby', 'swift' ]
+        # Use only 'java' to analyze code written in Java, Kotlin or both
+        # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      with:
+       fetch-depth: 0 # required for jgit timestamp provider to work
+       submodules: ${{ inputs.submodules }}
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+		
+    - name: Set up Java
+      uses: actions/setup-java@cd89f46ac9d01407894225f350157564c9c7cee2 # v3.12.0
+      with:
+        java-version: |
+          8
+          11
+          17
+        distribution: 'temurin'
+        cache: maven
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@07fbbe97d97ef44336b7382563d66743297e442f # v4.5
+      with:
+        maven-version: ${{ inputs.mavenVersion }}
+    - name: Build with Maven
+      uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
+      with:
+       run: >- 
+        mvn --batch-mode -V -U
+        -ntp
+        -Dcompare-version-with-baselines.skip=true
+        -Pbree-libs
+        -DskipTests=true
+        --fail-at-end
+        ${{ inputs.maven-goals }}
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
