@@ -13,7 +13,7 @@ for (STREAM in STREAMS){
 	
 	  parameters {
 	    stringParam('buildId', null, null)
-	    stringParam('javaDownload', 'https://download.java.net/java/early_access/jdk21/32/GPL/openjdk-21-ea+32_linux-x64_bin.tar.gz', null)
+	    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz', null)
 	  }
 	
 	  definition {
