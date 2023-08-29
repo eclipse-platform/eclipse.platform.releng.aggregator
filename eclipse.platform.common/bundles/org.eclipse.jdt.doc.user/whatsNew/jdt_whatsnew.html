@@ -17,20 +17,20 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.28 (JDT)</title>
+<title>What's New in Eclipse 4.29 (JDT)</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.28 (JDT)</h2>
+<h2>What's New in Eclipse 4.29 (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.27 release of Eclipse.
+for the 4.29 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   	<!--li><a href="#Java19">Java 19 Support</a></li-->
 	<!--li><a href="#JavaCompiler">Java Compiler</a></li-->
-  	<!--li><a href="#JUnit">JUnit</a></li-->
+  	<li><a href="#JUnit">JUnit</a></li>
 	<li><a href="#JavaEditor">Java Editor</a></li>
-	<!--li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li-->
+	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
 	<li><a href="#JavaFormatter">Java Formatter</a></li>
 	<li><a href="#Debug">Debug</a></li>
 	<li><a href="#JDTDev">JDT Developers</a></li>
@@ -49,39 +49,116 @@ document for changes in the Platform.</p>
 </colgroup>
 <tbody>
 
+  <!-- ******************* Java XX Support ************************************* -->
+  <!--
+  <tr>
+    <td id="JavaXX" class="section" colspan="2">
+    <h2>Java&trade; XX Support </h2>
+    </td>
+  </tr>
+  -->
+  <!-- ******************* End of Java XX Support ************************************* -->
+
+  <!-- ******************* JUnit ************************************* -->
+  <tr>
+    <td id="JUnit" class="section" colspan="2">
+    <h2>JUnit</h2>
+    </td>
+  </tr>
+  <tr id="junit-search-progress">
+  <td class="title"><a href="#junit-search-progress">Show progress when searching test methods in JUnit run/debug configuration</a></td>
+  <td class="content">
+  A progress dialog and a progress bar have been added to the <b>Run/Debug configurations</b> of JUnit tests. 
+  <p>If the configuration references a <b>test method</b> then a search takes place, which sometimes requires some time and led previously to a UI freeze. 
+  There is now a progress indication in the form of a progress dialog when first opening the <b>Run/Debug Configurations</b> dialog:</p>
+  <p><img src="images/junit-search-progress-dialog.png" alt="JUnit search progress dialog"/></p>
+  <p>Or in the form of a progress bar if the dialog is already opened:</p>
+  <p><img src="images/junit-search-progress-bar.png" alt="JUnit search progress bar"/></p>
+  <p>In case the search is canceled by the user, the cancelation will be reported in the notification area of the <b>Run/Debug Configurations</b> dialog,
+  the text field <b>Test method:</b> will be disabled and and the <b>Run/Debug</b> button will be disabled. The <b>Search...</b> button right next to
+  <b>Test method:</b> remains enabled and triggers the search again.</p>.
+  <p><img src="images/junit-search-progress-run-configuration.png" alt="JUnit search progress Run Configuration"/></p>
+  </td>
+  </tr>
+  <!-- ******************* End of JUnit ************************************* -->
+
   <!-- ******************* Java Editor ************************************* -->
   <tr>
     <td id="JavaEditor" class="section" colspan="2">
     <h2>Java Editor </h2>
     </td>
   </tr>
-  <tr id="call-hierarchy-on-ctrl-click">
-  <td class="title"><a href="#call-hierarchy-on-ctrl-click">Call Hierarchy on Ctrl+Click</a></td>
+  <tr id="java-constant-hover">
+  <td class="title"><a href="#java-constant-hover">Java Constant Hover</a></td>
   <td class="content">
-  <p><code>Open Call Hierarchy</code> action added to the list of actions shown on <code>Ctrl+Click</code> for fields or methods</p>
-  <p><img src="images/call-hierarchy-on-ctrl-click1.png" alt="Call hierarchy action for fields"/></p>
-  <p><img src="images/call-hierarchy-on-ctrl-click.png" alt="Call hierarchy action for methods"/></p>
+  A new hover has been added to display the values of integer or float constants specified in binary, octal, or hex
+  format.  When hovering over such constants, the value will be shown in decimal format followed by the value in hex.
+  <p>The hover can be activated in the <b>Java &gt; Editor &gt; Hovers</b> preference page either by
+  selecting the <b>Combined Hover</b> or by clicking on the <b>Java Constant</b> check box.</p>
+  <p><img src="images/java-constant-hover-prefs.png" alt="Java Constant Hover in preferences"/></p>
+  <p>The following shows hovering over an integer constant specified in octal format:</p>
+  <p><img src="images/java-constant-hover-example.png" alt="Example of Java Constant Hover"/></p>
   </td>
   </tr>
+  <tr id="lambda-cleanup-improvements">
+  <td class="title"><a href="#lambda-cleanup-improvements">Lambda Cleanup Improvements</a></td>
+  <td class="content">
+  A number of improvements have been made to the Java cleanups concerning converting to use lambdas and simplifying existing
+  lambdas.  First of all, the cleanup preference: <b>Convert functional interface instances</b> on the <b>Java Features</b> tab
+  for Java 8 has added an additional checkbox: <b>Simplify method reference syntax for lambda conversions</b>.  This checkbox is
+  selected by default and instructs the cleanup to use method reference syntax where possible when converting from anonymous
+  classes.  If the checkbox is unselected, method reference syntax will not be used by default (sometimes required to avoid
+  a runtime <i>NullPointerException</i>) but will only be used if the user has also selected the <b>Simplify lambda expression and
+  method reference syntax</b> cleanup option found on the <b>Code Style</b> tab.  By default, the Quick fix to convert an
+  anonymous class will also by default now use the method reference syntax where possible.
+  <p><img src="images/new-lambda-pref.png" alt="New Lambda Cleanup Preference"/></p>
+  <p>The second improvement to the lambda cleanups and quick fix is that the code now recognizes use of <b>instanceof</b> can
+  be replaced with a method reference to <b>isInstance</b></p>.
+  <p>The following code:</p>
+  <p><img src="images/lambda-example-before.png" alt="Lambda Cleanup Example Before"/></p>
+  <p>with the lambda cleanup will by default change to:</p>
+  <p><img src="images/lambda-example-after.png" alt="Lambda Cleanup Example After"/></p>
+  </td>
+  </tr>
+
   <!-- ******************* End of Java Editor ************************************* -->
+ 
+
+  <!-- ******************* Java Views and Dialogs ************************************* -->
+  <tr>
+    <td id="JavaViewsAndDialogs" class="section" colspan="2">
+    <h2>Java Views and Dialogs</h2>
+    </td>
+  </tr>
+  <tr id="ignoreWhitespace">
+    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/584 -->
+    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/commit/8234af07ce40f708b34b4d48b195f0d4e4dc8402 -->
+    <td class="title">Improved "Ignore Whitespace" in Java Compare</td>
+    <td class="content">
+      Up to now the "Ignore White Space" context menu action in the Java Compare editor ignored all whitespace, including what may be semantically significant whitespace.
+      <p><img src="images/show_ws.png" alt="Showing all white space changed"/></p>
+      For example, a white space difference in a Java string literal is semantically significant while trailing white space is not.
+      <p>
+	  This has now been inproved so that e.g. white space changes in string literals are also shown while "Ignore White Space" is active.
+      </p>
+      <p><img src="images/ignore_ws.png" alt="Hiding insignificant white space"/></p>
+    </td>
+  </tr>
+  <!-- ******************* End of Java Views and Dialogs ************************************* -->
+
+  <!-- ******************* Java Compiler ************************************* -->
+  <tr>
+    <td id="JavaCompiler" class="section" colspan="2">
+    <h2>Java Compiler</h2>
+    </td>
+  </tr>
+  <!-- ******************* End of Java Compiler ************************************* -->
 
   <!-- ******************* Java Formatter ************************************* -->
   <tr>
     <td id="JavaFormatter" class="section" colspan="2">
     <h2>Java Formatter </h2>
     </td>
-  </tr>
-  <tr id="new-javadoc-html-formatting-option">
-  <td class="title"><a href="#new-javadoc-html-formatting-option">New Javadoc html format option</a></td>
-  <td class="content">
-      When the formatter option <b>Comments &gt; Javadocs &gt; Format HTML tags</b> is selected, the default behavior for block tags (&lt;pre&gt;, &lt;p&gt;, &lt;dl&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;hr&gt;, and &lt;dir&gt;) is to put each tag and it's closing tag on separate lines.  A new sub-option: <b>Do not put block tags on separate lines</b> has been added to specify not to do this and instead have the tags start on a new line and have their closing tags end a line.
-  <p>For example, without the option, the following:</p>
-  <p><img src="images/javadoc-html-sample.png" alt="Javadoc sample unformatted"/></p>
-  <p>is formatted to:</p>
-  <p><img src="images/javadoc-default-html-format.png" alt="Javadoc default html format"/></p>
-  <p>and with the option specified, is formatted:</p>
-  <p><img src="images/javadoc-new-html-format.png" alt="Javadoc new html format"/></p>
-  </td>
   </tr>
   <!-- ******************* End of Java Formatter ************************************* -->
   
@@ -91,20 +168,6 @@ document for changes in the Platform.</p>
     <h2>Debug</h2>
     </td>
   </tr>
-  <tr id="new-launch-config-name-preferences">
-  <td class="title"><a href="#new-launch-config-name-preferences">New launch config name preference</a></td>
-   <td class="content">
-        For launch configurations, a name is often generated on behalf of the user which is simply the type name of the Java application, Java applet, or the JUnit test class.  In some instances, a user may have classes with the same name in different packages or projects.  Creating launch configurations for each will reuse the type name and add <b>(nn)</b> for each configuration created after the first.  Looking in the <b>Run Configurations</b> or <b>Debug Configurations</b> dialogs or the pull-down for <b>Run</b> or <b>Debug</b>, it may be difficult to determine via the name which type the configuration is referring to.
-	<p>To alleviate this, a new set of preferences has been added to specify that the launch configuration name generated use the fully qualified type name.  Once set, new configurations (either manually created in the <b>Run Configurations</b> or <b>Debug Configurations</b> dialogs or as a result of specifying <b>Run as...</b> or <b>Debug as...</b> from the context menu will qualify the generated name.  Existing configurations are not altered.
-	</p>
-	<p>To specify the new preferences, go to <b>Preferences &gt; Java &gt; Launching</b>
-	</p>
-	<p><img src="images/new-launch-name-prefs.png" alt="New Launch Config Name Preferences"/></p>
-	<p>Launching a Java application results in:</p>
-	<p><img src="images/new-launch-config.png" alt="New Launch Config for Java Application"/></p>
-   </td>
-  </tr>
-
   <!--************************ End of Debug ******************************** -->
 
   <!-- *********************** JDT Developers ******************************** -->
@@ -112,23 +175,6 @@ document for changes in the Platform.</p>
     <td id="JDTDev" class="section" colspan="2">
     <h2>JDT Developers</h2>
     </td>
-  </tr>
-  <tr id="new-method-to-mark-used-message-keys">
-  <td class="title"><a href="#new-method-to-mark-used-message-keys">Method to mark message keys used</a></td>
-  <td class="content">
-      When developing Java code, there are set mechanisms for handling message translation.  There is also a context action <b>Source &gt; Find Broken Externalized Strings</b> which checks <i>.properties</i> file and Java message translation classes that access the <i>.properties</i> file.  The action checks for a number of issues including whether a message key is unused or missing and provides the results in the <b>Search</b> dialog.
-   <p>When detecting unused keys, it is possible for the action to generate false positives.  For example, a message could be used by another plug-in or product which is not in the workspace or a message key could be dynamically created and the action cannot detect this.</p>
-   <p>A new mechanism has been added for a developer to denote that a message key is known to be used and should be ignored by the <b>Find Broken Externalized Strings</b> action.  Simply copy any known used messages from the existing <i>.properties</i> file into a <i>.usedproperties</i> file with the same name, in the same package.  The <i>.usedproperties</i> file follows the same syntax as a <i>.properties</i> file and any message keys added there will not be marked as unused by the action.  The message data in the <i>.usedproperties</i> file is ignored and can be removed if desired.</p>
-   </td>
-  </tr>
-  
-  <tr id="new-compilationparticipant-api">
-  <td class="title"><a href="#new-compilationparticipant-api">Updated CompilationParticipant API</a></td>
-  <td class="content">
-  	<p>New <code>CompilationParticipant.postProcess()</code> method was added that 
-  	notifies participants about finished class compilation. This notification occurs right before the compiled 
-  	class is written out to disk. This allows participants perform arbitrary byte code manipulation on generated classes.</p>
-  </td>
   </tr>
   <!-- *********************** End of JDT Developers ******************************** -->
   <tr><td colspan="2"/></tr>
