@@ -21,20 +21,20 @@
   ul {padding-left: 13px;}
   /*]]>*/
   </style>
-  <title>Eclipse Platform What's New in 4.28</title>
+  <title>Eclipse Platform What's New in 4.29</title>
 </head>
 <body>
-  <h2>What's New in Eclipse 4.28 (Platform)</h2>
+  <h2>What's New in Eclipse 4.29 (Platform)</h2>
   <p>Here are descriptions of some of the more interesting or significant changes made to the Eclipse Platform for the
-  4.25 release of Eclipse. They are grouped into:</p>
+  4.29 release of Eclipse. They are grouped into:</p>
   <ul>
     <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
     <!--li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li-->
-    <li><a href="#TextEditors">Text Editors</a></li>
+    <!--li><a href="#TextEditors">Text Editors</a></li-->
     <!--li><a href="#Preferences">Preferences</a></li-->
     <!--li><a href="#Debug">Debug</a></li-->
     <!--li><a href="#StylingThemes">Themes and Styling</a></li-->
-    <li><a href="#Security">Security</a></li>
+    <!--li><a href="#Security">Security</a></li-->
     <li><a href="#GeneralUpdates">General Updates</a></li>
   </ul>
   <p>Plug-in developers will also be interested in the corresponding <a href=
@@ -48,155 +48,6 @@
   <col />
 </colgroup>
 <tbody>
-  <!-- ******************* Text Editors ************************************* -->
-  <tr>
-    <td id="TextEditors" class="section" colspan="2">
-    <h2>Text Editors </h2>
-    </td>
-  </tr>
-  <tr id="editor-onboarding">
-    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/633 -->
-    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/78 -->
-    <td class="title">Onboarding information in editor area</td>
-    <td class="content">
-      The editor area now shows the most important and useful commands and their key binding when no editor is open.
-      <p>
-      <img src="images/editor_onboarding.png" alt="Information in editor area" style="max-width: 100%;"/>
-      </p>
-      The information shown is dependent on the selected perspective.
-    </td>
-  </tr>
-  <!-- ******************* End of Text Editors ************************************* -->
-
-  <!-- ******************* Security ************************************* -->
-  <tr>
-    <td id="Security" class="section" colspan="2">
-    <h2>Security</h2>
-    </td>
-  </tr>
-
-  <tr id="force-https">
-    <!-- https://github.com/eclipse-equinox/p2/issues/230 -->
-    <td class="title">CVE-2021-41033: Enforce https protocol</td>
-    <td class="content">
-    To address <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-41033" target="_blank">CVE-2021-41033</a>,
-    all access to external update sites and their artifacts is forced to use https, even when http is specified.
-	The following system properties can be used to affect this behavior:
-	<br/>
-	<br/>
-	<ul>
-	<li><code>p2.httpRule</code></li>
-	<ul>
-	<li><code>redirect</code></li>
-	<ul><li>http:// &rarr; https://</li></ul>
-	<li><code>allow</code></li>
-	<ul><li>http:// &rarr; http://</li></ul>
-	<li><code>block</code></li>
-	<ul><li>http:// &rarr; fail</li></ul>
-	</ul>
-	<li><code>p2.ftpRule</code></li>
-	<ul>
-	<li><code>redirect</code></li>
-	<ul><li>ftp:// &rarr; ftps://</li></ul>
-	<li><code>allow</code></li>
-	<ul><li>ftp:// &rarr; ftp://</li></ul>
-	<li><code>block</code></li>
-	<ul><li>ftp:// &rarr; fail</li></ul>
-	</ul>
-	</ul>
-	<p>
-	Adding the line <code>-Dp2.httpRule=allow</code> as the last line of the <code>eclipse.ini</code> can be used to restore the previous behavior.
-	This can be relevant inside a corporate environment where the firewall may introduce certificates into the network traffic that are not recognized by the cacerts of the Java runtime,
-	i.e., this may be used to avoid "PKIX path validation failed" exceptions that can otherwise be fixed only by importing the firewall certificate into the Java runtime's cacerts.
-	</p>
-	<p>
-	These rules can be specified as configuration-scoped preferences available via the <b>Authorities</b> tab of the <b>Install/Update &rarr; Trust</b> preferences:
-	</p>
-    <p>
-    <img src="images/ProtocolRulesPreferences.png" alt="Protocol Rules Preferences" style="max-width: 100%;"/>
-    </p>
-    <p>
-    The default preference value of each rule is determined by the corresponding system property.
-    </p>
-    </td>
-  </tr>
-
-  <tr id="trusted-authorities">
-    <!-- https://github.com/eclipse-equinox/p2/issues/235 -->
-    <td class="title">CVE-2021-41037: Track trusted hosts</td>
-    <td class="content">
-    To address <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-41037" target="_blank">CVE-2021-41037</a>,
-    all access to external update sites and their artifacts during installation and updates is tracked and reported so that you are made aware of the source of the content being installed and can decide whether to trust content from that source.
-    This provides an additional level of security in addition to the signing of artifacts.
-    Simply installing content, even without actually installing any associated artifacts, can in general reconfigure the installation and that could potentially be used for malicious purposes.
-    Also, simply because an artifact is signed, doesn't imply the artifact is necessarily trustworthy.
-    It is important to take into account the source of installed content before installing that content.
-    <p>
-    When installing new content as well as when installing updates,
-    the following <b>Trust Authorities</b> dialog is displayed showing the sites that have been contacted,
-    details about those sites,
-    and details about the specific content being installed from each site:
-    </p>
-    <p>
-    <img src="images/TrustAuthoritiesDialog.png" alt="Trust Authorities Dialog" style="max-width: 100%;"/>
-    </p>
-    <p>
-    All content must originate from sites explicitly accepted as trusted before installation proceeds and before library artifacts are downloaded.
-    The trusted authorities can be remembered in the preferences to avoid being prompted repeatedly for authorities that have already been considered as trusted.
-    Those recorded preferences are available for review and modification via the <b>Authorities</b> tab of the <b>Install/Update &rarr; Trust</b> preferences:
-    </p>
-    <p>
-    <img src="images/TrustAuthoritiesPreferences.png" alt="Trusted Authorities Preferences" style="max-width: 100%;"/>
-    </p>
-    <p>
-    The system property <code>p2.trustedAuthorities</code> can be used to specify a (comma or space separated) list of authorities considered trusted.
-    The default value is effectively <code>-Dp2.trustedAuthorities=https://download.eclipse.org,https://archive.eclipse.org</code>,
-    but product providers may set it differently in their product's <code>eclipse.ini</code>.
-    </p>
-    </td>
-  </tr>
-
-  <tr id="pgp-revocation">
-    <!-- https://github.com/eclipse-equinox/p2/pull/245 -->
-    <td class="title">PGP Key Revocation Handling</td>
-    <td class="content">
-    In the event that a PGP key is compromised, the key may be revoked.
-    Artifacts signed before the revocation date are generally still valid, 
-    but an attacker can create back-dated signatures.
-    Therefore, any artifact signed with a revoked key, 
-    and any internal exception that occurs while processing the revocation information of the key,
-    will result in that artifact being treated as a suspicious artifact,
-    leading to a <b>Trust Artifacts</b> prompt:
-    <p>
-    <img src="images/TrustArtifactsDialog.png" alt="Trust Artifacts Dialog" style="max-width: 100%;"/>
-    </p>
-    <p>
-    You may still choose to install such content, but you will be reminded of the risk:
-    </p>
-    <p>
-    <img src="images/TrustRevokedKeyPrompt.png" alt="Trust Revoked Key Prompt" style="max-width: 100%;"/>
-    </p>
-    <p>
-    You should consider very carefully the source of the content as <a href="#trusted-authorities">tracked</a> for your review <b>before</b> taking this risk.
-    </p>
-    </td>
-  </tr>
-
-  <tr id="untrusted-artifacts">
-    <!-- https://github.com/eclipse-equinox/p2/pull/248 -->
-    <td class="title">Untrusted Artifact Handling</td>
-    <td class="content">
-    As an extra security precaution, the handling of <b>Cancel</b> for the <b>Trust Artifacts</b> dialog has been modified:
-    <p>
-    <img src="images/TrustArtifactsDialogReject.png" alt="Trust Artifacts Dialog Reject" style="max-width: 100%;"/>
-    </p>
-    In particular, if you choose to reject the content,
-    i.e., if you press <b>Cancel</b> or close the dialog,
-    any of the prompted artifacts that have been downloaded during the current install or update operation will be removed from disk to avoid caching of untrusted artifacts.
-    </td>
-  </tr>
-  <!-- ******************* End of Security ************************************* -->
-
   <!-- ******************* General Updates ************************************* -->
   <tr>
     <td id="GeneralUpdates" class="section" colspan="2">
@@ -204,40 +55,22 @@
     </td>
   </tr>
 
-  <tr id="launch-debug-shortcuts-expanded">
-    <!-- https://github.com/eclipse-platform/eclipse.platform.debug/pull/122 -->
-    <td class="title">Launch/Debug context menus directly shows relevant launch configurations</td>
+  <tr id="open-new-workbench-window-on-current-monitor">
+    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/755 -->
+    <td class="title">Open New Workbench Window on Current Monitor</td>
     <td class="content">
-      In the "Run As/Debug As" context-menus, the shortcuts that can resolve directly to 1 or more
-      launch configurations (i.e., shortcuts which implement <code>ILaunchShortcut2</code>) are replaced by
-      the resolved launch directly.
-      <p>This allows to more directly know which launch configuration will be used for the Run or Debug
-      session so it will be easier to identify it afterwards if you intend to tweak it. It is also useful
-      in case you have setup multiple launch configurations of the same for the project and often want to
-      run different ones; for example for A/B testing or for distinct build actions.
-	  </p>
-    </td>
-  </tr>
-
-  <tr id="slf4j.api-version-2">
-    <!-- https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/588 -->
-    <!-- https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/981 -->
-    <td class="title">Logging API SLF4J version 2</td>
-    <td class="content">
-      The Eclipse Platform is now shipped with <code>slf4j.api</code> version 2 by default.
-      But even for version 2 the back-ward compatibility of the package <code>org.sfl4j</code> (but only for that package) has not been broken and <code>slf4j.api</code> exports the package <code>org.sfl4j</code> in version 1 and 2.
-      Therefore Plug-ins that only import and use the package org.slf4j in version 1 don't have to be touched.
+      When creating a new workbench window, it was either placed on the monitor showing the currently
+      active window or on the primary monitor, depending on the operating system. Now the new window
+      is always placed on the monitor that shows the active workbench window.
+      In case the active workbench window spans multiple monitors, the monitor that displays the
+      largest part of the active window is selected.
       <p>
-      Besides breaking changes in the other <code>sfl4j</code> packages than <code>org.sfl4j</code>, version 2 has also changed the way to connect the <code>slf4j.api</code> bundle to a logging-backend to use Java's <code>ServiceLoader</code> mechanism.
-      Consequently you have to make sure that the logging-backend used in your application uses is compatible with <code>slf4j.api</code> version 2.
-      Additionally a <em>OSGi Service Loader Mediator</em> is needed to permit Java's <code>ServiceLoader</code> access to the the provider bundle.
-      To fulfill this requirement Eclipse Platform ships <code>org.apache.aries.spifly.dynamic.bundle</code> by default.
-      If you assemble a final application you have to ensure that this bundle is automatically activated during startup.
-      For an Eclipse Product this can be achieved by assigning the Plug-in <code>org.apache.aries.spifly.dynamic.bundle</code> a suitable start-level in the <code>Configuration</code> section of your product.
+      This makes the placement of newly created workbench windows consistent across all operating
+      systems. It also better reflects the common user expectation to have a new window placed near
+      the existing one rather than on the primary monitor.
       </p>
     </td>
   </tr>
-
   <!-- ******************* End of General Updates ************************************* -->
   <tr><td colspan="2"/></tr>
 </tbody>

@@ -17,17 +17,17 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.28</title>
+<title>Eclipse Platform What's New in 4.29</title>
 </head>
 
 <body>
-<h2>What's New in Eclipse 4.28</h2>
+<h2>What's New in Eclipse 4.29</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.27 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.29 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  <li><a href="#Platform">Platform Changes</a></li>
-  <!--li><a href="#SWT">SWT Changes</a></li-->
+  <!--li><a href="#Platform">Platform Changes</a></li-->
+  <li><a href="#SWT">SWT Changes</a></li>
 </ul>
 
 <p>
@@ -44,67 +44,33 @@ section of the Eclipse Platform User Guide.
   <col />
 </colgroup>
 <tbody>
-  <!-- ******************** Platform ********************** -->
+  <!-- *********************** SWT *********************** -->
   <tr>
-    <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
+    <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
 
-  <tr id="e4CommandIcons">
-    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/614 -->
-    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/commit/cdb6e2875d7abaa9213c60d22e5ab0a72a8c53f2 -->
-    <td class="title">Command Icons in e4</td>
+  <tr id="setfocus-no-longer-activates-shell"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/issues/450 -->
+    <td class="title">Control.setFocus() no longer activates its Shell</td>
     <td class="content">
-      It is now possible to set command icons in the e4 model using the Eclipse 4 Model Editor.
-      Previously this was only possible for e3 commands using the <code>org.eclipse.ui.commandImages</code> extension point.
-    </td>
-  </tr>
-  
-    <tr id="ignoreWhitesplace">
-    <!-- https://github.com/eclipse-platform/eclipse.platform/pull/429 -->
-    <!-- https://github.com/eclipse-platform/eclipse.platform/pull/429/commits/00a41e5445dc9e3263109bd0ce4c3abac7100739 -->
-    <td class="title">Influence "Ignore Whitespace" in Compare</td>
-    <td class="content">
-      The "Ignore White Space" context menu action in the Eclipse Compare editor ignores all whitespace, including what may be semantically significant whitespace.
-      For example, in Java a whitespace difference in a string literal is semantically significant while trailing whitespace is not.
+      Previously calling <code>Control.setFocus()</code> also activated its
+      <code>Shell</code>. This behavior was never documented and was never
+      explained why it existed. But it caused problems: setting focus
+	  to a control in a background Shell caused the Shell to jump on user.
       <p>
-      It is now possible to hook into the ignore-whitespace algorithm by providing an implementation of the new <code>IIgnoreWhitespaceContributor</code> interface.
-      Return an instance of this interface in your override of the <code>createIgnoreWhitespaceContributor</code> method in your sub-class of <code>TextMergeViewer</code>.
-      </p>
-      <p>
-      Your implementation is called for each detected whitespace difference when "Ignore White Space" is enabled.
-      Your implementation can decide whether that whitespace difference should be ignored or not.
-      </p>
+      Now setting focus just sets focus, even if the Shell is in the background.
+      To also bring Shell to front, explicitly call <code>Shell.setActive()</code>.
+	  </p><p>
+      This change can be disabled using a Java property.
+      For Example, add this VM argument in <code>eclipse.ini</code> or on
+	  the command line after <code>-vmargs</code>:</p>
+      <pre><b>-Dorg.eclipse.swt.internal.activateShellOnForceFocus=true</b></pre>
+      <p>Note: this property is only added temporarily and will be removed later.
+	  </p><p>
+	  See <a href="https://github.com/eclipse-platform/eclipse.platform.swt/issues/450" target="_blank">SWT Issue 450</a>
+	  </p>
     </td>
   </tr>
-  <tr id="editor-onboarding">
-    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/633 -->
-    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/78 -->
-    <td class="title">Onboarding information in editor area</td>
-    <td class="content">
-      The editor area now shows the most important and useful commands and their key binding when no editor is open.
-      The information shown is dependent on the currently active perspective.
-      Perspective have to provide these details by providing an extension to the <code>org.eclipse.ui.perspectiveExtensions</code> extension point.
-      Provide and image in the <code>editorOnboardingImage</code> attribute and an short text in the <code>editorOnboardingText</code> attribute of the <code>perspectiveExtension</code> element.
-      Up to 5 commands can be provided in the <code>editorOnboardingCommand</code>.
-      For more details refer to the extension point's documentation. The <code>org.eclipse.ui.resourcePerspective</code> perspective can be used as an example.
-    </td>
-  </tr>
-
-  <tr id="ipath-enhancements">
-    <!-- https://github.com/eclipse-equinox/equinox/pull/228 -->
-    <!-- https://github.com/eclipse-equinox/equinox/pull/259 -->
-    <td class="title">Enhanced IPath creation and conversion</td>
-    <td class="content">
-      The <code>IPath</code> interface now provides various static factory methods to create <code>IPath</code> instances from portable, Linux or Windows path strings as well as from <code>java.io.File</code> or <code>java.nio.file.Path</code> objects.
-      You can now create an <code>IPath</code> completely without referring to <code>org.eclipse.core.runtime.Path</code>.
-      <br/>
-      Furthermore <code>IPath.toPath()</code> was added, which converts an <code>IPath</code> to a equivalent <code>java.nio.file.Path</code> object.
-    </td>
-  </tr>
-
-
-  <!-- ******************** End of Platform ********************** -->
-
+  <!-- *********************** End of SWT *********************** -->
   <tr><td colspan="2"/></tr>
 </tbody>
 </table>
