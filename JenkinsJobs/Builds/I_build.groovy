@@ -26,8 +26,8 @@ for (STREAM in STREAMS){
 # Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
 # 0 6 1-7 7 5-7,1-3
 # 0 18 30,1-7 6-7 5-7,1-3
-0 6 11-30 8 5-7,1-3
-0 18 11-30 8 5-7,1-3
+# 0 6 11-30 8 5-7,1-3
+# 0 18 11-30 8 5-7,1-3
             """)
           }
         }
