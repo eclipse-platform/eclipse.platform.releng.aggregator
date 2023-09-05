@@ -30,6 +30,7 @@ For this to be used by consuming projects, they must have their local maven repo
       branch('R4_26_maintenance')
       branch('R4_27_maintenance')
       branch('R4_28_maintenance')
+      branch('R4_29_maintenance')
     }
   }
 
