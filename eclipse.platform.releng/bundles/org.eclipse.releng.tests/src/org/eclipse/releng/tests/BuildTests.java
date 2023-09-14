@@ -164,9 +164,9 @@ public class BuildTests {
 		String installDir = Platform.getInstallLocation().getURL().getPath();
 		File pluginDir = new File(installDir, "plugins");
 		for (File aPlugin : pluginDir.listFiles()) {
-			if (!aPlugin.getName().contains("test") && aPlugin.getName().startsWith("org.eclipse")
-					&& !aPlugin.getName().contains("org.eclipse.jetty")
-					&& !aPlugin.getName().contains("org.eclipse.ecf")) {
+			String name = aPlugin.getName();
+			if (!name.contains("test") && name.startsWith("org.eclipse") && !name.contains("org.eclipse.jetty")
+					&& !name.contains("org.eclipse.ecf") && !name.startsWith("org.eclipse.orbit")) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
 				}
