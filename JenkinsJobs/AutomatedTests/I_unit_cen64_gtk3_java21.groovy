@@ -5,7 +5,7 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java20'){
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java21'){
 
     logRotator {
       numToKeep(5)
@@ -13,7 +13,8 @@ for (STREAM in STREAMS){
 
     parameters {
       stringParam('buildId', null, null)
-      stringParam('javaDownload', 'https://download.java.net/java/GA/jdk20/bdc68b4b9cbc4ebcb30745c85038d91d/36/GPL/openjdk-20_linux-x64_bin.tar.gz', null)
+      stringParam('javaDownload', 'https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz', null)
+      
     }
 
     definition {
@@ -28,7 +29,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod20'
+      label 'centos-unitpod21'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
