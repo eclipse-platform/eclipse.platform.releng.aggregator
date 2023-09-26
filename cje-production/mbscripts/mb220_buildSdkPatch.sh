@@ -31,7 +31,7 @@ else
 fi
 
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
-mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$LOCAL_REPO
+mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$LOCAL_REPO -DcompilerBaselineMode=disable -DcompilerBaselineReplace=none
 mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Dtycho.debug.artifactcomparator \
   -Dtycho.localArtifacts=ignore \
