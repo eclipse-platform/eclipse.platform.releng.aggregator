@@ -1,6 +1,6 @@
 #!/bin/bash
 #*******************************************************************************
-# Copyright (c) 2016, 2018 GK Software SE and others.
+# Copyright (c) 2016, 2023 GK Software SE and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -116,13 +116,6 @@ fi
 #==== remove the p2 repository (not logged): ====
 
 /bin/rm -rf p2.index p2.packed content.jar artifacts.jar
-
-#==== remove features: ====
-
-echo "== Features: ==" | tee >> .logs/removed.txt
-
-/usr/bin/find * -type d -name \*feature.group -print -exec /bin/rm -rf {} \; -prune >> .logs/removed.txt
-/usr/bin/find * -type d -name \*feature.jar -print -exec /bin/rm -rf {} \; -prune >> .logs/removed.txt
 
 #==== remove eclipse test plug-ins: ====
 
