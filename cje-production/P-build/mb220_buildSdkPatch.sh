@@ -42,7 +42,6 @@ mvn -f eclipse.platform.releng.tychoeclipsebuilder/${PATCH_OR_BRANCH_LABEL}/pom.
   -Djgit.dirtyWorkingTree=error \
   -Dmaven.repo.local=$LOCAL_REPO \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-  -DaggregatorBuild=true \
   -DbuildTimestamp=$TIMESTAMP \
   -DbuildType=$BUILD_TYPE \
   -DbuildId=$BUILD_ID \

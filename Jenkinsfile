@@ -55,10 +55,9 @@ pipeline {
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-Pbree-libs \
 						${MVN_ARGS} \
-						-Dmaven.test.skip=true -DskipTests=true -DaggregatorBuild=true \
+						-Dmaven.test.skip=true -DskipTests=true \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
 						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
-						-Dproject.build.sourceEncoding=UTF-8 \
 						-Dcbi-ecj-version=99.99
 					'''
 				}

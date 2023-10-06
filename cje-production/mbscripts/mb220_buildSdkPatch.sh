@@ -39,7 +39,6 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Djgit.dirtyWorkingTree=error \
   -Dmaven.repo.local=$LOCAL_REPO \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-  -DaggregatorBuild=true \
   -DbuildTimestamp=$TIMESTAMP \
   -DbuildType=$BUILD_TYPE \
   -DbuildId=$BUILD_ID \
