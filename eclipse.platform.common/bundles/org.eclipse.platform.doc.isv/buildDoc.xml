@@ -146,7 +146,7 @@
 		</condition>
 
 		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
-		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
+		<replace file="${basedir}/${optionsFile}" token="@rt@" value="target/dependency/jakarta.annotation-api-1.3.5.jar:target/dependency/jakarta.inject-api-1.0.5.jar" />
 
 		<!-- expand _* to actual version -->
 			<!-- prepare ${replaceFile} with all files and folders from workspace -->
@@ -170,8 +170,6 @@
 
 			<!-- strip away leading path -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^.*/([^/]*)$$" replace="\1" />
-			<!-- remove lines without version pattern "[_-]\d+\.\d+\.\d+"; version pattern is a workaround for bug 402392 -->
-		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*[-_]\d+\.\d+(\.\d+)?.*)|(.*)$$" replace="\1" />
 			<!-- create "<aa>_*[.jar]=<aa><version>[.jar]" property for lines with a version -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*)[-_]\d+\.\d+(\.\d+)?.*?(.jar)?$$" replace="\1_*\3=\0" />
 
@@ -201,25 +199,6 @@
 			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M ${env.JAVA_DOC_PROXIES}"  />
 		</exec>
 
-<!-- Debugging: Add a snapshot of the workspace contents:
-		<fileset dir="${basedir}/.." id="fileSet">
-			<include name="*"/>
-			<include name="*/*"/>
-		</fileset>
-		<dirset dir="${basedir}/.." id="dirSet">
-			<include name="*"/>
-			<include name="*/*"/>
-		</dirset>
-		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
-		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
-		<echo file="doc.bin.log" append="true">
-Content of ${basedir}/..:
-Files:
-${fileList}
-Directories:
-${dirList}
-</echo>
--->
 
 		<!--workaround for bug 409511, bug 101048-->
 		<replace dir="reference/api" token="='/../misc/api-usage-rules.html" value="='./../misc/api-usage-rules.html">
@@ -228,8 +207,5 @@ ${dirList}
 
 	</target>
 
-	<target name="createDocZip">
-		<zip zipfile="${basedir}/doc.zip" basedir="${basedir}" includes="book.css, notices.html, about.html, concepts/**, gettingStarted/**, images/**, reference/**, porting/**, tasks/**,samples/**,guide/**,questions/**" />
-	</target>
 </project>
 

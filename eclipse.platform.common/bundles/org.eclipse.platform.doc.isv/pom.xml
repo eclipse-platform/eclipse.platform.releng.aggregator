@@ -79,7 +79,7 @@
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>jakarta.annotation-api</id>
-                    <versionRange>0.0.0</versionRange>
+                    <versionRange>[1,2)</versionRange>
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>
@@ -89,7 +89,7 @@
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>jakarta.inject.jakarta.inject-api</id>
-                    <versionRange>0.0.0</versionRange>
+                    <versionRange>[1,2)</versionRange>
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>
@@ -259,12 +259,12 @@
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>jakarta.inject.jakarta.inject-api</id>
-                    <versionRange>0.0.0</versionRange>
+                    <versionRange>[2,3)</versionRange>
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>jakarta.annotation-api</id>
-                    <versionRange>0.0.0</versionRange>
+                    <versionRange>[2,3)</versionRange>
                   </requirement>
                 </extraRequirements>
               </dependency-resolution>
@@ -273,6 +273,38 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+			  <execution>
+				  <id>copy-deps</id>
+				  <phase>compile</phase>
+				  <goals>
+					  <goal>copy-dependencies</goal>
+				  </goals>
+			  </execution>
+	          <execution>
+	            <id>copy</id>
+	            <phase>compile</phase>
+	            <goals>
+	              <goal>copy</goal>
+	            </goals>
+	            <configuration>
+	              <artifactItems>
+	                <artifactItem>
+	                  <groupId>jakarta.annotation</groupId>
+	                  <artifactId>jakarta.annotation-api</artifactId>
+	                  <version>1.3.5</version>
+	                </artifactItem>
+	                <artifactItem>
+	                  <groupId>jakarta.inject</groupId>
+	                  <artifactId>jakarta.inject-api</artifactId>
+	                  <version>1.0.5</version>
+	                </artifactItem>
+	              </artifactItems>
+	              <!-- other configurations here -->
+	            </configuration>
+	          </execution>
+	          
+	        </executions>
           </plugin>
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
@@ -291,7 +323,6 @@
 		              <args>target/workspace</args>
 		              <args>-application</args>
 		              <args>org.eclipse.ant.core.antRunner</args>
-		              <args>-quiet</args>
 		              <args>-buildfile</args>
 		              <args>buildDoc.xml</args>
 		              <args>-Dbasedir.properties=cbi_basedirs.properties</args>
@@ -330,7 +361,13 @@
                     <dependency>
                       <artifactId>jakarta.annotation-api</artifactId>
                       <type>eclipse-plugin</type>
-                    </dependency>
+                      <version>1.3.5</version>
+					</dependency>
+                    <dependency>
+                      <artifactId>jakarta.annotation-api</artifactId>
+                      <type>eclipse-plugin</type>
+                      <version>2.1.1</version>
+					</dependency>
                     <dependency>
                       <artifactId>org.eclipse.equinox.launcher</artifactId>
                       <type>eclipse-plugin</type>
