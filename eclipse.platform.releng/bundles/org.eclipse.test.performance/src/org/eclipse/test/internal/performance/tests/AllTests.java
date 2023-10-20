@@ -14,18 +14,11 @@
 
 package org.eclipse.test.internal.performance.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
+@Suite
+@SelectClasses({ PerformanceMeterFactoryTest.class, SimplePerformanceMeterTest.class, VariationsTests.class })
 public class AllTests {
-
-    public static Test suite() {
-        TestSuite suite = new TestSuite("Performance Test plugin tests"); //$NON-NLS-1$
-
-        // suite.addTestSuite(SimplePerformanceMeterTest.class);
-        suite.addTestSuite(VariationsTests.class);
-        suite.addTestSuite(PerformanceMeterFactoryTest.class);
-
-        return suite;
-    }
+    //
 }

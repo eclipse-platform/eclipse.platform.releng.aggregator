@@ -14,17 +14,19 @@
 
 package org.eclipse.test.internal.performance.tests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.eclipse.test.internal.performance.OSPerformanceMeter;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+public class SimplePerformanceMeterTest {
 
-public class SimplePerformanceMeterTest extends TestCase {
-
+    @Test
     public void testPerformanceMeterFactory() {
         Performance performance = Performance.getDefault();
-        PerformanceMeter meter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+        PerformanceMeter meter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this.getClass()));
 
         assertTrue(meter instanceof OSPerformanceMeter);
 

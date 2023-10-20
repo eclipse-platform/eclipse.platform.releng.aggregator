@@ -14,12 +14,14 @@
 
 package org.eclipse.test.internal.performance.tests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.eclipse.test.internal.performance.db.Variations;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+public class VariationsTests {
 
-public class VariationsTests extends TestCase {
-
+    @Test
     public void testVariations() {
         Variations v1 = new Variations();
         v1.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -40,6 +42,7 @@ public class VariationsTests extends TestCase {
         assertEquals("%|k1=foo|%|k2=bar|%|k3=xyz|%", v3.toQueryPattern()); //$NON-NLS-1$
     }
 
+    @Test
     public void testParseVariations() {
         Variations v1 = new Variations();
         v1.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$

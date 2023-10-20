@@ -14,20 +14,22 @@
 
 package org.eclipse.test.internal.performance.tests;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.eclipse.test.internal.performance.OSPerformanceMeter;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+public class PerformanceMeterFactoryTest {
 
-public class PerformanceMeterFactoryTest extends TestCase {
-
+    @Test
     public void testPerformanceMeterFactory() {
         System.setProperty(
                 "PerformanceMeterFactory", "org.eclipse.test.performance:org.eclipse.test.internal.performance.OSPerformanceMeterFactory"); //$NON-NLS-1$ //$NON-NLS-2$
 
         Performance performance = Performance.getDefault();
-        PerformanceMeter pm = performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+        PerformanceMeter pm = performance.createPerformanceMeter(performance.getDefaultScenarioId(this.getClass()));
 
         assertTrue(pm instanceof OSPerformanceMeter);
     }
