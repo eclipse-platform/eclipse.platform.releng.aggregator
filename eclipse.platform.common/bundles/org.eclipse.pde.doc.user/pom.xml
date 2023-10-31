@@ -21,6 +21,10 @@
   <artifactId>org.eclipse.pde.doc.user</artifactId>
   <version>3.14.2200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+  <properties>
+	  <searchPaths>${pdeSearchPath},${jdtSearchPath},${platformSearchPath},${runtimeSearchPath}</searchPaths>
+  </properties>
+  
   <profiles>
     <profile>
       <id>build-docs</id>
@@ -82,6 +86,30 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
           </plugin>
+          <plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-document-bundle-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>schema-to-html</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>schema-to-html</goal>
+						</goals>
+						<configuration>
+							<manifests>
+								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.ui.trace/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.core/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.pde.build}/org.eclipse.pde.build/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.ui/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.launching/plugin.xml</manifest>
+							</manifests>
+							<destination>${basedir}/reference/extension-points</destination>
+							<additionalSearchPaths>${searchPaths}</additionalSearchPaths>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>

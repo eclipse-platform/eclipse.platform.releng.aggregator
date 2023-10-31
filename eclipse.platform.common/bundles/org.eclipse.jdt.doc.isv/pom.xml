@@ -21,6 +21,10 @@
   <artifactId>org.eclipse.jdt.doc.isv</artifactId>
   <version>3.14.2200-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+  
+  <properties>
+	  <searchPaths>${jdtSearchPath},${platformSearchPath},${runtimeSearchPath}</searchPaths>
+  </properties>
   <profiles>
     <profile>
       <id>build-docs</id>
@@ -118,6 +122,34 @@
               </dependency-resolution>
             </configuration>
           </plugin>
+          <plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-document-bundle-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>schema-to-html</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>schema-to-html</goal>
+						</goals>
+						<configuration>
+							<manifests>
+								<manifest>${basedir}/${eclipse.jdt.core}/org.eclipse.jdt.apt.core/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.core}/org.eclipse.jdt.core/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.core.manipulation/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.debug/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.debug.ui/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.junit/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.junit.core/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.launching/plugin.xml</manifest>
+								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.ui/plugin.xml</manifest>
+							</manifests>
+							<destination>${basedir}/reference/extension-points</destination>
+							<additionalSearchPaths>${searchPaths}</additionalSearchPaths>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
