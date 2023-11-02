@@ -74,106 +74,131 @@
                     <id>org.eclipse.update.configurator</id>
                     <versionRange>0.0.0</versionRange>
                   </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.eclipse.ui.views.log</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.eclipse.jdt.doc.isv</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                   <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.eclipse.platform.doc.isv</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
                 </extraRequirements>
               </dependency-resolution>
             </configuration>
           </plugin>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
+              <groupId>org.eclipse.tycho.extras</groupId>
+              <artifactId>tycho-document-bundle-plugin</artifactId>
+              <executions>
+                  <execution>
+                    <id>schema-to-html</id>
+                    <phase>process-resources</phase>
+                    <goals>
+                        <goal>schema-to-html</goal>
+                    </goals>
+                    <configuration>
+                        <manifests>
+                            <manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.ui.trace/plugin.xml</manifest>
+                            <manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.core/plugin.xml</manifest>
+                            <manifest>${basedir}/${eclipse.pde.build}/org.eclipse.pde.build/plugin.xml</manifest>
+                            <manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.ui/plugin.xml</manifest>
+                            <manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.launching/plugin.xml</manifest>
+                        </manifests>
+                        <destination>${basedir}/reference/extension-points</destination>
+                    </configuration>
+                  </execution>
+              </executions>
           </plugin>
           <plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-document-bundle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>schema-to-html</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>schema-to-html</goal>
-						</goals>
-						<configuration>
-							<manifests>
-								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.ui.trace/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.core/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.pde.build}/org.eclipse.pde.build/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.ui/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.pde.ui.ui}/org.eclipse.pde.launching/plugin.xml</manifest>
-							</manifests>
-							<destination>${basedir}/reference/extension-points</destination>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-platform-doc</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>org.eclipse.platform.doc.isv</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/unpack/org.eclipse.platform.doc.isv</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-jdt-doc</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>org.eclipse.jdt.doc.isv</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/unpack/org.eclipse.jdt.doc.isv</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+          </plugin>
           <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>attach-javadocs</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>javadoc</goal>
+                    </goals>
+                    <configuration>
+                        <failOnError>true</failOnError>
+                        <excludePackageNames>*.internal.*</excludePackageNames>
+                        <windowtitle>Eclipse PDE API Specification</windowtitle>
+                        <doctitle>Eclipse PDE API Specification</doctitle>
+                        <header><![CDATA[<span style='font-size:small'><b>Eclipse PDE</b><br>2023-12 (4.30)</span> ]]></header>
+                        <bottom><![CDATA[<br><span style='font-size:small;float:right'>Copyright (c) 2000, 2023 Eclipse Contributors and others. All rights reserved.</span><span style='font-size:small'><a href='{@docRoot}/../misc/api-usage-rules.html'>Guidelines for using Eclipse APIs.</a></span>]]></bottom>
+                        <sourcepath>${eclipse.pde.build}/org.eclipse.pde.build/src
+                                    ;${eclipse.pde.ui.apitools}/org.eclipse.pde.api.tools.annotations/src
+                                    ;${eclipse.pde.ui.ui}/org.eclipse.pde.core/src
+                                    ;${eclipse.pde.ui.ui}/org.eclipse.pde.launching/src
+                                    ;${eclipse.pde.ui.ui}/org.eclipse.pde.ui/src</sourcepath>
+                        <offlineLinks>
+                            <!-- This is used to make linkt to other docs from eclipse relative -->
+                            <offlineLink>
+                                <url>./../../../org.eclipse.platform.doc.isv/reference/api</url>
+                                <location>../../unpack/org.eclipse.platform.doc.isv/reference/api</location>
+                            </offlineLink>
+                            <offlineLink>
+                                <url>./../../../org.eclipse.jdt.doc.isv/reference/api</url>
+                                <location>../../unpack/org.eclipse.jdt.doc.isv/reference/api</location>
+                            </offlineLink>
+                        </offlineLinks>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
             <executions>
               <execution>
-                <id>dont_skip_me</id>
-                <phase>compile</phase>
-                <configuration>
-                  <skip>false</skip>
-                  <!-- call buildDoc.xml -->
-                  <applicationsArgs>
-	                  <args>-consolelog</args>
-	                  <args>-debug</args>
-	                  <args>-data</args>
-	                  <args>target/workspace</args>
-	                  <args>-application</args>
-	                  <args>org.eclipse.ant.core.antRunner</args>
-	                  <args>-quiet</args>
-	                  <args>-buildfile</args>
-	                  <args>buildDoc.xml</args>
-	                  <args>-Dbasedir.properties=cbi_basedirs.properties</args>
-	                  <args>-Declipse.javadoc=${eclipse.javadoc}</args>
-                  </applicationsArgs>
-                  <dependencies>
-                    <dependency>
-                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.ant.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.apache.ant</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.help.base</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.build</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>jakarta.annotation-api</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.update.configurator</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <type>eclipse-plugin</type>
-                      <artifactId>com.ibm.icu</artifactId>
-                    </dependency>
-                    <dependency>
-                      <type>eclipse-plugin</type>
-                      <artifactId>biz.aQute.bndlib</artifactId>
-                    </dependency>
-                  </dependencies>
-                </configuration>
+                <id>copy-resources</id>
+                <!-- here the phase you need -->
+                <phase>prepare-package</phase>
                 <goals>
-                  <goal>eclipse-run</goal>
+                  <goal>copy-resources</goal>
                 </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/reference/api</outputDirectory>
+                  <resources>          
+                    <resource>
+                      <directory>${project.build.directory}/site/apidocs</directory>
+                    </resource>
+                  </resources>              
+                </configuration>            
               </execution>
             </executions>
           </plugin>
