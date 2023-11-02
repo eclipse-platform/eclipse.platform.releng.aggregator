@@ -428,7 +428,7 @@
           <artifactId>maven-antrun-plugin</artifactId>
           <version>3.1.0</version>
         </plugin>
-		<plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
           <version>3.6.1</version>
@@ -591,15 +591,115 @@
           <version>1.1.0</version>
         </plugin>
         <plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-toolchains-plugin</artifactId>
-		    <version>3.1.0</version>
-		</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.4.0</version>
-				</plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-toolchains-plugin</artifactId>
+            <version>3.1.0</version>
+        </plugin>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.4.0</version>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.0</version>
+            <configuration>
+                <source>17</source>
+                <legacyMode>true</legacyMode>
+                <doclint>reference,html,syntax</doclint>
+                <splitindex>true</splitindex>
+                <breakiterator>true</breakiterator>
+                <encoding>UTF-8</encoding>
+                <charset>UTF-8</charset>
+                <use>true</use>
+                <links>
+                    <link>https://docs.osgi.org/javadoc/osgi.core/8.0.0/</link>
+                    <link>https://docs.osgi.org/javadoc/osgi.cmpn/8.0.0/</link>
+                    <link>https://docs.osgi.org/javadoc/osgi.enterprise/7.0.0/</link>
+                </links>
+                <tags>
+                    <tag>
+                        <name>noimplement</name>
+                        <placement>a</placement>
+                        <head>Restriction:</head>
+                    </tag>
+                    <tag>
+                        <name>noextend</name>
+                        <placement>a</placement>
+                        <head>Restriction:</head>
+                    </tag>
+                    <tag>
+                        <name>noreference</name>
+                        <placement>a</placement>
+                        <head>Restriction:</head>
+                    </tag>
+                    <tag>
+                        <name>noinstantiate</name>
+                        <placement>a</placement>
+                        <head>Restriction:</head>
+                    </tag>
+                    <tag>
+                        <name>nooverride</name>
+                        <placement>a</placement>
+                        <head>Restriction:</head>
+                    </tag>
+                    <tag>
+                        <name>TrackedGetter</name>
+                        <placement>cm</placement>
+                        <head>TrackedGetter</head>
+                    </tag>
+                    <tag>
+                        <name>model</name>
+                        <placement>X</placement>
+                        <head>EMF generated tag</head>
+                    </tag>
+                    <tag>
+                        <name>generated</name>
+                        <placement>X</placement>
+                        <head>EMF generated tag</head>
+                    </tag>
+                    <tag>
+                        <name>ordered</name>
+                        <placement>X</placement>
+                        <head>EMF generated tag</head>
+                    </tag>
+                    <tag>
+                        <name>Immutable</name>
+                        <placement>t</placement>
+                        <head></head>
+                    </tag>
+                    <tag>
+                        <name>implNote</name>
+                        <placement>a</placement>
+                        <head><![CDATA[<em>Implementation Note:</em>]]></head>
+                    </tag>
+                    <tag>
+                        <name>implSpec</name>
+                        <placement>a</placement>
+                        <head>Implementation Requirements:</head>
+                    </tag>
+                </tags>
+                <!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
+                <additionalDependencies>
+                    <additionalDependency>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.annotation.bundle</artifactId>
+                        <version>2.0.0</version>
+                    </additionalDependency>
+                    <additionalDependency>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.annotation.versioning</artifactId>
+                        <version>1.1.2</version>
+                    </additionalDependency>
+                    <additionalDependency>
+                        <groupId>org.osgi</groupId>
+                        <artifactId>org.osgi.service.component.annotations</artifactId>
+                        <version>1.5.0</version>
+                    </additionalDependency>
+                </additionalDependencies>
+            </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -640,10 +740,10 @@
      </repositories>
    </profile>
    <profile>
-	  <!-- This provile enables automatic version bumps when running the build -->
+      <!-- This provile enables automatic version bumps when running the build -->
       <id>vb</id>
       <properties>
-		  <compare-version-with-baselines.skip>false</compare-version-with-baselines.skip>
+          <compare-version-with-baselines.skip>false</compare-version-with-baselines.skip>
       </properties>
        <build>
         <plugins>
@@ -658,7 +758,7 @@
                   <goal>bump-versions</goal>
                 </goals>
                 <configuration>
-					<increment>100</increment>
+                    <increment>100</increment>
                 </configuration>
               </execution>
             </executions>
@@ -782,30 +882,30 @@
        </activation>
        <build>
          <plugins>
-         	<plugin>
-	            <groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-apitools-plugin</artifactId>
-	            <version>${tycho.version}</version>
-				<executions>
-					<execution>
-						<id>verify</id>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-						 	<apiToolsRepository>
-						 		<url>${eclipserun-repo}</url>
-						 	</apiToolsRepository>
-						 	<baselines>
-							 	<repository>
-							 		<url>${previous-release.baseline}</url>
-							 	</repository>
-						 	</baselines>
-						 	<skip>${skipAPIAnalysis}</skip>
-						</configuration>
-					</execution>
-				</executions>
-		  	</plugin>
+             <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-apitools-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <executions>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                             <apiToolsRepository>
+                                 <url>${eclipserun-repo}</url>
+                             </apiToolsRepository>
+                             <baselines>
+                                 <repository>
+                                     <url>${previous-release.baseline}</url>
+                                 </repository>
+                             </baselines>
+                             <skip>${skipAPIAnalysis}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+              </plugin>
          </plugins>
       </build>
     </profile>
@@ -1007,120 +1107,30 @@
         <surefire.moduleProperties>--add-modules=ALL-SYSTEM</surefire.moduleProperties>
       </properties>
     </profile>
-	<profile>
-		<id>javadoc</id>
-		<build>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<!-- Must use older version see https://issues.apache.org/jira/projects/MJAVADOC/issues/MJAVADOC-707 -->
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.6.0</version>
-					<executions>
-						<execution>
-							<id>attach-javadocs</id>
-							<phase>package</phase>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<source>17</source>
-            <legacyMode>true</legacyMode>
-						<failOnError>false</failOnError>
-						<quiet>true</quiet>
-						<doclint>reference,html,syntax</doclint>
-						<links>
-							<link>https://docs.osgi.org/javadoc/osgi.core/8.0.0/</link>
-							<link>https://docs.osgi.org/javadoc/osgi.cmpn/8.0.0/</link>
-							<link>https://docs.osgi.org/javadoc/osgi.enterprise/7.0.0/</link>
-						</links>
-						<tags>
-							<tag>
-								<name>noimplement</name>
-								<placement>a</placement>
-								<head>Restriction:</head>
-							</tag>
-							<tag>
-								<name>noextend</name>
-								<placement>a</placement>
-								<head>Restriction:</head>
-							</tag>
-							<tag>
-								<name>noreference</name>
-								<placement>a</placement>
-								<head>Restriction:</head>
-							</tag>
-							<tag>
-								<name>noinstantiate</name>
-								<placement>a</placement>
-								<head>Restriction:</head>
-							</tag>
-							<tag>
-								<name>nooverride</name>
-								<placement>a</placement>
-								<head>Restriction:</head>
-							</tag>
-							<tag>
-								<name>TrackedGetter</name>
-								<placement>cm</placement>
-								<head>TrackedGetter</head>
-							</tag>
-							<tag>
-								<name>model</name>
-								<placement>X</placement>
-								<head>EMF generated tag</head>
-							</tag>
-							<tag>
-								<name>generated</name>
-								<placement>X</placement>
-								<head>EMF generated tag</head>
-							</tag>
-							<tag>
-								<name>ordered</name>
-								<placement>X</placement>
-								<head>EMF generated tag</head>
-							</tag>
-							<tag>
-								<name>Immutable</name>
-								<placement>t</placement>
-								<head></head>
-							</tag>
-							<tag>
-								<name>implNote</name>
-								<placement>a</placement>
-								<head><![CDATA[<em>Implementation Note:</em>]]></head>
-							</tag>
-							<tag>
-								<name>implSpec</name>
-								<placement>a</placement>
-								<head>Implementation Requirements:</head>
-							</tag>
-						</tags>
-						<!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
-						<additionalDependencies>
-							<additionalDependency>
-								<groupId>org.osgi</groupId>
-								<artifactId>org.osgi.annotation.bundle</artifactId>
-								<version>2.0.0</version>
-							</additionalDependency>
-							<additionalDependency>
-								<groupId>org.osgi</groupId>
-								<artifactId>org.osgi.annotation.versioning</artifactId>
-								<version>1.1.2</version>
-							</additionalDependency>
-							<additionalDependency>
-								<groupId>org.osgi</groupId>
-								<artifactId>org.osgi.service.component.annotations</artifactId>
-								<version>1.5.0</version>
-							</additionalDependency>
-						</additionalDependencies>
-					</configuration>
-				</plugin>
-			</plugins>
-		</build>
-	</profile>
+    <profile>
+        <id>javadoc</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <configuration>
+                                <failOnError>false</failOnError>
+                                <quiet>true</quiet>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
   </profiles>
   <scm>
     <connection>scm:git:https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git</connection>
