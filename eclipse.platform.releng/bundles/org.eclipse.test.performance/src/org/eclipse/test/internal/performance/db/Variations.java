@@ -57,8 +57,6 @@ public class Variations extends Properties {
      * <pre>
      *   key1=value1;key2=value2; .... ; keyn=valuen
      * </pre>
-     *
-     * @param keyValuePairs
      */
     public Variations(String keyValuePairs) {
         parsePairs(keyValuePairs);
@@ -83,9 +81,6 @@ public class Variations extends Properties {
     /**
      * parsing the given string as key/value pairs and stores them in Variations. The string's format is an implementation detail of
      * the database.
-     *
-     * @param keyvaluepairs
-     * @param separator
      */
     private void parse(String keyvaluepairs, String separator) {
         StringTokenizer st = new StringTokenizer(keyvaluepairs, separator);

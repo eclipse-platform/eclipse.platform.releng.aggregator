@@ -40,7 +40,6 @@ public class TimeSeries {
     /**
      * Returns value at given index.
      *
-     * @param ix
      * @return value at given index
      */
     public double getValue(int ix) {
@@ -50,7 +49,6 @@ public class TimeSeries {
     /**
      * Returns std dev at given index.
      *
-     * @param ix
      * @return std dev at given index
      */
     public double getStddev(int ix) {
@@ -60,7 +58,6 @@ public class TimeSeries {
     /**
      * Returns label at given index.
      *
-     * @param ix
      * @return label at given index
      */
     public String getLabel(int ix) {
@@ -70,7 +67,6 @@ public class TimeSeries {
     /**
      * Returns the sample size at the given index.
      *
-     * @param ix
      * @return the sample size at the given index
      */
     public long getCount(int ix) {

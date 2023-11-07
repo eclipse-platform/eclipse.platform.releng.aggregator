@@ -52,10 +52,6 @@ public class PerformanceTestCaseJunit5 extends AbstractPerformanceTestCase {
 
     /**
      * Create a default performance meter for this test case.
-     *
-     * @param testInfo
-     *
-     * @throws Exception
      */
     @BeforeEach
     public void setUp(TestInfo testInfo) throws Exception {
@@ -65,8 +61,6 @@ public class PerformanceTestCaseJunit5 extends AbstractPerformanceTestCase {
 
     /**
      * Dispose of the performance meter.
-     *
-     * @throws Exception
      */
     @AfterEach
     public void tearDown() throws Exception {

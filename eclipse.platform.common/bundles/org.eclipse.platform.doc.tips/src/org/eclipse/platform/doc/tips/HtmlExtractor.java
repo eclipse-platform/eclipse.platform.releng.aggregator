@@ -48,8 +48,6 @@ public final class HtmlExtractor {
 	 * @param html    String containing HTML
 	 * @param monitor {@link IProgressMonitor}
 	 * @return a list of {@link Tip} objects
-	 * @throws OperationCanceledException
-	 * @throws IOException
 	 */
 	public static List<Tip> getTips(String providerId, String html, IProgressMonitor monitor)
 			throws OperationCanceledException, IOException {

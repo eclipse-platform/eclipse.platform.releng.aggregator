@@ -83,7 +83,6 @@ public class UITestApplication implements ITestHarness, IApplication {
 	 * JUnit launcher did not set this argument, then return the name of the default
 	 * application. In 3.0, the default is the "org.eclipse.ui.ide.worbench"
 	 * application.
-	 *
 	 */
 	private String getApplicationToRun(String[] args) {
 		for (int i = 0; i < args.length; i++) {
