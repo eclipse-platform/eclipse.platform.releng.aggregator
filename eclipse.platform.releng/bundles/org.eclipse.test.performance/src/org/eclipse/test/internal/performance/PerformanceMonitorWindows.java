@@ -58,8 +58,6 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
      * This function depends on the GetPerformanceInfo() function being available in the Windows ivjperf.dll. This is available in
      * XP but is usually not available in Win2000. If it is not available then this function throws an
      * UnsupportedOperationException.
-     *
-     * @param scalars
      */
     @Override
     protected void collectGlobalPerformanceInfo(Map scalars) {

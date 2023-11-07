@@ -312,7 +312,6 @@ public class BuildTests {
 	/**
 	 * Return true if the receiver is a source plugin, false otherwise A separate method because this is a little tricky.
 	 *
-	 * @param aPlugin
 	 * @return boolean
 	 */
 	private boolean testSourcePlugin(File aPlugin) {

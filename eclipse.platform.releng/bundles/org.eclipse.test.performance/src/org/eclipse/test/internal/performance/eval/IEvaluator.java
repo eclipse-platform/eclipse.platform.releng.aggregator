@@ -43,7 +43,6 @@ public interface IEvaluator {
     /**
      * Selects the reference build against which the current session will be compared in <code>evaluate</code>.
      *
-     * @param driver
      * @param timestamp
      *            the timestamp of the reference, may be null to use any
      */

@@ -28,8 +28,6 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 
     /**
      * Write out operating system counters for Linux.
-     *
-     * @param scalars
      */
     @Override
     protected void collectOperatingSystemCounters(Map scalars) {
@@ -111,8 +109,6 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 
     /**
      * Write out the global machine counters for Linux.
-     *
-     * @param scalars
      */
     @Override
     protected void collectGlobalPerformanceInfo(Map scalars) {
