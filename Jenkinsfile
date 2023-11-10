@@ -51,7 +51,7 @@ pipeline {
 						export KEYRING="deadbeef"
 						export KEYRING_PASSPHRASE="none"
 					fi
-					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository
+					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-Pbree-libs \
 						${MVN_ARGS} \
@@ -59,7 +59,8 @@ pipeline {
 						-Dcompare-version-with-baselines.skip=false \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
 						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
-						-Dcbi-ecj-version=99.99
+						-Dcbi-ecj-version=99.99 \
+						-U
 					'''
 				}
 
