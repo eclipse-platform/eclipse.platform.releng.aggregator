@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in 4.29 (PDE)</title>
+<title>What's New in 4.30 (PDE)</title>
 </head>
 
 <body>
-<h2>What's New in 4.29 (PDE)</h2>
+<h2>What's New in 4.30 (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Plug-in Development Environment (PDE)
-for the 4.29 release of Eclipse. They are grouped into:</p>
+for the 4.30 release of Eclipse. They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
 	<!--li><a href="#dialogs-wizards-views">Dialogs, Wizards and Views</a></li-->
 	<li><a href="#editors">Editors</a></li>
@@ -40,58 +40,71 @@ for the 4.29 release of Eclipse. They are grouped into:</p>
   <col class="title" />
   <col />
 </colgroup>
-<tbody> 
+<tbody>
+  <!-- ******************** Dialogs, Wizard and Views ********************** -->
+  <!--tr>
+    <td id="dialogs-wizards-views" class="section" colspan="2"><h2>Dialogs, Wizards and Views</h2></td>
+  </tr-->
+  <!-- ******************** End ofDialogs, Wizard and Views ********************** -->
+  
   <!-- ******************** Editors ********************** -->
   <tr>
     <td id="editors" class="section" colspan="2"><h2>Editors</h2></td>
   </tr>
-  <tr id="osgi-repository-target-type">
-    <td class="title"><a href="#osgi-repository-target-type">New OSGi Repository Target Location Type</a></td>
+
+  <tr id="product-update-repository-name">
+    <!-- https://github.com/eclipse-equinox/p2/issues/345 -->
+    <!-- https://github.com/eclipse-equinox/p2/pull/353 -->
+    <!-- https://github.com/eclipse-pde/eclipse.pde/pull/824 -->
+    <td class="title">Support for names of product update repositories</td>
     <td class="content">
-      The OSGi Specification defines a XML format for representing a repository as defined in "<a href="https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.repository.html" target="_blank">132 Repository Service Specification</a>" that allows to hold "Resources" with requirements and capabilities.
-      Such a repository usually contains a set of bundles and is very similar to what we have today with P2 updatesites, to improve interfacing of PDE with such repositories this adds a new target location type "Repository" where content can be used as usual.
-      <p>
-        <img src="images/osgi-repository-target-type.png" alt="grafik"/>
-      </p>
+      The PDE Product Editor now supports in its <code>Updates</code> section to specify the <code>Name</code> of each update repository.
+      In the assembled product the names will be presented to a user in the preferences under <code>Available Software Sites</code>.
+      <p><img src="images/product_updates_names.png" alt="Product Updates with Name"/></p>
     </td>
   </tr>
 
-  <tr id="mixed-products">
-    <!-- https://github.com/eclipse-pde/eclipse.pde/pull/291 -->
-    <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=325614 -->
-    <td class="title">Support for mixed Products</td>
+  <tr id="unnecessary-attributes-removal">
+    <!-- https://github.com/eclipse-pde/eclipse.pde/issues/730 -->
+    <!-- https://github.com/eclipse-pde/eclipse.pde/pull/770 -->
+    <!-- https://github.com/eclipse-equinox/p2/pull/378 -->
+    <!-- https://github.com/eclipse-pde/eclipse.pde/pull/882 -->
+    <td class="title">Removed support for unnecessary attributes in Features and Products</td>
     <td class="content">
-      The PDE Product Editor now supports <em>mixed products</em>, which consist of both Plug-ins and Feature.
-      On the <code>Overview</code> page of the Product, just select
-      <br/>
-      <code>The product configuration is based on: <b>plug-ins and feature</b></code>
-      <br/>
-      and you can add Plug-ins and Features to the Product in the <code>Contents</code> page of the editor.
-      <p>
-      You can launch <em>mixed products</em> as usual from the IDE via shortcuts in the <code>Overview</code> page.
-      Tycho supports building mixed products since version <code>3.0.0</code>.
-      </p>
-      <p><img src="images/mixed-products.png" alt="Mixed products usage"/></p>
-    </td>
-  </tr>
-
-  <tr id="product-startLevel-configuration">
-    <!-- https://github.com/eclipse-pde/eclipse.pde/pull/642 -->
-    <!-- https://github.com/eclipse-pde/eclipse.pde/pull/643 -->
-    <td class="title">Enhanced Start Levels configuration in Products</td>
-    <td class="content">
-      For Products the specification of Plug-in <code>Start Levels</code> in the <code>Configuration</code> page of the Product-Editor has been enhanced.
+      The <code>Feature</code> editor has its support for the following attributes of <code>plugin</code> elements removed:
       <ul>
-      <li>Plugin's that are only transitively contained in a product can now have their <code>Start Level</code> configured too</li>
-      <li>Recommended Plug-ins are only added if they are (transitively) contained in the product.</li>
+        <li><code>download-size</code></li>
+        <li><code>install-size</code></li>
+        <li><code>unpack</code></li>
+        <li><code>fragment</code></li>
       </ul>
-      <p><img src="images/product-start-levels.png" alt="Mixed products usage"/></p>
+      These attributes are unused and without effect for a long time and unnecessarily increase the complexity of the editor and the size of a <code>feature.xml</code> file.
+      They are ignored when present in an existing Feature and removed by the editor upon the next modification through the editor.
+      <p>
+      The <code>Product Configuration</code> editor has its support for the following attribute of <code>plugin</code> elements removed:
+      <ul>
+        <li><code>fragment</code></li>
+      </ul>
+      This attribute is unused and without effect for a long time and unnecessarily increase the size of a <code>.product</code> file.
+      They are ignored when present in an existing Product and removed by the editor upon the next modification through the editor.
+      </p>
     </td>
   </tr>
 
   <!-- ******************** End of Editors ********************** -->
 
-  <tr><td colspan="2"/></tr>
+  <!-- ******************** APITools ********************** -->
+  <!--tr>
+    <td id="APITools" class="section" colspan="2"><h2>API Tools</h2></td>
+  </tr-->
+  <!-- ******************** End of APITools ********************** -->
+  
+   <!-- ******************** PDE Compiler ********************** -->
+  <!--tr>
+    <td id="pde-compiler" class="section" colspan="2"><h2>PDE Compiler</h2></td>
+  </tr-->
+   <!-- ******************** End of PDE Compiler ********************** --> 
+  <!--tr><td colspan="2"/></tr-->
 </tbody>
 </table>
 <!-- ****************** END OF N&N TABLE ****************** -->
