@@ -143,10 +143,24 @@ set +x
 
 #export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
 
-JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
+#JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
 
-
+set -x
+mkdir -p ${WORKSPACE}/java
+pushd ${WORKSPACE}/java
+wget -O jdk.tar.gz --no-verbose https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
+tar xzf jdk.tar.gz
+rm jdk.tar.gz
+export JAVA_HOME_NEW=$(pwd)/$(ls)
+popd
+set +x
+export PATH=${JAVA_HOME_NEW}/bin:${ANT_HOME}/bin:${PATH}                                
+                                
 echo JAVA_HOME: $JAVA_HOME
+export JAVA_HOME=$JAVA_HOME_NEW
+
+
+#echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
 

@@ -138,11 +138,25 @@ cat buildproperties.shsource
 source ./buildproperties.shsource
 set +x
 
-export JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
+#export JAVA_HOME=`readlink -f /usr/bin/java | sed "s:jre/::" | sed "s:bin/java::"`
 echo $JAVA_HOME
 #export ANT_HOME=/shared/common/apache-ant-1.9.6
 
-export PATH=${JAVA_HOME}/bin:${PATH}
+set -x
+mkdir -p ${WORKSPACE}/java
+pushd ${WORKSPACE}/java
+wget -O jdk.tar.gz --no-verbose https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz
+tar xzf jdk.tar.gz
+rm jdk.tar.gz
+export JAVA_HOME_NEW=$(pwd)/$(ls)
+popd
+set +x
+export PATH=${JAVA_HOME_NEW}/bin:${ANT_HOME}/bin:${PATH}                                
+                                
+echo JAVA_HOME: $JAVA_HOME
+export JAVA_HOME=$JAVA_HOME_NEW
+
+#export PATH=${JAVA_HOME}/bin:${PATH}
 export baselinePerf=true
 
 echo JAVA_HOME: $JAVA_HOME
