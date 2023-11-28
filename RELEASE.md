@@ -1,8 +1,6 @@
 # Releng-Tasks 2.0
 
-[Eclipse Major Release Schedule](https://wiki.eclipse.org/Simultaneous_Release)
-
-[Previous Documentation](https://wiki.eclipse.org/Releng-Tasks)
+[Eclipse Major Release Schedule](https://github.com/eclipse-simrel/.github/blob/main/wiki/Simultaneous_Release.md)
 
 ## Milestone and RC Releases
 
