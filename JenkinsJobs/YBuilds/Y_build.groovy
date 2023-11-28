@@ -516,7 +516,6 @@ spec:
           steps {
               container('jnlp') {
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java20', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
