@@ -129,8 +129,9 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	 * @throws IOException If any I/O problem occurs during writing the data
 	 */
 	void writeSysOut(Writer writer) throws IOException {
-		Objects.requireNonNull(writer, "Writer cannot be null");
-		writeFrom(this.sysOutStore, writer);
+		@SuppressWarnings("resource") // requireNonNull just returns first argument
+		Writer w = Objects.requireNonNull(writer, "Writer cannot be null");
+		writeFrom(this.sysOutStore, w);
 	}
 
 	/**
@@ -141,8 +142,9 @@ abstract class AbstractJUnitResultFormatter implements TestResultFormatter {
 	 * @throws IOException If any I/O problem occurs during writing the data
 	 */
 	void writeSysErr(Writer writer) throws IOException {
-		Objects.requireNonNull(writer, "Writer cannot be null");
-		writeFrom(this.sysErrStore, writer);
+		@SuppressWarnings("resource") // requireNonNull just returns first argument
+		Writer w = Objects.requireNonNull(writer, "Writer cannot be null");
+		writeFrom(this.sysErrStore, w);
 	}
 
 	static Optional<TestIdentifier> traverseAndFindTestClass(TestPlan testPlan, TestIdentifier testIdentifier) {
