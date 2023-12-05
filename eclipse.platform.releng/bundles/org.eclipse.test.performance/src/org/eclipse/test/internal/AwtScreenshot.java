@@ -93,8 +93,15 @@ public class AwtScreenshot {
                 processBuilder.environment().put("AWT_TOOLKIT", "CToolkit");
             }
             Process process = processBuilder.start();
-            new StreamForwarder(process.getErrorStream(), System.out).start();
-            new StreamForwarder(process.getInputStream(), System.out).start();
+
+            @SuppressWarnings("resource") // never close process streams
+            InputStream errorStream = process.getErrorStream();
+
+            @SuppressWarnings("resource") // never close process streams
+            InputStream inputStream = process.getInputStream();
+
+            new StreamForwarder(errorStream, System.out).start();
+            new StreamForwarder(inputStream, System.out).start();
             long end = System.currentTimeMillis() + TIMEOUT_SECONDS * 1000;
             boolean done = false;
             do {
