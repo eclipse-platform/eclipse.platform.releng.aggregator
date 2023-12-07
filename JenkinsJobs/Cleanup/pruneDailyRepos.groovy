@@ -12,7 +12,6 @@ and other such scripts.
     numToKeep(5)
   }
 
-  jdk('oracle-jdk8-latest')
 
   label('centos-latest')
 
