@@ -59,7 +59,7 @@ then
 	cd ${LOCAL_TOOLS}
 	echo "Extracting Eclipse from ${FILE_ECLIPSE} ..."
 	scp genie.releng@projects-storage.eclipse.org:${FILE_ECLIPSE} .
-	tar xf eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
+	tar --warning=no-unknown-keyword -xf eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 	cd ${WORKSPACE}
 fi
 require_executable ${ECLIPSE}
