@@ -67,10 +67,10 @@ public class TouchBundles {
 		Map<String, File> gitDirMap = Arrays.asList(gitDirs).stream().filter(File::isDirectory)
 				.collect(Collectors.toMap(File::getName, f -> f));
 
-		if (gitDirMap.containsKey("eclipse.pde")) {
-			gitDirMap.put("eclipse.pde.ui", gitDirMap.get("eclipse.pde"));
+		if (gitDirMap.containsKey("eclipse.pde.ui")) {
+			gitDirMap.put("eclipse.pde", gitDirMap.get("eclipse.pde.ui"));
 		}
-		if (gitDirMap.containsKey("eclipse.platform.releng.aggregator")) {
+		if (gitDirMap.containsKey("eclipse.platform.releng.aggregator")) { 
 			gitDirMap.put("eclipse.platform.releng",
 					new File(gitDirMap.get("eclipse.platform.releng.aggregator"), "eclipse.platform.releng"));
 		}
