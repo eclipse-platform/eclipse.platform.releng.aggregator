@@ -247,8 +247,8 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 		void writeTestCase(final XMLStreamWriter writer) throws XMLStreamException {
 			for (final Map.Entry<TestIdentifier, Stats> entry : testIds.entrySet()) {
 				final TestIdentifier testId = entry.getKey();
-				if (!testId.isTest()) {
-					// only interested in test methods
+				if (!testId.isTest() && isSuccessful(testId)) {
+					// only interested in test methods and in failing containers
 					continue;
 				}
 				// find the parent class of this test method
@@ -256,10 +256,16 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 				if (!parent.isPresent()) {
 					continue;
 				}
-				final String classname = parent.get().getLegacyReportingName();
+
 				writer.writeStartElement(ELEM_TESTCASE);
-				writer.writeAttribute(ATTR_CLASSNAME, classname);
-				writer.writeAttribute(ATTR_NAME, testId.getDisplayName());
+				if (testId.isTest()) {
+					final String classname = parent.get().getLegacyReportingName();
+					writer.writeAttribute(ATTR_CLASSNAME, classname);
+					writer.writeAttribute(ATTR_NAME, testId.getDisplayName());
+				} else { // is a container
+					writer.writeAttribute(ATTR_CLASSNAME, testId.getDisplayName());
+					writer.writeAttribute(ATTR_NAME, "");
+				}
 				final Stats stats = entry.getValue();
 				writer.writeAttribute(ATTR_TIME, String.valueOf((stats.endedAt - stats.startedAt) / ONE_SECOND));
 				// skipped element if the test was skipped
@@ -273,6 +279,13 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 
 				writer.writeEndElement();
 			}
+		}
+
+		private boolean isSuccessful(final TestIdentifier testId) {
+			return !aborted.containsKey(testId)//
+					&& !failed.containsKey(testId) //
+					&& !errored.containsKey(testId)//
+					&& !skipped.containsKey(testId);
 		}
 
 		private void writeSkipped(final XMLStreamWriter writer, final TestIdentifier testIdentifier)
@@ -290,49 +303,27 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 
 		private void writeFailed(final XMLStreamWriter writer, final TestIdentifier testIdentifier)
 				throws XMLStreamException {
-			if (!failed.containsKey(testIdentifier)) {
-				return;
-			}
-			writer.writeStartElement(ELEM_FAILURE);
-			final Optional<Throwable> cause = failed.get(testIdentifier);
-			if (cause.isPresent()) {
-				final Throwable t = cause.get();
-				final String message = t.getMessage();
-				if (message != null && !message.trim().isEmpty()) {
-					writer.writeAttribute(ATTR_MESSAGE, message);
-				}
-				writer.writeAttribute(ATTR_TYPE, t.getClass().getName());
-				writer.writeCharacters(ExceptionUtils.readStackTrace(t));
-			}
-			writer.writeEndElement();
+			writeIfPresentInMap(writer, testIdentifier, ELEM_FAILURE, failed, true);
 		}
 
 		private void writeErrored(final XMLStreamWriter writer, final TestIdentifier testIdentifier)
 				throws XMLStreamException {
-			if (!errored.containsKey(testIdentifier)) {
-				return;
-			}
-			writer.writeStartElement(ELEM_ERROR);
-			final Optional<Throwable> cause = errored.get(testIdentifier);
-			if (cause.isPresent()) {
-				final Throwable t = cause.get();
-				final String message = t.getMessage();
-				if (message != null && !message.trim().isEmpty()) {
-					writer.writeAttribute(ATTR_MESSAGE, message);
-				}
-				writer.writeAttribute(ATTR_TYPE, t.getClass().getName());
-				writer.writeCharacters(ExceptionUtils.readStackTrace(t));
-			}
-			writer.writeEndElement();
+			writeIfPresentInMap(writer, testIdentifier, ELEM_ERROR, errored, true);
 		}
 
 		private void writeAborted(final XMLStreamWriter writer, final TestIdentifier testIdentifier)
 				throws XMLStreamException {
-			if (!aborted.containsKey(testIdentifier)) {
+			writeIfPresentInMap(writer, testIdentifier, ELEM_ABORTED, aborted, false);
+		}
+
+		private static void writeIfPresentInMap(XMLStreamWriter writer, TestIdentifier testIdentifier,
+				String elemFailure, Map<TestIdentifier, Optional<Throwable>> map, boolean writeExceptionStackTrace)
+				throws XMLStreamException {
+			if (!map.containsKey(testIdentifier)) {
 				return;
 			}
-			writer.writeStartElement(ELEM_ABORTED);
-			final Optional<Throwable> cause = aborted.get(testIdentifier);
+			writer.writeStartElement(elemFailure);
+			final Optional<Throwable> cause = map.get(testIdentifier);
 			if (cause.isPresent()) {
 				final Throwable t = cause.get();
 				final String message = t.getMessage();
@@ -340,6 +331,10 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 					writer.writeAttribute(ATTR_MESSAGE, message);
 				}
 				writer.writeAttribute(ATTR_TYPE, t.getClass().getName());
+
+				if (writeExceptionStackTrace) {
+					writer.writeCharacters(ExceptionUtils.readStackTrace(t));
+				}
 			}
 			writer.writeEndElement();
 		}
