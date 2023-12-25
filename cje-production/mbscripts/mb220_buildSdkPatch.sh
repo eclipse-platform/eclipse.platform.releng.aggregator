@@ -45,4 +45,5 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
   -Dgpg.passphrase=${KEYRING_PASSPHRASE} \
   -Dcbi-ecj-version=99.99 \
+  -e \
   ${JAVA_DOC_TOOL}
