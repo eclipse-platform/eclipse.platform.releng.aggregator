@@ -10,54 +10,7 @@
 	</target>
 
 	<target name="all" depends="init" unless="index.present">
-		<antcall target="convertSchemaToHtml" />
-		<antcall target="examplesDocCopy" />
 		<antcall target="generateJavadoc" />
-	</target>
-
-	<target name="convertSchemaToHtml" if="eclipse.running">
-		<property name="dest" value="reference/extension-points" />
-		<property name="platformSearchPath" value="${eclipse.platform.ant},${eclipse.platform.debug},${eclipse.platform.platform},${eclipse.platform.resources.bundles},${eclipse.platform.runtime.bundles},${eclipse.platform.swt.bundles},${eclipse.platform.team.bundles},${eclipse.platform.ua},${eclipse.platform.ui.bundles}" />
-		<property name="runtimeSearchPath" value="${rt.equinox.bundles.bundles},${rt.equinox.framework.bundles},${rt.equinox.p2.bundles}" />
-		<property name="searchPaths" value="${platformSearchPath},${runtimeSearchPath}" />
-
-		<record name="${basedir}/target/platformconvert.txt" loglevel="warn" action="start"/>
-		<!--copy extra files linked to by generated extension point doc-->
-		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/cheatSheetContentFileSpec.html" todir="${dest}"/>
-		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/cheatSheetContentFileSpec.exsd" todir="${dest}"/>
-		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/compositeContentFile.html" todir="${dest}"/>
-		<copy file="${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/compositeContentFile.exsd" todir="${dest}"/>
-		<!--copy extra HTML file linked to by generated extension point doc-->
-		<copy file="${eclipse.platform.ua}/org.eclipse.ui.intro/schema/introContentFileSpec.html" todir="${dest}"/>
-		<record name="${basedir}/target/platformconvert.txt" action="stop"/>
-	</target>
-
-	<target name="examplesDocCopy" >
-		<copy todir="samples">
-			<fileset dir="${eclipse.platform.team.examples}">
-				<include name="org.eclipse.compare.examples/doc-html/"/>
-				<include name="org.eclipse.compare.examples.xml/doc-html/"/>
-				<include name="org.eclipse.team.examples.filesystem/doc-html/"/>
-			</fileset>
-		</copy>
-		<copy todir="samples">
-			<fileset dir="${eclipse.platform.swt.examples}">
-				<include name="org.eclipse.swt.examples/doc-html/"/>
-				<include name="org.eclipse.swt.examples.views/doc-html/"/>
-				<include name="org.eclipse.swt.examples.launcher/doc-html/"/>
-				<include name="org.eclipse.swt.examples.ole.win32/doc-html/"/>
-			</fileset>
-		</copy>
-		<copy todir="samples">
-			<fileset dir="${eclipse.platform.ui.examples}">
-				<include name="org.eclipse.ui.examples.fieldassist/doc-html/"/>
-				<include name="org.eclipse.ui.examples.multipageeditor/doc-html/"/>
-				<include name="org.eclipse.ui.examples.propertysheet/doc-html/"/>
-				<include name="org.eclipse.ui.examples.readmetool/doc-html/"/>
-				<include name="org.eclipse.ui.examples.undo/doc-html/"/>
-				<include name="org.eclipse.ui.examples.javaeditor/doc-html/"/>
-			</fileset>
-		</copy>
 	</target>
 
 	<target name="getJavadocPath" depends="getEclipseJavadocPath" unless="javadocExecutable">

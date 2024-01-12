@@ -50,6 +50,28 @@
       </activation>
       <build>
         <plugins>
+		  <plugin>
+		    <artifactId>maven-clean-plugin</artifactId>
+		    <configuration>
+		      <filesets>
+		        <fileset>
+		          <directory>reference/api</directory>
+		        </fileset>
+		        <fileset>
+				    <directory>reference/extension-points</directory>
+				    <excludes>
+				      <exclude>index.html</exclude>
+				    </excludes>
+				  </fileset>
+				  <fileset>
+				    <directory>samples</directory>
+				    <excludes>
+				      <exclude>samples.html</exclude>
+				    </excludes>
+				  </fileset>
+		      </filesets>
+		    </configuration>
+		  </plugin>
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
@@ -376,7 +398,84 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+		  </plugin>
+		  <plugin>
+	        <artifactId>maven-resources-plugin</artifactId>
+	        <executions>
+	          <execution>
+	            <id>copy-extension-resources</id>
+	            <phase>process-resources</phase>
+	            <goals>
+	              <goal>copy-resources</goal>
+	            </goals>
+	            <configuration>
+	              <outputDirectory>${basedir}/reference/extension-points</outputDirectory>
+	              <resources>          
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>cheatSheetContentFileSpec.html</include>
+			                <include>cheatSheetContentFileSpec.exsd</include>
+			                <include>compositeContentFile.html</include>
+			                <include>compositeContentFile.exsd</include>
+			                <include>org.eclipse.ui.intro/schema/introContentFileSpec.html</include>
+		            	</includes>
+	                </resource>
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.ua}/org.eclipse.ui.intro/schema/</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>introContentFileSpec.html</include>
+		            	</includes>
+	                </resource>
+	              </resources>              
+	            </configuration>            
+	          </execution>
+	          <execution>
+	            <id>copy-example-resources</id>
+	            <phase>process-resources</phase>
+	            <goals>
+	              <goal>copy-resources</goal>
+	            </goals>
+	            <configuration>
+	              <outputDirectory>${basedir}/samples</outputDirectory>
+	              <resources>          
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.team.examples}</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>org.eclipse.compare.examples/doc-html/*.*</include>
+			                <include>org.eclipse.compare.examples.xml/doc-html/*.*</include>
+			                <include>org.eclipse.team.examples.filesystem/doc-html/*.*</include>
+		            	</includes>
+	                </resource>
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.swt.examples}</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>org.eclipse.swt.examples/doc-html/*.*</include>
+			                <include>org.eclipse.swt.examples.views/doc-html/*.*</include>
+			                <include>org.eclipse.swt.examples.launcher/doc-html/*.*</include>
+			                <include>org.eclipse.swt.examples.ole.win32/doc-html/*.*</include>
+		            	</includes>
+	                </resource>
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.ui.examples}</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>org.eclipse.ui.examples.fieldassist/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.multipageeditor/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.propertysheet/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.undo/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.javaeditor/doc-html/*.*</include>
+		            	</includes>
+	                </resource>
+	              </resources>              
+	            </configuration>            
+	          </execution>
+	        </executions>
+	      </plugin>	
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>
