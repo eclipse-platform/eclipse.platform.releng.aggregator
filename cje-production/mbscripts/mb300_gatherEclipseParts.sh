@@ -91,7 +91,7 @@ if [ -z $PATCH_BUILD ]; then
 
 
   # gather swt zips
-  SWT_BUNDLES_DIR=$CJE_ROOT/$AGG_DIR/eclipse.platform.swt.binaries/bundles
+  SWT_BUNDLES_DIR=$CJE_ROOT/$AGG_DIR/eclipse.platform.swt/binaries
   if [ -d $SWT_BUNDLES_DIR ]; then
     pushd $SWT_BUNDLES_DIR
     cp */target/*.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID
