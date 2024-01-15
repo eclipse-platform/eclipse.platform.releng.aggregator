@@ -149,11 +149,11 @@ spec:
   }
   tools {
       jdk 'openjdk-jdk17-latest'
-      maven 'apache-maven-latest'
   }
   environment {
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
+      PATH = "$PATH:/opt/tools/apache-maven/latest/bin"
       logDir = "$CJE_ROOT/buildlogs"
     }
   stages {
