@@ -160,10 +160,7 @@ spec:
       stage('Clean Workspace'){
           steps {
               container('jnlp') {
-                sh \'\'\'
-                    cd $WORKSPACE
-                    rm -rf *
-                \'\'\'
+                cleanWs()
                 }
             }
 	    }
@@ -185,7 +182,7 @@ spec:
                 }
             }
 		}
-	  stage('Genrerate environment variables'){
+	  stage('Generate environment variables'){
           steps {
               container('jnlp') {
                 sh \'\'\'
@@ -274,7 +271,7 @@ spec:
               container('jnlp') {
                   sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh \'\'\'
-                        git config --global user.email "releng-bot@eclipse.org"
+                        git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
@@ -293,8 +290,6 @@ spec:
               container('jnlp') {
                   sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
-                        git config --global user.email "eclipse-releng-bot@eclipse.org"
-                        git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         bash -x ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
