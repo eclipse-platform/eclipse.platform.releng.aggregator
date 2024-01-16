@@ -121,6 +121,9 @@ spec:
 """
     }
   }
+  tools {
+      jdk 'openjdk-jdk17-latest'
+  }
   environment {
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
@@ -258,7 +261,6 @@ spec:
 		stage('Aggregator maven build'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -270,15 +272,13 @@ spec:
                             exit 1
                         fi
                     \'\'\'
-                  }
                 }
             }
 		}
 	  stage('Gather Eclipse Parts'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk17-latest') {
+                      withAnt(installation: 'apache-ant-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
@@ -289,7 +289,6 @@ spec:
                             fi
                           \'\'\'
                       }
-                  }
                 }
             }
 		}
