@@ -46,6 +46,7 @@ class PerformanceMonitor {
         // no default implementation
     }
 
+    @SuppressWarnings("unchecked")
     void addScalar(Map scalars, Dim dimension, long value) {
         scalars.put(dimension, new Scalar(dimension, value));
     }

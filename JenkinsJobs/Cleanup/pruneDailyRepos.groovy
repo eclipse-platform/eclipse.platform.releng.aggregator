@@ -1,5 +1,5 @@
-job('Cleanup/dailyCleanOldBuilds'){
-  displayName('Daily Cleanup for Old Builds')
+job('Cleanup/pruneDailyRepos'){
+  displayName('Daily Repo Pruner')
   description('''
 This job runs several types of "cleanup" on the build machine and downloads server to remove old builds and other left overs from old build.
 It acts as a simple cron job, currently running at 16:00 every day, to execute 
@@ -12,12 +12,13 @@ and other such scripts.
     numToKeep(5)
   }
 
+
   label('centos-latest')
 
   triggers {
     cron('''
-0 4 * * * 
-0 16 * * * 
+0 5 * * * 
+0 17 * * * 
     ''')
   }
 
@@ -52,9 +53,9 @@ ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
 epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/dailyCleanDownloads.sh https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/cleaners/dailyCleanDownloads.sh
+ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/cleanupNightlyRepo.sh https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/cleaners/cleanupNightlyRepo.sh
 
-ssh genie.releng@projects-storage.eclipse.org bash -x ${workspace}/dailyCleanDownloads.sh
+ssh genie.releng@projects-storage.eclipse.org bash -x ${workspace}/cleanupNightlyRepo.sh ${workspace}
 
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
     ''')

@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse</groupId>
   <artifactId>eclipse-platform-parent</artifactId>
-  <version>4.30.0-SNAPSHOT</version>
+  <version>4.31.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <!--
     See maven-enforcer-plugin configuration to actually break the build if
@@ -49,7 +49,7 @@
       such as Version: Mars (4.5), for main features.
       See bug 328139.
     -->
-    <releaseName>2023-12</releaseName>
+    <releaseName>2024-03</releaseName>
     <!--
       The releaseNumbers below, for SDK and Platform, might be
       thought of as the "marketing number" or "branding number",
@@ -64,29 +64,29 @@
       but we'd still want the "marketing number" to be increased to reflect
       "a new yearly release".
     -->
-    <releaseNumberSDK>4.30</releaseNumberSDK>
-    <releaseNumberPlatform>4.30</releaseNumberPlatform>
+    <releaseNumberSDK>4.31</releaseNumberSDK>
+    <releaseNumberPlatform>4.31</releaseNumberPlatform>
 
-    <tycho.version>4.0.4</tycho.version>
+    <tycho.version>4.0.5</tycho.version>
 
-    <cbi-plugins.version>1.4.2</cbi-plugins.version>
-    <surefire.version>3.2.2</surefire.version>
+    <cbi-plugins.version>1.4.3</cbi-plugins.version>
+    <surefire.version>3.2.5</surefire.version>
 
     <!--  
       The tycho-eclipserun-plugin will create its instance of Eclipse from this
       'eclipiserun-repo' repository, such as for computing .api-descriptions and
       generating API Tools reports.
     -->
-    <eclipserun-repo>https://download.eclipse.org/eclipse/updates/4.30-I-builds/</eclipserun-repo>
+    <eclipserun-repo>https://download.eclipse.org/eclipse/updates/4.31-I-builds/</eclipserun-repo>
     
-    <comparator.repo>https://download.eclipse.org/eclipse/updates/4.30-I-builds</comparator.repo>
+    <comparator.repo>https://download.eclipse.org/eclipse/updates/4.31-I-builds</comparator.repo>
 
     <!-- only used when Tycho snapshot repo is enabled in <pluginRepositories> further down -->
     <tycho-snapshot-repo.url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</tycho-snapshot-repo.url>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
-    <cbi-ecj-version>3.36.0.v20231114-0937</cbi-ecj-version>
+    <cbi-ecj-version>3.37.0.v20240131-1047</cbi-ecj-version>
 
     <!--
       Production bundles are produced by ignoring the compiler warnings specified
@@ -138,9 +138,12 @@
     <tycho.addMavenDescriptor>false</tycho.addMavenDescriptor>
     <!-- allows submodules to enable the mapping of p2 artifacts to maven artifacts -->
     <tycho.mapP2Dependencies>false</tycho.mapP2Dependencies>
+    <!-- allows submodules to disable the usage of BREE for their builds -->
+    <tycho.useJDK>BREE</tycho.useJDK>
     
     <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
-    <previous-release.baseline>https://download.eclipse.org/eclipse/updates/4.29/R-4.29-202309031000/</previous-release.baseline>
+    <tycho.baseline.replace>all</tycho.baseline.replace>
+    <previous-release.baseline>https://download.eclipse.org/eclipse/updates/4.30/R-4.30-202312010110/</previous-release.baseline>
 
     <!--
       Declaration of properties that contribute to the arg line for the tycho-surefire-plugin.
@@ -156,6 +159,7 @@
     <!-- system specific JVM args; if needed provided by system properties to the build command -->
     <surefire.systemProperties></surefire.systemProperties>
     <java.version>17</java.version>
+    <printApiMessages>false</printApiMessages>
   </properties>
 
   <organization>
@@ -245,14 +249,11 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
-          <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=453757
-            <resolveWithExecutionEnvironmentConstraints>false</resolveWithExecutionEnvironmentConstraints>
-          -->
           <target>
             <artifact>
               <groupId>org.eclipse</groupId>
               <artifactId>eclipse-sdk-prereqs</artifactId>
-              <version>4.30.0-SNAPSHOT</version>
+              <version>4.31.0-SNAPSHOT</version>
             </artifact>
           </target>
           <environments>
@@ -287,6 +288,12 @@
               <arch>aarch64</arch>
             </environment>
           </environments>
+          <dependency-resolution>
+            <profileProperties>
+				<!-- this is to disable some requirements only important for installtime but not for compile time in JDT-->
+                <org.eclipse.jdt.buildtime>true</org.eclipse.jdt.buildtime>
+            </profileProperties>
+          </dependency-resolution>
         </configuration>
       </plugin>
       <plugin>
@@ -438,6 +445,11 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.version}</version>
         </plugin>
+         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>3.1.1</version>
+        </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>target-platform-configuration</artifactId>
@@ -475,7 +487,7 @@
             <excludeResources>
               <exclude>**/package.html</exclude>
             </excludeResources>
-            <useProjectSettings>false</useProjectSettings>
+            <useProjectSettings>true</useProjectSettings>
           </configuration>
         </plugin>
         <plugin>
@@ -557,7 +569,6 @@
           <version>${tycho.version}</version>
           <configuration>
             <baselineMode>warn</baselineMode>
-            <baselineReplace>all</baselineReplace>
             <baselineRepositories>
               <repository>
                 <url>${comparator.repo}</url>
@@ -598,18 +609,20 @@
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.4.0</version>
+            <version>3.5.0</version>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.6.2</version>
+            <version>3.6.3</version>
             <configuration>
                 <source>17</source>
                 <legacyMode>true</legacyMode>
                 <doclint>reference,html,syntax</doclint>
                 <splitindex>true</splitindex>
                 <breakiterator>true</breakiterator>
+                <notimestamp>true</notimestamp>
+                <locale>en</locale>
                 <encoding>UTF-8</encoding>
                 <charset>UTF-8</charset>
                 <use>true</use>
@@ -679,9 +692,34 @@
                         <placement>a</placement>
                         <head>Implementation Requirements:</head>
                     </tag>
+                    <tag>
+                        <name>category</name>
+                        <placement>a</placement>
+                        <head>Category:</head>
+                    </tag>
+                    <tag>
+                        <name>provisional</name>
+                        <placement>a</placement>
+                        <head>Provisional:</head>
+                    </tag>
+                    <tag>
+                        <name>jniclass</name>
+                        <placement>a</placement>
+                        <head>JNI Class:</head>
+                    </tag>
+                    <tag>
+                        <name>ThreadSafe</name>
+                        <placement>a</placement>
+                        <head>Thread Safe:</head>
+                    </tag>
+                    <tag>
+                        <name>issue</name>
+                        <placement>a</placement>
+                        <head>Issue:</head>
+                    </tag>
                 </tags>
-                <!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
                 <additionalDependencies>
+	                <!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
                     <additionalDependency>
                         <groupId>org.osgi</groupId>
                         <artifactId>org.osgi.annotation.bundle</artifactId>
@@ -697,6 +735,22 @@
                         <artifactId>org.osgi.service.component.annotations</artifactId>
                         <version>1.5.0</version>
                     </additionalDependency>
+                    <dependency>
+					    <groupId>org.eclipse.pde</groupId>
+					    <artifactId>org.eclipse.pde.api.tools.annotations</artifactId>
+					    <version>1.2.0</version>
+					</dependency>
+                    <!-- These are required unless we have no backward-compat anymore but javadoc do not know that ... -->
+                    <additionalDependency>
+					    <groupId>javax.inject</groupId>
+					    <artifactId>javax.inject</artifactId>
+					    <version>1</version>
+					</additionalDependency>
+					<additionalDependency>
+					    <groupId>javax.annotation</groupId>
+					    <artifactId>javax.annotation-api</artifactId>
+					    <version>1.3.2</version>
+					</additionalDependency>
                 </additionalDependencies>
             </configuration>
         </plugin>
@@ -729,12 +783,12 @@
         <!-- Can specify an exact range here, or something of a loose range, depending on what's needed. -->
         <versionRangeForPatch>[3.19.200.v20230705-1800,3.19.249.v20231213-1800)</versionRangeForPatch>
         <!-- Comment this line when a patch is required on top of I-build -->
-        <comparator.repo>https://download.eclipse.org/eclipse/updates/4.29/R-4.29-202309031000/</comparator.repo>
+        <comparator.repo>https://download.eclipse.org/eclipse/updates/4.30/R-4.30-202312010110/</comparator.repo>
       </properties>
       <repositories>
        <repository>
          <id>eclipse-p2-repo-java21patch</id>
-         <url>https://download.eclipse.org/eclipse/updates/4.29/R-4.29-202309031000/</url>
+         <url>https://download.eclipse.org/eclipse/updates/4.30/R-4.30-202312010110/</url>
          <layout>p2</layout>
        </repository>
      </repositories>
@@ -781,7 +835,7 @@
           For maintenance streams should always be "M-builds".
           Ideally, this value would be provided by the environment, see bug 489789.
         -->
-        <eclipse-p2-repo.url>https://download.eclipse.org/eclipse/updates/4.30-I-builds</eclipse-p2-repo.url>
+        <eclipse-p2-repo.url>https://download.eclipse.org/eclipse/updates/4.31-I-builds</eclipse-p2-repo.url>
       </properties>
       <repositories>
         <repository>
@@ -849,11 +903,10 @@
               <version>${tycho.version}</version>
               <configuration>
                 <!--
-                  this tells Tycho to use JRE libraries that match bundle runtime execution environment
-                  https://wiki.eclipse.org/Tycho/Release_Notes/0.14
-                  TODO provide CBI-specific wiki that explains how to setup BREE libraries and toolchain.xml
+                  this tells Tycho to use JRE libraries that match bundle runtime execution environment see:
+                  https://tycho.eclipseprojects.io/doc/latest/tycho-compiler-plugin/compile-mojo.html#useJDK
                 -->
-                <useJDK>BREE</useJDK>
+                <useJDK>${tycho.useJDK}</useJDK>
               </configuration>
             </plugin>
           </plugins>
@@ -902,6 +955,10 @@
                                  </repository>
                              </baselines>
                              <skip>${skipAPIAnalysis}</skip>
+                             <skipIfReplaced>false</skipIfReplaced>
+                             <logDirectory>${project.build.directory}/compilelogs</logDirectory>
+                             <enhanceLogs>true</enhanceLogs>
+                             <printProblems>${printApiMessages}</printProblems>
                         </configuration>
                     </execution>
                 </executions>
@@ -1002,7 +1059,7 @@
           <plugin>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-maven-plugin</artifactId>
-            <version>4.8.1.0</version>
+            <version>4.8.3.0</version>
             <configuration>
               <targetJDK>${java.version}</targetJDK>
               <xmlOutput>true</xmlOutput>

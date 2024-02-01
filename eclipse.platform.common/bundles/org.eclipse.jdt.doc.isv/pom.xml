@@ -14,12 +14,12 @@
   <parent>
     <artifactId>eclipse.platform.common</artifactId>
     <groupId>eclipse.platform.common</groupId>
-    <version>4.30.0-SNAPSHOT</version>
+    <version>4.31.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.doc.isv</artifactId>
-  <version>3.14.2200-SNAPSHOT</version>
+  <version>3.14.2300-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
   
   <profiles>
@@ -43,16 +43,6 @@
                   <requirement>
                     <type>eclipse-plugin</type>
                     <id>org.eclipse.platform.doc.isv</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
-                  <requirement>
-                    <type>eclipse-plugin</type>
-                    <id>org.eclipse.pde.build</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
-                  <requirement>
-                    <type>eclipse-plugin</type>
-                    <id>org.eclipse.pde.core</id>
                     <versionRange>0.0.0</versionRange>
                   </requirement>
                   <requirement>
@@ -115,106 +105,159 @@
                     <id>org.eclipse.update.configurator</id>
                     <versionRange>0.0.0</versionRange>
                   </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.eclipse.platform.doc.isv</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
                 </extraRequirements>
               </dependency-resolution>
             </configuration>
           </plugin>
           <plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-document-bundle-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>schema-to-html</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>schema-to-html</goal>
-						</goals>
-						<configuration>
-							<manifests>
-								<manifest>${basedir}/${eclipse.jdt.core}/org.eclipse.jdt.apt.core/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.core}/org.eclipse.jdt.core/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.core.manipulation/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.debug/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.debug.ui/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.junit/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.junit.core/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.launching/plugin.xml</manifest>
-								<manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.ui/plugin.xml</manifest>
-							</manifests>
-							<destination>${basedir}/reference/extension-points</destination>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-document-bundle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>schema-to-html</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>schema-to-html</goal>
+                        </goals>
+                        <configuration>
+                            <manifests>
+                                <manifest>${basedir}/${eclipse.jdt.core}/org.eclipse.jdt.apt.core/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.core}/org.eclipse.jdt.core/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.core.manipulation/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.debug/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.debug.ui/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.junit/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.junit.core/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.debug}/org.eclipse.jdt.launching/plugin.xml</manifest>
+                                <manifest>${basedir}/${eclipse.jdt.ui}/org.eclipse.jdt.ui/plugin.xml</manifest>
+                            </manifests>
+                            <destination>${basedir}/reference/extension-points</destination>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-platform-doc</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>org.eclipse.platform.doc.isv</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/unpack/org.eclipse.platform.doc.isv/reference/api</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
           </plugin>
           <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>attach-javadocs</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>javadoc</goal>
+                    </goals>
+                    <configuration>
+                        <failOnError>true</failOnError>
+                        <excludePackageNames>*.internal.*:*.internal</excludePackageNames>
+                        <windowtitle>Eclipse JDT API Specification</windowtitle>
+                        <doctitle>Eclipse JDT API Specification</doctitle>
+                        <header><![CDATA[<span style='font-size:small'><b>Eclipse JDT</b><br>${releaseName} (${releaseNumberSDK})</span>]]></header>
+                        <bottom><![CDATA[<br><span style='font-size:small;float:right'>Copyright (c) 2000, 2023 Eclipse Contributors and others. All rights reserved.</span><span style='font-size:small'><a href='{@docRoot}/../misc/api-usage-rules.html'>Guidelines for using Eclipse APIs.</a></span>]]></bottom>
+                        <sourcepath>${eclipse.jdt.core}/org.eclipse.jdt.annotation/src
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core.compiler.batch/src
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.apt.core/src
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/antadapter
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/codeassist
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/compiler
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/dom
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/eval
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/formatter
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/model
+                                    ;${eclipse.jdt.core}/org.eclipse.jdt.core/search
+                                    ;${eclipse.jdt.debug}/org.eclipse.jdt.debug/eval
+                                    ;${eclipse.jdt.debug}/org.eclipse.jdt.debug/jdi
+                                    ;${eclipse.jdt.debug}/org.eclipse.jdt.debug/model
+                                    ;${eclipse.jdt.debug}/org.eclipse.jdt.debug.ui/ui
+                                    ;${eclipse.jdt.debug}/org.eclipse.jdt.launching/launching
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.core.manipulation/common
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.core.manipulation/refactoring
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.junit/src
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.junit.core/src
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.junit.runtime/src
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.junit4.runtime/src
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.junit5.runtime/src
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.ui/core extension
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.ui/core refactoring
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.ui/internal compatibility
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.ui/ui
+                                    ;${eclipse.jdt.ui}/org.eclipse.jdt.ui/ui refactoring
+                                    ;${eclipse.platform.ant}/org.eclipse.ant.launching/src
+                                    ;${eclipse.platform.ant}/org.eclipse.ant.ui/Ant Editor
+                                    ;${eclipse.platform.ant}/org.eclipse.ant.ui/Ant Tools Support
+                        </sourcepath>
+                        <groups>
+                            <group>
+                                <title>Java development tools core packages</title>
+                                  <packages>org.eclipse.jdt.core;org.eclipse.jdt.core.*</packages>
+                            </group>
+                            <group>
+                                <title>Java development tools UI packages</title>
+                                  <packages>org.eclipse.jdt.ui;org.eclipse.jdt.ui.*</packages>
+                            </group>
+                            <group>
+                                <title>Java development tools APT packages</title>
+                                <packages>org.eclipse.jdt.apt.core;org.eclipse.jdt.apt.core.*;com.sun.mirror.*</packages>
+                            </group>
+                            <group>
+                                <title>Java development tools debug and launching packages</title>
+                                  <packages>org.eclipse.ant.launching;org.eclipse.ant.ui.launching;org.eclipse.jdt.debug.*;org.eclipse.jdt.launching;org.eclipse.jdt.launching.*</packages>
+                            </group>
+                            <group>
+                                <title>Java development tools JUnit packages</title>
+                                  <packages>org.eclipse.jdt.junit;org.eclipse.jdt.junit.*</packages>
+                            </group>
+                        </groups>
+                        <offlineLinks>
+                            <!-- This is used to make link to other docs from eclipse relative -->
+                            <offlineLink>
+                                <url>./../../../org.eclipse.platform.doc.isv/reference/api</url>
+                                <location>${project.build.directory}/unpack/org.eclipse.platform.doc.isv</location>
+                            </offlineLink>
+                        </offlineLinks>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
             <executions>
               <execution>
-                <id>dont_skip_me</id>
-                <phase>compile</phase>
-                <configuration>
-                  <skip>false</skip>
-                  <!-- call buildDoc.xml -->
-                  <applicationsArgs>
-	                  <args>-consolelog</args>
-	                  <args>-debug</args>
-	                  <args>-data</args>
-	                  <args>target/workspace</args>
-	                  <args>-application</args>
-	                  <args>org.eclipse.ant.core.antRunner</args>
-	                  <args>-buildfile</args>
-	                  <args>buildDoc.xml</args>
-	                  <args>-Dbasedir.properties=cbi_basedirs.properties</args>
-	                  <args>-Declipse.javadoc=${eclipse.javadoc}</args>
-                  </applicationsArgs>
-                  <dependencies>
-                    <!-- list of bundles that we need -->
-                    <dependency>
-                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.ant.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.apache.ant</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.help.base</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.build</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>jakarta.annotation-api</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.update.configurator</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <type>eclipse-plugin</type>
-                      <artifactId>com.ibm.icu</artifactId>
-                    </dependency>
-                  </dependencies>
-                </configuration>
+                <id>copy-resources</id>
+                <!-- here the phase you need -->
+                <phase>prepare-package</phase>
                 <goals>
-                  <goal>eclipse-run</goal>
+                  <goal>copy-resources</goal>
                 </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/reference/api</outputDirectory>
+                  <resources>          
+                    <resource>
+                      <directory>${project.build.directory}/site/apidocs</directory>
+                    </resource>
+                  </resources>              
+                </configuration>            
               </execution>
             </executions>
           </plugin>

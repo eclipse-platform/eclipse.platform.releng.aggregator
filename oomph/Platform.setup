@@ -60,16 +60,26 @@
           key="/instance/org.eclipse.pde.api.tools/MISSING_EE_DESCRIPTIONS"
           value="Warning"/>
     </setupTask>
+    <setupTask
+        xsi:type="setup:CompoundTask"
+        name="org.eclipse.egit.ui">
+      <setupTask
+          xsi:type="setup:PreferenceTask"
+          key="/instance/org.eclipse.egit.ui/auto_lfs_config"
+          value="true"/>
+    </setupTask>
   </setupTask>
   <setupTask
       xsi:type="setup.p2:P2Task"
-      label="Platform">
+      label="Platform and Git LFS">
     <requirement
         name="org.eclipse.platform.feature.group"/>
     <requirement
         name="org.eclipse.jdt.feature.group"/>
     <requirement
         name="org.eclipse.pde.feature.group"/>
+    <requirement
+        name="org.eclipse.jgit.lfs"/>
   </setupTask>
   <setupTask
       xsi:type="setup:VariableTask"
@@ -157,6 +167,32 @@
     <mapping
         filePattern="*.json"
         defaultEditorID="org.eclipse.ui.genericeditor.GenericEditor"/>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:VariableTask"
+      disabled="true"
+      type="BOOLEAN"
+      name="early.redirection.4.31"
+      defaultValue="true"
+      storageURI="scope://Workspace"
+      label="Early redirect to 4.31">
+    <description>Redirect 4.29 p2 repos to 4.30 and redirect 4.30 repos 4.31 to begin development on the open master streams immediately.</description>
+  </setupTask>
+  <setupTask
+      xsi:type="setup:CompoundTask"
+      disabled="true"
+      filter="(early.redirection.4.31=true)"
+      name="EarlyRedirection">
+    <setupTask
+        xsi:type="setup:RedirectionTask"
+        disabled="true"
+        sourceURL="https://download.eclipse.org/eclipse/updates/4.30-I-builds"
+        targetURL="https://download.eclipse.org/eclipse/updates/4.31-I-builds"/>
+    <setupTask
+        xsi:type="setup:RedirectionTask"
+        disabled="true"
+        sourceURL="https://download.eclipse.org/eclipse/updates/4.29/R-4.29-202309031000"
+        targetURL="https://download.eclipse.org/eclipse/updates/4.30-I-builds"/>
   </setupTask>
   <project name="platform"
       label="Ant, Base, Debug, Runtime, Resources, Team, User Assistance, and Update">
@@ -807,7 +843,7 @@
       <repository
           url="https://download.eclipse.org/technology/m2e/snapshots/latest"/>
       <repository
-          url="https://download.eclipse.org/webtools/CI/3.32.0/I-latest/repository"/>
+          url="https://download.eclipse.org/webtools/CI/3.33.0/I-latest/repository"/>
     </setupTask>
     <stream
         name="master"

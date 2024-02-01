@@ -14,7 +14,7 @@
   <parent>
     <artifactId>eclipse.platform.common</artifactId>
     <groupId>eclipse.platform.common</groupId>
-    <version>4.30.0-SNAPSHOT</version>
+    <version>4.31.0-SNAPSHOT</version>
     <relativePath>../../</relativePath>
   </parent>
   <groupId>org.eclipse.platform</groupId>
@@ -50,6 +50,28 @@
       </activation>
       <build>
         <plugins>
+		  <plugin>
+		    <artifactId>maven-clean-plugin</artifactId>
+		    <configuration>
+		      <filesets>
+		        <fileset>
+		          <directory>reference/api</directory>
+		        </fileset>
+		        <fileset>
+				    <directory>reference/extension-points</directory>
+				    <excludes>
+				      <exclude>index.html</exclude>
+				    </excludes>
+				  </fileset>
+				  <fileset>
+				    <directory>samples</directory>
+				    <excludes>
+				      <exclude>samples.html</exclude>
+				    </excludes>
+				  </fileset>
+		      </filesets>
+		    </configuration>
+		  </plugin>
           <plugin>
             <groupId>org.eclipse.tycho</groupId>
             <artifactId>target-platform-configuration</artifactId>
@@ -58,17 +80,17 @@
                 <extraRequirements>
                   <requirement>
                     <type>eclipse-plugin</type>
-                    <id>org.eclipse.pde.build</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
-                  <requirement>
-                    <type>eclipse-plugin</type>
-                    <id>org.eclipse.pde.core</id>
-                    <versionRange>0.0.0</versionRange>
-                  </requirement>
-                  <requirement>
-                    <type>eclipse-plugin</type>
                     <id>com.ibm.icu</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.osgi.service.event</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.osgi.service.http.whiteboard</id>
                     <versionRange>0.0.0</versionRange>
                   </requirement>
                   <requirement>
@@ -248,6 +270,26 @@
                   </requirement>
                   <requirement>
                     <type>eclipse-plugin</type>
+                    <id>org.eclipse.equinox.simpleconfigurator</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.eclipse.e4.ui.workbench.addons.swt</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.osgi.service.component.annotations</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
+                    <id>org.eclipse.e4.emf.xpath</id>
+                    <versionRange>0.0.0</versionRange>
+                  </requirement>
+                  <requirement>
+                    <type>eclipse-plugin</type>
                     <id>org.osgi.annotation.versioning</id>
                     <versionRange>0.0.0</versionRange>
                   </requirement>
@@ -269,42 +311,6 @@
                 </extraRequirements>
               </dependency-resolution>
             </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-			  <execution>
-				  <id>copy-deps</id>
-				  <phase>compile</phase>
-				  <goals>
-					  <goal>copy-dependencies</goal>
-				  </goals>
-			  </execution>
-	          <execution>
-	            <id>copy</id>
-	            <phase>compile</phase>
-	            <goals>
-	              <goal>copy</goal>
-	            </goals>
-	            <configuration>
-	              <artifactItems>
-	                <artifactItem>
-	                  <groupId>jakarta.annotation</groupId>
-	                  <artifactId>jakarta.annotation-api</artifactId>
-	                  <version>1.3.5</version>
-	                </artifactItem>
-	                <artifactItem>
-	                  <groupId>jakarta.inject</groupId>
-	                  <artifactId>jakarta.inject-api</artifactId>
-	                  <version>1.0.5</version>
-	                </artifactItem>
-	              </artifactItems>
-	              <!-- other configurations here -->
-	            </configuration>
-	          </execution>
-	          
-	        </executions>
           </plugin>
           <plugin>
 				<groupId>org.eclipse.tycho.extras</groupId>
@@ -371,97 +377,252 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-          <plugin>
-            <groupId>org.eclipse.tycho.extras</groupId>
-            <artifactId>tycho-eclipserun-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>dont_skip_me</id>
-                <phase>compile</phase>
-                <configuration>
-                  <skip>false</skip>
-                  <!-- call buildDoc.xml -->
-                  <applicationsArgs>
-		              <args>-consolelog</args>
-		              <args>-debug</args>
-		              <args>-data</args>
-		              <args>target/workspace</args>
-		              <args>-application</args>
-		              <args>org.eclipse.ant.core.antRunner</args>
-		              <args>-buildfile</args>
-		              <args>buildDoc.xml</args>
-		              <args>-Dbasedir.properties=cbi_basedirs.properties</args>
-		              <args>-Declipse.javadoc=${eclipse.javadoc}</args>
-                  </applicationsArgs>
-                  <dependencies>
-                    <!-- list of bundles that we need -->
-                    <dependency>
-                      <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.osgi.service.cm</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.ant.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.apache.ant</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.help.base</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.build</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.pde.core</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>jakarta.annotation-api</artifactId>
-                      <type>eclipse-plugin</type>
-                      <version>1.3.5</version>
-					</dependency>
-                    <dependency>
-                      <artifactId>jakarta.annotation-api</artifactId>
-                      <type>eclipse-plugin</type>
-                      <version>2.1.1</version>
-					</dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.equinox.launcher</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <artifactId>org.eclipse.update.configurator</artifactId>
-                      <type>eclipse-plugin</type>
-                    </dependency>
-                    <dependency>
-                      <type>eclipse-plugin</type>
-                      <artifactId>bcpg</artifactId>
-                    </dependency>
-                    <dependency>
-                      <type>eclipse-plugin</type>
-                      <artifactId>bcprov</artifactId>
-                    </dependency>
-                    <dependency>
-                      <type>eclipse-plugin</type>
-                      <artifactId>com.ibm.icu</artifactId>
-                    </dependency>
-                  </dependencies>
-                </configuration>
+		  </plugin>
+		  <plugin>
+	        <artifactId>maven-resources-plugin</artifactId>
+	        <executions>
+	          <execution>
+	            <id>copy-extension-resources</id>
+	            <phase>process-resources</phase>
+	            <goals>
+	              <goal>copy-resources</goal>
+	            </goals>
+	            <configuration>
+	              <outputDirectory>${basedir}/reference/extension-points</outputDirectory>
+	              <resources>          
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/schema/</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>cheatSheetContentFileSpec.html</include>
+			                <include>cheatSheetContentFileSpec.exsd</include>
+			                <include>compositeContentFile.html</include>
+			                <include>compositeContentFile.exsd</include>
+			                <include>org.eclipse.ui.intro/schema/introContentFileSpec.html</include>
+		            	</includes>
+	                </resource>
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.ua}/org.eclipse.ui.intro/schema/</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>introContentFileSpec.html</include>
+		            	</includes>
+	                </resource>
+	              </resources>              
+	            </configuration>            
+	          </execution>
+	          <execution>
+	            <id>copy-example-resources</id>
+	            <phase>process-resources</phase>
+	            <goals>
+	              <goal>copy-resources</goal>
+	            </goals>
+	            <configuration>
+	              <outputDirectory>${basedir}/samples</outputDirectory>
+	              <resources>          
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.team.examples}</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>org.eclipse.compare.examples/doc-html/*.*</include>
+			                <include>org.eclipse.compare.examples.xml/doc-html/*.*</include>
+			                <include>org.eclipse.team.examples.filesystem/doc-html/*.*</include>
+		            	</includes>
+	                </resource>
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.swt.examples}</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>org.eclipse.swt.examples/doc-html/*.*</include>
+			                <include>org.eclipse.swt.examples.views/doc-html/*.*</include>
+			                <include>org.eclipse.swt.examples.launcher/doc-html/*.*</include>
+			                <include>org.eclipse.swt.examples.ole.win32/doc-html/*.*</include>
+		            	</includes>
+	                </resource>
+	                <resource>
+	                  <directory>${basedir}/${eclipse.platform.ui.examples}</directory>
+	                  <filtering>false</filtering>
+	                  	<includes>
+			                <include>org.eclipse.ui.examples.fieldassist/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.multipageeditor/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.propertysheet/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.readmetool/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.undo/doc-html/*.*</include>
+			                <include>org.eclipse.ui.examples.javaeditor/doc-html/*.*</include>
+		            	</includes>
+	                </resource>
+	              </resources>              
+	            </configuration>
+	          </execution>
+	          <execution>
+                <id>copy-javadoc</id>
+                <phase>prepare-package</phase>
                 <goals>
-                  <goal>eclipse-run</goal>
+                  <goal>copy-resources</goal>
                 </goals>
-              </execution>
-            </executions>
-          </plugin>
+                <configuration>
+                  <outputDirectory>${basedir}/reference/api</outputDirectory>
+                  <resources>          
+                    <resource>
+                      <directory>${project.build.directory}/site/apidocs</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>         
+	        </executions>
+	      </plugin>	
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>attach-javadocs</id>
+                    <phase>process-classes</phase>
+                    <goals>
+                        <goal>javadoc</goal>
+                    </goals>
+                    <configuration>
+                        <failOnError>true</failOnError>
+                        <excludePackageNames>*.internal.*</excludePackageNames>
+                        <windowtitle>Eclipse Platform API Specification</windowtitle>
+                        <doctitle>Eclipse Platform API Specification</doctitle>
+                        <header><![CDATA[<span style='font-size:small'><b>Eclipse Platform</b><br>${releaseName} (${releaseNumberSDK})</span>]]></header>
+                        <bottom><![CDATA[<br><span style='font-size:small;float:right'>Copyright (c) 2000, 2023 Eclipse Contributors and others. All rights reserved.</span><span style='font-size:small'><a href='{@docRoot}/../misc/api-usage-rules.html'>Guidelines for using Eclipse APIs.</a></span>]]></bottom>
+                        <sourcepath>;${eclipse.platform.ui.bundles}/org.eclipse.ltk.core.refactoring/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ltk.ui.refactoring/src
+                                ;${eclipse.pde}/org.eclipse.pde/src
+                                ;${eclipse.platform.ant}/org.eclipse.ant.core/src
+                                ;${eclipse.platform.debug}/org.eclipse.core.variables/src
+                                ;${eclipse.platform.debug}/org.eclipse.debug.core/core
+                                ;${eclipse.platform.debug}/org.eclipse.debug.ui/ui
+                                ;${eclipse.platform.debug}/org.eclipse.ui.console/src
+                                ;${eclipse.platform.debug}/org.eclipse.unittest.ui/src
+                                ;${eclipse.platform.platform}/org.eclipse.platform/src
+                                ;${eclipse.platform.resources.bundles}/org.eclipse.core.filesystem/src
+                                ;${eclipse.platform.resources.bundles}/org.eclipse.core.resources/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.core.contenttype/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.core.expressions/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.core.jobs/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.core.runtime/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.e4.core.contexts/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.e4.core.di/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.e4.core.di.annotations/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.e4.core.di.extensions/src
+                                ;${eclipse.platform.runtime.bundles}/org.eclipse.e4.core.services/src
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Accessibility/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Accessibility/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT AWT/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT AWT/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Browser/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Browser/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Custom Widgets/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Drag and Drop/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Drag and Drop/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT OLE Win32/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT OpenGL/common
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT OpenGL/emulated
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT OpenGL/glx
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT OpenGL/win32
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT PI/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT PI/common_j2se/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT PI/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Printing/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Printing/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Program/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT Program/win32/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT/common/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT/common_j2se/
+                                ;${eclipse.platform.swt.bundles}/org.eclipse.swt/Eclipse SWT/win32/
+                                ;${eclipse.platform.team.bundles}/org.eclipse.compare/compare
+                                ;${eclipse.platform.team.bundles}/org.eclipse.compare.core/src
+                                ;${eclipse.platform.team.bundles}/org.eclipse.core.net/src
+                                ;${eclipse.platform.team.bundles}/org.eclipse.jsch.core/src
+                                ;${eclipse.platform.team.bundles}/org.eclipse.jsch.ui/src
+                                ;${eclipse.platform.team.bundles}/org.eclipse.team.core/src
+                                ;${eclipse.platform.team.bundles}/org.eclipse.team.ui/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.core.filebuffers/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.jface.text/projection
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.jface.text/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.search.core/search
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.search/newsearch
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.search/search
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.text/projection
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.text/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.editors/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.workbench.texteditor/src
+                                ;${eclipse.platform.ua}/org.eclipse.help/src
+                                ;${eclipse.platform.ua}/org.eclipse.help.base/src
+                                ;${eclipse.platform.ua}/org.eclipse.help.base/src_demo
+                                ;${eclipse.platform.ua}/org.eclipse.help.ui/src
+                                ;${eclipse.platform.ua}/org.eclipse.help.webapp/src
+                                ;${eclipse.platform.ua}/org.eclipse.ui.cheatsheets/src
+                                ;${eclipse.platform.ua}/org.eclipse.ui.intro/src
+                                ;${eclipse.platform.ua}/org.eclipse.ui.intro.universal/src
+                                ;${eclipse.platform.ua}/org.eclipse.ui.intro.quicklinks/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.core.commands/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.core.databinding/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.core.databinding.beans/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.core.databinding.observable/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.core.databinding.property/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.core.commands/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.bindings/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.css.core/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.css.swt/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.css.swt.theme/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.di/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.dialogs/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.ide/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.model.workbench/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.services/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.widgets/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.workbench/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.workbench.renderers.swt/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.workbench.swt/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.e4.ui.workbench3/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.jface/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.jface.databinding/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.jface.notifications/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.forms/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.genericeditor/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.ide/extensions
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.ide/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.navigator/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.navigator.resources/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.views/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.views.properties.tabbed/src
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.workbench/Eclipse UI
+                                ;${eclipse.platform.ui.bundles}/org.eclipse.ui.workbench/Eclipse UI Editor Support
+                                ;${eclipse.platform.update}/org.eclipse.update.configurator/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.http.jetty/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.app/osgi
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.app/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.bidi/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.common/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.http.registry/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.http.servlet/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.jsp.jasper/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.jsp.jasper.registry/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.preferences/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.registry/src
+                                ;${rt.equinox.bundles.bundles}/org.eclipse.equinox.security/src
+                                ;${rt.equinox.framework.bundles}/org.eclipse.osgi/container/src
+                                ;${rt.equinox.framework.bundles}/org.eclipse.osgi/supplement/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.frameworkadmin/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.core/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.director/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.engine/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.metadata/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.metadata.repository/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.operations/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.repository/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.touchpoint.eclipse/src
+                                ;${rt.equinox.p2.bundles}/org.eclipse.equinox.p2.ui/src
+                        </sourcepath>
+                    	</configuration>
+                	</execution>
+            	</executions>
+           </plugin>
         </plugins>
       </build>
     </profile>

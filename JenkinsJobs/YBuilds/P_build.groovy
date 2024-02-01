@@ -121,6 +121,9 @@ spec:
 """
     }
   }
+  tools {
+      jdk 'openjdk-jdk17-latest'
+  }
   environment {
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
@@ -132,17 +135,14 @@ spec:
       stage('Clean Workspace'){
           steps {
               container('jnlp') {
-                sh \'\'\'
-                    cd $WORKSPACE
-                    rm -rf *
-                \'\'\'
+                cleanWs()
                 }
             }
 	    }
 	  stage('Setup intial configuration'){
           steps {
               container('jnlp') {
-                 sshagent(['github-bot-ssh']) {
+                  sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh \'\'\'
                             git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
@@ -157,7 +157,7 @@ spec:
                 }
             }
 		}
-	  stage('Genrerate environment variables'){
+	  stage('Generate environment variables'){
           steps {
               container('jnlp') {
                 sh \'\'\'
@@ -166,14 +166,14 @@ spec:
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
-                        echo "Failed in Genrerate environment variables stage"
+                        echo "Failed in Generate environment variables stage"
                         exit 1
                     fi
                 \'\'\'
                 }
             }
 		}
-		stage('Load PGP keys'){
+	  stage('Load PGP keys'){
           environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
@@ -207,7 +207,7 @@ spec:
               container('jnlp') {
                   sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh \'\'\'
-                        git config --global user.email "releng-bot@eclipse.org"
+                        git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
@@ -226,8 +226,6 @@ spec:
               container('jnlp') {
                   sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
-                        git config --global user.email "releng-bot@eclipse.org"
-                        git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         bash -x ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
@@ -258,7 +256,6 @@ spec:
 		stage('Aggregator maven build'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -270,15 +267,13 @@ spec:
                             exit 1
                         fi
                     \'\'\'
-                  }
                 }
             }
 		}
 	  stage('Gather Eclipse Parts'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk17-latest') {
+                      withAnt(installation: 'apache-ant-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
@@ -289,7 +284,6 @@ spec:
                             fi
                           \'\'\'
                       }
-                  }
                 }
             }
 		}

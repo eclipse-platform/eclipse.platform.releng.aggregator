@@ -1,30 +1,24 @@
 # Releng-Tasks 2.0
 
-[Eclipse Major Release Schedule](https://wiki.eclipse.org/Simultaneous_Release)
-
-[Previous Documentation](https://wiki.eclipse.org/Releng-Tasks)
+[Eclipse Major Release Schedule](https://github.com/eclipse-simrel/.github/blob/main/wiki/Simultaneous_Release.md)
 
 ## Milestone and RC Releases
 
 ### Friday before release week:
  * Update [I-builds](JenkinsJobs/Builds/I_build.groovy) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
  * Create or update prerequisite issues for tracking ECF, EMF and Orbit
- * Send reminder email for upcoming milestone week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
-   * [Example from 4.23 M1](https://www.eclipse.org/lists/platform-releng-dev/msg38067.html) but the usual schedule:
-     * Monday: Last day of development.
-     * Tuesday: Tests
+ * Send reminder email for upcoming RC week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
+   * [Example from 4.30 RC1](https://www.eclipse.org/lists/platform-dev/msg03924.html) but the usual schedule:
      * Wednesday: 
-       - Fixes from Tuesday. 
-       - "New and Noteworthy" entries due. 
        - Release Candidate is built Wednesday evening at 6PM EST. 
      * Thursday: Sign-Off
      * Friday: 
        - Build delcared and released.
-       - Make sure to mention that the Master branch will stay closed until the milestone is officially released.
+       - Make sure to mention that the Master branch will stay closed until RC is officially released.
 
-### Milestone Week
-   - **M2 Release**
-     * The M2 release is 'lightweight', meaning there is no announcement or signoff. No additional builds need to be run, just the daily I-build at 6PM EST. Thursdays build is promoted to simrel on friday (unless there are problems with Thursdays build, in which case promote Wednesdays) and the compiler is updated if necessary, but the promote and makevisible jobs don't need to be run.
+### Milestone/RC Week
+   - **M 1/2/3 Release**
+     * All milestone releases are 'lightweight', meaning there is no announcement or signoff. No additional builds need to be run, just the daily I-build at 6PM EST. Thursdays build is promoted to simrel on friday (unless there are problems with Thursdays build, in which case promote Wednesdays) and the compiler is updated if necessary, but the promote and makevisible jobs don't need to be run.
    - **Wednesday**:
      * Verify that EMF, ECF and Orbit contributions have been included (if applicable).
      * Final release candidate build runs at 6PM EST.
@@ -45,7 +39,7 @@
          - TRAIN_NAME: Whenever the current GA release is planned for (formatted 4 digit year - 2 digit month, i.e `2022-06`)
          - STREAM: 4.24.0 etc
          - DL_TYPE: S is used to promote I-builds.
-         - TAG: Parameter should match stream version, i.e `S4_24_0_M1` etc
+         - TAG: Parameter should match stream version, i.e `S4_30_0_RC1` etc
          - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) and have it ready.
          - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
        * Contribute to SimRel

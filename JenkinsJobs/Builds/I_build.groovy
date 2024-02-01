@@ -19,13 +19,13 @@ for (STREAM in STREAMS){
 # - - - Integration Eclipse SDK builds - - - 
 # 2023-12 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
-#0 18 * * *
+0 18 * * *
 
 
 # Milestone/RC Schedule 
 # Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-0 6 6-22 11 5-7,1-3
-0 18 5-22 11 5-7,1-3
+#0 6 6-22 11 5-7,1-3
+#0 18 5-22 11 5-7,1-3
 
 
 
@@ -147,21 +147,20 @@ spec:
 """
     }
   }
+  tools {
+      jdk 'openjdk-jdk17-latest'
+  }
   environment {
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       PATH = "$PATH:/opt/tools/apache-maven/latest/bin"
       logDir = "$CJE_ROOT/buildlogs"
     }
-  
   stages {
       stage('Clean Workspace'){
           steps {
               container('jnlp') {
-                sh \'\'\'
-                    cd $WORKSPACE
-                    rm -rf *
-                \'\'\'
+                cleanWs()
                 }
             }
 	    }
@@ -183,7 +182,7 @@ spec:
                 }
             }
 		}
-	  stage('Genrerate environment variables'){
+	  stage('Generate environment variables'){
           steps {
               container('jnlp') {
                 sh \'\'\'
@@ -234,8 +233,7 @@ spec:
           steps {
               container('jnlp') {
 		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-		          withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
-		              withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk17-latest') {
+		              withAnt(installation: 'apache-ant-latest') {
 		                sh \'\'\'
 		                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
 		                    ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb020_createBaseBuilder.sh.log
@@ -246,7 +244,6 @@ spec:
 		                    fi
 		                \'\'\'
 		              }
-		          }
 		        }
 		      }
 		}
@@ -274,7 +271,7 @@ spec:
               container('jnlp') {
                   sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh \'\'\'
-                        git config --global user.email "releng-bot@eclipse.org"
+                        git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
@@ -293,8 +290,6 @@ spec:
               container('jnlp') {
                   sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
-                        git config --global user.email "eclipse-releng-bot@eclipse.org"
-                        git config --global user.name "Eclipse Releng Bot"
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         bash -x ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
@@ -310,7 +305,6 @@ spec:
 	  stage('Create Source Bundles'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -322,7 +316,6 @@ spec:
                             exit 1
                         fi
                     \'\'\'
-                  }
                 }
             }
 		}
@@ -333,7 +326,6 @@ spec:
           }
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -345,7 +337,6 @@ spec:
                             exit 1
                         fi
                     \'\'\'
-                  }
                 }
             }
 		}
@@ -356,8 +347,7 @@ spec:
           }
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk17-latest') {
+                      withAnt(installation: 'apache-ant-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
@@ -368,7 +358,6 @@ spec:
                             fi
                           \'\'\'
                       }
-                  }
                 }
             }
 		}
@@ -379,8 +368,7 @@ spec:
           }
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
-                      withAnt(installation: 'apache-ant-latest', jdk: 'openjdk-jdk17-latest') {
+                      withAnt(installation: 'apache-ant-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             ./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb310_gatherEquinoxParts.sh.log
@@ -391,14 +379,12 @@ spec:
                             fi
                           \'\'\'
                       }
-                  }
                 }
             }
 		}
 	  stage('Generate Repo reports'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -410,14 +396,12 @@ spec:
                             exit 1
                         fi
                       \'\'\'
-                  }
                 }
             }
 		}
 	  stage('Generate API tools reports'){
           steps {
               container('jnlp') {
-                  withEnv(["JAVA_HOME=${ tool 'openjdk-jdk17-latest' }"]) {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -429,7 +413,6 @@ spec:
                             exit 1
                         fi
                       \'\'\'
-                  }
                 }
             }
 		}
