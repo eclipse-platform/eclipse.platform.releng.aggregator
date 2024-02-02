@@ -44,13 +44,7 @@ pipeline {
 			steps {
 				withCredentials([string(credentialsId: 'gpg-passphrase', variable: 'KEYRING_PASSPHRASE')]) {
 					sh '''
-					if [[ ${BRANCH_NAME} == master ]] || [[ ${BRANCH_NAME} =~ ^R[0-9]_[0-9]+_maintenance ]]; then
 						MVN_ARGS="-Peclipse-sign"
-					else
-						MVN_ARGS=
-						export KEYRING="deadbeef"
-						export KEYRING_PASSPHRASE="none"
-					fi
 					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-Pbree-libs \
