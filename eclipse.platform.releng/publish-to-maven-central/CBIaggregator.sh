@@ -128,8 +128,8 @@ echo "== Features: ==" | tee >> .logs/removed.txt
 
 echo "== Test plugins: ==" | tee >> .logs/removed.txt
 
-ls -d org/eclipse/*/*test* >> .logs/removed.txt
-/bin/rm -r org/eclipse/*/*test*
+ls -d org/eclipse/*/*.test* >> .logs/removed.txt
+/bin/rm -r org/eclipse/*/*.test*
 
 #==== remove other non-artifacts: ====
 
