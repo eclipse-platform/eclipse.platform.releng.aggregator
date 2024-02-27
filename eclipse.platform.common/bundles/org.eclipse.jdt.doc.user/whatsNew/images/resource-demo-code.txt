@@ -1,0 +1,25 @@
+public class ResourcesOK {
+
+	private static final int HEADER_LEN = 42;
+
+	@Owning InputStream produce(String name) throws IOException {
+		InputStream in = new FileInputStream(name);
+		skipHeader(in);
+		return in;
+	}
+
+	void skipHeader(@NotOwning InputStream in) throws IOException {
+		in.readNBytes(HEADER_LEN);
+	}
+	
+	void consume(@Owning InputStream in) throws IOException {
+		try (in) {
+			// do useful stuff with 'in'
+		}
+	}
+	
+	void test(String name) throws IOException {
+		InputStream in = produce(name);
+		consume(in);
+	}
+}

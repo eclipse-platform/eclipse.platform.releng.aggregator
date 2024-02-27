@@ -27,7 +27,7 @@ for the 4.30 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   	<li><a href="#Java21">New Java&trade; Language Features</a></li>
-	<!--li><a href="#JavaCompiler">Java Compiler</a></li-->
+	<li><a href="#JavaCompiler">Java Compiler</a></li>
   	<!--li><a href="#JUnit">JUnit</a></li-->
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<!--li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li-->
@@ -155,11 +155,80 @@ document for changes in the Platform.</p>
   <!-- ******************* End of Java Views and Dialogs ************************************* -->
 
   <!-- ******************* Java Compiler ************************************* -->
-  <!--tr>
+  <tr>
     <td id="JavaCompiler" class="section" colspan="2">
     <h2>Java Compiler</h2>
     </td>
-  </tr-->
+  </tr>
+  <tr id="annotation-based-resource-analysis">
+    <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1716 -->
+    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1059 -->
+    <td class="title">Analysis of resource leaks improved with annotations</td>
+    <td class="content">
+      The compiler's capability to detect when resources (implementation of <code>AutoCloseable</code>) are not properly closed
+      has been enhanced. 
+      <p>
+	      Previously, flow analysis for resource leaks was focused on resources that are created and closed within the same method.
+	      It could not deal well with resources that are shared between different methods,
+	      perhaps even different objects.
+      </p>
+      <p>
+      	The compiler now interprets an annotation <code>@Owning</code> to understand data flows of resources by way of the
+      	following concepts:
+      </p>
+      <dl>
+      <dt><strong>A source of resources</strong></dt><dd>Here a resource will come into the focus of the current method,
+      	along with a responsibility to close it.</dd>
+      <dt><strong>A sink for resources</strong></dt><dd>Here a resource will be consumed, either by closing, or by delegation
+      	to other code which then will be responsible</dd>
+      </dl>
+      <p>Resource allocation is the primordial source, and a call to <code>AutoCloseable.close()</code> is the final sink.
+      	When allocation and closing do not happen within the same method, then annotation <code>@Owning</code> should be used to create
+      	connections through which responsibility for a resource can be transferred from one method to another.
+      	The inverse annotation <code>@NotOwning</code>, on the other hand, signals that no such connection is made;
+      	the original holder of the resource is still responsible for sending it to a suitable sink.
+     </p>
+      <p>
+      <a href="images/resource-demo-code.txt"><img src="images/resource-demo-code.png" alt="code properly annotated for resource leak analysis"/></a>
+      </p>
+      <p>
+      	It's in method <code>produce()</code> where a new resource is allocated.
+      	The return statement in that method is governed by the <code>@Owning</code> annotation on the method.
+      	This implies that returning this value is a <strong>sink</strong> from the point of view of <code>produce()</code>.
+      	By this method <code>produce()</code> is considered safe.
+      	But looking from the outside this sink is in fact the <strong>source</strong> by which the resource arrives in method <code>test()</code>.
+      </p>
+      <p>
+      	After method <code>test()</code> receives the resource, the responsibility to close is fulfilled by passing it down into <code>consume()</code>.
+      	In method <code>consume()</code> it's the annotation on parameter <code>in</code> that creates the connection:
+      	<code>test()</code> has done its part and now <code>consume()</code> is responsible.
+      	Protecting the resource with a try-with-resources statement is the preferred way to fulfill the responsibility, its implicit <code>close()</code> call is the ultimate sink.
+      	Thus the given combination of method calls indeed creates a provably safe data flow from initial source to final sink,
+      	because both calls are governed by <code>@Owning</code>.
+      </p>
+      <p>
+      	The body of <code>produce()</code> also shows another detail:
+      	just like <code>test()</code> it passes the resource as a parameter to another method, here: <code>skipHeader()</code>.
+      	The parameter of <code>skipHeader()</code>, however, is annotated as <code>@NotOwning</code>
+      	by which the method rejects any responsibility.
+      	Indeed there's no close call to be found here, but that's OK under the <code>@NotOwning</code> annotation - this parameter is <em>not a source</em>.
+      	As a result, still after the call to <code>skipHeader()</code> it is <code>produce()</code> who is responsible.
+      	For that reason saying <code>return in;</code> is indeed necessary for <code>produce()</code> to demonstrate obedience to the contract.
+      </p>
+      <p>
+      	Additional rules exist for fields holding a resource and for methods other than <code>close()</code> that perform mandatory clean-up.
+      	Details on those can be found in the documentation of
+      	 <a href="../../org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/Owning.html"><code>org.eclipse.jdt.annotation.Owning</code></a>.
+      </p>
+      <p>
+      	To enable this feature select <strong>Java Compiler > Errors/Warnings > Enable annotation based resource analysis</strong> in the project preferences:
+      </p>
+      <p>
+      <img src="images/resource-compiler-options.png" alt="compiler properties dialog"/>
+      </p>
+    </td>
+  </tr>
+  
   <!-- ******************* End of Java Compiler ************************************* -->
 
   <!-- ******************* Java Formatter ************************************* -->
