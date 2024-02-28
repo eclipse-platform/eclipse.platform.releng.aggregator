@@ -21,25 +21,22 @@
   ul {padding-left: 13px;}
   /*]]>*/
   </style>
-  <title>Eclipse Platform What's New in 4.30</title>
+  <title>Eclipse Platform What's New in 4.31</title>
 </head>
 <body>
-  <h2>What's New in Eclipse 4.30 (Platform)</h2>
+  <h2>Platform and Equinox</h2>
   <p>Here are descriptions of some of the more interesting or significant changes made to the Eclipse Platform for the
-  4.30 release of Eclipse. They are grouped into:</p>
+  4.31 release of Eclipse. They are grouped into:</p>
   <ul>
     <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-    <!--li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li-->
-    <!--li><a href="#TextEditors">Text Editors</a></li-->
+    <li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li>
+    <li><a href="#TextEditors">Text Editors</a></li>
     <!--li><a href="#Preferences">Preferences</a></li-->
     <!--li><a href="#Debug">Debug</a></li-->
-    <!--li><a href="#StylingThemes">Themes and Styling</a></li-->
-    <li><a href="#Security">Security</a></li>
+    <li><a href="#StylingThemes">Themes and Styling</a></li>
+    <!--li><a href="#Security">Security</a></li-->
     <li><a href="#GeneralUpdates">General Updates</a></li>
   </ul>
-  <p>Plug-in developers will also be interested in the corresponding <a href=
-  "../../org.eclipse.pde.doc.user/whatsNew/pde_whatsnew.html">What's new</a> document in the plug-in
-  developer's guide.</p>
   <p>We also recommend to read the <a href="../tips/platform_tips.html">Tips and Tricks</a>.</p><br />
 <!-- ****************** START OF N&N TABLE ****************** -->
 <table class="news">
@@ -49,133 +46,374 @@
 </colgroup>
 <tbody>
   <!-- ******************* Views, Dialogs and Toolbar ************************************* -->
-  <!--tr>
+  <tr>
     <td id="ViewsAndDialogs" class="section" colspan="2">
     <h2>Views, Dialogs and Toolbar </h2>
     </td>
-  </tr-->
+  </tr>
+
+  <tr id="viewer_limit_applied"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1425 -->
+      <td class="title">Viewer Limit in Workbench</td>
+      <td class="content">
+        <p>
+        Several of the most commonly used Eclipse views have enabled incremental view updates. 
+        These views limit the initially-shown number of children to 1000 per parent element, and support incrementally displaying the next
+        batch of elements. The increment number can be configured in the preferences under
+        <code>General &gt; Initial maximum number of elements shown in views</code> as follows:
+        </p>
+        <p><img src="images/viewer_limit_preference.png" alt="New preference"/></p>
+        <p>
+        Other (3rd party) views can also read this preference to enable this feature for that view; this must be done explicitly for each view. 
+        </p>
+        <p>
+        The support for incremental view updates was added to avoid UI freezes in large viewers, where SWT/JFace
+        approaches the limits of the underlying native widget machinery while trying to render
+        many thousands of elements, leading to minute long UI freezes.
+        </p>
+        <p>
+        Incremental view update is currently enabled in the following views:
+        </p>
+        <ol>
+			<li>Package Explorer</li>
+			<li>Project Explorer</li>
+			<li>Problems</li>
+			<li>Java Outline</li>
+			<li>JUnit</li>
+	    </ol>
+	    <p><img src="images/limit_in_package_explorer.png" alt="Package Explorer"/></p>
+	    <p><img src="images/limit_in_project_explorer.png" alt="Project Explorer"/></p>
+	    <p><img src="images/limit_in_problems_view.png" alt="Problems View"/></p>
+	    <p><img src="images/limit_in_outline_view.png" alt="Java Outline"/></p>
+	    <p><img src="images/limit_in_junit_view.png" alt="JUnit View"/></p>
+	    <p>
+		This new preference can be disabled in products by specifying
+		<code>org.eclipse.ui.workbench/largeViewLimit=0</code> in the
+		<code>plugin_customization.ini</code> file or via an Oomph preference task. 
+		In the same way, the preference value can be changed for products that need a lower or higher limit.
+        </p>
+      </td>
+  </tr>
+
+  <tr id="tab_installation_details_features_filter"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1472-->
+      <td class="title">Filter Field for the Installation Details Dialog's Features Tab</td>
+      <td class="content">
+        <p>
+        Previously the <b>Features</b> tab of the Installation Details dialog, unlike the dialog's Plug-ins tab, did not provide a filter field. 
+        That inconsistency has been addressed, making it easier to find details about a specific feature.
+        </p>
+        <p><img src="images/featuresTab.png" alt="Hovering over tabs" width="600" height="500"/></p>
+      </td>
+  </tr>
+  
+  <tr id="resolved_path_in_workspace_launch_dialog"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1477-->
+      <td class="title">Showing Resolved Workspace Path in Launch Dialog</td>
+      <td class="content">
+        <p>
+        A new feature has been implemented in the Eclipse launch dialog, which alerts the user that, the tilde (~) character, 
+        which usually refers to the user's home directory according to many operating system shell semantics, is unresolved whenever 
+        they enter that character. Additionally, this enhancement displays the resolved path within a label, offering user 
+        clear insight into the specified path.
+        </p>
+        <p><img src="images/Launch_dialog.png" alt="Launch Dialog" width="600" height="300"/></p>
+      </td>
+  </tr>
+
+<tr id="display_search_pattern_in_Quick_Search_dialog"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1543-->
+      <td class="title">Displaying Search Patterns in the Title Bar of Quick Search Dialogs</td>
+      <td class="content">
+        <p>
+        Distinguishing between the search patterns of concurrently open <b>Quick Search</b> dialogs was challenging, as they were all 
+        uniformly labeled as "Quick Search". A new functionality has been incorporated, wherein the search term is displayed alongside
+        the "Quick Search" label in the title bar of the dialog. This enhancement ensures that each window is uniquely identifiable,
+        now denoted as "Quick Search - " followed by the respective search term, thereby enhancing effortless navigation and improved user clarity.
+        </p>
+        <p><img src="images/Quick_Search.png" alt="Quick Search dialog" width="600" height="500"/></p>
+      </td>
+  </tr>
+
   <!-- ******************* End of Views, Dialogs and Toolbar ************************************* -->
 
   <!-- ******************* Text Editors ************************************* -->
-  <!--tr>
+  <tr>
     <td id="TextEditors" class="section" colspan="2">
     <h2>Text Editors </h2>
     </td>
-  </tr-->
+  </tr>
+  
+  <tr id="Number_of_differences_shown"> <!-- https://github.com/eclipse-platform/eclipse.platform/issues/504 -->
+      <td class="title">Compare Editor</td>
+      <td class="content">
+        <p>
+        The number of differences between two files is shown on the toolbar of compare editor;
+        this is equal to the number of change markers shown next to the scroll bar in compare editor. 
+        This feature is helpful when the files compared are large and have many differences that cannot be counted manually.
+        </p>
+        <p><img src="images/compare_editor_differences.png" alt="Compare Editor"/></p>
+        <p>
+        The number of differences changes based on the selection in the compilation unit of Java Structure Compare.
+        </p>
+        <p><img src="images/java_structure_compare_selection_differences.png" alt="Compare Editor"/></p>
+      </td>
+  </tr>
+  <tr id="default_editor_preference"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1659 -->
+      <td class="title">Default Editor for a Content Type</td>
+      <td class="content">
+        <p>
+        For the case that there are multiple editors suitable to open a given content type, the user can declare one of these editors as
+        default editor, i.e., the preferred editor. Simply select the editor in the associated editors list and press the
+        <b>Default</b> button. If there is no default editor, the first suitable editor found is used to open the
+        content type.
+        </p>
+        <p><img src="images/default-editor-for-content-type.png" alt="Default Editor"/></p>
+      </td>
+  </tr>
   <!-- ******************* End of Text Editors ************************************* -->
 
   <!-- ****************** Preferences ************************************* -->
-  <!--tr>
+  <!--
+  <tr>
     <td id="Preferences" class="section" colspan="2">
     <h2>Preferences </h2>
     </td>
-  </tr-->
+  </tr>
+  -->
   <!-- ****************** End of Preferences ************************************* -->
 
   <!-- ******************* Themes and Styling ************************************* -->
-  <!--tr>
+  <tr>
     <td id="StylingThemes" class="section" colspan="2">
     <h2>Themes and Styling </h2>
     </td>
-  </tr-->
+  </tr>
+
+  <tr id="tab_hover"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1645-->
+      <td class="title">Hovering Over Editor / View Tabs</td>
+      <td class="content">
+        <p>When using the <b>Light</b> theme on macOS, the background color of unselected tabs 
+        now slightly changes color when the user hovers over them with the mouse cursor.
+        The same hovering behaviour already exists on Windows and when using the <b>Dark</b> theme. 
+        </p>
+        <p><img src="images/hover.png" alt="Hovering over tabs"/></p>
+      </td>
+  </tr>
+  
+  <tr id="tab_highlight"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1651-->
+      <td class="title">Highlighting of Active Part</td>
+      <td class="content">
+        <p>The <b>Light</b> theme now also highlights the active part with a blue underline just 
+        like it was already done when using the <b>Dark</b> theme. 
+        </p>
+        <p><img src="images/active_tab.png" alt="Highlighting of active part"/></p>
+      </td>
+  </tr>
+  <tr id="full_text_in_view_tabs"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/735 -->
+    <td class="title">Full Text in View Tabs</td>
+    <td class="content">
+        <p>
+            A new preference has been introduced to enhance the user experience for managing views. With this preference, users have more control over how view tabs are displayed.
+        </p>
+        <p>
+            Previously, as the number of views increased within a view stack, the tab titles became very small, displaying only icons.
+            This made it more challenging for users to identify views solely based on icons, sometimes leading to a cluttered UI and decreased usability.
+        </p>
+        <p>
+            To address this issue, two options are now available in the <em>Tab icons and titles in view areas</em> section on the <code>General &gt; Appearance</code> preference page:
+        </p>
+        <ul>
+            <li>
+                <b>Always show full titles:</b> This option ensures that the full text of each view title is always visible in each tab, regardless of the number of views present.
+                It improves usability by making it easier for users to identify views by label. 
+                By default this option is <em>off</em>.
+                <br></br>
+                <img src="images/preference_view_tabs_full_text.png" alt="Always show full titles" />
+                <img src="images/view_tabs_full_text.png" alt="Always show full titles" />
+            </li>
+            <li>
+                <b>Hide icons:</b> With this option selected, view icons are hidden, and only the full text of each view title is displayed in each tab.
+                This helps in decluttering the UI and ensures that the editor area remains the focal point, especially in scenarios where numerous views are open.
+                By default this option is <em>off</em>.
+                <br></br>
+                <img src="images/preference_view_tabs_hide_icons.png" alt="Hide icons" />
+                <img src="images/view_tabs_hide_icons.png" alt="Hide icons" />
+            </li>
+        </ul>
+    </td>
+  </tr>
   <!-- ******************* End of Themes and Styling ************************************* -->
 
-  <!-- ******************* Security ************************************* -->
-  <tr>
-    <td id="Security" class="section" colspan="2">
-    <h2>Security</h2>
-    </td>
-  </tr>
-
-  <tr id="p2-director">
-    <!-- https://github.com/eclipse-equinox/p2/issues/365 -->
-    <td class="title">p2 Director Application Security</td>
-    <td class="content">
-    To provide similar security controls as <a href="https://eclipse.dev/eclipse/news/4.28/platform.php#Security" target="_blank">available in the IDE</a>,
-    the following command-line arguments are now supported the <a href="https://help.eclipse.org/latest/index.jsp?topic=%2Forg.eclipse.platform.doc.isv%2Fguide%2Fp2_director.html" target="_blank">p2 director application</a>:
-    <p></p>
-    <dl>
-    <dt>-trustSignedContentOnly | -tsco</dt>
-    <dd>
-    Whether to trust each artifact only if it is jar-signed or PGP-signed.
-    </dd>
-    <dt>-trustedAuthorities | -ta &lt;comma separated list&gt;</dt>
-    <dd>
-    The authorities from which repository content, including repository metadata, is trusted. An empty value will reject all remote connections.
-    </dd>
-    <dt>-trustedPGPKeys | -tk &lt;comma separated list&gt;</dt>
-    <dd>
-    The fingerprints of PGP keys to trust as signers of artifacts. An empty value will reject all PGP keys.
-    </dd>
-    <dt>-trustedCertificates | -tc &lt;comma separated list&gt;</dt>
-    <dd>
-    The SHA-256 'fingerprints' of unanchored certificates to trust as signers of artifacts. An empty value will reject all unanchored certificates.
-    </dd>
-    <dt>-verboseTrust | -vt</dt>
-    <dd>
-    Whether to print detailed information about the content trust.
-    </dd>
-    </dl>
-    </td>
-  </tr>
-
-  <!-- ******************* End of Security ************************************* -->
-  
   <!-- ******************* General Updates ************************************* -->
   <tr>
     <td id="GeneralUpdates" class="section" colspan="2">
     <h2>General Updates </h2>
     </td>
   </tr>
-
-  <tr id="support-jakarta-annotations">
-    <!-- https://github.com/eclipse-platform/eclipse.platform/pull/696 -->
-    <!-- https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/1056 -->
-    <td class="title">Support for Jakarta Annotations by Eclipse E4</td>
-    <td class="content">
-      The Eclipse E4 Platform Dependency Injector now supports annotations from the <code>jakarta.inject</code> and <code>jakarta.annotation</code> package.
-      <p>
-        Plug-in developers are encouraged to migrate their E4 application model element classes to use for example <code>jakarta.inject.Inject</code> instead of <code>javax.inject.Inject</code>
-        or <code>jakarta.annotation.PostConstruct</code> instead of <code>javax.annotation.PostConstruct</code>.
-        At the moment annotations from both namespaces <code>jakarta</code> and <code>javax</code> are supported.
-      </p>
-      <p>
-        The support for annotations from the <code>javax.inject</code> and <code>javax.annotation</code> package is now deprecated and will be removed in a future release, after a deprecation period of at least two years.
-        If it necessary to make a Plug-in compatible with past versions (that don't support <code>jakarta</code> annotations), recent and future versions (that don't support <code>javax</code> annotations) of the E4-Injector,
-        it can be considered to apply the annotations from both namespaces simultaneously and to import the packages from both namespaces only optionally.
-        But this strategy does not work for usages of the <code>javax/jakarta.inject.Provider</code> and should generally be used with caution and be verified in detail for more complex setups.
-      </p>
-      <p>
-        The Eclipse SDK itself already has been migrated off these annotations from the <code>javax</code> namespace to the <code>jakarta</code> replacements and therefore does not pull the former into a target-platform anymore.
-        If your application still needs these <code>javax</code> annotations you potentially have to add them explicitly to your target using entries like:
-      </p>
-      <pre><code>
-  &lt;unit id&#x3D;&quot;jakarta.inject.jakarta.inject-api&quot; version&#x3D;&quot;1.0.5&quot;&#x2F;&gt;
-  &lt;unit id&#x3D;&quot;jakarta.annotation-api&quot; version&#x3D;&quot;1.3.5&quot;&#x2F;&gt;
-      </code></pre>
-      <p>
-        Counterintuitively the <code>javax</code> annotations are provided by a bundle with the same symbolic name as their <code>jakarta</code> successor but with a 1.x version, while the jakarta successors have a 2.x version.
-        It is therefore necessary to specify the version explicitly since those bundles are not required in their latest version.
-      </p>
-    </td>
+  <tr id="eclipse_launcher_reloads_eclipse_ini_on_restart"> <!-- https://github.com/eclipse-equinox/equinox/pull/401 -->
+      <td class="title">Eclipse Launcher Reloads Configuration Files on Restart</td>
+      <td class="content">
+        <p>
+        Previously when Eclipse was restarted using <code>File &gt; Restart</code> or <code>File &gt; Switch Workspace</code> as well as after installing or updating from a p2 update site, 
+        it restarted with same arguments as those in effect for the initial start. 
+        Any manual changes made to the <code>eclipse.ini</code>, as well as changes made by  p2 touchpoints when installing or updating, were ignored.
+        To actually apply the changes of a modified <code>eclipse.ini</code>, it was necessary to exit the application and restart it from the launcher.
+        </p>
+        <p>
+        Now the Eclipse launcher is enhanced to reload the configuration files on restart,
+        so any changes to the <code>eclipse.ini</code> take effect immediately.
+        In addition, any command line arguments specified for the initial launch remain in effect on restart,
+        except if the restart command contains <code style="white-space: nowrap;">--launcher.skipOldUserArgs</code>.
+        </p>
+      </td>
   </tr>
-  <tr id="new-ecf-client">
-    <!-- https://github.com/eclipse-equinox/p2/pull/206 -->
-    <td class="title"><a href="#new-ecf-client">New Http Client Backend for P2</a></td>
+  <tr id="new_wires_command"> <!-- https://github.com/eclipse-equinox/equinox/pull/466 -->
+      <td class="title">New 'wires' Command in the OSGi Console</td>
+      <td class="content">
+        <p>
+        Previously it was quite challenging to determine if or why a certain bundle was using other bundles or was used by other bundles.
+        There is now a new <code>wires</code> command that, for a specified bundle, prints all wires that are used by the bundle and any wires it provides to other bundles.
+        This provides a powerful tool for analyzing dependency problems and for determining why a bundle is actually used.
+        </p>
+        <p>
+        For example, you can open Host OSGi console and use the <code>wires</code> command as follows:
+        
+WARNING: This console is connected to the current running instance of Eclipse!
+____________________________
+Welcome to Apache Felix Gogo
+
+g! ss org.eclipse.ui.workbench
+
+id	State       Bundle
+5018	ACTIVE      org.eclipse.ui.workbench_3.131.100
+
+g! wires 5018
+
+Bundle org.eclipse.ui.workbench 3.131.100:
+is wired to:
+	 - com.ibm.icu 74.1.0
+	   - because of Import-Package: com.ibm.icu.util
+	 - jakarta.annotation-api 2.1.1
+	   - because of Import-Package: jakarta.annotation; version="[2.1.0,3.0.0)"
+	 - jakarta.inject.jakarta.inject-api 2.0.1
+	   - because of Import-Package: jakarta.inject; version="[2.0.0,3.0.0)"
+	 - org.apache.felix.scr 2.2.6
+	   - because of Require-Capability: osgi.extender; filter:="(&amp;(osgi.extender=osgi.component)(version>=1.2)(!(version>=2.0)))"
+	 - org.eclipse.core.databinding.observable 1.13.200
+	   - because of Require-Bundle: org.eclipse.core.databinding.observable; bundle-version="[1.2.0,2.0.0)"
+	 - org.eclipse.core.databinding.property 1.10.200
+	   - because of Require-Bundle: org.eclipse.core.databinding.property; bundle-version="[1.2.0,2.0.0)"
+	 - org.eclipse.core.runtime 3.31.0
+	   - because of Require-Bundle: org.eclipse.core.runtime; bundle-version="[3.29.0,4.0.0)"
+	 - org.eclipse.e4.core.commands 1.1.300
+	   - because of Import-Package: org.eclipse.e4.core.commands
+	   - because of Import-Package: org.eclipse.e4.core.commands.internal
+	 - org.eclipse.e4.core.contexts 1.12.500
+	   - because of Require-Bundle: org.eclipse.e4.core.contexts; bundle-version="1.0.0"
+	 - org.eclipse.e4.core.di 1.9.300
+	   - because of Require-Bundle: org.eclipse.e4.core.di; bundle-version="1.1.0"
+	 - org.eclipse.e4.core.di.extensions 0.18.200
+	   - because of Require-Bundle: org.eclipse.e4.core.di.extensions; bundle-version="0.13.0"
+	 - org.eclipse.e4.core.services 2.4.300
+	   - because of Require-Bundle: org.eclipse.e4.core.services; bundle-version="2.2.0"
+	 - org.eclipse.e4.ui.bindings 0.14.300
+	   - because of Require-Bundle: org.eclipse.e4.ui.bindings; bundle-version="0.9.0"
+	 - org.eclipse.e4.ui.css.swt 0.15.300
+	   - because of Require-Bundle: org.eclipse.e4.ui.css.swt; bundle-version="0.9.1"
+	 - org.eclipse.e4.ui.css.swt.theme 0.14.300
+	   - because of Require-Bundle: org.eclipse.e4.ui.css.swt.theme; bundle-version="0.9.0"
+	 - org.eclipse.e4.ui.di 1.5.300
+	   - because of Require-Bundle: org.eclipse.e4.ui.di; bundle-version="0.9.0"
+	 - org.eclipse.e4.ui.model.workbench 2.4.200
+	   - because of Require-Bundle: org.eclipse.e4.ui.model.workbench; bundle-version="0.9.1"
+	 - org.eclipse.e4.ui.services 1.6.300
+	   - because of Import-Package: org.eclipse.e4.ui.services
+	   - because of Require-Bundle: org.eclipse.e4.ui.services; bundle-version="1.3.0"
+	 - org.eclipse.e4.ui.workbench 1.15.300
+	   - because of Import-Package: org.eclipse.e4.ui.internal.workbench
+	   - because of Import-Package: org.eclipse.e4.ui.internal.workbench.addons
+	   - because of Import-Package: org.eclipse.e4.ui.workbench
+	   - because of Import-Package: org.eclipse.e4.ui.workbench.modeling
+	 - org.eclipse.e4.ui.workbench.addons.swt 1.5.300
+	   - because of Require-Bundle: org.eclipse.e4.ui.workbench.addons.swt; bundle-version="0.10.0"
+	 - org.eclipse.e4.ui.workbench.renderers.swt 0.16.300
+	   - because of Import-Package: org.eclipse.e4.ui.internal.workbench.renderers.swt
+	   - because of Import-Package: org.eclipse.e4.ui.workbench.renderers.swt
+	 - org.eclipse.e4.ui.workbench.swt 0.17.300
+	   - because of Import-Package: org.eclipse.e4.ui.internal.workbench.swt
+	   - because of Require-Bundle: org.eclipse.e4.ui.workbench.swt; bundle-version="0.9.1"
+	 - org.eclipse.e4.ui.workbench3 0.17.300
+	   - because of Require-Bundle: org.eclipse.e4.ui.workbench3; bundle-version="0.15.0"; visibility:="reexport"
+	 - org.eclipse.emf.ecore.xmi 2.37.0
+	   - because of Require-Bundle: org.eclipse.emf.ecore.xmi; bundle-version="2.11.0"
+	 - org.eclipse.help 3.10.300
+	   - because of Require-Bundle: org.eclipse.help; bundle-version="[3.2.0,4.0.0)"
+	 - org.eclipse.jface 3.33.0
+	   - because of Require-Bundle: org.eclipse.jface; bundle-version="[3.31.0,4.0.0)"
+	 - org.eclipse.jface.databinding 1.15.200
+	   - because of Require-Bundle: org.eclipse.jface.databinding; bundle-version="[1.3.0,2.0.0)"
+	 - org.eclipse.osgi 3.19.0
+	   - because of Import-Package: javax.xml.parsers
+	   - because of Import-Package: org.w3c.dom
+	   - because of Import-Package: org.xml.sax
+	   - because of Require-Capability: osgi.ee; filter:="(&amp;(osgi.ee=JavaSE)(version=17))"
+	 - org.osgi.service.event 1.4.1.202109301733
+	   - because of Import-Package: org.osgi.service.event; version="[1.2.0,2.0.0)"
+and is consumed by:
+	 - org.eclipse.jdt.ui 3.31.100
+	   - because it Require-Bundle: org.eclipse.ui.workbench; bundle-version="[3.131.0,4.0.0)"
+	 - org.eclipse.ui 3.205.100
+	   - because it Require-Bundle: org.eclipse.ui.workbench; bundle-version="[3.130.0,4.0.0)"; visibility:="reexport"
+	 - org.eclipse.ui.editors 3.17.200
+	   - because it Require-Bundle: org.eclipse.ui.workbench; bundle-version="[3.130.0,4.0.0)"
+	 - org.eclipse.ui.genericeditor 1.3.300
+	   - because it Require-Bundle: org.eclipse.ui.workbench; bundle-version="3.109.0"
+	 - org.eclipse.ui.intro.quicklinks 1.2.300
+	   - because it Require-Bundle: org.eclipse.ui.workbench; bundle-version="3.108.0"
+        
+        </p>
+      </td>
+  </tr>
+
+  <tr id="windows-defender-auto-config">
+    <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1453 -->
+    <td class="title">Windows Defender Automatic Configuration</td>
     <td class="content">
-      <p>The ECF Backend used by P2 has switched to use the httpjava-client to lower the dependency chain and efforts to maintain certain third party libraries.</p>
       <p>
-      For now Eclipse will ship both, the new and the old backend while the newer one takes precedence. If you see any issues please proceed as follows:
-      <ol>
-      	<li>Collect as much data as possible, e.g. is a proxy used, are the site you want contact password protected, your os and similar what could be useful or is know to diverge from standard desktop environment settings.</li>
-      	<li><a href="https://github.com/eclipse-equinox/p2/issues?q=is%3Aissue+is%3Aopen+label%3A%22ecf+transport%22" target="_blank">Open an issue here</a> with the description of the problem and the collected data.</li>
-      	<li>Consider <a href="https://github.com/eclipse-equinox/p2/blob/master/CONTRIBUTING" target="_blank">providing a test-case for P2</a> to make sure your use-case is covered now and in the future and will not break again</li>
-      	<li>Configure your <code>eclipse.ini</code> to include <code>-Dorg.eclipse.ecf.provider.filetransfer.excludeContributors=org.eclipse.ecf.provider.filetransfer.httpclientjava</code> unless the problem is fixed</li>
-      </ol>
+        On Microsoft Windows 10 or later, the Microsoft Defender can significantly slow down the startup and overall performance of Eclipse-based applications.
+        The Eclipse IDE can now detect if Microsoft Defender is active, inform the user about it and, if desired, can exclude itself from future Defender scans.
       </p>
+      <p><img src="images/windows-defender-autofix_startup-check.png" alt="Windows Defender autofix startup check"/></p>
+      <p>
+        On Windows the <code>General &gt; Startup and Shutdown</code> preference page offers further information 
+        and allows the user to disable the startup check for new installations and to run the exclusion check again for the running installation.
+      </p>
+      <p><img src="images/windows-defender-autofix_preference-page.png" alt="Windows Defender autofix preference page"/></p>
+      <p>
+        Creators of custom Eclipse-based products that use the <code>org.eclipse.ui.ide.workbench</code> application and want to suppress the new startup check for their product
+        can disable it by adding the following entry to their product's <em>preferenceCustomization</em> properties file:<br></br>
+      </p>
+      <p><code>org.eclipse.ui/windows.defender.startup.check.skip=true</code></p>
+      <p>
+        To execute the startup check for products that run applications other than <code>org.eclipse.ui.ide.workbench</code> add the entry:<br></br>
+      </p>
+      <p><code>org.eclipse.ui/windows.defender.startup.check.app=&#60;application-id-in-use&#62;</code></p>
     </td>
   </tr>
   
+  <tr id="progress_bar_made_smooth_when_launching"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1545 -->
+      <td class="title">Improvement in Progress Bar Consistency and Smoothness</td>
+      <td class="content">
+        <p>
+        Previously in Eclipse, the progress bar did not accurately reflect the progress relative to the total time. Specifically, the initial half of the progress bar advanced rapidly,
+        while a noticeable delay occurred in the latter half. This discrepancy was due to the utilisation of bundle-changed events for progress determination, which resulted in an uneven
+        progression due to the non-uniform nature of these events.
+        </p>
+        <p>
+        The progress is now determined as a function of the service level events occurring while the workbench is being bootstrapped. This gives more meaningful values about the progress
+        the workbench has achieved towards completion. This modification has led to a more consistent and smooth advancement of the progress bar, leading to an overall improved user experience.
+        </p>
+        <p><img src="images/Progress_bar.png" alt="Progress Bar" width="500" height="300"/></p>
+      </td>
+  </tr>
+
   <!-- ******************* End of General Updates ************************************* -->
   <tr><td colspan="2"/></tr>
 </tbody>
