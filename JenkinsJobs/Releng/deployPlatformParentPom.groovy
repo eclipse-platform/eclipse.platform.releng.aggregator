@@ -22,16 +22,8 @@ For this to be used by consuming projects, they must have their local maven repo
       remote{
         url('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git')
       }
-      branch('master')
-      branch('R4_7_maintenance')
-      branch('R4_8_maintenance')
-      branch('R4_19_maintenance')
-      branch('R4_23_maintenance')
-      branch('R4_26_maintenance')
-      branch('R4_27_maintenance')
-      branch('R4_28_maintenance')
-      branch('R4_29_maintenance')
-      branch('R4_30_maintenance')                  
+      branch('master') 
+      branch('R4_31_maintenance')           
     }
   }
 
