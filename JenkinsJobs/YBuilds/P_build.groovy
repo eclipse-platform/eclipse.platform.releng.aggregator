@@ -145,7 +145,7 @@ spec:
                   sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh \'\'\'
-                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+                            git clone -b R4_31_maintenance git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
                         \'\'\'
                       }
                     }
