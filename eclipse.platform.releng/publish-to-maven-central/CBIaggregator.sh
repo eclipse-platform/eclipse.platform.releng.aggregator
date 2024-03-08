@@ -79,7 +79,7 @@ Repo=${WORKSPACE}/repo-${BUILD_NUMBER}
 /bin/mkdir ${RepoRaw}
 
 echo "Running the aggregator with build model ${FILE_SDK_AGGR} ..."
-${AGGREGATOR} aggregate --buildModel ${FILE_SDK_AGGR} --action CLEAN_BUILD --buildRoot ${RepoRaw}
+${AGGREGATOR} aggregate --buildModel ${FILE_SDK_AGGR} --action CLEAN_BUILD --buildRoot ${RepoRaw} -vmargs -Dorg.eclipse.ecf.provider.filetransfer.excludeContributors=org.eclipse.ecf.provider.filetransfer.httpclientjava
 if [ "$?" != "0" ]
 then
     echo "FAILURE $?"
