@@ -34,7 +34,7 @@ public class JDTTipProvider extends JsonTipProvider {
 		if (fUrl != null) {
 			setJsonUrl(fUrl);
 		} else {
-			fUrl = "http://www.eclipse.org/downloads/download.php?r=1&file=/eclipse/tips/org.eclipse.jdt.tips.user/" + FILENAME; //$NON-NLS-1$
+			fUrl = "https://www.eclipse.org/downloads/download.php?r=1&file=/eclipse/tips/org.eclipse.jdt.tips.user/" + FILENAME; //$NON-NLS-1$
 			setJsonUrl(fUrl);
 		}
 	}

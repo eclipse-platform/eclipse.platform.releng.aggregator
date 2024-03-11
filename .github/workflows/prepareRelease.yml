@@ -26,17 +26,17 @@ jobs:
       with:
         ref: master
     - name: Set up JDK
-      uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
+      uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
     - name: Update Main Versions
-      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:4.0.2:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk
+      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:4.0.6:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk
     - name: Update Release Versions
-      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:4.0.2:set-property -Dproperties=releaseNumberSDK,releaseNumberPlatform,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewReleaseNumberSDK=${{ github.event.milestone.title }} -DnewReleaseNumberPlatform=${{ github.event.milestone.title }}
+      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:4.0.6:set-property -Dproperties=releaseNumberSDK,releaseNumberPlatform,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewReleaseNumberSDK=${{ github.event.milestone.title }} -DnewReleaseNumberPlatform=${{ github.event.milestone.title }}
     - name: Create Pull Request for Release ${{ github.event.milestone.title }}
-      uses: peter-evans/create-pull-request@b1ddad2c994a25fbc81a28b3ec0e368bb2021c50 # v6.0.0
+      uses: peter-evans/create-pull-request@a4f52f8033a6168103c2538976c07b467e8163bc # v6.0.1
       with:
         commit-message: Prepare Release ${{ github.event.milestone.title }}
         branch: prepare_R${{ github.event.milestone.title }}

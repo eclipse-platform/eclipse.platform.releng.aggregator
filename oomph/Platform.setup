@@ -94,7 +94,7 @@
   <setupTask
       xsi:type="setup:EclipseIniTask"
       option="-Xmx"
-      value="2048m"
+      value="4g"
       vm="true"/>
   <setupTask
       xsi:type="setup:ResourceCreationTask"
@@ -170,29 +170,25 @@
   </setupTask>
   <setupTask
       xsi:type="setup:VariableTask"
-      disabled="true"
       type="BOOLEAN"
-      name="early.redirection.4.31"
+      name="early.redirection.4.32"
       defaultValue="true"
       storageURI="scope://Workspace"
-      label="Early redirect to 4.31">
-    <description>Redirect 4.29 p2 repos to 4.30 and redirect 4.30 repos 4.31 to begin development on the open master streams immediately.</description>
+      label="Early redirect to 4.32">
+    <description>Redirect 4.30 p2 repos to 4.31 and redirect 4.31 repos 4.32 to begin development on the open master streams immediately.</description>
   </setupTask>
   <setupTask
       xsi:type="setup:CompoundTask"
-      disabled="true"
-      filter="(early.redirection.4.31=true)"
+      filter="(early.redirection.4.32=true)"
       name="EarlyRedirection">
     <setupTask
         xsi:type="setup:RedirectionTask"
-        disabled="true"
-        sourceURL="https://download.eclipse.org/eclipse/updates/4.30-I-builds"
-        targetURL="https://download.eclipse.org/eclipse/updates/4.31-I-builds"/>
+        sourceURL="https://download.eclipse.org/eclipse/updates/4.31-I-builds"
+        targetURL="https://download.eclipse.org/eclipse/updates/4.31-I-builds/I20240229-0520"/>
     <setupTask
         xsi:type="setup:RedirectionTask"
-        disabled="true"
-        sourceURL="https://download.eclipse.org/eclipse/updates/4.29/R-4.29-202309031000"
-        targetURL="https://download.eclipse.org/eclipse/updates/4.30-I-builds"/>
+        sourceURL="https://download.eclipse.org/eclipse/updates/4.30/R-4.30-202312010110"
+        targetURL="https://download.eclipse.org/eclipse/updates/4.31-I-builds"/>
   </setupTask>
   <project name="platform"
       label="Ant, Base, Debug, Runtime, Resources, Team, User Assistance, and Update">
@@ -506,67 +502,6 @@
               value="always"/>
         </configSections>
         <description>ECF</description>
-      </setupTask>
-      <setupTask
-          xsi:type="setup:TextModifyTask"
-          excludedTriggers="BOOTSTRAP"
-          url="${github.clone.ecf.location|uri}/framework/bundles/org.eclipse.ecf.identity/src/org/eclipse/ecf/core/util/SystemLogService.java"
-          encoding="UTF-8">
-        <modification
-            pattern="(?im)public void log\(@SuppressWarnings\(&quot;rawtypes&quot;\) ServiceReference sr, int level, String message, Throwable exception\) \{\s+doLog\(sr, level, message, exception\);\s+\}\s+()\}(\s+)$">
-          <substitution>	public org.osgi.service.log.Logger getLogger(String name) {\2		throw new UnsupportedOperationException();\2	}\2\2	public org.osgi.service.log.Logger getLogger(Class&lt;?> clazz) {\2		throw new UnsupportedOperationException();\2	}\2\2	public &lt;L extends org.osgi.service.log.Logger> L getLogger(String name, Class&lt;L> LoggerType) {\2		throw new UnsupportedOperationException();\2	}\2\2	public &lt;L extends org.osgi.service.log.Logger> L getLogger(Class&lt;?> clazz, Class&lt;L> LoggerType) {\2		throw new UnsupportedOperationException();\2	}\2	public &lt;L extends org.osgi.service.log.Logger> L getLogger(org.osgi.framework.Bundle bundle, String name, Class&lt;L> LoggerType) {\2		throw new UnsupportedOperationException();\2	}\2</substitution>
-          <substitution>\2</substitution>
-        </modification>
-      </setupTask>
-      <setupTask
-          xsi:type="setup:TextModifyTask"
-          excludedTriggers="BOOTSTRAP"
-          url="${github.clone.ecf.location|uri}/releng/features/org.eclipse.ecf.filetransfer.httpclient5.feature/.project"
-          encoding="UTF-8">
-        <modification
-            pattern="(?im)(^[^&lt;].*maven.*$)">
-          <substitution>&lt;!-- \1 --></substitution>
-        </modification>
-      </setupTask>
-      <setupTask
-          xsi:type="setup:TextModifyTask"
-          excludedTriggers="BOOTSTRAP"
-          url="${github.clone.ecf.location|uri}/releng/features/org.eclipse.ecf.filetransfer.httpclientjava.feature/.project"
-          encoding="UTF-8">
-        <modification
-            pattern="(?im)(^[^&lt;].*maven.*$)">
-          <substitution>&lt;!-- \1 --></substitution>
-        </modification>
-      </setupTask>
-      <setupTask
-          xsi:type="setup:TextModifyTask"
-          excludedTriggers="BOOTSTRAP"
-          url="${github.clone.ecf.location|uri}/providers/bundles/org.eclipse.ecf.provider.filetransfer.httpclient5/.project"
-          encoding="UTF-8">
-        <modification
-            pattern="(?im)(^[^&lt;].*maven.*$)">
-          <substitution>&lt;!-- \1 --></substitution>
-        </modification>
-      </setupTask>
-      <setupTask
-          xsi:type="setup:TextModifyTask"
-          excludedTriggers="BOOTSTRAP"
-          url="${github.clone.ecf.location|uri}/providers/bundles/org.eclipse.ecf.provider.filetransfer.httpclient5.win32/.project"
-          encoding="UTF-8">
-        <modification
-            pattern="(?im)(^[^&lt;].*maven.*$)">
-          <substitution>&lt;!-- \1 --></substitution>
-        </modification>
-      </setupTask>
-      <setupTask
-          xsi:type="setup:TextModifyTask"
-          excludedTriggers="BOOTSTRAP"
-          url="${github.clone.ecf.location|uri}/providers/bundles/org.eclipse.ecf.provider.filetransfer.httpclientjava/.project"
-          encoding="UTF-8">
-        <modification
-            pattern="(?im)(^[^&lt;].*maven.*$)">
-          <substitution>&lt;!-- \1 --></substitution>
-        </modification>
       </setupTask>
       <setupTask
           xsi:type="setup.targlets:TargletTask">
