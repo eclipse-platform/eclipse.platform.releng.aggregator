@@ -19,7 +19,7 @@ for (STREAM in STREAMS){
 # - - - Integration Eclipse SDK builds - - - 
 # 2023-12 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
-#0 18 * * *
+0 18 * * *
 
 
 # Milestone/RC Schedule 
