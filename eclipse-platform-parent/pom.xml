@@ -145,6 +145,7 @@
     <java.version>17</java.version>
     <printApiMessages>false</printApiMessages>
     <failOnJavadocErrors>false</failOnJavadocErrors>
+    <compileLogDir>${project.build.directory}/compilelogs</compileLogDir>
   </properties>
 
   <organization>
@@ -443,14 +444,9 @@
               <args>-encoding</args>
               <args>${project.build.sourceEncoding}</args>
               <args>-proceedOnError</args>
-              <!-- Use this form, for Tycho 22 or less.
-                <args>-log</args>
-                <args>${project.build.directory}/@dot.xml</args>
-              -->
             </compilerArgs>
-            <!-- Use this form for Tycho 23 or greater -->
             <log>xml</log>
-            <logDirectory>${project.build.directory}/compilelogs</logDirectory>
+            <logDirectory>${compileLogDir}</logDirectory>
             <showWarnings>true</showWarnings>
             <excludeResources>
               <exclude>**/package.html</exclude>
@@ -537,7 +533,9 @@
           <artifactId>tycho-p2-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <baselineMode>warn</baselineMode>
+            <baselineMode>warnCommon</baselineMode>
+            <enhanceLogs>true</enhanceLogs>
+            <logDirectory>${compileLogDir}</logDirectory>
             <baselineRepositories>
               <repository>
                 <url>${comparator.repo}</url>
@@ -922,7 +920,7 @@
                              </baselines>
                              <skip>${skipAPIAnalysis}</skip>
                              <skipIfReplaced>false</skipIfReplaced>
-                             <logDirectory>${project.build.directory}/compilelogs</logDirectory>
+                             <logDirectory>${compileLogDir}</logDirectory>
                              <enhanceLogs>true</enhanceLogs>
                              <printProblems>${printApiMessages}</printProblems>
                         </configuration>
