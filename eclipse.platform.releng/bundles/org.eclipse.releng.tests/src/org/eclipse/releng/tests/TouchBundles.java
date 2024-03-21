@@ -26,10 +26,12 @@ import java.util.stream.Collectors;
 public class TouchBundles {
 
 	final static String FQU_FILE = "forceQualifierUpdate.txt";
+	final static String RELEASE_TAG = "R4_31";
 	static String ticketMessage;
 
 	/**
 	 * Tries to map & touch all bundles that are mentioned in artifactcomparisons.
+	 * Automatically bumps versions if needed.
 	 *
 	 * @param args first is path to the extracted artifactcomparisons.zip, second
 	 *             path to the root directory with all repositories, third one is
@@ -38,7 +40,7 @@ public class TouchBundles {
 	 */
 	public static void main(String[] args) throws Exception {
 		if (args.length != 3) {
-			System.out.println("Arguments: first is path to the artifactcomparisons.zip, \n"
+			System.out.println("Arguments: first is path to the extracted artifactcomparisons.zip, \n"
 					+ "second is the path to the root directory with all repositories, \n"
 					+ "third is the ticket message");
 			System.exit(1);
@@ -70,7 +72,7 @@ public class TouchBundles {
 		if (gitDirMap.containsKey("eclipse.pde.ui")) {
 			gitDirMap.put("eclipse.pde", gitDirMap.get("eclipse.pde.ui"));
 		}
-		if (gitDirMap.containsKey("eclipse.platform.releng.aggregator")) { 
+		if (gitDirMap.containsKey("eclipse.platform.releng.aggregator")) {
 			gitDirMap.put("eclipse.platform.releng",
 					new File(gitDirMap.get("eclipse.platform.releng.aggregator"), "eclipse.platform.releng"));
 		}
@@ -109,13 +111,18 @@ public class TouchBundles {
 		}
 	}
 
-	private static void updateFQU(File dir) {
-		if (!dir.isDirectory()) {
-			System.err.println("\tCan't update non existing directory " + dir);
+	private static void updateFQU(File bundleRoot) {
+		if (!bundleRoot.isDirectory()) {
+			System.err.println("\tCan't update non existing directory " + bundleRoot);
 			return;
 		}
-		System.out.println("\tUpdating " + dir);
-		File fquFile = new File(dir, FQU_FILE);
+		System.out.println("\tUpdating " + bundleRoot);
+		boolean versionBumped = VersionBump.run(bundleRoot.toPath(), RELEASE_TAG);
+		if (versionBumped) {
+			System.out.println("No need to update " + FQU_FILE);
+			return;
+		}
+		File fquFile = new File(bundleRoot, FQU_FILE);
 		try {
 			boolean created;
 			if (!fquFile.exists()) {
