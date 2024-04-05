@@ -53,7 +53,27 @@ pipeline {
 				  steps {
 						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java21arm64}")]
 				  }
-			  }          
+			  }
+			  stage('Ubuntu 22.04 Java22'){
+				  steps {
+						build job: 'SmokeTests/ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+				  }
+			  }
+			  stage('Opensuse Leap Java22'){
+				  steps {
+						build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+				  }
+			  }
+			  stage('Centos 9.x Java22'){
+				  steps {
+						build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+				  }
+			  }
+			  stage('Centos 8 arm64 Java22'){
+				  steps {
+						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22arm64}")]
+				  }
+			  }
           }
           
 		}
