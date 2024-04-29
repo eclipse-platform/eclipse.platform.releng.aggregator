@@ -6,10 +6,10 @@ for (STREAM in STREAMS){
   def MINOR = STREAM.split('\\.')[1]
 
   job('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-win32-java17'){
-    description('Run Eclipse SDK Windows Tests ')
+    description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
 
     logRotator {
-      numToKeep(25)
+      numToKeep(5)
     }
 
     parameters {
