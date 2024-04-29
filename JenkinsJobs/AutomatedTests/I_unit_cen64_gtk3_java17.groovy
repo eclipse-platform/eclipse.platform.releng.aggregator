@@ -6,25 +6,21 @@ for (STREAM in STREAMS){
   def MINOR = STREAM.split('\\.')[1]
 
   pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java17'){
-
-    logRotator {
-      numToKeep(5)
-    }
-
-    parameters {
-      stringParam('buildId', null, null)
-    }
+    description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
 
     definition {
       cps {
         sandbox()
         script('''
 pipeline {
-	options {
-		timeout(time: 600, unit: 'MINUTES')
-		timestamps()
-		buildDiscarder(logRotator(numToKeepStr:'5'))
-	}
+  options {
+    timeout(time: 600, unit: 'MINUTES')
+    timestamps()
+    buildDiscarder(logRotator(numToKeepStr:'5'))
+  }
+  parameters {
+    string(name: 'buildId', defaultValue: null, description: 'Build Id to test (such as I20120717-0800, N20120716-0800).')
+  }
   agent {
     kubernetes {
       label 'centos-unitpod17'
@@ -86,10 +82,10 @@ spec:
   stages {
       stage('Run tests'){
           environment {
-              // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of fundamental commands like xvnc, pkill and sh
+              // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
               JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk17-latest')
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
-              PATH = "$JAVA_HOME/bin:$ANT_HOME/bin:$PATH"
+              PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
           }
           steps {
               container ('custom'){
@@ -130,7 +126,11 @@ spec:
                         ant -diagnostics 1>antDiagnostics.txt 2>&1
                         java -XshowSettings -version 1>javaSettings.txt 2>&1
                         
-                        ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=all -Djvm=${JAVA_HOME}/bin/java
+                        ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \\
+                          -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
+                          -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 \\
+                          -DtestSuite=all \\
+                          -Djvm=${JAVA_HOME}/bin/java
                         
                         RAW_DATE_END="$(date +%s )"
                         
@@ -144,7 +144,11 @@ spec:
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-              build job: 'Releng/ep-collectResults', parameters: [string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"), string(name: 'buildURL', value: "${BUILD_URL}"), string(name: 'buildID', value: "${params.buildId}")], wait: false
+              build job: 'Releng/ep-collectResults', wait: false, parameters: [
+                string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"),
+                string(name: 'buildURL', value: "${BUILD_URL}"),
+                string(name: 'buildID', value: "${params.buildId}")
+              ]
           }
       }
   }

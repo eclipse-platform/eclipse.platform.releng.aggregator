@@ -6,11 +6,10 @@ for (STREAM in STREAMS){
   def MINOR = STREAM.split('\\.')[1]
 
   job('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-mac64-java17'){
-    description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
+    description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
 
     logRotator {
-      daysToKeep(5)
-      numToKeep(10)
+      numToKeep(5)
     }
 
     parameters {
@@ -116,13 +115,15 @@ echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
 
-
 env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
 export eclipseArch=x86_64
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \\
+  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
+  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=${eclipseArch} \\
+  -DtestSuite=${testSuite}
 
 RAW_DATE_END="$(date +%s )"
 
