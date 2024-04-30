@@ -1,11 +1,15 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
-for (STREAM in STREAMS){
-  def MAJOR = STREAM.split('\\.')[0]
-  def MINOR = STREAM.split('\\.')[1]
+def ARCHS = ['aarch64', 'x86_64']
+def ARCHS_AGENT_LABEL = ['aarch64': 'nc1ht-macos11-arm64', 'x86_64': 'nc1ht-macos11-arm64']
+def ARCHS_JAVA_HOME = ['aarch64': '/usr/local/openjdk-17/Contents/Home', 'x86_64': '/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home']
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-mac64-java17'){
+for (STREAM in STREAMS){
+for (ARCH in ARCHS){
+  def (MAJOR, MINOR) = STREAM.split('\\.')
+
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-mac-' + ARCH + '-java17'){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
 
     authenticationToken('windows2012tests')
@@ -24,17 +28,17 @@ pipeline {
     string(name: 'buildId', defaultValue: null, description: 'Build Id to test (such as I20120717-0800, N20120716-0800).')
   }
   agent {
-    label 'nc1ht-macos11-arm64'
+    label '&&AGENT_LABEL&&'
   }
 
   stages {
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = '/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home'
+              JAVA_HOME = '&&JAVA_HOME&&'
               ANT_HOME = '/opt/homebrew/Cellar/ant/1.10.11/libexec'
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
-              eclipseArch = 'x86_64'
+              eclipseArch = '&&ARCH&&'
           }
           steps {
               cleanWs() // workspace not cleaned by default
@@ -99,8 +103,9 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
       }
   }
 }
-        ''')
+        '''.replace('&&ARCH&&', ARCH).replace('&&AGENT_LABEL&&', ARCHS_AGENT_LABEL[ARCH]).replace('&&JAVA_HOME&&', ARCHS_JAVA_HOME[ARCH]))
       }
     }
   }
+}
 }
