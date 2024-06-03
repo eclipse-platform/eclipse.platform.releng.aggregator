@@ -23,7 +23,7 @@ For this to be used by consuming projects, they must have their local maven repo
         url('https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git')
       }
       branch('master')
-      branch('R4_31_maintenance')
+      branch('R4_32_maintenance')
     }
   }
 
