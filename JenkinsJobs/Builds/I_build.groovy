@@ -59,7 +59,6 @@ pipeline {
   agent {
     kubernetes {
       label 'aggrbuild-pod'
-      defaultContainer 'container'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -491,6 +490,7 @@ spec:
 		}
 	  stage('Trigger tests'){
           steps {
+            container('jnlp') {
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java22', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
@@ -500,10 +500,13 @@ spec:
               build job: 'PerformanceTests/ep''' + MAJOR + MINOR + '''I-perf-lin64-baseline', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
+          }
 		}
 		stage('Trigger publication to Maven snapshots repo') {
 			steps {
+              container('jnlp') {
 				build job: 'CBIaggregator', parameters: [string(name: 'snapshotOrRelease', value: '-snapshot')], wait: false
+              }
 			}
 		}
 	}
