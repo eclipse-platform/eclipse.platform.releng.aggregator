@@ -59,15 +59,13 @@ pipeline {
   agent {
     kubernetes {
       label 'aggrbuild-pod'
-      defaultContainer 'container'
+      inheritFrom 'centos-8'
       yaml """
 apiVersion: v1
 kind: Pod
 spec:
   containers:
   - name: "jnlp"
-    image: "eclipsecbi/jiro-agent-centos-8:latest"
-    imagePullPolicy: "Always"
     resources:
       limits:
         memory: "8192Mi"
@@ -75,75 +73,6 @@ spec:
       requests:
         memory: "6144Mi"
         cpu: "2000m"
-    securityContext:
-      privileged: false
-    tty: true
-    volumeMounts:
-    - mountPath: "/home/jenkins/agent"
-      name: "workspace-volume"
-      readOnly: false
-    - mountPath: "/home/jenkins/.m2/toolchains.xml"
-      name: "toolchains-xml"
-      readOnly: true
-      subPath: "toolchains.xml"
-    - mountPath: "/opt/tools"
-      name: "volume-0"
-      readOnly: false
-    - mountPath: "/home/jenkins"
-      name: "volume-2"
-      readOnly: false
-    - mountPath: "/home/jenkins/.m2/repository"
-      name: "volume-3"
-      readOnly: false
-    - mountPath: "/home/jenkins/.m2/settings-security.xml"
-      name: "settings-security-xml"
-      readOnly: true
-      subPath: "settings-security.xml"
-    - mountPath: "/home/jenkins/.m2/settings.xml"
-      name: "settings-xml"
-      readOnly: true
-      subPath: "settings.xml"
-    - mountPath: "/home/jenkins/.ssh"
-      name: "volume-1"
-      readOnly: false
-    workingDir: "/home/jenkins/agent"
-  nodeSelector: {}
-  restartPolicy: "Never"
-  volumes:
-  - name: "settings-security-xml"
-    secret:
-      items:
-      - key: "settings-security.xml"
-        path: "settings-security.xml"
-      secretName: "m2-secret-dir"
-  - name: "volume-0"
-    persistentVolumeClaim:
-      claimName: "tools-claim-jiro-releng"
-      readOnly: true
-  - configMap:
-      items:
-      - key: "toolchains.xml"
-        path: "toolchains.xml"
-      name: "m2-dir"
-    name: "toolchains-xml"
-  - emptyDir:
-      medium: ""
-    name: "volume-2"
-  - configMap:
-      name: "known-hosts"
-    name: "volume-1"
-  - name: "settings-xml"
-    secret:
-      items:
-      - key: "settings.xml"
-        path: "settings.xml"
-      secretName: "m2-secret-dir"
-  - emptyDir:
-      medium: ""
-    name: "workspace-volume"
-  - emptyDir:
-      medium: ""
-    name: "volume-3"
 """
     }
   }
@@ -159,14 +88,11 @@ spec:
   stages {
       stage('Clean Workspace'){
           steps {
-              container('jnlp') {
                 cleanWs()
-                }
             }
 	    }
 	  stage('Setup intial configuration'){
           steps {
-              container('jnlp') {
                   sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh \'\'\'
@@ -179,12 +105,10 @@ spec:
                         chmod +x mbscripts/*
                         mkdir -p $logDir
                     \'\'\'
-                }
             }
 		}
 	  stage('Generate environment variables'){
           steps {
-              container('jnlp') {
                 sh \'\'\'
                     cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
@@ -194,7 +118,6 @@ spec:
                         exit 1
                     fi
                 \'\'\'
-                }
             }
 		}
 	  stage('Load PGP keys'){
@@ -203,7 +126,6 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
-              container('jnlp') {
                 sh \'\'\'
                     cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                     ./mb011_loadPGPKeys.sh 2>&1 | tee $logDir/mb011_loadPGPKeys.sh.log
@@ -213,12 +135,10 @@ spec:
                         exit 1
                     fi
                 \'\'\'
-                }
             }
 		}
 	  stage('Export environment variables stage 1'){
           steps {
-              container('jnlp') {
                 script {
                     env.BUILD_IID = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $BUILD_TYPE$TIMESTAMP)', returnStdout: true)
                     env.BUILD_VERSION = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
@@ -226,12 +146,10 @@ spec:
                     env.EBUILDER_HASH = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $EBUILDER_HASH)', returnStdout: true)
                     env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
                   }
-                }
             }
         }
 	  stage('Create Base builder'){
           steps {
-              container('jnlp') {
 		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 		              withAnt(installation: 'apache-ant-latest') {
 		                sh \'\'\'
@@ -245,12 +163,10 @@ spec:
 		                \'\'\'
 		              }
 		        }
-		      }
 		}
 	  }
 	  stage('Download reference repo for repo reports'){
           steps {
-              container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
@@ -263,12 +179,10 @@ spec:
                         cd ${WORKSPACE}
                     \'\'\'
                   }
-                }
             }
 		}
 	  stage('Clone Repositories'){
           steps {
-              container('jnlp') {
                   sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh \'\'\'
                         git config --global user.email "eclipse-releng-bot@eclipse.org"
@@ -282,12 +196,10 @@ spec:
                         fi
                     \'\'\'
                   }
-                }
             }
 		}
 	  stage('Tag Build Inputs'){
           steps {
-              container('jnlp') {
                   sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
@@ -299,12 +211,10 @@ spec:
                         fi
                     \'\'\'
                   }
-                }
             }
 		}
 	  stage('Create Source Bundles'){
           steps {
-              container('jnlp') {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -316,7 +226,6 @@ spec:
                             exit 1
                         fi
                     \'\'\'
-                }
             }
 		}
 	  stage('Aggregator maven build'){
@@ -325,7 +234,6 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
-              container('jnlp') {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -337,7 +245,6 @@ spec:
                             exit 1
                         fi
                     \'\'\'
-                }
             }
 		}
 	  stage('Gather Eclipse Parts'){
@@ -346,7 +253,6 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
-              container('jnlp') {
                       withAnt(installation: 'apache-ant-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
@@ -358,7 +264,6 @@ spec:
                             fi
                           \'\'\'
                       }
-                }
             }
 		}
 	  stage('Gather Equinox Parts'){
@@ -367,7 +272,6 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
-              container('jnlp') {
                       withAnt(installation: 'apache-ant-latest') {
                           sh \'\'\'
                             cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
@@ -379,12 +283,10 @@ spec:
                             fi
                           \'\'\'
                       }
-                }
             }
 		}
 	  stage('Generate Repo reports'){
           steps {
-              container('jnlp') {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -396,12 +298,10 @@ spec:
                             exit 1
                         fi
                       \'\'\'
-                }
             }
 		}
 	  stage('Generate API tools reports'){
           steps {
-              container('jnlp') {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
@@ -413,12 +313,10 @@ spec:
                             exit 1
                         fi
                       \'\'\'
-                }
             }
 		}
 	  stage('Export environment variables stage 2'){
           steps {
-              container('jnlp') {
                 script {
                     env.BUILD_IID = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $BUILD_TYPE$TIMESTAMP)', returnStdout: true)
                     env.BUILD_VERSION = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
@@ -430,12 +328,10 @@ spec:
                     env.EBUILDER_HASH = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $EBUILDER_HASH)', returnStdout: true)
                     env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
                   }
-                }
             }
         }
 	  stage('Archive artifacts'){
           steps {
-              container('jnlp') {
                 sh \'\'\'
                     cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production
                     source $CJE_ROOT/buildproperties.shsource
@@ -448,45 +344,38 @@ spec:
                     cp $CJE_ROOT/buildproperties.shsource $CJE_ROOT/$DROP_DIR/$BUILD_ID
                     cp $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
                 \'\'\'
-              }
               archiveArtifacts '**/siteDir/**'
             }
 		}
 	  stage('Promote Eclipse platform'){
           steps {
-              container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb600_promoteEclipse.sh $CJE_ROOT/buildproperties.shsource
                       \'\'\'
                   }
-                }
                 build job: 'eclipse.releng.updateIndex', wait: false
             }
 		}
 	  stage('Promote Equinox'){
           steps {
-              container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb610_promoteEquinox.sh $CJE_ROOT/buildproperties.shsource
                       \'\'\'
                   }
-                }
             }
 		}
 	  stage('Promote Update Site'){
           steps {
-              container('jnlp') {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                       sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb620_promoteUpdateSite.sh $CJE_ROOT/buildproperties.shsource
                       \'\'\'
                   }
-                }
             }
 		}
 	  stage('Trigger tests'){
