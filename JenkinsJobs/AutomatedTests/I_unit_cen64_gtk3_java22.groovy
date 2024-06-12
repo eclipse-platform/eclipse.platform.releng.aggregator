@@ -7,6 +7,9 @@ for (STREAM in STREAMS){
 
   pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java22'){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
+    parameters { // Define parameters in job configuration to make them available from the very first build onwards
+      stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
+    }
 
     definition {
       cps {
@@ -17,9 +20,6 @@ pipeline {
     timeout(time: 600, unit: 'MINUTES')
     timestamps()
     buildDiscarder(logRotator(numToKeepStr:'5'))
-  }
-  parameters {
-    string(name: 'buildId', defaultValue: null, description: 'Build Id to test (such as I20120717-0800, N20120716-0800).')
   }
   agent {
     kubernetes {
