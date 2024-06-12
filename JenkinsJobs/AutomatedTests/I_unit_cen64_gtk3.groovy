@@ -1,11 +1,12 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
+def JAVA_VERSIONS = ['17', '21', '22']
 
 for (STREAM in STREAMS){
-  def MAJOR = STREAM.split('\\.')[0]
-  def MINOR = STREAM.split('\\.')[1]
+for (JAVA_VERSION in JAVA_VERSIONS){
+  def (MAJOR, MINOR) = STREAM.split('\\.')
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java17'){
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java' + JAVA_VERSION){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
 
     definition {
@@ -23,7 +24,7 @@ pipeline {
   }
   agent {
     kubernetes {
-      label 'centos-unitpod17'
+      label 'centos-unitpod&&JAVA_VERSION&&'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -83,7 +84,7 @@ spec:
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk17-latest')
+              JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk&&JAVA_VERSION&&-latest')
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
           }
@@ -120,7 +121,7 @@ spec:
                         echo JAVA_HOME: $JAVA_HOME
                         echo ANT_HOME: $ANT_HOME
                         echo PATH: $PATH
-                        export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp"
+                        export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
                         
                         env 1>envVars.txt 2>&1
                         ant -diagnostics 1>antDiagnostics.txt 2>&1
@@ -153,8 +154,9 @@ spec:
       }
   }
 }
-        ''')
+        '''.replace('&&JAVA_VERSION&&', JAVA_VERSION))
       }
     }
   }
+}
 }
