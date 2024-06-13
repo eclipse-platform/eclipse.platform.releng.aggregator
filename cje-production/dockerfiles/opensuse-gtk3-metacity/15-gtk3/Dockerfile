@@ -1,4 +1,4 @@
-FROM opensuse/leap:15@sha256:e9440db7b4e53a56f3e4fc9a50f17030fa7d64b8b1c60f77282df282e2f12365
+FROM opensuse/leap:15@sha256:2f0d8bb33b4d6869bbcf65ef925f9da8a863e75268da66943a3fa8a721347869
 
 ### user name recognition at runtime w/ an arbitrary uid - for OpenShift deployments
 COPY scripts/uid_entrypoint /usr/local/bin/uid_entrypoint
