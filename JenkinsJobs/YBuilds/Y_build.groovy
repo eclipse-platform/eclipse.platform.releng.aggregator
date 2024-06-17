@@ -501,7 +501,7 @@ spec:
               container('jnlp') {
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java22', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-cen64-gtk3-java23', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
