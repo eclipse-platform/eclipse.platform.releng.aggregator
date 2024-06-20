@@ -46,4 +46,5 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Dgpg.passphrase=${KEYRING_PASSPHRASE} \
   -Dcbi-ecj-version=99.99 \
   -e \
+  -T 1C \
   ${JAVA_DOC_TOOL}
