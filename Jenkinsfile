@@ -37,6 +37,7 @@ pipeline {
 				sh '''
 					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+						-T 1C \
 						-Pbree-libs \
 						-DskipTests=true \
 						-Dcompare-version-with-baselines.skip=false \
