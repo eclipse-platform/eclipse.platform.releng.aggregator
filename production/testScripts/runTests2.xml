@@ -134,21 +134,21 @@
   </target>
 
   <target
-    name="getwinzips64"
+    name="getwinzips"
     depends="init, getPlatformIndependentZips"
     unless="skipInstall">
     <get
       verbose="${selectiveVerbose}"
-      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-win32-x86_64.zip"
-      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-win32-x86_64.zip" />
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-win32-${osgi.arch}.zip"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-win32-${osgi.arch}.zip" />
     <get
       verbose="${selectiveVerbose}"
-      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-win32-x86_64.zip"
-      dest="${executionDir}/eclipse-platform-${buildIdToUse}-win32-x86_64.zip" />
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-win32-${osgi.arch}.zip"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-win32-${osgi.arch}.zip" />
     <get
       verbose="${selectiveVerbose}"
-      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip"
-      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip" />
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-win32-${osgi.arch}.zip"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-win32-${osgi.arch}.zip" />
   </target>
   <target
     name="getlinzips"
@@ -191,58 +191,19 @@
     unless="testPlatform">
     <condition
       property="testPlatform"
-      value="linuxjava14">
+      value="windows">
       <and>
         <equals
           arg1="${osgi.os}"
-          arg2="linux" />
+          arg2="win32" />
         <equals
           arg1="${osgi.ws}"
-          arg2="gtk" />
+          arg2="win32" />
         <or>
-        	<equals
-          		arg1="${osgi.arch}"
-          		arg2="x86_64" />
-        	<equals
-          		arg1="${osgi.arch}"
-          		arg2="ppc64le" />
-        	<equals
-          		arg1="${osgi.arch}"
-          		arg2="aarch64" />
+          <equals
+            arg1="${osgi.arch}"
+            arg2="x86_64" />
         </or>
-        <equals
-          arg1="${jvm.version}"
-          arg2="java14" />
-      </and>
-    </condition>
-    <condition
-      property="testPlatform"
-      value="win7-64">
-      <and>
-        <equals
-          arg1="${osgi.os}"
-          arg2="win32" />
-        <equals
-          arg1="${osgi.ws}"
-          arg2="win32" />
-        <equals
-          arg1="${osgi.arch}"
-          arg2="x86_64" />
-      </and>
-    </condition>
-    <condition
-      property="testPlatform"
-      value="win7">
-      <and>
-        <equals
-          arg1="${osgi.os}"
-          arg2="win32" />
-        <equals
-          arg1="${osgi.ws}"
-          arg2="win32" />
-        <equals
-          arg1="${osgi.arch}"
-          arg2="x86" />
       </and>
     </condition>
 
@@ -257,15 +218,15 @@
           arg1="${osgi.ws}"
           arg2="gtk" />
         <or>
-        	<equals
-          		arg1="${osgi.arch}"
-          		arg2="x86_64" />
-        	<equals
-          		arg1="${osgi.arch}"
-          		arg2="ppc64le" />
-        	<equals
-        	    arg1="${osgi.arch}"
-        	    arg2="aarch64" />
+          <equals
+            arg1="${osgi.arch}"
+            arg2="x86_64" />
+          <equals
+            arg1="${osgi.arch}"
+            arg2="ppc64le" />
+          <equals
+            arg1="${osgi.arch}"
+            arg2="aarch64" />
         </or>
       </and>
     </condition>
@@ -280,12 +241,12 @@
           arg1="${osgi.ws}"
           arg2="cocoa" />
         <or>
-	        <equals
-	          arg1="${osgi.arch}"
-	          arg2="x86_64" />
-	        <equals
-	          arg1="${osgi.arch}"
-	          arg2="aarch64" />
+          <equals
+            arg1="${osgi.arch}"
+            arg2="x86_64" />
+          <equals
+            arg1="${osgi.arch}"
+            arg2="aarch64" />
        	</or>
       </and>
     </condition>
@@ -312,14 +273,7 @@
       value="getwinzips">
       <equals
         arg1="${testPlatform}"
-        arg2="win7" />
-    </condition>
-    <condition
-      property="getArtifacts"
-      value="getwinzips64">
-      <equals
-        arg1="${testPlatform}"
-        arg2="win7-64" />
+        arg2="windows" />
     </condition>
     <condition
       property="getArtifacts"
@@ -328,14 +282,6 @@
         arg1="${testPlatform}"
         arg2="linux" />
     </condition>
-    <condition
-      property="getArtifacts"
-      value="getlinzips">
-      <equals
-        arg1="${testPlatform}"
-        arg2="linuxjava14" />
-    </condition>
-
     <condition
       property="getArtifacts"
       value="getmacosx">
@@ -715,21 +661,6 @@
       </filterchain>
     </loadresource>
     <echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
-  	<!--
-  	<script language="javascript">
-      <![CDATA[
-      var buildId = project.getProperty("buildId");
-      var pattern = new RegExp(/^([IMXYNPSRU])(\d{8})-(\d{4})$/);
-
-      var sArray = pattern.exec(buildId);
-      // sArray 0 is "whole match"
-      project.setProperty("buildType", sArray[1]);
-      project.setProperty("buildIdTimestamp",sArray[2]+sArray[3]);
-      ]]>
-    </script>
-    -->
-
-
     <fail unless="buildType" />
   </target>
   <!-- main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor
@@ -781,25 +712,6 @@
       </filterchain>
     </loadresource>
     <echo message="updateSiteSegment: ${updateSiteSegment}"/>
-
-  	<!--
-  	<script language="javascript">
-      <![CDATA[
-      var eclipseStream = project.getProperty("eclipseStream");
-      var pattern = new
-      RegExp(/(\d+)\.(\d+)(\.(\d+))?/);
-      var sArray = pattern.exec(eclipseStream);
-      // sArray[0] is "whole match"
-      project.setProperty("eclipseStreamMajor", sArray[1]);
-      project.setProperty("eclipseStreamMinor", sArray[2]);
-      // zero based: index 3 is 4th item, etc, and we have digit only in a nested group (due to optional)
-      if (sArray.length > 4) {
-         project.setProperty("eclipseStreamService", sArray[4]);
-      }
-      project.setProperty("updateSiteSegment", sArray[1] + "." + sArray[2]);
-      ]]>
-    </script>
-    -->
 
     <fail
       unless="eclipseStreamMajor"
@@ -1112,46 +1024,6 @@
     <echo message="full output from 'java -version' of ${jvm} is " />
     <echo message="${javaversion}" />
     <escapeProperty property="javaversion" />
-    <echo message="full output from 'java -version' of ${jvm} is " />
-    <echo message="${javaversionEscaped}" />
-
-    <!--enable tests requiring 1.5 or or greater vms to run if running vm level
-      detected matches required execution environment -->
-    <condition
-      property="J2SE-8.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[8]' />
-    </condition>
-    <condition
-      property="J2SE-7.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[78]' />
-    </condition>
-    <condition
-      property="J2SE-6.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[678]' />
-    </condition>
-    <condition
-      property="J2SE-5.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[5678]' />
-    </condition>
-    <echo
-      level="info"
-      message="DEBUG: values from setJVMfromUserSpecified" />
-    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
-    <echo message="J2SE-7.0:  ${J2SE-7.0}" />
-    <echo message="J2SE-6.0:  ${J2SE-6.0}" />
-    <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
   <target
     name="setJVMfromUserSpecified"
@@ -1172,44 +1044,6 @@
     <echo message="full output from 'java -version' of ${jvm} is " />
     <echo message="${javaversion}" />
     <escapeProperty property="javaversion" />
-    <echo message="full output from 'java -version' of ${jvm} is " />
-    <echo message="${javaversionEscaped}" />
-
-    <condition
-      property="J2SE-8.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[8]' />
-    </condition>
-    <condition
-      property="J2SE-7.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[78]' />
-    </condition>
-    <condition
-      property="J2SE-6.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[678]' />
-    </condition>
-    <condition
-      property="J2SE-5.0"
-      value="${jvm}">
-      <matches
-        string="${javaversionEscaped}"
-        pattern='^.*java version .*1\.[5678]' />
-    </condition>
-    <echo
-      level="info"
-      message="DEBUG: values from setJVMfromUserSpecified" />
-    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
-    <echo message="J2SE-7.0:  ${J2SE-7.0}" />
-    <echo message="J2SE-6.0:  ${J2SE-6.0}" />
-    <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
   <!-- function to centralize how we get (that is, set) the value of 'javaMajorVersion'.
     (expected to be integer, such as 5,6,7,8,9, or will be "0" if the version
@@ -1231,43 +1065,6 @@
       </filterchain>
     </loadresource>
     <echo message="javaMajorVersion: ${javaMajorVersion}"/>
-  	<!--
-  	<script language="javascript">
-
-       technically does not have to be wrapped in "CDATA" (Ant and BSD define
-        it that way, but if not done, other tools (such as XML Editor) can break
-        the code by changing the formatting.
-    <![CDATA[
-      var javaVer = project.getProperty("javaversionEscaped");
-      var pattern = new RegExp(/^.*1\.([456789]\.\d)/);
-      var sArray = pattern.exec(javaVer);
-      // sArray 0 is "whole match"
-      // so can always exist if any match,
-      // but can be null if no match?
-      // For safety from programing
-      // errors, we'll check for null and length
-      if (sArray != null) {
-          var length = sArray.length;
-          if (length > 1) {
-            project.setProperty("javaMajorVersion", sArray[1]);
-          } else {
-            project.setProperty("javaMajorVersion", "0");
-          }
-    } else {
-        var pattern = new RegExp(/^\D*\"(\d+)[\.\\\"-].*/);
-        var sArray = pattern.exec(javaVer);
-        if (sArray != null) {
-            var length = sArray.length;
-            if (length > 0) {
-                project.setProperty("javaMajorVersion", sArray[1]);
-            } else {
-                project.setProperty("javaMajorVersion", "0");
-            }
-        }
-    }
-      ]]>
-    </script>
-    -->
   </target>
 
   <macrodef name="printPHPProperty">

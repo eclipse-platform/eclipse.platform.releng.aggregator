@@ -17,15 +17,15 @@ for (STREAM in STREAMS){
 # format: Minute Hour Day Month Day of the week (0-7)
 
 # - - - Integration Eclipse SDK builds - - - 
-# 2023-12 Release Schedule
+# 2024-06 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
 0 18 * * *
 
 
 # Milestone/RC Schedule 
 # Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-#0 6 6-22 11 5-7,1-3
-#0 18 5-22 11 5-7,1-3
+#0 6 16-28 8 5-7,1-3
+#0 18 16-28 8 5-7,1-3
 
 
 
@@ -59,7 +59,6 @@ pipeline {
   agent {
     kubernetes {
       label 'aggrbuild-pod'
-      defaultContainer 'container'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -491,18 +490,23 @@ spec:
 		}
 	  stage('Trigger tests'){
           steps {
+            container('jnlp') {
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-cen64-gtk3-java22', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macM1-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-mac64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'PerformanceTests/ep''' + MAJOR + MINOR + '''I-perf-lin64-baseline', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
+          }
 		}
 		stage('Trigger publication to Maven snapshots repo') {
 			steps {
+              container('jnlp') {
 				build job: 'CBIaggregator', parameters: [string(name: 'snapshotOrRelease', value: '-snapshot')], wait: false
+              }
 			}
 		}
 	}

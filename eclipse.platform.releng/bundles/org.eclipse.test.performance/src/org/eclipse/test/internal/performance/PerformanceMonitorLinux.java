@@ -117,7 +117,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
              * The meminfo values for a Linux machine, that is the values that come from /proc/meminfo.
              */
             // /proc/meminfo is formatted on linux - use byte-counted output from free
-            StringTokenizer st = readOutput("free -b", true); //$NON-NLS-1$
+            StringTokenizer st = readOutput(true, "free", "-b"); //$NON-NLS-1$
             if (st != null) {
                 st.nextToken(); // throw away label
                 long total = Long.parseLong(st.nextToken());
@@ -148,7 +148,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
         return null;
     }
 
-    private StringTokenizer readOutput(String cmd, boolean skipFirst) {
+    private StringTokenizer readOutput(boolean skipFirst, String... cmd) {
         BufferedReader rdr = null;
         try {
             Process process = Runtime.getRuntime().exec(cmd);
@@ -158,8 +158,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
             return new StringTokenizer(rdr.readLine());
         } catch (IOException e) {
             PerformanceTestPlugin.log(e);
-        }
-        finally {
+        } finally {
             try {
                 if (rdr != null)
                     rdr.close();

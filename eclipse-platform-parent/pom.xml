@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse</groupId>
   <artifactId>eclipse-platform-parent</artifactId>
-  <version>4.32.0-SNAPSHOT</version>
+  <version>4.33.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <!--
     See maven-enforcer-plugin configuration to actually break the build if
@@ -49,7 +49,7 @@
       such as Version: Mars (4.5), for main features.
       See bug 328139.
     -->
-    <releaseName>2024-06</releaseName>
+    <releaseName>2024-09</releaseName>
     <!--
       The releaseNumbers below, for SDK and Platform, might be
       thought of as the "marketing number" or "branding number",
@@ -64,29 +64,29 @@
       but we'd still want the "marketing number" to be increased to reflect
       "a new yearly release".
     -->
-    <releaseNumberSDK>4.32</releaseNumberSDK>
-    <releaseNumberPlatform>4.32</releaseNumberPlatform>
+    <releaseNumberSDK>4.33</releaseNumberSDK>
+    <releaseNumberPlatform>4.33</releaseNumberPlatform>
 
-    <tycho.version>4.0.7-SNAPSHOT</tycho.version>
+    <tycho.version>4.0.8</tycho.version>
 
     <cbi-plugins.version>1.4.3</cbi-plugins.version>
-    <surefire.version>3.2.5</surefire.version>
+    <surefire.version>3.3.0</surefire.version>
 
     <!--  
       The tycho-eclipserun-plugin will create its instance of Eclipse from this
       'eclipiserun-repo' repository, such as for computing .api-descriptions and
       generating API Tools reports.
     -->
-    <eclipserun-repo>https://download.eclipse.org/eclipse/updates/4.32-I-builds/</eclipserun-repo>
+    <eclipserun-repo>https://download.eclipse.org/eclipse/updates/4.33-I-builds/</eclipserun-repo>
     
-    <comparator.repo>https://download.eclipse.org/eclipse/updates/4.32-I-builds</comparator.repo>
+    <comparator.repo>https://download.eclipse.org/eclipse/updates/4.33-I-builds</comparator.repo>
 
     <!-- only used when Tycho snapshot repo is enabled in <pluginRepositories> further down -->
     <tycho-snapshot-repo.url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</tycho-snapshot-repo.url>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
-    <cbi-ecj-version>3.37.0.v20240215-1558</cbi-ecj-version>
+    <cbi-ecj-version>3.38.0.v20240524-2033</cbi-ecj-version>
 
     <!--
       repo for released versions of CBI. Note, we intentionally use as specific a repo as possible.
@@ -127,7 +127,7 @@
     
     <compare-version-with-baselines.skip>true</compare-version-with-baselines.skip>
     <tycho.baseline.replace>all</tycho.baseline.replace>
-    <previous-release.baseline>https://download.eclipse.org/eclipse/updates/4.31/R-4.31-202402290520/</previous-release.baseline>
+    <previous-release.baseline>https://download.eclipse.org/eclipse/updates/4.32/R-4.32-202406010610/</previous-release.baseline>
 
     <!--
       Declaration of properties that contribute to the arg line for the tycho-surefire-plugin.
@@ -140,11 +140,14 @@
     <surefire.platformSystemProperties></surefire.platformSystemProperties>
     <!-- properties related to Java modules on Java 9+ -->
     <surefire.moduleProperties></surefire.moduleProperties>
+    <!-- properties related to Java security -->
+    <surefire.securityProperties></surefire.securityProperties>
     <!-- system specific JVM args; if needed provided by system properties to the build command -->
     <surefire.systemProperties></surefire.systemProperties>
     <java.version>17</java.version>
     <printApiMessages>false</printApiMessages>
     <failOnJavadocErrors>false</failOnJavadocErrors>
+    <compileLogDir>${project.build.directory}/compilelogs</compileLogDir>
   </properties>
 
   <organization>
@@ -238,7 +241,7 @@
             <artifact>
               <groupId>org.eclipse</groupId>
               <artifactId>eclipse-sdk-prereqs</artifactId>
-              <version>4.32.0-SNAPSHOT</version>
+              <version>4.33.0-SNAPSHOT</version>
             </artifact>
           </target>
           <environments>
@@ -261,6 +264,11 @@
               <os>win32</os>
               <ws>win32</ws>
               <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>aarch64</arch>
             </environment>
             <environment>
               <os>macosx</os>
@@ -343,7 +351,7 @@
         -->
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -400,22 +408,6 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.eclipse.tycho.extras</groupId>
-          <artifactId>tycho-eclipserun-plugin</artifactId>
-          <!-- this is actually present in any 0.14+ version -->
-          <version>${tycho.version}</version>
-          <configuration>
-            <executionEnvironment>JavaSE-17</executionEnvironment>
-            <repositories>
-              <repository>
-                <id>eclipse</id>
-                <layout>p2</layout>
-                <url>${eclipserun-repo}</url>
-              </repository>
-            </repositories>
-          </configuration>
-        </plugin>
-        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>3.1.0</version>
@@ -423,7 +415,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.7.1</version>
         </plugin>
          <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -433,7 +425,7 @@
          <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.1.1</version>
+          <version>3.1.2</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -459,14 +451,9 @@
               <args>-encoding</args>
               <args>${project.build.sourceEncoding}</args>
               <args>-proceedOnError</args>
-              <!-- Use this form, for Tycho 22 or less.
-                <args>-log</args>
-                <args>${project.build.directory}/@dot.xml</args>
-              -->
             </compilerArgs>
-            <!-- Use this form for Tycho 23 or greater -->
             <log>xml</log>
-            <logDirectory>${project.build.directory}/compilelogs</logDirectory>
+            <logDirectory>${compileLogDir}</logDirectory>
             <showWarnings>true</showWarnings>
             <excludeResources>
               <exclude>**/package.html</exclude>
@@ -522,7 +509,7 @@
           <version>${tycho.version}</version>
           <configuration>
             <enableAssertions>true</enableAssertions>
-            <argLine>${surefire.testArgLine} ${surefire.platformSystemProperties} ${surefire.systemProperties} ${surefire.moduleProperties}</argLine>
+            <argLine>${surefire.testArgLine} ${surefire.platformSystemProperties} ${surefire.systemProperties} ${surefire.moduleProperties} ${surefire.securityProperties}</argLine>
             <quiet>true</quiet>
           </configuration>
         </plugin>
@@ -553,7 +540,9 @@
           <artifactId>tycho-p2-plugin</artifactId>
           <version>${tycho.version}</version>
           <configuration>
-            <baselineMode>warn</baselineMode>
+            <baselineMode>warnCommon</baselineMode>
+            <enhanceLogs>true</enhanceLogs>
+            <logDirectory>${compileLogDir}</logDirectory>
             <baselineRepositories>
               <repository>
                 <url>${comparator.repo}</url>
@@ -569,12 +558,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.7.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.3.2</version>
+          <version>3.4.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -589,17 +578,17 @@
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-toolchains-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>3.2.0</version>
         </plugin>
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>3.5.0</version>
+            <version>3.6.0</version>
         </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.6.3</version>
+            <version>3.7.0</version>
             <configuration>
                 <source>17</source>
                 <legacyMode>true</legacyMode>
@@ -768,12 +757,12 @@
         <!-- Can specify an exact range here, or something of a loose range, depending on what's needed. -->
         <versionRangeForPatch>[3.19.400.v20240221-1800,3.19.449.v20240612-1800)</versionRangeForPatch>
         <!-- Comment this line when a patch is required on top of I-build -->
-        <comparator.repo>https://download.eclipse.org/eclipse/updates/4.31/R-4.31-202402290520/</comparator.repo>
+        <comparator.repo>https://download.eclipse.org/eclipse/updates/4.32/R-4.32-202406010610/</comparator.repo>
       </properties>
       <repositories>
        <repository>
          <id>eclipse-p2-repo-java22patch</id>
-         <url>https://download.eclipse.org/eclipse/updates/4.31/R-4.31-202402290520/</url>
+         <url>https://download.eclipse.org/eclipse/updates/4.32/R-4.32-202406010610/</url>
          <layout>p2</layout>
        </repository>
      </repositories>
@@ -820,7 +809,7 @@
           For maintenance streams should always be "M-builds".
           Ideally, this value would be provided by the environment, see bug 489789.
         -->
-        <eclipse-p2-repo.url>https://download.eclipse.org/eclipse/updates/4.32-I-builds</eclipse-p2-repo.url>
+        <eclipse-p2-repo.url>https://download.eclipse.org/eclipse/updates/4.33-I-builds</eclipse-p2-repo.url>
       </properties>
       <repositories>
         <repository>
@@ -848,6 +837,7 @@
               </execution>
             </executions>
             <configuration>
+              <resigningStrategy>DO_NOT_RESIGN</resigningStrategy>
               <excludeInnerJars>${defaultSigning-excludeInnerJars}</excludeInnerJars>
               <!--
                The default timeout is 0 seconds which means "wait forever": https://www.eclipse.org/cbi/sitedocs/eclipse-jarsigner-plugin/sign-mojo.html#timeoutMillis
@@ -938,7 +928,7 @@
                              </baselines>
                              <skip>${skipAPIAnalysis}</skip>
                              <skipIfReplaced>false</skipIfReplaced>
-                             <logDirectory>${project.build.directory}/compilelogs</logDirectory>
+                             <logDirectory>${compileLogDir}</logDirectory>
                              <enhanceLogs>true</enhanceLogs>
                              <printProblems>${printApiMessages}</printProblems>
                         </configuration>
@@ -1017,7 +1007,7 @@
           <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>0.8.11</version>
+            <version>0.8.12</version>
             <executions>
               <execution>
                 <id>jacoco-agent</id>
@@ -1041,7 +1031,7 @@
           <plugin>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-maven-plugin</artifactId>
-            <version>4.8.3.0</version>
+            <version>4.8.5.0</version>
             <configuration>
               <targetJDK>${java.version}</targetJDK>
               <xmlOutput>true</xmlOutput>
@@ -1072,7 +1062,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-pmd-plugin</artifactId>
-            <version>3.21.2</version>
+            <version>3.23.0</version>
             <configuration>
             <!-- PMD options -->
               <targetJDK>${java.version}</targetJDK>
@@ -1105,7 +1095,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
-            <version>3.3.1</version>
+            <version>3.4.0</version>
             <configuration>
               <consoleOutput>true</consoleOutput>
               <failsOnError>false</failsOnError>
@@ -1144,6 +1134,15 @@
       </activation>
       <properties>
         <surefire.moduleProperties>--add-modules=ALL-SYSTEM</surefire.moduleProperties>
+      </properties>
+    </profile>
+    <profile>
+      <id>jdk18-or-newer</id>
+      <activation>
+        <jdk>[18,)</jdk>
+      </activation>
+      <properties>
+        <surefire.securityProperties>-Djava.security.manager=allow</surefire.securityProperties>
       </properties>
     </profile>
     <profile>

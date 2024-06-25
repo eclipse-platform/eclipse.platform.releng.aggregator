@@ -17,13 +17,13 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.31</title>
+<title>Eclipse Platform What's New in 4.32</title>
 </head>
 
 <body>
 <h2>Platform and Equinox API</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.31 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.32 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   <li><a href="#Platform">Platform Changes</a></li>
@@ -49,74 +49,31 @@ section of the Eclipse Platform User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
-  <tr id="viewer_limit_jface"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1425 -->
-      <td class="title">Viewer Limit in JFace</td>
-      <td class="content">
-        <p>
-        The API method <code>org.eclipse.jface.viewers.ColumnViewer.setDisplayIncrementally(int incrementSize)</code> was added to
-        JFace. If <code>incrementSize</code> is set to some positive value, the viewer will initially show 
-        no more than this number of child elements per parent element.
-        Additionally, the viewer provides a mechanism for a user to show more elements, if available, as needed.
-        This API solves the problem with UI hangs in case a viewer tries to display a very large number of child elements per parent element.
-        </p>
-        <p>
-        This feature is currently implemented in <code>org.eclipse.jface.viewers.TableViewer</code> 
-        and <code>org.eclipse.jface.viewers.TreeViewer</code> but is not enabled by default;
-        <code>incrementSize</code> is <code>0</code> by default.
-        Each concrete viewer implementation is responsible to enable this feature if needed.
-        </p>
-        <p>Note that even though this feature is designed to be backwards compatible API,
-        there remains the possibility of regressions when converting existing viewer to use
-        the new API. Please fully test your code when enabling this functionality!
-        </p>
-      </td>
+  <tr id="treeviewer_autoexpand_singlechild"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1063 -->
+    <td class="title">Auto-Expand for Single Child Elements in JFace Tree Viewers</td>
+    <td class="content">
+      <p>
+        The API method
+        <code>org.eclipse.jface.viewers.AbstractTreeViewer.setAutoExpandOnSingleChildLevels(int level)</code> was added to
+        JFace. If this method is called on a tree viewer with some positive value or the constant <code>ALL_LEVELS</code>,
+        expanding a tree item that only has a single child element will lead to a recursive expansion of child items. The
+        recursive expansion stops once an item has more than one child item or the number of expansions reaches the value
+        passed to the method.
+      </p>
+      <p>
+        To ensure backwards compatibility, this feature is disabled by default. Each instantiation of a concrete
+        implementation of <code>AbstractTreeViewer</code> is responsible for enabling this feature if needed.
+      </p>
+    </td>
   </tr>
-  
-  <tr id="viewer_limit_workbench"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1425 -->
-      <td class="title">Viewer Limit in Workbench</td>
-      <td class="content">
-        <p>Complementary to the JFace API above, <code>org.eclipse.ui.IWorkbenchPreferenceConstants</code> and
-        <code>org.eclipse.ui.views.WorkbenchViewerSetup</code> API's were added.
-        This API provides default workbench preference access and a convenient way for viewers
-        to use default workbench values without writing extra code to listen for preference changes.
-        </p>
-      </td>
-  </tr>
-
-  <tr id="eclipse-osgi-services_deprecation">
-      <!-- https://github.com/eclipse-equinox/equinox/issues/18 -->
-      <!-- https://github.com/eclipse-equinox/equinox/issues/191 -->
-      <!-- https://github.com/eclipse-equinox/equinox/pull/451 -->
-      <td class="title">Deprecation of Equinox Bundles</td>
-      <td class="content">
-        <p>
-          The following Equinox bundles are deprecated for removal:
-        </p>
-        <ul>
-          <li>
-            <code>org.eclipse.osgi.services</code><br/>
-            Its content has been replaced by the official OSGi bundles published to Maven-Central and it only re-exports these <code>org.osgi.service.*</code> bundles.
-            Consumers are already encouraged to replace their requirements on the bundle <code>org.eclipse.osgi.services</code> with imports of the actual required <code>org.osgi.service.*</code> packages.
-            This allows the OSGi runtime to choose any suitable, available provider of the package.
-          </li>
-          <li>
-            <code>org.eclipse.equinox.device</code><br/>
-            This implementation of the <code>org.osgi.service.device</code> service is not known to have any users and did not receive updates in the past.
-            It is deprecated for removal from future releases without replacement.
-            In case there are users after all, they can continue to use past releases, use an alternative implementation, or get in contact with the Equinox team.
-          </li>
-        </ul>
-      </td>
-  </tr>
-
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
-  <!--
+<!--
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-  -->
+-->
   <!-- *********************** End of SWT *********************** -->
   <tr><td colspan="2"/></tr>
 </tbody>

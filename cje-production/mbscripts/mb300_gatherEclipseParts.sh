@@ -67,6 +67,7 @@ if [ -z $PATCH_BUILD ]; then
     cp org.eclipse.sdk.ide-macosx.cocoa.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-aarch64.tar.gz
     cp org.eclipse.sdk.ide-macosx.cocoa.aarch64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-aarch64.dmg
     cp org.eclipse.sdk.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-win32-x86_64.zip
+    cp org.eclipse.sdk.ide-win32.win32.aarch64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-win32-aarch64.zip
     # platform
     cp org.eclipse.platform.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-ppc64le.tar.gz
@@ -76,6 +77,7 @@ if [ -z $PATCH_BUILD ]; then
     cp org.eclipse.platform.ide-macosx.cocoa.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-aarch64.tar.gz
     cp org.eclipse.platform.ide-macosx.cocoa.aarch64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-aarch64.dmg
     cp org.eclipse.platform.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-win32-x86_64.zip
+    cp org.eclipse.platform.ide-win32.win32.aarch64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-win32-aarch64.zip
     popd
     chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
     NOTARIZE_LOG_DIR=$CJE_ROOT/notarizeLog

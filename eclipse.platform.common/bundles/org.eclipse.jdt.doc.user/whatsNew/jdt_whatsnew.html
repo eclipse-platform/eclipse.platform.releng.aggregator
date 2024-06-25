@@ -17,21 +17,21 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.31 (JDT)</title>
+<title>What's New in Eclipse 4.32 (JDT)</title>
 </head>
 
 <body>
 <h2>Java Development Tools</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.31 release of Eclipse.
+for the 4.32 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   	<!--li><a href="#Java21">New Java&trade; Language Features</a></li-->
   	<!--li><a href="#JUnit">JUnit</a></li-->
 	<li><a href="#JavaEditor">Java Editor</a></li>
-	<li><a href="#JavaCompiler">Java Compiler</a></li>
-	<!--li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li-->
-	<li><a href="#JavaFormatter">Java Formatter</a></li>
+	<!--li><a href="#JavaCompiler">Java Compiler</a></li-->
+	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
+	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
 	<!--li><a href="#Debug">Debug</a></li-->
 	<!--li><a href="#JDTDev">JDT Developers</a></li-->
 </ul>
@@ -60,13 +60,13 @@ document for changes in the Platform.</p>
   <!-- ******************* End of Java XX Support ************************************* -->
 
   <!-- ******************* JUnit ************************************* -->
-  <!--
+ <!--
   <tr>
     <td id="JUnit" class="section" colspan="2">
     <h2>JUnit</h2>
     </td>
   </tr>
-  -->
+ -->
   <!-- ******************* End of JUnit ************************************* -->
 
   <!-- ******************* Java Editor ************************************* -->
@@ -76,144 +76,151 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="new-make-static-refactoring">
-    <td class="title"><a href="#new-make-static-refactoring">New Make Static Refactoring</a></td>
+  <tr id="split-try-with-resources">
+    <td class="title"><a href="#split-try-with-resources">Split try-with-resources</a></td>
     <td class="content">
-      <p>A new refactoring called 'Make Static' has been added to Eclipse's Java Development Tools (JDT), which converts instance methods into static methods, when possible. This refactoring adds an extra parameter to the method declarations to handle references to instance fields, methods, or classes in the original method. Existing calls to the method are altered accordingly, and if the extra parameter is necessary, the refactoring passes 'this' or the specific instance originally used to access the method.</p>
-      <p>To apply this refactoring, the following conditions must be met:</p>
-      <ul>
-        <li>The method is not a constructor.</li>
-        <li>The method does not override a method from the parent type nor is overridden in any child types.</li>
-        <li>The type in which the method is declared is not a local type, an anonymous type, or an annotation.</li>
-      </ul>
-      <p>The refactoring can be executed by selecting a method invocation, except in cases where a super method invocation is selected.</p>
-      <p><img src="images/make-static-refactoring-example-before.png" alt="Make Static Refactoring Example Before" width="600"/></p>
-      <p><img src="images/make-static-refactoring-example-after.png" alt="Make Static Refactoring Example After" width="600"/></p>
-      <!-- PR: https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/689 -->
-      <!-- Issue/Proposal: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/590 -->
+      <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1226 -->
+      A new quick assist has been added to allow splitting resources from a try-with-resources into an inner try-with-resources.  All resources from the point of the split are added to the new inner try-with-resources statement.  The assist is offered when <b>CTRL+1</b> is clicked while some part of a resource statement in the try-with-resources is selected.
+      <p>For example, in the following example, we can select part of the second resources statement:</p>
+      <p><img src="images/split-try-with-resources-before.png" alt="try-with-resources example before" width="800"/></p>
+      <p>and choose to split from that point:</p>
+      <p><img src="images/split-try-with-resources-after.png" alt="try-with-resources example after" width="800"/></p>
     </td>
   </tr>
+  <tr id="message-format-text-block">
+    <td class="title"><a href="#message-format-text-block">String concat to formatted text block</a></td>
+    <td class="content">
+      <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1366 -->
+      The quick assists to convert a mixed string concatenatation of literals and variables into a <b>MessageFormat</b> or <b>String.format</b> call have been enhanced to use a text block when using Java 15 or greater.  This is useful when there is purposeful alignment of the line indentation of the concatenation (e.g. a code snippet).
+      <p>For example, in the following example:</p>
+      <p><img src="images/original-string-concat.png" alt="original string concatenation" width="800"/></p>
+      <p>If we use <b>CTRL+1</b> with the cursor in the concatenation and choose <b>Use 'MessageFormat' for string concatenation</b> we get:</p>
+      <p><img src="images/message-format-after.png" alt="after changing to MessageFormat" width="800"/></p>
+      <p>or if we choose <b>Use 'String.format' for string concatenation</b> we get:</p>
+      <p><img src="images/string-format-after.png" alt="after changing to String.format" width="800"/></p>
+    </td>
+  </tr>
+  <tr id="combine-decl-and-assigment">
+    <td class="title"><a href="#combine-decl-and-assignment">Combine declaration and assignment</a></td>
+    <td class="content">
+      <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1330 -->
+      The <b>Remove overridden assignment</b> cleanup found in the <b>Unnecessary Code</b> tab of the clean-up configuration dialog has been enhanced to combine a variable declaration that is immediately followed by an assignment into a declaration with assignment.
+      <p>For example, the following:</p>
+      <p><img src="images/decl-with-assignment-after.png" alt="declaration with assignment immediately after" width="800"/></p>
+      <p>will be transformed into:</p>
+      <p><img src="images/decl-with-assignment-combined.png" alt="declaration with assignment combined" width="800"/></p>
+    </td>
+  </tr>
+  <tr id="extract-anonymous-class">
+    <td class="title"><a href="#extract-anonymous-class">Extract anonymous class to local variable</a></td>
+    <td class="content">
+      <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1063 -->
+      A new quick-assist has been added to extract an anonymous class implementation to a local variable.  To use, click on <b>CTRL+1</b> with the cursor within the anonymous class.
+      For example:
+      <p><img src="images/anonymous-local-var-before.png" alt="anonymous class to local variable before"/></p>
+      <p>Results in:</p>
+      <p><img src="images/anonymous-local-var-after.png" alt="anonymous class to local variable after"/></p>
+    </td>
+  </tr>
+  <tr id="types-call-hierarchy-on-ctrl-click">
+    <td class="title"><a href="#types-call-hierarchy-on-ctrl-click">Types call Hierarchy on Ctrl+Click</a></td>
+    <td class="content">
+    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/1367 -->
+    <p><code>Open Call Hierarchy</code> action now added to the list of actions shown on <code>Ctrl+Click</code> for types as well</p>
+    <p><img src="images/types-call-hierarchy-on-ctrl-click.png" alt="Call hierarchy action for types"/></p>
+    </td>
+    </tr>
   <!-- ******************* End of Java Editor ************************************* -->
 
   <!-- ******************* Java Views and Dialogs ************************************* -->
-  <!--
   <tr>
     <td id="JavaViewsAndDialogs" class="section" colspan="2">
     <h2>Java Views and Dialogs</h2>
     </td>
   </tr>
-  -->
+  <tr id="javadocStylingImprovements">
+    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/1074 -->
+    <td class="title">Javadoc styling improvements</td>
+    <td class="content">
+      Styling of the method signatures displayed in the Javadoc view and hover dialog has been improved to make them easier
+      to read.
+      <p>
+      Until now, the entire signature has been rendered as one continuous text making it a bit hard to identify specific parts.
+      This is especially difficult when the signature contained type variables of generic declarations:
+      </p>
+      <p><img src="images/javadoc-styling-old.png" alt="Old Javadoc styling"/></p>
+      Now, by default, parts of the signature are visually distinguished by using italic, lighter, or colorized text or by placing
+      them on separate lines.
+      <p><img src="images/javadoc-styling-new.png" alt="New Javadoc styling"/></p>
+      <p>
+      Coloring is used to distinguish different types used as type variables. Four different colors are pre-configured and are also
+      re-used repeatedly in case more unique types are present in displayed Javadoc.  Note: custom colors can be configured to
+      avoid this repetition.
+      </p>
+      <p>
+      All aspects of the new styling can be customized through the Javadoc styling menu accessible via a new menu button added to 
+      the toolbar of the Javadoc view and Javadoc hover (here visible after pressing F2), where the button itself toggles the new styling
+      functionality on/off.
+      </p>
+      <p><img src="images/javadoc-styling-menu.png" alt="New Javadoc styling menu"/></p>
+    </td>
+  </tr>
+  
+  <tr id="batch-encapsulate-fields">
+	  <td class="title"><a href="#batch-encapsulate-fields">Enable encapsulating multiple fields from a single dialog</a></td>
+	  <td class="content">
+	  It is now possible to encapsulate multiple fields of a class and its references in other classes by invoking <b>Refactor > Encapsulate Fields...</b> on that class.
+	  <p>The new dialog looks like this:</p>
+	  <p><img src="images/new-self-encapsulate-fields-dialog.png" width="800"/></p>
+	  <p>The Encapsulate Fields option can be accessed either by the <b>menu bar &gt; Refactor</b> or by right clicking while hovering over any field. </p>
+	  <p>The dialog now consists of a tree where you can check all the fields that need to be encapsulated along with their getter and setter.</p>
+	  <p>You can now select <b>Same as field</b> (default option) as the access modifier for the generated getters and setters.</p>
+	  <p>The operation would have the following results as displayed in the example below:</p> 
+	  <p><img src="images/ser-change-in-own-class.png" width="800"/></p>
+	  <p><img src="images/ser-change-in-references.png" width="800"/></p>
+	  
+	  </td>
+  </tr>
   <!-- ******************* End of Java Views and Dialogs ************************************* -->
 
   <!-- ******************* Java Compiler ************************************* -->
+<!--
   <tr>
     <td id="JavaCompiler" class="section" colspan="2">
     <h2>Java Compiler</h2>
     </td>
   </tr>
-  <tr id="annotation-based-resource-analysis">
-    <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1716 -->
-    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1059 -->
-    <td class="title">Analysis of Resource Leaks Improved with Annotations</td>
-    <td class="content">
-      The compiler's capability to detect when resources (implementation of <code>AutoCloseable</code>) are not properly closed
-      has been enhanced. 
-      <p>
-	      Previously, flow analysis for resource leaks was focused on resources that are created and closed within the same method.
-	      It could not deal well with resources that are shared between different methods,
-	      perhaps even different objects.
-      </p>
-      <p>
-      	The compiler now interprets an annotation <code>@Owning</code> to understand data flows of resources by way of the
-      	following concepts:
-      </p>
-      <dl>
-      <dt><strong>A source of resources</strong></dt><dd>Here a resource will come into the focus of the current method,
-      	along with a responsibility to close it.</dd>
-      <dt><strong>A sink for resources</strong></dt><dd>Here a resource will be consumed, either by closing, or by delegation
-      	to other code which then will be responsible</dd>
-      </dl>
-      <p>Resource allocation is the primordial source, and a call to <code>AutoCloseable.close()</code> is the final sink.
-      	When allocation and closing do not happen within the same method, then annotation <code>@Owning</code> should be used to create
-      	connections through which responsibility for a resource can be transferred from one method to another.
-      	The inverse annotation <code>@NotOwning</code>, on the other hand, signals that no such connection is made;
-      	the original holder of the resource is still responsible for sending it to a suitable sink.
-     </p>
-      <p>
-      <a href="images/resource-demo-code.txt"><img src="images/resource-demo-code.png" alt="code properly annotated for resource leak analysis"/></a>
-      </p>
-      <p>
-      	It's in method <code>produce()</code> where a new resource is allocated.
-      	The return statement in that method is governed by the <code>@Owning</code> annotation on the method.
-      	This implies that returning this value is a <strong>sink</strong> from the point of view of <code>produce()</code>.
-      	By this method <code>produce()</code> is considered safe.
-      	But looking from the outside this sink is in fact the <strong>source</strong> by which the resource arrives in method <code>test()</code>.
-      </p>
-      <p>
-      	After method <code>test()</code> receives the resource, the responsibility to close is fulfilled by passing it down into <code>consume()</code>.
-      	In method <code>consume()</code> it's the annotation on parameter <code>in</code> that creates the connection:
-      	<code>test()</code> has done its part and now <code>consume()</code> is responsible.
-      	Protecting the resource with a try-with-resources statement is the preferred way to fulfill the responsibility, its implicit <code>close()</code> call is the ultimate sink.
-      	Thus the given combination of method calls indeed creates a provably safe data flow from initial source to final sink,
-      	because both calls are governed by <code>@Owning</code>.
-      </p>
-      <p>
-      	The body of <code>produce()</code> also shows another detail:
-      	just like <code>test()</code> it passes the resource as a parameter to another method, here: <code>skipHeader()</code>.
-      	The parameter of <code>skipHeader()</code>, however, is annotated as <code>@NotOwning</code>
-      	by which the method rejects any responsibility.
-      	Indeed there's no close call to be found here, but that's OK under the <code>@NotOwning</code> annotation - this parameter is <em>not a source</em>.
-      	As a result, still after the call to <code>skipHeader()</code> it is <code>produce()</code> who is responsible.
-      	For that reason saying <code>return in;</code> is indeed necessary for <code>produce()</code> to demonstrate obedience to the contract.
-      </p>
-      <p>
-      	Additional rules exist for fields holding a resource and for methods other than <code>close()</code> that perform mandatory clean-up.
-      	Details on those can be found in the documentation of org.eclipse.jdt.annotation.Owning.
-      </p>
-      <p>
-      	To enable this feature select <code>Java Compiler &gt; Errors/Warnings &gt; Enable annotation based resource analysis</code> in the project preferences:
-      </p>
-      <p>
-      <img src="images/resource-compiler-options.png" alt="compiler properties dialog" width="600"/>
-      </p>
-    </td>
-  </tr>
+-->
   <!-- ******************* End of Java Compiler ************************************* -->
 
   <!-- ******************* Java Formatter ************************************* -->
+<!--
   <tr>
     <td id="JavaFormatter" class="section" colspan="2">
-      <h2>Java Formatter </h2>
+    <h2>Java Formatter </h2>
     </td>
   </tr>
-  <tr id="align-arrows"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/1049 -->
-      <td class="title"><a href="#align-arrows">Switch Statements/Expressions: Align Arrows on Column</a></td>
-      <td class="content">
-        Switch statements and expressions with arrows can now be aligned so that all arrows are placed at the same position in line.
-        Open the formatter profile editor and find the new option under <code>Indentation &gt; Align items in columns &gt; Arrows in switch statements/expressions</code>.
-        <p><img src="images/formatter_align_arrows.png" alt="Formatter options and code preview"/></p>
-      </td>
-  </tr>
+-->
   <!-- ******************* End of Java Formatter ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
-  <!--
+<!--
   <tr>
     <td id="Debug" class="section" colspan="2">
     <h2>Debug</h2>
     </td>
   </tr>
-  -->
+-->
   <!--************************ End of Debug ******************************** -->
 
   <!-- *********************** JDT Developers ******************************** -->
-  <!--
+ <!--
   <tr>
     <td id="JDTDev" class="section" colspan="2">
     <h2>JDT Developers</h2>
     </td>
   </tr>
-  -->
+-->
   <!-- *********************** End of JDT Developers ******************************** -->
   <tr><td colspan="2"/></tr>
 </tbody>

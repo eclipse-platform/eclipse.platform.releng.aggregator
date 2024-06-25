@@ -19,7 +19,7 @@ on:
         description: 'The version of Maven set up'
         type: string
         required: false
-        default: '3.9.6'
+        default: '3.9.7'
 
 permissions: {}
 
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Upload
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: Event File
         path: ${{ github.event_path }}
@@ -41,29 +41,31 @@ jobs:
         config: 
           - { name: Linux,   os: ubuntu-latest  }
           - { name: Windows, os: windows-latest }
-          - { name: MacOS,   os: macos-latest   }
+          - { name: MacOS,   os: macos-13   }
     name: Verify ${{ matrix.config.name }}
     steps:
     - name: Checkout
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
        fetch-depth: 0 # required for jgit timestamp provider to work
        submodules: ${{ inputs.submodules }}
     - name: Set up Java
-      uses: actions/setup-java@9704b39bf258b59bc04b50fa2dd55e9ed76b47a8 # v4.1.0
+      uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
       with:
         java-version: |
           8
           11
           17
+          21
         mvn-toolchain-id: |
           JavaSE-1.8
           JavaSE-11
           JavaSE-17
+          JavaSE-21
         distribution: 'temurin'
         cache: maven
     - name: Set up Maven
-      uses: stCarolas/setup-maven@07fbbe97d97ef44336b7382563d66743297e442f # v4.5
+      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
       with:
         maven-version: ${{ inputs.mavenVersion }}
     - name: Download the API Tools matcher
@@ -74,10 +76,10 @@ jobs:
         target: .github/matcher
     - run: echo "::add-matcher::.github/matcher/${{ steps.api-tools-matcher.outputs.filename }}"
     - name: Build with Maven
-      uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
+      uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
       with:
        run: >- 
-        mvn --batch-mode -V -U
+        mvn --batch-mode -V -U -e
         -ntp
         -Dcompare-version-with-baselines.skip=false
         -Pbree-libs
@@ -86,7 +88,7 @@ jobs:
         ${{ inputs.maven-goals }}
     - name: Upload Test Results for ${{ matrix.config.name }}
       if: always()
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: test-results-${{ matrix.config.os }}
         if-no-files-found: warn

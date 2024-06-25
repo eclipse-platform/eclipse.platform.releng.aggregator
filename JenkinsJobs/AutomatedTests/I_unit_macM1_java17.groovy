@@ -5,79 +5,40 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-  job('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-macM1-java17'){
-    description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
-
-    logRotator {
-      numToKeep(5)
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-macM1-java17'){
+    description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
+    parameters { // Define parameters in job configuration to make them available from the very first build onwards
+      stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
     }
-
-    parameters {
-      stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-      stringParam('testSuite', 'all', null)
-    }
-
-    label('nc1ht-macos11-arm64')
-
-    jdk('openjdk-jdk11-latest')
 
     authenticationToken('windows2012tests')
  
-    wrappers { //adds pre/post actions
-      timestamps()
-      timeout {
-        absolute(600)
-      }
-    }
-  
-    steps {
-      shell('''
-#!/usr/bin/env bash
+    definition {
+      cps {
+        sandbox()
+        script('''
+pipeline {
+  options {
+    timeout(time: 600, unit: 'MINUTES')
+    timestamps()
+    buildDiscarder(logRotator(numToKeepStr:'5'))
+  }
+  agent {
+    label 'nc1ht-macos11-arm64'
+  }
 
-if [[ -z "${WORKSPACE}" ]]
-then
-  echo -e "\\n\\tERROR: WORKSPACE variable was not defined"
-  exit 1
-else
-  if [[ ! -d "${WORKSPACE}" ]]
-  then
-    echo -e "\\n\\tERROR: WORKSPACE was defined, but did not exist?"
-    echo -e "\\t\\tIt was defined as ${WORKSPACE}"
-    exit 1
-  else
-    echo -e "\\n\\tINFO: WORKSPACE was defined as ${WORKSPACE}"
-    echo -e "\\t\\tWill delete contents, for clean run"
-    MaxLoops=15
-    SleepTime=60
-    currentLoop=0
-    nFilesOrDirs=$( find "${WORKSPACE}" -mindepth 1 -maxdepth 1 | wc -l )
-    while [[ ${nFilesOrDirs} -gt 0 ]]
-    do
-      currentLoop=$(( ${currentLoop} + 1 ))
-      if [[ ${currentLoop} -gt ${MaxLoops} ]]
-      then
-        echo -e "\\n\\tERROR: Number of re-try loops, ${currentLoop}, exceeded maximum, ${MaxLoops}. "
-        echo -e " \\t\\tPossibly due to files still being used by another process?"
-        exit 0
-        break
-      fi
-      echo -e "\\tcurrentLoop: ${currentLoop}   nFilesOrDirs:  ${nFilesOrDirs}"
-      find "${WORKSPACE}" -mindepth 1 -maxdepth 1 -execdir rm -fr '{}' \\;
-      nFilesOrDirs=$( find "${WORKSPACE}" -mindepth 1 -maxdepth 1 | wc -l )
-      if [[ ${nFilesOrDirs} -gt 0 ]]
-      then
-        sleep ${SleepTime}
-      fi
-    done
-  fi
-fi
-echo -e "\\t... ending cleaning"
-
-exit 0
-      ''')
-      shell('''
-#!/bin/bash -x
-
+  stages {
+      stage('Run tests'){
+          environment {
+              // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
+              JAVA_HOME = '/usr/local/openjdk-17/Contents/Home'
+              ANT_HOME = '/opt/homebrew/Cellar/ant/1.10.11/libexec'
+              PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
+              eclipseArch = 'aarch64'
+          }
+          steps {
+              cleanWs() // workspace not cleaned by default
+              sh \'\'\'#!/bin/bash -x
 RAW_DATE_START="$(date +%s )"
 
 echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
@@ -87,8 +48,8 @@ echo -e "\\n\\t uname -a: $(uname -a)\\n"
 
 # unset commonly defined system variables, which we either do not need, or want to set ourselves.
 # (this is to improve consistency running on one machine versus another)
-echo -e "Unsetting variables: JAVA_BINDIR JAVA_HOME JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH ANT_HOME\\n"
-unset -v JAVA_BINDIR JAVA_HOME JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH ANT_HOME
+echo "Unsetting variables: JAVA_BINDIR JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH"
+unset -v JAVA_BINDIR JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH
 
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
@@ -106,22 +67,18 @@ curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4
 cat getEBuilder.xml
 source buildProperties.sh
 
-export JAVA_HOME=/usr/local/openjdk-17/Contents/Home
-export ANT_HOME=/opt/homebrew/Cellar/ant/1.10.11/libexec
-export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
-
 echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
-
-export eclipseArch=aarch64
-
 
 env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=aarch64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \\
+  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
+  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=${eclipseArch} \\
+  -DtestSuite=all
 
 RAW_DATE_END="$(date +%s )"
 
@@ -130,29 +87,19 @@ echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
 TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
 
 echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
-      ''')
-    }
-
-    publishers {
-      archiveJunit('**/eclipse-testing/results/xml/*.xml') {
-        retainLongStdout()
-        healthScaleFactor((1.0).doubleValue())
-      }
-      archiveArtifacts {
-        pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt')
-      }
-      extendedEmail {
-        recipientList("sravankumarl@in.ibm.com")
-      }
-      downstreamParameterized {
-        trigger('Releng/ep-collectResults') {
-          condition('UNSTABLE_OR_BETTER')
-          parameters {
-            predefinedProp('triggeringJob', '$JOB_BASE_NAME')
-            predefinedProp('buildURL', '$BUILD_URL')
-            predefinedProp('buildID', '$buildId')
+              \'\'\'
+              archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
+              junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+              build job: 'Releng/ep-collectResults', wait: false, parameters: [
+                string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"),
+                string(name: 'buildURL', value: "${BUILD_URL}"),
+                string(name: 'buildID', value: "${params.buildId}")
+              ]
           }
-        }
+      }
+  }
+}
+        ''')
       }
     }
   }
