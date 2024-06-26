@@ -46,18 +46,6 @@ spec:
       requests:
         memory: "6144Mi"
         cpu: "2000m"
-    volumeMounts:
-    - mountPath: "/home/jenkins/.m2/toolchains.xml"
-      name: "toolchains-xml"
-      readOnly: true
-      subPath: "toolchains.xml"
-  volumes:
-  - configMap:
-      items:
-      - key: "toolchains.xml"
-        path: "toolchains.xml"
-      name: "m2-dir"
-    name: "toolchains-xml"
 """
     }
   }
