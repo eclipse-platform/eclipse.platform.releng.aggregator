@@ -191,7 +191,7 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.  
     Performance and Unit tests should also be generated for the new release automatically.
 
-#### **Create new Stream Repo:**
+#### **Create new Stream Repos:**
   - Run the [Create New Stream Repos](https://ci.eclipse.org/releng/job/Releng/job/newStreamRepos/) job to make an I-builds repo for the next release.
 
 #### **Create Git Milestones for the next Release:**
