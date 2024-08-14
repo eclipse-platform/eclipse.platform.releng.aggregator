@@ -13,11 +13,11 @@ pipeline {
 		jdk 'temurin-jdk21-latest'
 	}
 	stages {
-		stage('Use master') {
-			steps {
-				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
-			}
-		}
+//		stage('Use master') {
+//			steps {
+//				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
+//			}
+//		}
 		stage('Deploy eclipse-platform-parent pom and eclipse-sdk target') {
 			when {
 				anyOf {
