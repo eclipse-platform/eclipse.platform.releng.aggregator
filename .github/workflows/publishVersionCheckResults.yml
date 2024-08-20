@@ -1,0 +1,136 @@
+name: Publish Version Check Results
+on:
+  workflow_call:
+    inputs:
+      botGithubId:
+        description: The id of the bot's github account that adds the information comment
+        type: string
+        required: true
+
+    secrets:
+      githubBotPAT:
+        description: The personal access token (with scope 'public_repo') of the bot to push a required change to a PR branch in a fork.
+        required: true
+
+permissions: {} # all none
+
+env:
+  COMMENT_FIRST_LINE: 'This pull request changes some projects for the first time in this development cycle'
+
+jobs:
+  versions-check-result:
+    name: Publish Version Check Results
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion != 'skipped'
+    steps:
+
+    - name: Search version increment git patch
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      id: search-patch
+      with:
+        script: |
+          let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+             run_id: context.payload.workflow_run.id,
+             ...context.repo
+          })
+          let artifact = allArtifacts.data.artifacts.find(artifact => artifact.name == 'versions-git-patch')
+          return artifact?.id
+
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      if: steps.search-patch.outputs.result
+      with:
+        ref: '${{ github.event.workflow_run.head_sha }}'
+        persist-credentials: false #Opt out from persisting the default Github-token authentication in order to enable use of the bot's PAT when pushing below
+
+    - name: Download version increment git patch
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      id: fetch-patch
+      if: steps.search-patch.outputs.result
+      with:
+        script: |
+          let download = await github.rest.actions.downloadArtifact({
+             artifact_id: ${{ steps.search-patch.outputs.result }},
+             archive_format: 'zip',
+             ...context.repo
+          })
+          let fs = require('fs')
+          fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/patch.zip`, Buffer.from(download.data))
+          await exec.exec('unzip', ['patch.zip'])
+          let pr_number = Number(fs.readFileSync('github_pull_request_number.txt'))
+          core.setOutput('pull_request_number', pr_number)
+          await io.rmRF('patch.zip')
+          await io.rmRF('github_pull_request_number.txt')
+
+    - name: Apply and push version increment
+      id: git-commit
+      if: steps.search-patch.outputs.result
+      run: |
+          set -x
+          # Set initial placeholder name/mail and read it from the patch later
+          git config --global user.email 'foo@bar'
+          git config --global user.name 'Foo Bar'
+          
+          git am version_increments.patch
+          
+          # Read the author's name+mail from the just applied patch and recommit it with both set as committer
+          botMail=$(git log -1 --pretty=format:'%ae')
+          botName=$(git log -1 --pretty=format:'%an')
+          git config --global user.email "${botMail}"
+          git config --global user.name "${botName}"
+          git commit --amend --no-edit
+          
+          fileList=$(git diff-tree --no-commit-id --name-only HEAD -r)
+          echo "file-list<<EOF" >> $GITHUB_OUTPUT
+          echo "$fileList" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          git push \
+            "https://oauth2:${BOT_PA_TOKEN}@github.com/${{ github.event.workflow_run.head_repository.full_name }}.git" \
+            'HEAD:refs/heads/${{ github.event.workflow_run.head_branch }}'
+      env:
+        BOT_PA_TOKEN: ${{ secrets.githubBotPAT }}
+
+    - name: Find existing information comment
+      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+      id: search-comment
+      if: steps.fetch-patch.outputs.pull_request_number
+      with:
+        body-regex: '^${{ env.COMMENT_FIRST_LINE }}'
+        issue-number: ${{ steps.fetch-patch.outputs.pull_request_number }}
+        comment-author: ${{ inputs.botGithubId }}
+        direction: last
+
+    - name: Add or update information comment
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      if: always()
+      with:
+        github-token: ${{ secrets.githubBotPAT }}
+        script: |
+          const fs = require('fs')
+          const fileList = `${{ steps.git-commit.outputs.file-list }}`
+          if (fileList) { // if list is empty, no versions were changed
+            const commentBody = `
+          ${{ env.COMMENT_FIRST_LINE }}.
+          Therefore the following files need a version increment:
+          \`\`\`
+          ${fileList}
+          \`\`\`
+          An additional commit containing all the necessary changes was pushed to the top of this PR's branch. To obtain these changes (for example if you want to push more changes) either fetch from your fork or apply the _git patch_.
+          <details>
+          <summary>Git patch</summary>
+          
+          \`\`\`
+          ${ fs.readFileSync( process.env.GITHUB_WORKSPACE + '/version_increments.patch', {encoding: 'utf8'}).trim() }
+          \`\`\`
+          </details>
+          
+          Further information are available in [Common Build Issues - Missing version increments](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/wiki/Common-Build-Issues#missing-version-increments).
+          `.trim()
+            const prNumber = '${{ steps.fetch-patch.outputs.pull_request_number }}'
+            const existingCommentId = '${{ steps.search-comment.outputs.comment-id  }}'
+            if (existingCommentId) {
+              github.rest.issues.updateComment({...context.repo, comment_id: existingCommentId, body: commentBody })
+            } else {
+              github.rest.issues.createComment({...context.repo, issue_number: prNumber, body: commentBody })
+            }
+          }
