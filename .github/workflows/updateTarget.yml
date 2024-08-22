@@ -1,0 +1,41 @@
+name: Update Target Platform
+
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      with:
+        fetch-depth: 0
+        ref: master
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+      with:
+        maven-version: 3.9.7
+    - name: Set up JDK
+      uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Update Target Platform
+      run: >-
+          mvn -f eclipse.platform.releng.prereqs.sdk 
+          org.eclipse.tycho.extras:tycho-version-bump-plugin:4.0.9-SNAPSHOT:update-target
+          -DallowMajorUpdates=false
+          -Ddiscovery=parent
+          -Dmaven.version.rules=update-rules.xml
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+      with:
+        commit-message: Update target-platform with latest version
+        branch: update_target
+        title: Dependency Updates
+        body: Please review the changes and merge if appropriate, or cherry pick individual updates.
+        delete-branch: true
+        draft: true
+        add-paths: |
+            **/*.target
