@@ -21,19 +21,19 @@
   ul {padding-left: 13px;}
   /*]]>*/
   </style>
-  <title>Eclipse Platform What's New in 4.32</title>
+  <title>Eclipse Platform What's New in 4.33</title>
 </head>
 <body>
   <h2>Platform and Equinox</h2>
   <p>Here are descriptions of some of the more interesting or significant changes made to the Eclipse Platform for the
-  4.32 release of Eclipse. They are grouped into:</p>
+  4.33 release of Eclipse. They are grouped into:</p>
   <ul>
     <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-    <!--li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li-->
+    <li><a href="#ViewsAndDialogs">Views, Dialogs and Toolbar</a></li>
     <li><a href="#TextEditors">Text Editors</a></li>
     <li><a href="#Preferences">Preferences</a></li>
     <!--li><a href="#Debug">Debug</a></li-->
-    <!--li><a href="#StylingThemes">Themes and Styling</a></li-->
+    <li><a href="#StylingThemes">Themes and Styling</a></li>
     <!--li><a href="#Security">Security</a></li-->
     <li><a href="#GeneralUpdates">General Updates</a></li>
   </ul>
@@ -46,13 +46,26 @@
 </colgroup>
 <tbody>
   <!-- ******************* Views, Dialogs and Toolbar ************************************* -->
-<!--
   <tr>
     <td id="ViewsAndDialogs" class="section" colspan="2">
     <h2>Views, Dialogs and Toolbar </h2>
     </td>
   </tr>
--->
+
+  <tr id="pin-debug-inspect-popup"> <!-- https://github.com/eclipse-platform/eclipse.platform/pull/1403 -->
+      <td class="title">Pin debug Inspect pop-up</td>
+      <td class="content">
+        <p>
+        The pop-up dialog that is displayed when calling the <em>Inspect</em> debug action now offer a menu
+        to <em>Pin</em> it so it remains visible even when focusing on other UI elements.
+        </p>
+        <p>
+        This can be convenient for example when comparing similar expressions, but in different debug contexts
+        (different applications, different launches or different threads).
+        </p>
+        <p><img style="max-width: 600px;" src="images/pinInspect.png" alt="Pinned Inspect dialogs"/></p>
+      </td>
+  </tr>
   <!-- ******************* End of Views, Dialogs and Toolbar ************************************* -->
 
   <!-- ******************* Text Editors ************************************* -->
@@ -62,14 +75,65 @@
     </td>
   </tr>
   
-  <tr id="generic_editor_in_diff"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/1747 -->
-      <td class="title">Compare Editor meets Generic Editor</td>
+  <tr id="find-replace-overlay"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1192 -->
+    <td class="title">Overlay for Performing Find/Replace Operations</td>
+    <td class="content">
+      <p>
+        The find/replace dialog for performing search and replace operations within an open editor now appears as a
+        seamlessly integrated overlay on top of the editor.
+        By default, it performs a "search as you type" and opens with the replace bar collapsed, thus focussing on the
+        mostly used search functionality.
+      </p>
+      <p><img src="images/overlay-top-replace-closed.png" alt="Find/Replace Overlay with Replace Bar Collapsed" /></p>
+      <p>
+        The replace bar can be opened on demand using the expand button or with the according keyboard shortcut
+        (<code>Ctrl</code>/<code>Cmd</code> + <code>R</code>).
+      </p>
+      <p><img src="images/overlay-top-replace-opened.png" alt="Find/Replace Overlay with Replace Bar Opened" /></p>
+      <p>
+        This overlay includes several search options that can be toggled on or off either through keyboard shortcuts or by
+        clicking the corresponding icons in the overlay.
+        The supported search options are:
+      </p>
+      <ul>
+        <li><img src="images/case-sensitive.svg" alt="Icon for Search Option: Case Sensitive" /> Case sensitive search
+          (<code>Ctrl</code>/<code>Cmd</code> + <code>Shift</code> + <code>C</code>)</li>
+        <li><img src="images/whole-word.svg" alt="Icon for Search Option: Whole Word" /> Whole word search
+          (<code>Ctrl</code>/<code>Cmd</code> + <code>Shift </code>+ <code>W</code>)</li>
+        <li><img src="images/regex.svg" alt="Icon for Search Option: Regular Expression" /> Search for a regular
+          expression (<code>Ctrl</code>/<code>Cmd</code> + <code>Shift</code> + <code>P</code>)</li>
+        <li><img src="images/search-in-area.svg" alt="Icon for Search Option: Search in Area" /> Search in a selected area
+          (<code>Ctrl</code>/<code>Cmd</code> + <code>Shift</code> + <code>A</code>)</li>
+      </ul>
+      <p>
+        In case you prefer the old find/replace dialog, you can disable the overlay in the preferences under <b>General ->
+          Editors -> Text Editors</b>.
+        You can also change in the preferences whether you prefer to have the overlay appear at the bottom instead of the
+        top of the editor.
+      </p>
+      <p>
+        <img src="images/overlay-options.png" alt="Preferences for Customizing Find/Replace UI Appearance" />
+      </p>
+      <p>
+        The overlay keeps a history of the past searches and updates the history everytime you perform a search.
+        Searches by "search as you type" will not be stored to the history. You can also navigate the history using the
+        arrow keys up or down.
+      </p>
+      <p><img src="images/overlay-top-search-history.png" alt="Example for Search History in Find/Replace Overlay" /></p>
+    </td>
+  </tr>
+  <tr id="multi-line-code-mining"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/2024 -->
+      <td class="title">Multiple Lines in Text Editor Code Minings</td>
       <td class="content">
         <p>
-        The Compare Editor opened on file types supported by the Generic Editor now shows the same syntax highlighting as in the Generic Editor.
-        To get most of this feature, the latest TextMate (tm4e) with the Language Pack should be installed.  
+        Code minings in the Eclipse text editor now support drawing text over multiple lines.
         </p>
-        <p><img src="images/compare_generic.png" alt="Compare Editor with Generic Editor"/></p>
+        <p><img src="images/multiline_mining_new.png" alt="Multiline code minding drawn correctly" width="70"/></p>
+        <p>In previous releases line breaks were ignored and the complete text was drawn in one line only.</p>
+        <p><img src="images/multiline_mining_old.png" alt="Multiline code minding drawn in one line in previous releases" width="70"/></p>
+        <p>
+        This paves the way to render code suggestions as <em>Ghost-Text</em> in the Eclipse text editor.
+        </p>
       </td>
   </tr>
   <!-- ******************* End of Text Editors ************************************* -->
@@ -80,28 +144,53 @@
     <h2>Preferences </h2>
     </td>
   </tr>
-  
-  <tr id="generic_text_editors_preference_page"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/866 -->
-      <td class="title">Generic Text Editors Preference Page</td>
+  <tr id="show-hide-editor-name"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/2072 -->
+      <td class="title">Show / Hide Active Editor Name in Window Title</td>
       <td class="content">
         <p>
-        The Generic Text Editor now has its own preference page.
-        It is now possible to change the Content Assist behavior for the Generic Text Editor as well as for all editors based on it.
-        It is located under General &gt; Editors &gt; Text Editors.
+        Up to now the workbench window title can be customized to display workspace name, perspective name, full path and product name. 
+        The active editor name is shown as a part of the window title but could not customized. 
+        This can now be customized on the <b>General -> Workspace</b> preference page via the <em>Show active editor name</em> checkbox.
         </p>
-        <p><img src="images/generic-text-editors-preferences.png" alt="Generic Text Editors Preference Page"/></p>
+        
+        <p><img style="max-width: 600px;" src="images/show-editor-name.png" alt="Show Editor Name"/></p>
       </td>
   </tr>
   <!-- ****************** End of Preferences ************************************* -->
 
   <!-- ******************* Themes and Styling ************************************* -->
-<!--
   <tr>
     <td id="StylingThemes" class="section" colspan="2">
     <h2>Themes and Styling </h2>
     </td>
   </tr>
--->
+  <tr id="new-light-theme"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/issues/2114 -->
+      <td class="title">Preview Version of Improved Light Theme</td>
+      <td class="content">
+        <p>
+        After many years of stability we have reworked the light theme of Eclipse to follow more modern design principles, similar to other major IDEs:
+        </p>
+        <ol>
+          <li>Lightweight view tab design</li>
+          <li>Flat look - No use of 3D gradients</li>
+          <li>Views use a darker background color.</li>
+        </ol>
+        <p>
+        These improvement are not yet completed but are available as a preview. 
+        </p>
+        <p><img style="max-width: 600px;" src="images/preview-theme.png" alt="Preview Theme"/></p>
+        <p>
+        You can try it out by selecting <em>Light (Preview)</em> on the <b>General > 
+        Appearance</b> preference page. See 
+        <a href="https://github.com/eclipse-platform/eclipse.platform.ui/issues/2114" target="_blank">issue #2114</a>
+        for more details and the motivation behind these changes and to give your feedback. 
+        </p>
+        <p>
+        The improvements in the <em>Light (Preview)</em> theme will be integrated in the standard
+        <em>Light</em> theme once ready and the <em>Light (Preview)</em> will be removed again.
+        </p>
+      </td>
+  </tr>
   <!-- ******************* End of Themes and Styling ************************************* -->
 
   <!-- ******************* General Updates ************************************* -->
@@ -110,26 +199,27 @@
     <h2>General Updates </h2>
     </td>
   </tr>
-  
-  <tr id="winows-on-arm">
-    <!-- https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/577 -->
-    <td class="title">Support for Windows on ARM</td>
-    <td class="content">
-      <p>
-        The Eclipse SDK is now also available for Windows on the ARM-64bit architecture.
-		Eclipse Packages are not yet provided for Windows on ARM due to missing Eclipse Temurin JDKs for that environment,
-		but the SDK should be completely functional on that platform, with only the following limitations:
-        <ul>
-          <li>Automatic file system refresh through native hooks is not yet available.</li>
-          <li>File system access in general might be slightly slower than on the <code>x86_64</code> architecture.</li>
-        </ul>
-		It is intended to remove all those restrictions in a future release.
-      </p>
-      <p>
-      </p>
-    </td>
+  <tr id="link-handlers-on-mac"> <!-- https://github.com/eclipse-platform/eclipse.platform.ui/pull/1902 -->
+      <td class="title">Automatic Link Handler Registration on macOS</td>
+      <td class="content">
+        <p>
+        Registering link handlers on macOS breaks the signature of the signed Eclipse application. 
+        Breaking the signature has the effect that the Eclipse application cannot be started any more.
+        </p>
+        <p>
+        For signed Eclipse applications link handlers are no longer registered automatically at start-up and also cannot 
+        be registered manually on the <b>Link Handlers</b> preference page.
+        </p>
+        <p>
+        For product distributions that already know upfront which URL schemes they are going to handle,
+        <a href="pde.html#macos-url-schemes">PDE provides an alternative</a> to declare such URL schemes in the app bundle
+        before it is code-signed.
+        </p>
+        <p>
+        For unsigned Eclipse applications nothing has changed.
+        </p>
+      </td>
   </tr>
-  
   <!-- ******************* End of General Updates ************************************* -->
   <tr><td colspan="2"/></tr>
 </tbody>
