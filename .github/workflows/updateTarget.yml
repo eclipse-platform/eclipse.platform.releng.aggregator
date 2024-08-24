@@ -1,8 +1,17 @@
 name: Update Target Platform
 
+concurrency: 
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 on:
   schedule:
     - cron:  '0 0 * * *'
+  push:
+    branches:
+      - master
+    paths:
+      - '**.target'
 jobs:
   update:
     runs-on: ubuntu-latest
