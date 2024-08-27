@@ -31,8 +31,7 @@ RUN dnf -y update && dnf -y install \
       webkit2gtk3 \
       webkit2gtk3-devel \
       gtk3-devel \
-      gtk2 \
-      gtk2-devel \
+      gtk4-devel \
       java-17-openjdk-devel \
       webkit2gtk3-devel \
       make \
