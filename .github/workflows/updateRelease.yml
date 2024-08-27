@@ -24,8 +24,8 @@ jobs:
     - name: Update Versions
       run: >-
           mvn -U -Pbuild-individual-bundles -ntp
-          org.eclipse.tycho:tycho-versions-plugin:4.0.6:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
-          org.eclipse.tycho:tycho-versions-plugin:4.0.6:set-parent-version -DnewParentVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
+          org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
+          org.eclipse.tycho:tycho-versions-plugin:set-parent-version -DnewParentVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
     - name: Build and Bump Versions
       uses: Wandalen/wretry.action@6feedb7dedadeb826de0f45ff482b53b379a7844 # master
       with:
@@ -36,7 +36,7 @@ jobs:
             clean verify
             -DskipTests
             -Dcompare-version-with-baselines.skip=false
-            org.eclipse.tycho:tycho-versions-plugin:4.0.6:bump-versions -Dtycho.bump-versions.increment=100
+            org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100
     - name: Create Pull Request for Release ${{ github.event.milestone.title }}
       uses: peter-evans/create-pull-request@6cd32fd93684475c31847837f87bb135d40a2b79 # v7.0.3
       with:

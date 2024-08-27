@@ -32,9 +32,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Update Main Versions
-      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:4.0.6:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk
+      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk
     - name: Update Release Versions
-      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:4.0.8:set-property -Dproperties=releaseNumberSDK,releaseNumberPlatform,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewReleaseNumberSDK=${{ github.event.milestone.title }} -DnewReleaseNumberPlatform=${{ github.event.milestone.title }}
+      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:set-property -Dproperties=releaseNumberSDK,releaseNumberPlatform,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewReleaseNumberSDK=${{ github.event.milestone.title }} -DnewReleaseNumberPlatform=${{ github.event.milestone.title }}
     - name: Create Pull Request for Release ${{ github.event.milestone.title }}
       uses: peter-evans/create-pull-request@6cd32fd93684475c31847837f87bb135d40a2b79 # v7.0.3
       with:
