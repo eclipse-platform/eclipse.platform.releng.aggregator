@@ -21,44 +21,28 @@ pipeline {
 				'''
 			}
 		}
-		stage('Build Docker Images') {
+		stage('Build and push Docker Images') {
 			steps {
-				sh '''#!/bin/bash -x
-				cd ${WORKSPACE}/eclipse.platform.releng.aggregator/cje-production/dockerfiles/
-				chmod +x *.sh
-				(./build-centos_9.sh|tee centos9.log)&
-				(./build-centos_9_swt_build.sh|tee swt_9_build.log)&
-				(./build-ubuntu-22.04.sh|tee ubuntu22.log)&
-				(./build-openSuse-15.sh|tee opensuse_leap.log)&
-				cd ${WORKSPACE}/eclipse.jdt.core/org.eclipse.jdt.core/docker/
-				chmod +x *.sh
-				(./build-ubuntu-jikespg.sh|tee ubuntuJikespg.log)&
-				wait
-				docker images
-				'''
-			}
-		}
-		stage('Push docker image') {
-			steps {
-				withDockerRegistry([credentialsId: 'docker.com-bot', url: '']) {
-					sh '''#!/bin/bash -x
-					cd ${WORKSPACE}/eclipse.platform.releng.aggregator/cje-production/dockerfiles/
-					chmod +x *.sh
-					(./push-centos_9.sh|tee push-centos9.log)&
-					(./push-centos9_swt_build.sh|tee push-swt_9_build.log)&
-					(./push-ubuntu-22.04.sh|tee push-ubuntu22.log)&
-					(./push-opensuse-15.sh|tee push-opensuse_leap.log)&
-					cd ${WORKSPACE}/eclipse.jdt.core/org.eclipse.jdt.core/docker/
-					chmod +x *.sh
-					(./push-ubuntu-jikespg.sh|tee push-ubuntuJikespg.log)&
-					wait
-					'''
+				script {
+					dir('eclipse.platform.releng.aggregator/cje-production/dockerfiles') {
+						parallel(
+							'centos9-gtk4': { buildAndPushImage('centos-gtk4-mutter/9-gtk4', 'eclipse/platformreleng-centos-gtk4-mutter:9') },
+							'centos9-gtk4-swt': { buildAndPushImage('centos-gtk4-mutter/9-swtBuild', 'eclipse/platformreleng-centos-swt-build:9') },
+							'ubuntu-gtk3': { buildAndPushImage('ubuntu-gtk3-metacity/22.04-gtk3', 'eclipse/platformreleng-ubuntu-gtk3-metacity:22.04') },
+							'opensuse-gtk3': { buildAndPushImage('opensuse-gtk3-metacity/15-gtk3', 'eclipse/platformreleng-opensuse-gtk3-metacity:15') },
+						failFast: false)
+					}
+					dir('eclipse.jdt.core/org.eclipse.jdt.core/docker') {
+						parallel(
+							'jikespg': { buildAndPushImage('jikespg', 'eclipse/platformreleng-ubuntu-gtk3-metacity:jikespg') },
+						failFast: false)
+					}
 				}
 			}
 		}
 		stage('Clean Docker Images') {
 			steps {
-				sh '''#!/bin/bash -x
+				sh '''
 					docker images
 					docker system prune -a -f
 					docker images
@@ -74,8 +58,18 @@ pipeline {
 			from:"genie.releng@eclipse.org"
 		}
 		always {
-			archiveArtifacts '**/*.log'
 			cleanWs()
 		}
+	}
+}
+
+def buildAndPushImage(directory, imageId) {
+	withDockerRegistry([credentialsId: 'docker.com-bot', url: '']) {
+		sh """
+			pushd ${directory}
+			docker build --pull -t ${imageId} .
+			docker push ${imageId}
+			popd
+		"""
 	}
 }
