@@ -1,0 +1,98 @@
+pipeline {
+	options {
+		timeout(time: 2, unit: 'HOURS')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+		disableConcurrentBuilds(abortPrevious: true)
+		timestamps()
+	}
+	agent {
+		label 'docker-build'
+	}
+	stages {
+		stage('Clean workspace') {
+			steps {
+				sh '''#!/bin/bash -x
+				docker images
+				docker system prune -a -f
+				cd ${WORKSPACE}
+				rm -rf *
+				'''
+			}
+		}
+		stage('Get Docker Files') {
+			steps {
+				sh '''
+					git clone -b master https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
+					git clone -b master https://git.eclipse.org/r/jdt/eclipse.jdt.core.git
+				'''
+			}
+		}
+		stage('Build Docker Images') {
+			steps {
+				sh '''#!/bin/bash -x
+				cd ${WORKSPACE}/eclipse.platform.releng.aggregator/cje-production/dockerfiles/
+				chmod +x *.sh
+				(./build-centos_8.sh|tee centos8.log)&
+				(./build-centos_swt_build.sh|tee swt_build.log)&
+				(./build-centos_9.sh|tee centos9.log)&
+				(./build-centos_9_swt_build.sh|tee swt_9_build.log)&
+				(./build-ubuntu-22.04.sh|tee ubuntu22.log)&
+				(./build-openSuse-15.sh|tee opensuse_leap.log)&
+				cd ${WORKSPACE}/eclipse.jdt.core/org.eclipse.jdt.core/docker/
+				chmod +x *.sh
+				(./build-ubuntu-jikespg.sh|tee ubuntuJikespg.log)&
+				wait
+				docker images
+				'''
+			}
+		}
+		stage('Push docker image') {
+			steps {
+				withDockerRegistry([credentialsId: 'docker.com-bot', url: '']) {
+					sh '''#!/bin/bash -x
+					cd ${WORKSPACE}/eclipse.platform.releng.aggregator/cje-production/dockerfiles/
+					chmod +x *.sh
+					(./push-centos_8.sh|tee push-centos8.log)&
+					(./push-centos_swt_build.sh|tee push-swt_build.log)&
+					(./push-centos_9.sh|tee push-centos9.log)&
+					(./push-centos9_swt_build.sh|tee push-swt_9_build.log)&
+					(./push-ubuntu-22.04.sh|tee push-ubuntu22.log)&
+					(./push-opensuse-15.sh|tee push-opensuse_leap.log)&
+					cd ${WORKSPACE}/eclipse.jdt.core/org.eclipse.jdt.core/docker/
+					chmod +x *.sh
+					(./push-ubuntu-jikespg.sh|tee push-ubuntuJikespg.log)&
+					wait
+					'''
+				}
+			}
+		}
+		stage('Clean Docker Images') {
+			steps {
+				sh '''#!/bin/bash -x
+					docker images
+					docker system prune -a -f
+					docker images
+				'''
+			}
+		}
+	}
+	post {
+		success {
+			emailext body: "Container images used for testing eclipse platform - Build Successful. Please go to ${BUILD_URL}console and check the log",
+			subject: "Container images - Build Successful", 
+			to: "sravankumarl@in.ibm.com manoj.palat@in.ibm.com kalyan_prasad@in.ibm.com sdawley@redhat.com platform-releng-dev@eclipse.org",
+			from:"genie.releng@eclipse.org"
+		}
+		
+		unsuccessful {
+			emailext body: "Container images used for testing eclipse platform - Build Unsuccessful. Please go to ${BUILD_URL}console and check the log",
+			subject: "Container images - Build Unsuccessful", 
+			to: "sravankumarl@in.ibm.com manoj.palat@in.ibm.com kalyan_prasad@in.ibm.com sdawley@redhat.com platform-releng-dev@eclipse.org",
+			from:"genie.releng@eclipse.org"
+		}
+		
+		always {
+			archiveArtifacts '**/*.log'
+		}
+	}
+}
