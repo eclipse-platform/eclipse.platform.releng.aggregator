@@ -17,20 +17,20 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.32 (JDT)</title>
+<title>What's New in Eclipse 4.33 (JDT)</title>
 </head>
 
 <body>
 <h2>Java Development Tools</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.32 release of Eclipse.
+for the 4.33 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
   	<!--li><a href="#Java21">New Java&trade; Language Features</a></li-->
   	<!--li><a href="#JUnit">JUnit</a></li-->
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<!--li><a href="#JavaCompiler">Java Compiler</a></li-->
-	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
+	<!--<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>-->
 	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
 	<!--li><a href="#Debug">Debug</a></li-->
 	<!--li><a href="#JDTDev">JDT Developers</a></li-->
@@ -60,13 +60,11 @@ document for changes in the Platform.</p>
   <!-- ******************* End of Java XX Support ************************************* -->
 
   <!-- ******************* JUnit ************************************* -->
- <!--
-  <tr>
+ <!-- <tr>
     <td id="JUnit" class="section" colspan="2">
     <h2>JUnit</h2>
-    </td>
-  </tr>
- -->
+    </td> 
+  </tr> -->
   <!-- ******************* End of JUnit ************************************* -->
 
   <!-- ******************* Java Editor ************************************* -->
@@ -76,151 +74,60 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="split-try-with-resources">
-    <td class="title"><a href="#split-try-with-resources">Split try-with-resources</a></td>
+ <tr id="enhanced-if-else-switch-cleanup">
+    <td class="title"><a href="#new-make-static-refactoring">Enhance if/else to switch CleanUp</a></td>
     <td class="content">
-      <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1226 -->
-      A new quick assist has been added to allow splitting resources from a try-with-resources into an inner try-with-resources.  All resources from the point of the split are added to the new inner try-with-resources statement.  The assist is offered when <b>CTRL+1</b> is clicked while some part of a resource statement in the try-with-resources is selected.
-      <p>For example, in the following example, we can select part of the second resources statement:</p>
-      <p><img src="images/split-try-with-resources-before.png" alt="try-with-resources example before" width="800"/></p>
-      <p>and choose to split from that point:</p>
-      <p><img src="images/split-try-with-resources-after.png" alt="try-with-resources example after" width="800"/></p>
+	The clean-up to convert an if/else-if/else block into a switch has been enhanced to support String literals and Enum constants.  As before, the if/else-if/else block must have at least 3 blocks and must look for constant expressions except for the last block which can be put into the <b>default</b> case.
+	<p>For a <b>String</b> variable, each <b>if/else</b> expression can check using the <b>String.equals()</b> method.  For an <b>Enum</b> the code simply uses the <b>==</b> operator.  Use of the <b>||</b> operator is allowed to check multiple values and corresponds to a fall-through in the resultant switch statement.</p>
+	<p>To use the clean-up, go to <b>Source &gt; Clean Up &gt; Code Style</b> page and select: <b>Convert if/else if/else chain with 3 blocks min to switch</b>.</p>
+	<p>For example, performing the clean-up on the following:</p>
+	<p><img src="images/ifelsestring-before.png" alt="convert if/else if/else to switch"/></p>
+	<p>will result in:</p>
+	<p><img src="images/ifelsestring-after.png" alt="converted if/else if/else to switch"/></p>
     </td>
-  </tr>
-  <tr id="message-format-text-block">
-    <td class="title"><a href="#message-format-text-block">String concat to formatted text block</a></td>
-    <td class="content">
-      <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1366 -->
-      The quick assists to convert a mixed string concatenatation of literals and variables into a <b>MessageFormat</b> or <b>String.format</b> call have been enhanced to use a text block when using Java 15 or greater.  This is useful when there is purposeful alignment of the line indentation of the concatenation (e.g. a code snippet).
-      <p>For example, in the following example:</p>
-      <p><img src="images/original-string-concat.png" alt="original string concatenation" width="800"/></p>
-      <p>If we use <b>CTRL+1</b> with the cursor in the concatenation and choose <b>Use 'MessageFormat' for string concatenation</b> we get:</p>
-      <p><img src="images/message-format-after.png" alt="after changing to MessageFormat" width="800"/></p>
-      <p>or if we choose <b>Use 'String.format' for string concatenation</b> we get:</p>
-      <p><img src="images/string-format-after.png" alt="after changing to String.format" width="800"/></p>
-    </td>
-  </tr>
-  <tr id="combine-decl-and-assigment">
-    <td class="title"><a href="#combine-decl-and-assignment">Combine declaration and assignment</a></td>
-    <td class="content">
-      <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1330 -->
-      The <b>Remove overridden assignment</b> cleanup found in the <b>Unnecessary Code</b> tab of the clean-up configuration dialog has been enhanced to combine a variable declaration that is immediately followed by an assignment into a declaration with assignment.
-      <p>For example, the following:</p>
-      <p><img src="images/decl-with-assignment-after.png" alt="declaration with assignment immediately after" width="800"/></p>
-      <p>will be transformed into:</p>
-      <p><img src="images/decl-with-assignment-combined.png" alt="declaration with assignment combined" width="800"/></p>
-    </td>
-  </tr>
-  <tr id="extract-anonymous-class">
-    <td class="title"><a href="#extract-anonymous-class">Extract anonymous class to local variable</a></td>
-    <td class="content">
-      <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/pull/1063 -->
-      A new quick-assist has been added to extract an anonymous class implementation to a local variable.  To use, click on <b>CTRL+1</b> with the cursor within the anonymous class.
-      For example:
-      <p><img src="images/anonymous-local-var-before.png" alt="anonymous class to local variable before"/></p>
-      <p>Results in:</p>
-      <p><img src="images/anonymous-local-var-after.png" alt="anonymous class to local variable after"/></p>
-    </td>
-  </tr>
-  <tr id="types-call-hierarchy-on-ctrl-click">
-    <td class="title"><a href="#types-call-hierarchy-on-ctrl-click">Types call Hierarchy on Ctrl+Click</a></td>
-    <td class="content">
-    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/1367 -->
-    <p><code>Open Call Hierarchy</code> action now added to the list of actions shown on <code>Ctrl+Click</code> for types as well</p>
-    <p><img src="images/types-call-hierarchy-on-ctrl-click.png" alt="Call hierarchy action for types"/></p>
-    </td>
-    </tr>
+ </tr>
+
+
   <!-- ******************* End of Java Editor ************************************* -->
 
   <!-- ******************* Java Views and Dialogs ************************************* -->
-  <tr>
+  <!--<tr>
     <td id="JavaViewsAndDialogs" class="section" colspan="2">
     <h2>Java Views and Dialogs</h2>
     </td>
-  </tr>
-  <tr id="javadocStylingImprovements">
-    <!-- https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/1074 -->
-    <td class="title">Javadoc styling improvements</td>
-    <td class="content">
-      Styling of the method signatures displayed in the Javadoc view and hover dialog has been improved to make them easier
-      to read.
-      <p>
-      Until now, the entire signature has been rendered as one continuous text making it a bit hard to identify specific parts.
-      This is especially difficult when the signature contained type variables of generic declarations:
-      </p>
-      <p><img src="images/javadoc-styling-old.png" alt="Old Javadoc styling"/></p>
-      Now, by default, parts of the signature are visually distinguished by using italic, lighter, or colorized text or by placing
-      them on separate lines.
-      <p><img src="images/javadoc-styling-new.png" alt="New Javadoc styling"/></p>
-      <p>
-      Coloring is used to distinguish different types used as type variables. Four different colors are pre-configured and are also
-      re-used repeatedly in case more unique types are present in displayed Javadoc.  Note: custom colors can be configured to
-      avoid this repetition.
-      </p>
-      <p>
-      All aspects of the new styling can be customized through the Javadoc styling menu accessible via a new menu button added to 
-      the toolbar of the Javadoc view and Javadoc hover (here visible after pressing F2), where the button itself toggles the new styling
-      functionality on/off.
-      </p>
-      <p><img src="images/javadoc-styling-menu.png" alt="New Javadoc styling menu"/></p>
-    </td>
-  </tr>
-  
-  <tr id="batch-encapsulate-fields">
-	  <td class="title"><a href="#batch-encapsulate-fields">Enable encapsulating multiple fields from a single dialog</a></td>
-	  <td class="content">
-	  It is now possible to encapsulate multiple fields of a class and its references in other classes by invoking <b>Refactor > Encapsulate Fields...</b> on that class.
-	  <p>The new dialog looks like this:</p>
-	  <p><img src="images/new-self-encapsulate-fields-dialog.png" width="800"/></p>
-	  <p>The Encapsulate Fields option can be accessed either by the <b>menu bar &gt; Refactor</b> or by right clicking while hovering over any field. </p>
-	  <p>The dialog now consists of a tree where you can check all the fields that need to be encapsulated along with their getter and setter.</p>
-	  <p>You can now select <b>Same as field</b> (default option) as the access modifier for the generated getters and setters.</p>
-	  <p>The operation would have the following results as displayed in the example below:</p> 
-	  <p><img src="images/ser-change-in-own-class.png" width="800"/></p>
-	  <p><img src="images/ser-change-in-references.png" width="800"/></p>
-	  
-	  </td>
-  </tr>
+  </tr> -->
   <!-- ******************* End of Java Views and Dialogs ************************************* -->
 
   <!-- ******************* Java Compiler ************************************* -->
-<!--
-  <tr>
+ <!-- <tr>
     <td id="JavaCompiler" class="section" colspan="2">
     <h2>Java Compiler</h2>
     </td>
-  </tr>
--->
+  </tr> -->
   <!-- ******************* End of Java Compiler ************************************* -->
 
   <!-- ******************* Java Formatter ************************************* -->
-<!--
-  <tr>
+ <!-- <tr>
     <td id="JavaFormatter" class="section" colspan="2">
     <h2>Java Formatter </h2>
     </td>
-  </tr>
--->
+  </tr> -->
   <!-- ******************* End of Java Formatter ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
-<!--
-  <tr>
+ <!-- <tr>
     <td id="Debug" class="section" colspan="2">
     <h2>Debug</h2>
     </td>
-  </tr>
--->
+  </tr> -->
   <!--************************ End of Debug ******************************** -->
 
   <!-- *********************** JDT Developers ******************************** -->
- <!--
-  <tr>
+ <!-- <tr>
     <td id="JDTDev" class="section" colspan="2">
     <h2>JDT Developers</h2>
     </td>
-  </tr>
--->
+  </tr> -->
   <!-- *********************** End of JDT Developers ******************************** -->
   <tr><td colspan="2"/></tr>
 </tbody>
