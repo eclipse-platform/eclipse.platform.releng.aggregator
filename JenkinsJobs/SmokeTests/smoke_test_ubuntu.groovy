@@ -1,4 +1,4 @@
-pipelineJob('SmokeTests/ep-smoke-test-ubuntu22'){
+pipelineJob('SmokeTests/ep-smoke-test-ubuntu'){
 
   logRotator {
     numToKeep(5)
