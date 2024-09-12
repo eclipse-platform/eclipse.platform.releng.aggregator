@@ -108,14 +108,6 @@ if [ -z $PATCH_BUILD ]; then
     popd
   fi
 
-  # gather test framework
-  TEST_FRAMEWORK_DIR=$TEST_ZIP_DIR/eclipse-test-framework
-  if [ -d $TEST_FRAMEWORK_DIR ]; then
-    pushd $TEST_FRAMEWORK_DIR
-    zip -r $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-test-framework-$BUILD_ID.zip *
-    popd
-  fi
-
   set -x
   # slice repos
   ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/buildAll.xml
