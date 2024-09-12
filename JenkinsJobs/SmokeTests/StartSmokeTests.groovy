@@ -9,9 +9,9 @@ pipeline {
   stages {
 	  stage('Trigger tests'){
           parallel {
-              stage('Ubuntu 22.04 Java17'){
+              stage('Ubuntu 24.04 Java17'){
                   steps {
-                        build job: 'SmokeTests/ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
+                        build job: 'SmokeTests/ep-smoke-test-ubuntu', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17x64}")]
                   }
               }
               stage('Opensuse Leap Java17'){
@@ -34,9 +34,9 @@ pipeline {
                         build job: 'SmokeTests/ep-smoke-test-ppcle', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java17ppcle}")]
                   }
               }
-          	  stage('Ubuntu 22.04 Java21'){
+          	  stage('Ubuntu 24.04 Java21'){
 				  steps {
-						build job: 'SmokeTests/ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java21x64}")]
+						build job: 'SmokeTests/ep-smoke-test-ubuntu', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java21x64}")]
 				  }
 			  }
 			  stage('Opensuse Leap Java21'){
@@ -54,9 +54,9 @@ pipeline {
 						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java21arm64}")]
 				  }
 			  }
-			  stage('Ubuntu 22.04 Java22'){
+			  stage('Ubuntu 24.04 Java22'){
 				  steps {
-						build job: 'SmokeTests/ep-smoke-test-ubuntu22', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+						build job: 'SmokeTests/ep-smoke-test-ubuntu', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
 				  }
 			  }
 			  stage('Opensuse Leap Java22'){
