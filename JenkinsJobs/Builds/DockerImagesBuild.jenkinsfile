@@ -5,25 +5,19 @@ pipeline {
 		disableConcurrentBuilds(abortPrevious: true)
 		timestamps()
 	}
+	triggers {
+		cron '@weekly'
+	}
 	agent {
 		label 'docker-build'
 	}
 	stages {
-		stage('Clean workspace') {
-			steps {
-				sh '''#!/bin/bash -x
-				docker images
-				docker system prune -a -f
-				cd ${WORKSPACE}
-				rm -rf *
-				'''
-			}
-		}
 		stage('Get Docker Files') {
 			steps {
+				cleanWs()
 				sh '''
 					git clone -b master https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-					git clone -b master https://git.eclipse.org/r/jdt/eclipse.jdt.core.git
+					git clone -b master https://github.com/eclipse-jdt/eclipse.jdt.core
 				'''
 			}
 		}
@@ -73,22 +67,15 @@ pipeline {
 		}
 	}
 	post {
-		success {
-			emailext body: "Container images used for testing eclipse platform - Build Successful. Please go to ${BUILD_URL}console and check the log",
-			subject: "Container images - Build Successful", 
-			to: "sravankumarl@in.ibm.com manoj.palat@in.ibm.com kalyan_prasad@in.ibm.com sdawley@redhat.com platform-releng-dev@eclipse.org",
-			from:"genie.releng@eclipse.org"
-		}
-		
 		unsuccessful {
 			emailext body: "Container images used for testing eclipse platform - Build Unsuccessful. Please go to ${BUILD_URL}console and check the log",
 			subject: "Container images - Build Unsuccessful", 
-			to: "sravankumarl@in.ibm.com manoj.palat@in.ibm.com kalyan_prasad@in.ibm.com sdawley@redhat.com platform-releng-dev@eclipse.org",
+			to: "platform-releng-dev@eclipse.org",
 			from:"genie.releng@eclipse.org"
 		}
-		
 		always {
 			archiveArtifacts '**/*.log'
+			cleanWs()
 		}
 	}
 }
