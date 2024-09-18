@@ -28,7 +28,6 @@ pipeline {
   stages {
       stage('Run tests'){
           steps {
-              container ('custom'){
                   wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
                       withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk19-latest' }"]) {
                           withAnt(installation: 'apache-ant-latest') {
@@ -90,7 +89,6 @@ pipeline {
                                 
                                 echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
                               \'\'\'
-                          }
                       }
                   }
               }
