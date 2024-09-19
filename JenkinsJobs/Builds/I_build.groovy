@@ -17,9 +17,9 @@ for (STREAM in STREAMS){
 # format: Minute Hour Day Month Day of the week (0-7)
 
 # - - - Integration Eclipse SDK builds - - - 
-# 2024-06 Release Schedule
+# 2024-12 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
-# 0 18 * * *
+0 18 * * *
 
 
 # Milestone/RC Schedule 
