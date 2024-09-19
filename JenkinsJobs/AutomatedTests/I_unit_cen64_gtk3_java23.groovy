@@ -83,6 +83,7 @@ spec:
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
+              JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk23-latest')
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
           }
