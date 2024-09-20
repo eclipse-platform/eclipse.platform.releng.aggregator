@@ -16,6 +16,7 @@ package org.eclipse.test;
 import java.io.File;
 
 import org.eclipse.core.runtime.Platform;
+import org.junit.rules.TestWatcher;
 
 /**
  * Helper class to take screenshots from running tests.
@@ -24,6 +25,19 @@ import org.eclipse.core.runtime.Platform;
  */
 public final class Screenshots {
 
+	private static final class ScreenshotOnFailure extends TestWatcher {
+		@Override
+		protected void failed(Throwable e, org.junit.runner.Description description) {
+			String screenshot = Screenshots.takeScreenshot(description.getTestClass(), description.getMethodName());
+			e.addSuppressed((new Throwable("Screenshot written to " + screenshot)));
+			super.failed(e, description);
+		}
+	}
+
+	/** @since 3.21 **/
+	public static TestWatcher onFailure() {
+		return new ScreenshotOnFailure();
+	}
     /**
      * Takes a screenshot and writes the path to the generated image file to System.out.
      * <p>
