@@ -1,9 +1,10 @@
 pipeline {
 	options {
+		skipDefaultCheckout()
+		timestamps()
 		timeout(time: 2, unit: 'HOURS')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 		disableConcurrentBuilds(abortPrevious: true)
-		timestamps()
 	}
 	triggers {
 		cron '@weekly'
@@ -64,12 +65,10 @@ pipeline {
 }
 
 def buildAndPushImage(directory, imageId) {
-	withDockerRegistry([credentialsId: 'docker.com-bot', url: '']) {
-		sh """
-			pushd ${directory}
-			docker build --pull -t ${imageId} .
-			docker push ${imageId}
-			popd
-		"""
+	dir(directory) {
+		sh "docker build --pull -t ${imageId} ."
+		withDockerRegistry([credentialsId: 'docker.com-bot', url: '']) {
+			sh "docker push ${imageId}"
+		}
 	}
 }
