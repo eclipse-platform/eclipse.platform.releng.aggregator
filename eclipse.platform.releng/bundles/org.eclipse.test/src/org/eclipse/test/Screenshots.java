@@ -16,7 +16,6 @@ package org.eclipse.test;
 import java.io.File;
 
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.test.internal.AwtScreenshot;
 
 /**
  * Helper class to take screenshots from running tests.
