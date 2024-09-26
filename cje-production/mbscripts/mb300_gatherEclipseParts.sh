@@ -61,6 +61,7 @@ if [ -z $PATCH_BUILD ]; then
     # sdk
     cp org.eclipse.sdk.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-ppc64le.tar.gz
+    cp org.eclipse.sdk.ide-linux.gtk.riscv64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-riscv64.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-x86_64.tar.gz
     cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-x86_64.tar.gz
     cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-x86_64.dmg
@@ -71,6 +72,7 @@ if [ -z $PATCH_BUILD ]; then
     # platform
     cp org.eclipse.platform.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-ppc64le.tar.gz
+    cp org.eclipse.platform.ide-linux.gtk.riscv64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-riscv64.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-x86_64.tar.gz
     cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-x86_64.tar.gz
     cp org.eclipse.platform.ide-macosx.cocoa.x86_64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-macosx-cocoa-x86_64.dmg
