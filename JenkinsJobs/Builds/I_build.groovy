@@ -73,7 +73,7 @@ spec:
     }
   }
   tools {
-      jdk 'openjdk-jdk17-latest'
+      jdk 'temurin-jdk17-latest'
   }
   environment {
       MAVEN_OPTS = "-Xmx6G"
