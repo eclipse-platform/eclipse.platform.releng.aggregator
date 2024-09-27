@@ -4,6 +4,13 @@ folder('Builds') {
 
 pipelineJob('Builds/Build-Docker-images'){
 	description('Build and publish custom Docker images')
+	properties {
+		pipelineTriggers {
+			triggers {
+				cron { spec('@weekly') }
+			}
+		}
+	}
 	definition {
 		cpsScm {
 			lightweight(true)
