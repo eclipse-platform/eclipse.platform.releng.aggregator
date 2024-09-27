@@ -1,4 +1,4 @@
-name: Check for version increments and apply them if necessary 
+name: Check for and apply version increments
 
 on:
   workflow_call:
@@ -49,15 +49,15 @@ jobs:
     - name: Commit version increments, if any
       run: |
         set -x
-        if [[ $(git status --ignore-submodules --porcelain) != '' ]]; then
-          # Workspace is not clean, i.e. some version were changed
+        git add '*/META-INF/MANIFEST.MF' '*/feature.xml' '*/pom.xml'
+        if [[ $(git diff --name-only --cached) != '' ]]; then
+          # Relevant files were staged, i.e. some version were changed
           
           # Read 'releaseNumberSDK' property as stream version
           streamVersion=$(mvn help:evaluate -Dexpression=releaseNumberSDK --quiet -DforceStdout)
           
           git config --global user.email '${{ inputs.botMail }}'
           git config --global user.name '${{ inputs.botName }}'
-          git add --all
           git status
           git commit -m "Version bump(s) for ${streamVersion} stream"
           
