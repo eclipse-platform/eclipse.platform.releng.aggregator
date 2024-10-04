@@ -8,7 +8,7 @@
 <title>Using null annotations</title>
 </head>
 <body>
-<h1> Using null annotations </h1>
+<h1> Using Null Annotations </h1>
 <p><code>NullPointerException</code> is one of the most common causes for failure of Java programs.
 In the simplest cases the compiler can directly warn you when it sees code like this:
 </p>
@@ -29,7 +29,7 @@ such that the compiler can warn you directly as you type.
 The down-side: the analysis can not "see" which values (null or non-null) are
 flowing between methods (as parameters and return values).    
 </p>
-<h2 id="interprocedural_null_analysis">Inter-procedural null analysis</h2>
+<h2 id="interprocedural_null_analysis">Inter-procedural Null Analysis</h2>
 <p>
 This is where null annotations come into play.
 By specifying a method parameter as <code>@NonNull</code> you can tell the compiler
@@ -71,7 +71,7 @@ For method return values the situation is symmetric:
 <li>Conversely the caller now enjoys the guarantee that dereferencing the 
 method result without checking is OK.
 </ol>
-<h2 id="available_annotations">Available annotations</h2>
+<h2 id="available_annotations">Available Annotations</h2>
 <p>
 The Eclipse Java compiler can be <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_analysis">configured</a> to use three distinct annotation types
 for its enhanced null analysis (which is disabled by default):
@@ -106,7 +106,7 @@ and type annotations (Java 8). Furthermore, some <a href="#cancel_default">detai
 3rd party annotation types (see <a href="task-using_null_type_annotations.htm#compatibility_semantics">here</a> for the Java 8 variant). 
 </p>
 
-<h2 id="buildpath_setup">Setup of the build path</h2>
+<h2 id="buildpath_setup">Setup of the Build Path</h2>
 <p>
 A JAR with the default null annotations is shipped with Eclipse in eclipse/plugins/org.eclipse.jdt.annotation_*.jar.
 This JAR needs to be on the build path at compile time but it is not necessary at run time (so you don't have to ship this to users of your compiled code).
@@ -135,7 +135,7 @@ Require-Bundle: ...,
 <p>
 See also the discussion in the corresponding section on <a href="task-using_null_type_annotations.htm#compatibility_configuration">compatibility</a>.
 </p>
-<h2 id="interpretation_of_null_annotations">Interpretation of null annotations</h2>
+<h2 id="interpretation_of_null_annotations">Interpretation of Null Annotations</h2>
 <p>
 It should be clear now that null annotations add more information to your
 Java program (which can then be used by the compiler to give better warnings).
@@ -152,7 +152,7 @@ For (1) you may start using null annotations right away and without reading furt
 but you shouldn't expect more than a little hint every now and then.
 The other levels deserve some more explaining.
 </p>
-<h2 id="design_by_contract">Design by contract: API specification</h2>
+<h2 id="design_by_contract">Design by Contract: API Specification</h2>
 <p>
 At first sight using null annotations for API specifications in the vein of Design by Contract
 only means that the signatures of all API methods should be fully annotated,
@@ -178,7 +178,7 @@ Without an annotation the compiler will not give specific advice, but with a
 With these basics we can directly map all parameter annotations to <b>pre-conditions</b> and 
 interpret return annotations as <b>post-conditions</b> of the method.
 </p>
-<h3 id="override">Sub-typing and overriding</h3>
+<h3 id="override">Sub-typing and Overriding</h3>
 <p>
 In object-oriented programming the concept of Design by Contract needs to address one more dimension:
 <b>sub-typing</b> and overriding (in the sequel the term "override" will be used in the sense of the
@@ -221,7 +221,7 @@ It is possible that a method overrides two methods with different null contracts
 can be applicable at a method which is in conflict with an inherited null annotation.
 These cases are flagged as an error and the overriding method must use an explicit null annotation to resolve the conflict.
 </p>
-<h4>Relaxing a <code>@NonNull</code> parameter to unspecified?</h4> 
+<h4>Relaxing a <code>@NonNull</code> Parameter to Unspecified?</h4> 
 <p>
 If <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#inherit_null_annotations">inheritance of null annotations</a>
 is <em>not</em> enabled, one particular situation is safe from a type theory point of view,
@@ -248,7 +248,7 @@ For this reasons the compiler provides an option
     the approach of null annotations.</li>
 </ul>
 
-<h3>Legacy super-types</h3>
+<h3>Legacy Super-types</h3>
 <p>
 The previous considerations add a difficulty when annotated code is written as a sub-type
 of a "legacy" (i.e., un-annotated) type (which may be from a 3rd party library, thus cannot be changed).
@@ -261,7 +261,7 @@ In this situation you will be forced to omit null annotations
 (<em>plans exist to support adding annotations to libraries after-the-fact, but no promise can be made yet,
 if and when such a feature will be available</em>).
 </p>
-<h3 id="cancel_default">Canceling a nullness default</h3>
+<h3 id="cancel_default">Canceling a Nullness Default</h3>
 <p>The situation will get tricky, if a sub-type of a "legacy" type resides in a package for which 
 <code>@NonNullByDefault</code> has been specified. Now a type with an un-annotated super-type
 would need to mark all parameters in overriding methods as <code>@Nullable</code>:
@@ -294,7 +294,7 @@ class MyClass extends LegacyClass {
 <p>Canceling a nullness default may not be possible when using annotation types other than
 <code>org.eclipse.jdt.annotation.NonNullByDefault</code> supplied by Eclipse,
 because other annotation types may not declare the boolean property that is used here.</p>
-<h3 id="fields">The case of fields</h3>
+<h3 id="fields">The Case of Fields</h3>
 <p>Null annotations work best when applied in <b>method signatures</b> (<b>local variables</b>
 typically don't even need these, but may also leverage null annotations for bridging between
 annotated code and "legacy" code).
@@ -329,7 +329,7 @@ is possible, the field's value should <em>never</em> be directly dereferenced,
 <em>always</em> a local variable should be used instead.
 Even if no concurrency is involved, the remaining issues pose a challenge to a
 complete analysis that is harder than what a compiler can typically handle.</p>
-<h4 id="syntactic_analysis">Flow analysis vs. syntactic analysis</h4>
+<h4 id="syntactic_analysis">Flow Analysis vs. Syntactic Analysis</h4>
 <p>Given the compiler cannot fully analyze the effects of aliasing, side effects and
 concurrency, <b>the Eclipse compiler does not perform any flow analysis for fields</b>
 (other than regarding their initialization). Since many developers will consider this
@@ -358,7 +358,7 @@ rewrite your code to closely follow the recognized pattern shown above, or, even
 use a local variable to leverage all the sophistication of flow analysis, which syntactic
 analysis will never attain.
 </p>
-<h3>Benefits of Design-by-Contract</h3>
+<h3>Benefits of Design-by-contract</h3>
 <p>
 Using null annotations in the style of Design-by-Contract as outlined above,
 helps to improve the <b>quality</b> of your Java code in several ways:
@@ -377,7 +377,7 @@ However, you should be aware that still some loopholes exist, where unspecified
 values flow into the analysis, preventing a complete statement whether NPEs can
 occur at runtime.
 </p>
-<h2 id="complete_specification">Complete specification using an extended type system</h2>
+<h2 id="complete_specification">Complete Specification Using an Extended Type System</h2>
 <p>
 The support for null annotations had been designed in a way that should be compatible to
 a future extension. 
@@ -386,7 +386,7 @@ which have been introduced in Java 8.
 JDT supports to leverage the new concept for 
 <a href="task-using_null_type_annotations.htm">null type annotations</a>.
 </p>
-<h2 id="compiler_messages_explained">Compiler messages explained</h2>
+<h2 id="compiler_messages_explained">Compiler Messages Explained</h2>
 <p>
 Semantic details of annotation based null analysis are presented here, by explaining the rules
 that the compiler checks and the messages it issues upon violation of a rule.
@@ -395,7 +395,7 @@ that the compiler checks and the messages it issues upon violation of a rule.
 On the corresponding <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm">preference page</a>
 the individual rules checked by the compiler are grouped under the following headings: 
 </p>
-<h3>Violation of null specification</h3>
+<h3>Violation of Null Specification</h3>
 <p>As specification violation we handle any situation where a null annotation
 makes a claim that is violated by the actual implementation. The typical situation results
 from specifying a value (local, argument, method return) as <code>@NonNull</code> whereas
@@ -422,7 +422,7 @@ it takes it for granted that null will not occur at runtime.
 It's the rules about specification violations which ensure that this reasoning is sound.
 Therefore it is strongly recommended to leave this kind of problem configured as <b>errors</b>.
 </p>
-<h3>Conflict between null annotations and null inference</h3>
+<h3>Conflict Between Null Annotations and Null Inference</h3>
 <p>
 Also this group of rules watches over the adherence to null specifications.
 However, here we deal with values that are not <em>declared</em> as <code>@Nullable</code>
@@ -482,7 +482,7 @@ into two separate ifs, one for each local variable, which is a very small price 
 gain that now the compiler can exactly see what happens and check your code accordingly.
 More discussion on this topic will follow <a href="#tips_analyzable">below</a>.
 </p>
-<h3>Unchecked conversion from non-annotated type to @NonNull type</h3>
+<h3>Unchecked Conversion From Non-annotated Type to @NonNull Type</h3>
 <p>
 This group of problems is based on the following analogy: in a program using Java 5 generics
 any calls to pre-Java-5 libraries may expose raw types, i.e., applications of a generic type
@@ -516,7 +516,7 @@ By adding a corresponding <code>SuppressWarnings("null")</code> to this declarat
 we acknowledge the inherent danger and accept the responsibility of having verified that
 the library actually behaves as desired.
 </p>
-<h2 id="tips_analyzable">Tips for making code better analyzable</h2>
+<h2 id="tips_analyzable">Tips for Making Code Better Analyzable</h2>
 <p>
 If flow analysis cannot see that a value is indeed not null, the simplest strategy is always
 to add a new scoped local variable annotated with <code>@NonNull</code>.
@@ -542,7 +542,7 @@ that this assertion will always hold at runtime.
 If that is not what you want, annotated local variables will still help to narrow down where and why the analysis
 sees a potential for null flowing into a certain location.
 </p>
-<h2 id="tips_adoption">Tips for adopting null annotations</h2>
+<h2 id="tips_adoption">Tips for Adopting Null Annotations</h2>
 <p>
 At the time of releasing the JDT version 3.8.0, collecting advice for adopting null annotations is
 still work in progress. For that reason this information is currently maintained in the 
