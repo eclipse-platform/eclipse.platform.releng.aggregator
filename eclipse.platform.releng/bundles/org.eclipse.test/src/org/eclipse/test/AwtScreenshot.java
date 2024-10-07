@@ -74,60 +74,63 @@ public class AwtScreenshot {
         }
     }
 
-    public static void dumpAwtScreenshot(String screenshotFile) {
-        try {
-            URL location = AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
-            String cp = location.toURI().getPath();
-            if (new File(cp).isDirectory() && !cp.endsWith(File.separatorChar + "bin" + File.separatorChar)) {
-                cp += "bin" + File.separatorChar;
-            }
-            String javaHome = System.getProperty("java.home");
-            String javaExe = javaHome + File.separatorChar + "bin" + File.separatorChar + "java";
-            if (File.separatorChar == '\\') {
-                javaExe += ".exe"; // assume it's Windows
-            }
-            String[] args = new String[] { javaExe, "-cp", cp, AwtScreenshot.class.getName(), screenshotFile };
-            // System.out.println("Start process: " + Arrays.asList(args));
-            ProcessBuilder processBuilder = new ProcessBuilder(args);
-            if ("Mac OS X".equals(System.getProperty("os.name"))) {
-                processBuilder.environment().put("AWT_TOOLKIT", "CToolkit");
-            }
-            Process process = processBuilder.start();
+	public static void dumpAwtScreenshot(String screenshotFile) {
+		try {
+			URL location = AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
+			String cp = location.toURI().getPath();
+			if (new File(cp).isDirectory() && !cp.endsWith(File.separatorChar + "bin" + File.separatorChar)
+					&& new File(cp + "bin" + File.separatorChar).isDirectory()) {
+				cp += "bin" + File.separatorChar;
+			}
+			String javaHome = System.getProperty("java.home");
+			String javaExe = javaHome + File.separatorChar + "bin" + File.separatorChar + "java";
+			if (File.separatorChar == '\\') {
+				javaExe += ".exe"; // assume it's Windows
+			}
+			String[] args = new String[] { javaExe, "-cp", cp, AwtScreenshot.class.getName(), screenshotFile };
+			// System.out.println("Start process: " + Arrays.asList(args));
+			ProcessBuilder processBuilder = new ProcessBuilder(args);
+			if ("Mac OS X".equals(System.getProperty("os.name"))) {
+				processBuilder.environment().put("AWT_TOOLKIT", "CToolkit");
+			}
+			Process process = processBuilder.start();
 
-            @SuppressWarnings("resource") // never close process streams
-            InputStream errorStream = process.getErrorStream();
+			@SuppressWarnings("resource") // never close process streams
+			InputStream errorStream = process.getErrorStream();
 
-            @SuppressWarnings("resource") // never close process streams
-            InputStream inputStream = process.getInputStream();
+			@SuppressWarnings("resource") // never close process streams
+			InputStream inputStream = process.getInputStream();
 
-            new StreamForwarder(errorStream, System.out).start();
-            new StreamForwarder(inputStream, System.out).start();
-            long end = System.currentTimeMillis() + TIMEOUT_SECONDS * 1000;
-            boolean done = false;
-            do {
-                try {
-                    process.exitValue();
-                    done = true;
-                } catch (IllegalThreadStateException e) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e1) {
-                        // continue
-                    }
-                }
-            } while (!done && System.currentTimeMillis() < end);
+			new StreamForwarder(errorStream, System.out).start();
+			new StreamForwarder(inputStream, System.out).start();
+			long end = System.currentTimeMillis() + TIMEOUT_SECONDS * 1000;
+			boolean done = false;
+			do {
+				try {
+					process.exitValue();
+					done = true;
+				} catch (IllegalThreadStateException e) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e1) {
+						// continue
+					}
+				}
+			} while (!done && System.currentTimeMillis() < end);
 
-            if (done) {
-                int exitCode = process.exitValue();
-                if (exitCode != 0) {
-                    System.out.println("AwtScreenshot VM finished with exit code " + exitCode + ".");
-                }
-            } else {
-                process.destroy();
-                System.out.println("Killed AwtScreenshot VM after " + TIMEOUT_SECONDS + " seconds.");
-            }
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-        }
-    }
+			if (done) {
+				int exitCode = process.exitValue();
+				if (exitCode != 0) {
+					new RuntimeException("AwtScreenshot VM finished with exit code " + exitCode + ".")
+							.printStackTrace();
+				}
+			} else {
+				process.destroy();
+				new RuntimeException("Killed AwtScreenshot VM after " + TIMEOUT_SECONDS + " seconds.")
+						.printStackTrace();
+			}
+		} catch (URISyntaxException | IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
