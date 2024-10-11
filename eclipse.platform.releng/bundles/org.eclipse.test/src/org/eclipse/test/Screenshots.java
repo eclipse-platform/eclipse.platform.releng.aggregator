@@ -14,9 +14,12 @@
 package org.eclipse.test;
 
 import java.io.File;
+import java.util.function.Supplier;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.widgets.Widget;
 import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 /**
  * Helper class to take screenshots from running tests.
@@ -25,18 +28,53 @@ import org.junit.rules.TestWatcher;
  */
 public final class Screenshots {
 
-	private static final class ScreenshotOnFailure extends TestWatcher {
+	public static class ScreenshotOnFailure extends TestWatcher {
+		private final Supplier<Widget> shell;
+
+		public ScreenshotOnFailure(Supplier<Widget> shell) {
+			this.shell = shell;
+		}
+
 		@Override
 		protected void failed(Throwable e, org.junit.runner.Description description) {
 			String screenshot = Screenshots.takeScreenshot(description.getTestClass(), description.getMethodName());
 			e.addSuppressed((new Throwable("Screenshot written to " + screenshot)));
 			super.failed(e, description);
 		}
+
+		@Override
+		protected void finished(Description description) {
+			dispose();
+			super.finished(description);
+		}
+
+		public void dispose() {
+			Widget widget = shell.get();
+			if (widget != null && !widget.isDisposed()) {
+				widget.dispose();
+			}
+		}
 	}
 
-	/** @since 3.21 **/
-	public static TestWatcher onFailure() {
-		return new ScreenshotOnFailure();
+	/**
+	 * @since 3.6.200
+	 * @deprecated Screenshots must be taken before dispose. Use
+	 *             {@link #onFailure(Supplier)} instead
+	 **/
+	@Deprecated
+	public static ScreenshotOnFailure onFailure() {
+		return onFailure(null);
+	}
+
+	/**
+	 * Takes a screenshot on failure before dispose. The supplied shell must not be
+	 * disposed in {@code @org.junit.After} but is disposed by the returned Rule
+	 * even if no failure occurred.
+	 * 
+	 * @since 3.6.200
+	 **/
+	public static ScreenshotOnFailure onFailure(Supplier<Widget> shell) {
+		return new ScreenshotOnFailure(shell);
 	}
     /**
      * Takes a screenshot and writes the path to the generated image file to System.out.
