@@ -146,6 +146,14 @@ public class TracingSuite extends Suite {
 
         @Override
         public void fireTestFailure(Failure failure) {
+			if (fTracingOptions.logTestStart()) {
+				if (failure.getException() != null) {
+					Date start = new Date();
+					String message = format(start, failure.getDescription());
+					System.out.println(message + " failed:");
+					failure.getException().printStackTrace(System.out);
+				}
+			}
             fNotifier.fireTestFailure(failure);
         }
 
@@ -261,7 +269,7 @@ public class TracingSuite extends Suite {
 
     private static String format(Date time, Description description) {
         String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(time);
-        String message = "[" + now + "] " + description.getClassName() + "#" + description.getMethodName() + "()";
+		String message = "[" + now + "] " + description.getClassName() + "." + description.getMethodName() + "()";
         return message;
     }
 
