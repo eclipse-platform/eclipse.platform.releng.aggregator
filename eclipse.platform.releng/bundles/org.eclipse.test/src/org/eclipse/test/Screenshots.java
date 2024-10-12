@@ -62,7 +62,7 @@ public final class Screenshots {
 	 *             {@link #onFailure(Supplier)} instead
 	 **/
 	@Deprecated
-	public static ScreenshotOnFailure onFailure() {
+	public static TestWatcher onFailure() {
 		return onFailure(null);
 	}
 
