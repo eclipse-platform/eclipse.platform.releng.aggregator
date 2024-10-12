@@ -57,7 +57,9 @@ jobs:
           # Relevant files were staged, i.e. some version were changed
           
           # Read 'releaseNumberSDK' property as stream version
-          streamVersion=$(mvn help:evaluate -Dexpression=releaseNumberSDK --quiet -DforceStdout)
+          mvn help:evaluate -Dexpression=releaseNumberSDK --quiet '-Doutput=releaseNumberSDK-value.txt'
+          streamVersion=$(<releaseNumberSDK-value.txt)
+          rm -f releaseNumberSDK-value.txt
           
           git config --global user.email '${{ inputs.botMail }}'
           git config --global user.name '${{ inputs.botName }}'
