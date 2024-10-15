@@ -49,6 +49,9 @@ public final class Screenshots {
 		}
 
 		public void dispose() {
+			if (shell == null) {
+				return;
+			}
 			Widget widget = shell.get();
 			if (widget != null && !widget.isDisposed()) {
 				widget.dispose();
