@@ -54,24 +54,24 @@ pipeline {
 						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java21arm64}")]
 				  }
 			  }
-			  stage('Ubuntu 24.04 Java22'){
+			  stage('Ubuntu 24.04 Java23'){
 				  steps {
-						build job: 'SmokeTests/ep-smoke-test-ubuntu', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+						build job: 'SmokeTests/ep-smoke-test-ubuntu', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java23x64}")]
 				  }
 			  }
-			  stage('Opensuse Leap Java22'){
+			  stage('Opensuse Leap Java23'){
 				  steps {
-						build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+						build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java23x64}")]
 				  }
 			  }
-			  stage('Centos 9.x Java22'){
+			  stage('Centos 9.x Java23'){
 				  steps {
-						build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22x64}")]
+						build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java23x64}")]
 				  }
 			  }
-			  stage('Centos 8 arm64 Java22'){
+			  stage('Centos 8 arm64 Java23'){
 				  steps {
-						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java22arm64}")]
+						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: "${params.java23arm64}")]
 				  }
 			  }
           }
