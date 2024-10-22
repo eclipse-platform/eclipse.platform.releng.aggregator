@@ -31,7 +31,7 @@ pipeline {
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = 'C:\\\\PROGRA~1\\\\ECLIPS~1\\\\jdk-17.0.5.8-hotspot\\\\'
+              JAVA_HOME = 'C:\\\\PROGRA~1\\\\ECLIPS~1\\\\jdk-17.0.12.7-hotspot\\\\'
               PATH = "%JAVA_HOME%\\\\bin;C:\\\\ProgramData\\\\Boxstarter;C:\\\\Program Files\\\\IcedTeaWeb\\\\WebStart\\\\bin;C:\\\\Users\\\\jenkins_vnc\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps;${env.PATH}"
           }
           steps {
