@@ -4,7 +4,8 @@ def JAVA_VERSIONS = ['17', '21', '23']
 
 for (STREAM in STREAMS){
 for (JAVA_VERSION in JAVA_VERSIONS){
-  def (MAJOR, MINOR) = STREAM.split('\\.')
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
   pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java' + JAVA_VERSION){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')

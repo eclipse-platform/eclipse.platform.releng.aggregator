@@ -2,7 +2,8 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 def STREAMS = config.Streams
 
 for (STREAM in STREAMS){
-  def (MAJOR, MINOR) = STREAM.split('\\.')
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
   pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-win32-java17'){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
