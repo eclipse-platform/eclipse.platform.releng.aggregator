@@ -8,7 +8,8 @@ def ARCHS_JAVA_HOME = ['aarch64': '/usr/local/openjdk-17/Contents/Home', 'x86_64
 
 for (STREAM in STREAMS){
 for (ARCH in ARCHS){
-  def (MAJOR, MINOR) = STREAM.split('\\.')
+  def MAJOR = STREAM.split('\\.')[0]
+  def MINOR = STREAM.split('\\.')[1]
 
   pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-' + ARCHS_JOB_NAME[ARCH] + '-java17'){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
