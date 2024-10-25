@@ -64,7 +64,7 @@ spec:
   - name: "jnlp"
     resources:
       limits:
-        memory: "8192Mi"
+        memory: "10Gi"
         cpu: "4000m"
       requests:
         memory: "6144Mi"
