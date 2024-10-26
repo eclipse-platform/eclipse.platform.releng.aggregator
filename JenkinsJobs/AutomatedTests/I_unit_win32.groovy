@@ -5,7 +5,7 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-win32-java17'){
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-win32-x86_64-java17'){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
     parameters { // Define parameters in job configuration to make them available from the very first build onwards
       stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')

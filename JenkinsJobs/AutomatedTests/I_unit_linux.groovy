@@ -7,7 +7,7 @@ for (JAVA_VERSION in JAVA_VERSIONS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-cen64-gtk3-java' + JAVA_VERSION){
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-linux-x86_64-java' + JAVA_VERSION){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
     parameters { // Define parameters in job configuration to make them available from the very first build onwards
       stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
@@ -25,7 +25,7 @@ pipeline {
   }
   agent {
     kubernetes {
-      label 'centos-unitpod&&JAVA_VERSION&&'
+      label 'centos-unitpod''' + JAVA_VERSION + ''''
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -85,7 +85,7 @@ spec:
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk&&JAVA_VERSION&&-latest')
+              JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk''' + JAVA_VERSION + '''-latest')
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
           }
@@ -155,7 +155,7 @@ spec:
       }
   }
 }
-        '''.replace('&&JAVA_VERSION&&', JAVA_VERSION))
+        ''')
       }
     }
   }
