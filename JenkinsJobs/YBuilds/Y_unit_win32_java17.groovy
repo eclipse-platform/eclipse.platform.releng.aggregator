@@ -18,8 +18,6 @@ for (STREAM in STREAMS){
 	
 	  label('qa6xd-win11')
 	
-	  authenticationToken('windows2012tests')
-	 
 	  wrappers { //adds pre/post actions
 	    timestamps()
 	    timeout {

@@ -17,8 +17,6 @@ job('SmokeTests/ep-smoke-test-ppcle'){
 
   jdk('openjdk-jdk17-latest')
 
-  authenticationToken('windows2012tests')
- 
   wrappers { //adds pre/post actions
     timestamps()
     preBuildCleanup()

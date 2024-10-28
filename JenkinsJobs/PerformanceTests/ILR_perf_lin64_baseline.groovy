@@ -49,8 +49,6 @@ jdtuirefactoring
 
     label('performance')
 
-    authenticationToken('windows2012tests')
-
     wrappers { //adds pre/post actions
       timestamps()
       preBuildCleanup()
