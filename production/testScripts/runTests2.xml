@@ -842,9 +842,14 @@
       name="VMSource"
       value="VM used for tests, is same that invoked Ant: '${java.home}/bin/java' (that is, 'jvm' not specified by caller)." />
     <echo message="VMSource: ${VMSource}" />
-    <property
-      name="jvm"
-      value="${java.home}/bin/java" />
+    <condition
+      property="jvm"
+      value="${java.home}\bin\java.exe"
+      else="${java.home}/bin/java">
+        <equals
+          arg1="${testPlatform}"
+          arg2="windows" />
+    </condition>
 
     <echo message="full output from 'java -version' of ${jvm} is" />
     <exec

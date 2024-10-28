@@ -69,8 +69,6 @@ set /p launcher-jar=<launcher-jar-name.txt
 echo "list all environment variables in effect as tests start"
 set
 
-rem -Dtimeout=300000 "%ANT_OPTS%"
-
 IF NOT EXIST %jvm% (
 ECHO ERROR: jvm not defined or does not exist: %jvm%
 exit 1
@@ -80,11 +78,11 @@ REM -XshowSettings is supported on windows VMs but ... not every where. So where
 REM causes VM to not start at all. Can be handy for diagnostics. (without running ant <echoproperties/>
 
 IF DEFINED extdirproperty (
-%jvm%  %extdirproperty%  -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch%  -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
+%jvm% %ANT_OPTS% %extdirproperty% -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
 GOTO END
 )
 
-%jvm%  -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch%  -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
+%jvm% %ANT_OPTS% -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
 
 :END
 

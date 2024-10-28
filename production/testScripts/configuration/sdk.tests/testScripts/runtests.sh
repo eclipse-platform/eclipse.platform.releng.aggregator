@@ -217,12 +217,11 @@ echo "platformParmString: ${platformParmString}"
 echo "platformString: ${platformString}"
 echo "testedPlatform: ${testedPlatform}"
 
-# -Dtimeout=300000 "${ANT_OPTS}"
 if [[ -n "${extdirproperty}" ]]
 then
   echo "running with extdir defined"
-  $jvm ${ANT_OPTS} "${extdirproperty}" ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests 2>&1 | tee $consolelogs
+  $jvm ${ANT_OPTS} "${extdirproperty}" ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
 else
   echo "running without extdir defined"
-  $jvm ${ANT_OPTS} ${platformArgString}  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests 2>&1 | tee $consolelogs
+  $jvm ${ANT_OPTS} ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
 fi
