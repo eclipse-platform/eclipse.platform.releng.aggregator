@@ -610,18 +610,6 @@
     <echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
 
 
-  	<!--
-    <script language="javascript"><![CDATA[
-      var buildId = project.getProperty("buildId");
-      var pattern = new RegExp(/^([IMXYNPSRU])(\d{8})-(\d{4})$/);
-
-      var sArray = pattern.exec(buildId);
-      // sArray 0 is "whole match"
-      project.setProperty("buildType", sArray[1]);
-      project.setProperty("buildIdTimestamp",sArray[2]+sArray[3]);
-      ]]>
-    </script>
-    -->
     <fail unless="buildType" />
   </target>
   <target
@@ -697,24 +685,6 @@
       </filterchain>
     </loadresource>
     <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
-<!--
-    <script language="javascript"><![CDATA[
-      var eclipseStream = project.getProperty("eclipseStream");
-      var pattern = new RegExp(/^\s*(\d+)\.(\d+)(\.(\d+))?\s*$/);
-
-      var sArray = pattern.exec(eclipseStream);
-      // sArray[0] is "whole match"
-
-      project.setProperty("eclipseStreamMajor", sArray[1]);
-      project.setProperty("eclipseStreamMinor", sArray[2]);
-      // currently don't
-      // set eclipseStreamService since not used,
-      // but it is optional in this context, so if needed, need to check
-      // length of array and assign "0" if not provided.
-      // project.setProperty("eclipseStreamService", sArray[3]);
-      ]]>
-    </script>
--->
     <fail
       unless="eclipseStreamMajor"
       message="eclipseStreamMajor not defined or computable" />
@@ -1132,219 +1102,12 @@
       name="VMSource"
       value="VM used for tests, is same that invoked Ant: '${java.home}/bin/java' (that is, 'jvm' not specified by caller)." />
     <echo message="VMSource: $VMSource" />
-    <!--
-      Remember, we don't want J2SE-X.0 set at all, if there is nothing
-      that can run tests that require that level.
-    -->
 
+    <echo message="full output from 'java -version' of ${java.home}/bin/java is" />
     <exec
-      executable="${java.home}/bin/java"
-      outputproperty="javaversion">
+      executable="${java.home}/bin/java">
       <arg value="-version" />
     </exec>
-    <echo message="full output from 'java -version' of ${java.home}/bin/java is " />
-    <echo message="${javaversion}" />
-
-    <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment -->
-    <condition
-      property="J2SE-5.0"
-      value="${java.home}/bin/java">
-        <or>
-          <matches
-            string="${java.version}"
-            pattern="^1\.[5678].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[9].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[10].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[11].*$" />
-            <matches
-              string="${java.version}"
-              pattern="^[12].*$" />
-            <matches
-              string="${java.version}"
-              pattern="^[13].*$" />
-        </or>
-    </condition>
-    <condition
-      property="J2SE-6.0"
-      value="${java.home}/bin/java">
-        <or>
-          <matches
-            string="${java.version}"
-            pattern="^1\.[678].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[9].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[10].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[11].*$" />
-            <matches
-              string="${java.version}"
-              pattern="^[12].*$" />
-            <matches
-              string="${java.version}"
-              pattern="^[13].*$" />
-    </or>
-    </condition>
-    <condition
-      property="J2SE-7.0"
-      value="${java.home}/bin/java">
-        <or>
-          <matches
-            string="${java.version}"
-            pattern="^1\.[78].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[9].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[10].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[11].*$" />
-            <matches
-              string="${java.version}"
-              pattern="^[12].*$" />
-            <matches
-              string="${java.version}"
-              pattern="^[13].*$" />
-        </or>
-    </condition>
-    <condition
-      property="J2SE-8.0"
-      value="${java.home}/bin/java">
-        <or>
-          <matches
-            string="${java.version}"
-            pattern="^1\.[8].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[9].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[10].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[11].*$" />
-	        <matches
-	          string="${java.version}"
-	          pattern="^[12].*$" />
-	        <matches
-	          string="${java.version}"
-	          pattern="^[13].*$" />
-        </or>
-    </condition>
-    <condition
-          property="J2SE-9.0"
-          value="${java.home}/bin/java">
-        <or>
-          <matches
-            string="${java.version}"
-            pattern="^[9].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[10].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[11].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[12].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[13].*$" />
-        </or>
-    </condition>
-    <condition
-		property="J2SE-10.0"
-		value="${java.home}/bin/java">
-        <or>
-          <matches
-            string="${java.version}"
-            pattern="^[10].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[11].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[12].*$" />
-          <matches
-            string="${java.version}"
-            pattern="^[13].*$" />
-        </or>
-	</condition>
-    <condition
-		property="J2SE-11.0"
-		value="${java.home}/bin/java">
-    	<or>
-			<matches
-			  string="${java.version}"
-			  pattern="^[11].*$" />
-	        <matches
-	          string="${java.version}"
-	          pattern="^[12].*$" />
-	        <matches
-	          string="${java.version}"
-	          pattern="^[13].*$" />
-    	</or>
-	</condition>
-    <condition
-		property="J2SE-12.0"
-		value="${java.home}/bin/java">
-    	<or>
-	        <matches
-	          string="${java.version}"
-	          pattern="^[12].*$" />
-	        <matches
-	          string="${java.version}"
-	          pattern="^[13].*$" />
-    	</or>
-	</condition>
-    <condition
-		property="J2SE-13.0"
-		value="${java.home}/bin/java">
-	        <matches
-	          string="${java.version}"
-	          pattern="^[13].*$" />
-	</condition>
-    <echo
-      level="info"
-      message="DEBUG: values from setJVMProperties" />
-    <echo
-      level="info"
-      message="J2SE-13.0:  ${J2SE-13.0}" />
-    <echo
-      level="info"
-      message="J2SE-12.0:  ${J2SE-12.0}" />
-    <echo
-      level="info"
-      message="J2SE-11.0:  ${J2SE-11.0}" />
-     <echo
-       level="info"
-       message="J2SE-10.0:  ${J2SE-10.0}" />
-     <echo
-       level="info"
-       message="J2SE-9.0:  ${J2SE-9.0}" />
-    <echo
-      level="info"
-      message="J2SE-8.0:  ${J2SE-8.0}" />
-    <echo
-      level="info"
-      message="J2SE-7.0:  ${J2SE-7.0}" />
-    <echo
-      level="info"
-      message="J2SE-6.0:  ${J2SE-6.0}" />
-    <echo
-      level="info"
-      message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
 
   <target
@@ -1355,199 +1118,11 @@
       name="VMSource"
       value="VM used for tests, specified by caller: 'jvm'=${jvm}" />
     <echo message="VMSource: $VMSource" />
-    <!--
-      Remember, we don't want J2SE-X.0 set at all, if there is nothing
-      that can run tests that require that level.
-    -->
+    <echo message="full output from 'java -version' of ${jvm} is" />
     <exec
-      executable="${jvm}"
-      outputproperty="javaversion">
+      executable="${jvm}">
       <arg value="-version" />
     </exec>
-    <echo message="full output from 'java -version' of ${jvm} is " />
-    <echo message="${javaversion}" />
-
-    <condition
-      property="J2SE-13.0"
-      value="${jvm}">
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[13].*"' />
-    </condition>
-    <condition
-      property="J2SE-12.0"
-      value="${jvm}">
-    	<or>
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[12].*"' />
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[13].*"' />
-    	</or>
-    </condition>
-    <condition
-      property="J2SE-11.0"
-      value="${jvm}">
-    	<or>
-	    	<matches
-		        string="${javaversion}"
-		        pattern='.*version "[11].*"' />
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[12].*"' />
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[13].*"' />
-    	</or>
-    </condition>
-    <condition
-      property="J2SE-10.0"
-      value="${jvm}">
-      <or>
-        <matches
-          string="${javaversion}"
-          pattern='^java version "[10].*"' />
-        <matches
-          string="${javaversion}"
-          pattern='.*version "[11].*"' />
-		<matches
-			string="${javaversion}"
-			pattern='.*version "[12].*"' />
-		<matches
-			string="${javaversion}"
-			pattern='.*version "[13].*"' />
-      </or>
-    </condition>
-    <condition
-      property="J2SE-9.0"
-      value="${jvm}">
-        <or>
-          <matches
-            string="${javaversion}"
-            pattern='^java version "[9].*"' />
-          <matches
-        	string="${javaversion}"
-        	pattern='^java version "[10].*"' />
-          <matches
-              string="${javaversion}"
-              pattern='.*version "[11].*"' />
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[12].*"' />
-    		<matches
-				string="${javaversion}"
-				pattern='.*version "[13].*"' />
-        </or>
-    </condition>
-    <condition
-      property="J2SE-8.0"
-      value="${jvm}">
-        <or>
-          <matches
-            string="${javaversion}"
-            pattern='^java version "1\.[8].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='^java version "[9].*"' />
-          <matches
-          	string="${javaversion}"
-          	pattern='^java version "[10].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='.*version "[11].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[12].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[13].*"' />
-        </or>
-    </condition>
-    <condition
-      property="J2SE-7.0"
-      value="${jvm}">
-        <or>
-          <matches
-            string="${javaversion}"
-            pattern='^java version "1\.[78].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='^java version "[9].*"' />
-          <matches
-          	string="${javaversion}"
-          	pattern='^java version "[10].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='.*version "[11].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[12].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[13].*"' />
-        </or>
-    </condition>
-    <condition
-      property="J2SE-6.0"
-      value="${jvm}">
-        <or>
-          <matches
-            string="${javaversion}"
-            pattern='^java version "1\.[678].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='^java version "[9].*"' />
-          <matches
-          	string="${javaversion}"
-          	pattern='^java version "[10].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='.*version "[11].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[12].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[13].*"' />
-        </or>
-    </condition>
-    <condition
-      property="J2SE-5.0"
-      value="${jvm}">
-        <or>
-          <matches
-            string="${javaversion}"
-            pattern='^java version "1\.[5678].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='^java version "[9].*"' />
-          <matches
-          	string="${javaversion}"
-          	pattern='^java version "[10].*"' />
-          <matches
-            string="${javaversion}"
-            pattern='.*version "[11].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[12].*"' />
-    		<matches
-    			string="${javaversion}"
-    			pattern='.*version "[13].*"' />
-        </or>
-    </condition>
-    <echo
-      level="info"
-      message="DEBUG: values from setJVMfromUserSpecified" />
-  	<echo message="J2SE-13.0:  ${J2SE-13.0}" />
-  	<echo message="J2SE-12.0:  ${J2SE-12.0}" />
-  	<echo message="J2SE-11.0:  ${J2SE-11.0}" />
-    <echo message="J2SE-10.0:  ${J2SE-10.0}" />
-    <echo message="J2SE-9.0:  ${J2SE-9.0}" />
-    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
-    <echo message="J2SE-7.0:  ${J2SE-7.0}" />
-    <echo message="J2SE-6.0:  ${J2SE-6.0}" />
-    <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
 
   <macrodef name="runTests">
@@ -2017,46 +1592,18 @@
   <target
     name="jdtcorecompiler"
     depends="init, setJVMProperties">
-    <condition
-      property="jvm"
-      value="${J2SE-5.0}">
-      <isset property="J2SE-5.0" />
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.core.tests.compiler" />
   </target>
 
   <target
     name="jdtapt"
     depends="init,setJVMProperties">
-    <property
-      name="jvm"
-      value="${J2SE-5.0}" />
-    <!--only run test if J2SE-5.0 property set -->
-    <condition property="skip.test">
-      <not>
-        <isset property="J2SE-5.0" />
-      </not>
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.apt.tests" />
   </target>
 
   <target
     name="jdtaptpluggable"
     depends="init, setJVMProperties">
-    <property
-      name="jvm"
-      value="${J2SE-6.0}" />
-    <!--only run test if J2SE-5.0 property set -->
-    <condition property="skip.test">
-      <not>
-        <or>
-          <isset property="J2SE-6.0" />
-          <isset property="J2SE-7.0" />
-          <isset property="J2SE-8.0" />
-          <isset property="J2SE-9.0" />
-        </or>
-      </not>
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.apt.pluggable.tests" />
   </target>
 
@@ -2064,63 +1611,24 @@
   <target
     name="jdtcorebuilder"
     depends="init, setJVMProperties">
-    <!--Run with 1.5 vm if it is available -->
-    <condition
-      property="jvm"
-      value="${J2SE-5.0}">
-      <isset property="J2SE-5.0" />
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.core.tests.builder" />
   </target>
 
   <target
     name="jdtcompilertool"
     depends="init, setJVMProperties">
-    <property
-      name="jvm"
-      value="${J2SE-6.0}" />
-    <!--only run test if J2SE-6.0 property or greater is set -->
-    <condition property="skip.test">
-      <not>
-        <or>
-          <isset property="J2SE-6.0" />
-          <isset property="J2SE-7.0" />
-          <isset property="J2SE-8.0" />
-          <isset property="J2SE-9.0" />
-        </or>
-      </not>
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.compiler.tool.tests" />
   </target>
 
   <target
     name="jdtcompilerapt"
     depends="init, setJVMProperties">
-    <property
-      name="jvm"
-      value="${J2SE-6.0}" />
-    <!--only run test if J2SE-6.0 property or greater is set -->
-    <condition property="skip.test">
-      <not>
-        <or>
-          <isset property="J2SE-6.0" />
-          <isset property="J2SE-7.0" />
-          <isset property="J2SE-8.0" />
-          <isset property="J2SE-9.0" />
-        </or>
-      </not>
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.compiler.apt.tests" />
   </target>
 
   <target
     name="jdtcoremodel"
     depends="init, setJVMProperties">
-    <condition
-      property="jvm"
-      value="${J2SE-5.0}">
-      <isset property="J2SE-5.0" />
-    </condition>
     <runTests testPlugin="org.eclipse.jdt.core.tests.model" />
   </target>
 
@@ -2817,34 +2325,6 @@
     </loadresource>
     <echo message="javaMajorVersion: ${javaMajorVersion}"/>
 
-  	<!--
-    <script language="javascript">
-
-        technically does not have to be wrapped in "CDATA" (Ant and BSD define
-        it that way, but if not done, other tools (such as XML Editor) can
-        break the code by changing the formatting.
-
-    <![CDATA[
-      var javaVersion = project.getProperty("java.version");
-      var pattern = new
-      RegExp(/^1\.([456789]).*$/);
-
-      var sArray = pattern.exec(javaVersion);
-      // sArray 0 is "whole match"
-      // so will always exist (even
-      // if no match?)
-      // for safety from programing
-      // errors, we'll check that there is
-      // something in '1'.
-      var length = sArray.length;
-      if (length > 1) {
-      project.setProperty("javaMajorVersion", sArray[1]);
-      } else {
-      project.setProperty("javaMajorVersion", "0");
-      }
-      ]]>
-    </script>
-      -->
   </target>
 
   <macrodef name="printProperty">
