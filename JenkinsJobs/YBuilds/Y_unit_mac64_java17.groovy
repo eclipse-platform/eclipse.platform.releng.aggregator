@@ -23,8 +23,6 @@ for (STREAM in STREAMS){
 	
 	  jdk('openjdk-jdk11-latest')
 	
-	  authenticationToken('windows2012tests')
-	 
 	  wrappers { //adds pre/post actions
 	
 	    timestamps()

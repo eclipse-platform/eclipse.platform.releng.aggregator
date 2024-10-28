@@ -11,8 +11,6 @@ for (STREAM in STREAMS){
       stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
     }
 
-    authenticationToken('windows2012tests')
- 
     definition {
       cps {
         sandbox()
