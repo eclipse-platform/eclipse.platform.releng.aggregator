@@ -21,6 +21,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
@@ -47,6 +49,7 @@ public class AwtScreenshot {
             System.out.println("AWT screenshot saved to: " + file.getAbsolutePath());
         } catch (HeadlessException | AWTException | IOException e) {
             e.printStackTrace();
+			System.exit(3);
         }
     }
 
@@ -88,49 +91,39 @@ public class AwtScreenshot {
 				javaExe += ".exe"; // assume it's Windows
 			}
 			String[] args = new String[] { javaExe, "-cp", cp, AwtScreenshot.class.getName(), screenshotFile };
-			// System.out.println("Start process: " + Arrays.asList(args));
 			ProcessBuilder processBuilder = new ProcessBuilder(args);
 			if ("Mac OS X".equals(System.getProperty("os.name"))) {
 				processBuilder.environment().put("AWT_TOOLKIT", "CToolkit");
 			}
 			Process process = processBuilder.start();
-
-			@SuppressWarnings("resource") // never close process streams
-			InputStream errorStream = process.getErrorStream();
-
-			@SuppressWarnings("resource") // never close process streams
-			InputStream inputStream = process.getInputStream();
-
-			new StreamForwarder(errorStream, System.out).start();
-			new StreamForwarder(inputStream, System.out).start();
-			long end = System.currentTimeMillis() + TIMEOUT_SECONDS * 1000;
-			boolean done = false;
-			do {
+			try (InputStream errorStream = process.getErrorStream();
+					InputStream inputStream = process.getInputStream()) {
+				ByteArrayOutputStream errorOut = new ByteArrayOutputStream();
+				new StreamForwarder(errorStream, new PrintStream(errorOut)).start();
+				new StreamForwarder(inputStream, System.out).start();
 				try {
-					process.exitValue();
-					done = true;
-				} catch (IllegalThreadStateException e) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e1) {
-						// continue
-					}
+					process.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+				} catch (InterruptedException ie) {
+					ie.printStackTrace();
 				}
-			} while (!done && System.currentTimeMillis() < end);
 
-			if (done) {
-				int exitCode = process.exitValue();
-				if (exitCode != 0) {
-					new RuntimeException("AwtScreenshot VM finished with exit code " + exitCode + ".")
-							.printStackTrace();
+				if (!process.isAlive()) {
+					int exitCode = process.exitValue();
+					if (exitCode != 0) {
+						throw new RuntimeException(
+								"AwtScreenshot VM finished with exit code " + exitCode + ":\n" + errorOut.toString());
+					}
+					if (errorOut.size() > 0) {
+						System.out.println(errorOut.toString());
+					}
+				} else {
+					process.destroy();
+					throw new RuntimeException(
+							"Killed AwtScreenshot VM after " + TIMEOUT_SECONDS + " seconds:\n" + errorOut.toString());
 				}
-			} else {
-				process.destroy();
-				new RuntimeException("Killed AwtScreenshot VM after " + TIMEOUT_SECONDS + " seconds.")
-						.printStackTrace();
 			}
 		} catch (URISyntaxException | IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 }
