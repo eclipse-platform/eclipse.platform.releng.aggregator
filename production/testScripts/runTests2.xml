@@ -352,9 +352,7 @@
       printProperty from anywhere, but seems best to centralize the function. -->
     <antcall target="printProductionProperties" />
 
-    <!-- The PHP properties are useful to display (directly or indirectly)
-      on "test results" page (such as "testPlatform" headings). -->
-    <antcall target="printMainPropertiesAsPHP" />
+  	<echo message="DEBUG ant.version: ${ant.version}" />
 
     <!-- following are all required by "runtests" ... used to be part of it,
       but wanted these variables to print out, even if merely testing scripts,
@@ -419,7 +417,7 @@
     <printProperty property="testExecutable" />
     <printProperty property="testScript" />
     <printProperty property="jvm" />
-    <printProperty property="javaversionEscaped" />
+    <printProperty property="java.version" />
     <printProperty property="javaMajorVersion" />
     <printProperty property="testedPlatform" />
     <printProperty property="testedPlatformConfig" />
@@ -860,148 +858,6 @@
     </exec>
   </target>
 
-  <!-- Prints properties in "PHP form" to use on test results summary, to
-    be sure accurate and meaningful. -->
-  <target
-    name="printMainPropertiesAsPHP"
-    depends="init"
-    unless="printedMainPHPProperties">
-
-    <property
-      name="EOL"
-      value="${line.separator}" />
-
-
-    <property
-      name="phpPropertyFile"
-      value="${junit-report-output}/testProperties.php" />
-
-    <!-- on first write to php file, don't append -->
-    <echo
-      message="&lt;?php${EOL}"
-      append="false"
-      file="${phpPropertyFile}" />
-    <escapeProperty property="ant.version" />
-    <printPHPProperty
-      phpvar="ANT_VERSION"
-      value="ant.versionEscaped" />
-    <printPHPProperty
-      phpvar="ANT_JAVA_VERSION"
-      value="ant.java.versionEscaped" />
-    <printPHPProperty
-      phpvar="INVOKED_JAVA_VERSION"
-      value="javaversionEscaped" />
-    <!-- Note: there might be times, the java.runtime.version at this point
-      in time, may not be quite right ... such as if invoked with some other VM
-      with the intent of using 'jvm' on "eclipse" command line ... which we currently
-      do not do. -->
-    <printPHPProperty
-      phpvar="JAVA_VERSION"
-      value="java.version" />
-    <printPHPProperty
-      phpvar="JAVA_MAJOR_VERSION"
-      value="javaMajorVersion" />
-    <printPHPProperty
-      phpvar="JAVA_RUNTIME_VERSION"
-      value="java.runtime.version" />
-    <printPHPProperty
-      phpvar="JAVA_VM_INFO"
-      value="java.vm.info" />
-    <printPHPProperty
-      phpvar="JAVA_SPECIFICATION_VERSION"
-      value="java.specification.version" />
-    <printPHPProperty
-      phpvar="JAVA_VENDOR"
-      value="java.vendor" />
-    <printPHPProperty
-      phpvar="OSGI_OS"
-      value="osgi.os" />
-    <printPHPProperty
-      phpvar="OSGI_WS"
-      value="osgi.ws" />
-    <printPHPProperty
-      phpvar="OSGI_ARCH"
-      value="osgi.arch" />
-    <!-- NODE_NAME will be empty string, if on master -->
-    <condition
-      property="hudsonSlave"
-      value="master">
-      <or>
-        <not>
-          <isset property="env.NODE_NAME" />
-        </not>
-        <equals
-          arg1="${env.NODE_NAME}"
-          arg2="" />
-        <equals
-          arg1="${env.NODE_NAME}"
-          arg2=" " />
-      </or>
-    </condition>
-    <!-- if not set above, we'll set to the non blank NODE_NAME -->
-    <property
-      name="hudsonSlave"
-      value="${env.NODE_NAME}" />
-
-    <printPHPProperty
-      phpvar="HUDSON_NODE_NAME"
-      value="hudsonSlave" />
-    <!-- I believe all (common) platforms have env variable for HOSTNAME. If
-      not, user might want to set/export to be meaningful. (Surprisingly, it doesn't
-      seem obvious that Hudson makes this available in its process environment). -->
-    <printPHPProperty
-      phpvar="HOSTNAME"
-      value="env.HOSTNAME" />
-    <printPHPProperty
-      phpvar="HUDSON_JOB_NAME"
-      value="env.JOB_BASE_NAME" />
-    <printPHPProperty
-      phpvar="HUDSON_BUILD_NUMBER"
-      value="env.BUILD_NUMBER" />
-    <printPHPProperty
-      phpvar="HUDSON_BUILD_URL"
-      value="env.BUILD_URL" />
-    <!-- With HUDSON_URL and WORKSPACE_PATH should be able to figure out URL
-      to WORKSPACE, though only temporarily available (until next job is ran). -->
-    <printPHPProperty
-      phpvar="HUDSON_URL"
-      value="env.HUDSON_URL" />
-    <printPHPProperty
-      phpvar="HUDSON_WORKSPACE"
-      value="env.WORKSPACE" />
-    <printPHPProperty
-      phpvar="TESTED_RUNTIME_ID"
-      value="buildIdToUse" />
-    <printPHPProperty
-      phpvar="TEST_TARGET"
-      value="test.target" />
-    <printPHPProperty
-      phpvar="ECLIPSE_PERF_SAMPLES_OUT"
-      value="eclipse.perf.samples.out" />
-    <printPHPProperty
-      phpvar="ECLIPSE_PERF_DBLOC"
-      value="eclipse.perf.dbloc" />
-
-    <printPHPProperty
-      phpvar="ECLIPSE_PERF_CONFIG"
-      value="eclipse.perf.config" />
-    <printPHPProperty
-      phpvar="ECLIPSE_PERF_ASSERTAGAINST"
-      value="eclipse.perf.assertAgainst" />
-
-    <!-- We end with an empty line, but it is recommended to not end included
-      PHP files with "end PHP" marker. -->
-    <echo
-      message="${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-
-    <!-- set property so we only print these variables once -->
-    <property
-      name="printedMainPHPProperties"
-      value="true" />
-
-  </target>
   <target
     name="setJVMProperties"
     depends="initPlatformSpecificProperties,setJVMfromUserSpecified"
@@ -1010,51 +866,40 @@
       name="VMSource"
       value="VM used for tests, is same that invoked Ant: '${java.home}/bin/java' (that is, 'jvm' not specified by caller)." />
     <echo message="VMSource: ${VMSource}" />
-    <!-- Remember, we don't want J2SE-X.0 set at all, if there is nothing that
-      can run tests that require that level. -->
     <property
       name="jvm"
       value="${java.home}/bin/java" />
 
+    <echo message="full output from 'java -version' of ${jvm} is" />
     <exec
-      executable="${jvm}"
-      outputproperty="javaversion">
+      executable="${jvm}">
       <arg line="-version" />
     </exec>
-    <echo message="full output from 'java -version' of ${jvm} is " />
-    <echo message="${javaversion}" />
-    <escapeProperty property="javaversion" />
   </target>
   <target
     name="setJVMfromUserSpecified"
-    if="jvm"
-    unless="javaversionEscaped">
+    if="jvm">
 
     <property
       name="VMSource"
       value="VM used for tests, specified by caller: 'jvm'=${jvm}" />
     <echo message="VMSource: ${VMSource}" />
-    <!-- Remember, we don't want J2SE-X.0 set at all, if there is nothing that
-      can run tests that require that level. -->
+    <echo message="full output from 'java -version' of ${jvm} is" />
     <exec
-      executable="${jvm}"
-      outputproperty="javaversion">
+      executable="${jvm}">
       <arg line="-version" />
     </exec>
-    <echo message="full output from 'java -version' of ${jvm} is " />
-    <echo message="${javaversion}" />
-    <escapeProperty property="javaversion" />
   </target>
+
   <!-- function to centralize how we get (that is, set) the value of 'javaMajorVersion'.
     (expected to be integer, such as 5,6,7,8,9, or will be "0" if the version
     could not be determined, for some reason. -->
-
   <target
     name="setJavaMajorVersion"
     depends="setJVMProperties"
     unless="javaMajorVersion">
 
-    <echo message="javaversion in setJavaMajorVersion: ${javaversionEscaped}" />
+    <echo message="javaversion in setJavaMajorVersion: ${java.version}" />
   	
   	<loadresource property="javaMajorVersion">
       <string value="${java.version}"/>
@@ -1067,39 +912,4 @@
     <echo message="javaMajorVersion: ${javaMajorVersion}"/>
   </target>
 
-  <macrodef name="printPHPProperty">
-    <attribute name="phpvar" />
-    <attribute name="value" />
-    <sequential>
-      <!-- DEBUG <echo message="@{value}" /> -->
-      <condition
-        property="printValue@{value}"
-        value="${@{value}}"
-        else="NotSet">
-        <isset property="@{value}" />
-      </condition>
-      <echo
-        message="$@{phpvar}=&quot;${printValue@{value}}&quot;;${EOL}"
-        file="${phpPropertyFile}"
-        append="true" />
-    </sequential>
-  </macrodef>
-  <macrodef name="escapeProperty">
-    <!-- the use of propertyfile and local require at least Ant 1.8 -->
-    <attribute name="property" />
-    <sequential>
-      <echo message="DEBUG @{property}: ${@{property}}" />
-      <loadresource property="@{property}Escaped">
-        <propertyresource name="@{property}" />
-        <filterchain>
-          <tokenfilter>
-            <filetokenizer />
-            <replacestring
-              from='"'
-              to='\"' />
-          </tokenfilter>
-        </filterchain>
-      </loadresource>
-    </sequential>
-  </macrodef>
 </project>
