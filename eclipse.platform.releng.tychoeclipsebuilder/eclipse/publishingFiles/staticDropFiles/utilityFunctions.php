@@ -276,7 +276,7 @@ be split as
  */
 function computeDisplayConfig($config) {
   $lastUnderscore = strrpos ($config, "_");
-  $firstUnderscore = strpos ($config, "_"); 
+  $firstUnderscore = strpos ($config, "_", strpos($config, "x86_64") + 6);
   $platformLength=$lastUnderscore - $firstUnderscore - 1;
   //echo "<br/>DEBUG: config: $config firstUnderscore: $firstUnderscore  lastUnderscore: $lastUnderscore  lastMinusFirst: $platformLength"
   $jobname = substr($config,0,$firstUnderscore);
@@ -293,7 +293,7 @@ function computeDisplayConfig($config) {
    which is 'jobname' on Hudson.
  */
 function jobname($config) {
-  $firstUnderscore = strpos ($config, "_");
+  $firstUnderscore = strpos ($config, "_", strpos($config, "x86_64") + 6);
   $jobname = substr($config,0,$firstUnderscore);
   return $jobname;
 }
