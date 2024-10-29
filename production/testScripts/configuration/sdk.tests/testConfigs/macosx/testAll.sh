@@ -10,21 +10,33 @@ ulimit -c unlimited
 
 source localBuildProperties.shsource 2>/dev/null
 
+if [[ -z "${propertyFile}" ]]; then
+  echo "expect 'propertyFile' as environment variable for production runs"
+  exit 1
+fi
+if [[ -z "${jvm}" ]]; then
+  echo "expect 'jvm' as environment variable for production runs"
+  exit 1
+fi
+if [[ -z "${testedPlatform}" ]]; then
+  echo "expect 'testedPlatform' as environment variable for production runs"
+  exit 1
+fi
+
 echo "PWD: $PWD"
-jvm=${jvm:-/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/jre/bin/java}
 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
 # this value in localBuildProperties.shsource.
 eclipseArch=${eclipseArch:-x86_64}
 
-# vm.properties is used by default on production machines, but will
-# need to override on local setups to specify appropriate vm (usually same as jvm).
-# see bug 388269
-propertyFile=${propertyFile:-vm.properties}
-
-echo "jvm in testAll: ${jvm}"
-echo "extdir in testAll (if any): ${extdir}"
-echo "propertyFile in testAll: ${propertyFile}"
+echo "=== properties in testAll.sh"
+echo "    DOWNLOAD_HOST: ${DOWNLOAD_HOST}"
+echo "    jvm in testAll: ${jvm}"
+echo "    extdir in testAll (if any): ${extdir}"
+echo "    propertyFile in testAll: ${propertyFile}"
+echo "    buildId in testAll: ${buildId}"
+echo "    testedPlatform: ${testedPlatform}"
+echo "    ANT_OPTS: ${ANT_OPTS}"
 echo "contents of propertyFile:"
 cat ${propertyFile}
 
