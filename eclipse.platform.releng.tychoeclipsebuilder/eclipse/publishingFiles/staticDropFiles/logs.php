@@ -66,13 +66,9 @@ listLogs("compilelogs");
 
 <?php
 listLogs("$testresults/consolelogs");
-listDetailedLogs($testresults,$expectedTestConfigs[0]);
-listDetailedLogs($testresults,$expectedTestConfigs[1]);
-listDetailedLogs($testresults,$expectedTestConfigs[2]);
-listDetailedLogs($testresults,$expectedTestConfigs[3]);
-listDetailedLogs($testresults,$expectedTestConfigs[4]);
-listDetailedLogs($testresults,$expectedTestConfigs[5]);
-listDetailedLogs($testresults,$expectedTestConfigs[6]);
+foreach ($expectedTestConfigs as $expectedTestConfig) {
+	listDetailedLogs($testresults, $expectedTestConfig);
+}
 ?>
 
 </div>
