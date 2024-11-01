@@ -215,92 +215,6 @@
 
   </target>
 
-  <!--use an stable version of the director so that instability in the current build doesn't cause all the tests to fail -->
-  <target
-    name="initPlatformArhiveName"
-    unless="platformArchive">
-    <echo message="os.arch ${os.arch}" />
-
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.dmg">
-      <and>
-        <os family="mac" />
-        <os family="unix" />
-        <or>
-          <os arch="x86_64" />
-          <os arch="amd64" />
-        </or>
-      </and>
-    </condition>
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa-aarch64.dmg">
-      <and>
-        <os family="mac" />
-        <os family="unix" />
-        <or>
-          <os arch="aarch64" />
-          <os arch="arm64" />
-          <os arch="arm64e" />
-        </or>
-      </and>
-    </condition>
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa.dmg">
-      <and>
-        <os family="mac" />
-        <os family="unix" />
-        <!-- should not need, as long as x86_64 rules (above) comes first
-          <os arch="i386" />
-        -->
-      </and>
-    </condition>
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip">
-      <and>
-        <os family="windows" />
-        <or>
-          <os arch="x86_64" />
-          <os arch="amd64" />
-        </or>
-      </and>
-    </condition>
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz">
-      <and>
-        <os family="unix" />
-        <or>
-          <os arch="x86_64" />
-          <os arch="amd64" />
-        </or>
-      </and>
-    </condition>
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-linux-gtk-ppc64le.tar.gz">
-      <and>
-        <os family="unix" />
-        <os arch="ppc64le" />
-      </and>
-    </condition>
-    <condition
-      property="platformArchive"
-      value="eclipse-platform-${previousReleaseVersion}-linux-gtk-aarch64.tar.gz">
-      <and>
-        <os family="unix" />
-        <os arch="aarch64" />
-      </and>
-    </condition>
-
-    <fail
-      unless="platformArchive"
-      message="platformArchive is not defined. Check that conditions cover os arch ${os.arch}. May be VM dependent.)" />
-
-  </target>
   <target name="setupPlatform">
     <condition
       property="platformTarget"
@@ -878,7 +792,7 @@
 
   <target
     name="init"
-    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive"
+    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initOSes, initPlatformAndRuntimeArchiveName"
     unless="testingIsInitialized">
 
     <property environment="env" />
@@ -990,7 +904,7 @@
     job.
   -->
   <target
-    name="setRuntimeArchive"
+    name="initPlatformAndRuntimeArchiveName"
     unless="runtimeArchive">
 
     <condition
@@ -999,11 +913,11 @@
       else="${buildId}">
       <istrue value="${baselinePerf}" />
     </condition>
-    <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
+    <echo message="Set runtimeArchive and platformArchive for os: ${os}, ws: ${ws}, arch: ${arch}" />
     <echo message="build id of runtimeArchive ${buildIdToUse}" />
     <condition
-      property="runtimeArchive"
-      value="eclipse-SDK-${buildIdToUse}-win32-x86_64.zip">
+      property="osArchiveNameSuffix"
+      value="win32-${arch}.zip">
       <and>
         <equals
           arg1="${os}"
@@ -1011,14 +925,11 @@
         <equals
           arg1="${ws}"
           arg2="win32" />
-        <equals
-          arg1="${arch}"
-          arg2="x86_64" />
       </and>
     </condition>
     <condition
-      property="runtimeArchive"
-      value="eclipse-SDK-${buildIdToUse}-linux-gtk-x86_64.tar.gz">
+      property="osArchiveNameSuffix"
+      value="linux-gtk-${arch}.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -1026,44 +937,11 @@
         <equals
           arg1="${ws}"
           arg2="gtk" />
-        <equals
-          arg1="${arch}"
-          arg2="x86_64" />
       </and>
     </condition>
     <condition
-      property="runtimeArchive"
-      value="eclipse-SDK-${buildIdToUse}-linux-gtk-ppc64le.tar.gz">
-      <and>
-        <equals
-          arg1="${os}"
-          arg2="linux" />
-        <equals
-          arg1="${ws}"
-          arg2="gtk" />
-        <equals
-          arg1="${arch}"
-          arg2="ppc64le" />
-      </and>
-    </condition>
-    <condition
-      property="runtimeArchive"
-      value="eclipse-SDK-${buildIdToUse}-linux-gtk-aarch64.tar.gz">
-      <and>
-        <equals
-          arg1="${os}"
-          arg2="linux" />
-        <equals
-          arg1="${ws}"
-          arg2="gtk" />
-        <equals
-          arg1="${arch}"
-          arg2="aarch64" />
-      </and>
-    </condition>
-    <condition
-      property="runtimeArchive"
-      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.dmg">
+      property="osArchiveNameSuffix"
+      value="macosx-cocoa-${arch}.dmg">
       <and>
         <equals
           arg1="${os}"
@@ -1071,26 +949,19 @@
         <equals
           arg1="${ws}"
           arg2="cocoa" />
-        <equals
-          arg1="${arch}"
-          arg2="x86_64" />
       </and>
     </condition>
-    <condition
-      property="runtimeArchive"
-      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa-aarch64.dmg">
-      <and>
-        <equals
-          arg1="${os}"
-          arg2="macosx" />
-        <equals
-          arg1="${ws}"
-          arg2="cocoa" />
-        <equals
-          arg1="${arch}"
-          arg2="aarch64" />
-      </and>
-    </condition>
+    <fail
+      unless="osArchiveNameSuffix"
+      message="osArchiveNameSuffix is not defined. Check that conditions cover os and ws: ${os} ${ws}" />
+    <property
+      name="runtimeArchive"
+      value="eclipse-SDK-${buildIdToUse}-${osArchiveNameSuffix}"/>
+    <!--use an stable version of the director so that instability in the current build doesn't cause all the tests to fail -->
+    <property
+      name="platformArchive"
+      value="eclipse-platform-${previousReleaseVersion}-${osArchiveNameSuffix}"
+    />
     <echo message="runtimeArchive ${runtimeArchive} !!! " />
   </target>
 
