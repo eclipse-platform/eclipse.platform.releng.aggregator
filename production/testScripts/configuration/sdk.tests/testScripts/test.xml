@@ -46,7 +46,7 @@
         arg1="${testPlugin}"
         arg2="org.eclipse.pde.build.tests" />
     </condition>
-    	
+
     <condition
       property="extraIU"
       value="org.eclipse.unittest.ui">
@@ -332,7 +332,7 @@
     <delete
       verbose="false"
       dir="${platformLocation}/eclipse" />
-	    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
+    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
     <exec
       dir="${platformLocation}"
       executable="hdiutil">
@@ -502,7 +502,7 @@
     <fail
       message="buildId variable had unexpected format. Should be of the form  [IMXYNPSRU] 8 digits '-' 4 digits, but was ${buildId}"
       unless="buildIdOK" />
-  	
+
     <loadresource property="buildType">
       <string value="${buildId}"/>
       <filterchain>
@@ -579,7 +579,7 @@
     <fail
       message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
       unless="streamOK" />
-  	
+
     <loadresource property="eclipseStreamMajor">
       <string value="${eclipseStream}"/>
       <filterchain>
@@ -792,8 +792,19 @@
 
   <target
     name="init"
-    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initOSes, initPlatformAndRuntimeArchiveName"
+    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initPlatformAndRuntimeArchiveName"
     unless="testingIsInitialized">
+
+    <!-- Make sure the values of os, ws, and arch are set. -->
+    <fail
+      unless="os"
+      message="Value of 'os' not specified. 'os' must be set as system property" />
+    <fail
+      unless="ws"
+      message="Value of 'ws' not specified. 'ws' must be set as system property" />
+    <fail
+      unless="arch"
+      message="Value of 'arch' not specified. 'arch' must be set as system property" />
 
     <property environment="env" />
 
@@ -1290,10 +1301,10 @@
       basedir="${results}/xml"
       destdir="${results}/html"
       filenameparameter="filename">
-    	<factory>
-    		<feature name="http://www.oracle.com/xml/jaxp/properties/enableExtensionFunctions" value="true"/>
-		</factory>
-	</xslt>
+      <factory>
+        <feature name="http://www.oracle.com/xml/jaxp/properties/enableExtensionFunctions" value="true"/>
+      </factory>
+    </xslt>
   </target>
 
   <target
@@ -1325,7 +1336,7 @@
     depends="init">
     <runTests testPlugin="org.eclipse.equinox.common.tests" />
   </target>
-	
+
   <target
     name="equinoxds"
     depends="init">
@@ -1343,7 +1354,7 @@
     depends="init">
     <runTests testPlugin="org.eclipse.core.tests.resources" />
   </target>
-	
+
   <target
     name="coreresourcessaveparticipant"
     depends="init">
@@ -1404,7 +1415,7 @@
     <runTests testPlugin="org.eclipse.jface.tests.databinding" />
   </target>
 
-	<target
+  <target
     name="jface"
     depends="init">
     <runTests testPlugin="org.eclipse.jface.tests" />
@@ -1441,7 +1452,7 @@
     depends="init">
     <runTests testPlugin="org.eclipse.tips.tests" />
   </target>
-	
+
   <target
     name="ua"
     depends="init">
@@ -1538,7 +1549,7 @@
     depends="init">
     <runTests testPlugin="org.eclipse.pde.ui.tests" />
   </target>
-	
+
   <target
 	name="pdeua"
 	depends="init">
@@ -1997,7 +2008,7 @@
 
 	  </target>
 
-	<!--
+  <!--
     admittedly, not quite all of 'platform', but for
     now serves dual purpose of a "short set" of tests, that area
     relatively quick, and relatively reliable on build.eclipse.org hardware
@@ -2035,7 +2046,7 @@
     <antcall target="uiforms" />
     <antcall target="equinoxp2ui" />
     <antcall target="equinoxsecurity" />
-  	<antcall target="equinoxpreferences" />
+    <antcall target="equinoxpreferences" />
     <antcall target="search" />
     <antcall target="debug" />
     <antcall target="e4Core" />
@@ -2094,9 +2105,9 @@
     <antcall target="pdeds" />
     <antcall target="pdejunit" />
     <antcall target="pdeui" />
-  	<antcall target="pdeua" />
+    <antcall target="pdeua" />
     <antcall target="pdeuitemplates" />
-  	<antcall target="pdegenericeditor" />
+    <antcall target="pdegenericeditor" />
   </target>
 
   <target
@@ -2115,7 +2126,7 @@
     <antcall target="jdtcoreperf" />
     <antcall target="jdtcorebuilder" />
     <antcall target="jdtdebug" />
-    <antcall target="jdtjdi" />  	
+    <antcall target="jdtjdi" />
     <antcall target="jdtapt" />
     <antcall target="jdtaptpluggable" />
   </target>
@@ -2213,95 +2224,6 @@
     <echoproperties regex="^os\..*$" />
   </target>
 
-  <!--
-    initOSes is to make sure the values of os, ws, and arch are set.
-    We need them to match their "osgi.X" counterparts, so users often will
-    need to simply set the "osgi.X" values as system variables, since
-    our ability to guess varies from OS to OS and VM to VM ... but, if
-    the osgi.X values are not set, we'll take a guess based on common systems.
-  -->
-  <target name="initOSes">
-
-    <condition
-      property="guessed.os"
-      value="win32">
-      <os family="windows" />
-    </condition>
-    <condition
-      property="guessed.os"
-      value="macosx">
-      <os family="mac" />
-    </condition>
-    <condition
-      property="guessed.os"
-      value="linux">
-      <or>
-        <os family="unix" />
-      </or>
-    </condition>
-    <!-- if not set above, set to a ridiculous value, that will at least give hint of action to take once it causes a failure -->
-    <property
-      name="guessed.os"
-      value="Value of 'os' could not be determined. 'os' must be set as system variable." />
-
-    <condition
-      property="os"
-      value="${os}"
-      else="${guessed.os}">
-      <isset property="os" />
-    </condition>
-
-    <!-- luckily, these days, not multiple windowing systems, for common OSes -->
-    <condition
-      property="guessed.ws"
-      value="win32">
-      <os family="windows" />
-    </condition>
-    <condition
-      property="guessed.ws"
-      value="cocoa">
-      <os family="mac" />
-    </condition>
-    <condition
-      property="guessed.ws"
-      value="gtk">
-      <os family="unix" />
-    </condition>
-    <!-- if not set above, set to a ridiculous value, that will at least give hint of action to take once it causes a failure -->
-    <property
-      name="guessed.ws"
-      value="Value of 'ws' could not be determined. 'ws' must be set as system variable." />
-
-    <condition
-      property="ws"
-      value="${ws}"
-      else="${guessed.ws}">
-      <isset property="ws" />
-    </condition>
-
-    <!-- not sure this will work well? -->
-    <condition
-      property="guessed.arch"
-      value="x86_64">
-      <or>
-        <os arch="x86_64" />
-        <os arch="amd64" />
-      </or>
-    </condition>
-    <!-- if not set above, set to a ridiculous value, that will at least give hint of action to take once it causes a failure -->
-    <property
-      name="guessed.ws"
-      value="Value of 'arch' could not be determined. 'arch' must be set as system variable." />
-
-    <condition
-      property="arch"
-      value="${arch}"
-      else="${guessed.arch}">
-      <isset property="arch" />
-    </condition>
-
-  </target>
-
   <target
     name="test-getJavaMajorVersion"
     depends="debug-allJavaProperties,debug-allOSProperties,getJavaMajorVersion">
@@ -2317,16 +2239,8 @@
   </target>
 
   <target
-    name="test-initOSes"
-    depends="debug-allProperties,initOSes">
-    <printProperty property="os" />
-    <printProperty property="ws" />
-    <printProperty property="arch" />
-  </target>
-
-  <target
     name="test-all"
-    depends="init,test-initOSes,test-getJavaMajorVersion">
+    depends="init,debug-allProperties,test-getJavaMajorVersion">
   </target>
 
   <target
