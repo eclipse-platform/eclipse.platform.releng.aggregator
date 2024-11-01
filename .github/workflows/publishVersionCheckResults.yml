@@ -64,6 +64,10 @@ jobs:
     - name: Apply and push version increment
       id: git-commit
       if: steps.search-patch.outputs.result
+      env:
+        REPOSITORY_NAME: ${{ github.event.workflow_run.head_repository.full_name }}
+        BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        BOT_PA_TOKEN: ${{ secrets.githubBotPAT }}
       run: |
           set -x
           # Set initial placeholder name/mail and read it from the patch later
@@ -85,10 +89,8 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
           
           git push \
-            "https://oauth2:${BOT_PA_TOKEN}@github.com/${{ github.event.workflow_run.head_repository.full_name }}.git" \
-            'HEAD:refs/heads/${{ github.event.workflow_run.head_branch }}'
-      env:
-        BOT_PA_TOKEN: ${{ secrets.githubBotPAT }}
+            "https://oauth2:${BOT_PA_TOKEN}@github.com/${REPOSITORY_NAME}.git" \
+            "HEAD:refs/heads/${BRANCH_NAME}"
 
     - name: Find existing information comment
       uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
@@ -103,11 +105,13 @@ jobs:
     - name: Add or update information comment
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       if: always()
+      env:
+        FILELIST: ${{ steps.git-commit.outputs.file-list }}
       with:
         github-token: ${{ secrets.githubBotPAT }}
         script: |
           const fs = require('fs')
-          const fileList = `${{ steps.git-commit.outputs.file-list }}`
+          const fileList = process.env.FILELIST
           if (fileList) { // if list is empty, no versions were changed
             const commentBody = `
           ${{ env.COMMENT_FIRST_LINE }}.
