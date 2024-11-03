@@ -60,7 +60,7 @@ set ANT_HOME
 set PATH
 
 env 1>envVars.txt 2>&1
-ant -diagnostics 1>antDiagnostics.txt 2>&1
+cmd /c ant -diagnostics 1>antDiagnostics.txt 2>&1
 java -XshowSettings -version 1>javaSettings.txt 2>&1
 
 ant -f getEBuilder.xml -DbuildId=%buildId%  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH% ^
