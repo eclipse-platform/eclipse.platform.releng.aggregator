@@ -816,15 +816,18 @@
     depends="init"
     unless="env.TESTING_TEST_XML">
 
+    <mkdir dir="results/consolelogs"/>
+    <chmod file="${testScript}" perm="755"/>
     <!--run the tests -->
     <exec
       dir="${executionDir}"
-      executable="${testExecutable}">
+      executable="${testExecutable}"
+      output="results/consolelogs/${testedPlatform}_consolelog.txt">
       <arg line="${executionArguments}" />
+      <arg line="-os ${osgi.os} -ws ${osgi.ws} -arch ${osgi.arch}"/>
+      <arg value="-vm"/><arg path="${jvm}"/>
+      <arg value="-properties"/><arg path="${WORKSPACE}/production.properties"/>
       <arg value="${testSuite}" />
-      <env
-        key="propertyFile"
-        file="${WORKSPACE}/production.properties" />
       <env
         key="jvm"
         file="${jvm}" />

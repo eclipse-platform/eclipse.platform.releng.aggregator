@@ -38,7 +38,6 @@ pipeline {
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
               ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
-              eclipseArch = \'''' + ARCH + ''''
           }
           steps {
               cleanWs() // workspace not cleaned by default
@@ -75,7 +74,7 @@ java -XshowSettings -version 1>javaSettings.txt 2>&1
 
 ant -f getEBuilder.xml -DbuildId=${buildId} -DeclipseStream=${STREAM} -DEBUILDER_HASH=${EBUILDER_HASH} \\
   -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
-  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=${eclipseArch} \\
+  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=''' + ARCH + ''' \\
   -DtestSuite=all
 # For smaller test-suites see: https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/be721e33c916b03c342e7b6f334220c6124946f8/production/testScripts/configuration/sdk.tests/testScripts/test.xml#L1893-L1903
               \'\'\'
