@@ -48,14 +48,11 @@ if x%1==x-arch set arch=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-noclean set installmode=noclean&& shift && goto processcmdlineargs
 if x%1==x-properties set properties=-propertyfile %2 && shift && shift && goto processcmdlineargs
 if x%1==x-vm set jvm=%2 && shift && shift && goto processcmdlineargs
-if x%1==x-extdirprop SET extdirproperty="-Djava.ext.dirs=%2" && shift && shift && goto processcmdlineargs
-
 
 
 set tests=%tests% %1 && shift && goto processcmdlineargs
 
 echo Specified test targets (if any): %tests%
-echo Specified extdirs (if any): %extdirprop%
 
 :run
 REM ***************************************************************************
@@ -76,11 +73,6 @@ exit 1
 
 REM -XshowSettings is supported on windows VMs but ... not every where. So where not supported
 REM causes VM to not start at all. Can be handy for diagnostics. (without running ant <echoproperties/>
-
-IF DEFINED extdirproperty (
-%jvm% %ANT_OPTS% %extdirproperty% -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
-GOTO END
-)
 
 %jvm% %ANT_OPTS% -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
 

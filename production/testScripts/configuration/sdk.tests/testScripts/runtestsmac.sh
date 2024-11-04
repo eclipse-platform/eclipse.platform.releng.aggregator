@@ -36,9 +36,6 @@ installmode="clean"
 # name of a property file to pass to Ant
 properties=
 
-# ext dir customization. Be sure "blank", if not defined explicitly on command line
-extdirproperty=
-
 # message printed to console
 usage="usage: $0 -os <osType> -ws <windowingSystemType> -arch <architecture> [-noclean] [<test target>][-properties <path>]"
 
@@ -59,8 +56,6 @@ do
       installmode="noclean";;
     -properties)
       properties="-propertyfile ${2}";shift;;
-    -extdirprop)
-      extdirproperty="-Djava.ext.dirs=${2}";shift;;
     -vm)
       jvm="${2}"; shift;;
     *)
@@ -70,8 +65,6 @@ do
 done
 
 echo "Specified test targets (if any): ${tests}"
-
-echo "Specified ext dir (if any): ${extdirproperty}"
 
 # for *nix systems, os, ws and arch values must be specified
 if [ "x$os" = "x" ]
@@ -131,11 +124,5 @@ fi
 
 echo "properties: $properties"
 
-if [[ ! -z "${extdirproperty}" ]]
-then
-  $jvm ${ANT_OPTS} "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
-else
-  $jvm ${ANT_OPTS} -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
-fi
-
+$jvm ${ANT_OPTS} -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
 
