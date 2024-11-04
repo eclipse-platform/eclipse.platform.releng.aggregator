@@ -32,7 +32,6 @@ eclipseArch=${eclipseArch:-x86_64}
 echo "=== properties in testAll.sh"
 echo "    DOWNLOAD_HOST: ${DOWNLOAD_HOST}"
 echo "    jvm in testAll: ${jvm}"
-echo "    extdir in testAll (if any): ${extdir}"
 echo "    propertyFile in testAll: ${propertyFile}"
 echo "    buildId in testAll: ${buildId}"
 echo "    testedPlatform: ${testedPlatform}"
@@ -44,9 +43,4 @@ cat ${propertyFile}
 /bin/chmod 755 runtestsmac.sh
 /bin/mkdir -p results/consolelogs
 
-if [[ -n "${extdir}" ]]
-then
-  ./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -extdirprop "${extdir}" -vm "${jvm}" -properties ${propertyFile} $* > results/consolelogs/${testedPlatform}_consolelog.txt
-else
-  ./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -vm "${jvm}" -properties ${propertyFile} $* > results/consolelogs/${testedPlatform}_consolelog.txt
-fi
+./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -vm "${jvm}" -properties ${propertyFile} $* > results/consolelogs/${testedPlatform}_consolelog.txt

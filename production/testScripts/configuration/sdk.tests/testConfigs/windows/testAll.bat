@@ -30,7 +30,6 @@ IF NOT DEFINED eclipseArch SET eclipseArch=x86_64
 ECHO === properties in testAll.bat
 ECHO     DOWNLOAD_HOST: %DOWNLOAD_HOST%
 ECHO     jvm in testAll: %jvm%
-ECHO     extdir in testAll (if any): %extdir%
 ECHO     propertyFile in testAll: %propertyFile%
 ECHO     buildId in testAll: %buildId%
 ECHO     testedPlatform: %testedPlatform%
@@ -39,11 +38,6 @@ ECHO     ANT_OPTS: %ANT_OPTS%
 mkdir results\consolelogs
 
 set consolelogs=results\consolelogs\%testedPlatform%_consolelog.txt
-
-IF DEFINED extdir (
-runtests.bat -extdirprop "%extdir%" -os win32 -ws win32 -arch %eclipseArch% -vm "%jvm%" -properties %propertyFile% %* > %consolelogs%
-GOTO END
-)
 
 runtests.bat -os win32 -ws win32 -arch %eclipseArch% -vm "%jvm%" -properties %propertyFile% %* > %consolelogs%
 

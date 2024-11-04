@@ -78,9 +78,6 @@ installmode="clean"
 # name of a property file to pass to Ant
 properties=
 
-# ext dir customization. Be sure "blank", if not defined explicitly on command line
-extdirproperty=
-
 # message printed to console
 usage="usage: $0 -os <osType> -ws <windowingSystemType> -arch <architecture> [-noclean] [<test target>][-properties <path>]"
 
@@ -101,8 +98,6 @@ do
       installmode="noclean";;
     -properties)
       properties="-propertyfile ${2}";shift;;
-    -extdirprop)
-      extdirproperty="-Djava.ext.dirs=${2}";shift;;
     -vm)
       jvm="${2}"; shift;;
     *)
@@ -112,8 +107,6 @@ do
 done
 
 echo "Specified test targets (if any): ${tests}"
-
-echo "Specified ext dir (if any): ${extdirproperty}"
 
 # for *nix systems, os, ws and arch values must be specified
 if [[ -z "${os}" || -z "${ws}" || -z "${arch}" ]]
@@ -208,8 +201,6 @@ echo
 
 
 mkdir -p results/consolelogs
-echo "extdirprop in runtest.sh: ${extdirprop}"
-echo "extdirproperty in runtest.sh: ${extdirproperty}"
 echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
 echo "DOWNLOAD_HOST: $DOWNLOAD_HOST"
 echo "platformArgString: ${platformArgString}"
@@ -217,11 +208,4 @@ echo "platformParmString: ${platformParmString}"
 echo "platformString: ${platformString}"
 echo "testedPlatform: ${testedPlatform}"
 
-if [[ -n "${extdirproperty}" ]]
-then
-  echo "running with extdir defined"
-  $jvm ${ANT_OPTS} "${extdirproperty}" ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
-else
-  echo "running without extdir defined"
-  $jvm ${ANT_OPTS} ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
-fi
+$jvm ${ANT_OPTS} ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
