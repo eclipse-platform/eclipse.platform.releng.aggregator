@@ -24,61 +24,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr:'5'))
   }
   agent {
-    kubernetes {
-      label 'centos-unitpod''' + JAVA_VERSION + ''''
-      defaultContainer 'custom'
-      yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: "jnlp"
-    resources:
-      limits:
-        memory: "2048Mi"
-        cpu: "2000m"
-      requests:
-        memory: "512Mi"
-        cpu: "1000m"
-  - name: "custom"
-    image: "eclipse/platformreleng-centos-gtk3-metacity:8"
-    imagePullPolicy: "Always"
-    resources:
-      limits:
-        memory: "4096Mi"
-        cpu: "1000m"
-      requests:
-        # memory needs to be at least 1024Mi, see https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2478
-        memory: "1024Mi"
-        cpu: "1000m"
-    securityContext:
-      privileged: false
-    tty: true
-    command:
-    - cat
-    volumeMounts:
-    - mountPath: "/opt/tools"
-      name: "volume-0"
-      readOnly: false
-    workingDir: "/home/jenkins/agent"
-  nodeSelector: {}
-  restartPolicy: "Never"
-  volumes:
-  - name: "volume-0"
-    persistentVolumeClaim:
-      claimName: "tools-claim-jiro-releng"
-      readOnly: true
-  - configMap:
-      name: "known-hosts"
-    name: "volume-1"
-  - emptyDir:
-      medium: ""
-    name: "workspace-volume"
-  - emptyDir:
-      medium: ""
-    name: "volume-3"
-"""
-    }
+    label 'centos-8'
   }
 
   stages {
@@ -91,8 +37,7 @@ spec:
               ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
           }
           steps {
-              container ('custom'){
-                  xvnc(useXauthority: true) {
+              xvnc(useXauthority: true) {
                       sh \'\'\'#!/bin/bash -x
                         
                         buildId=$(echo $buildId|tr -d ' ')
@@ -129,7 +74,6 @@ spec:
                           -DtestSuite=all
                         # For smaller test-suites see: https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/be721e33c916b03c342e7b6f334220c6124946f8/production/testScripts/configuration/sdk.tests/testScripts/test.xml#L1893-L1903
                       \'\'\'
-                  }
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
