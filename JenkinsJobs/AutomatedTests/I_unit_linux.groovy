@@ -24,7 +24,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr:'5'))
   }
   agent {
-    label 'centos-8'
+    label 'ubuntu-2404'
   }
 
   stages {
