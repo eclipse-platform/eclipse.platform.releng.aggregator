@@ -27,11 +27,23 @@ pipeline {
     label 'centos-8'
   }
 
-  stages {
+  stages {''' + (JAVA_VERSION != '23' ? '' : '''
+      stage('Download latest JDK-23 EA') {
+          steps {
+              script{
+                  def path = "${WORKSPACE}/tools"
+                  dir(path) {
+                      sh 'curl -L https://staging-api.adoptium.net/v3/binary/latest/23/ea/linux/x64/jdk/hotspot/normal/eclipse?project=jdk | tar -xzf -'
+                      JAVA_23_HOME = path + '/' + sh(script: 'find -name "jdk-23+*"', returnStdout: true).substring(2).trim()
+                  }
+              }
+          }
+      }
+''') + '''
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = tool(type:'jdk', name:'openjdk-jdk''' + JAVA_VERSION + '''-latest')
+              JAVA_HOME = ''' + (JAVA_VERSION != '23' ? "tool(type:'jdk', name:'openjdk-jdk${JAVA_VERSION}-latest')" : '"${JAVA_23_HOME}"') + '''
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
               ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
