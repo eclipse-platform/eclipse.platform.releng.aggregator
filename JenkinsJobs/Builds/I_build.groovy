@@ -428,6 +428,11 @@ spec:
           }
 		}
 		stage('Trigger publication to Maven snapshots repo') {
+			when {
+				environment name: 'COMPARATOR_ERRORS_SUBJECT', value: ''
+				// On comparator-erros, skip the deployment of snapshot version to the 'eclipse-snapshots' maven repository to prevent that ECJ snapshot
+				// from being used in verification builds. Similar to how the p2-repository is not added to the I-build composite in that case.
+			}
 			steps {
               container('jnlp') {
 				build job: 'CBIaggregator', parameters: [string(name: 'snapshotOrRelease', value: '-snapshot')], wait: false
