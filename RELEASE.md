@@ -58,16 +58,6 @@
          - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/eclipse.releng.renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
          - Make sure to mention that the Master branch is now again open for development.
        * For **Milestone builds** return the I-builds to the normal schedule.
-     * **Update ECJ compiler** in the platform build (if it needs to be updated).
-       * To find the new compiler version:
-         - Go to the update site for the release candidate
-         - Click `plugins`
-         - Find `org.eclipse.jdt.core.complier.batch_${ecjversion}.jar`
-       * Edit the [copyAndDeployJDTCompiler](https://ci.eclipse.org/jdt/job/copyAndDeployJDTCompiler) job in Jenkins
-         - Only JDT committers can run the job, but Releng/Platform committers can configure it
-         - Update the default values of the `versionfolder`, `buildid` and `ecjversion` parameters.
-         - Update the build triggers to schedule a build for the current date.
-       * Finally update the `cbi-ecj-version` in [eclipse.platform.releng.aggregator/eclipse-platform-parent/pom.xml](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse-platform-parent/pom.xml)
      * **After RC1**
        * Leave the I-builds running on the milestone schedule for RC2. 
        * Comment on EMF, ECF and Orbit issues to ask for final release builds.
@@ -157,13 +147,21 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
 
 #### **Maintenance Branches:**
   * **Maintenance Branch Creation:**
-    - Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng jeknins.
+    - Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng Jenkins.
   * **Update maintenance branch with release version**
     - Once the I-build repo is removed for the previous release the maintenance branch will have to use the release location, i.e. any references to `https://download.eclipse.org/eclipse/updates/4.25-I-builds/` will need to be updated to `https://download.eclipse.org/eclipse/updates/4.26/R-4.26-202211231800/`
     - Functionally this means:
       - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
       - Update eclipserun-repo, comparator.repo and eclipse-p2-repo.url in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
     - This step can be prepared ahead of time but can't be merged until the release build has been promoted and the update site exists.
+     * **Update ECJ compiler** in the platform build (if it needs to be updated).
+       * To find the new *unqualified* compiler version:
+         - Go to the update site for the release candidate
+         - Click `plugins`
+         - Find the *unqualified* version of the artifact `org.eclipse.jdt.core.complier.batch_${ecjversion}.jar`, i.e. the version consisting only of the _major_._minor_._service_ part, but without qualifier.
+         It's the version of the `org.eclipse.jdt:ecj` artifact at Maven-Central, about to be relased.
+       * Update the `cbi-ecj-version` in [eclipse.platform.releng.aggregator/eclipse-platform-parent/pom.xml](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse-platform-parent/pom.xml)
+       to the exact version of the `org.eclipse.jdt.core.complier.batch` bundle, e.g.: `3.40.0`
 
 #### **Update the Build Calendar:**
   - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).
