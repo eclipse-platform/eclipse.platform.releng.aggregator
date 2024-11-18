@@ -17,19 +17,18 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>Eclipse Platform What's New in 4.33</title>
+<title>Eclipse Platform What's New in 4.34</title>
 </head>
 
 <body>
 <h2>Platform and Equinox API</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse Platform and SWT for the 4.33 release of Eclipse.
+made to the Eclipse Platform and SWT for the 4.34 release of Eclipse.
 </p>
 <ul><!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  <li><a href="#Platform">Platform Changes</a></li>
-  <!--li><a href="#SWT">SWT Changes</a></li-->
+  <!--li><a href="#Platform">Platform Changes</a></li-->
+  <li><a href="#SWT">SWT Changes</a></li>
 </ul>
-
 <p>
 New features oriented towards end-users of the platform
 can be viewed in the
@@ -41,19 +40,49 @@ section of the Eclipse Platform User Guide.
 <table class="news">
 <colgroup>
   <col class="title" />
-  <col class="Description" />
+  <col />
 </colgroup>
 <tbody>
   <!-- ******************** Platform ********************** -->
-  <tr>
+  <!--
+  <tr>	
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
+  -->
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
- <!-- <tr>
+  <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
-  </tr> -->
+  </tr>
+  <tr id="display_rescaling_windows"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/pull/1358 -->
+    <td class="title">Monitor-Specific UI Rescaling in Display Class (Windows only)</td>
+    <td class="content">
+      <p>
+        The API methods
+        <code>org.eclipse.swt.widgets.Display#setRescalingAtRuntime(boolean)</code> and
+        <code>org.eclipse.swt.widgets.Display#isRescalingAtRuntime()</code> have been added to SWT.
+        These methods allow to enable, disable, and retrieve the state of the "rescaling at runtime" functionality.
+        When enabled, it makes shells and their contents sharply rescale according to the current monitor they are placed on
+        or moved to.
+      </p>
+      <p>
+        Note that in order to work as expected, enabling the rescaling at runtime functionality will also set the DPI
+        awareness of the Display's thread to <a
+          href="https://learn.microsoft.com/en-us/windows/win32/hidpi/setting-the-default-dpi-awareness-for-a-process">PerMonitorV2</a>.
+        This happens even if the DPI awareness of the Java process itself is set to some different value.
+      </p>
+      <p>
+        To ensure backwards compatibility, this feature is disabled by default. The feature has to be enabled for a
+        <code>Display</code> it is supposed to be used for. It needs to be activated before a shell is created to take
+        proper effect.
+        As an example, the feature can be enabled in Eclipse applications via a preference.
+      </p>
+      <p>
+        <b>Note:</b> Those methods will currently only have an effect on Windows.
+      </p>
+    </td>
+  </tr>
   <!-- *********************** End of SWT *********************** -->
   <tr><td colspan="2"/></tr>
 </tbody>
