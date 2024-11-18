@@ -17,20 +17,20 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.33 (JDT)</title>
+<title>What's New in Eclipse 4.34 (JDT)</title>
 </head>
 
 <body>
 <h2>Java Development Tools</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.33 release of Eclipse.
+for the 4.34 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  	<!--li><a href="#Java21">New Java&trade; Language Features</a></li-->
+  	<li><a href="#Java23">New Language Features</a></li>
   	<!--li><a href="#JUnit">JUnit</a></li-->
 	<li><a href="#JavaEditor">Java Editor</a></li>
-	<!--li><a href="#JavaCompiler">Java Compiler</a></li-->
-	<!--<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>-->
+	<li><a href="#JavaCompiler">Java Compiler</a></li>
+	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
 	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
 	<!--li><a href="#Debug">Debug</a></li-->
 	<!--li><a href="#JDTDev">JDT Developers</a></li-->
@@ -50,21 +50,39 @@ document for changes in the Platform.</p>
 <tbody>
 
   <!-- ******************* Java XX Support ************************************* -->
-  <!--
   <tr>
-    <td id="JavaXX" class="section" colspan="2">
-    <h2>Java&trade; XX Support </h2>
+    <td id="Java23" class="section" colspan="2">
+    <h2>New Java Language Features</h2>
     </td>
   </tr>
-  -->
+  <tr id="Java_23"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/issues/1396 -->
+    <td class="title"><a href="#Java23">New Java Language Features</a></td>
+      <td class="content">
+          <p>
+          The release notably includes the following Java features:
+           <br/>
+           <a href="https://openjdk.org/jeps/467">JEP 467: Markdown Documentation Comments</a>
+           <br/>
+           <a href="https://openjdk.org/jeps/455">JEP 455: Primitive Types in Patterns, instanceof, and switch (Preview)</a>
+           <br/>
+           <a href="https://openjdk.org/jeps/476">JEP 476: Module Import Declarations (Preview)</a>
+           <br/>
+           <a href="https://openjdk.org/jeps/477">JEP 477: Implicitly Declared Classes and Instance Main Methods (Third Preview)</a>
+           <br/>
+           <a href="https://openjdk.org/jeps/482">JEP 482: Flexible Constructor Bodies (Second Preview)</a>
+           </p>
+      </td>
+  </tr>
   <!-- ******************* End of Java XX Support ************************************* -->
 
   <!-- ******************* JUnit ************************************* -->
- <!-- <tr>
+  <!--
+  <tr>
     <td id="JUnit" class="section" colspan="2">
     <h2>JUnit</h2>
-    </td> 
-  </tr> -->
+    </td>
+  </tr>
+  -->
   <!-- ******************* End of JUnit ************************************* -->
 
   <!-- ******************* Java Editor ************************************* -->
@@ -73,61 +91,175 @@ document for changes in the Platform.</p>
     <h2>Java Editor </h2>
     </td>
   </tr>
-
- <tr id="enhanced-if-else-switch-cleanup">
-    <td class="title"><a href="#new-make-static-refactoring">Enhance if/else to switch CleanUp</a></td>
+  <tr id="boolean-if-else-cleanup">
+    <td class="title"><a href="#boolean-if-else-cleanup">New boolean if/else clean-up</a></td>
     <td class="content">
-	The clean-up to convert an if/else-if/else block into a switch has been enhanced to support String literals and Enum constants.  As before, the if/else-if/else block must have at least 3 blocks and must look for constant expressions except for the last block which can be put into the <b>default</b> case.
-	<p>For a <b>String</b> variable, each <b>if/else</b> expression can check using the <b>String.equals()</b> method.  For an <b>Enum</b> the code simply uses the <b>==</b> operator.  Use of the <b>||</b> operator is allowed to check multiple values and corresponds to a fall-through in the resultant switch statement.</p>
-	<p>To use the clean-up, go to <b>Source &gt; Clean Up &gt; Code Style</b> page and select: <b>Convert if/else if/else chain with 3 blocks min to switch</b>.</p>
-	<p>For example, performing the clean-up on the following:</p>
-	<p><img src="images/ifelsestring-before.png" alt="convert if/else if/else to switch"/></p>
-	<p>will result in:</p>
-	<p><img src="images/ifelsestring-after.png" alt="converted if/else if/else to switch"/></p>
+        A new clean-up has been created to combine two opposite boolean returns controlled by an if statement into a single return where possible.
+	<p>To use the clean-up, go to the <b>Code Style</b> tab of the clean-up configuration dialog under <b>Control statements</b> and  select: <b>Simplify boolean if/else to single return if possible</b>.</p>
+	<p>For example, applying the clean-up to the following code:</p>
+        <p><img src="images/ifelseboolean-before.png" alt="convert boolean if/else to single return before"/></p>
+	<p>results in:</p>
+        <p><img src="images/ifelseboolean-after.png" alt="convert boolean if/else to single return after"/></p>
     </td>
- </tr>
+  </tr>
+  <tr id="unused-to-unnamed-quickfix">
+    <td class="title"><a href="#unused-to-unnamed-quickfix">Rename unused to unnamed quickfix/cleanup</a></td>
+    <td class="content">
+        The quick-fix/clean-up for unused local variables has been enhanced when using Java 22 or above to rename to the unnamed variable ("_") where appropriate.  These situations include:
+	<ul>
+		<li>unused lambda parameters</li>
+		<li>unused try-with-resources resources</li>
+		<li>unused pattern variables in switch</li>
+		<li>unused variables in enhanced for statement</li>
+		<li>unused variables in regular for statement</li>
+	</ul>
+	<p>In these cases, a quick-fix will be offered to rename to the unnamed variable.  The quick-fix is a multi-fix and will also offer to fix multiple instances of the problem.</p>
+	<p>For example, hovering one of the unused variables in the file will show:</p>
+	<p><img src="images/unnamed-quickfix-before.png" alt="rename to unnamed variable before"/></p>
+	<p>and selecting to fix multiple problems of the same category results in:</p>
+	<p><img src="images/unnamed-quickfix-after.png" alt="rename to unnamed variable after"/></p>
+	<p>The new rename functionality is embedded into the existing <b>Remove unused local variables</b> clean-up found on the <b>Unnecessary Code</b> tab of the clean-up configuration dialog.  The clean-up 
+	will rename to the unnamed variable for unused locals or lambda parameters when
+	the compliance level is 22 or above.</p>
+    </td>
+  </tr>
+  <tr id="if-else-to-switch-null-handling">
+    <td class="title"><a href="#if-else-to-switch-null-handling">Null handling for if/else to switch clean-up</a></td>
+    <td class="content">
+	    The if/else to switch clean-up has been enhanced to properly handle the case where the value can be null.  In the if/else statement, this is handled intrinsically either by an else statement or falling through the if/else if, but when converting to a switch statement, either the switch must be embedded in an if statement to test for null or for Java 21 or above, a <b>case null</b> statement needs to be added.
+	    <p>The clean-up is accessed on the <b>Code style</b> tab of the clean-up configuration dialog under <b>Control statements</b> and selecting: <b>Convert if/else if/else chain with 3 blocks min to switch</b>.</p>
+	    <p>Applying the clean-up to the following code:</p>
+            <p><img src="images/ifelse-to-switch-null-before.png" alt="convert if/else to switch before"/></p>
+	    <p>results in the following when Java version is less than 21</p>
+            <p><img src="images/ifelse-to-switch-null-after.png" alt="convert if/else to switch after"/></p>
+	    <p>and results in the following when the Java release is set to 21 and up:</p>
+            <p><img src="images/ifelse-to-switch-null-21-after.png" alt="convert if/else to switch after for Java 21 and up"/></p>
 
+    </td>
+  </tr>
 
   <!-- ******************* End of Java Editor ************************************* -->
 
   <!-- ******************* Java Views and Dialogs ************************************* -->
-  <!--<tr>
-    <td id="JavaViewsAndDialogs" class="section" colspan="2">
-    <h2>Java Views and Dialogs</h2>
+  <tr>
+     <td id="JavaViewsAndDialogs" class="section" colspan="2">
+       <h2>Java Views and Dialogs</h2>
+     </td>
+  	</tr>
+	<tr id="markdown-doc">
+		<td class="title"><a href="#markdown-doc">Rendering Markdown Documentation Comments</a></td>
+	    <td class="content">
+	        <p>
+				In this release, JDT has added HTML parsing and rendering support for 
+				markdown documentation comments on Java programming elements. This comes as a 
+				standard feature at source level 23. The HTML rendering
+				is provided both on hover and Javadoc view. 
+			</p>
+			<p>
+				Here are some examples of how the markdown comments get rendered:
+			</p>
+			<p>
+				Hovering in the editor:
+			</p>
+			<p>
+				<img src="images/markdown_hover.png" alt="Markdown Comments"/>
+			</p>
+			<p>
+				Javadoc View:
+			</p>
+			<p>
+				<img src="images/markdown_javadoc.png" alt="Markdown Comments"/>
+			</p>
+	    </td>
+	</tr>
+  	<tr id="new-filter-options">
+  	<td class="title">
+        <a href="#new-filter-options">New Filter Options in Call Hierarchy</a>
     </td>
-  </tr> -->
+        <td class="content">
+            <p>
+				This change helps <strong>filtering your results</strong> after calling the <strong>Call Hierarchy</strong> on a method. 
+				With <strong>more filter options</strong> that are also much more 
+				understandable, you can filter your results much better than before.           
+			</p>
+			<p>
+				In the following picture you can see the new filter Options!
+			</p>
+            <p>
+                <img src="images/show-all-code.png" alt="Filter Options"/>
+            </p>
+        </td>
+	</tr>
+	<tr id="move-filter-button">
+		<td class="title">
+        <a href="#move-filter-button">Show the Filters in the buttons bar of the Call Hierarchy view</a>
+    </td>
+      <td class="content">
+          <p>
+              Thanks to this change, you can <strong>easily access</strong> the <strong>filters</strong> after calling the <strong>call hierarchy</strong> on a method.
+			  With the new, more accessible filters button, changing the filters is easier than ever, especially now that there are more and better options to filter the results.
+          </p>
+          <p>
+              <img src="images/move-filtersbutton-to-top.png" alt="Filters Button on Top bar"/>
+          </p>
+		  <p>
+				You can still use the old way to access the filter like so:
+		  </p>
+		  <p>
+			<img src="images/move-filtersbutton-to-top-other-way.png" alt="old menu"/>
+		  </p>
+      </td>
+  </tr>
   <!-- ******************* End of Java Views and Dialogs ************************************* -->
 
   <!-- ******************* Java Compiler ************************************* -->
- <!-- <tr>
+  <tr>
     <td id="JavaCompiler" class="section" colspan="2">
     <h2>Java Compiler</h2>
     </td>
-  </tr> -->
+  </tr>
+	<tr id="ui-unused-lambda-params">
+  		<td class="title">
+        <a href="#ui-unused-lambda-params">Configure problem severity for unused lambda parameters</a>
+    </td>
+        <td class="content">
+            You can configure the problem severity for unused lambda parameters with the new option in 
+            Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings:        
+            <p>
+                <img src="images/ui-unused-lambda-params.png" alt="UI option to configure unused lambda parameters"/>
+            </p>
+        </td>
+	</tr>
   <!-- ******************* End of Java Compiler ************************************* -->
 
   <!-- ******************* Java Formatter ************************************* -->
- <!-- <tr>
+  <!--
+  <tr>
     <td id="JavaFormatter" class="section" colspan="2">
     <h2>Java Formatter </h2>
     </td>
-  </tr> -->
+  </tr>
+  -->
   <!-- ******************* End of Java Formatter ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
- <!-- <tr>
+  <!--
+  <tr>
     <td id="Debug" class="section" colspan="2">
     <h2>Debug</h2>
     </td>
-  </tr> -->
+  </tr>
+  -->
   <!--************************ End of Debug ******************************** -->
 
   <!-- *********************** JDT Developers ******************************** -->
- <!-- <tr>
+  <!--
+  <tr>
     <td id="JDTDev" class="section" colspan="2">
     <h2>JDT Developers</h2>
     </td>
-  </tr> -->
+  </tr>
+  -->
   <!-- *********************** End of JDT Developers ******************************** -->
   <tr><td colspan="2"/></tr>
 </tbody>
