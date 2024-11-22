@@ -96,22 +96,6 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 ?>
 
 <?php
-  // have removed coverage measurements for now
-  // echo " <li><a href=\"coverage.php\"><b>JaCoCo code coverage report</b></a></li>";
-?>
-
-<?php
-  $freezeFilename="apitools/freeze_report.html";
-  if (file_exists($freezeFilename)) {
-    echo "<li><a href=\"$freezeFilename\"><b>API Tools Post-API Freeze Report</b></a>&nbsp;&nbsp;";
-    echo "This report describes API changes since ${API_FREEZE_REF_LABEL}.  Exclusions are listed in <a href=\"https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/$BRANCH/eclipse.platform.releng.tychoeclipsebuilder/eclipse/apiexclude/exclude_list.txt\">.../apiexclude/exclude_list.txt</a>.</li>";
-  }
-  else {
-    echo "  <li>No freeze report. Only generated in main stream after RC1.</li>";
-  }
-?>
-
-<?php
   echo " <li><a href=\"apitools/apifilters-$BUILD_ID.zip\"><b>Zip of .api_filters files used in the build</b></a></li>";
 ?>
 <?php
