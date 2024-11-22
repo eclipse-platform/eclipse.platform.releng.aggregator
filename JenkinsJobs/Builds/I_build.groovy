@@ -24,8 +24,8 @@ for (STREAM in STREAMS){
 
 # Milestone/RC Schedule 
 # Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-0 6 9-20 11 5-7,1-3
-0 18 9-20 11 5-7,1-3
+# 0 6 9-20 11 5-7,1-3
+# 0 18 9-20 11 5-7,1-3
             """)
           }
         }
