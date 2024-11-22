@@ -17,7 +17,7 @@ for (STREAM in STREAMS){
 # format: Minute Hour Day Month Day of the week (0-7)
 
 #Daily Y-build
-0 10 * * *
+#0 10 * * *
 #milestone week
 #0 6 * * 2
 #0 6 * * 4
@@ -93,7 +93,7 @@ spec:
                   sshagent(['github-bot-ssh']) {
                       dir ('eclipse.platform.releng.aggregator') {
                         sh \'\'\'
-                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
+                            git clone -b R4_34_maintenance git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
                         \'\'\'
                       }
                     }
