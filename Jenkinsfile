@@ -23,7 +23,6 @@ pipeline {
 				anyOf {
 					branch 'master'
 					branch 'R*_maintenance'
-					branch 'prepare_R*'
 				}
 			}
 			steps {
