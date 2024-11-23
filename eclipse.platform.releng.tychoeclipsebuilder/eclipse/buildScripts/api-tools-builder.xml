@@ -29,10 +29,8 @@
   name="API Tools builder integration"
   default="apiToolsReports">
 
-
-
   <!--
-    The default target that calls apitooling.apifreeze, apitooling.analysis and apitooling.apideprecation
+    The default target that calls apitooling.analysis and apitooling.apideprecation
     and their respective _reportconversion tasks
   -->
   <target
@@ -45,14 +43,6 @@
       name="report"
       value="${buildDirectory}/apitools" />
     <mkdir dir="${report}" />
-    <property
-      name="freeze_report"
-      value="${report}/freeze_report.xml" />
-    <touch file="${freeze_report}" />
-    <property
-      name="freeze_html"
-      value="${report}/freeze_report.html" />
-
 
 
     <!-- we would have to fetch the baseline we wanted, or perhaps just link to its location -->
@@ -61,9 +51,6 @@
       value="${reference}/${previousBaselineFilename}" />
 
     <!-- create properties for the filters -->
-    <property
-      name="exclude_list_location"
-      value="${EBuilderDir}/eclipse/apiexclude/exclude_list.txt" />
     <property
       name="exclude_list_external_location"
       value="${EBuilderDir}/eclipse/apiexclude/exclude_list_external.txt" />
@@ -139,8 +126,7 @@
 
   <target
     name="init"
-    unless="apitoolinginitialized"
-    depends="getfreezereference">
+    unless="apitoolinginitialized">
 
     <!-- The name for the build - i.e. I20130603-2000 -->
     <fail
@@ -210,49 +196,4 @@
       property="currentZipAvailable" />
   </target>
 
-  <!-- there will not always be a freeze report, only after M6 -->
-  <target
-    name="getfreezereference"
-    if="freezeFilename">
-    <fail
-      unless="freezeBaseURL"
-      message="full URL of freeze build must be provided, if freezeFilename is." />
-
-    <!-- if not provided, assume freezeName is same as freezeFilename -->
-    <property
-      name="freezeName"
-      value="freezeFilename" />
-
-    <property
-      name="freezereference"
-      value="${buildDirectory}/apitoolingreference/${freezeName}" />
-    <mkdir dir="${freezereference}" />
-
-    <get
-      dest="${freezereference}"
-      src="${freezeBaseURL}" />
-    <!-- no need to unzip?
-      <unzip
-      src="${freezereference}/${freezeFilename}"
-      dest="${freezereference}" />
-    -->
-
-  </target>
-
-  <!-- there will not always be a freeze report, only after M6 -->
-  <target
-    name="dofreezeReport"
-    if="freezereference">
-    <!-- run the freeze task -->
-    <apitooling.apifreeze
-      baseline="${freezereference}/${freezeFilename}"
-      profile="${current_location}"
-      report="${freeze_report}"
-      excludelist="${exclude_list_location}"
-      debug="true" />
-    <apitooling.apifreeze_reportconversion
-      xmlfile="${freeze_report}"
-      htmlfile="${freeze_html}"
-      debug="true" />
-  </target>
 </project>
