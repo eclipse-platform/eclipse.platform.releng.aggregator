@@ -39,7 +39,6 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 - [ ] Move previous version to ${PREV_MAJOR}.${PREV_MINOR}RC2 across build scripts
 - [ ] Update version number in Mac's Eclipse.app for ${NEXT_STREAM}
 - [ ] Clean forceQualifierUpdate files for doc bundles
-- [ ] Cleanup approved api list
 - [ ] Update builds and repo cleanup scripts for ${NEXT_STREAM}
 - [ ] Update check composites script to verify ${NEXT_STREAM} repositories
 - [ ] Update Comparator repo and eclipse run repo to ${NEXT_STREAM}-I-builds repo
