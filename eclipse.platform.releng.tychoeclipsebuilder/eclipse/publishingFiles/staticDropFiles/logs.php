@@ -49,18 +49,6 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <h1>Unit Test Logs for <?= $BUILD_ID ?></h1>
 <div class="homeitem3col">
 
-<!-- 
-     javaDoc logs are "at the top" of the compile logs directory, having been 
-     copied there by "helper.xml". Seems they could easily go into their own directory, 
-     and if so, then there is a releng test that would have to change too, either simply 
-     changing their location in the test.xml, or, changing to whole test to it would know
-     where to find their special directory, and then loop through the whole directory. 
--->
-<h2 id="javadoc">Javadoc Logs</h2>
-<?php
-listLogs("compilelogs");
-?>
-
 <h2 id="console">Console Logs</h2>
 <p>These logs contain the console output captured while running the JUnit automated tests.</p>
 

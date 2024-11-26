@@ -71,9 +71,6 @@ if (file_exists("buildlogs/reporeports/index.html")) {
         </li>
         <?php } ?>
 
-        <li>
-        <a href="logs.php#javadoc"><b> Javadoc Logs </b></a>
-        </li>
         <li> <a href="logs.php#console"><b> Console Output Logs </b></a>
         </li>
         <li> <a href="buildlogs.php"><b>Release engineering build logs</b></a>
