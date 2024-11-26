@@ -50,21 +50,6 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div class="homeitem3col">
 <h1>Performance Unit Test Logs for <?= $BUILD_ID ?></h1>
 
-
-<!-- 
- No Javadoc logs.
-
-
-
-
-
-
-
-
-
-
--->
-
 <h2><a name="console" id="console"></a>Console Logs</h2>
 <p>These logs contain the console output captured while running the JUnit automated tests.</p>
 
