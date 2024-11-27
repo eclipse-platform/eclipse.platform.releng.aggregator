@@ -247,7 +247,7 @@ spec:
 	  stage('Aggregator maven build'){
 	      environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
+                MAVEN_GPG_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
               container('jnlp') {
