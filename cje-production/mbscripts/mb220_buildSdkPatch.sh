@@ -43,7 +43,6 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -DbuildType=$BUILD_TYPE \
   -DbuildId=$BUILD_ID \
   -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
-  -Dgpg.passphrase=${KEYRING_PASSPHRASE} \
   -Dcbi-ecj-version=99.99 \
   -e \
   -T 1C \
