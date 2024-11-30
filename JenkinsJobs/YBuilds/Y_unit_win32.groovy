@@ -39,19 +39,8 @@ rem tmp must already exist, for Java to make use of it, in subsequent steps
 rem no -p (or /p) needed on Windows. It creates 
 mkdir tmp
 
-rem Note: currently this file always comes from master, no matter what branch is being built/tested.
-wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-set buildId
-wget -O buildProperties.properties https://download.eclipse.org/eclipse/downloads/drops4/%buildId%/buildproperties.properties
-echo off
-For /F "tokens=1* delims==" %%A IN (buildProperties.properties) DO (
- IF "%%A"=="STREAM " set STREAM=%%B
- IF "%%A"=="EBUILDER_HASH " set EBUILDER_HASH=%%B
-) 
-echo on
+curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
 
-set STREAM
-set EBUILDER_HASH
 set JAVA_HOME
 set ANT_HOME
 set PATH
@@ -61,8 +50,6 @@ cmd /c ant -diagnostics 1>antDiagnostics.txt 2>&1
 java -XshowSettings -version 1>javaSettings.txt 2>&1
 
 ant -f getEBuilder.xml -DbuildId=%buildId% ^
-  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH% ^
-  -DdownloadURL="https://download.eclipse.org/eclipse/downloads/drops4/%buildId%" ^
   -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 ^
   -DtestSuite=all
 \'\'\'

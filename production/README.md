@@ -22,17 +22,17 @@ In order to run the performance tests locally:
     curl -o buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
     source buildproperties.shsource
     ```
-  * Make sure you have the latest testScripts/hudsonBootstrap/getEBuilder.xml from this folder.  
+  * Make sure you have the latest testScripts/bootstrap/getEBuilder.xml from this folder.  
     If you don't want to pull the whole repo:
     ```
-    wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+    curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
     ```
   * Make sure you have ant installed so you can run the following command:
     ```
-    ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -Djvm=$JAVA_HOME/bin/java -DeclipseStream=${STREAM} -DEBUILDER_HASH=${EBUILDER_HASH}  -DbaselinePerf=${baselinePerf} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=${testToRun} -Dtest.target=performance
+    ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -DbaselinePerf=${baselinePerf} -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=${testToRun} -Dtest.target=performance
     ```
 
-The current process uses [getEBuilder.xml](testScripts/hudsonBootstrap/getEBuilder.xml) to download a pre-zipped version of the testScripts folder then calls [runTests2.xml](testScripts/runTests2.xml).
+The current process uses [getEBuilder.xml](testScripts/bootstrap/getEBuilder.xml) to download the testScripts folder then calls [runTests2.xml](testScripts/runTests2.xml).
 
 runTests2.xml downloads the installer for the build being tested and the zip of the tests being run, then runs them.
 

@@ -57,9 +57,7 @@ pipeline {
 										# we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
 										mkdir -p tmp
 										
-										curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-										curl -o buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
-										source ./buildproperties.shsource
+										curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
 										
 										echo JAVA_HOME: $JAVA_HOME
 										echo ANT_HOME: $ANT_HOME
@@ -71,8 +69,6 @@ pipeline {
 										java -XshowSettings -version 1>javaSettings.txt 2>&1
 										
 										ant -f getEBuilder.xml -DbuildId=${buildId} -DbaselinePerf=${baselinePerf} \
-										  -DeclipseStream=${STREAM} -DEBUILDER_HASH=${EBUILDER_HASH} \
-										  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \
 										  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 \
 										  -DtestSuite=${testToRun} -Dtest.target=performance
 									'''

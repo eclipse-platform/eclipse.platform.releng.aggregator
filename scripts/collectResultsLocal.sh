@@ -95,9 +95,7 @@ java -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -appli
   -DpostingDirectory=${postingDirectory} \
   -Djob=${triggeringJob} \
   -DbuildURL=${buildURL} \
-  -DbuildID=${buildID} \
-  -DEBUILDER_HASH=${EBUILDER_HASH}
-  
+  -DbuildID=${buildID}
   
 devworkspace=${workspace}/workspace-updateTestResults
 
