@@ -8,7 +8,7 @@ job('Releng/updateIndex'){
 
   jdk('openjdk-jdk11-latest')
 
-  label('centos-8')
+  label('basic')
 
   wrappers { //adds pre/post actions
     timestamps()

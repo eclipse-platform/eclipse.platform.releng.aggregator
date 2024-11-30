@@ -21,7 +21,7 @@ GitHub issue (or legacy bugzilla bug ID) to track tagging the release, for examp
 
   jdk('oracle-jdk8-latest')
 
-  label('centos-latest')
+  label('basic')
 
   wrappers { //adds pre/post actions
     timestamps()

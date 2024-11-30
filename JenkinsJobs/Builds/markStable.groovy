@@ -6,7 +6,7 @@ job('Builds/markStable'){
     stringParam('buildId', null, 'ID of the build to be marked stable.')
   }
 
-  label('centos-8')
+  label('basic')
 
   logRotator {
     daysToKeep(3)

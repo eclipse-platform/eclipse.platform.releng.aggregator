@@ -6,7 +6,7 @@ job('Releng/PublishPlatformToMaven'){
     stringParam('REPO_ID', null, 'ID (buildNo) of repository created by CBI aggregator job.')
   }
 
-  label('centos-latest')
+  label('basic')
 
   jdk('openjdk-jdk11-latest')
 

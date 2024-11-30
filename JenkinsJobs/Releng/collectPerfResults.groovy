@@ -8,7 +8,7 @@ job('Releng/collectPerfResults'){
     stringParam('buildID', null, 'ID of the I-build being tested.')
   }
 
-  label('centos-8')
+  label('basic')
 
   logRotator {
     daysToKeep(5)

@@ -12,7 +12,7 @@ and other such scripts.
     numToKeep(5)
   }
 
-  label('centos-latest')
+  label('basic')
 
   triggers {
     cron('''
