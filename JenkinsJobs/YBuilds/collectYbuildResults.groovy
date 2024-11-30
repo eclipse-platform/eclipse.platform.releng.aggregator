@@ -8,7 +8,7 @@ job('YPBuilds/ep-collectYbuildResults'){
     stringParam('buildID', null, 'ID of the I-build being tested.')
   }
 
-  label('centos-8')
+  label('basic')
 
   logRotator {
     daysToKeep(5)

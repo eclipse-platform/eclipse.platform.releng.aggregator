@@ -8,7 +8,7 @@ job('Builds/markUnstable'){
     stringParam('issueUrl', null, 'URL for the issue.')
   }
 
-  label('centos-8')
+  label('basic')
 
   logRotator {
     daysToKeep(3)

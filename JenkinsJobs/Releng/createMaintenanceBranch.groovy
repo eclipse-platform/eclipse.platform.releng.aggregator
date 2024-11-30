@@ -12,7 +12,7 @@ job('Releng/createMaintenanceBranch'){
     stringParam('tag', null, 'Release tag to be used when making the branch. For example: S4_26_0_RC2')
   }
 
-  label('centos-latest')
+  label('basic')
 
   wrappers { //adds pre/post actions
     timestamps()

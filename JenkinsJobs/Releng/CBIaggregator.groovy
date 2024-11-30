@@ -10,7 +10,7 @@ job('Releng/CBIaggregator'){
     choiceParam('snapshotOrRelease', ['release', 'snapshot'], null)
   }
 
-  label('centos-latest')
+  label('basic')
 
   jdk('openjdk-jdk11-latest')
 

@@ -55,7 +55,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      inheritFrom 'centos-8'
+      inheritFrom 'ubuntu-2404'
       yaml """
 apiVersion: v1
 kind: Pod

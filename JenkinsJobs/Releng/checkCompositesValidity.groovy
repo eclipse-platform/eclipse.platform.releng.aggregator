@@ -8,7 +8,7 @@ job('Releng/checkCompositesValidity'){
 
   jdk('adoptopenjdk-hotspot-jdk11-latest')
 
-  label('centos-8')
+  label('basic')
 
   triggers {
     cron {

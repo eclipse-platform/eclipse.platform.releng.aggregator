@@ -32,7 +32,7 @@ S is used for milestones and includes the milestone version. For example: S4_25_
 
   jdk('adoptopenjdk-hotspot-jdk11-latest')
 
-  label('centos-latest')
+  label('basic')
 
   wrappers { //adds pre/post actions
     timestamps()

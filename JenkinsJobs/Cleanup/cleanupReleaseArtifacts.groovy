@@ -2,7 +2,7 @@ job('Cleanup/cleanupReleaseArtifacts'){
   displayName('Cleanup Release Artifacts')
   description('Cleanup major artifacts from previous releases at the beginning of a new release.')
 
-  label('centos-latest')
+  label('basic')
 
   logRotator {
     daysToKeep(1)

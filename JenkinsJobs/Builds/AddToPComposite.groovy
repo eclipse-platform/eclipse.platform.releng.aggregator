@@ -10,7 +10,7 @@ for (STREAM in STREAMS){
       stringParam('buildId', null, 'Build ID of the build to be added.')
     }
 
-    label('centos-latest')
+    label('basic')
 
     logRotator {
       daysToKeep(3)

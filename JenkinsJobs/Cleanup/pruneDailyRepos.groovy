@@ -13,7 +13,7 @@ and other such scripts.
   }
 
 
-  label('centos-latest')
+  label('basic')
 
   triggers {
     cron('''
