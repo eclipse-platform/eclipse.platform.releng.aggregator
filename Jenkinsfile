@@ -53,7 +53,9 @@ pipeline {
 						ssh genie.platform@projects-storage.eclipse.org rm -rf ${serverStaging}
 						ssh genie.platform@projects-storage.eclipse.org mkdir -p ${serverStaging}
 						
-						scp -r production genie.platform@projects-storage.eclipse.org:${serverStaging}
+						ssh genie.platform@projects-storage.eclipse.org mkdir -p ${serverStaging}/testScripts
+						scp -r production/testScripts/bootstrap genie.platform@projects-storage.eclipse.org:${serverStaging}/testScripts
+						
 						scp -r scripts genie.platform@projects-storage.eclipse.org:${serverStaging}
 						scp -r cje-production genie.platform@projects-storage.eclipse.org:${serverStaging}
 						

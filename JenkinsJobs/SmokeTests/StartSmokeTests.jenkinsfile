@@ -101,10 +101,7 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 							# we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
 							mkdir -p tmp
 							
-							wget -O getEBuilder.xml --no-verbose --no-check-certificate https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-							wget -O buildproperties.shsource --no-check-certificate https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
-							cat buildproperties.shsource
-							source buildproperties.shsource
+							curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
 							
 							echo JAVA_HOME: $JAVA_HOME
 							echo ANT_HOME: $ANT_HOME
@@ -114,9 +111,7 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 							ant -diagnostics 1>antDiagnostics.txt 2>&1
 							java -XshowSettings -version 1>javaSettings.txt 2>&1
 							
-							ant -f getEBuilder.xml -DbuildId=$buildId \
-							  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \
-							  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \
+							ant -f getEBuilder.xml -DbuildId=${buildId} \
 							  -Dosgi.os=''' + os + ''' -Dosgi.ws=''' + ws + ''' -Dosgi.arch=''' + arch + ''' \
 							  -DtestSuite=${testsToRun}
 						'''
