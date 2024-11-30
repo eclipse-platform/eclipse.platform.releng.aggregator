@@ -96,8 +96,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -DpostingDirectory=${dropsPath} \\
   -DbuildURL=${buildURL} \\
   -DbuildID=${buildID} \\
-  -Djob=${triggeringJob} \\
-  -DEBUILDER_HASH=${EBUILDER_HASH}
+  -Djob=${triggeringJob}
 
 #
 

@@ -130,10 +130,7 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 # we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
 mkdir -p tmp
 
-wget -O getEBuilder.xml --no-verbose https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-curl -o buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
-cat buildproperties.shsource
-source ./buildproperties.shsource
+curl -o getEBuilder.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/production/testScripts/bootstrap/getEBuilder.xml
 set +x
 
 #export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.201.b09-2.el7_6.x86_64
@@ -168,7 +165,9 @@ env 1>envVars.txt 2>&1
 ant -diagnostics 1>antDiagnostics.txt 2>&1
 java -XshowSettings -version 1>javaSettings.txt 2>&1
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -Djvm=$JAVA_HOME/bin/java -DeclipseStream=${STREAM} -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=${testToRun} -Dtest.target=performance
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId -Djvm=$JAVA_HOME/bin/java \\
+  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 \\
+  -DtestSuite=${testToRun} -Dtest.target=performance
 
 RAW_DATE_END="$(date +%s )"
 
