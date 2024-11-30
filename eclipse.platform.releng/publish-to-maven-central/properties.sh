@@ -14,8 +14,8 @@
 
 # ECLIPSE:
 DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
-SDK_BUILD_DIR=R-4.33-202409030240
-SDK_VERSION=4.33
+SDK_BUILD_DIR=R-4.34-202411201800
+SDK_VERSION=4.34
 FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
 
 # AGGREGATOR:
