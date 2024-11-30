@@ -100,8 +100,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -DpostingDirectory=${dropsPath} \\
   -Djob=${triggeringJob} \\
   -DbuildURL=${buildURL} \\
-  -DbuildID=${buildID} \\
-  -DEBUILDER_HASH=${EBUILDER_HASH}
+  -DbuildID=${buildID}
   
 #
 devworkspace=${workspace}/workspace-updateTestResults
