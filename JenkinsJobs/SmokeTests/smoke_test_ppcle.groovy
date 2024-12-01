@@ -6,7 +6,7 @@ job('SmokeTests/ep-smoke-test-ppcle'){
 
   parameters {
     stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-    stringParam('javaDownload', 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17%2B35/OpenJDK17-jdk_ppc64le_linux_hotspot_17_35.tar.gz', 'fully qualified link to java download')
+    stringParam('javaDownload', null, 'fully qualified link to java download')
     stringParam('testsToRun', 'ui', 'This can be any ant target from https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml')
     stringParam('secManager', '-Djava.security.manager=allow', null)
   }
