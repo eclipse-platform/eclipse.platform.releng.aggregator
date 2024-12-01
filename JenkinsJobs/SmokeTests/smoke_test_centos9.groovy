@@ -23,8 +23,8 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos9-pod-' + env.BUILD_NUMBER
       defaultContainer 'custom'
+      inheritFrom 'basic'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -40,32 +40,9 @@ spec:
       requests:
         memory: "512Mi"
         cpu: "1000m"
-    securityContext:
-      privileged: false
     tty: true
     command:
     - cat
-    volumeMounts:
-    - mountPath: "/opt/tools"
-      name: "volume-0"
-      readOnly: false
-    workingDir: "/home/jenkins/agent"
-  nodeSelector: {}
-  restartPolicy: "Never"
-  volumes:
-  - name: "volume-0"
-    persistentVolumeClaim:
-      claimName: "tools-claim-jiro-releng"
-      readOnly: true
-  - configMap:
-      name: "known-hosts"
-    name: "volume-1"
-  - emptyDir:
-      medium: ""
-    name: "workspace-volume"
-  - emptyDir:
-      medium: ""
-    name: "volume-3"
 """
     }
   }

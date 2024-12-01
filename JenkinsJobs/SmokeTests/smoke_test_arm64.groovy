@@ -11,28 +11,27 @@ job('SmokeTests/ep-smoke-test-arm64'){
     stringParam('secManager', '-Djava.security.manager=allow', null)
   }
 
-  concurrentBuild()
-
-  label('arm64')
-
-  jdk('openjdk-jdk19-latest')
- 
-  wrappers { //adds pre/post actions
-    timestamps()
-    preBuildCleanup()
-    timeout {
-      absolute(60)
-    }
-    xvnc {
-      useXauthority()
-    }
-    withAnt {
-      installation('apache-ant-latest')
-    }
-  }
-  
-  steps {
-    shell('''#!/usr/bin/env bash
+  definition {
+    cps {
+      sandbox()
+      script('''
+pipeline {
+	options {
+		timeout(time: 60, unit: 'MINUTES')
+		timestamps()
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label "arm64"
+	}
+  stages {
+      stage('Run tests'){
+          steps {
+                  cleanWs()
+                  wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
+                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk19-latest' }"]) {
+                          withAnt(installation: 'apache-ant-latest') {
+                              sh \'\'\'#!/bin/bash -x
 
 buildId=$(echo $buildId|tr -d ' ')
 
@@ -92,22 +91,17 @@ echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
 TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
 
 echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
-    ''')
-  }
-
-  publishers {
-    archiveJunit('**/eclipse-testing/results/xml/*.xml') {
-      healthScaleFactor((1.0).doubleValue())
-    }
-    archiveArtifacts {
-      pattern('**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt')
-    }
-    extendedEmail {
-      triggers {
-        unstable {
-          recipientList("sravankumarl@in.ibm.com akurtakov@gmail.com")
-        }
+                              \'\'\'
+                      }
+                  }
+              }
+              archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
+              junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+          }
       }
+  }
+}
+      ''')
     }
   }
 }
