@@ -6,7 +6,7 @@ pipelineJob('SmokeTests/ep-smoke-test-ubuntu'){
 
   parameters {
     stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk19/877d6127e982470ba2a7faa31cc93d04/36/GPL/openjdk-19_linux-x64_bin.tar.gz', 'fully qualified link to java download')
+    stringParam('javaDownload', null, 'fully qualified link to java download')
     stringParam('testsToRun', 'ui', 'This can be any ant target from https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml')
     stringParam('secManager', '-Djava.security.manager=allow', null)
   }
