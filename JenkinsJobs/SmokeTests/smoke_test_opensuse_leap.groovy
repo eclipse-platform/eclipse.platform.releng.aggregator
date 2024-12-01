@@ -23,8 +23,8 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'leap-' + env.BUILD_NUMBER
       defaultContainer 'custom'
+      inheritFrom 'basic'
       yaml """
 apiVersion: v1
 kind: Pod
@@ -40,77 +40,9 @@ spec:
       requests:
         memory: "512Mi"
         cpu: "1000m"
-    securityContext:
-      privileged: false
     tty: true
     command:
     - cat
-    volumeMounts:
-    - mountPath: "/home/jenkins/agent"
-      name: "workspace-volume"
-      readOnly: false
-    - mountPath: "/home/jenkins/.m2/toolchains.xml"
-      name: "toolchains-xml"
-      readOnly: true
-      subPath: "toolchains.xml"
-    - mountPath: "/opt/tools"
-      name: "volume-0"
-      readOnly: false
-    - mountPath: "/home/jenkins"
-      name: "volume-2"
-      readOnly: false
-    - mountPath: "/home/jenkins/.m2/repository"
-      name: "volume-3"
-      readOnly: false
-    - mountPath: "/home/jenkins/.m2/settings-security.xml"
-      name: "settings-security-xml"
-      readOnly: true
-      subPath: "settings-security.xml"
-    - mountPath: "/home/jenkins/.m2/settings.xml"
-      name: "settings-xml"
-      readOnly: true
-      subPath: "settings.xml"
-    - mountPath: "/home/jenkins/.ssh"
-      name: "volume-1"
-      readOnly: false
-    workingDir: "/home/jenkins/agent"
-  nodeSelector: {}
-  restartPolicy: "Never"
-  volumes:
-  - name: "settings-security-xml"
-    secret:
-      items:
-      - key: "settings-security.xml"
-        path: "settings-security.xml"
-      secretName: "m2-secret-dir"
-  - name: "volume-0"
-    persistentVolumeClaim:
-      claimName: "tools-claim-jiro-releng"
-      readOnly: true
-  - configMap:
-      items:
-      - key: "toolchains.xml"
-        path: "toolchains.xml"
-      name: "m2-dir"
-    name: "toolchains-xml"
-  - emptyDir:
-      medium: ""
-    name: "volume-2"
-  - configMap:
-      name: "known-hosts"
-    name: "volume-1"
-  - name: "settings-xml"
-    secret:
-      items:
-      - key: "settings.xml"
-        path: "settings.xml"
-      secretName: "m2-secret-dir"
-  - emptyDir:
-      medium: ""
-    name: "workspace-volume"
-  - emptyDir:
-      medium: ""
-    name: "volume-3"
 """
     }
   }
