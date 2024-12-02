@@ -10,7 +10,24 @@ pipeline {
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 	}
-	agent any
+	agent {
+		kubernetes { // a lean basic agent is sufficient.
+			inheritFrom 'basic' yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: "jnlp"
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+'''
+		}
+	}
 	parameters {
 		string(name: 'buildId', description: 'Build Id to test (such as I20240611-1800, N20120716-0800).')
 		string(name: 'testsToRun', defaultValue: 'ui', description: 'This can be any ant target from https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml')
@@ -102,28 +119,28 @@ pipeline {
 def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, String javaVersion) {
 	executorAgent.call({
 		cleanWs()
+		def javaHome = installJDK(javaVersion, os, arch)
+		def antHome = tool(type:'ant', name:'apache-ant-latest')
 		dir ("${WORKSPACE}/${agentId}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
-			wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
-				withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk19-latest' }"]) {
-				withEnv(["javaDownload=${jdkURL(javaVersion, os, arch)}" , "WORKSPACE=${pwd()}"]) {
-				withAnt(installation: 'apache-ant-latest') {
+			withEnv([
+				"JAVA_HOME=${javaHome}", "ANT_HOME=${ antHome }",
+				"WORKSPACE=${pwd()}", "PATH=${javaHome}/bin:${antHome}/bin:${PATH}",
+				"ANT_OPTS=-Djava.io.tmpdir=${pwd()}/tmp -Djava.security.manager=allow"
+			]) {
+				xvnc(useXauthority: true) {
 					if (os =='linux') {
 						def ws = 'gtk'
 						sh '''#!/bin/bash -x
 							buildId=$(echo $buildId|tr -d ' ')
-							RAW_DATE_START="$(date +%s )"
-							
 							cat /etc/*release
-							echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
-							echo -e "\\n\\t whoami:  $( whoami )\\n"
-							echo -e "\\n\\t uname -a: $(uname -a)\\n"
+							echo "whoami:  $(whoami)"
+							echo "uname -a: $(uname -a)"
 							
 							# 0002 is often the default for shell users, but it is not when ran from
 							# a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
 							# we create on shared area.
 							oldumask=$(umask)
 							umask 0002
-							
 							echo "umask explicitly set to 0002, old value was $oldumask"
 							
 							# we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
@@ -134,47 +151,23 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 							cat buildproperties.shsource
 							source buildproperties.shsource
 							
-							set -x
-							mkdir -p ${WORKSPACE}/java
-							pushd ${WORKSPACE}/java
-							wget -O jdk.tar.gz --no-verbose ${javaDownload}
-							tar xzf jdk.tar.gz
-							rm jdk.tar.gz
-							export JAVA_HOME_NEW=$(pwd)/$(ls)
-							popd
-							set +x
-							
-							export PATH=${JAVA_HOME_NEW}/bin:${ANT_HOME}/bin:${PATH}
-							
 							echo JAVA_HOME: $JAVA_HOME
-							export JAVA_HOME=$JAVA_HOME_NEW
 							echo ANT_HOME: $ANT_HOME
 							echo PATH: $PATH
-							export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp ${secManager}"
 							
 							env 1>envVars.txt 2>&1
 							ant -diagnostics 1>antDiagnostics.txt 2>&1
 							java -XshowSettings -version 1>javaSettings.txt 2>&1
 							
-							ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId \
+							ant -f getEBuilder.xml -DbuildId=$buildId \
 							  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \
 							  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \
 							  -Dosgi.os=''' + os + ''' -Dosgi.ws=''' + ws + ''' -Dosgi.arch=''' + arch + ''' \
 							  -DtestSuite=${testsToRun}
-							
-							RAW_DATE_END="$(date +%s )"
-							
-							echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
-							
-							TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
-							
-							echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
 						'''
 					} else{
 						error('Not yet implemented OS: ' + os)
 					}
-				}
-				}
 				}
 			}
 		}
@@ -200,7 +193,7 @@ def createLabeledAgent(String agentLabel){
 	return { body -> node(agentLabel) { stage('Run tests') { body() } } }
 }
 
-def jdkURL(String version, String os, String arch) {
+def installJDK(String version, String os, String arch, String releaseType='ga') {
 	// Translate os/arch names that are different in the Adoptium API
 	if (os == 'win32') {
 		os == 'windows'
@@ -208,7 +201,10 @@ def jdkURL(String version, String os, String arch) {
 		os == 'mac'
 	}
 	if (arch == 'x86_64') {
-		os == 'x64'
+		arch == 'x64'
 	}
-	return "https://api.adoptium.net/v3/binary/latest/${version}/ga/${os}/${arch}/jdk/hotspot/normal/eclipse"
+	dir ("${WORKSPACE}/java") {
+		sh "curl -L https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse | tar -xzf -"
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
+	}
 }
