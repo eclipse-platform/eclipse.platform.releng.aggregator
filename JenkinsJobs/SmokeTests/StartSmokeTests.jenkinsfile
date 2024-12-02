@@ -1,66 +1,74 @@
+
+def AGENT_OPENSUSE_LEAP = createKubernetesAgent('eclipse/platformreleng-opensuse-gtk3-metacity:15')
+def AGENT_CENTOS9 = createKubernetesAgent('eclipse/platformreleng-centos-gtk4-mutter:9')
+def AGENT_ARM64 = createLabeledAgent('arm64')
+def AGENT_PPCLE = createLabeledAgent('ppctest')
+
 pipeline {
 	options {
 		timeout(time: 300, unit: 'MINUTES')
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 	}
-  agent any
-
-  stages {
-	  stage('Trigger tests'){
+	agent any
+	parameters {
+		string(name: 'buildId', description: 'Build Id to test (such as I20240611-1800, N20120716-0800).')
+		string(name: 'testsToRun', defaultValue: 'ui', description: 'This can be any ant target from https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml')
+	}
+	stages {
+		stage('Trigger tests'){
           parallel {
               stage('Opensuse Leap Java17'){
-                  steps {
-                        build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('17', 'linux', 'x64'))]
-                  }
+					steps { script {
+						runSmokeTest(AGENT_OPENSUSE_LEAP, 'opensuse_leap', 'linux', 'x86_64', '17')
+					} }
               }
               stage('Centos 9.x Java17'){
-                  steps {
-                        build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('17', 'linux', 'x64'))]
-                  }
+					steps { script {
+						runSmokeTest(AGENT_CENTOS9, 'centos9', 'linux', 'x86_64', '17')
+					} }
               }
               stage('Centos 8 arm64 Java17'){
-                  steps {
-                        build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('17', 'linux', 'aarch64'))]
-                  }
+					steps { script {
+						runSmokeTest(AGENT_ARM64, 'centos8_arm', 'linux', 'aarch64', '17')
+					} }
               }
               stage('Centos 8.x ppc64le Java17'){
-                  steps {
-                        build job: 'SmokeTests/ep-smoke-test-ppcle', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('17', 'linux', 'ppc64le'))]
-                  }
+					steps { script {
+						runSmokeTest(AGENT_PPCLE, 'centos8_ppc', 'linux', 'ppc64le', '17')
+					} }
               }
 			  stage('Opensuse Leap Java21'){
-				  steps {
-						build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('21', 'linux', 'x64'))]
-				  }
+					steps { script {
+						runSmokeTest(AGENT_OPENSUSE_LEAP, 'opensuse_leap', 'linux', 'x86_64', '21')
+					} }
 			  }
 			  stage('Centos 9.x Java21'){
-				  steps {
-						build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('21', 'linux', 'x64'))]
-				  }
+					steps { script {
+						runSmokeTest(AGENT_CENTOS9, 'centos9', 'linux', 'x86_64', '21')
+					} }
 			  }
 			  stage('Centos 8 arm64 Java21'){
-				  steps {
-						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('21', 'linux', 'aarch64'))]
-				  }
+					steps { script {
+						runSmokeTest(AGENT_ARM64, 'centos8_arm', 'linux', 'aarch64', '21')
+					} }
 			  }
 			  stage('Opensuse Leap Java23'){
-				  steps {
-						build job: 'SmokeTests/ep-smoke-test-opensuse-leap', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('23', 'linux', 'x64'))]
-				  }
+					steps { script {
+						runSmokeTest(AGENT_OPENSUSE_LEAP, 'opensuse_leap', 'linux', 'x86_64', '23')
+					} }
 			  }
 			  stage('Centos 9.x Java23'){
-				  steps {
-						build job: 'SmokeTests/ep-smoke-test-centos9', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('23', 'linux', 'x64'))]
-				  }
+					steps { script {
+						runSmokeTest(AGENT_CENTOS9, 'centos9', 'linux', 'x86_64', '23')
+					} }
 			  }
 			  stage('Centos 8 arm64 Java23'){
-				  steps {
-						build job: 'SmokeTests/ep-smoke-test-arm64', parameters: [string(name: 'buildId', value: "${params.buildId}"), string(name: 'javaDownload', value: jdkURL('23', 'linux', 'aarch64'))]
-				  }
+					steps { script {
+						runSmokeTest(AGENT_ARM64, 'centos8_arm', 'linux', 'aarch64', '23')
+					} }
 			  }
-          }
-          
+			}
 		}
 	}
 	post {
@@ -91,6 +99,116 @@ pipeline {
 	}
 }
 
+def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, String javaVersion) {
+	executorAgent.call({
+		cleanWs()
+		dir ("${WORKSPACE}/${agentId}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
+			wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
+				withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk19-latest' }"]) {
+				withEnv(["javaDownload=${jdkURL(javaVersion, os, arch)}" , "WORKSPACE=${pwd()}"]) {
+				withAnt(installation: 'apache-ant-latest') {
+					if (os =='linux') {
+						def ws = 'gtk'
+						sh '''#!/bin/bash -x
+							buildId=$(echo $buildId|tr -d ' ')
+							RAW_DATE_START="$(date +%s )"
+							
+							cat /etc/*release
+							echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
+							echo -e "\\n\\t whoami:  $( whoami )\\n"
+							echo -e "\\n\\t uname -a: $(uname -a)\\n"
+							
+							# 0002 is often the default for shell users, but it is not when ran from
+							# a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
+							# we create on shared area.
+							oldumask=$(umask)
+							umask 0002
+							
+							echo "umask explicitly set to 0002, old value was $oldumask"
+							
+							# we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
+							mkdir -p tmp
+							
+							wget -O getEBuilder.xml --no-verbose --no-check-certificate https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+							wget -O buildproperties.shsource --no-check-certificate https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
+							cat buildproperties.shsource
+							source buildproperties.shsource
+							
+							set -x
+							mkdir -p ${WORKSPACE}/java
+							pushd ${WORKSPACE}/java
+							wget -O jdk.tar.gz --no-verbose ${javaDownload}
+							tar xzf jdk.tar.gz
+							rm jdk.tar.gz
+							export JAVA_HOME_NEW=$(pwd)/$(ls)
+							popd
+							set +x
+							
+							export PATH=${JAVA_HOME_NEW}/bin:${ANT_HOME}/bin:${PATH}
+							
+							echo JAVA_HOME: $JAVA_HOME
+							export JAVA_HOME=$JAVA_HOME_NEW
+							echo ANT_HOME: $ANT_HOME
+							echo PATH: $PATH
+							export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp ${secManager}"
+							
+							env 1>envVars.txt 2>&1
+							ant -diagnostics 1>antDiagnostics.txt 2>&1
+							java -XshowSettings -version 1>javaSettings.txt 2>&1
+							
+							ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId \
+							  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \
+							  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \
+							  -Dosgi.os=''' + os + ''' -Dosgi.ws=''' + ws + ''' -Dosgi.arch=''' + arch + ''' \
+							  -DtestSuite=${testsToRun}
+							
+							RAW_DATE_END="$(date +%s )"
+							
+							echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
+							
+							TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
+							
+							echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
+						'''
+					} else{
+						error('Not yet implemented OS: ' + os)
+					}
+				}
+				}
+				}
+			}
+		}
+		archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, */*.properties, */*.txt'
+		junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+	})
+}
+
+def createKubernetesAgent(String imageName){
+	return { body ->
+		podTemplate(inheritFrom: 'basic' /* inherit general configuration */, containers: [
+			containerTemplate(name: 'custom', image: imageName,
+				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
+				resourceLimitCpu:'1000m', resourceLimitMemory:'2048Mi',
+				alwaysPullImage: true, command: 'cat', ttyEnabled: true)
+		]) {
+			node(POD_LABEL) { stage('Run tests') { container('custom') { body() } } }
+		}
+	}
+}
+
+def createLabeledAgent(String agentLabel){
+	return { body -> node(agentLabel) { stage('Run tests') { body() } } }
+}
+
 def jdkURL(String version, String os, String arch) {
+	// Translate os/arch names that are different in the Adoptium API
+	if (os == 'win32') {
+		os == 'windows'
+	} else if (os == 'macosx') {
+		os == 'mac'
+	}
+	if (arch == 'x86_64') {
+		os == 'x64'
+	}
 	return "https://api.adoptium.net/v3/binary/latest/${version}/ga/${os}/${arch}/jdk/hotspot/normal/eclipse"
 }
