@@ -1,16 +1,21 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
+def BUILD_CONFIGURATIONS = [ 
+  [name: 'macM1', arch: 'aarch64', agentLabel: 'nc1ht-macos11-arm64', javaHome: '/usr/local/openjdk-17/Contents/Home' ],
+  [name: 'mac64', arch: 'x86_64',  agentLabel: 'nc1ht-macos11-arm64', javaHome: '/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home' ]
+]
+
 for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
+  for (BUILD_CONFIG in BUILD_CONFIGURATIONS){
 
-	job('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-mac64-java17'){
-	  description('Run Eclipse SDK Tests for 64 bit Mac (and 64 bit VM and Eclipse)')
+	job('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-' + BUILD_CONFIG.name + '-java17'){
+	  description('Run Eclipse SDK Tests for ' + BUILD_CONFIG.arch + ' Mac (and ' + BUILD_CONFIG.arch + ' VM and Eclipse)')
 	
 	  logRotator {
-	    daysToKeep(5)
-	    numToKeep(10)
+	    numToKeep(5)
 	  }
 	
 	  parameters {
@@ -24,7 +29,6 @@ for (STREAM in STREAMS){
 	  jdk('openjdk-jdk11-latest')
 	
 	  wrappers { //adds pre/post actions
-	
 	    timestamps()
 	    timeout {
 	      absolute(600)
@@ -107,7 +111,7 @@ curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4
 cat getEBuilder.xml
 source buildProperties.sh
 
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
+export JAVA_HOME=''' + BUILD_CONFIG.javaHome + '''
 export ANT_HOME=/opt/homebrew/Cellar/ant/1.10.11/libexec
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
 
@@ -115,12 +119,15 @@ echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
 
-
 env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DtestSuite=${testSuite}
+ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId \\
+  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \\
+  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
+  -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=''' + BUILD_CONFIG.arch + ''' \\
+  -DtestSuite=${testSuite}
 
 RAW_DATE_END="$(date +%s )"
 
@@ -155,4 +162,5 @@ echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
     }
   }
  }
+}
 }
