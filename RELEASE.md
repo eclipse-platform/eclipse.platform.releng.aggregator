@@ -161,7 +161,7 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
          - Find the *unqualified* version of the artifact `org.eclipse.jdt.core.complier.batch_${ecjversion}.jar`, i.e. the version consisting only of the _major_._minor_._service_ part, but without qualifier.
          It's the version of the `org.eclipse.jdt:ecj` artifact at Maven-Central, about to be relased.
        * Update the `cbi-ecj-version` in [eclipse.platform.releng.aggregator/eclipse-platform-parent/pom.xml](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse-platform-parent/pom.xml)
-       to the exact version of the `org.eclipse.jdt.core.complier.batch` bundle, e.g.: `3.40.0`
+       to the exact version of the to be released`org.eclipse.jdt.core.complier.batch` bundle, e.g.: `3.40.0`
 
 #### **Update the Build Calendar:**
   - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).
