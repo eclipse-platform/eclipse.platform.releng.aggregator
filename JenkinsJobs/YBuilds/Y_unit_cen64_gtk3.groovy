@@ -1,11 +1,18 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
+def BUILD_CONFIGURATIONS = [ 
+  [javaVersion: 17, javaDownload: 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz' ],
+  [javaVersion: 21, javaDownload: 'https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz' ],
+  [javaVersion: 24, javaDownload: 'https://download.java.net/java/early_access/jdk24/18/GPL/openjdk-24-ea+18_linux-x64_bin.tar.gz' ]
+]
+
 for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
-
-	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java21'){
+  for (BUILD_CONFIG in BUILD_CONFIGURATIONS){
+	
+	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java' + BUILD_CONFIG.javaVersion){
 	
 	  logRotator {
 	    numToKeep(5)
@@ -13,7 +20,7 @@ for (STREAM in STREAMS){
 	
 	  parameters {
 	    stringParam('buildId', null, null)
-	    stringParam('javaDownload', 'https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz', null)
+	    stringParam('javaDownload', BUILD_CONFIG.javaDownload, null)
 	  }
 	
 	  definition {
@@ -28,7 +35,7 @@ pipeline {
 	}
   agent {
     kubernetes {
-      label 'centos-unitpod21'
+      label 'centos-unitpod''' + BUILD_CONFIG.javaVersion + '''\'
       defaultContainer 'custom'
       yaml """
 apiVersion: v1
@@ -89,7 +96,7 @@ spec:
           steps {
               container ('custom'){
                   wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
-                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk18-latest' }"]) {
+                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk15-latest' }"]) {
                           withAnt(installation: 'apache-ant-latest') {
                               sh \'\'\'#!/bin/bash -x
                                 
@@ -165,4 +172,5 @@ spec:
     }
   }
  }
+}
 }
