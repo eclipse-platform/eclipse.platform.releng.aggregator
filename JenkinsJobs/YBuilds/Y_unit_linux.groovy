@@ -11,13 +11,8 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
   for (BUILD_CONFIG in BUILD_CONFIGURATIONS){
-	
+
     pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-linux-x86_64-java' + BUILD_CONFIG.javaVersion){
-	
-	  logRotator {
-	    numToKeep(5)
-	  }
-	
 	  parameters {
 	    stringParam('buildId', null, null)
 	    stringParam('javaDownload', BUILD_CONFIG.javaDownload, null)
@@ -107,12 +102,16 @@ pipeline {
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-              build job: 'YPBuilds/ep-collectYbuildResults', parameters: [string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"), string(name: 'buildURL', value: "${BUILD_URL}"), string(name: 'buildID', value: "${params.buildId}")], wait: false
+              build job: 'YPBuilds/ep-collectYbuildResults', wait: false, parameters: [
+                string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"),
+                string(name: 'buildURL', value: "${BUILD_URL}"),
+                string(name: 'buildID', value: "${params.buildId}")
+              ]
           }
       }
   }
 }
-      ''')
+''')
     }
   }
  }
