@@ -12,7 +12,7 @@ for (STREAM in STREAMS){
   def MINOR = STREAM.split('\\.')[1]
   for (BUILD_CONFIG in BUILD_CONFIGURATIONS){
 	
-	pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-cen64-gtk3-java' + BUILD_CONFIG.javaVersion){
+    pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-linux-x86_64-java' + BUILD_CONFIG.javaVersion){
 	
 	  logRotator {
 	    numToKeep(5)
