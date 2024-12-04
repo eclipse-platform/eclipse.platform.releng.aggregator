@@ -34,67 +34,12 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 	}
   agent {
-    kubernetes {
-      label 'centos-unitpod''' + BUILD_CONFIG.javaVersion + '''\'
-      defaultContainer 'custom'
-      yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: "jnlp"
-    resources:
-      limits:
-        memory: "2048Mi"
-        cpu: "2000m"
-      requests:
-        memory: "512Mi"
-        cpu: "1000m"
-  - name: "custom"
-    image: "eclipse/platformreleng-centos-gtk3-metacity:8"
-    imagePullPolicy: "Always"
-    resources:
-      limits:
-        memory: "4096Mi"
-        cpu: "1000m"
-      requests:
-        # memory needs to be at least 1024Mi, see https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2478
-        memory: "1024Mi"
-        cpu: "1000m"
-    securityContext:
-      privileged: false
-    tty: true
-    command:
-    - cat
-    volumeMounts:
-    - mountPath: "/opt/tools"
-      name: "volume-0"
-      readOnly: false
-    workingDir: "/home/jenkins/agent"
-  nodeSelector: {}
-  restartPolicy: "Never"
-  volumes:
-  - name: "volume-0"
-    persistentVolumeClaim:
-      claimName: "tools-claim-jiro-releng"
-      readOnly: true
-  - configMap:
-      name: "known-hosts"
-    name: "volume-1"
-  - emptyDir:
-      medium: ""
-    name: "workspace-volume"
-  - emptyDir:
-      medium: ""
-    name: "volume-3"
-"""
-    }
+    label 'ubuntu-2404'
   }
 
   stages {
       stage('Run tests'){
           steps {
-              container ('custom'){
                   wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
                       withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk15-latest' }"]) {
                           withAnt(installation: 'apache-ant-latest') {
@@ -157,7 +102,6 @@ spec:
                                 
                                 echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
                               \'\'\'
-                          }
                       }
                   }
               }
