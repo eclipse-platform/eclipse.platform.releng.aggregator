@@ -8,7 +8,7 @@ for (STREAM in STREAMS){
     pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-win32-x86_64-java17'){
 	  description('Run Eclipse SDK Windows Tests ')
 	  parameters {
-	    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
+	    stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
 	  }
       definition {
         cps {
@@ -25,6 +25,13 @@ pipeline {
   }
   stages {
       stage('Run tests'){
+          environment {
+              // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
+              JAVA_HOME = 'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-17.0.11+9'
+              ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
+              PATH = "${JAVA_HOME}\\\\bin;${ANT_HOME}\\\\bin;${PATH}"
+              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}\\\\tmp -Djava.security.manager=allow"
+          }
           steps {
               cleanWs() // workspace not cleaned by default
               bat \'\'\'
@@ -46,13 +53,22 @@ For /F "tokens=1* delims==" %%A IN (buildProperties.properties) DO (
  IF "%%A"=="EBUILDER_HASH " set EBUILDER_HASH=%%B
 ) 
 echo on
+
 set STREAM
 set EBUILDER_HASH
-set JAVA_HOME="C:\\PROGRA~1\\ECLIPS~1\\jdk-17.0.5.8-hotspot\\"
 set JAVA_HOME
-set Path="C:\\PROGRA~1\\ECLIPS~1\\jdk-17.0.5.8-hotspot\\bin";C:\\ProgramData\\Boxstarter;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\ProgramData\\chocolatey\\bin;C:\\tools\\cygwin\\bin;C:\\Program Files\\IcedTeaWeb\\WebStart\\bin;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Users\\jenkins_vnc\\AppData\\Local\\Microsoft\\WindowsApps;%PATH%
+set ANT_HOME
+set PATH
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=%WORKSPACE%\\tmp -Djvm="C:\\PROGRA~1\\ECLIPS~1\\jdk-17.0.5.8-hotspot\\bin\\java.exe" -DbuildId=%buildId%  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH%  -DdownloadURL="https://download.eclipse.org/eclipse/downloads/drops4/%buildId%" -Dargs=all -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 -DtestSuite=all
+env 1>envVars.txt 2>&1
+cmd /c ant -diagnostics 1>antDiagnostics.txt 2>&1
+java -XshowSettings -version 1>javaSettings.txt 2>&1
+
+ant -f getEBuilder.xml -DbuildId=%buildId% ^
+  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH% ^
+  -DdownloadURL="https://download.eclipse.org/eclipse/downloads/drops4/%buildId%" ^
+  -Dargs=all -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 ^
+  -DtestSuite=all
 \'\'\'
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'

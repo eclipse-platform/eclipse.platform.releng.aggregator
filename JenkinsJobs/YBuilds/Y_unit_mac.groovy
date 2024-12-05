@@ -1,7 +1,7 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
-def BUILD_CONFIGURATIONS = [ 
+def BUILD_CONFIGURATIONS = [
   [arch: 'aarch64', agentLabel: 'nc1ht-macos11-arm64', javaHome: '/usr/local/openjdk-17/Contents/Home' ],
   [arch: 'x86_64',  agentLabel: 'nc1ht-macos11-arm64', javaHome: '/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home' ]
 ]
@@ -14,8 +14,7 @@ for (STREAM in STREAMS){
     pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-macosx-' + BUILD_CONFIG.arch + '-java17'){
 	  description('Run Eclipse SDK Tests for ' + BUILD_CONFIG.arch + ' Mac (and ' + BUILD_CONFIG.arch + ' VM and Eclipse)')
 	  parameters {
-	    stringParam('buildId', null, 'Build Id to test (such as I20120717-0800, N20120716-0800). ')
-	    stringParam('testSuite', 'all', null)
+	    stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
 	  }
       definition {
         cps {
@@ -32,16 +31,18 @@ pipeline {
   }
   stages {
       stage('Run tests'){
+          environment {
+              // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
+              JAVA_HOME = \'''' + BUILD_CONFIG.javaHome + ''''
+              ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
+              PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
+              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
+          }
           steps {
               cleanWs() // workspace not cleaned by default
               sh \'\'\'#!/bin/bash -x
-
-RAW_DATE_START="$(date +%s )"
-
-echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
-
-echo -e "\\n\\t whoami:  $( whoami )\\n"
-echo -e "\\n\\t uname -a: $(uname -a)\\n"
+echo "whoami:  $(whoami)"
+echo "uname -a: $(uname -a)"
 
 # unset commonly defined system variables, which we either do not need, or want to set ourselves.
 # (this is to improve consistency running on one machine versus another)
@@ -64,10 +65,6 @@ curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4
 cat getEBuilder.xml
 source buildProperties.sh
 
-export JAVA_HOME=''' + BUILD_CONFIG.javaHome + '''
-export ANT_HOME=/opt/homebrew/Cellar/ant/1.10.11/libexec
-export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}
-
 echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME
 echo PATH: $PATH
@@ -76,19 +73,11 @@ env  1>envVars.txt 2>&1
 ant -diagnostics  1>antDiagnostics.txt 2>&1
 java -XshowSettings -version  1>javaSettings.txt 2>&1
 
-ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId \\
+ant -f getEBuilder.xml -DbuildId=${buildId} \\
   -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \\
   -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
   -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=''' + BUILD_CONFIG.arch + ''' \\
-  -DtestSuite=${testSuite}
-
-RAW_DATE_END="$(date +%s )"
-
-echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
-
-TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
-
-echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
+  -DtestSuite=all
 \'\'\'
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
