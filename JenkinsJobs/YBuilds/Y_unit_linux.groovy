@@ -1,10 +1,10 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
-def BUILD_CONFIGURATIONS = [ 
-  [javaVersion: 17, javaDownload: 'https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz' ],
-  [javaVersion: 21, javaDownload: 'https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz' ],
-  [javaVersion: 24, javaDownload: 'https://download.java.net/java/early_access/jdk24/18/GPL/openjdk-24-ea+18_linux-x64_bin.tar.gz' ]
+def BUILD_CONFIGURATIONS = [
+  [javaVersion: 17, javaHome: '''installJDK('https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz')''' ],
+  [javaVersion: 21, javaHome: '''installJDK('https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz')''' ],
+  [javaVersion: 24, javaHome: '''installJDK('https://download.java.net/java/early_access/jdk24/18/GPL/openjdk-24-ea+18_linux-x64_bin.tar.gz')''' ]
 ]
 
 for (STREAM in STREAMS){
@@ -14,8 +14,7 @@ for (STREAM in STREAMS){
 
     pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-linux-x86_64-java' + BUILD_CONFIG.javaVersion){
 	  parameters {
-	    stringParam('buildId', null, null)
-	    stringParam('javaDownload', BUILD_CONFIG.javaDownload, null)
+	    stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
 	  }
 	
 	  definition {
@@ -31,23 +30,24 @@ pipeline {
   agent {
     label 'ubuntu-2404'
   }
-
   stages {
       stage('Run tests'){
+          environment {
+              // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
+              JAVA_HOME = ''' + BUILD_CONFIG.javaHome + '''
+              ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
+              PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
+              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
+          }
           steps {
-                  wrap([$class: 'Xvnc', takeScreenshot: false, useXauthority: true]) {
-                      withEnv(["JAVA_HOME_NEW=${ tool 'openjdk-jdk15-latest' }"]) {
-                          withAnt(installation: 'apache-ant-latest') {
+              xvnc(useXauthority: true) {
                               sh \'\'\'#!/bin/bash -x
                                 
                                 buildId=$(echo $buildId|tr -d ' ')
-                                RAW_DATE_START="$(date +%s )"
-                                
                                 export LANG=en_US.UTF-8
                                 cat /etc/*release
-                                echo -e "\\n\\tRAW Date Start: ${RAW_DATE_START} \\n"
-                                echo -e "\\n\\t whoami:  $( whoami )\\n"
-                                echo -e "\\n\\t uname -a: $(uname -a)\\n"
+                                echo "whoami:  $(whoami)"
+                                echo "uname -a: $(uname -a)"
                                 
                                 # 0002 is often the default for shell users, but it is not when ran from
                                 # a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
@@ -65,40 +65,20 @@ pipeline {
                                 cat ${WORKSPACE}/buildproperties.shsource
                                 source ${WORKSPACE}/buildproperties.shsource
                                 
-                                set -x
-                                mkdir -p ${WORKSPACE}/java
-                                pushd ${WORKSPACE}/java
-                                wget -O jdk.tar.gz --no-verbose ${javaDownload}
-                                tar xzf jdk.tar.gz
-                                rm jdk.tar.gz
-                                export JAVA_HOME_NEW=$(pwd)/$(ls)
-                                popd
-                                set +x
-                                
-                                export PATH=${JAVA_HOME_NEW}/bin:${ANT_HOME}/bin:${PATH}                                
-                                
                                 echo JAVA_HOME: $JAVA_HOME
-                                export JAVA_HOME=$JAVA_HOME_NEW
                                 echo ANT_HOME: $ANT_HOME
                                 echo PATH: $PATH
-                                export ANT_OPTS="${ANT_OPTS} -Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
                                 
                                 env 1>envVars.txt 2>&1
                                 ant -diagnostics 1>antDiagnostics.txt 2>&1
                                 java -XshowSettings -version 1>javaSettings.txt 2>&1
                                 
-                                ant -f getEBuilder.xml -Djava.io.tmpdir=${WORKSPACE}/tmp -DbuildId=$buildId  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH}  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId}  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DtestSuite=all -Djvm=${JAVA_HOME}/bin/java
-                                
-                                RAW_DATE_END="$(date +%s )"
-                                
-                                echo -e "\\n\\tRAW Date End: ${RAW_DATE_END} \\n"
-                                
-                                TOTAL_TIME=$((${RAW_DATE_END} - ${RAW_DATE_START}))
-                                
-                                echo -e "\\n\\tTotal elapsed time: ${TOTAL_TIME} \\n"
+                                ant -f getEBuilder.xml -DbuildId=${buildId} \\
+                                  -DeclipseStream=$STREAM -DEBUILDER_HASH=${EBUILDER_HASH} \\
+                                  -DdownloadURL=https://download.eclipse.org/eclipse/downloads/drops4/${buildId} \\
+                                  -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 \\
+                                  -DtestSuite=all
                               \'\'\'
-                      }
-                  }
               }
               archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
               junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
@@ -110,6 +90,13 @@ pipeline {
           }
       }
   }
+}
+
+def installJDK(String downloadURL) {
+	dir ("${WORKSPACE}/java") {
+		sh "curl -L ${downloadURL} | tar -xzf -"
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
+	}
 }
 ''')
     }
