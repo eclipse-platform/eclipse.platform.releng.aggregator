@@ -59,11 +59,7 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 # we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
 mkdir -p tmp
 
-curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-cat getEBuilder.xml
-curl -o buildProperties.sh https://download.eclipse.org/eclipse/downloads/drops4/$buildId/buildproperties.shsource
-cat getEBuilder.xml
-source buildProperties.sh
+curl -o getEBuilder.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/production/testScripts/bootstrap/getEBuilder.xml
 
 echo JAVA_HOME: $JAVA_HOME
 echo ANT_HOME: $ANT_HOME

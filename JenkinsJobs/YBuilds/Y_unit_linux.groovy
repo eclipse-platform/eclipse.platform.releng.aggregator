@@ -60,10 +60,7 @@ pipeline {
                                 # we want java.io.tmpdir to be in $WORKSPACE, but must already exist, for Java to use it.
                                 mkdir -p ${WORKSPACE}/tmp
                                 
-                                wget -O ${WORKSPACE}/getEBuilder.xml --no-verbose --no-check-certificate https://download.eclipse.org/eclipse/relengScripts/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-                                wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.shsource
-                                cat ${WORKSPACE}/buildproperties.shsource
-                                source ${WORKSPACE}/buildproperties.shsource
+                                curl -o getEBuilder.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/production/testScripts/bootstrap/getEBuilder.xml
                                 
                                 echo JAVA_HOME: $JAVA_HOME
                                 echo ANT_HOME: $ANT_HOME
