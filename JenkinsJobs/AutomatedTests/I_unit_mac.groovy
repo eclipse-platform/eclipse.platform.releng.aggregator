@@ -45,11 +45,6 @@ pipeline {
 echo " whoami:  $(whoami)"
 echo " uname -a: $(uname -a)"
 
-# unset commonly defined system variables, which we either do not need, or want to set ourselves.
-# (this is to improve consistency running on one machine versus another)
-echo "Unsetting variables: JAVA_BINDIR JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH"
-unset -v JAVA_BINDIR JAVA_ROOT JDK_HOME JRE_HOME CLASSPATH
-
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
 # we create on shared area.

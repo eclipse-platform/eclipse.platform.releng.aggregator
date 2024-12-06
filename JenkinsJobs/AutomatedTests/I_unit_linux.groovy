@@ -2,12 +2,18 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 def STREAMS = config.Streams
 def JAVA_VERSIONS = ['17', '21', '23']
 
+def BUILD_CONFIGURATIONS = [
+  [javaVersion: 17, javaHome: "tool(type:'jdk', name:'openjdk-jdk17-latest')" ],
+  [javaVersion: 21, javaHome: "tool(type:'jdk', name:'openjdk-jdk21-latest')" ],
+  [javaVersion: 23, javaHome: "installJDK('23', 'linux', 'x86_64', 'ea')" ]
+]
+
 for (STREAM in STREAMS){
-for (JAVA_VERSION in JAVA_VERSIONS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
+  for (BUILD_CONFIG in BUILD_CONFIGURATIONS){
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-linux-x86_64-java' + JAVA_VERSION){
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-linux-x86_64-java' + BUILD_CONFIG.javaVersion){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
     parameters { // Define parameters in job configuration to make them available from the very first build onwards
       stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
@@ -27,23 +33,11 @@ pipeline {
     label 'ubuntu-2404'
   }
 
-  stages {''' + (JAVA_VERSION != '23' ? '' : '''
-      stage('Download latest JDK-23 EA') {
-          steps {
-              script{
-                  def path = "${WORKSPACE}/tools"
-                  dir(path) {
-                      sh 'curl -L https://staging-api.adoptium.net/v3/binary/latest/23/ea/linux/x64/jdk/hotspot/normal/eclipse?project=jdk | tar -xzf -'
-                      JAVA_23_HOME = path + '/' + sh(script: 'find -name "jdk-23+*"', returnStdout: true).substring(2).trim()
-                  }
-              }
-          }
-      }
-''') + '''
+  stages {
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = ''' + (JAVA_VERSION != '23' ? "tool(type:'jdk', name:'openjdk-jdk${JAVA_VERSION}-latest')" : '"${JAVA_23_HOME}"') + '''
+              JAVA_HOME = ''' + BUILD_CONFIG.javaHome + '''
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
               ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
@@ -98,7 +92,18 @@ pipeline {
       }
   }
 }
-        ''')
+
+def installJDK(String version, String os, String arch, String releaseType='ga') {
+	// Translate os/arch names that are different in the Adoptium API
+	if (arch == 'x86_64') {
+		arch == 'x64'
+	}
+	dir ("${WORKSPACE}/java") {
+		sh "curl -L https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse | tar -xzf -"
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
+	}
+}
+''')
       }
     }
   }
