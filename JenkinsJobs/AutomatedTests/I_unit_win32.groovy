@@ -37,10 +37,6 @@ pipeline {
           steps {
               cleanWs() // workspace not cleaned by default
               bat \'\'\'
-@REM May want to try and restrict path, as we do on cron jobs, so we
-@REM have more consistent conditions.
-@REM export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/bin
-
 @REM tmp must already exist, for Java to make use of it, in subsequent steps
 @REM no -p (or /p) needed on Windows. It creates 
 mkdir tmp
@@ -65,7 +61,7 @@ java -XshowSettings -version 1>javaSettings.txt 2>&1
 
 ant -f getEBuilder.xml -DbuildId=%buildId%  -DeclipseStream=%STREAM% -DEBUILDER_HASH=%EBUILDER_HASH% ^
   -DdownloadURL="https://download.eclipse.org/eclipse/downloads/drops4/%buildId%" ^
-  -Dargs=all -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 ^
+  -Dosgi.os=win32 -Dosgi.ws=win32 -Dosgi.arch=x86_64 ^
   -DtestSuite=all
 @REM For smaller test-suites see: https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/be721e33c916b03c342e7b6f334220c6124946f8/production/testScripts/configuration/sdk.tests/testScripts/test.xml#L1893-L1903
               \'\'\'
