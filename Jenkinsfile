@@ -31,6 +31,33 @@ pipeline {
 				sh 'mvn clean deploy -f eclipse.platform.releng.prereqs.sdk/pom.xml'
 			}
 		}
+		stage('Deploy RelEng scripts') {
+			when {
+				branch 'master'
+			}
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''
+						serverLocation=/home/data/httpd/download.eclipse.org/eclipse/relengScripts
+						
+						ssh genie.platform@projects-storage.eclipse.org rm -rf ${serverLocation}
+						ssh genie.platform@projects-storage.eclipse.org mkdir -p ${serverLocation}
+						
+						scp -r production genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						scp -r scripts genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						scp -r cje-production genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						
+						pushd eclipse.platform.releng.tychoeclipsebuilder/eclipse
+						scp -r buildScripts genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						popd
+						
+						pushd eclipse.platform.releng.tychoeclipsebuilder
+						scp -r entitlement genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						popd
+					'''
+				}
+			}
+		}
 		stage('Build') {
 		    when { not { branch pattern: "prepare_R.*", comparator: "REGEXP" } }
 			steps {
