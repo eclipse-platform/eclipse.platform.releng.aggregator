@@ -18,7 +18,7 @@ pipeline {
 				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
 			}
 		}
-		stage('Deploy eclipse-platform-parent pom and eclipse-sdk target') {
+		stage('Deploy parent-pom and SDK-target') {
 			when {
 				anyOf {
 					branch 'master'
@@ -38,22 +38,33 @@ pipeline {
 			steps {
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''
-						serverLocation=/home/data/httpd/download.eclipse.org/eclipse/relengScripts
+						serverBase='/home/data/httpd/download.eclipse.org/eclipse/'
+						serverTarget="${serverBase}/relengScripts"
+						serverCradle="${serverBase}/relengScripts-cradle"
+						serverGrave="${serverBase}/relengScripts-grave"
+						#To minimize the 'downtime' transfer all files to a 'cradle' folder on the server first 
+						# then move the existing folder to a 'grave' and move the 'cradle' to the desired target.
+						# Eventually delete the previously existing content from the grave.
 						
-						ssh genie.platform@projects-storage.eclipse.org rm -rf ${serverLocation}
-						ssh genie.platform@projects-storage.eclipse.org mkdir -p ${serverLocation}
+						ssh genie.platform@projects-storage.eclipse.org rm -rf ${serverCradle}
+						ssh genie.platform@projects-storage.eclipse.org mkdir -p ${serverCradle}
 						
-						scp -r production genie.platform@projects-storage.eclipse.org:${serverLocation}/.
-						scp -r scripts genie.platform@projects-storage.eclipse.org:${serverLocation}/.
-						scp -r cje-production genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						scp -r production genie.platform@projects-storage.eclipse.org:${serverCradle}
+						scp -r scripts genie.platform@projects-storage.eclipse.org:${serverCradle}
+						scp -r cje-production genie.platform@projects-storage.eclipse.org:${serverCradle}
 						
 						pushd eclipse.platform.releng.tychoeclipsebuilder/eclipse
-						scp -r buildScripts genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						scp -r buildScripts genie.platform@projects-storage.eclipse.org:${serverCradle}
 						popd
 						
 						pushd eclipse.platform.releng.tychoeclipsebuilder
-						scp -r entitlement genie.platform@projects-storage.eclipse.org:${serverLocation}/.
+						scp -r entitlement genie.platform@projects-storage.eclipse.org:${serverCradle}
 						popd
+						
+						ssh genie.platform@projects-storage.eclipse.org "\
+							mv -f ${serverTarget} ${serverGrave} ;\
+							mv -f ${serverCradle} ${serverTarget} &&\
+							rm -rf ${serverGrave}"
 					'''
 				}
 			}
