@@ -30,7 +30,7 @@ pipeline {
               JAVA_HOME = 'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-17.0.11+9'
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}\\\\bin;${ANT_HOME}\\\\bin;${PATH}"
-              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}\\\\tmp -Djava.security.manager=allow"
+              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}\\\\tmp"
           }
           steps {
               cleanWs() // workspace not cleaned by default
