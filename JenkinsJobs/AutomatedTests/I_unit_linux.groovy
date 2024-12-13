@@ -40,7 +40,7 @@ pipeline {
               JAVA_HOME = ''' + BUILD_CONFIG.javaHome + '''
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
-              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
+              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp"
           }
           steps {
               xvnc(useXauthority: true) {

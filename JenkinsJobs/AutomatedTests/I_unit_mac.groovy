@@ -37,7 +37,7 @@ pipeline {
               JAVA_HOME = \'''' + ARCHS_JAVA_HOME[ARCH] + ''''
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}/bin:${ANT_HOME}/bin:${PATH}"
-              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp -Djava.security.manager=allow"
+              ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}/tmp"
           }
           steps {
               cleanWs() // workspace not cleaned by default
