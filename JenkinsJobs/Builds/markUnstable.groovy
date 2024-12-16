@@ -15,7 +15,7 @@ job('Builds/markUnstable'){
     numToKeep(5)
   }
 
-  jdk('openjdk-jdk17-latest')
+  jdk('temurin-jdk21-latest')
 
   wrappers { //adds pre/post actions
     timestamps()
