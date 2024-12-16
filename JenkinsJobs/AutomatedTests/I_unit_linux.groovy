@@ -1,9 +1,8 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
-def JAVA_VERSIONS = ['17', '21', '23']
+def JAVA_VERSIONS = ['21', '23']
 
 def BUILD_CONFIGURATIONS = [
-  [javaVersion: 17, javaHome: "tool(type:'jdk', name:'openjdk-jdk17-latest')" ],
   [javaVersion: 21, javaHome: "tool(type:'jdk', name:'openjdk-jdk21-latest')" ],
   [javaVersion: 23, javaHome: "installJDK('23', 'linux', 'x86_64', 'ea')" ]
 ]
