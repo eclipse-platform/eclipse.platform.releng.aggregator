@@ -24,7 +24,7 @@ pipeline {
   options {
     timeout(time: 600, unit: 'MINUTES')
     timestamps()
-    buildDiscarder(logRotator(numToKeepStr:'5'))
+    buildDiscarder(logRotator(numToKeepStr:'15', artifactNumToKeepStr:'5'))
   }
   agent {
     label \'''' + ARCHS_AGENT_LABEL[ARCH] + ''''
