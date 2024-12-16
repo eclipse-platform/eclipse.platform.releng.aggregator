@@ -19,7 +19,7 @@ pipeline {
   options {
     timeout(time: 901, unit: 'MINUTES')
     timestamps()
-    buildDiscarder(logRotator(numToKeepStr:'5'))
+    buildDiscarder(logRotator(numToKeepStr:'15', artifactNumToKeepStr:'5'))
   }
   agent {
     label 'qa6xd-win11'
