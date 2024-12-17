@@ -11,6 +11,7 @@ ENV LANG=en_US.UTF-8
 RUN apt-get update -qq && apt-get install -qq -y \
       locales \
       build-essential \
+      procps \
       git \
       libgtk-3-dev \
       libgtk-4-dev \
