@@ -27,6 +27,7 @@ RUN dnf -y update && dnf -y install \
       lsof \
       wget \
       curl-minimal \
+      git \
       dbus \
       webkit2gtk3 \
       glibc-locale-source \
