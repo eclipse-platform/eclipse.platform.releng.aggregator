@@ -11,6 +11,7 @@ RUN zypper --non-interactive update && zypper --non-interactive install \
       libgtk-3-0 \
       xorg-x11-Xvnc \
       tigervnc \
+      procps \
       metacity \
       xorg-x11-fonts \
       dejavu-fonts \

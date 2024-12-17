@@ -17,6 +17,7 @@ RUN dnf -y update && dnf -y install \
       tigervnc \
       mutter \
       xorg-x11-server-utils \
+      procps-ng \
       mesa-libGL \
       xorg-x11-fonts-misc \
       xorg-x11-fonts-75dpi \
