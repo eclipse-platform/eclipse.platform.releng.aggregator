@@ -91,6 +91,7 @@ pipeline {
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-T 1C \
 						-Pbree-libs \
+						-Pjavadoc \
 						-DskipTests=true \
 						-Dcompare-version-with-baselines.skip=false \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
