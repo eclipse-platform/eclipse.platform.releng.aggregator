@@ -21,6 +21,7 @@ RUN zypper --non-interactive update && zypper --non-interactive install \
       wget \
       curl \
       unzip \
+      git-core \
       vim \
       tar \
       gzip

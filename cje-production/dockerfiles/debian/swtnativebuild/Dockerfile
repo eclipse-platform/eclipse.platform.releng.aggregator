@@ -8,7 +8,15 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 ### end
 
 ENV LANG=en_US.UTF-8
-RUN apt-get update -qq && apt-get install -qq -y locales libgtk-3-dev libgtk-4-dev freeglut3-dev webkit2gtk-driver build-essential default-jdk
+RUN apt-get update -qq && apt-get install -qq -y \
+      locales \
+      build-essential \
+      git \
+      libgtk-3-dev \
+      libgtk-4-dev \
+      freeglut3-dev \
+      webkit2gtk-driver \
+      default-jdk
 
 ENV HOME=/home/swtbuild
 ENV DISPLAY :0
