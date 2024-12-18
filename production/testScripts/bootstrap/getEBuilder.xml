@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A utility ant script get the eclipse builder from Git. 
+
+  Hudson jobs can call this script from ant as one of it first build steps.
+  Such as, start with a wget fetch from CGit (where following $dash; is literally a '-',
+  it is escaped here just for XML rules against two dashes in a comment);
+
+  curl -o getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
+
+  Then use ant to invoke the functionality. Example:
+
+  ant -f getEBuilder.xml
+
+-->
+<project
+  name="getEBuilder"
+  default="getEBuilder"
+  basedir=".">
+
+
+  <target
+    name="init"
+    unless="getEBuilderInitialized">
+  	
+    <!-- assign defaults if not on hudson, for local testing if nothing else -->
+    <property environment="env" />
+    <condition
+      property="WORKSPACE"
+      value="${env.WORKSPACE}"
+      else="${basedir}">
+      <isset property="env.WORKSPACE" />
+    </condition>
+
+    <condition
+      property="gitHost"
+      value="${env.GIT_HOST}"
+      else="https://github.com/eclipse-platform">
+      <isset property="env.GIT_HOST" />
+    </condition>
+
+    <!-- Can be provided by caller to use another branch, e.g. for testing changes -->
+    <property
+      name="testConfigurationBranch"
+      value="${buildId}"/>
+
+    <property
+      name="projectName"
+      value="eclipse.platform.releng.aggregator" />
+
+    <property
+      name="eScriptLocation"
+      value="${projectName}/production/testScripts" />
+
+    <echo message="=== Properties in 'getEBuilder.xml'" />
+    <echo message="    WORKSPACE: ${WORKSPACE}" />
+    <echo message="    projectName: ${projectName}" />
+    <echo message="    eScriptLocation: ${eScriptLocation}" />
+    <echo message="    test-configuration source git branch: ${testConfigurationBranch}" />
+
+    <property
+      name="getEBuilderInitialized"
+      value="true" />
+  </target>
+
+
+  <target
+    name="getEBuilder"
+    depends="init">
+
+    <!-- remove old one, if there, and make sure directory exists for
+      eventual checkout/copy/globmapper
+    -->
+    <delete dir="${WORKSPACE}/${projectName}" />
+    <mkdir dir="${WORKSPACE}/${projectName}" />
+
+    <antcall target="fetchEBuilderFromGit" />
+
+    <antcall target="readStream"/>
+    <property file="${WORKSPACE}/${projectName}/stream.properties"/>
+  	<echo message="eclipseStream: ${eclipseStream}" />
+
+    <ant antfile="${WORKSPACE}/${eScriptLocation}/runTests2.xml" />
+
+  </target>
+
+  <target
+    name="fetchEBuilderFromGit"
+    depends="init">
+
+    <echo message="Fetching EBuilder from Git" />
+    <!--Create a partial and shallow clone and sprase-checkout only the 'production' sub-folder -->
+    <exec executable="git"
+      dir="${WORKSPACE}" failonerror="true">
+      <arg line="clone --depth=1 --filter=tree:0 --no-checkout"/>
+      <arg value="--branch=${testConfigurationBranch}"/>
+      <arg value="${gitHost}/${projectName}.git"/>
+    </exec>
+    <exec executable="git"
+      dir="${WORKSPACE}/${projectName}" failonerror="true">
+      <arg line="sparse-checkout set --no-cone production/ eclipse-platform-parent/"/>
+    </exec>
+    <exec executable="git"
+      dir="${WORKSPACE}/${projectName}" failonerror="true">
+      <arg line="checkout"/>
+    </exec>
+
+  </target>
+  <target name="readStream"
+    unless="eclipseStream">
+    <xmlproperty
+      file="${WORKSPACE}/${projectName}/eclipse-platform-parent/pom.xml"
+      prefix="eclipse-parent"/>
+    <!-- This target is called with a separate project and writes the stream property to a file, 
+      which is read by the caller to not propagate back all properties read from the pom.xml.-->
+    <echo
+      message="eclipseStream=${eclipse-parent.project.properties.releaseVersion}.0"
+      file="${WORKSPACE}/${projectName}/stream.properties"/>
+  </target>
+
+</project>
