@@ -419,8 +419,8 @@ spec:
             container('jnlp') {
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-linux-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-linux-x86_64-java23', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macosx-aarch64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macosx-x86_64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macosx-aarch64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macosx-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
             }
