@@ -57,19 +57,14 @@ pipeline {
 						scp -r scripts genie.platform@projects-storage.eclipse.org:${serverStaging}
 						scp -r cje-production genie.platform@projects-storage.eclipse.org:${serverStaging}
 						
-						pushd eclipse.platform.releng.tychoeclipsebuilder/eclipse
-						scp -r buildScripts genie.platform@projects-storage.eclipse.org:${serverStaging}
-						popd
-						
-						pushd eclipse.platform.releng.tychoeclipsebuilder
-						scp -r entitlement genie.platform@projects-storage.eclipse.org:${serverStaging}
-						popd
+						scp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts genie.platform@projects-storage.eclipse.org:${serverStaging}
+						scp -r eclipse.platform.releng.tychoeclipsebuilder/entitlement genie.platform@projects-storage.eclipse.org:${serverStaging}
 						
 						# Create state file that contains the current commitID for later diffs in this stage's conditional
 						commitID=$(git rev-parse HEAD)
 						ssh genie.platform@projects-storage.eclipse.org "echo ${commitID}>${serverStaging}/state"
 						
-						#To minimize 'downtime', all files are first transfered to a staging folder on the server, 
+						# To minimize 'downtime', all files are first transfered to a staging folder on the server, 
 						# then the existing folder is moved to 'disposal' and the 'staging' to the desired target.
 						# Eventually the previously existing content is deleted with the 'disposal'-folder.
 						serverTarget="${serverBase}/relengScripts"
