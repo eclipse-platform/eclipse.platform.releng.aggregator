@@ -3,14 +3,14 @@ def STREAMS = config.Streams
 
 def ARCHS = ['aarch64', 'x86_64']
 def ARCHS_AGENT_LABEL = ['aarch64': 'nc1ht-macos11-arm64', 'x86_64': 'nc1ht-macos11-arm64']
-def ARCHS_JAVA_HOME = ['aarch64': '/usr/local/openjdk-17/Contents/Home', 'x86_64': '/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home']
+def ARCHS_JAVA_HOME = ['aarch64': '/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home', 'x86_64': '/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home']
 
 for (STREAM in STREAMS){
 for (ARCH in ARCHS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-macosx-' + ARCH + '-java17'){
+  pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-macosx-' + ARCH + '-java21'){
     description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
     parameters { // Define parameters in job configuration to make them available from the very first build onwards
       stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
