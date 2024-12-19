@@ -22,9 +22,6 @@ job('Releng/collectPerfResults'){
   wrappers { //adds pre/post actions
     timestamps()
     preBuildCleanup()
-    xvnc {
-      useXauthority()
-    }
     sshAgent('git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh')
     withAnt {
       installation('apache-ant-latest')
