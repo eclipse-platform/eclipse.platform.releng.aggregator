@@ -78,3 +78,4 @@ fn-addToPropFiles ECLIPSE_BUILDER_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.rel
 fn-addToPropFiles PLATFORM_PRODUCTS_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products\""
 fn-addToPropFiles PLATFORM_REPO_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository\""
 fn-addToPropFiles PLATFORM_TARGET_DIR "\"$CJE_ROOT/$AGG_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target\""
+fn-addToPropFiles TESTS_CONFIGURATIONS_EXPECTED "\"${TESTS_CONFIGURATIONS_EXPECTED}\""
