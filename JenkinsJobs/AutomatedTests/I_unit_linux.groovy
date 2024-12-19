@@ -3,7 +3,7 @@ def STREAMS = config.Streams
 def JAVA_VERSIONS = ['21', '23']
 
 def BUILD_CONFIGURATIONS = [
-  [javaVersion: 21, javaHome: "tool(type:'jdk', name:'openjdk-jdk21-latest')" ],
+  [javaVersion: 21, javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
   [javaVersion: 23, javaHome: "installJDK('23', 'linux', 'x86_64', 'ea')" ]
 ]
 
