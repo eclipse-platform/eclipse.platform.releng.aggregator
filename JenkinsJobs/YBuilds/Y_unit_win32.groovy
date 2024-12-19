@@ -5,7 +5,7 @@ for (STREAM in STREAMS){
   def MAJOR = STREAM.split('\\.')[0]
   def MINOR = STREAM.split('\\.')[1]
 
-    pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-win32-x86_64-java17'){
+    pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-win32-x86_64-java21'){
 	  description('Run Eclipse SDK Windows Tests ')
 	  parameters {
 	    stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
@@ -27,7 +27,7 @@ pipeline {
       stage('Run tests'){
           environment {
               // Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-              JAVA_HOME = 'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-17.0.11+9'
+              JAVA_HOME = 'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'
               ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
               PATH = "${JAVA_HOME}\\\\bin;${ANT_HOME}\\\\bin;${PATH}"
               ANT_OPTS = "-Djava.io.tmpdir=${WORKSPACE}\\\\tmp"

@@ -70,7 +70,7 @@ spec:
     }
   }
   tools {
-      jdk 'openjdk-jdk17-latest'
+      jdk 'temurin-jdk21-latest'
       maven 'apache-maven-latest'
   }
   environment {
@@ -428,11 +428,10 @@ spec:
 	  stage('Trigger tests'){
           steps {
               container('jnlp') {
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-linux-x86_64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-linux-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-linux-x86_64-java24', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macosx-aarch64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macosx-x86_64-java17', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macosx-aarch64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macosx-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
                 build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
               }
             }

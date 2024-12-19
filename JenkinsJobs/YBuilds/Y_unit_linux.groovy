@@ -2,7 +2,6 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 def STREAMS = config.Streams
 
 def BUILD_CONFIGURATIONS = [
-  [javaVersion: 17, javaHome: "tool(type:'jdk', name:'temurin-jdk17-latest')" ],
   [javaVersion: 21, javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
   [javaVersion: 24, javaHome: "installTemurinJDK('24', 'linux', 'x86_64', 'ea')" ]
 ]

@@ -2,8 +2,8 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 def STREAMS = config.Streams
 
 def BUILD_CONFIGURATIONS = [
-  [arch: 'aarch64', agentLabel: 'nc1ht-macos11-arm64', javaHome: '/usr/local/openjdk-17/Contents/Home' ],
-  [arch: 'x86_64',  agentLabel: 'nc1ht-macos11-arm64', javaHome: '/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home' ]
+  [arch: 'aarch64', agentLabel: 'nc1ht-macos11-arm64', javaHome: '/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home' ],
+  [arch: 'x86_64',  agentLabel: 'nc1ht-macos11-arm64', javaHome: '/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home' ]
 ]
 
 for (STREAM in STREAMS){
@@ -11,7 +11,7 @@ for (STREAM in STREAMS){
   def MINOR = STREAM.split('\\.')[1]
   for (BUILD_CONFIG in BUILD_CONFIGURATIONS){
 
-    pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-macosx-' + BUILD_CONFIG.arch + '-java17'){
+    pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-macosx-' + BUILD_CONFIG.arch + '-java21'){
 	  description('Run Eclipse SDK Tests for ' + BUILD_CONFIG.arch + ' Mac (and ' + BUILD_CONFIG.arch + ' VM and Eclipse)')
 	  parameters {
 	    stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
