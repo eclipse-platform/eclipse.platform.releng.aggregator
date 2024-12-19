@@ -12,6 +12,9 @@ pipeline {
 		maven 'apache-maven-latest'
 		jdk 'temurin-jdk21-latest'
 	}
+	environment {
+		MAVEN_OPTS = '-Xmx3G'
+	}
 	stages {
 		stage('Use master') {
 			steps {
