@@ -2,9 +2,9 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 def STREAMS = config.Streams
 
 def BUILD_CONFIGURATIONS = [
-  [javaVersion: 17, javaHome: '''installJDK('https://download.java.net/java/GA/jdk17.0.2/dfd4a8d0985749f896bed50d7138ee7f/8/GPL/openjdk-17.0.2_linux-x64_bin.tar.gz')''' ],
-  [javaVersion: 21, javaHome: '''installJDK('https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz')''' ],
-  [javaVersion: 24, javaHome: '''installJDK('https://download.java.net/java/early_access/jdk24/18/GPL/openjdk-24-ea+18_linux-x64_bin.tar.gz')''' ]
+  [javaVersion: 17, javaHome: "tool(type:'jdk', name:'temurin-jdk17-latest')" ],
+  [javaVersion: 21, javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
+  [javaVersion: 24, javaHome: "installTemurinJDK('24', 'linux', 'x86_64', 'ea')" ]
 ]
 
 for (STREAM in STREAMS){
@@ -92,9 +92,13 @@ pipeline {
   }
 }
 
-def installJDK(String downloadURL) {
+def installTemurinJDK(String version, String os, String arch, String releaseType='ga') {
+	// Translate os/arch names that are different in the Adoptium API
+	if (arch == 'x86_64') {
+		arch == 'x64'
+	}
 	dir ("${WORKSPACE}/java") {
-		sh "curl -L ${downloadURL} | tar -xzf -"
+		sh "curl -L https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse | tar -xzf -"
 		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
 	}
 }
