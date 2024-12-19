@@ -10,9 +10,8 @@
 include("buildproperties.php");
 
 $expectedTestConfigs = array();
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-macosx-x86_64-java17_macosx.cocoa.x86_64_17";
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-macosx-aarch64-java17_macosx.cocoa.aarch64_17";
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-win32-x86_64-java17_win32.win32.x86_64_17";
-$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-linux-x86_64-java17_linux.gtk.x86_64_17";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-macosx-x86_64-java21_macosx.cocoa.x86_64_21";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-macosx-aarch64-java21_macosx.cocoa.aarch64_21";
+$expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-win32-x86_64-java21_win32.win32.x86_64_21";
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-linux-x86_64-java21_linux.gtk.x86_64_21";
 $expectedTestConfigs[]="ep$STREAMMajor$STREAMMinor$TESTED_BUILD_TYPE-unit-linux-x86_64-java23_linux.gtk.x86_64_23";
