@@ -1,6 +1,14 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
+def TEST_CONFIGURATIONS = [
+  [ os: 'linux' , ws: 'gtk'  , arch: 'x86_64' , javaVersion: 21],
+  [ os: 'linux' , ws: 'gtk'  , arch: 'x86_64' , javaVersion: 23],
+  [ os: 'macosx', ws: 'cocoa', arch: 'aarch64', javaVersion: 21],
+  [ os: 'macosx', ws: 'cocoa', arch: 'x86_64' , javaVersion: 21],
+  [ os: 'win32' , ws: 'win32', arch: 'x86_64' , javaVersion: 21],
+]
+
 for (STREAM in STREAMS){
   def BRANCH = config.Branches[STREAM]
   def MAJOR = STREAM.split('\\.')[0]
@@ -80,6 +88,9 @@ spec:
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       logDir = "$CJE_ROOT/buildlogs"
+      TESTS_CONFIGURATIONS_EXPECTED = \'''' + TEST_CONFIGURATIONS.collect{c ->
+        'ep' + MAJOR + MINOR + 'I-unit-' + c.os + '-' + c.arch + '-java' + c.javaVersion + '_' + c.os + '.' + c.ws + '.' + c.arch + '_'  + c.javaVersion
+      }.join(',') + ''''
     }
   stages {
       stage('Clean Workspace'){
@@ -358,11 +369,9 @@ spec:
 		}
 	  stage('Trigger tests'){
           steps {
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-linux-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-linux-x86_64-java23', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macosx-aarch64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-macosx-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              build job: 'AutomatedTests/ep''' + MAJOR + MINOR + '''I-unit-win32-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+''' + TEST_CONFIGURATIONS.collect{ c ->
+"              build job: 'AutomatedTests/ep" + MAJOR + MINOR + 'I-unit-' + c.os + '-' + c.arch + '-' + 'java'+ c.javaVersion + '''', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false'''
+}.join('\n') + '''
               build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
           }
 		}
