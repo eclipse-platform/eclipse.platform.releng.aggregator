@@ -5,24 +5,7 @@ pipeline {
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'10'))
 	}
-	agent {
-		kubernetes { // a lean basic agent is sufficient.
-			inheritFrom 'basic' yaml '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: "jnlp"
-    resources:
-      requests:
-        memory: "512Mi"
-        cpu: "500m"
-      limits:
-        memory: "1Gi"
-        cpu: "1000m"
-'''
-		}
-	}
+	agent none
 	stages {
 		stage('Trigger tests'){
 			matrix {
@@ -72,27 +55,15 @@ spec:
 		}
 	}
 	post {
-        aborted {
-            emailext body: "Smoke Tests failed. Please go to ${BUILD_URL} and check the build failure",
-            subject: "Smoke test for ${buildId} - ABORTED", 
-            to: "sravankumarl@in.ibm.com sravan.lakkimsetti@gmail.com rahul.mohanan@ibm.com",
-            from:"genie.releng@eclipse.org"
-        }
-        failure {
-            emailext body: "Smoke Tests failed. Please go to ${BUILD_URL} and check the build failure",
-            subject: "Smoke test for ${buildId} - FAILED", 
-            to: "sravankumarl@in.ibm.com sravan.lakkimsetti@gmail.com rahul.mohanan@ibm.com",
-            from:"genie.releng@eclipse.org"
-        }
-        unstable {
-            emailext body: "Smoke Tests failed. Please go to ${BUILD_URL} and check the test failures",
-            subject: "Smoke test for ${buildId} - UNSTABLE", 
+        unsuccessful {
+            emailext subject: "Smoke test for ${buildId} - ${currentBuild.currentResult}", 
+            body: "Smoke Tests failed. Please go to ${BUILD_URL} and check the build failure",
             to: "sravankumarl@in.ibm.com sravan.lakkimsetti@gmail.com rahul.mohanan@ibm.com",
             from:"genie.releng@eclipse.org"
         }
         success {
-            emailext body: "Smoke Tests successful",
-            subject: "Smoke test for ${buildId} - SUCCESS", 
+            emailext subject: "Smoke test for ${buildId} - SUCCESS",
+            body: "Smoke Tests successful: ${BUILD_URL}",
             to: "sravankumarl@in.ibm.com sravan.lakkimsetti@gmail.com rahul.mohanan@ibm.com",
             from:"genie.releng@eclipse.org"
         }
@@ -104,6 +75,7 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 		cleanWs()
 		def javaHome = installJDK(javaVersion, os, arch)
 		def antHome = tool(type:'ant', name:'apache-ant-latest')
+		try {
 		dir ("${WORKSPACE}/${agentId}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
 			withEnv([
 				"JAVA_HOME=${javaHome}", "ANT_HOME=${ antHome }",
@@ -154,8 +126,10 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 				}
 			}
 		}
-		archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, */*.properties, */*.txt'
 		junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+		} finally {
+			archiveArtifacts allowEmptyArchive: true, artifacts: '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, */*.properties, */*.txt'
+		}
 	})
 }
 
