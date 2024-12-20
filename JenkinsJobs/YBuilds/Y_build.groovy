@@ -1,6 +1,14 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
 def STREAMS = config.Streams
 
+def TEST_CONFIGURATIONS = [
+  [ os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21],
+  [ os: 'macosx', ws:'cocoa', arch: 'x86_64', javaVersion: 21],
+  [ os: 'linux', ws:'gtk', arch: 'x86_64', javaVersion: 21],
+  [ os: 'linux', ws:'gtk', arch: 'x86_64', javaVersion: 24],
+]
+def testConfigNames = TEST_CONFIGURATIONS.collect{c-> 'ep' + MAJOR + MINOR + 'I-unit-' + c.os + '-' + c.arch + '-java' + c.javaVersion + '_' + c.os + '.' + c.ws + '.' + c.arch + '_'  + c.javaVersion}
+
 for (STREAM in STREAMS){
   def BRANCH = config.Branches[STREAM]
   def MAJOR = STREAM.split('\\.')[0]
@@ -107,10 +115,8 @@ spec:
 		}
 	  stage('Generate environment variables'){
           steps {
-              container('jnlp') {
+              dir('eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts') {
                 sh \'\'\'
-                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                    cp ../Y-build/buildproperties.txt ../buildproperties.txt
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
@@ -118,8 +124,16 @@ spec:
                         exit 1
                     fi
                 \'\'\'
-                }
-            }
+              }
+              dir('eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production') {
+                writeFile(file: 'testsConfigExpected.properties', text: 'testsConfigExpected=''' + testConfigNames.join(',') + '''\')
+                writeFile(file: 'gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/testConfigs.php', text: \'''
+                <?php
+                $expectedTestConfigs = array();
+                ''' + testConfigNames.collect(c->'$expectedTestConfigs[]="' + c + '";').join('\n') + '''
+                \''')
+              }
+          }
 		}
 	  stage('Load PGP keys'){
           environment {
@@ -222,19 +236,6 @@ spec:
                         fi
                     \'\'\'
                   }
-                }
-            }
-		}
-	  stage('Copy test configs for Y-build'){
-          steps {
-              container('jnlp') {
-                    sh \'\'\'
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/Y-build
-                        cp testConfigs.php ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/.
-                        cp testConfigs.php ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/.
-                        cp publish.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
-                        cp publish.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
-                    \'\'\'
                 }
             }
 		}
@@ -426,17 +427,14 @@ spec:
             }
 		}
 	  stage('Trigger tests'){
-          steps {
-              container('jnlp') {
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-linux-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-linux-x86_64-java24', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macosx-aarch64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'YPBuilds/ep''' + MAJOR + MINOR + '''Y-unit-macosx-x86_64-java21', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-                build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-              }
-            }
+          steps {''' + 
+TEST_CONFIGURATIONS.collect{ c ->
+"              build job: 'YPBuilds/ep" + MAJOR + MINOR + 'Y-unit-' + c.os + '-' + c.arch + '-' + 'java'+ c.javaVersion + /', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false/
+}.join('\n') +
+'''
+              build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+          }
 		}
-	}
 	post {
         failure {
             emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
