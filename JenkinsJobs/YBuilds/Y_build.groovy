@@ -74,7 +74,7 @@ spec:
       maven 'apache-maven-latest'
   }
   environment {
-      MAVEN_OPTS = "-Xmx6G"
+      MAVEN_OPTS = "-Xmx4G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       logDir = "$CJE_ROOT/buildlogs"
     }
