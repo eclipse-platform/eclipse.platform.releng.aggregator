@@ -97,7 +97,7 @@ if (file_exists("buildlogs/reporeports/index.html")) {
 ?>
 <?php
 
-  echo"<li>eclipse.platform.releng.aggregator: $BRANCH (branch or hash: $EBUILDER_HASH)</li> ";
+  echo"<li>eclipse.platform.releng.aggregator: $BRANCH</li> ";
 
 ?>
 <?php

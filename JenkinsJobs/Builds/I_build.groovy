@@ -148,7 +148,6 @@ spec:
                     env.BUILD_IID = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $BUILD_TYPE$TIMESTAMP)', returnStdout: true)
                     env.BUILD_VERSION = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
                     env.STREAM = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $STREAM)', returnStdout: true)
-                    env.EBUILDER_HASH = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $EBUILDER_HASH)', returnStdout: true)
                     env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
                   }
                 }
@@ -223,23 +222,6 @@ spec:
                         fi
                     \'\'\'
                   }
-                }
-            }
-		}
-	  stage('Create Source Bundles'){
-          steps {
-              container('jnlp') {
-                    sh \'\'\'
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                        unset JAVA_TOOL_OPTIONS 
-                        unset _JAVA_OPTIONS
-                        ./mb200_createSourceBundles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb200_createSourceBundles.sh.log
-                        if [[ ${PIPESTATUS[0]} -ne 0 ]]
-                        then
-                            echo "Failed in Create Source Bundles stage"
-                            exit 1
-                        fi
-                    \'\'\'
                 }
             }
 		}
@@ -351,7 +333,6 @@ spec:
                     env.COMPARATOR_ERRORS_BODY = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $COMPARATOR_ERRORS_BODY)', returnStdout: true)
                     env.POM_UPDATES_SUBJECT = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $POM_UPDATES_SUBJECT)', returnStdout: true)
                     env.POM_UPDATES_BODY = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $POM_UPDATES_BODY)', returnStdout: true)
-                    env.EBUILDER_HASH = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $EBUILDER_HASH)', returnStdout: true)
                     env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
                   }
                 }
