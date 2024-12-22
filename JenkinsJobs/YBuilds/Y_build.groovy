@@ -210,8 +210,6 @@ spec:
           steps {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/Y-build
-                        cp testConfigs.php ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/.
-                        cp testConfigs.php ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/.
                         cp publish.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
                         cp publish.xml ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/.
                     \'\'\'
