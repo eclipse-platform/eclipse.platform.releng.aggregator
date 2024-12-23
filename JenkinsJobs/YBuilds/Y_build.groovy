@@ -81,6 +81,10 @@ spec:
       maven 'apache-maven-latest'
   }
   environment {
+      BUILD_TYPE = 'Y'
+      BUILD_TYPE_NAME = 'Beta Java 24'
+      PATCH_OR_BRANCH_LABEL = 'java24'
+      
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       logDir = "$CJE_ROOT/buildlogs"
@@ -115,7 +119,6 @@ spec:
           steps {
                 sh \'\'\'
                     cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                    cp ../Y-build/buildproperties.txt ../buildproperties.txt
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then

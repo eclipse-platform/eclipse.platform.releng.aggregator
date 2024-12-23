@@ -64,14 +64,9 @@ When the JDT team is ready they will raise an issue to create new Y and P builds
       the 4.27 M1 jdt version is 3.19.0.v20230104-1800.
     - The plugins for `org.eclipse.jdt.java20patch/feature.xml` will need to be supplied by the JDT team. You can email them or comment on the issue, but only they know what plugins were modified and need to be listed here.
     - The modules listed in the top level pom file (`java##pathc/pom.xml) should match the modified plugins.
-  * Update the Y-build (buildproperties.txt)[cje-production/Y-build/buildproperties.txt].
-    - Update the STREAM variables to the current stream
-    - Update basebuilder to the previous release
-    - Update java version
-  * Update the P-build (buildproperties.txt)[cje-production/P-build/buildproperties.txt] and (mb300_gatherEclipseParts.sh)[cje-production/P-build/mb300_gatherEclipseParts.sh].
-    - Update the STREAM variables to the current stream
-    - Update basebuilder to the previous release
-    - Set PATCH_BUILD and PATCH_OR_BRANCH_LABEL to the name of the new maven profile created in step 1
+  * Update the Y-build (Y_build.groovy)[JenkinsJobs/YBuilds/Y_build.groovy] and (P_build.groovy)[JenkinsJobs/YBuilds/P_build.groovy].
+    - Update `PATCH_OR_BRANCH_LABEL` and `BUILD_TYPE_NAME` to the name of the new java version
+  * Update the P-build (mb300_gatherEclipseParts.sh)[cje-production/P-build/mb300_gatherEclipseParts.sh].
     - PATCH_BUILD_GENERIC in mb300_gatherEclipseParts.sh should be set to the name of the new maven profile
       - The same variable in the normal (mb300_gatherEclipseParts)[cje-production/mbscripts/mb300_gatherEclipseParts.sh] should be updated as well.
   * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
