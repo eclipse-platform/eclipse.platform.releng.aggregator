@@ -53,6 +53,11 @@ spec:
       jdk 'openjdk-jdk17-latest'
   }
   environment {
+      BUILD_TYPE = 'P'
+      BUILD_TYPE_NAME = 'Beta Java 24'
+      PATCH_OR_BRANCH_LABEL = 'java24patch'
+      PATCH_BUILD="${PATCH_OR_BRANCH_LABEL}"
+      
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       PATH = "$PATH:/opt/tools/apache-maven/latest/bin"
@@ -90,7 +95,6 @@ spec:
               container('jnlp') {
                 sh \'\'\'
                     cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                    cp ../P-build/buildproperties.txt ../buildproperties.txt
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then

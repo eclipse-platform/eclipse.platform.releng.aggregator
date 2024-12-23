@@ -85,6 +85,10 @@ spec:
       maven 'apache-maven-latest'
   }
   environment {
+      BUILD_TYPE = 'I'
+      BUILD_TYPE_NAME = 'Integration'
+      PATCH_OR_BRANCH_LABEL = 'master'
+      
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       logDir = "$CJE_ROOT/buildlogs"
