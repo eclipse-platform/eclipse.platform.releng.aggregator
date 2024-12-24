@@ -88,7 +88,7 @@ spec:
       MAVEN_OPTS = "-Xmx6G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       logDir = "$CJE_ROOT/buildlogs"
-      TESTS_CONFIGURATIONS_EXPECTED = \'''' + TEST_CONFIGURATIONS.collect{c ->
+      TEST_CONFIGURATIONS_EXPECTED = \'''' + TEST_CONFIGURATIONS.collect{c ->
         'ep' + MAJOR + MINOR + 'I-unit-' + c.os + '-' + c.arch + '-java' + c.javaVersion + '_' + c.os + '.' + c.ws + '.' + c.arch + '_'  + c.javaVersion
       }.join(',') + ''''
     }
