@@ -110,6 +110,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -Djob=${triggeringJob} \\
   -DbuildID=${buildID} \\
   -DeclipseStream=${STREAM} \\
+  "-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \\
   -DEBuilderDir=${workspace}
 
 
