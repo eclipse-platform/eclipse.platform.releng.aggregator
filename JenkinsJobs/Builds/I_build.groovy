@@ -72,7 +72,7 @@ spec:
   - name: "jnlp"
     resources:
       limits:
-        memory: "10Gi"
+        memory: "8192Mi"
         cpu: "4000m"
       requests:
         memory: "6144Mi"
@@ -85,7 +85,7 @@ spec:
       maven 'apache-maven-latest'
   }
   environment {
-      MAVEN_OPTS = "-Xmx6G"
+      MAVEN_OPTS = "-Xmx4G"
       CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
       logDir = "$CJE_ROOT/buildlogs"
       TEST_CONFIGURATIONS_EXPECTED = \'''' + TEST_CONFIGURATIONS.collect{c ->
