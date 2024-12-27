@@ -208,6 +208,9 @@ spec:
             }
 		}
 	  stage('Tag Build Inputs'){
+          environment {
+            ABORT_IF_NO_CHANGES = "${!currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').isEmpty()}" // true, if triggered by timer
+          }
           steps {
                   sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
@@ -219,6 +222,16 @@ spec:
                             exit 1
                         fi
                     \'\'\'
+                  }
+                  script {
+                    if (env.ABORT_IF_NO_CHANGES && fileExists("${WORKSPACE}/noChanges")) {
+                      emailext subject: "${env.BUILD_VERSION} I-Build: ${env.BUILD_IID.trim()} - BUILD SKIPPED",
+                        body: "The scheduled build was skipped because no changes have been made since the last successful build.<br>For details see <a href='${BUILD_URL}console'>${BUILD_URL}console</a><br>",
+                        to: 'platform-releng-dev@eclipse.org',
+                        from: 'genie.releng@eclipse.org'
+                      currentBuild.result = 'ABORTED'
+                      error('Abort scheduled build due to no changes')
+                    }
                   }
             }
 		}
