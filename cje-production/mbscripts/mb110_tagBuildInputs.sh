@@ -46,6 +46,15 @@ fi
 
 pushd $CJE_ROOT/$AGG_DIR
 
+if $ABORT_IF_NO_CHANGES;then
+  listChangesInRepo="git diff ${lastTag}..HEAD --name-only"
+  if [[ -z $(${listChangesInRepo}) && -z $(git submodule --quiet foreach ${listChangesInRepo}) ]];then
+    echo "No changes in git repository since : ${lastTag}"
+    touch "${WORKSPACE}/noChanges"
+    exit 0
+  fi
+fi
+
 # git tagging
 if [ "${BUILD_TYPE}" == "I" ]
 then
