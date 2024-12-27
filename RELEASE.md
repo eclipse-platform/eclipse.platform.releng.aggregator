@@ -5,7 +5,7 @@
 ## Milestone and RC Releases
 
 ### Friday before release week:
- * Update [I-builds](JenkinsJobs/Builds/I_build.groovy) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
+ * Update [I-builds job definition](JenkinsJobs/Builds/FOLDER.groovy) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
  * Create or update prerequisite issues for tracking ECF, EMF and Orbit
  * Send reminder email for upcoming RC week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
    * [Example from 4.30 RC1](https://www.eclipse.org/lists/platform-dev/msg03924.html) but the usual schedule:
@@ -184,9 +184,8 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
 #### **Update Jenkins for the next Release:**
   - Edit the [JobDSL.json](JenkinsJobs/JobDSL.json)
       * Add the next release version to the `Streams` key item.
-      * In the `branches` item update the current release to map to the maintenance branch and add a new key:value pair mapping the next release to master.
   - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.  
-    This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.  
+    This should create new I-builds for the next release.
     Performance and Unit tests should also be generated for the new release automatically.
 
 #### **Create new Stream Repos:**
