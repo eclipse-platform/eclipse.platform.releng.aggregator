@@ -58,26 +58,22 @@ spec:
 """
     }
   }
-  tools {
-      jdk 'temurin-jdk21-latest'
-      maven 'apache-maven-latest'
-  }
-  environment {
+	tools {
+		jdk 'temurin-jdk21-latest'
+		maven 'apache-maven-latest'
+		ant 'apache-ant-latest'
+	}
+	environment {
 		BUILD_TYPE = "${BUILD.type}"
 		BUILD_TYPE_NAME = "${BUILD.typeName}"
 		PATCH_OR_BRANCH_LABEL = "${BUILD.branchLabel}"
 
-      MAVEN_OPTS = "-Xmx6G"
-      CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
-      logDir = "$CJE_ROOT/buildlogs"
+		MAVEN_OPTS = "-Xmx6G"
+		CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
+		logDir = "$CJE_ROOT/buildlogs"
 		TEST_CONFIGURATIONS_EXPECTED = "${testConfigurationsExpected}"
-    }
-  stages {
-      stage('Clean Workspace'){
-          steps {
-                cleanWs()
-            }
-	    }
+	}
+	stages {
 	  stage('Setup intial configuration'){
           steps {
                   sshagent(['github-bot-ssh']) {
@@ -87,17 +83,18 @@ spec:
                         '''
                       }
                     }
+				dir("${CJE_ROOT}") {
                     sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production
                         chmod +x mbscripts/*
                         mkdir -p $logDir
                     '''
-            }
+				}
+			}
 		}
 	  stage('Generate environment variables'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                 sh '''
-                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                     ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
@@ -105,7 +102,8 @@ spec:
                         exit 1
                     fi
                 '''
-            }
+				}
+			}
 		}
 	  stage('Load PGP keys'){
           environment {
@@ -113,8 +111,8 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                 sh '''
-                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                     ./mb011_loadPGPKeys.sh 2>&1 | tee $logDir/mb011_loadPGPKeys.sh.log
                     if [[ ${PIPESTATUS[0]} -ne 0 ]]
                     then
@@ -122,24 +120,24 @@ spec:
                         exit 1
                     fi
                 '''
-            }
+				}
+			}
 		}
-	  stage('Export environment variables stage 1'){
-          steps {
-                script {
-                    env.BUILD_IID = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $BUILD_TYPE$TIMESTAMP)', returnStdout: true)
-                    env.BUILD_VERSION = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
-                    env.STREAM = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $STREAM)', returnStdout: true)
-                    env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
-                  }
-            }
-        }
+		stage('Export environment variables stage 1'){
+			steps {
+				script {
+					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
+					env.BUILD_IID = buildProps.BUILD_TYPE + buildProps.TIMESTAMP
+					env.STREAM = buildProps.STREAM
+					env.RELEASE_VER = buildProps.RELEASE_VER
+				}
+			}
+		}
 	  stage('Create Base builder'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
 		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-		              withAnt(installation: 'apache-ant-latest') {
 		                sh '''
-		                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
 		                    ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb020_createBaseBuilder.sh.log
 		                    if [[ ${PIPESTATUS[0]} -ne 0 ]]
 		                    then
@@ -147,15 +145,15 @@ spec:
 		                        exit 1
 		                    fi
 		                '''
-		              }
 		        }
+				}
+			}
 		}
-	  }
 	  stage('Download reference repo for repo reports'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                     sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb030_downloadBuildToCompare.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb030_downloadBuildToCompare.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
                         then
@@ -164,15 +162,16 @@ spec:
                         fi
                     '''
                   }
-            }
+				}
+			}
 		}
 	  stage('Clone Repositories'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                   sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
                     sh '''
                         git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
                         then
@@ -181,16 +180,17 @@ spec:
                         fi
                     '''
                   }
-            }
+				}
+			}
 		}
 	  stage('Tag Build Inputs'){
           environment {
             ABORT_IF_NO_CHANGES = "${!currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').isEmpty()}" // true, if triggered by timer
           }
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                   sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         bash -x ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
                         then
@@ -199,12 +199,15 @@ spec:
                         fi
                     '''
                   }
+				}
                   script {
                     if (env.ABORT_IF_NO_CHANGES && fileExists("${WORKSPACE}/noChanges")) {
-                      emailext subject: "${env.BUILD_VERSION} ${env.BUILD_TYPE}-Build: ${env.BUILD_IID.trim()} - BUILD SKIPPED",
-                        body: "The scheduled build was skipped because no changes have been made since the last successful build.<br>For details see <a href='${BUILD_URL}console'>${BUILD_URL}console</a><br>",
-                        to: "${BUILD.mailingList}",
-                        from: 'genie.releng@eclipse.org'
+						emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - BUILD SKIPPED",
+							body: """\
+							No changes have been made since the last successful ${BUILD_TYPE}-Build and therefore this scheduled build was skipped:
+							${BUILD_URL}console
+							""".stripIndent(), mimeType: 'text/plain',
+							to: "${BUILD.mailingList}", from: 'genie.releng@eclipse.org'
                       currentBuild.result = 'ABORTED'
                       error('Abort scheduled build due to no changes')
                     }
@@ -217,8 +220,8 @@ spec:
                 MAVEN_GPG_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                     sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
                         unset _JAVA_OPTIONS
                         ./mb220_buildSdkPatch.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb220_buildSdkPatch.sh.log
@@ -228,7 +231,8 @@ spec:
                             exit 1
                         fi
                     '''
-            }
+				}
+			}
 		}
 	  stage('Gather Eclipse Parts'){
 	      environment {
@@ -236,9 +240,8 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
-                      withAnt(installation: 'apache-ant-latest') {
+				dir("${CJE_ROOT}/mbscripts") {
                           sh '''
-                            cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
                             if [[ ${PIPESTATUS[0]} -ne 0 ]]
                             then
@@ -246,8 +249,8 @@ spec:
                                 exit 1
                             fi
                           '''
-                      }
-            }
+				}
+			}
 		}
 	  stage('Gather Equinox Parts'){
 	  environment {
@@ -255,9 +258,8 @@ spec:
                 KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
           }
           steps {
-                      withAnt(installation: 'apache-ant-latest') {
+				dir("${CJE_ROOT}/mbscripts") {
                           sh '''
-                            cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                             ./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb310_gatherEquinoxParts.sh.log
                             if [[ ${PIPESTATUS[0]} -ne 0 ]]
                             then
@@ -265,13 +267,13 @@ spec:
                                 exit 1
                             fi
                           '''
-                      }
-            }
+				}
+			}
 		}
 	  stage('Generate Repo reports'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                       sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
                         unset _JAVA_OPTIONS
                         ./mb500_createRepoReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb500_createRepoReports.sh.log
@@ -281,12 +283,13 @@ spec:
                             exit 1
                         fi
                       '''
-            }
+				}
+			}
 		}
 	  stage('Generate API tools reports'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                       sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         unset JAVA_TOOL_OPTIONS 
                         unset _JAVA_OPTIONS
                         ./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb510_createApiToolsReports.sh.log
@@ -296,26 +299,21 @@ spec:
                             exit 1
                         fi
                       '''
-            }
+				}
+			}
 		}
-	  stage('Export environment variables stage 2'){
-          steps {
-                script {
-                    env.BUILD_IID = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $BUILD_TYPE$TIMESTAMP)', returnStdout: true)
-                    env.BUILD_VERSION = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
-                    env.STREAM = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $STREAM)', returnStdout: true)
-                    env.COMPARATOR_ERRORS_SUBJECT = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $COMPARATOR_ERRORS_SUBJECT)', returnStdout: true)
-                    env.COMPARATOR_ERRORS_BODY = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $COMPARATOR_ERRORS_BODY)', returnStdout: true)
-                    env.POM_UPDATES_SUBJECT = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $POM_UPDATES_SUBJECT)', returnStdout: true)
-                    env.POM_UPDATES_BODY = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $POM_UPDATES_BODY)', returnStdout: true)
-                    env.RELEASE_VER = sh(script:'echo $(source $CJE_ROOT/buildproperties.shsource;echo $RELEASE_VER)', returnStdout: true)
-                  }
-            }
-        }
+		stage('Export environment variables stage 2'){
+			steps {
+				script {
+					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
+					env.COMPARATOR_ERRORS_SUBJECT = buildProps.COMPARATOR_ERRORS_SUBJECT
+					env.COMPARATOR_ERRORS_BODY = buildProps.COMPARATOR_ERRORS_BODY
+				}
+			}
+		}
 	  stage('Archive artifacts'){
           steps {
                 sh '''
-                    cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production
                     source $CJE_ROOT/buildproperties.shsource
                     cp -r $logDir/* $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
                     rm -rf $logDir
@@ -331,50 +329,53 @@ spec:
 		}
 	  stage('Promote Eclipse platform'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                       sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb600_promoteEclipse.sh $CJE_ROOT/buildproperties.shsource
                       '''
                   }
                 build job: 'eclipse.releng.updateIndex', wait: false
-            }
+				}
+			}
 		}
 	  stage('Promote Equinox'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                       sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb610_promoteEquinox.sh $CJE_ROOT/buildproperties.shsource
                       '''
                   }
-            }
+				}
+			}
 		}
 	  stage('Promote Update Site'){
           steps {
+				dir("${CJE_ROOT}/mbscripts") {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
                       sh '''
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         ./mb620_promoteUpdateSite.sh $CJE_ROOT/buildproperties.shsource
                       '''
                   }
-            }
+				}
+			}
 		}
 		stage('Trigger tests'){
 			steps {
 				script {
 					for (c in BUILD.testConfigurations) {
-						build job: "${BUILD.testJobFolder}/${BUILD.testPrefix}-${c.os}-${c.arch}-java${c.javaVersion}", parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
+						build job: "${BUILD.testJobFolder}/${BUILD.testPrefix}-${c.os}-${c.arch}-java${c.javaVersion}", parameters: [string(name: 'buildId', value: "${BUILD_IID}")], wait: false
 					}
 				}
-              build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${env.BUILD_IID.trim()}")], wait: false
-          }
+				build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${BUILD_IID}")], wait: false
+			}
 		}
 		stage('Trigger publication to Maven snapshots repo') {
 			when {
 				allOf {
-				environment name: 'BUILD_TYPE', value: 'I'
-				expression { env.COMPARATOR_ERRORS_SUBJECT.trim().isEmpty() }
+					environment name: 'BUILD_TYPE', value: 'I'
+					environment name: 'COMPARATOR_ERRORS_SUBJECT', value: ''
 				// On comparator-erros, skip the deployment of snapshot version to the 'eclipse-snapshots' maven repository to prevent that ECJ snapshot
 				// from being used in verification builds. Similar to how the p2-repository is not added to the I-build composite in that case.
 				}
@@ -385,18 +386,38 @@ spec:
 		}
 	}
 	post {
-        failure {
-            emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
-            subject: "${env.BUILD_VERSION} ${env.BUILD_TYPE}-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
-            to: "${BUILD.mailingList}",
-            from:"genie.releng@eclipse.org"
-            archive '${CJE_ROOT}/siteDir/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/gitLog.html, $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator'
-        }
-        success {
-            emailext body: "Eclipse downloads:<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}</a><br><br> Build logs and/or test results (eventually):<br>    <a href='https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php'>https://download.eclipse.org/eclipse/downloads/drops4/${env.BUILD_IID.trim()}/testResults.php</a><br><br>${env.POM_UPDATES_BODY.trim()}${env.COMPARATOR_ERRORS_BODY.trim()}Software site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-${env.BUILD_TYPE}-builds'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-${env.BUILD_TYPE}-builds</a><br><br>Specific (simple) site repository:<br>    <a href='https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-${env.BUILD_TYPE}-builds/${env.BUILD_IID.trim()}'>https://download.eclipse.org/eclipse/updates/${env.RELEASE_VER.trim()}-${env.BUILD_TYPE}-builds/${env.BUILD_IID.trim()}</a><br><br>Equinox downloads:<br>     <a href='https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}'>https://download.eclipse.org/equinox/drops/${env.BUILD_IID.trim()}</a><br><br>", 
-            subject: "${env.BUILD_VERSION} ${env.BUILD_TYPE}-Build: ${env.BUILD_IID.trim()} ${env.POM_UPDATES_SUBJECT.trim()} ${env.COMPARATOR_ERRORS_SUBJECT.trim()}", 
-            to: "${BUILD.mailingList}",
-            from:"genie.releng@eclipse.org"
-        }
+		failure {
+			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - BUILD FAILED",
+				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
+				to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
+			archiveArtifacts "${CJE_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_IID}/gitLog.html, $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator"
+		}
+		success {
+			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} ${COMPARATOR_ERRORS_SUBJECT}",
+			body: """\
+			Eclipse downloads:
+			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}
+			
+			Build logs and/or test results (eventually):
+			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}/testResults.php
+			
+			${COMPARATOR_ERRORS_BODY}Software site repository:
+			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds
+			
+			Specific (simple) site repository:
+			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_IID}
+			
+			Equinox downloads:
+			https://download.eclipse.org/equinox/drops/${BUILD_IID}
+			""".stripIndent(), mimeType: 'text/plain',
+			to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
+		}
 	}
+}
+
+def readBuildProperties(String buildPropertiesFile){
+	return readProperties(file: buildPropertiesFile, charset: 'UTF-8').collectEntries{n, v ->
+			v = v.trim();
+			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
+		}
 }
