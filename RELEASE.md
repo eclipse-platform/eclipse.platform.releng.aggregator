@@ -184,8 +184,9 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
 #### **Update Jenkins for the next Release:**
   - Edit the [JobDSL.json](JenkinsJobs/JobDSL.json)
       * Add the next release version to the `Streams` key item.
+      * In the `branches` item update the current release to map to the maintenance branch and add a new key:value pair mapping the next release to master.
   - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.  
-    This should create new I-builds for the next release.
+    This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.
     Performance and Unit tests should also be generated for the new release automatically.
 
 #### **Create new Stream Repos:**

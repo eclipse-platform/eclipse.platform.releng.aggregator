@@ -25,7 +25,7 @@ def BUILD = {
 				mailingList: 'jdt-dev@eclipse.org'            , testJobFolder:'YPBuilds'      , testConfigurations: Y_TEST_CONFIGURATIONS]
 		}
 	}
-	throw new IllegalStateException("Unsupported job: $JOB_BASE_NAME" )
+	error("Unsupported job: $JOB_BASE_NAME" )
 }()
 
 def testConfigurationsExpected = BUILD.testConfigurations.collect{c ->
@@ -37,7 +37,6 @@ pipeline {
 		timeout(time: 360, unit: 'MINUTES')
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'25'))
-		skipDefaultCheckout()
 	}
   agent {
     kubernetes {
@@ -69,20 +68,13 @@ spec:
 		PATCH_OR_BRANCH_LABEL = "${BUILD.branchLabel}"
 
 		MAVEN_OPTS = "-Xmx6G"
-		CJE_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production"
+		CJE_ROOT = "${WORKSPACE}/cje-production"
 		logDir = "$CJE_ROOT/buildlogs"
 		TEST_CONFIGURATIONS_EXPECTED = "${testConfigurationsExpected}"
 	}
 	stages {
-	  stage('Setup intial configuration'){
-          steps {
-                  sshagent(['github-bot-ssh']) {
-                      dir ('eclipse.platform.releng.aggregator') {
-                        sh '''
-                            git clone -b master git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git
-                        '''
-                      }
-                    }
+		stage('Setup intial configuration'){
+			steps {
 				dir("${CJE_ROOT}") {
                     sh '''
                         chmod +x mbscripts/*
