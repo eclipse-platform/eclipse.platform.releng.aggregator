@@ -6,6 +6,7 @@ folder('YPBuilds') {
 }
 
 for (STREAM in config.Streams){
+	def BRANCH = config.Branches[STREAM]
 
 	pipelineJob('YPBuilds/Y-build-' + STREAM){
 		description('Daily Maintenance Builds.')
@@ -32,7 +33,7 @@ for (STREAM in config.Streams){
 			cpsScm {
 				lightweight(true)
 				scm {
-					github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+					github('eclipse-platform/eclipse.platform.releng.aggregator', BRANCH)
 				}
 				scriptPath('JenkinsJobs/Builds/build.jenkinsfile')
 			}

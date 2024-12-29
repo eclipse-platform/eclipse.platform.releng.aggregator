@@ -5,6 +5,7 @@ folder('Builds') {
 }
 
 for (STREAM in config.Streams){
+	def BRANCH = config.Branches[STREAM]
 
 	pipelineJob('Builds/I-build-' + STREAM){
 		description('Daily Eclipse Integration builds.')
@@ -34,7 +35,7 @@ for (STREAM in config.Streams){
 			cpsScm {
 				lightweight(true)
 				scm {
-					github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+					github('eclipse-platform/eclipse.platform.releng.aggregator', BRANCH)
 				}
 				scriptPath('JenkinsJobs/Builds/build.jenkinsfile')
 			}
