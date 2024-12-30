@@ -1,6 +1,6 @@
 #!/bin/bash
 #*******************************************************************************
-# Copyright (c) 2016, 2018 GK Software SE and others.
+# Copyright (c) 2016, 2025 GK Software SE and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -58,8 +58,7 @@ if [ ! -x ${ECLIPSE} ]
 then
 	cd ${LOCAL_TOOLS}
 	echo "Extracting Eclipse from ${FILE_ECLIPSE} ..."
-	scp genie.releng@projects-storage.eclipse.org:${FILE_ECLIPSE} .
-	tar --warning=no-unknown-keyword -xf eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
+	curl -L ${FILE_ECLIPSE} | tar -xzf -
 	cd ${WORKSPACE}
 fi
 require_executable ${ECLIPSE}

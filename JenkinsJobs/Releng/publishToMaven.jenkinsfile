@@ -1,0 +1,117 @@
+
+pipeline {
+	options {
+		timestamps()
+		timeout(time: 120, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'10'))
+	}
+	agent {
+		label 'basic'
+	}	
+	tools {
+		jdk 'temurin-jdk21-latest'
+		maven 'apache-maven-latest'
+	}
+	environment {
+		REPO = "${WORKSPACE}/repo-${BUILD_NUMBER}"
+	}
+	stages {
+		stage('Aggregate Maven repository') {
+			steps {
+				sh '''
+					SCRIPT="${WORKSPACE}/work/CBIaggregator.sh"
+					cp -r eclipse.platform.releng/publish-to-maven-central/ "${WORKSPACE}/work" #script currently expects ${WORKSPACE}/work, we cannot use another directory
+					chmod +x ${SCRIPT}
+					${SCRIPT} ${snapshotOrRelease}
+				'''
+			}
+		}
+		stage('Validate repository') {
+			// It prunes down the set of artifacts to be published, e.g., eliminate test artifacts,
+			// and it tests that each to-be-published artifact can transitively resolve all its dependencies.  
+			steps {
+				dir('repo-validation') { // Do the work in a clean folder without a pom.xml
+					sh '''#!/bin/bash
+						workingDir=$(pwd)
+						pushd "${REPO}"
+						# Find all the version folders for pde, jdt, and platform.
+						# Filter out all the feature, test, and product IUs that are not published.
+						# And transform each path to a Maven artifact coordinate groupId:artifactId:version.
+						find org/eclipse/pde org/eclipse/jdt/ org/eclipse/platform/ -regextype posix-egrep -regex '.*/[0-9]+\\.[0-9]+[^/]*' \\
+							| grep -vE "\\.feature\\.group|\\.feature\\.jar|\\.executable|\\.test|\\.platform\\.ide|\\.platform\\.sdk|_root|\\.id/|\\.sdk\\.ide/" \\
+							| sed -e '1,$s#/#:#g; 1,$s/org:eclipse:/org.eclipse./g' > "${workingDir}/coordinates.txt"
+						
+						# Because the pom enhancer modified the poms the checksums are wrong which produces noisy warnings.
+						# So regenerate the sha1 for every pom.
+						set +x
+						for i in $(find  org -name *.pom); do
+							sha1sum  -b < $i | awk '{print $1}' > $i.sha1
+						done
+						set -x
+						popd
+						
+						cat coordinates.txt
+						
+						set -o pipefail
+						for i in $(cat coordinates.txt); do
+							# Get each artifact and all its transitive dependencies from the Mavenized repository.
+							# Because we've enhanced the poms without producing new md5/sha1 we get noisy warnings we'd rather not see.
+							# Also filter out out many noisy messages about checking artifact for updates.
+							mvn dependency:get --no-transfer-progress -Dosgi.platform=gtk.linux.x86_64 -Dartifact=$i -DremoteRepositories=file:${REPO} | \\
+							grep -v "\\[INFO\\] artifact .*: checking for updates from temp"
+						done
+					'''
+				}
+			}
+		}
+		stage('Publish artifacts to Maven-Central') {
+			matrix {
+				axes {
+					axis { // environment variable is also used by called scripts!
+						name 'PROJECT'
+						values 'platform', 'jdt', 'pde'
+					}
+				}
+				stages {
+					stage('Publish project to Maven'){
+						environment {
+							SETTINGS = "/home/jenkins/.m2/settings-deploy-ossrh-${PROJECT == 'platform' ? 'releng': PROJECT}.xml"
+							// The location of the temporarily file that contains the secret file content
+							// (see https://www.jenkins.io/doc/book/pipeline/syntax/#supported-credentials-type):
+							KEYRING = credentials("secret-subkeys-${PROJECT == 'platform' ? 'releng': PROJECT}.asc")
+						}
+						steps {
+							dir("publish-${PROJECT}"){
+								sh '''
+									GIT_REL_PATH="${WORKSPACE}/eclipse.platform.releng/publish-to-maven-central"
+									SCRIPT=${GIT_REL_PATH}/publishProject.sh
+									
+									cp ${GIT_REL_PATH}/project-pom.xml .
+									chmod 744 ${SCRIPT}
+									
+									# Stop maven from searching the multi-module root further up the directory tree
+									mkdir -p .mvn
+									
+									${SCRIPT}
+								'''
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	post {
+		always {
+			archiveArtifacts allowEmptyArchive: true, artifacts: '\
+				repo-*/**, baseline-next.txt, \
+				repo-validation/coordinates.txt,\
+				publish-*/.log/*'
+		}
+		unsuccessful {
+			emailext subject: "Publication of Maven artifacts failed",
+				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
+				to: 'platform-releng-dev@eclipse.org', from:'genie.releng@eclipse.org'
+		}
+	}
+}
