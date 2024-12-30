@@ -26,9 +26,6 @@ job('YPBuilds/ep-collectYbuildResults'){
     timeout {
       absolute(30)
     }
-    xvnc {
-      useXauthority()
-    }
     withAnt {
       installation('apache-ant-latest')
       jdk('openjdk-jdk17-latest')
@@ -78,7 +75,7 @@ ssh genie.releng@projects-storage.eclipse.org rm -rf ${workspace}/eclipse
 
 #get requisite tools
 ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/Y-build/publish.xml
+ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/publish.xml
 
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
