@@ -1,5 +1,5 @@
 #*******************************************************************************
-# Copyright (c) 2016, 2019 GK Software SE and others.
+# Copyright (c) 2016, 2025 GK Software SE and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,9 @@
 #********************************************************************************
 
 # ECLIPSE:
-DROPS4=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
 SDK_BUILD_DIR=R-4.34-202411201800
 SDK_VERSION=4.34
-FILE_ECLIPSE=${DROPS4}/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz
+FILE_ECLIPSE="https://download.eclipse.org/eclipse/downloads/drops4/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz"
 
 # AGGREGATOR:
 URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest

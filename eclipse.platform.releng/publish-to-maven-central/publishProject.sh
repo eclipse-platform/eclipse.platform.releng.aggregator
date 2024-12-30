@@ -1,6 +1,6 @@
 #!/bin/sh
 #*******************************************************************************
-# Copyright (c) 2016, 2018 GK Software SE and others.
+# Copyright (c) 2016, 2025 GK Software SE and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -23,25 +23,21 @@ for fpr in $(gpg --list-keys --with-colons  | awk -F: '/fpr:/ {print $10}' | sor
 done
 
 if [ ${PROJECT} == platform ]; then
-	SETTINGS_NAME=releng
 	GPG_KEY_ID=CC641282
 elif [ ${PROJECT} == pde ]; then
-	SETTINGS_NAME=pde
 	GPG_KEY_ID=86085154
 elif [ ${PROJECT} == jdt ]; then
-	SETTINGS_NAME=jdt
 	GPG_KEY_ID=B414F87E
 else
 	echo "Unexpected project: '$PROJECT'"
 	exit 1
 fi
 
-REPO_BASE=${WORKSPACE}/archive
-REPO=${REPO_BASE}/repo-${REPO_ID}
+if [[ -z ${REPO} ]]; then
+	echo 'Required environment variable 'REPO' is not defined.'
+	exit 1
+fi
 PROJECT_PATH=org/eclipse/${PROJECT}
-
-wget -nv https://ci.eclipse.org/releng/job/CBIaggregator/${REPO_ID}/artifact/*zip*/archive.zip
-unzip -q archive.zip
 
 if [ ! -d ${REPO} ]
 then
@@ -61,9 +57,6 @@ cp -r ${REPO}/${PROJECT_PATH}/* ${PROJECT_PATH}/
 
 
 echo "==== UPLOAD ===="
-
-SETTINGS=/home/jenkins/.m2/settings-deploy-ossrh-${SETTINGS_NAME}.xml
-MVN=/opt/tools/apache-maven/latest/bin/mvn
 
 mkdir .log
 
@@ -117,8 +110,8 @@ do
 		echo -e "\tMissing ${javadocFile}"
 	fi
 
-	echo "${MVN} -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} -Durl=${URL} -DrepositoryId=${REPO} -DpomFile=${pomFile} -Dfile=${file} ${SOURCES_ARG} ${JAVADOC_ARG}"
-	${MVN} \
+	echo "mvn -f project-pom.xml -s ${SETTINGS} gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} -Durl=${URL} -DrepositoryId=${REPO} -DpomFile=${pomFile} -Dfile=${file} ${SOURCES_ARG} ${JAVADOC_ARG}"
+	mvn \
 		-f project-pom.xml \
 		-s ${SETTINGS} \
 		gpg:sign-and-deploy-file \
