@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #*******************************************************************************
 # Copyright (c) 2016, 2025 GK Software SE and others.
 #
@@ -14,10 +14,33 @@
 #********************************************************************************
 
 #================================================================================
-#   Parameters are read from a properties file
+#   Parameters
 #================================================================================
 
-source `dirname ${0}`/properties.sh
+WORKING_ROOT=$(pwd)
+# Directory containing this and other scripts and resources
+BASE_DIR=$( cd -- "$(dirname ${0})" &> /dev/null && pwd )
+
+# ECLIPSE:
+SDK_BUILD_DIR=R-4.34-202411201800
+SDK_VERSION=4.34
+FILE_ECLIPSE="https://download.eclipse.org/eclipse/downloads/drops4/${SDK_BUILD_DIR}/eclipse-SDK-${SDK_VERSION}-linux-gtk-x86_64.tar.gz"
+
+# AGGREGATOR:
+URL_AGG_UPDATES=https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest
+
+# LOCAL TOOLS:
+LOCAL_TOOLS=${WORKING_ROOT}/tools
+DIR_AGGREGATOR=aggregator
+AGGREGATOR=${LOCAL_TOOLS}/${DIR_AGGREGATOR}/cbiAggr
+ECLIPSE=${LOCAL_TOOLS}/eclipse/eclipse
+
+# ENRICH POMS tool:
+ENRICH_POMS_JAR=${WORKING_ROOT}/work/EnrichPoms.jar
+ENRICH_POMS_PACKAGE=org.eclipse.platform.releng.maven.pom
+
+# AGGREGATION MODEL:
+FILE_SDK_AGGR="${BASE_DIR}/SDK4Mvn.aggr"
 
 #================================================================================
 # Util functions
@@ -28,7 +51,7 @@ function require_executable() {
 		echo "Successfully installed: ${1}"
 	else
 		echo "not executable: ${1}"
-		/bin/ls -l ${1}
+		ls -l ${1}
 		exit 1
 	fi
 }
@@ -51,46 +74,45 @@ sed -e "s/snapshot=\".*\"/snapshot=\"${snapshot}\"/g" -i ${FILE_SDK_AGGR}
 
 if [ ! -d ${LOCAL_TOOLS} ]
 then
-	/bin/mkdir ${LOCAL_TOOLS}
+	mkdir ${LOCAL_TOOLS}
 fi
 
 if [ ! -x ${ECLIPSE} ]
 then
-	cd ${LOCAL_TOOLS}
+	pushd ${LOCAL_TOOLS}
 	echo "Extracting Eclipse from ${FILE_ECLIPSE} ..."
 	curl -L ${FILE_ECLIPSE} | tar -xzf -
-	cd ${WORKSPACE}
+	popd
 fi
 require_executable ${ECLIPSE}
 
 if [ ! -x ${AGGREGATOR} ]
 then
 	echo "Installing the CBI aggregator into ${LOCAL_TOOLS}/${DIR_AGGREGATOR} ..."
-	${ECLIPSE} -application org.eclipse.equinox.p2.director \
+	${ECLIPSE} --launcher.suppressErrors -noSplash \
+		-application org.eclipse.equinox.p2.director \
 		-r ${URL_AGG_UPDATES} \
 		-d ${LOCAL_TOOLS}/${DIR_AGGREGATOR} -p CBIProfile \
 		-installIU org.eclipse.cbi.p2repo.cli.product
 fi
 require_executable ${AGGREGATOR}
 
-RepoRaw=${WORKSPACE}/reporaw-${BUILD_NUMBER}
-Repo=${WORKSPACE}/repo-${BUILD_NUMBER}
-/bin/mkdir ${RepoRaw}
+RepoRaw="${WORKING_ROOT}/repo-raw"
+Repo="${WORKING_ROOT}/repo"
+mkdir ${RepoRaw}
 
 echo "Running the aggregator with build model ${FILE_SDK_AGGR} ..."
-${AGGREGATOR} aggregate --buildModel ${FILE_SDK_AGGR} --action CLEAN_BUILD --buildRoot ${RepoRaw} -vmargs -Dorg.eclipse.ecf.provider.filetransfer.excludeContributors=org.eclipse.ecf.provider.filetransfer.httpclientjava
-if [ "$?" != "0" ]
-then
-    echo "FAILURE $?"
-    exit 1
-fi
-/bin/mv ${RepoRaw}/final ${Repo}
-/bin/rm -rf ${RepoRaw}
+${AGGREGATOR} aggregate --buildModel ${FILE_SDK_AGGR} \
+  --action CLEAN_BUILD --buildRoot ${RepoRaw} \
+  -vmargs -Dorg.eclipse.ecf.provider.filetransfer.excludeContributors=org.eclipse.ecf.provider.filetransfer.httpclientjava
+
+mv ${RepoRaw}/final ${Repo}
+rm -rf ${RepoRaw}
 
 echo "========== Repo created: =========="
-/usr/bin/du -sc ${Repo}/*
-/usr/bin/du -sc ${Repo}/org/*
-/usr/bin/du -sc ${Repo}/org/eclipse/*
+du -sc ${Repo}/*
+du -sc ${Repo}/org/*
+du -sc ${Repo}/org/eclipse/*
 echo "==================================="
 
 
@@ -102,44 +124,44 @@ echo "==================================="
 
 echo "==== Remove irrelevant stuff ===="
 
-cd ${Repo}
+pushd ${Repo}
 
 if [ ! -d .logs ]
 then
-	/bin/mkdir .logs
+	mkdir .logs
 elif [ -f .logs/removed.txt ]
 then
-	/bin/rm .logs/removed.txt
+	rm .logs/removed.txt
 fi
 
 #==== remove the p2 repository (not logged): ====
 
-/bin/rm -rf p2.index p2.packed content.jar artifacts.jar
+rm -rf p2.index p2.packed content.jar artifacts.jar
 
 #==== remove features: ====
 
 echo "== Features: ==" | tee >> .logs/removed.txt
 
-/usr/bin/find * -type d -name \*feature.group -print -exec /bin/rm -rf {} \; -prune >> .logs/removed.txt
-/usr/bin/find * -type d -name \*feature.jar -print -exec /bin/rm -rf {} \; -prune >> .logs/removed.txt
+find * -type d -name \*feature.group -print -exec rm -rf {} \; -prune >> .logs/removed.txt
+find * -type d -name \*feature.jar -print -exec rm -rf {} \; -prune >> .logs/removed.txt
 
 #==== remove eclipse test plug-ins: ====
 
 echo "== Test plugins: ==" | tee >> .logs/removed.txt
 
 ls -d org/eclipse/*/*.test* >> .logs/removed.txt
-/bin/rm -r org/eclipse/*/*.test*
+rm -r org/eclipse/*/*.test*
 
 #==== remove other non-artifacts: ====
 
 echo "== Other non-artifacts: ==" | tee >> .logs/removed.txt
 
-/usr/bin/find tooling -type d >> .logs/removed.txt
-/bin/rm -r tooling*
+find tooling -type d >> .logs/removed.txt
+rm -r tooling*
 
 # ... folders that contain only 1.2.3/foo-1.2.3.pom but no corresponding 1.2.3/foo-1.2.3.jar:
 function hasPomButNoJar() {
-		cd ${1}
+		pushd ${1}
 		# expect only one sub-directory, starting with a digit, plus maven-metadata.xml*:
 		other=`ls -d [!0-9]* 2> /dev/null`
         if echo "${other}" | tr "\n" " " | egrep "^maven-metadata.xml maven-metadata.xml.md5 maven-metadata.xml.sha1 \$"
@@ -161,25 +183,26 @@ function hasPomButNoJar() {
                 # pom without jar found, let's answer true below
                 r=0
         done
+        popd
         exit $r
 }
 export -f hasPomButNoJar
 
-/usr/bin/find org/eclipse/{jdt,pde,platform} -type d \
-	-exec /bin/bash -c 'hasPomButNoJar "$@"' bash {} \; \
-	-print -exec /bin/rm -rf {} \; -prune >> .logs/removed.txt
+find org/eclipse/{jdt,pde,platform} -type d \
+	-exec bash -c 'hasPomButNoJar "$@"' bash {} \; \
+	-print -exec rm -rf {} \; -prune >> .logs/removed.txt
 # second "bash" is used as $0 in the function
 
-cd ${WORKSPACE}
+popd
 
 echo "========== Repo reduced: =========="
-/usr/bin/du -sc ${Repo}/*
-/usr/bin/du -sc ${Repo}/org/*
-/usr/bin/du -sc ${Repo}/org/eclipse/*
+du -sc ${Repo}/*
+du -sc ${Repo}/org/*
+du -sc ${Repo}/org/eclipse/*
 echo "==================================="
 
 #================================================================================
-#   (2) Garbage Collector
+#   (3) Garbage Collector
 #================================================================================
 # Removes from the build output of cbiAggregator everything that is not referenced 
 # from any pom below org/eclipse/{platform,jdt,pde}
@@ -191,7 +214,7 @@ echo "==================================="
 
 echo "==== Garbage Collector ===="
 
-cd ${Repo}
+pushd ${Repo}
 
 #==== function gc_bundle(): ====
 # Test if pom ${1} is referenced in any other pom.
@@ -202,7 +225,7 @@ function gc_bundle {
         POM=`basename ${1}`
 
         ANSWER=`find org/eclipse/{platform,jdt,pde} -name \*.pom \! -name ${POM} \
-        		 -exec /bin/grep -q "<artifactId>${AID}</artifactId>" {} \; -print -quit`
+        		 -exec grep -q "<artifactId>${AID}</artifactId>" {} \; -print -quit`
 
         if [ "$ANSWER" == "" ]
         then
@@ -222,7 +245,7 @@ do
 
 	# look for garbage only outside platform, jdt or pde folders:
 	find -name platform -prune -o -name jdt -prune -o -name pde -prune -o \
-		 -name \*.pom -exec /bin/bash -c 'gc_bundle "$@"' bash {} \; \
+		 -name \*.pom -exec bash -c 'gc_bundle "$@"' bash {} \; \
 		 > gc-${iteration}.log
 	# second "bash" is used as $0 in the function
 	
@@ -232,29 +255,29 @@ do
 		break
 	fi
 	cat toremove.txt >> .logs/removedGarbage.txt
-	for d in `cat toremove.txt`; do /bin/rm -r $d; done	
-	/bin/rm toremove.txt
+	for d in `cat toremove.txt`; do rm -r $d; done	
+	rm toremove.txt
 done
 
 # merge gc logs:
 cat gc-*.log | sort --unique > .logs/gc.log
-/bin/rm gc-*.log
+rm gc-*.log
 
 #==== remove all directories that have become empty: ====
 for iteration in 1 2 3 4 5 6 ; do find -type d -empty -print \
- 	-exec /bin/rmdir {} \; -prune; done \
+ 	-exec rmdir {} \; -prune; done \
  	>> .logs/empty-dirs.txt
 
 echo "========== Repo reduced: =========="
-/usr/bin/du -sc ${Repo}/*
-/usr/bin/du -sc ${Repo}/org/*
-/usr/bin/du -sc ${Repo}/org/eclipse/*
+du -sc ${Repo}/*
+du -sc ${Repo}/org/*
+du -sc ${Repo}/org/eclipse/*
 echo "==================================="
 
-cd ${WORKSPACE}
+popd
 
 #================================================================================
-#   (3) Enrich POMs
+#   (4) Enrich POMs
 #================================================================================
 # Add some required information to the generated poms:
 # - dynamic content (retrieved mostly from MANIFEST.MF):
@@ -272,28 +295,22 @@ cd ${WORKSPACE}
 echo "==== Enrich POMs ===="
 
 # build the jar:
-cd ${WORKSPACE}/work
-mkdir bin
-cd src
-javac -d ../bin/ `find * -name \*.java`
-cd ../bin
-jar cefv ${ENRICH_POMS_PACKAGE}.EnrichPoms ${ENRICH_POMS_JAR} `find * -name \*.class`
-cd ${WORKSPACE}
-/bin/ls -l ${ENRICH_POMS_JAR}
-
-cd ${Repo}
+mkdir -p ${WORKING_ROOT}/work/bin
+javac -d "${WORKING_ROOT}/work/bin" $(find "${BASE_DIR}/src" -name \*.java)
+pushd "${WORKING_ROOT}/work/bin"
+jar --create --verbose --main-class=${ENRICH_POMS_PACKAGE}.EnrichPoms --file=${ENRICH_POMS_JAR} $(find * -name \*.class)
+popd
+ls -l ${ENRICH_POMS_JAR}
 
 echo "platform"
-java -jar ${ENRICH_POMS_JAR} `pwd`/org/eclipse/platform &> .logs/enrich-platform.txt
+java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/platform"
 echo "jdt"
-java -jar ${ENRICH_POMS_JAR} `pwd`/org/eclipse/jdt &> .logs/enrich-jdt.txt
+java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/jdt"
 echo "pde"
-java -jar ${ENRICH_POMS_JAR} `pwd`/org/eclipse/pde &> .logs/enrich-pde.txt
+java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/pde"
 
 
 echo "==== Add Javadoc stubs ===="
-
-cd ${Repo}
 
 # (groupSimpleName, javadocArtifactGA)
 function createJavadocs() {
@@ -302,33 +319,33 @@ function createJavadocs() {
 	artifact=${2}
 	if [ -r ${jar} ]
 	then
-		/bin/rm ${jar}
+		rm ${jar}
 	fi
 	echo -e "Corresponding javadoc can be found in artifact ${artifact}\n" > README.txt
 	jar cf ${jar} README.txt
 	for pom in org/eclipse/${group}/*/*/*.pom
 	do
 		javadoc=`echo ${pom} | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
-		/bin/cp ${jar} ${javadoc}
+		cp ${jar} ${javadoc}
 	done	
 }
 
+pushd ${Repo}
 createJavadocs platform org.eclipse.platform:org.eclipse.platform.doc.isv
 createJavadocs jdt org.eclipse.jdt:org.eclipse.jdt.doc.isv
 createJavadocs pde org.eclipse.pde:org.eclipse.pde.doc.user
+popd
 
 echo "==== Create missing sources artifacts ===="
-
-cd ${Repo}
 
 function buildSourceJar() {
 	if [ -d assemble ]
 	then
-		/bin/rm -r assemble
+		rm -r assemble
 	fi
-	/bin/mkdir assemble
+	mkdir assemble
 	giturl=git@github.com:${1}
-	gitcache_dir=${WORKSPACE}/gitcache
+	gitcache_dir=${WORKING_ROOT}/gitcache
 	gitpath=${gitcache_dir}/repo/${2}
 	gittag=${3}
 	group=${4}
@@ -341,32 +358,30 @@ function buildSourceJar() {
 			git checkout ${3}
 		popd
 	popd
-	/bin/mv ${gitpath}/src/* assemble/
-	/bin/mv ${gitpath}/META-INF assemble/
+	mv ${gitpath}/src/* assemble/
+	mv ${gitpath}/META-INF assemble/
 	if [ -d ${gitpath}/OSGI-INF ]
 	then
-		/bin/mv ${gitpath}/OSGI-INF assemble/
+		mv ${gitpath}/OSGI-INF assemble/
 	fi
-	/bin/mv ${gitpath}/about.html assemble/
+	mv ${gitpath}/about.html assemble/
 	if [ $# > 6 ]
 	then
 		shift 6
 		for src in "$@"
 		do
-			/bin/mv "${gitpath}/${src}" assemble/ 
+			mv "${gitpath}/${src}" assemble/ 
 		done
 	fi
-	/bin/rm -rf ${gitcache_dir}
-	cd assemble
+	rm -rf ${gitcache_dir}
+	pushd assemble
 	jar cf ../${group}/${artifact}/${version}/${artifact}-${version}-sources.jar *
-	cd -
+	popd
 }
 
 while read line
 do
     buildSourceJar $line 
-done < ${WORKSPACE}/work/sourceBundles.txt
+done < ${BASE_DIR}/sourceBundles.txt
 
 echo "========== Repo completed ========="
-
-cd ${WORKSPACE}

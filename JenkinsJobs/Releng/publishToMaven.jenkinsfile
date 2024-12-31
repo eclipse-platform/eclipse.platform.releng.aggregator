@@ -13,15 +13,14 @@ pipeline {
 		maven 'apache-maven-latest'
 	}
 	environment {
-		REPO = "${WORKSPACE}/repo-${BUILD_NUMBER}"
+		REPO = "${WORKSPACE}/repo"
 	}
 	// parameters declared in the definition of the invoking job
 	stages {
 		stage('Aggregate Maven repository') {
 			steps {
 				sh '''
-					SCRIPT="${WORKSPACE}/work/CBIaggregator.sh"
-					cp -r eclipse.platform.releng/publish-to-maven-central/ "${WORKSPACE}/work" #script currently expects ${WORKSPACE}/work, we cannot use another directory
+					SCRIPT="eclipse.platform.releng/publish-to-maven-central/CBIaggregator.sh"
 					chmod +x ${SCRIPT}
 					${SCRIPT} ${snapshotOrRelease}
 				'''
@@ -52,6 +51,9 @@ pipeline {
 						popd
 						
 						cat coordinates.txt
+						
+						# Stop maven from searching the multi-module root further up the directory tree
+						mkdir -p ${GIT_REL_PATH}.mvn
 						
 						set -o pipefail
 						for i in $(cat coordinates.txt); do
@@ -105,7 +107,7 @@ pipeline {
 	post {
 		always {
 			archiveArtifacts allowEmptyArchive: true, artifacts: '\
-				repo-*/**, baseline-next.txt, \
+				repo/**, baseline-next.txt, \
 				repo-validation/coordinates.txt,\
 				publish-*/.log/*'
 		}
