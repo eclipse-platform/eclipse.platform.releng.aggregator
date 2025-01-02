@@ -4,10 +4,11 @@ pipeline {
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10'))
+		checkoutToSubdirectory('git-repo')
 	}
 	agent {
 		label 'basic'
-	}	
+	}
 	tools {
 		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
@@ -20,48 +21,50 @@ pipeline {
 		stage('Aggregate Maven repository') {
 			steps {
 				sh '''
-					SCRIPT="eclipse.platform.releng/publish-to-maven-central/CBIaggregator.sh"
+					SCRIPT='git-repo/eclipse.platform.releng/publish-to-maven-central/CBIaggregator.sh'
 					chmod +x ${SCRIPT}
 					${SCRIPT} ${snapshotOrRelease}
 				'''
+				dir("${REPO}") {
+					sh '''#!/bin/sh -e
+						# Because the pom enhancer modified the poms the checksums are wrong which produces noisy warnings.
+						# So regenerate the sha1 for every pom.
+						for i in $(find org -name *.pom); do
+							echo "Recalculate checksum of $i"
+							sha1sum -b < $i | awk '{print $1}' > $i.sha1
+						done
+					'''
+				}
 			}
 		}
 		stage('Validate repository') {
 			// It prunes down the set of artifacts to be published, e.g., eliminate test artifacts,
-			// and it tests that each to-be-published artifact can transitively resolve all its dependencies.  
+			// and it tests that each to-be-published artifact can transitively resolve all its dependencies.
 			steps {
 				dir('repo-validation') { // Do the work in a clean folder without a pom.xml
-					sh '''#!/bin/bash
+					sh '''#!/bin/bash -e
 						workingDir=$(pwd)
 						pushd "${REPO}"
-						# Find all the version folders for pde, jdt, and platform.
-						# Filter out all the feature, test, and product IUs that are not published.
-						# And transform each path to a Maven artifact coordinate groupId:artifactId:version.
-						find org/eclipse/pde org/eclipse/jdt/ org/eclipse/platform/ -regextype posix-egrep -regex '.*/[0-9]+\\.[0-9]+[^/]*' \\
-							| grep -vE "\\.feature\\.group|\\.feature\\.jar|\\.executable|\\.test|\\.platform\\.ide|\\.platform\\.sdk|_root|\\.id/|\\.sdk\\.ide/" \\
-							| sed -e '1,$s#/#:#g; 1,$s/org:eclipse:/org.eclipse./g' > "${workingDir}/coordinates.txt"
-						
-						# Because the pom enhancer modified the poms the checksums are wrong which produces noisy warnings.
-						# So regenerate the sha1 for every pom.
-						set +x
-						for i in $(find  org -name *.pom); do
-							sha1sum  -b < $i | awk '{print $1}' > $i.sha1
+						# Find all the version folders for all projects
+						projects='org/eclipse/pde org/eclipse/jdt/ org/eclipse/platform/'
+						paths=$(find ${projects} -regextype posix-egrep -regex '.*/[0-9]+\\.[0-9]+[^/]*')
+						for path in $paths; do
+							if [[ $path =~ \\.feature\\.group|\\.feature\\.jar|\\.executable|\\.test|\\.platform\\.ide|\\.platform\\.sdk|_root|\\.id/|\\.sdk\\.ide/ ]]; then
+								# Filter out all the feature, test, and product IUs that are not published.
+								continue
+							fi
+							# And transform each path to a Maven artifact coordinate groupId:artifactId:version.
+							elements=($(echo $path | tr '/' ' ')) #split by slash
+							groupId=$(echo ${elements[@]:0:(${#elements[@]}-2)} | tr ' ' '.') # join first n-2 elements by a dot
+							gav="${groupId}:${elements[-2]}:${elements[-1]}" # 'groupId:artifactId:version'
+							echo "${gav}">>"${workingDir}/coordinates.txt"
 						done
-						set -x
 						popd
 						
-						cat coordinates.txt
-						
-						# Stop maven from searching the multi-module root further up the directory tree
-						mkdir -p ${GIT_REL_PATH}.mvn
-						
-						set -o pipefail
+						# Get each artifact and all its transitive dependencies from the Mavenized repository.
+						set -x
 						for i in $(cat coordinates.txt); do
-							# Get each artifact and all its transitive dependencies from the Mavenized repository.
-							# Because we've enhanced the poms without producing new md5/sha1 we get noisy warnings we'd rather not see.
-							# Also filter out out many noisy messages about checking artifact for updates.
-							mvn dependency:get --no-transfer-progress -Dosgi.platform=gtk.linux.x86_64 -Dartifact=$i -DremoteRepositories=file:${REPO} | \\
-							grep -v "\\[INFO\\] artifact .*: checking for updates from temp"
+							mvn dependency:get --no-transfer-progress -Dosgi.platform=gtk.linux.x86_64 -Dartifact=$i -DremoteRepositories=file://${REPO}
 						done
 					'''
 				}
@@ -86,15 +89,11 @@ pipeline {
 						steps {
 							dir("publish-${PROJECT}"){
 								sh '''
-									GIT_REL_PATH="${WORKSPACE}/eclipse.platform.releng/publish-to-maven-central"
+									GIT_REL_PATH="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central"
 									SCRIPT=${GIT_REL_PATH}/publishProject.sh
 									
 									cp ${GIT_REL_PATH}/project-pom.xml .
 									chmod 744 ${SCRIPT}
-									
-									# Stop maven from searching the multi-module root further up the directory tree
-									mkdir -p .mvn
-									
 									${SCRIPT}
 								'''
 							}
