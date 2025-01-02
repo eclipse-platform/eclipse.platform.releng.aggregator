@@ -106,8 +106,7 @@ pipeline {
 									fi
 									
 									# Copy configuration pom into clean directory to stop maven from finding the .mvn folder of this git-repository
-									cp "${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/project-pom.xml" project-pom.xml
-									configurationPom=$(pwd)/project-pom.xml
+									cp "${WORKSPACE}/git-repo/eclipse-platform-parent/pom.xml" eclipse-parent-pom.xml
 									
 									for pomFile in ${REPO}/org/eclipse/${PROJECT}/*/*/*.pom; do
 										set +x
@@ -115,7 +114,7 @@ pipeline {
 										version=$(basename ${pomFolder})
 										if [[ $version == *-SNAPSHOT ]]; then
 											URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
-											MAVEN_REPO=repo.eclipse.org
+											REPO_ID=repo.eclipse.org # server-id in the settings.xml, used for authentication
 											MAVEN_CENTRAL_URL=https://repo1.maven.org/maven2/${pomFolder%-SNAPSHOT}
 											echo "Checking ${MAVEN_CENTRAL_URL}"
 											if curl --output /dev/null --silent --head --fail "$MAVEN_CENTRAL_URL"; then
@@ -123,7 +122,7 @@ pipeline {
 											fi
 										else
 											URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
-											MAVEN_REPO=ossrh
+											REPO_ID=ossrh # server-id in the settings.xml, used for authentication
 											MAVEN_CENTRAL_URL=https://repo1.maven.org/maven2/${pomFolder}
 											echo "Checking ${MAVEN_CENTRAL_URL}"
 											if curl --output /dev/null --silent --head --fail "$MAVEN_CENTRAL_URL"; then
@@ -160,9 +159,9 @@ pipeline {
 										fi
 										set -x
 									
-										mvn -f "${configurationPom}" -s ${SETTINGS} --no-transfer-progress \\
+										mvn -f eclipse-parent-pom.xml -s ${SETTINGS} \\
 											gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} \\
-											-Durl=${URL} -DrepositoryId=${MAVEN_REPO} \\
+											-Durl=${URL} -DrepositoryId=${REPO_ID} \\
 											-DpomFile=${pomFile} -Dfile=${file} \\
 											${SOURCES_ARG} ${JAVADOC_ARG}
 									done
