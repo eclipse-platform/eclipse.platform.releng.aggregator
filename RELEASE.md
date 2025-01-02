@@ -111,9 +111,8 @@ The actual steps to release
     - Update [SDK4Mvn.aggr](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/SDK4Mvn.aggr) and [properties.sh](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/properties.sh) to the release build.
       - SDK4Mvn.aggr determines what is being published to Maven
       - Updating properties.sh determines which Eclipse version is used to run the CBI aggregator
-    - Run the [CBI Aggregator](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/CBIaggregator/) job in jenkins with the `-release` parameter.
-      - This will trigger the [Repository Validator](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/RepositoryValidator/) job which will then trigger [Publish JDT to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/PublishJDTtoMaven/), [Publish PDE to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/PublishPDEToMaven/) and [Publish Platform to Maven](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/job/PublishPlatformToMaven/).
-    - Once the three publish jobs complete successfully log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
+    - Run the [Publish to Maven](https://ci.eclipse.org/releng/job/Releng/job/PublishToMaven/) job in jenkins with the `-release` parameter.
+    - Once that publish job has completed successfully, log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
       - If you do not have an account on oss.sonatype.org for performing the rest of the release request one by creating an issue like https://issues.sonatype.org/browse/OSSRH-43870 to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
   * **Contribute to SimRel**
     - If SimRel is not updated before the I-builds are cleaned up (specifically the build for RC2/GA) it will break. 
