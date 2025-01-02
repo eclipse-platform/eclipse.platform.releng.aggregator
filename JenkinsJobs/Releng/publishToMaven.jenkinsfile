@@ -74,6 +74,7 @@ pipeline {
 					ENRICH_POMS_JAR=${WORKSPACE}/work/EnrichPoms.jar
 					ENRICH_POMS_PACKAGE=org.eclipse.platform.releng.maven.pom
 					
+					#TODO: Just launch as multi-file source-code program as soon as Java-22 or later is used: https://openjdk.org/jeps/458
 					# build the jar:
 					mkdir -p ${WORKSPACE}/work/bin
 					javac -d "${WORKSPACE}/work/bin" $(find "${MAVEN_PUBLISH_BASE}/src" -name \\*.java)
@@ -82,10 +83,9 @@ pipeline {
 					popd
 					ls -l ${ENRICH_POMS_JAR}
 					
-					for project in {platform,jdt,pde}; do
-					  echo "${project}"
-					  java -jar ${ENRICH_POMS_JAR} "${REPO}/org/eclipse/${project}"
-					done
+					set -x
+					java -jar ${ENRICH_POMS_JAR} ${REPO}/org/eclipse/{platform,jdt,pde}
+					set +x
 					
 					echo "==== Add Javadoc stubs ===="
 					

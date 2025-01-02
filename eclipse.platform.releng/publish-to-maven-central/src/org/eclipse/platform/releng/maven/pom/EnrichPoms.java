@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2016, 2018 GK Software SE and others.
+ * Copyright (c) 2016, 2025 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,13 +14,14 @@
 package org.eclipse.platform.releng.maven.pom;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * To test locally, the /publish-to-maven-central/SDK4Mvn.aggr must be used to
@@ -32,7 +33,7 @@ import java.util.Set;
  * <code>${user.home}/build</code>. Only the contents of following three folders are
  * actually published to Maven (perhaps equinox in the future), so you can run
  * <code>main</code> for just those folders:
- * 
+ *
  * <pre>
  * ~/build/final/org/eclipse/pde
  * ~/build/final/org/eclipse/jdt
@@ -40,7 +41,7 @@ import java.util.Set;
  * -test
  * -verbose
  * </pre>
- * 
+ *
  * The <code>-test</code> will test that the SCM URL actually exists. The
  * <code>-verbose</code> will print the contents to each enriched pom to
  * <code>System.out</code>.
@@ -64,8 +65,9 @@ public class EnrichPoms {
 				verbose = true;
 			} else {
 				Path path = FileSystems.getDefault().getPath(arg);
-				if (!Files.exists(path) || !Files.isDirectory(path))
+				if (!Files.exists(path) || !Files.isDirectory(path)) {
 					throw new IllegalArgumentException(path.toString() + " is not a directory");
+				}
 				paths.add(path);
 			}
 		}
@@ -75,46 +77,46 @@ public class EnrichPoms {
 		}
 
 		for (Path path : paths) {
-			Files.walk(path).filter(EnrichPoms::isArtifact).forEach(EnrichPoms::enrich);
+			try (Stream<Path> files = Files.walk(path)) {
+				int enrichedCount = files.filter(EnrichPoms::isArtifact).mapToInt(EnrichPoms::enrich).sum();
+				System.out.println("Enriched " + enrichedCount + " POM files under " + path);
+			}
 		}
 	}
 
-	public static boolean isArtifact(Path path) {
-		if (Files.isDirectory(path))
+	private static boolean isArtifact(Path path) {
+		if (!path.getFileName().toString().endsWith(DOT_POM) || Files.isDirectory(path)) {
 			return false;
-		if (!path.getFileName().toString().endsWith(DOT_POM))
-			return false;
+		}
 		Path jarPath = getCorrespondingJarPath(path);
 		return Files.exists(jarPath);
 	}
 
-	public static Path getCorrespondingJarPath(Path pomPath) {
+	private static Path getCorrespondingJarPath(Path pomPath) {
 		String fileName = pomPath.getFileName().toString();
 		String jarName = fileName.substring(0, fileName.length() - DOT_POM.length()) + DOT_JAR;
 		return pomPath.resolveSibling(jarName);
 	}
 
-	public static void enrich(Path pomPath) {
+	public static int enrich(Path pomPath) {
 		try {
 			Path jarPath = getCorrespondingJarPath(pomPath);
 			ArtifactInfo info = ManifestReader.read(jarPath);
 			if (info == null) {
 				// Don't process features because they aren't published.
-				return;
+				return 0;
 			}
 
 			Path backPath = pomPath.resolveSibling(pomPath.getFileName().toString() + BAK_SUFFIX);
 			Path newPom = Files.createTempFile(pomPath.getParent(), "", DOT_POM);
-			try (OutputStreamWriter out = new OutputStreamWriter(Files.newOutputStream(newPom))) {
+			try (Stream<String> lines = Files.lines(Files.exists(backPath) ? backPath : pomPath);
+					Writer out = Files.newBufferedWriter(newPom);) {
 				boolean detailsInserted = false;
-				for (String line : Files.readAllLines(Files.exists(backPath) ? backPath : pomPath)) {
-					out.write(line);
-					out.append('\n');
-					if (!detailsInserted) {
-						if (line.contains("</description>")) {
-							out.append(info.toPomFragment());
-							detailsInserted = true;
-						}
+				for (String line : (Iterable<String>) lines::iterator) {
+					out.append(line).append('\n');
+					if (!detailsInserted && line.contains("</description>")) {
+						out.append(info.toPomFragment());
+						detailsInserted = true;
 					}
 				}
 			}
@@ -122,12 +124,13 @@ public class EnrichPoms {
 				String pomText = Files.readString(newPom);
 				System.out.println(pomText);
 			}
-			if (!Files.exists(backPath))
+			if (!Files.exists(backPath)) {
 				Files.move(pomPath, backPath);
+			}
 			Files.move(newPom, pomPath, StandardCopyOption.REPLACE_EXISTING);
+			return 1;
 		} catch (IOException e) {
-			System.err.println("Failed to rewrite pom " + pomPath + ": " + e.getClass() + ": " + e.getMessage());
-			e.printStackTrace();
+			throw new IllegalStateException("Failed to rewrite pom " + pomPath, e);
 		}
 	}
 }
