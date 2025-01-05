@@ -15,6 +15,10 @@ pipeline {
 	}
 	environment {
 		REPO = "${WORKSPACE}/repo"
+		PATH = "${installMavenDaemon('1.0.2')}/bin:${PATH}"
+		// Folder ~/.m2 is not writable for builds, ensure mvnd metadata are written within the workspace.
+		// prevent jline warning about inability to create a system terminal and increase keep-alive timeouts to increase stability in concurrent usage
+		MVND = "mvnd -Dmvnd.daemonStorage=${WORKSPACE}/tools/mvnd -Dorg.jline.terminal.type=dumb -Dmvnd.keepAlive=1000 -Dmvnd.maxLostKeepAlive=100"
 	}
 	// parameters declared in the definition of the invoking job
 	stages {
@@ -64,7 +68,7 @@ pipeline {
 						# Get each artifact and all its transitive dependencies from the Mavenized repository.
 						set -x
 						for i in $(cat coordinates.txt); do
-							mvn dependency:get --no-transfer-progress -Dosgi.platform=gtk.linux.x86_64 -Dartifact=$i -DremoteRepositories=file://${REPO}
+							${MVND} dependency:get --no-transfer-progress -Dosgi.platform=gtk.linux.x86_64 -Dartifact=$i -DremoteRepositories=file://${REPO}
 						done
 					'''
 				}
@@ -148,7 +152,7 @@ pipeline {
 										fi
 										set -x
 									
-										mvn -f eclipse-parent-pom.xml -s ${SETTINGS} \\
+										${MVND} -f eclipse-parent-pom.xml -s ${SETTINGS} \\
 											gpg:sign-and-deploy-file -DretryFailedDeploymentCount=5 \\
 											-Durl=${URL} -DrepositoryId=${REPO_ID} \\
 											-DpomFile=${pomFile} -Dfile=${file} \\
@@ -173,5 +177,16 @@ pipeline {
 				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
 				to: 'platform-releng-dev@eclipse.org', from:'genie.releng@eclipse.org'
 		}
+	}
+}
+
+def installMavenDaemon(String version){
+	return install('mvnd', "https://downloads.apache.org/maven/mvnd/${version}/maven-mvnd-${version}-linux-amd64.tar.gz")
+}
+
+def install(String toolType, String url) {
+	dir("${WORKSPACE}/tools/${toolType}") {
+		sh "curl -L ${url} | tar -xzf -"
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
 	}
 }
