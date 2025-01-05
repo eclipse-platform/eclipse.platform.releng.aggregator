@@ -88,13 +88,84 @@ pipeline {
 						}
 						steps {
 							dir("publish-${PROJECT}"){
-								sh '''
-									GIT_REL_PATH="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central"
-									SCRIPT=${GIT_REL_PATH}/publishProject.sh
+								sh '''#!/bin/sh -xe
+									gpg --batch --import "${KEYRING}"
+									for fpr in $(gpg --list-keys --with-colons  | awk -F: '/fpr:/ {print $10}' | sort -u); do
+										echo -e "5\ny\n" |  gpg --batch --command-fd 0 --expert --edit-key ${fpr} trust
+									done
 									
-									cp ${GIT_REL_PATH}/project-pom.xml .
-									chmod 744 ${SCRIPT}
-									${SCRIPT}
+									if [ ${PROJECT} == platform ]; then
+										GPG_KEY_ID=CC641282
+									elif [ ${PROJECT} == pde ]; then
+										GPG_KEY_ID=86085154
+									elif [ ${PROJECT} == jdt ]; then
+										GPG_KEY_ID=B414F87E
+									else
+										echo "Unexpected project: '$PROJECT'"
+										exit 1
+									fi
+									
+									# Copy configuration pom into clean directory to stop maven from finding the .mvn folder of this git-repository
+									cp "${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/project-pom.xml" project-pom.xml
+									configurationPom=$(pwd)/project-pom.xml
+									
+									for pomFile in ${REPO}/org/eclipse/${PROJECT}/*/*/*.pom; do
+										set +x
+										pomFolder=$(dirname ${pomFile#${REPO}/}) # name of folder, with leading REPO path stripped of
+										version=$(basename ${pomFolder})
+										if [[ $version == *-SNAPSHOT ]]; then
+											URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
+											MAVEN_REPO=repo.eclipse.org
+											MAVEN_CENTRAL_URL=https://repo1.maven.org/maven2/${pomFolder%-SNAPSHOT}
+											echo "Checking ${MAVEN_CENTRAL_URL}"
+											if curl --output /dev/null --silent --head --fail "$MAVEN_CENTRAL_URL"; then
+												echo "The released version of file "${pomFile}" is already present at $MAVEN_CENTRAL_URL."
+											fi
+										else
+											URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
+											MAVEN_REPO=ossrh
+											MAVEN_CENTRAL_URL=https://repo1.maven.org/maven2/${pomFolder}
+											echo "Checking ${MAVEN_CENTRAL_URL}"
+											if curl --output /dev/null --silent --head --fail "$MAVEN_CENTRAL_URL"; then
+												echo "Skipping file "${pomFile}" which is already present at $MAVEN_CENTRAL_URL"
+												continue;
+											fi
+										fi
+									
+										file=$(echo "${pomFile}" | sed -e "s|\\(.*\\)\\.pom|\\1.jar|")
+										sourcesFile=$(echo "${pomFile}" | sed -e "s|\\(.*\\)\\.pom|\\1-sources.jar|")
+										javadocFile=$(echo "${pomFile}" | sed -e "s|\\(.*\\)\\.pom|\\1-javadoc.jar|")
+										echo "${file}"
+									
+										if [ -f "${sourcesFile}" ]; then
+											echo "${sourcesFile}"
+											SOURCES_ARG="-Dsources=${sourcesFile}"
+										else
+											SOURCES_ARG=""
+											# If the -sources.jar is missing, and the main jar contains .class files, then we won't be able to promote this to Maven central.
+											if unzip -l ${file} | grep -q -e '.class$'; then 
+												echo "BUILD FAILURE ${file} contains .class files and requires a ${sourcesFile}"
+												exit 1
+											else
+												echo "Missing ${sourcesFile} but ${file} contains no .class files."
+											fi; 
+										fi
+									
+										if [ -f "${javadocFile}" ]; then
+											echo "${javadocFile}"
+											JAVADOC_ARG="-Djavadoc=${javadocFile}"
+										else
+											JAVADOC_ARG=""
+											echo "Missing ${javadocFile}"
+										fi
+										set -x
+									
+										mvn -f "${configurationPom}" -s ${SETTINGS} --no-transfer-progress \\
+											gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} \\
+											-Durl=${URL} -DrepositoryId=${MAVEN_REPO} \\
+											-DpomFile=${pomFile} -Dfile=${file} \\
+											${SOURCES_ARG} ${JAVADOC_ARG}
+									done
 								'''
 							}
 						}
@@ -107,8 +178,7 @@ pipeline {
 		always {
 			archiveArtifacts allowEmptyArchive: true, artifacts: '\
 				repo/**, baseline-next.txt, \
-				repo-validation/coordinates.txt,\
-				publish-*/.log/*'
+				repo-validation/coordinates.txt'
 		}
 		unsuccessful {
 			emailext subject: "Publication of Maven artifacts failed",
