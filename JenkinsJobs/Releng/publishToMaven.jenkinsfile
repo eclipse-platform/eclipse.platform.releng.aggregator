@@ -94,17 +94,6 @@ pipeline {
 										echo -e "5\ny\n" |  gpg --batch --command-fd 0 --expert --edit-key ${fpr} trust
 									done
 									
-									if [ ${PROJECT} == platform ]; then
-										GPG_KEY_ID=CC641282
-									elif [ ${PROJECT} == pde ]; then
-										GPG_KEY_ID=86085154
-									elif [ ${PROJECT} == jdt ]; then
-										GPG_KEY_ID=B414F87E
-									else
-										echo "Unexpected project: '$PROJECT'"
-										exit 1
-									fi
-									
 									# Copy configuration pom into clean directory to stop maven from finding the .mvn folder of this git-repository
 									cp "${WORKSPACE}/git-repo/eclipse-platform-parent/pom.xml" eclipse-parent-pom.xml
 									
@@ -160,7 +149,7 @@ pipeline {
 										set -x
 									
 										mvn -f eclipse-parent-pom.xml -s ${SETTINGS} \\
-											gpg:sign-and-deploy-file -Dgpg.key.id=${GPG_KEY_ID} \\
+											gpg:sign-and-deploy-file -DretryFailedDeploymentCount=5 \\
 											-Durl=${URL} -DrepositoryId=${REPO_ID} \\
 											-DpomFile=${pomFile} -Dfile=${file} \\
 											${SOURCES_ARG} ${JAVADOC_ARG}
