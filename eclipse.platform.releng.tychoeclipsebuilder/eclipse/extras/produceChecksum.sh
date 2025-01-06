@@ -42,6 +42,15 @@ echo "[DEBUG] Producing GPG signatures starting."
 set -e
 if [ ! -z "${KEYRING_PASSPHRASE}" ]
 then
+    #import gpg keys in fresh gpg-homedir
+    gpg_home="${WORKSPACE}/tools/${client}/gpg/"
+    mkdir -p ${gpg_home}
+    alias gpg='gpg --homedir "${gpg_home}"'
+    gpg --batch --import "${KEYRING}"
+    for fpr in $(gpg --list-keys --with-colons | awk -F: '/fpr:/ {print $10}' | sort -u); do
+      echo -e "5\ny\n" | gpg --batch --command-fd 0 --expert --edit-key "${fpr}" trust;
+    done
+    
     gpg --detach-sign --armor --output ${allCheckSumsSHA512}.asc --batch --pinentry-mode loopback --passphrase-fd 0 ${allCheckSumsSHA512} <<< "${KEYRING_PASSPHRASE}"
 else
     # We don't treat as ERROR since would be normal in a "local build".
