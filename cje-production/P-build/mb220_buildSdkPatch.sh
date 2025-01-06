@@ -39,6 +39,7 @@ mvn -f eclipse.platform.releng.tychoeclipsebuilder/${PATCH_OR_BRANCH_LABEL}/pom.
   -Dtycho.debug.artifactcomparator \
   -Dtycho.localArtifacts=ignore \
   -Dcbi.jarsigner.continueOnFail=true \
+  -Dtycho.pgp.signer=bc -Dtycho.pgp.signer.bc.secretKeys="${KEYRING}" \
   -Djgit.dirtyWorkingTree=error \
   -Dmaven.repo.local=$LOCAL_REPO \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
