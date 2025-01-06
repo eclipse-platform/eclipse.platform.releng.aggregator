@@ -171,8 +171,6 @@ spec:
               container('jnlp') {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
-                        unset JAVA_TOOL_OPTIONS 
-                        unset _JAVA_OPTIONS
                         ./mb220_buildSdkPatch.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb220_buildSdkPatch.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]
                         then
