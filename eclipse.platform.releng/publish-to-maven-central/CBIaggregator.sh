@@ -109,175 +109,8 @@ ${AGGREGATOR} aggregate --buildModel ${FILE_SDK_AGGR} \
 mv ${RepoRaw}/final ${Repo}
 rm -rf ${RepoRaw}
 
-echo "========== Repo created: =========="
-du -sc ${Repo}/*
-du -sc ${Repo}/org/*
-du -sc ${Repo}/org/eclipse/*
-echo "==================================="
-
-
 #================================================================================
-#   (2) Remove irrelevant stuff
-#================================================================================
-# Removes from the build output of cbiAggregator everything that is not relevant for maven.
-# All removed directories / files will be logged to .logs/removed.txt
-
-echo "==== Remove irrelevant stuff ===="
-
-pushd ${Repo}
-
-if [ ! -d .logs ]
-then
-	mkdir .logs
-elif [ -f .logs/removed.txt ]
-then
-	rm .logs/removed.txt
-fi
-
-#==== remove the p2 repository (not logged): ====
-
-rm -rf p2.index p2.packed content.jar artifacts.jar
-
-#==== remove features: ====
-
-echo "== Features: ==" | tee >> .logs/removed.txt
-
-find * -type d -name \*feature.group -print -exec rm -rf {} \; -prune >> .logs/removed.txt
-find * -type d -name \*feature.jar -print -exec rm -rf {} \; -prune >> .logs/removed.txt
-
-#==== remove eclipse test plug-ins: ====
-
-echo "== Test plugins: ==" | tee >> .logs/removed.txt
-
-ls -d org/eclipse/*/*.test* >> .logs/removed.txt
-rm -r org/eclipse/*/*.test*
-
-#==== remove other non-artifacts: ====
-
-echo "== Other non-artifacts: ==" | tee >> .logs/removed.txt
-
-find tooling -type d >> .logs/removed.txt
-rm -r tooling*
-
-# ... folders that contain only 1.2.3/foo-1.2.3.pom but no corresponding 1.2.3/foo-1.2.3.jar:
-function hasPomButNoJar() {
-		pushd ${1}
-		# expect only one sub-directory, starting with a digit, plus maven-metadata.xml*:
-		other=`ls -d [!0-9]* 2> /dev/null`
-        if echo "${other}" | tr "\n" " " | egrep "^maven-metadata.xml maven-metadata.xml.md5 maven-metadata.xml.sha1 \$"
-        then
-        	: # clean -> proceed below
-        else
-        	exit 1 # unexpected content found, don't remove
-        fi
-        # scan all *.pom inside the version sub-directory
-        r=1
-        for pom in `ls [0-9]*/*.pom 2> /dev/null`
-        do
-                jar=`echo ${pom} | sed -e "s|\(.*\)\.pom|\1.jar|"`
-                if [ -f ${jar} ]
-                then
-                		# jar found, so keep it
-                        exit 1
-                fi
-                # pom without jar found, let's answer true below
-                r=0
-        done
-        popd
-        exit $r
-}
-export -f hasPomButNoJar
-
-find org/eclipse/{jdt,pde,platform} -type d \
-	-exec bash -c 'hasPomButNoJar "$@"' bash {} \; \
-	-print -exec rm -rf {} \; -prune >> .logs/removed.txt
-# second "bash" is used as $0 in the function
-
-popd
-
-echo "========== Repo reduced: =========="
-du -sc ${Repo}/*
-du -sc ${Repo}/org/*
-du -sc ${Repo}/org/eclipse/*
-echo "==================================="
-
-#================================================================================
-#   (3) Garbage Collector
-#================================================================================
-# Removes from the build output of cbiAggregator everything that is not referenced 
-# from any pom below org/eclipse/{platform,jdt,pde}
-#
-# Log output:
-#  .logs/removedGarbage.txt	all directories during garbage collection 
-#  .logs/gc.log 			incoming dependencies of retained artifacts
-#  .logs/empty-dirs.txt		removed empty directories 
-
-echo "==== Garbage Collector ===="
-
-pushd ${Repo}
-
-#==== function gc_bundle(): ====
-# Test if pom ${1} is referenced in any other pom.
-# If not, append the containing directory to the file "toremove.txt"
-function gc_bundle {
-        AID=`echo ${1} | sed -e "s|.*/\(.*\)[_-].*|\1|"`
-        DIR=`echo ${1} | sed -e "s|\(.*\)/[0-9].*|\1|"`
-        POM=`basename ${1}`
-
-        ANSWER=`find org/eclipse/{platform,jdt,pde} -name \*.pom \! -name ${POM} \
-        		 -exec grep -q "<artifactId>${AID}</artifactId>" {} \; -print -quit`
-
-        if [ "$ANSWER" == "" ]
-        then
-                echo "Will remove $DIR"
-                echo $DIR >> toremove.txt
-        else
-                echo "$1 is used by $ANSWER"
-        fi
-}
-export -f gc_bundle
-
-#==== run the garbage collector: ====
-# iterate (max 5 times) in case artifacts were used only from garbage:
-for iteration in 1 2 3 4 5
-do
-	echo "== GC iteration ${iteration} =="
-
-	# look for garbage only outside platform, jdt or pde folders:
-	find -name platform -prune -o -name jdt -prune -o -name pde -prune -o \
-		 -name \*.pom -exec bash -c 'gc_bundle "$@"' bash {} \; \
-		 > gc-${iteration}.log
-	# second "bash" is used as $0 in the function
-	
-	if [ ! -f toremove.txt ]
-	then
-		# no more garbage found
-		break
-	fi
-	cat toremove.txt >> .logs/removedGarbage.txt
-	for d in `cat toremove.txt`; do rm -r $d; done	
-	rm toremove.txt
-done
-
-# merge gc logs:
-cat gc-*.log | sort --unique > .logs/gc.log
-rm gc-*.log
-
-#==== remove all directories that have become empty: ====
-for iteration in 1 2 3 4 5 6 ; do find -type d -empty -print \
- 	-exec rmdir {} \; -prune; done \
- 	>> .logs/empty-dirs.txt
-
-echo "========== Repo reduced: =========="
-du -sc ${Repo}/*
-du -sc ${Repo}/org/*
-du -sc ${Repo}/org/eclipse/*
-echo "==================================="
-
-popd
-
-#================================================================================
-#   (4) Enrich POMs
+#   (2) Enrich POMs
 #================================================================================
 # Add some required information to the generated poms:
 # - dynamic content (retrieved mostly from MANIFEST.MF):
@@ -302,13 +135,10 @@ jar --create --verbose --main-class=${ENRICH_POMS_PACKAGE}.EnrichPoms --file=${E
 popd
 ls -l ${ENRICH_POMS_JAR}
 
-echo "platform"
-java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/platform"
-echo "jdt"
-java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/jdt"
-echo "pde"
-java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/pde"
-
+for project in {platform,jdt,pde}; do
+  echo "${project}"
+  java -jar ${ENRICH_POMS_JAR} "${Repo}/org/eclipse/${project}"
+done
 
 echo "==== Add Javadoc stubs ===="
 
@@ -323,10 +153,12 @@ function createJavadocs() {
 	fi
 	echo -e "Corresponding javadoc can be found in artifact ${artifact}\n" > README.txt
 	jar cf ${jar} README.txt
-	for pom in org/eclipse/${group}/*/*/*.pom
-	do
-		javadoc=`echo ${pom} | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
-		cp ${jar} ${javadoc}
+	for pom in org/eclipse/${group}/*/*/*.pom; do
+		pomFolder=$(dirname ${pom})
+		if [[ ! $pomFolder =~ ${EXCLUDED_ARTIFACTS} ]]; then
+			javadoc=`echo ${pom} | sed -e "s|\(.*\)\.pom|\1-javadoc.jar|"`
+			cp ${jar} ${javadoc}
+		fi
 	done	
 }
 
