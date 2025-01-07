@@ -14,6 +14,8 @@ pipeline {
 		maven 'apache-maven-latest'
 	}
 	environment {
+		// Filter out all the feature, test, and product IUs that are not published. Escape dots to match them literally
+		EXCLUDED_ARTIFACTS = "${'.feature.group$|.feature.jar$|.test|org.eclipse.equinox.executable|org.eclipse.platform.ide|org.eclipse.sdk.ide|_root$'.replace('.', '\\.')}"
 		REPO = "${WORKSPACE}/repo"
 		PATH = "${installMavenDaemon('1.0.2')}/bin:${PATH}"
 		// Folder ~/.m2 is not writable for builds, ensure mvnd metadata are written within the workspace.
@@ -53,9 +55,9 @@ pipeline {
 						projects='org/eclipse/pde org/eclipse/jdt/ org/eclipse/platform/'
 						paths=$(find ${projects} -regextype posix-egrep -regex '.*/[0-9]+\\.[0-9]+[^/]*')
 						for path in $paths; do
-							if [[ $path =~ \\.feature\\.group|\\.feature\\.jar|\\.executable|\\.test|\\.platform\\.ide|\\.platform\\.sdk|_root|\\.id/|\\.sdk\\.ide/ ]]; then
-								# Filter out all the feature, test, and product IUs that are not published.
-								continue
+							artifactId=$(basename $(dirname ${path}))
+							if [[ $artifactId =~ ${EXCLUDED_ARTIFACTS} ]]; then
+								continue # Skip excluded artifact
 							fi
 							# And transform each path to a Maven artifact coordinate groupId:artifactId:version.
 							elements=($(echo $path | tr '/' ' ')) #split by slash
@@ -105,6 +107,10 @@ pipeline {
 										set +x
 										pomFolder=$(dirname ${pomFile#${REPO}/}) # name of folder, with leading REPO path stripped of
 										version=$(basename ${pomFolder})
+										artifactId=$(basename $(dirname "${pomFolder}"))
+										if [[ $artifactId =~ ${EXCLUDED_ARTIFACTS} ]]; then
+											continue # Skip excluded artifact
+										fi
 										if [[ $version == *-SNAPSHOT ]]; then
 											URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 											REPO_ID=repo.eclipse.org # server-id in the settings.xml, used for authentication
