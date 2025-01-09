@@ -108,7 +108,7 @@ spec:
 	  stage('Load PGP keys'){
           environment {
                 KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.acs-passphrase')
+                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
           }
           steps {
               container('jnlp') {
