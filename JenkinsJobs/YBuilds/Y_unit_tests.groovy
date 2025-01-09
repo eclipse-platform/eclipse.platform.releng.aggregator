@@ -3,7 +3,7 @@ def STREAMS = config.Streams
 
 def TEST_CONFIGURATIONS = [
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 24, agentLabel: 'ubuntu-2404'        , javaHome: "installTemurinJDK('24', 'linux', 'x86_64', 'ea')" ],
+	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 24, agentLabel: 'ubuntu-2404'        , javaHome: "install('jdk', 'https://download.java.net/java/early_access/jdk24/31/GPL/openjdk-24-ea+31_linux-x64_bin.tar.gz')" ],
 	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home'" ],
 	[os: 'macosx', ws:'cocoa', arch: 'x86_64' , javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home'" ],
 	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
@@ -128,12 +128,15 @@ def installTemurinJDK(String version, String os, String arch, String releaseType
 	if (arch == 'x86_64') {
 		arch == 'x64'
 	}
-	dir("${WORKSPACE}/java") {
-		sh "curl -L https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse | tar -xzf -"
+	return install('jdk', "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse")
+}
+
+def install(String toolType, String url) {
+	dir("${WORKSPACE}/tools/${toolType}") {
+		sh "curl -L ${url} | tar -xzf -"
 		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
 	}
 }
-
 ''')
 				}
 			}
