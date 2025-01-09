@@ -125,6 +125,22 @@ pipeline {
 					
 					echo "========== Repo aggregation completed ========="
 					
+					# Find all the artifact folders for all projects
+					for project in {platform,jdt,pde}; do
+						for pomPath in org/eclipse/${project}/*/*/*.pom; do
+							artifactId=$(basename $(dirname $(dirname ${pomPath})))
+							if [[ $artifactId =~ ${EXCLUDED_ARTIFACTS} ]]; then
+								continue # Skip excluded artifact
+							fi
+							version=$(basename $(dirname ${pomPath}))
+							groupPath=$(dirname $(dirname $(dirname ${pomPath})))
+							groupId=${groupPath//'/'/.}
+							# And transform each path to a Maven artifact coordinate groupId:artifactId:version.
+							echo "${groupId}:${artifactId}:${version}">>"${WORKSPACE}/coordinates-${project}.txt" # append the GAV
+							echo "${pomPath}">>"${WORKSPACE}/artifacts-${project}.txt"  # append the in-repo path
+						done
+					done
+					
 					popd
 				'''
 			}
@@ -134,28 +150,9 @@ pipeline {
 			// and it tests that each to-be-published artifact can transitively resolve all its dependencies.
 			steps {
 				dir('repo-validation') { // Do the work in a clean folder without a pom.xml
-					sh '''#!/bin/bash -e
-						workingDir=$(pwd)
-						pushd "${REPO}"
-						# Find all the version folders for all projects
-						projects='org/eclipse/pde org/eclipse/jdt/ org/eclipse/platform/'
-						paths=$(find ${projects} -regextype posix-egrep -regex '.*/[0-9]+\\.[0-9]+[^/]*')
-						for path in $paths; do
-							artifactId=$(basename $(dirname ${path}))
-							if [[ $artifactId =~ ${EXCLUDED_ARTIFACTS} ]]; then
-								continue # Skip excluded artifact
-							fi
-							# And transform each path to a Maven artifact coordinate groupId:artifactId:version.
-							elements=($(echo $path | tr '/' ' ')) #split by slash
-							groupId=$(echo ${elements[@]:0:(${#elements[@]}-2)} | tr ' ' '.') # join first n-2 elements by a dot
-							gav="${groupId}:${elements[-2]}:${elements[-1]}" # 'groupId:artifactId:version'
-							echo "${gav}">>"${workingDir}/coordinates.txt"
-						done
-						popd
-						
+					sh '''#!/bin/bash -xe
 						# Get each artifact and all its transitive dependencies from the Mavenized repository.
-						set -x
-						for i in $(cat coordinates.txt); do
+						for i in $(cat ${WORKSPACE}/coordinates-*.txt); do
 							${MVND} dependency:get --no-transfer-progress -Dosgi.platform=gtk.linux.x86_64 -Dartifact=$i -DremoteRepositories=file://${REPO}
 						done
 					'''
@@ -189,14 +186,10 @@ pipeline {
 									# Copy configuration pom into clean directory to stop maven from finding the .mvn folder of this git-repository
 									cp "${WORKSPACE}/git-repo/eclipse-platform-parent/pom.xml" eclipse-parent-pom.xml
 									
-									for pomFile in ${REPO}/org/eclipse/${PROJECT}/*/*/*.pom; do
+									for pomFile in $(cat "${WORKSPACE}/artifacts-${PROJECT}.txt"); do
 										set +x
-										pomFolder=$(dirname ${pomFile#${REPO}/}) # name of folder, with leading REPO path stripped of
+										pomFolder=$(dirname ${pomFile})
 										version=$(basename ${pomFolder})
-										artifactId=$(basename $(dirname "${pomFolder}"))
-										if [[ $artifactId =~ ${EXCLUDED_ARTIFACTS} ]]; then
-											continue # Skip excluded artifact
-										fi
 										if [[ $version == *-SNAPSHOT ]]; then
 											URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 											REPO_ID=repo.eclipse.org # server-id in the settings.xml, used for authentication
@@ -216,6 +209,7 @@ pipeline {
 											fi
 										fi
 									
+										pomFile="${REPO}/${pomFile}"
 										file=$(echo "${pomFile}" | sed -e "s|\\(.*\\)\\.pom|\\1.jar|")
 										sourcesFile=$(echo "${pomFile}" | sed -e "s|\\(.*\\)\\.pom|\\1-sources.jar|")
 										javadocFile=$(echo "${pomFile}" | sed -e "s|\\(.*\\)\\.pom|\\1-javadoc.jar|")
@@ -262,7 +256,7 @@ pipeline {
 		always {
 			archiveArtifacts allowEmptyArchive: true, artifacts: '\
 				repo/**, \
-				repo-validation/coordinates.txt'
+				coordinates*.txt, artifacts*.txt'
 		}
 		unsuccessful {
 			emailext subject: "Publication of Maven artifacts failed",
