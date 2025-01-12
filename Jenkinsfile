@@ -91,7 +91,6 @@ pipeline {
 						-DskipTests=true \
 						-Dcompare-version-with-baselines.skip=false \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
-						-Dgpg.passphrase="${KEYRING_PASSPHRASE}" \
 						-Dcbi-ecj-version=99.99 \
 						-U
 				'''
