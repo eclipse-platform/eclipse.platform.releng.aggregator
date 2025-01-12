@@ -10,7 +10,7 @@ pipeline {
 		label 'basic'
 	}
 	tools {
-		jdk 'temurin-jdk21-latest'
+		jdk 'temurin-jdk23-latest'
 		maven 'apache-maven-latest'
 	}
 	environment {
@@ -71,20 +71,9 @@ pipeline {
 					#   - organization
 					#   - issue management
 					
-					ENRICH_POMS_JAR=${WORKSPACE}/work/EnrichPoms.jar
-					ENRICH_POMS_PACKAGE=org.eclipse.platform.releng.maven.pom
-					
-					#TODO: Just launch as multi-file source-code program as soon as Java-22 or later is used: https://openjdk.org/jeps/458
-					# build the jar:
-					mkdir -p ${WORKSPACE}/work/bin
-					javac -d "${WORKSPACE}/work/bin" $(find "${MAVEN_PUBLISH_BASE}/src" -name \\*.java)
-					pushd "${WORKSPACE}/work/bin"
-					jar --create --verbose --main-class=${ENRICH_POMS_PACKAGE}.EnrichPoms --file=${ENRICH_POMS_JAR} $(find * -name \\*.class)
-					popd
-					ls -l ${ENRICH_POMS_JAR}
-					
+					enrichPomsSourceFile="${MAVEN_PUBLISH_BASE}/src/org/eclipse/platform/releng/maven/pom/EnrichPoms.java"
 					set -x
-					java -jar ${ENRICH_POMS_JAR} ${REPO}/org/eclipse/{platform,jdt,pde}
+					java ${enrichPomsSourceFile} ${REPO}/org/eclipse/{platform,jdt,pde}
 					set +x
 					
 					echo "==== Add Javadoc stubs ===="
