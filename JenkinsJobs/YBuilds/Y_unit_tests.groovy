@@ -117,6 +117,11 @@ pipeline {
       }
     }
   }
+  post {
+    always {
+      cleanWs()
+    }
+  }
 }
 
 def pathOf(String path){
