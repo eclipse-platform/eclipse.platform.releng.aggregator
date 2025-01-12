@@ -22,8 +22,11 @@
   $generateChecksumLinks = 'generateChecksumLinks';
   $buildlabel = "$EQ_BUILD_DIR_SEG";
   $sums512file = "checksum/equinox-$BUILD_ID-SUMSSHA512";
-  if (file_exists($sums512file)) {
+  $sums512file_asc = $sums512file.".asc";
+  if ((file_exists($sums512file)) && (file_exists($sums512file_asc))) {
       $gpgchecksumline = "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>&nbsp;(<a href=\"$sums512file.asc\">GPG</a>)</p>";
+  } else if (file_exists($sums512file)) {
+      $gpgchecksumline = "<p style=\"text-indent: 3em;\"><a href=\"$sums512file\">SHA512 Checksums for $BUILD_ID</a>";
   }
   $html = <<<EOHTML
 
