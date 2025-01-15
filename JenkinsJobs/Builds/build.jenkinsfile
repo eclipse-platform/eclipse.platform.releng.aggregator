@@ -142,7 +142,7 @@ spec:
 	  stage('Clone Repositories'){
           steps {
 				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
+                  sshagent(['github-bot-ssh']) {
                     sh '''
                         git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
@@ -163,7 +163,7 @@ spec:
           }
           steps {
 				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
+                  sshagent (['github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh '''
                         bash -x ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
                         if [[ ${PIPESTATUS[0]} -ne 0 ]]

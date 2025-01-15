@@ -118,7 +118,7 @@ spec:
 	  stage('Clone Repositories'){
           steps {
               container('jnlp') {
-                  sshagent(['git.eclipse.org-bot-ssh', 'github-bot-ssh']) {
+                  sshagent(['github-bot-ssh']) {
                     sh \'\'\'
                         git config --global user.email "eclipse-releng-bot@eclipse.org"
                         git config --global user.name "Eclipse Releng Bot"
@@ -137,7 +137,7 @@ spec:
 	  stage('Tag Build Inputs'){
           steps {
               container('jnlp') {
-                  sshagent (['git.eclipse.org-bot-ssh', 'github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
+                  sshagent (['github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
                     sh \'\'\'
                         cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts
                         bash -x ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
