@@ -208,11 +208,6 @@ spec:
                 }
             }
         }
-	  stage('Archive artifacts'){
-          steps {
-              archiveArtifacts '**/siteDir/**'
-            }
-		}
 	  stage('Promote Update Site'){
           steps {
               container('jnlp') {
@@ -227,6 +222,9 @@ spec:
 		}
 	}
 	post {
+		always {
+			archiveArtifacts 'cje-production/siteDir/**'
+		}
         failure {
             emailext body: "Please go to <a href='${BUILD_URL}console'>${BUILD_URL}console</a> and check the build failure.<br><br>",
             subject: "${env.RELEASE_VER.trim()} P-Build: ${env.BUILD_IID.trim()} - BUILD FAILED", 
