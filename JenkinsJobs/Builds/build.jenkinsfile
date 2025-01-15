@@ -284,15 +284,10 @@ spec:
                 sh '''
                     source $CJE_ROOT/buildproperties.shsource
                     cp -r $logDir/* $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
-                    rm -rf $logDir
                     rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
-                    cp $CJE_ROOT/buildproperties.txt $CJE_ROOT/$DROP_DIR/$BUILD_ID
-                    cp $CJE_ROOT/buildproperties.php $CJE_ROOT/$DROP_DIR/$BUILD_ID
-                    cp $CJE_ROOT/buildproperties.properties $CJE_ROOT/$DROP_DIR/$BUILD_ID
-                    cp $CJE_ROOT/buildproperties.shsource $CJE_ROOT/$DROP_DIR/$BUILD_ID
+                    cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
                     cp $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
                 '''
-              archiveArtifacts '**/siteDir/**'
             }
 		}
 	  stage('Promote Eclipse platform'){
@@ -354,11 +349,13 @@ spec:
 		}
 	}
 	post {
+		always {
+			archiveArtifacts 'cje-production/siteDir/**'
+		}
 		failure {
 			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - BUILD FAILED",
 				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
 				to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
-			archiveArtifacts "${CJE_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_IID}/gitLog.html, $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator"
 		}
 		success {
 			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} ${COMPARATOR_ERRORS_SUBJECT}",
