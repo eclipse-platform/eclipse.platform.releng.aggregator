@@ -83,7 +83,6 @@ ${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
   -DpostingDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
   -DeqpublishingContent=$ECLIPSE_BUILDER_DIR/equinox/publishingFiles \
-  -DdropTemplateFileName=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles/templateFiles/index.template_$PATCH_OR_BRANCH_LABEL.php \
   -DindexFileName=index.php \
   -DeclipseStream=$STREAM \
   -Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \

@@ -256,7 +256,6 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
   -DequinoxPostingDirectory=$BUILD_ROOT/$EQUINOX_DROP_DIR \
   -DpublishingContent=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles \
-  -DdropTemplateFileName=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles/templateFiles/index.template_$PATCH_OR_BRANCH_LABEL.php \
   -DindexFileName=index.php \
   -DeclipseStream=$STREAM \
   -Dbase.builder=$CJE_ROOT/$BASEBUILDER_DIR \
