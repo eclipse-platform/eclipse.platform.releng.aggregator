@@ -93,7 +93,7 @@ job('Builds/markUnstable'){
 
   publishers {
     downstreamParameterized {
-      trigger('updateIndex') {
+      trigger('Releng/updateIndex') {
         condition('SUCCESS')
         triggerWithNoParameters(true)
       }
