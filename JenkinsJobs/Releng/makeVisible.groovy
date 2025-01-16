@@ -52,7 +52,7 @@ ${WORKSPACE}/makeVisible.sh
 
   publishers {
     downstreamParameterized {
-      trigger('updateIndex') {
+      trigger('Releng/updateIndex') {
         triggerWithNoParameters(true)
       }
     }
