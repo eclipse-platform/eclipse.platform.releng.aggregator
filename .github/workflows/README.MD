@@ -30,3 +30,8 @@ If a gist-url is given it requires the follwoing secret:
 ## mavenBuild.yml
 
 A unified maven matrix build that covers the usual workflow for a build verification of a platform repository.
+
+## checkDependencies.yml
+
+Workflow that can be used as a timed action to check if any bundles need to update their version ranges of dependencies.
+It checks all artifacts that match the provided range and suggest a lower bound depending on the references in the classfiles. 
