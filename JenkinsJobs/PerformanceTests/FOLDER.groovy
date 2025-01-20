@@ -9,8 +9,9 @@ folder('PerformanceTests') {
 for (STREAM in STREAMS){
 	def MAJOR = STREAM.split('\\.')[0]
 	def MINOR = STREAM.split('\\.')[1]
-	pipelineJob('PerformanceTests/ep' + MAJOR + MINOR + '-performance-tests'){
-		description('Build and publish custom Docker images')
+	pipelineJob('PerformanceTests/ep' + MAJOR + MINOR + '-perf-tests'){ // The result collecting scripts rely on the '-perf-' part in the name
+		displayName('ep' + MAJOR + MINOR + '-Performance-Tests')
+		description('Run performance tests')
 		// Define parameters in job configuration to make them already available in the very first build
 		parameters {
 			stringParam('buildId', null, 'Build ID to test, such as I20140821-0800 or M20140822-0800')
