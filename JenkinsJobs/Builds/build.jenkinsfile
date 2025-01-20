@@ -275,7 +275,6 @@ spec:
 				script {
 					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
 					env.COMPARATOR_ERRORS_SUBJECT = buildProps.COMPARATOR_ERRORS_SUBJECT
-					env.COMPARATOR_ERRORS_BODY = buildProps.COMPARATOR_ERRORS_BODY
 				}
 			}
 		}
@@ -359,14 +358,17 @@ spec:
 		}
 		success {
 			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} ${COMPARATOR_ERRORS_SUBJECT}",
-			body: """\
+			body: ("""\
 			Eclipse downloads:
 			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}
 			
 			Build logs and/or test results (eventually):
 			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}/testResults.php
-			
-			${COMPARATOR_ERRORS_BODY}Software site repository:
+			""" + (env.COMPARATOR_ERRORS_SUBJECT == '' ? '' : """
+			Check unanticipated comparator messages:
+			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
+			""") + """
+			Software site repository:
 			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds
 			
 			Specific (simple) site repository:
@@ -374,7 +376,7 @@ spec:
 			
 			Equinox downloads:
 			https://download.eclipse.org/equinox/drops/${BUILD_IID}
-			""".stripIndent(), mimeType: 'text/plain',
+			""").stripIndent(), mimeType: 'text/plain',
 			to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
 		}
 	}
