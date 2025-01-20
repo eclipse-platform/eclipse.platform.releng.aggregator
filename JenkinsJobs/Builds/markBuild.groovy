@@ -21,7 +21,7 @@ pipeline {
 		label 'basic'
 	}
 	stages {
-		stage('Update index'){
+		stage('Mark ''' + marker + ''''){
 			steps { // workspace is not always cleaned by default. Clean before custom tools are installed into workspace.
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh \'''#!/bin/bash -xe
