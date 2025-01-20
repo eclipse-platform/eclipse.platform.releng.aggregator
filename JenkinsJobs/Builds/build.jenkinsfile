@@ -63,12 +63,10 @@ pipeline {
 						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1
 					'''
 				}
-				script {
-					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
-					assignEnvVariable('BUILD_IID', buildProps.BUILD_TYPE + buildProps.TIMESTAMP)
-					assignEnvVariable('STREAM', buildProps.STREAM)
-					assignEnvVariable('RELEASE_VER', buildProps.RELEASE_VER)
-				}
+				exportPropertiesAsEnvironmentVariables("${CJE_ROOT}/buildproperties.properties", [
+					'BUILD_ID',
+					'STREAM', 'RELEASE_VER',
+				])
 			}
 		}
 		stage('Clone and tag Build Inputs') {
@@ -79,8 +77,6 @@ pipeline {
 			steps {
 				dir("${CJE_ROOT}/${AGG_DIR}") {
 					sh '''#!/bin/bash -xe
-						source $CJE_ROOT/buildproperties.shsource
-						
 						git config --global user.email 'releng-bot@eclipse.org'
 						git config --global user.name 'Eclipse Releng Bot'
 						
@@ -124,7 +120,7 @@ pipeline {
 					script { // Check for changes and abort if nothing changed since the last build
 						def boolean isScheduledBuild = !currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').isEmpty()
 						if (isScheduledBuild && sh(script: 'git diff $(cat "${WORKSPACE}/lastTag")..HEAD --name-only', returnStdout: true).trim().isEmpty()) {
-							emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - Build skipped", body: """\
+							emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_ID} - Build skipped", body: """\
 								No changes have been made since the last successful ${BUILD_TYPE}-Build and therefore this scheduled build was skipped:
 								${BUILD_URL}console
 								""".stripIndent(), mimeType: 'text/plain',
@@ -272,10 +268,7 @@ pipeline {
 						fn-write-property COMPARATOR_ERRORS_SUBJECT "\\"\\""
 					fi
 				'''
-				script {
-					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
-					env.COMPARATOR_ERRORS_SUBJECT = buildProps.COMPARATOR_ERRORS_SUBJECT
-				}
+				exportPropertiesAsEnvironmentVariables("${CJE_ROOT}/buildproperties.properties", [ 'COMPARATOR_ERRORS_SUBJECT' ])
 			}
 		}
 		stage('Promote results') {
@@ -379,7 +372,7 @@ pipeline {
 							}
 							build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
 								string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds"),
-								string(name: 'add', value: "${BUILD_IID}"),
+								string(name: 'add', value: "${BUILD_ID}"),
 								string(name: 'sizeLimit', value: '3')
 							]
 						}
@@ -409,7 +402,6 @@ pipeline {
 				}
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
-						source $CJE_ROOT/buildproperties.shsource
 						dropPath=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}
 						scp -r $logDir/* genie.releng@projects-storage.eclipse.org:${dropPath}/buildlogs/
 					'''
@@ -421,13 +413,13 @@ pipeline {
 				script {
 					for (c in BUILD.tests) {
 						build job: "${BUILD.testsFolder}/${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}", wait: false, parameters: [
-							string(name: 'buildId', value: "${BUILD_IID}"),
+							string(name: 'buildId', value: "${BUILD_ID}"),
 							string(name: 'testAgent', value: "${c.agent}"),
 						]
 					}
 				}
 				build job: 'AutomatedTests/smokeTests', wait: false, parameters: [
-					string(name: 'buildId', value: "${BUILD_IID}")
+					string(name: 'buildId', value: "${BUILD_ID}")
 				]
 			}
 		}
@@ -442,7 +434,7 @@ pipeline {
 			}
 			steps {
 				build job: 'Releng/deployToMaven', wait: false, parameters: [
-					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_IID}")
+					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_ID}")
 				]
 			}
 		}
@@ -452,30 +444,30 @@ pipeline {
 			archiveArtifacts artifacts: 'cje-production/siteDir/**', excludes: 'cje-production/siteDir/eclipse/updates/**'
 		}
 		failure {
-			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - BUILD FAILED",
+			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_ID} - BUILD FAILED",
 				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
 				to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
 		}
 		success {
-			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} ${COMPARATOR_ERRORS_SUBJECT}",
+			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_ID} ${COMPARATOR_ERRORS_SUBJECT}",
 			body: ("""\
 			Eclipse downloads:
-			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}
+			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}
 			
 			Build logs and/or test results (eventually):
-			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}/testResults.php
+			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/testResults.php
 			""" + (env.COMPARATOR_ERRORS_SUBJECT == '' ? '' : """
 			Check unanticipated comparator messages:
-			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_IID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
+			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
 			""") + """
 			Software site repository:
 			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds
 			
 			Specific (simple) site repository:
-			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_IID}
+			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_ID}
 			
 			Equinox downloads:
-			https://download.eclipse.org/equinox/drops/${BUILD_IID}
+			https://download.eclipse.org/equinox/drops/${BUILD_ID}
 			""").stripIndent(), mimeType: 'text/plain',
 			to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
 		}
@@ -488,9 +480,10 @@ def assignEnvVariable(String name, String value) {
 	println("${name}=${value}")
 }
 
-def readBuildProperties(String buildPropertiesFile) {
-	return readProperties(file: buildPropertiesFile, charset: 'UTF-8').collectEntries{n, v ->
-			v = v.trim();
-			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
-		}
+def exportPropertiesAsEnvironmentVariables(String propertiesFile, Collection<String> exportedVariables){
+	def properties = readProperties(file: propertiesFile, charset: 'UTF-8')
+	for (envVar in exportedVariables) {
+		def value = properties[envVar].trim()
+		assignEnvVariable(envVar, value.startsWith('"') && value.endsWith('"') ? value.substring(1, value.length() - 1) : value)
+	}
 }
