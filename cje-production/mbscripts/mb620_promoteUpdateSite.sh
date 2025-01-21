@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #*******************************************************************************
-# Copyright (c) 2019 IBM Corporation and others.
+# Copyright (c) 2019, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 # Contributors:
 #     Sravan Lakkimsetti - initial API and implementation
 #*******************************************************************************
-set -e
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
@@ -34,6 +33,8 @@ popd
 
 if [ "$COMPARATOR_ERRORS" == "true" ] && [ "$BUILD_TYPE" == "I" ]
 then
+	exit 0
+elif [ "$BUILD_TYPE" == "P" ]; then
 	exit 0
 fi
 

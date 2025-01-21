@@ -66,9 +66,6 @@ When the JDT team is ready they will raise an issue to create new Y and P builds
     - The modules listed in the top level pom file (`java##pathc/pom.xml) should match the modified plugins.
   * Update the Y-build (Y_build.groovy)[JenkinsJobs/YBuilds/Y_build.groovy] and (P_build.groovy)[JenkinsJobs/YBuilds/P_build.groovy].
     - Update `PATCH_OR_BRANCH_LABEL` and `BUILD_TYPE_NAME` to the name of the new java version
-  * Update the P-build (mb300_gatherEclipseParts.sh)[cje-production/P-build/mb300_gatherEclipseParts.sh].
-    - PATCH_BUILD_GENERIC in mb300_gatherEclipseParts.sh should be set to the name of the new maven profile
-      - The same variable in the normal (mb300_gatherEclipseParts)[cje-production/mbscripts/mb300_gatherEclipseParts.sh] should be updated as well.
   * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
     - Repos without a BETA_JAVA## branch should be set to master
   * Update (eclipse-platform-parent/pom.xml)[eclipse-platform-parent/pom.xml]

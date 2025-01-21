@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2019, 2021 IBM Corporation and others.
+# Copyright (c) 2019, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ reportDate=$(TZ="America/New_York" date +%s)
 reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M --date='@'$reportDate)
 gitLogFile=$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
+mkdir -p $CJE_ROOT/$TMP_DIR
 
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
 updateSiteRootPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds

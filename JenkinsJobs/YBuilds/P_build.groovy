@@ -151,21 +151,6 @@ spec:
                 }
             }
 		}
-	  stage('Copy build scripts for P-build'){
-          steps {
-              container('jnlp') {
-                    sh \'\'\'
-                        cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/P-build
-                        cp mb220_buildSdkPatch.sh ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/cje-production/mbscripts/.
-                        cp mb220_buildSdkPatch.sh ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts/.
-                        cp mb300_gatherEclipseParts.sh ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/cje-production/mbscripts/.
-                        cp mb300_gatherEclipseParts.sh ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts/.
-                        cp mb620_promoteUpdateSite.sh ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/gitCache/eclipse.platform.releng.aggregator/cje-production/mbscripts/.
-                        cp mb620_promoteUpdateSite.sh ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.aggregator/cje-production/mbscripts/.
-                    \'\'\'
-                }
-            }
-		}
 		stage('Aggregator maven build'){
           steps {
               container('jnlp') {
