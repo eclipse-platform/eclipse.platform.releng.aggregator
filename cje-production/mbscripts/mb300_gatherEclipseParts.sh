@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash -e
 
 #*******************************************************************************
-# Copyright (c) 2019, 2021 IBM Corporation and others.
+# Copyright (c) 2019, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,6 @@
 # Contributors:
 #     Kit Lo - initial API and implementation
 #*******************************************************************************
-set -e
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
@@ -34,14 +33,12 @@ JavaCMD=${JAVA_HOME}/bin/java
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
 # gather repo
-echo $PATCH_BUILD
-if [ -z $PATCH_BUILD ]; then
+echo "PATCH_BUILD: $PATCH_BUILD"
+if [ -z "$PATCH_BUILD" ]; then
   REPO_DIR=$PLATFORM_REPO_DIR
   REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
 else
-  PATCH_BUILD_GENERIC=java18patch
-  REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/repository
-  REPO_ZIP=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.$PATCH_BUILD_GENERIC/target/eclipse.releng.repository.$PATCH_BUILD_GENERIC-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
+  REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.${PATCH_BUILD}/target/repository
 fi
   
 if [ -d $REPO_DIR ]; then
@@ -49,12 +46,16 @@ if [ -d $REPO_DIR ]; then
   cp -r * $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
   popd
 fi
+
+if [ -n "$PATCH_BUILD" ]; then
+  exit 0 # Nothing more to do for patch-builds
+fi
+
 if [ -f $REPO_ZIP ]; then
   cp $REPO_ZIP $CJE_ROOT/$DROP_DIR/$BUILD_ID/repository-$BUILD_ID.zip
 fi
 
 
-if [ -z $PATCH_BUILD ]; then
   # gather sdk
   if [ -d $PLATFORM_PRODUCTS_DIR ]; then
     pushd $PLATFORM_PRODUCTS_DIR
@@ -131,7 +132,6 @@ if [ -z $PATCH_BUILD ]; then
     popd
   fi
   set +x
-fi
 
 # gather ecj jars
 ECJ_JAR_DIR=$CJE_ROOT/$AGG_DIR/eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch/target
