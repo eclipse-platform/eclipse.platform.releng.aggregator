@@ -251,7 +251,7 @@
           </environments>
           <dependency-resolution>
             <profileProperties>
-				<!-- this is to disable some requirements only important for installtime but not for compile time in JDT-->
+                <!-- this is to disable some requirements only important for installtime but not for compile time in JDT-->
                 <org.eclipse.jdt.buildtime>true</org.eclipse.jdt.buildtime>
             </profileProperties>
           </dependency-resolution>
@@ -536,16 +536,36 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-cleancode-plugin</artifactId>
           <version>${tycho.version}</version>
+        <executions>
+            <execution>
+                <id>cleanups</id>
+                <configuration>
+                    <cleanUpProfile>
+                        <cleanup.static_inner_class>true</cleanup.static_inner_class>
+                    </cleanUpProfile>
+                </configuration>
+            </execution>
+            <execution>
+                <id>quickfixes</id>
+                <configuration>
+                    <baselines>
+                         <repository>
+                             <url>${previous-release.baseline}</url>
+                         </repository>
+                    </baselines>
+                    <bundles>
+                        <bundle>org.eclipse.ui.ide.application</bundle>
+                    </bundles>
+                    <application>org.eclipse.ui.ide.workbench</application>
+                    <quickfixes>
+                        <quickfix>org.eclipse.jdt.ui</quickfix>
+                        <quickfix>org.eclipse.pde.api.tools.ui</quickfix>
+                    </quickfixes>
+                </configuration>
+            </execution>
+        </executions>
           <configuration>
                 <local>true</local>
-                <cleanUpProfile>
-                    <cleanup.static_inner_class>true</cleanup.static_inner_class>
-                </cleanUpProfile>
-                <quickfixes>
-                    <bundle>org.eclipse.ui.ide.application</bundle>
-                    <quickfix>org.eclipse.jdt.ui</quickfix>
-                    <quickfix>org.eclipse.pde.api.tools.ui</quickfix>
-                </quickfixes>
             </configuration>
         </plugin>
         <plugin>
@@ -691,7 +711,7 @@
                     </tag>
                 </tags>
                 <additionalDependencies>
-	                <!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
+                    <!-- These are provided by PDE/Tycho by default but javadoc do not know that ... -->
                     <additionalDependency>
                         <groupId>org.osgi</groupId>
                         <artifactId>org.osgi.annotation.bundle</artifactId>
@@ -708,21 +728,21 @@
                         <version>1.5.0</version>
                     </additionalDependency>
                     <dependency>
-					    <groupId>org.eclipse.pde</groupId>
-					    <artifactId>org.eclipse.pde.api.tools.annotations</artifactId>
-					    <version>1.2.0</version>
-					</dependency>
+                        <groupId>org.eclipse.pde</groupId>
+                        <artifactId>org.eclipse.pde.api.tools.annotations</artifactId>
+                        <version>1.2.0</version>
+                    </dependency>
                     <!-- These are required unless we have no backward-compat anymore but javadoc do not know that ... -->
                     <additionalDependency>
-					    <groupId>javax.inject</groupId>
-					    <artifactId>javax.inject</artifactId>
-					    <version>1</version>
-					</additionalDependency>
-					<additionalDependency>
-					    <groupId>javax.annotation</groupId>
-					    <artifactId>javax.annotation-api</artifactId>
-					    <version>1.3.2</version>
-					</additionalDependency>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                        <version>1</version>
+                    </additionalDependency>
+                    <additionalDependency>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>javax.annotation-api</artifactId>
+                        <version>1.3.2</version>
+                    </additionalDependency>
                 </additionalDependencies>
             </configuration>
         </plugin>
@@ -935,18 +955,6 @@
                     </execution>
                 </executions>
               </plugin>
-              <plugin>
-                  <groupId>org.eclipse.tycho</groupId>
-                  <artifactId>tycho-cleancode-plugin</artifactId>
-                  <version>${tycho.version}</version>
-                  <configuration>
-                        <baselines>
-                             <repository>
-                                 <url>${previous-release.baseline}</url>
-                             </repository>
-                        </baselines>
-                    </configuration>
-                </plugin>
          </plugins>
       </build>
     </profile>
