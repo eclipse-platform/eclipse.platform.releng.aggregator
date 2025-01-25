@@ -1,0 +1,124 @@
+name: Automatic Code Cleanups
+on:
+  workflow_call:
+    inputs:
+      author:
+        description: Defines the committer / author that should be used for the commit
+        required: true
+        type: string
+      bundle-folders:
+        description: Defines the folders that should be scanned for bundles, must be a valid argument to the 'ls' command, defaults to 'bundles/*/'
+        required: false
+        default: 'bundles/*/'
+        type: string
+      do-cleanups:
+        description: Configures if cleanup actions should be performed
+        required: false
+        default: true
+        type: boolean
+      do-quickfix:
+        description: Configures if quickfix actions should be performed
+        required: false
+        default: true
+        type: boolean
+      submodules:
+        description: |
+          Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
+          When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
+          The value is just passed as it is to the github/actions/checkout action: https://github.com/actions/checkout#usage
+        type: string
+        required: false
+        default: 'false'
+      mavenVersion: 
+        description: 'The version of Maven set up'
+        type: string
+        required: false
+        default: '3.9.9'
+    secrets:
+      token:
+        description: Personal Access Token to use for creating pull-requests
+        required: true
+
+jobs:
+  list-bundles:
+    runs-on: ubuntu-latest
+    outputs:
+      bundles: ${{ steps.list-bundles.outputs.bundles }}
+    steps:
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      with:
+        fetch-depth: 0
+        ref: master
+        submodules: ${{ inputs.submodules }}
+    - name: List all bundles
+      id: list-bundles
+      env:
+          FOLDER_PATTERN: ${{ inputs.bundle-folders }}
+      run: |
+          directories=($(ls -d $FOLDER_PATTERN))
+          directories=("${directories[@]%/}")
+          json_array=()
+          for dir in "${directories[@]}"; do
+            if [ -e ${dir}/META-INF/MANIFEST.MF ]
+            then
+              json_array+=("\"$dir\"")
+            fi
+          done
+          json_elements=$(IFS=,; echo "${json_array[*]}")
+          json_output="{ \"bundles\": [$json_elements] }"
+          echo "bundles=$json_output" | tee -a "$GITHUB_OUTPUT"
+
+  clean-bundles:
+    runs-on: ubuntu-latest
+    name: Cleanup ${{ matrix.bundles }}
+    if: always()
+    needs: list-bundles
+    strategy:
+      matrix: ${{ fromJson(needs.list-bundles.outputs.bundles) }}
+      max-parallel: 1
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          fetch-depth: 0
+          ref: master
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+        with:
+          maven-version: ${{ inputs.mavenVersion }}
+      - name: Set up JDK
+        uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Perform Cleanups on ${{ matrix.bundles }} 
+        working-directory: ${{ matrix.bundles }}
+        if: ${{ inputs.do-cleanups }}
+        run: >-
+          xvfb-run mvn -B -ntp tycho-cleancode:cleanup@cleanups
+      - name: Perform QuickFixes on ${{ matrix.bundles }} 
+        working-directory: ${{ matrix.bundles }}
+        if: ${{ inputs.do-quickfix }}
+        run: >-
+          xvfb-run mvn -B -ntp tycho-cleancode:quickfix@quickfixes
+      - name: Create final PR description
+        working-directory: ${{ matrix.bundles }}/target
+        if: ${{ hashFiles(format('{0}/target/quickfix.md', matrix.bundles)) != '' }} || ${{ hashFiles(format('{0}/target/cleanups.md', matrix.bundles)) != '' }} 
+        run: >-
+          cat *.md > pr.md
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
+        if: ${{ hashFiles(format('{0}/target/pr.md', matrix.bundles)) != '' }} 
+        with:
+          commit-message: Perform clean code of ${{ matrix.bundles }}
+          branch: clean-code/${{ matrix.bundles }}
+          title: Clean Code for ${{ matrix.bundles }}
+          body-path: ${{ matrix.bundles }}/target/pr.md
+          delete-branch: true
+          draft: false
+          token: ${{ secrets.token }}
+          committer: ${{ inputs.author }}
+          author: ${{ inputs.author }}
+          add-paths: |
+            **/*.java
