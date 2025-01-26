@@ -1,0 +1,25 @@
+name: Check for Target Platform updates
+
+concurrency: 
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 */2 * * *'
+  push:
+    branches:
+      - master
+    paths:
+      - '**.target'
+
+
+jobs:
+  update:
+    uses: eclipse-platform/eclipse.platform.releng.aggregator/.github/workflows/updateTarget.yml@master
+    with:
+      author: Eclipse Releng Bot <releng-bot@eclipse.org>
+      path: 'eclipse.platform.releng.prereqs.sdk'
+    secrets:
+      token: ${{ secrets.RELENG_BOT_PAT }}
