@@ -11,6 +11,11 @@ on:
         description: The name of the bot that adds the necessary version increment changes
         type: string
         required: true
+      extra-maven-args:
+        description: Additional arguments to the maven call
+        type: string
+        required: false
+        default: ''
 
 permissions: {} # all none
 
@@ -42,7 +47,7 @@ jobs:
         attempt_delay: 200
         attempt_limit: 10
         command: >
-          mvn verify -DskipTests -Dcompare-version-with-baselines.skip=false
+          mvn verify ${{ inputs.extra-maven-args }} -DskipTests -Dcompare-version-with-baselines.skip=false
           org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100
           --threads 1C --fail-at-end --batch-mode --no-transfer-progress --show-version
 
