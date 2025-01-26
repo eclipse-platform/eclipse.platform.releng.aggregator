@@ -1,18 +1,21 @@
 name: Update Target Platform
 
-concurrency: 
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
-
 on:
-  workflow_dispatch:
-  schedule:
-    - cron:  '0 0 * * *'
-  push:
-    branches:
-      - master
-    paths:
-      - '**.target'
+  workflow_call:
+    inputs:
+      author:
+        description: Defines the committer / author that should be used for the commit
+        required: false
+        type: string
+        default: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+      path:
+        description: Defines the committer / author that should be used for the commit
+        required: true
+        type: string
+    secrets:
+      token:
+        description: Personal Access Token to use for creating pull-requests
+        required: true
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -33,11 +36,8 @@ jobs:
         cache: maven
     - name: Update Target Platform
       run: >-
-          mvn -ntp -f eclipse.platform.releng.prereqs.sdk 
-          org.eclipse.tycho.extras:tycho-version-bump-plugin:4.0.9:update-target
-          -DallowMajorUpdates=false
-          -Ddiscovery=parent
-          -Dmaven.version.rules=update-rules.xml
+          mvn -ntp -f ${{ inputs.path }} 
+          tycho-version-bump:update-target@update-target
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
       with:
@@ -47,8 +47,8 @@ jobs:
         body: Please review the changes and merge if appropriate, or cherry pick individual updates.
         delete-branch: true
         draft: false
-        token: ${{ secrets.RELENG_BOT_PAT }}
-        committer: Eclipse Releng Bot <releng-bot@eclipse.org>
-        author: Eclipse Releng Bot <releng-bot@eclipse.org>
+        token: ${{ secrets.token }}
+        committer: ${{ inputs.author }}
+        author: ${{ inputs.author }}
         add-paths: |
             **/*.target
