@@ -31,14 +31,9 @@ fi
 
 mkdir -p $CJE_ROOT/$TMP_DIR
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
-if [ -z "$PATCH_BUILD" ];then
-	mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
-		-DlocalEcjVersion=99.99 \
-		-Dmaven.repo.local=$LOCAL_REPO -DcompilerBaselineMode=disable -DcompilerBaselineReplace=none
-	MVN_ARGS="${MVN_ARGS} -Dcbi-ecj-version=99.99"
-else
-	MVN_ARGS="${MVN_ARGS} -f eclipse.platform.releng.tychoeclipsebuilder/${PATCH_OR_BRANCH_LABEL}/pom.xml -P${PATCH_OR_BRANCH_LABEL}"
-fi
+mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
+	-DlocalEcjVersion=99.99 \
+	-Dmaven.repo.local=$LOCAL_REPO -DcompilerBaselineMode=disable -DcompilerBaselineReplace=none
 
 mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -Dtycho.debug.artifactcomparator \
@@ -52,6 +47,7 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -DbuildType=$BUILD_TYPE \
   -DbuildId=$BUILD_ID \
   -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
+  -Dcbi-ecj-version=99.99 \
   -e \
   -T 1C \
   ${JAVA_DOC_TOOL}

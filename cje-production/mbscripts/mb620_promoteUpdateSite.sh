@@ -34,8 +34,6 @@ popd
 if [ "$COMPARATOR_ERRORS" == "true" ] && [ "$BUILD_TYPE" == "I" ]
 then
 	exit 0
-elif [ "$BUILD_TYPE" == "P" ]; then
-	exit 0
 fi
 
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
