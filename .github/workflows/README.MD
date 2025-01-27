@@ -73,3 +73,12 @@ An example might look like this:
 ```
 
 See the [tycho-version-bump:update-target](https://tycho.eclipseprojects.io/doc/latest/tycho-extras/tycho-version-bump-plugin/update-target-mojo.html) for further details.
+
+## checkVersions.yml
+
+A workflow that checks for required but missing service-version increment for projects that are changed for the first time in the current development-cycle and applies them.
+It creates a git-commit with the required changes applied.
+
+## publishVersionCheckResults.yml
+
+Publishes the results of the `checkVersions` workflow by adding a comment to the affected PR that lists files to change and additionally pushes the created git-commit to the PR's branch.
