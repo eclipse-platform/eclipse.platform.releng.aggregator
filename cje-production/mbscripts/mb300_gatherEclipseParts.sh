@@ -33,22 +33,13 @@ JavaCMD=${JAVA_HOME}/bin/java
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
 # gather repo
-echo "PATCH_BUILD: $PATCH_BUILD"
-if [ -z "$PATCH_BUILD" ]; then
-  REPO_DIR=$PLATFORM_REPO_DIR
-  REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
-else
-  REPO_DIR=$ECLIPSE_BUILDER_DIR/$PATCH_BUILD/eclipse.releng.repository.${PATCH_BUILD}/target/repository
-fi
+REPO_DIR=$PLATFORM_REPO_DIR
+REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
   
 if [ -d $REPO_DIR ]; then
   pushd $REPO_DIR
   cp -r * $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
   popd
-fi
-
-if [ -n "$PATCH_BUILD" ]; then
-  exit 0 # Nothing more to do for patch-builds
 fi
 
 if [ -f $REPO_ZIP ]; then
