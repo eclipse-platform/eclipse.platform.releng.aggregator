@@ -71,10 +71,8 @@ if (file_exists("buildlogs/reporeports/index.html")) {
         </li>
         <?php } ?>
 
-        <li> <a href="logs.php#console"><b> Console Output Logs </b></a>
-        </li>
-        <li> <a href="buildlogs.php"><b>Release engineering build logs</b></a>
-        </li>
+        <li> <a href="buildlogs.php"><b>Build and Release Engineering Logs</b></a></li>
+        <li> <a href="logs.php"><b>Test Console Logs</b></a></li>
 <?php
   echo " <li><a href=\"apitools/analysis/html/index.html\"><b>API Tools Version Verification Report</b></a>";
   echo "  This tool verifies the versions of the plugins against Eclipse ${API_PREV_REF_LABEL}.&nbsp;&nbsp;
