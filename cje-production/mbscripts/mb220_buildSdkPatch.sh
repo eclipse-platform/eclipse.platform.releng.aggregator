@@ -22,8 +22,7 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-if [[ -z "${WORKSPACE}" ]]
-then
+if [[ -z "${WORKSPACE}" ]]; then
 	MVN_ARGS=""
 else
 	MVN_ARGS="-Pbree-libs -Peclipse-sign"
@@ -46,7 +45,6 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -DbuildTimestamp=$TIMESTAMP \
   -DbuildType=$BUILD_TYPE \
   -DbuildId=$BUILD_ID \
-  -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
   -Dcbi-ecj-version=99.99 \
   -e \
   -T 1C \
