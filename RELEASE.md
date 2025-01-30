@@ -150,7 +150,7 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     - Once the I-build repo is removed for the previous release the maintenance branch will have to use the release location, i.e. any references to `https://download.eclipse.org/eclipse/updates/4.25-I-builds/` will need to be updated to `https://download.eclipse.org/eclipse/updates/4.26/R-4.26-202211231800/`
     - Functionally this means:
       - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
-      - Update eclipserun-repo, comparator.repo and eclipse-p2-repo.url in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
+      - Update `eclipse-sdk-repo` in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
     - This step can be prepared ahead of time but can't be merged until the release build has been promoted and the update site exists.
      * **Update ECJ compiler** in the platform build (if it needs to be updated).
        * To find the new *unqualified* compiler version:
@@ -202,7 +202,6 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     - In [eclipse-equinox/equinox](https://github.com/eclipse-equinox/equinox) update the versions in the Info.plist for both architectures under `eclipse-equinox/equinox/features/org.eclipse.equinox.executable.feature/bin/cocoa/macosx`
   - **Update comparator repo and eclipse run repo**
     - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
-    - Update eclipserun-repo, comparator.repo and eclipse-p2-repo.url in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
   - **Set Previous Version to RC2** 
     - RC2 becomes the new baseline for the week before the GA release.
     - Update previous-release.baseline in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
