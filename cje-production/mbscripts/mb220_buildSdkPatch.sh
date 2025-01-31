@@ -29,6 +29,10 @@ else
 	MVN_ARGS="-Pbree-libs -Peclipse-sign"
 fi
 
+if [[ "$BUILD_TYPE" == "Y" ]]; then
+	MVN_ARGS="${MVN_ARGS} -Pjdt-y-build"
+fi
+
 mkdir -p $CJE_ROOT/$TMP_DIR
 cd $CJE_ROOT/gitCache/eclipse.platform.releng.aggregator
 mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
