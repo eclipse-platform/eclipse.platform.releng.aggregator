@@ -16,8 +16,7 @@ RUN apt-get update -qq && apt-get install -qq -y \
       libgtk-3-dev \
       libgtk-4-dev \
       freeglut3-dev \
-      webkit2gtk-driver \
-      default-jdk
+      webkit2gtk-driver
 
 ENV HOME=/home/swtbuild
 ENV DISPLAY :0
@@ -32,6 +31,5 @@ RUN chgrp -R 0 ${HOME} && chmod -R g=u ${HOME}
 
 RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG=en_US.UTF-8
-ENV SWT_JAVA_HOME=/usr/lib/jvm/default-java/
 
 USER 10001
