@@ -17,9 +17,6 @@ RUN apt-get update -qq && apt-get install -qq -y \
       freeglut3-dev \
       webkit2gtk-driver
 
-# There is purposefully no JDK in this image. If a particular build needs JDK it installs
-# it in the Jenkinsfile.
-
 ENV HOME=/home/swtbuild
 ENV DISPLAY :0
 RUN useradd -u 10001 -d ${HOME} testuser
