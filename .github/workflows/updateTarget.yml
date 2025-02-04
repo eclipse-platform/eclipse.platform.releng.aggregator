@@ -9,7 +9,7 @@ on:
         type: string
         default: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
       path:
-        description: Defines the committer / author that should be used for the commit
+        description: Defines the path where the target file to update is located
         required: true
         type: string
     secrets:
@@ -35,16 +35,22 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Update Target Platform
+      working-directory: ${{ inputs.path }} 
       run: >-
-          mvn -ntp -f ${{ inputs.path }} 
-          tycho-version-bump:update-target@update-target
+          mvn -ntp --non-recursive tycho-version-bump:update-target@update-target
+    - name: Create PR description file if missing
+      if: ${{ hashFiles(format('{0}/target/targetUpdates.md', inputs.path)) == '' }}
+      working-directory: ${{ inputs.path }}
+      run: |
+          mkdir -p target
+          echo '## Everything is up to date' > target/targetUpdates.md
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
       with:
         commit-message: Update target-platform with latest version
         branch: update_target
         title: Dependency Updates
-        body: Please review the changes and merge if appropriate, or cherry pick individual updates.
+        body-path: ${{ inputs.path }}/target/targetUpdates.md
         delete-branch: true
         draft: false
         token: ${{ secrets.token }}
