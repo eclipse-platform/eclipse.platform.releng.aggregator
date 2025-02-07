@@ -91,9 +91,14 @@ jobs:
         working-directory: ${{ matrix.bundles }} 
         run: >-
           mvn -B -ntp ${{ inputs.maven-goals }} -DskipTests -Pdependency-check -Dtycho.dependency.check.apply=true
+      - name: Create PR description file if missing
+        if: ${{ hashFiles(format('{0}/target/versionProblems.md', matrix.bundles)) == '' }}
+        working-directory: ${{ matrix.bundles }}
+        run: |
+          mkdir -p target
+          echo '## No version problems detected' > target/versionProblems.md
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
-        if: ${{ hashFiles(format('{0}/target/versionProblems.md', matrix.bundles)) != '' }} 
         with:
           commit-message: Update version ranges of dependencies for ${{ matrix.bundles }}
           branch: dependency-check/${{ matrix.bundles }}
