@@ -44,45 +44,47 @@ section of the Eclipse Platform User Guide.
 </colgroup>
 <tbody>
   <!-- ******************** Platform ********************** -->
-  <!--
-  <tr>	
+  <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  -->
   <!-- ******************** End of Platform ********************** -->
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
-  </tr>
-  <tr id="display_rescaling_windows"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/pull/1358 -->
-    <td class="title">Monitor-Specific UI Rescaling in Display Class (Windows only)</td>
-    <td class="content">
-      <p>
-        The API methods
-        <code>org.eclipse.swt.widgets.Display#setRescalingAtRuntime(boolean)</code> and
-        <code>org.eclipse.swt.widgets.Display#isRescalingAtRuntime()</code> have been added to SWT.
-        These methods allow to enable, disable, and retrieve the state of the "rescaling at runtime" functionality.
-        When enabled, it makes shells and their contents sharply rescale according to the current monitor they are placed on
-        or moved to.
-      </p>
-      <p>
-        Note that in order to work as expected, enabling the rescaling at runtime functionality will also set the DPI
-        awareness of the Display's thread to <a
-          href="https://learn.microsoft.com/en-us/windows/win32/hidpi/setting-the-default-dpi-awareness-for-a-process">PerMonitorV2</a>.
-        This happens even if the DPI awareness of the Java process itself is set to some different value.
-      </p>
-      <p>
-        To ensure backwards compatibility, this feature is disabled by default. The feature has to be enabled for a
-        <code>Display</code> it is supposed to be used for. It needs to be activated before a shell is created to take
-        proper effect.
-        As an example, the feature can be enabled in Eclipse applications via a preference.
-      </p>
-      <p>
-        <b>Note:</b> Those methods will currently only have an effect on Windows.
-      </p>
-    </td>
-  </tr>
+  </tr>  
+<tr id="imageConstructorGcDrawer"> <!-- https://github.com/eclipse-platform/eclipse.platform.swt/pull/1734 -->
+      <td class="title">Constructor for Dynamically Scaled, Custom-Drawn Image</td>
+      <td class="content">
+        <p>
+          The <code>Image</code> class provides a constructor for creating an empty image based on a concrete size,
+          which is then usually filled programmatically via a <code>GC</code>. Such an image will be created according to a
+          fixed zoom value. When the image is requested in a different zoom via <code>getImageData(zoom)</code>, the
+          image will be raster-scaled, leading to blurry results.
+        </p>
+        <br/>
+          The API has been extended as follows to address this limitation:
+        <ul>
+          <li>
+            A new constructor has been added to the <code>Image</code> class:<br/>
+            <code>Image(Device device, ImageGcDrawer imageGcDrawer, int width, int height)</code><br/>
+          </li>
+	  <li>
+            The constructor accepts implementations of <code>ImageGcDrawer</code> defining the method:<br/>
+            <code>drawOn(GC gc, int imageWidth, int imageHeight)</code>
+          </li>
+        </ul>
+        <p>
+          Such an image will call <code>imageGcDrawer.drawOn(...)</code> whenever the image data for a different
+          zoom is requested to generate that data in a size as required for the specified zoom.
+        </p>
+        <p>
+          To be prepared for enhanced UI scaling mechanisms, such as the monitor-specific scaling feature on windows (see <a
+            href="platform.php#rescaleOnRuntimePreference">this news</a>), this new constructor should be
+          preferred for programmatic creation of images instead of the existing constructors using a fixed size.
+        </p>
+      </td>
+    </tr>
   <!-- *********************** End of SWT *********************** -->
   <tr><td colspan="2"/></tr>
 </tbody>
