@@ -60,3 +60,29 @@ Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">
 		}
 	}
 }
+
+pipelineJob('Releng/prepareNextDevCycle'){
+	displayName('Prepare Next Development Cycle')
+	description('Perform all steps to prepare the next development cycle of Eclipse.')
+	parameters {
+		booleanParam('DRY_RUN', true, 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
+		stringParam('NEXT_RELEASE_VERSION', null, 'Version of the release to prepare, for example: 4.37')
+		stringParam('PREVIOUS_RELEASE_CANDIDATE_ID', null, 'Id of the current release-candiate for the previous release, for example: S-4.36RC2-202505281830')
+		stringParam('M1_DATE', null, 'Milestone 1 end date in the format yyyy-mm-dd, for example: 2025-07-04')
+		stringParam('M2_DATE', null, 'Milestone 2 end date in the format yyyy-mm-dd, for example: 2025-07-25')
+		stringParam('M3_DATE', null, 'Milestone 3 end date in the format yyyy-mm-dd, for example: 2025-08-15')
+		stringParam('RC1_DATE', null, 'Release-Candidate 1 end date in the format yyyy-mm-dd, for example: 2025-08-22')
+		stringParam('RC2_DATE', null, 'Release-Candidate 2 end date in the format yyyy-mm-dd, for example: 2025-08-29')
+		stringParam('GA_DATE', null, 'Final general availability release date in the format yyyy-mm-dd, for example: 2025-09-10')
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/prepareNextDevCycle.jenkinsfile')
+		}
+	}
+}
+

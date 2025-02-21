@@ -6,10 +6,6 @@ This repository contains some workflows that can be shared across all platform r
 
 Check if there is currently a freeze period in place.
 
-## updateRelease.yml
-
-Workflow that can be used to trigger an automatic update to the next release when a new milestone is created
-
 ## checkMergeCommits.yml
 
 Check if a PR contains unwanted merge commits.
