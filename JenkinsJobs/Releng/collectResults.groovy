@@ -15,26 +15,17 @@ job('Releng/ep-collectResults'){
     numToKeep(10)
   }
 
-  jdk('openjdk-jdk17-latest')
-
-  authenticationToken('collectResults')
-
   wrappers { //adds pre/post actions
     timestamps()
     preBuildCleanup()
-    sshAgent('git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh')
+    sshAgent('projects-storage.eclipse.org-bot-ssh')
     timeout {
       absolute(30)
-    }
-    withAnt {
-      installation('apache-ant-latest')
-      jdk('openjdk-jdk17-latest')
     }
   }
 
   steps {
-    shell('''
-#!/bin/bash -x
+    shell('''#!/bin/bash -xe
 
 buildID=$(echo $buildID|tr -d ' ')
 buildURL=$(echo $buildURL|tr -d ' ')
@@ -45,7 +36,6 @@ java_home=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin
 wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
 cat ${WORKSPACE}/buildproperties.shsource
 source ${WORKSPACE}/buildproperties.shsource
-
 
 epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 dropsPath=${epDownloadDir}/downloads/drops4
@@ -58,7 +48,6 @@ workspace=${workingDir}/${JOB_BASE_NAME}-${BUILD_NUMBER}
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
 
 ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
-ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
 
 #get latest Eclipse platform product
 epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
@@ -84,7 +73,6 @@ cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tycho
 scp -r eclipse genie.releng@projects-storage.eclipse.org:${workspace}/eclipse
 cd ${WORKSPACE}
 
-
 #triggering ant runner
 baseBuilderDir=${workspace}/basebuilder
 javaCMD=${java_home}/java
@@ -101,8 +89,7 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   -Djob=${triggeringJob} \\
   -DbuildURL=${buildURL} \\
   -DbuildID=${buildID}
-  
-#
+
 devworkspace=${workspace}/workspace-updateTestResults
 
 ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/publish.xml \\
@@ -113,18 +100,12 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
   "-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \\
   -DEBuilderDir=${workspace}
 
-
-
-
 #Delete Workspace
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
     ''')
   }
 
   publishers {
-    extendedEmail {
-      recipientList("sravankumarl@in.ibm.com")
-    }
     downstream('Releng/updateIndex', 'SUCCESS')
   }
 }

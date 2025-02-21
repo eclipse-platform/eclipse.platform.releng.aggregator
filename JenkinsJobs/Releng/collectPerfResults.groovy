@@ -15,27 +15,22 @@ job('Releng/collectPerfResults'){
     numToKeep(10)
   }
 
-  jdk('openjdk-jdk17-latest')
-
-  authenticationToken('collectResults')
-
   wrappers { //adds pre/post actions
     timestamps()
     preBuildCleanup()
-    sshAgent('git.eclipse.org-bot-ssh', 'projects-storage.eclipse.org-bot-ssh')
-    withAnt {
-      installation('apache-ant-latest')
-      jdk('openjdk-jdk17-latest')
+    sshAgent('projects-storage.eclipse.org-bot-ssh')
+    timeout {
+      absolute(30)
     }
   }
 
   steps {
-    shell('''
-#!/bin/bash -x
-set -e
+    shell('''#!/bin/bash -xe
+
 buildID=$(echo $buildID|tr -d ' ')
 buildURL=$(echo $buildURL|tr -d ' ')
 triggeringJob=$(echo $triggeringJob|tr -d ' ')
+
 java_home=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin
 
 wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
@@ -71,9 +66,9 @@ ssh genie.releng@projects-storage.eclipse.org rm -rf ${workspace}/eclipse
 #get requisite tools
 ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
 ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/publish.xml
+
 cd ${WORKSPACE}
 git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-#wget -r -l 3 -np https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles
 cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
 scp -r eclipse genie.releng@projects-storage.eclipse.org:${workspace}/eclipse
 cd ${WORKSPACE}
@@ -91,11 +86,10 @@ devworkspace=${workspace}/workspace-antRunner
 
 ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \\
   -DpostingDirectory=${dropsPath} \\
+  -Djob=${triggeringJob} \\
   -DbuildURL=${buildURL} \\
-  -DbuildID=${buildID} \\
-  -Djob=${triggeringJob}
+  -DbuildID=${buildID}
 
-#
 
 #if all 4 dat files are present generate results tables
 #do first so performance.php regenerated
@@ -130,11 +124,5 @@ ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -n
 #Delete Workspace
 ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
     ''')
-  }
-
-  publishers {
-    extendedEmail {
-      recipientList("sravankumarl@in.ibm.com")
-    }
   }
 }
