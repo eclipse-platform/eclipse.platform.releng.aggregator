@@ -34,9 +34,7 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 - [ ] Configure SWT build scripts for ${NEXT_STREAM}
 - [ ] Splash Screen for ${NEXT_STREAM} (${NEXT_TRAIN})
 - [ ] Create ${NEXT_STREAM}-I-builds repo
-- [ ] POM and product version changes for ${NEXT_STREAM} release
-- [ ] Update product version number to ${NEXT_STREAM} across build scripts
-- [ ] Move previous version to ${PREV_MAJOR}.${PREV_MINOR}RC2 across build scripts
+- [ ] Run [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job and submit the created changes
 - [ ] Update version number in Mac's Eclipse.app for ${NEXT_STREAM}
 - [ ] Clean forceQualifierUpdate files for doc bundles
 - [ ] Update builds and repo cleanup scripts for ${NEXT_STREAM}

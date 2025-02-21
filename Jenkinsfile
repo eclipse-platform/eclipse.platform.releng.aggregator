@@ -21,7 +21,6 @@ pipeline {
 				anyOf {
 					branch 'master'
 					branch 'R*_maintenance'
-					branch 'prepare_R*'
 				}
 			}
 			steps {
@@ -79,7 +78,6 @@ pipeline {
 			}
 		}
 		stage('Build') {
-		    when { not { branch pattern: "prepare_R.*", comparator: "REGEXP" } }
 			steps {
 				sh '''
 					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U

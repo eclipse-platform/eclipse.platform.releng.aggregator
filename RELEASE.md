@@ -191,10 +191,13 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
   - Run the [Create New Stream Repos](https://ci.eclipse.org/releng/job/Releng/job/newStreamRepos/) job to make an I-builds repo for the next release.
 
 #### **Create Git Milestones for the next Release:**
+
+Milestones are already created by running [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job.
+Previously they were created in ther own job:
   - Milestones in git are created by running the create-milestones job in jenkins, usually after RC1 or RC2. Only specific users can access this job for security reasons. If milestones need to be created and have not please contact @sdawley @sravanlakkimsetti or @laeubi to run it.
 
 #### **Version Updates:**
-  - Once the milestones are created (see above) the [Prepare Next Release](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/actions/workflows/prepareRelease.yml) workflow will run, which will update pom and product versions for the Eclipse repositories and submit pull requests for the changes.  
+  - Running the [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job will update pom and product versions for the Eclipse repositories and submit pull requests for the changes.  
   This is still a work in progress so if there are any issues or a repo gets missed you can fall back to the old process below:   
   If you cloned eclipse.platform.releng.aggregator's submodules you can fix the set version and run [updateProductVersion.sh](scripts/updateProductVersion.sh) to update most of the versions.  
   Once that's done it's easiest to just grep for the previous release version or stream number to find the remaining instances that need to be updated, then commit the changes in a new branch for each repo.   
