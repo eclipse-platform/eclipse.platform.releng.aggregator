@@ -17,22 +17,22 @@ table.news tr td.title {vertical-align: top; font-weight: bold;}
 table.news tr td.content {vertical-align: top;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Eclipse 4.34 (JDT)</title>
+<title>What's New in Eclipse 4.35 (JDT)</title>
 </head>
 
 <body>
 <h2>Java Development Tools</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools (JDT)
-for the 4.34 release of Eclipse.
+for the 4.35 release of Eclipse.
 They are grouped into:</p>
 <ul> <!-- NOTE: Sync ../topics_WhatsNew.xml with this! -->
-  	<li><a href="#Java23">New Language Features</a></li>
+  	<!--<li><a href="#Java23">New Language Features</a></li>-->
   	<!--li><a href="#JUnit">JUnit</a></li-->
 	<li><a href="#JavaEditor">Java Editor</a></li>
-	<li><a href="#JavaCompiler">Java Compiler</a></li>
-	<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>
+	<!--<li><a href="#JavaCompiler">Java Compiler</a></li>-->
+	<!--<li><a href="#JavaViewsAndDialogs">Java Views and Dialogs</a></li>-->
 	<!--li><a href="#JavaFormatter">Java Formatter</a></li-->
-	<!--li><a href="#Debug">Debug</a></li-->
+	<li><a href="#Debug">Debug</a></li>
 	<!--li><a href="#JDTDev">JDT Developers</a></li-->
 </ul>
 
@@ -50,40 +50,22 @@ document for changes in the Platform.</p>
 <tbody>
 
   <!-- ******************* Java XX Support ************************************* -->
-  <tr>
-    <td id="Java23" class="section" colspan="2">
-    <h2>New Java Language Features</h2>
-    </td>
-  </tr>
-  <tr id="Java_23"> <!-- https://github.com/eclipse-jdt/eclipse.jdt.core/issues/1396 -->
-    <td class="title"><a href="#Java23">New Java Language Features</a></td>
-      <td class="content">
-          <p>
-          The release notably includes the following Java features:
-           <br/>
-           <a href="https://openjdk.org/jeps/467">JEP 467: Markdown Documentation Comments</a>
-           <br/>
-           <a href="https://openjdk.org/jeps/455">JEP 455: Primitive Types in Patterns, instanceof, and switch (Preview)</a>
-           <br/>
-           <a href="https://openjdk.org/jeps/476">JEP 476: Module Import Declarations (Preview)</a>
-           <br/>
-           <a href="https://openjdk.org/jeps/477">JEP 477: Implicitly Declared Classes and Instance Main Methods (Third Preview)</a>
-           <br/>
-           <a href="https://openjdk.org/jeps/482">JEP 482: Flexible Constructor Bodies (Second Preview)</a>
-           </p>
-      </td>
-  </tr>
-  <!-- ******************* End of Java XX Support ************************************* -->
-
-  <!-- ******************* JUnit ************************************* -->
   <!--
   <tr>
+    <td id="JavaXX" class="section" colspan="2">
+    <h2>Java&trade; XX Support </h2>
+    </td>
+  </tr>
+  -->
+  <!-- ******************* End of Java XX Support ************************************* -->
+
+  <!-- ******************* JUnit ************************************* 
+<tr>
     <td id="JUnit" class="section" colspan="2">
     <h2>JUnit</h2>
     </td>
   </tr>
-  -->
-  <!-- ******************* End of JUnit ************************************* -->
+   ******************* End of JUnit ************************************* -->
 
   <!-- ******************* Java Editor ************************************* -->
   <tr>
@@ -91,176 +73,193 @@ document for changes in the Platform.</p>
     <h2>Java Editor </h2>
     </td>
   </tr>
-  <tr id="boolean-if-else-cleanup">
-    <td class="title"><a href="#boolean-if-else-cleanup">New boolean if/else clean-up</a></td>
-    <td class="content">
-        A new clean-up has been created to combine two opposite boolean returns controlled by an if statement into a single return where possible.
-	<p>To use the clean-up, go to the <b>Code Style</b> tab of the clean-up configuration dialog under <b>Control statements</b> and  select: <b>Simplify boolean if/else to single return if possible</b>.</p>
-	<p>For example, applying the clean-up to the following code:</p>
-        <p><img src="images/ifelseboolean-before.png" alt="convert boolean if/else to single return before"/></p>
-	<p>results in:</p>
-        <p><img src="images/ifelseboolean-after.png" alt="convert boolean if/else to single return after"/></p>
-    </td>
-  </tr>
-  <tr id="unused-to-unnamed-quickfix">
-    <td class="title"><a href="#unused-to-unnamed-quickfix">Rename unused to unnamed quickfix/cleanup</a></td>
-    <td class="content">
-        The quick-fix/clean-up for unused local variables has been enhanced when using Java 22 or above to rename to the unnamed variable ("_") where appropriate.  These situations include:
-	<ul>
-		<li>unused lambda parameters</li>
-		<li>unused try-with-resources resources</li>
-		<li>unused pattern variables in switch</li>
-		<li>unused variables in enhanced for statement</li>
-		<li>unused variables in regular for statement</li>
-	</ul>
-	<p>In these cases, a quick-fix will be offered to rename to the unnamed variable.  The quick-fix is a multi-fix and will also offer to fix multiple instances of the problem.</p>
-	<p>For example, hovering one of the unused variables in the file will show:</p>
-	<p><img src="images/unnamed-quickfix-before.png" alt="rename to unnamed variable before"/></p>
-	<p>and selecting to fix multiple problems of the same category results in:</p>
-	<p><img src="images/unnamed-quickfix-after.png" alt="rename to unnamed variable after"/></p>
-	<p>The new rename functionality is embedded into the existing <b>Remove unused local variables</b> clean-up found on the <b>Unnecessary Code</b> tab of the clean-up configuration dialog.  The clean-up 
-	will rename to the unnamed variable for unused locals or lambda parameters when
-	the compliance level is 22 or above.</p>
-    </td>
-  </tr>
-  <tr id="if-else-to-switch-null-handling">
-    <td class="title"><a href="#if-else-to-switch-null-handling">Null handling for if/else to switch clean-up</a></td>
-    <td class="content">
-	    The if/else to switch clean-up has been enhanced to properly handle the case where the value can be null.  In the if/else statement, this is handled intrinsically either by an else statement or falling through the if/else if, but when converting to a switch statement, either the switch must be embedded in an if statement to test for null or for Java 21 or above, a <b>case null</b> statement needs to be added.
-	    <p>The clean-up is accessed on the <b>Code style</b> tab of the clean-up configuration dialog under <b>Control statements</b> and selecting: <b>Convert if/else if/else chain with 3 blocks min to switch</b>.</p>
-	    <p>Applying the clean-up to the following code:</p>
-            <p><img src="images/ifelse-to-switch-null-before.png" alt="convert if/else to switch before"/></p>
-	    <p>results in the following when Java version is less than 21</p>
-            <p><img src="images/ifelse-to-switch-null-after.png" alt="convert if/else to switch after"/></p>
-	    <p>and results in the following when the Java release is set to 21 and up:</p>
-            <p><img src="images/ifelse-to-switch-null-21-after.png" alt="convert if/else to switch after for Java 21 and up"/></p>
-
-    </td>
-  </tr>
-
-  <!-- ******************* End of Java Editor ************************************* -->
-
-  <!-- ******************* Java Views and Dialogs ************************************* -->
-  <tr>
-     <td id="JavaViewsAndDialogs" class="section" colspan="2">
-       <h2>Java Views and Dialogs</h2>
-     </td>
-  	</tr>
-	<tr id="markdown-doc">
-		<td class="title"><a href="#markdown-doc">Rendering Markdown Documentation Comments</a></td>
-	    <td class="content">
-	        <p>
-				In this release, JDT has added HTML parsing and rendering support for 
-				markdown documentation comments on Java programming elements. This comes as a 
-				standard feature at source level 23. The HTML rendering
-				is provided both on hover and Javadoc view. 
-			</p>
-			<p>
-				Here are some examples of how the markdown comments get rendered:
-			</p>
-			<p>
-				Hovering in the editor:
-			</p>
-			<p>
-				<img src="images/markdown_hover.png" alt="Markdown Comments"/>
-			</p>
-			<p>
-				Javadoc View:
-			</p>
-			<p>
-				<img src="images/markdown_javadoc.png" alt="Markdown Comments"/>
-			</p>
-	    </td>
-	</tr>
-  	<tr id="new-filter-options">
-  	<td class="title">
-        <a href="#new-filter-options">New Filter Options in Call Hierarchy</a>
-    </td>
-        <td class="content">
-            <p>
-				This change helps <strong>filtering your results</strong> after calling the <strong>Call Hierarchy</strong> on a method. 
-				With <strong>more filter options</strong> that are also much more 
-				understandable, you can filter your results much better than before.           
-			</p>
-			<p>
-				In the following picture you can see the new filter Options!
-			</p>
-            <p>
-                <img src="images/show-all-code.png" alt="Filter Options"/>
-            </p>
-        </td>
-	</tr>
-	<tr id="move-filter-button">
-		<td class="title">
-        <a href="#move-filter-button">Show the Filters in the buttons bar of the Call Hierarchy view</a>
-    </td>
+  <tr id="new-folding">
+    <td class="title">Enhanced folding for control statements</td>
       <td class="content">
-          <p>
-              Thanks to this change, you can <strong>easily access</strong> the <strong>filters</strong> after calling the <strong>call hierarchy</strong> on a method.
-			  With the new, more accessible filters button, changing the filters is easier than ever, especially now that there are more and better options to filter the results.
-          </p>
-          <p>
-              <img src="images/move-filtersbutton-to-top.png" alt="Filters Button on Top bar"/>
-          </p>
-		  <p>
-				You can still use the old way to access the filter like so:
-		  </p>
-		  <p>
-			<img src="images/move-filtersbutton-to-top-other-way.png" alt="old menu"/>
-		  </p>
+        This feature enhances the code folding mechanism in Eclipse JDT by enabling folding for control statements like <b>if, while, and for. </b>
+        It improves code readability and navigation by allowing developers to collapse and expand structured blocks.
+        In very large files, opening the file may take slightly longer, but afterwards, everything functions as normal.
+        <br/>
+          <img src="images/new_folding.png" alt="View of the new folding"/>
+        <br/>
+        The feature can be enabled in the settings under Java → Editor → Folding.<br/>
+        <br/>
+          <img src="images/settings_folding.png" alt="Settings view of the folding"/>
+        <br/>
+    </td>
+  </tr>
+  <tr id="new-add-permitted-types-quick-fix">
+    <td class="title">New add permitted types quick-fix</td>
+      <td class="content">
+	 A new quick-fix has been created for Java 21 and up to add 
+	 permitted types as case labels to
+	 a switch statement/expression that specifies a variable
+	 for the expression that has a sealed type
+	 and the switch has no case labels added yet.  The quick-fix will
+	 also add <b>null</b> and <b>default</b> case labels to make
+	 the switch exhaustive.
+	 <p>In the following example, there is a sealed type: <b>Shape</b> that
+	 only permits <b>Circle</b> and <b>Crescent</b> classes to extend it.</p>
+	 <img src="images/sealed-shape.png" alt="Shape class"/>
+	 <img src="images/sealed-circle.png" alt="Circle class"/>
+	 <img src="images/sealed-crescent.png" alt="Crescent.class"/>
+	 <p>The following code gets a compiler error and the new
+	 <b>Add permitted type cases</b> quick-fix is offered:</p>
+	 <img src="images/sealed-before.png" alt="Sealed test before"/>
+	 <p>After selecting this quick-fix, this results in:</p>
+	 <img src="images/sealed-after.png" alt="Sealed test after"/>
       </td>
   </tr>
-  <!-- ******************* End of Java Views and Dialogs ************************************* -->
+  <tr id="new-pattern-instanceof-to-switch">
+    <td class="title">New pattern instanceof to switch cleanup</td>
+      <td class="content">
+	A new clean-up and quick-assist has been added for Java 21 and up to 
+	convert if statements using pattern instanceof expressions
+	into a switch statement or switch expression (if possible).
+	The transformation only applies if there are three
+	or more pattern instanceof references to a single variable.
+	To use the clean-up, go to the <b>Java Feature</b>
+	tab of the clean-up configuration dialog under <b>Java 21</b> and
+	select <b>Pattern instanceof to Switch</b>.
+	<p>For the following example:</p>
+	<img src="images/pattern-instanceof-before.png" alt="Pattern instanceof before"/>
+	<p>Applying the clean-up results in:</p>
+	<img src="images/pattern-instanceof-after.png" alt="Pattern instanceof after"/>
+	<p>In cases where a switch expression is not possible, a switch
+	statement will be created instead.  The quick-assist is activated
+	by clicking <b>CTRL+1</b> while having the cursor pointing within
+	an if/else if/else block.</p>
+      </td>
+  </tr>
+  <tr id="string-concat-to-text-block-enhancement">
+    <td class="title">String concat to text block clean-up enhancement</td>
+      <td class="content">
+	The String concatenation to text block clean-up/quick-assist has been
+	enhanced with regards to converting a StringBuilder or StringBuffer.
+	There are situations where the StringBuilder/StringBuffer cannot
+	be converted directly into a text block (for example, if the StringBuffer
+	is further appended to or is passed as an argument to a method).  In
+	the past, the code would be left unaltered but now a text block will
+	be used to initialize the StringBuffer/StringBuilder if not too
+	small to warrant a text block.
+	<p>The clean-up is enabled on the <b>Java Feature</b> tab underi</p>
+	<b>Java 15</b> by selecting both: 
+	<b>Convert String concatenation to text block</b> and
+	<b>Include StringBuffer or StringBuilder concatenations</b>.
+	<p>For example, the following code sample:</p>
+	<img src="images/string-concat-to-text-block-before.png" alt="Text block clean-up before"/>
+	<p>gets converted to:</p>
+	<img src="images/string-concat-to-text-block-after.png" alt="Text block clean-up after"/>
+      </td>
+  </tr>
+  <!-- ******************* End of Java Editor ************************************* -->
 
-  <!-- ******************* Java Compiler ************************************* -->
+<!-- ******************* Java Views and Dialogs ************************************* 
+  <tr>
+    <td id="JavaViewsAndDialogs" class="section" colspan="2">
+    <h2>Java Views and Dialogs</h2>
+    </td>
+  </tr>
+
+   ******************* End of Java Views and Dialogs ************************************* --> 
+
+  <!-- ******************* Java Compiler ************************************* 
   <tr>
     <td id="JavaCompiler" class="section" colspan="2">
     <h2>Java Compiler</h2>
     </td>
   </tr>
-	<tr id="ui-unused-lambda-params">
-  		<td class="title">
-        <a href="#ui-unused-lambda-params">Configure problem severity for unused lambda parameters</a>
-    </td>
-        <td class="content">
-            You can configure the problem severity for unused lambda parameters with the new option in 
-            Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings:        
-            <p>
-                <img src="images/ui-unused-lambda-params.png" alt="UI option to configure unused lambda parameters"/>
-            </p>
-        </td>
-	</tr>
-  <!-- ******************* End of Java Compiler ************************************* -->
+   ******************* End of Java Compiler ************************************* -->
 
-  <!-- ******************* Java Formatter ************************************* -->
-  <!--
+  <!-- ******************* Java Formatter ************************************* 
   <tr>
     <td id="JavaFormatter" class="section" colspan="2">
     <h2>Java Formatter </h2>
     </td>
   </tr>
-  -->
-  <!-- ******************* End of Java Formatter ************************************* -->
+   ******************* End of Java Formatter ************************************* -->
   
   <!-- *********************** Debug ******************************** -->
-  <!--
   <tr>
     <td id="Debug" class="section" colspan="2">
     <h2>Debug</h2>
     </td>
   </tr>
-  -->
+  <tr id="compare-objects">
+    <td class="title">Compare Objects from Variables View</td>
+      <td class="content">
+          Developers can now easily compare elements in objects of the same type, such as <b><i>Lists, CharSequences, Sets, Iterables, Maps, Wrappers, Queues, and Deques</i> </b>, directly from the variables view. 
+          This feature provides a summarised overview of their similarities and differences.
+           For other Java types, comparisons will be made based on their fields (if available), or by their references if fields are not present.
+           This eliminates the need to write explicit comparison code in the debug shell or manually inspect each collection.<br/> Simply stop at a breakpoint, select at least two variables of the same type, and view the comparison results..
+          <br/>
+          <br/>Here's an example <br/>
+          We have stopped at line 26 which left us 4 objects of List types, now all we have to do is just select all 4 and choose "<b>Compare</b>" from right click
+          <p>
+              <img src="images/compareObjects_Menu.png" alt="Compare objects from variables view"/>
+          </p>
+          <br/> Results
+          <p>
+              <img src="images/compareObjects_Results1.png" alt="Results of comparison"/>
+          </p>
+          <br/>
+          Another example of comparing two char sequences <br/>
+          <p>
+              <img src="images/compareObjects_Results2.png" alt="Results of comparison"/>
+          </p>
+          <br/> Maps <br/>
+           <p>
+              <img src="images/compareObjects_Results3.png" alt="Results of comparison"/>
+          </p>
+          <br/> Custom Types (Fields available) <br/>
+           <p>
+              <img src="images/compareObjects_Results4.png" alt="Results of comparison"/>
+          </p>
+          <br/> Custom Types (Fields unavailable) <br/>
+           <p>
+              <img src="images/compareObjects_Results5.png" alt="Results of comparison"/>
+          </p>
+     </td>
+ </tr>
+ 
+ <tr id="Detailformatter-for-primitives">
+    <td class="title">Detail formatters for primitives and arrays</td>
+      <td class="content">
+          Developers can now add custom formatters for Java primitives and arrays. An additional option to configure formatters for primitives is available under<b> Preferences -> Detail Formatters -> Add </b>.
+          <p>
+              <img src="images/detailFormatters_Primitives.png" alt="detail formatters option"/>
+          </p><br/>
+           <p>
+              <img src="images/detailFormatters_Primitives2.png" alt="detail formatters option"/>
+          </p>
+          Custom formatting can also be accessed from the variables view menu options.<br/>
+           <p>
+              <img src="images/detailFormatters_Primitives3.png" alt="detail formatters option"/>
+          </p>
+          <br/>
+     </td>
+ </tr>
+ 
+ <tr id="Detailformatter-for-Exception">
+    <td class="title">Enhanced Formatting For Exception Objects </td>
+      <td class="content">
+          Java debugger now shows stack traces for exceptions directly in the Variables and Expressions views. This enhancement applies by default for all Throwables, so developers can instantly access detailed exception information—such as stack traces and causes—without needing to configure a custom detail formatter.
+          <p>
+              <img src="images/exceptionObjects2.png" alt="Exception objects stack traces"/><br/>
+              <img src="images/exceptionObjects.png" alt="Exception objects stack traces"/>
+          </p><br/>
+          <br/>
+</td>
+</tr>
   <!--************************ End of Debug ******************************** -->
 
-  <!-- *********************** JDT Developers ******************************** -->
-  <!--
+  <!-- *********************** JDT Developers ******************************** 
   <tr>
     <td id="JDTDev" class="section" colspan="2">
     <h2>JDT Developers</h2>
     </td>
   </tr>
-  -->
-  <!-- *********************** End of JDT Developers ******************************** -->
+   *********************** End of JDT Developers ******************************** -->
   <tr><td colspan="2"/></tr>
 </tbody>
 </table>
