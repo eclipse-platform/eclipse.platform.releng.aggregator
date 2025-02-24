@@ -50,6 +50,7 @@ jobs:
           mkdir -p target
           echo '## Everything is up to date' > target/targetUpdates.md
     - name: Create Pull Request
+      id: create-pr
       uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
       with:
         commit-message: Update target-platform with latest version
@@ -63,3 +64,11 @@ jobs:
         author: ${{ inputs.author }}
         add-paths: |
             **/*.target
+    - name: Check license vetting status and ask for review if required
+      if: ${{ steps.create-pr.outputs.pull-request-operation == 'created' }} || ${{ steps.create-pr.outputs.pull-request-operation }} == 'updated'
+      uses: eclipse-dash/dash-licenses/.github/actions/maven-license-check-action@master
+      with:
+        request-review: true
+        project-id: eclipse.platform
+      env:
+          GITLAB_API_TOKEN: ${{ secrets.ECLIPSE_GITLAB_API_TOKEN }}
