@@ -32,9 +32,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Update Main Versions
-      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk
+      run: mvn -U -ntp -f eclipse-platform-parent org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT -Dmodules=../eclipse.platform.releng.prereqs.sdk,../eclipse.platform.releng.tychoeclipsebuilder
     - name: Update Release Versions
-      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:set-property -Dproperties=releaseVersion,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewreleaseVersion=${{ github.event.milestone.title }}
+      run: mvn -ntp -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:set-property -Dproperties=releaseVersion,releaseName -DnewReleaseName=${{ steps.get-release-name.outputs.name }} -DnewReleaseVersion=${{ github.event.milestone.title }}
     - name: Create Pull Request for Release ${{ github.event.milestone.title }}
       uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
       with:
@@ -47,4 +47,6 @@ jobs:
         add-paths: |
             eclipse-platform-parent/pom.xml
             eclipse.platform.releng.prereqs.sdk/pom.xml
+            eclipse.platform.releng.tychoeclipsebuilder/**/*.pom.xml
+            eclipse.platform.releng.tychoeclipsebuilder/**/*.product
 
