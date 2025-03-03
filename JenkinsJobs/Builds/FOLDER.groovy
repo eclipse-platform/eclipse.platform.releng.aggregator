@@ -24,8 +24,8 @@ for (STREAM in config.Streams){
 
 # Milestone/RC Schedule 
 # Post M1, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-0 6 15-26 2 5-7,1-3
-0 18 14-26 2 5-7,1-3
+#0 6 15-26 2 5-7,1-3
+#0 18 14-26 2 5-7,1-3
 ''')
 					}
 				}
@@ -57,7 +57,7 @@ pipelineJob('Builds/Build-Docker-images'){
 		cpsScm {
 			lightweight(true)
 			scm {
-				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'R4_35_maintenance')
 			}
 			scriptPath('JenkinsJobs/Builds/DockerImagesBuild.jenkinsfile')
 		}
