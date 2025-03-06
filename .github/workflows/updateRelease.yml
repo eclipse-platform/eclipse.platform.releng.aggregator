@@ -2,10 +2,26 @@ name: Update For Next Release
 
 on:
   workflow_call:
+    inputs:
+      nextReleaseVersion:
+        description: 'The version of the release, for example: 4.35'
+        type: string
+        required: true
+      botName:
+        description: The name of the bot that authos the changes
+        type: string
+        default: 'Eclipse Releng Bot'
+      botMail:
+        description: The name of the bot that authos the changes
+        type: string
+        default: 'eclipse-releng-bot@eclipse.org'
+    secrets:
+      githubBotPAT:
+        description: The personal access token (with scope 'public_repo') of the bot to push a required change to a branch.
+
 jobs:
   update:
     runs-on: ubuntu-latest
-    if: contains(github.event.milestone.description, 'Release') 
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
@@ -24,15 +40,18 @@ jobs:
     - name: Update Versions
       run: >-
           mvn -U -B -ntp
-          org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
-          org.eclipse.tycho:tycho-versions-plugin:set-parent-version -DnewParentVersion=${{ github.event.milestone.title }}.0-SNAPSHOT
-    - name: Create Pull Request for Release ${{ github.event.milestone.title }}
+          org.eclipse.tycho:tycho-versions-plugin:set-version -DnewVersion=${{ inputs.nextReleaseVersion }}.0-SNAPSHOT
+          org.eclipse.tycho:tycho-versions-plugin:set-parent-version -DnewParentVersion=${{ inputs.nextReleaseVersion }}.0-SNAPSHOT
+    - name: Create Pull Request for Release ${{ inputs.nextReleaseVersion }}
       uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
       with:
-        commit-message: Update for release ${{ github.event.milestone.title }}
-        branch: update_R${{ github.event.milestone.title }}
-        title: Update for release ${{ github.event.milestone.title }}
-        body: A new release milstone was created, please review the changes and merge if appropriate.
+        token: ${{ secrets.githubBotPAT || secrets.GITHUB_TOKEN }}
+        commit-message: Update for release ${{ inputs.nextReleaseVersion }}
+        branch: update_R${{ inputs.nextReleaseVersion }}
+        title: Update for release ${{ inputs.nextReleaseVersion }}
+        body: A new release milestone was created, please review the changes and merge if appropriate.
+        author: ${{ inputs.botName }} <${{ inputs.botMail }}>
+        committer: ${{ inputs.botName }} <${{ inputs.botMail }}>
         delete-branch: true
         milestone: ${{ github.event.milestone.number }}
         add-paths: |
