@@ -87,7 +87,7 @@ pipeline {
 		    when { not { branch pattern: "prepare_R.*", comparator: "REGEXP" } }
 			steps {
 				sh '''
-					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U
+					mvn clean install -pl !:infocenter-app,!:infocenter-product,:eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-T 1C \
 						-Pbree-libs \
