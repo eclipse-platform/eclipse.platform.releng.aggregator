@@ -13,7 +13,7 @@ pipeline {
 		jdk 'temurin-jdk21-latest'
 	}
 	environment {
-		MAVEN_OPTS = '-Xmx3G'
+		MAVEN_OPTS = '-Xmx3300m'
 	}
 	stages {
 		stage('Use master') {
