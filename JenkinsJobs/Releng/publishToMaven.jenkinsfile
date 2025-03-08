@@ -90,10 +90,11 @@ pipeline {
 						jar cf ${jar} README.txt
 						for pom in org/eclipse/${group}/*/*/*.pom; do
 							pomFolder=$(dirname ${pom})
-							if [[ ! $pomFolder =~ ${EXCLUDED_ARTIFACTS_PATTERN} ]]; then
+							# This is not working because EXCLUDED_ARTIFACTS_PATTERN is not defined and the empty string matches everything.
+							# if [[ ! $pomFolder =~ ${EXCLUDED_ARTIFACTS_PATTERN} ]]; then
 								javadoc=`echo ${pom} | sed -e "s|\\(.*\\)\\.pom|\\1-javadoc.jar|"`
 								cp ${jar} ${javadoc}
-							fi
+							# fi
 						done	
 					}
 					
@@ -219,7 +220,12 @@ pipeline {
 											JAVADOC_ARG="-Djavadoc=${javadocFile}"
 										else
 											JAVADOC_ARG=""
-											echo "Missing ${javadocFile}"
+											if unzip -l ${file} | grep -q -e '.class$'; then 
+												echo "BUILD FAILURE ${file} contains .class files and requires a ${javadocFile}"
+												exit 1
+											else
+												echo "Missing ${javadocFile} but ${file} contains no .class files."
+											fi; 
 										fi
 										set -x
 									
