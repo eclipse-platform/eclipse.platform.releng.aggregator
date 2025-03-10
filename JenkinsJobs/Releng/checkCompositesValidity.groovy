@@ -6,7 +6,7 @@ job('Releng/checkCompositesValidity'){
     daysToKeep(15)
   }
 
-  jdk('adoptopenjdk-hotspot-jdk11-latest')
+  jdk('temurin-jdk21-latest')
 
   label('basic')
 
@@ -31,7 +31,7 @@ job('Releng/checkCompositesValidity'){
 
   publishers {
     extendedEmail {
-      recipientList("sravankumarl@in.ibm.com")
+      recipientList("platform-releng-dev@eclipse.org")
     }
   }
   
