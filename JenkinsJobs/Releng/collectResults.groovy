@@ -14,6 +14,8 @@ job('Releng/ep-collectResults'){
     daysToKeep(5)
     numToKeep(10)
   }
+  
+  jdk('temurin-jdk21-latest')
 
   wrappers { //adds pre/post actions
     timestamps()
@@ -31,8 +33,6 @@ buildID=$(echo $buildID|tr -d ' ')
 buildURL=$(echo $buildURL|tr -d ' ')
 triggeringJob=$(echo $triggeringJob|tr -d ' ')
 
-java_home=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin
-
 wget -O ${WORKSPACE}/buildproperties.shsource --no-check-certificate http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
 cat ${WORKSPACE}/buildproperties.shsource
 source ${WORKSPACE}/buildproperties.shsource
@@ -41,67 +41,45 @@ epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
 dropsPath=${epDownloadDir}/downloads/drops4
 buildDir=${dropsPath}/${buildID}
 
-workingDir=${epDownloadDir}/workingDir
-
-workspace=${workingDir}/${JOB_BASE_NAME}-${BUILD_NUMBER}
-
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
-
-ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
+rsync -avzh genie.releng@projects-storage.eclipse.org:${buildDir} postingDir
 
 #get latest Eclipse platform product
 epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
-ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
+scp genie.releng@projects-storage.eclipse.org:${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz .
+ 
+tar -C . -xzf eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
-ssh genie.releng@projects-storage.eclipse.org PATH=${java_home}:$PATH ${workspace}/eclipse/eclipse -nosplash \\
-  -debug -consolelog -data ${workspace}/workspace-toolsinstall \\
+eclipse/eclipse -nosplash \\
+  -consolelog -data workspace-toolsinstall \\
   -application org.eclipse.equinox.p2.director \\
   -repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO},${WEBTOOLS_REPO} \\
-  -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \\
-  -destination ${workspace}/basebuilder \\
-  -profile SDKProfile
-
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workspace}/eclipse
+  -installIU org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group 
 
 #get requisite tools
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/publish.xml
-
-cd ${WORKSPACE}
-git clone https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-cd ${WORKSPACE}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-scp -r eclipse genie.releng@projects-storage.eclipse.org:${workspace}/eclipse
-cd ${WORKSPACE}
+wget -O collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
+wget -O publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/publish.xml
 
 #triggering ant runner
-baseBuilderDir=${workspace}/basebuilder
-javaCMD=${java_home}/java
+devworkspace=${WORKSPACE}/workspace-antRunner
 
-launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
-
-scp genie.releng@projects-storage.eclipse.org:${buildDir}/buildproperties.shsource .
-source ./buildproperties.shsource
-
-devworkspace=${workspace}/workspace-antRunner
-
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/collectTestResults.xml \\
-  -DpostingDirectory=${dropsPath} \\
+eclipse/eclipse -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file collectTestResults.xml \\
+  -DpostingDirectory=postingDir \\
   -Djob=${triggeringJob} \\
   -DbuildURL=${buildURL} \\
   -DbuildID=${buildID}
 
-devworkspace=${workspace}/workspace-updateTestResults
+devworkspace=${WORKSPACE}/workspace-updateTestResults
 
-ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/publish.xml \\
-  -DpostingDirectory=${dropsPath} \\
+eclipse/eclipse -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner -file publish.xml \\
+  -DpostingDirectory=postingDir \\
   -Djob=${triggeringJob} \\
   -DbuildID=${buildID} \\
   -DeclipseStream=${STREAM} \\
   "-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \\
   -DEBuilderDir=${workspace}
 
-#Delete Workspace
-ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_BASE_NAME}*
+rsync -avzh postingDir/${buildID} genie.releng@projects-storage.eclipse.org:${dropsPath}
+
     ''')
   }
 
