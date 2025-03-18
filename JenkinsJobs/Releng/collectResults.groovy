@@ -58,6 +58,7 @@ eclipse/eclipse -nosplash \\
 #get requisite tools
 wget -O collectTestResults.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/collectTestResults.xml
 wget -O publish.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/cje-production/scripts/publish.xml
+wget -O testManifest.xml https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/master/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml
 
 #triggering ant runner
 devworkspace=${WORKSPACE}/workspace-antRunner
@@ -76,7 +77,7 @@ eclipse/eclipse -nosplash -consolelog -debug -data $devworkspace -application or
   -DbuildID=${buildID} \\
   -DeclipseStream=${STREAM} \\
   "-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \\
-  -DEBuilderDir=${workspace}
+  -DmanifestFile=testManifest.xml
 
 rsync -avzh postingDir/${buildID} genie.releng@projects-storage.eclipse.org:${dropsPath}
 
