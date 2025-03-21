@@ -12,6 +12,7 @@ and other such scripts.
     numToKeep(5)
   }
 
+ jdk('temurin-jdk21-latest')
 
   label('basic')
 
