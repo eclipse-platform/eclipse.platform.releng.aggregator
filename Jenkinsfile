@@ -16,11 +16,6 @@ pipeline {
 		MAVEN_OPTS = '-Xmx3800m'
 	}
 	stages {
-		stage('Use master') {
-			steps {
-				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
-			}
-		}
 		stage('Deploy parent-pom and SDK-target') {
 			when {
 				anyOf {
@@ -104,7 +99,9 @@ pipeline {
 						.*log,*/target/work/data/.metadata/.*log,\
 						*/tests/target/work/data/.metadata/.*log,\
 						apiAnalyzer-workspace/.metadata/.*log,\
-						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*'
+						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*,\
+						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products/*.zip,\
+						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products/*.tar.gz'
 				}
 			}
 		}
