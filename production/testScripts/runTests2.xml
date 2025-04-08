@@ -3,510 +3,455 @@
   default="runTests2"
   basedir=".">
 
-  <target
+	<target
     name="init"
     depends="initWorkspace, initDownloadHosts, initBuildId, initBuildType, initBasicDirectories, initStreamSpecificVariables, initTargetPlatform, initPlatformSpecificProperties, initCurrentUpdateSite,setJavaMajorVersion"
     unless="runTest2Initialized">
 
-    <property
+		<property
       name="EOL"
       value="${line.separator}" />
 
-    <property
+		<property
       name="selectiveVerbose"
       value="false" />
-    <!-- 
+		<!-- 
       If not explicitly passed in from caller, assume 'all'. This is the
       default target already, in global test.xml, but this allows us to be explicit
       (and, make sure it continues working). 
     -->
-    <condition
+		<condition
       property="testSuite"
       value="${env.testSuite}"
       else="all">
-      <isset property="env.testSuite" />
-    </condition>
-    <property
+			<isset property="env.testSuite" />
+		</condition>
+		<property
       name="buildURL"
       value="https://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
 
-    <!-- if 'baselinePerf' is specified, need to it for "buildId", plus adjust
-      URL to it, not what we just built. Only "tests" always get buildURL -->
-    <condition
-      property="buildIdToUse"
-      value="${baselinePerfVersionLabel}"
-      else="${buildId}">
-      <istrue value="${baselinePerf}" />
-    </condition>
-    <condition
-      property="repoBuildIdToUse"
-      value="${baselinePerfBuildId}"
-      else="${buildId}">
-      <istrue value="${baselinePerf}" />
-    </condition>
-    <condition
-      property="archiveLocation"
-      value="${baselinePerfLocation}"
-      else="${buildURL}">
-      <istrue value="${baselinePerf}" />
-    </condition>
-    <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to
-      match with? Or, else will take large number of "baselines" averaged? -->
+		<property name="buildIdToUse" value="${buildId}" />
+		<property name="repoBuildIdToUse" value="${buildId}" />
+		<property name="archiveLocation" value="${buildURL}" />
+		<echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
+		<echo message="build id of runtimeArchive ${buildIdToUse}" />
 
-    <condition
-      property="eclipse.perf.config"
-      value="build=${baselinePerfVersion}-${buildIdTimestamp};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
-      else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
-      <istrue value="${baselinePerf}" />
-    </condition>
-    <!-- This "assert" property works, in this context, because we run baseline
-      first, when buildIdToUse != buildId that is a "baseline run" (so, no "assert"
-      for that baseline run). But, when buildIdToUse == buildId that is a "normal
-      run" so then we do want to "assert" against the already-collected baseline
-      data. Note: Note, docs say order does not matter, and could specify "just
-      build" and reset filled in with what's in 'config', but some experiences
-      makes me doubt that? TODO: design problem: how to distinguish assert against
-      baseline vs. baseline alt. -->
-    <condition
-      property="eclipse.perf.assertAgainst"
-      value="build=${baselinePerfVersion}-${buildIdTimestamp};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
-      <equals
-        arg1="${buildIdToUse}"
-        arg2="${buildId}" />
-    </condition>
-    <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
-    <condition
-      property="frameworkperfargs"
-      value="-DInternalWriteRawPerformanceData=${eclipse.perf.samples.out} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
-      else="-DInternalWriteRawPerformanceData=${eclipse.perf.samples.out} -Declipse.perf.config=${eclipse.perf.config}">
-      <isset property="eclipse.perf.assertAgainst" />
-    </condition>
-    <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
-    <echo message="build id of runtimeArchive ${buildIdToUse}" />
-
-    <echo message="Variables in 'runTests2.xml'" />
-    <echo message="DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
-    <echo message="WORKSPACE: ${WORKSPACE}" />
-    <echo message="buildId: ${buildId}" />
-    <echo message="buildIdToUse: ${buildIdToUse}" />
-    <echo message="relengBaseBuilderDir: ${relengBaseBuilderDir}" />
-    <echo message="configurationDir: ${configurationDir}" />
-    <echo message="java.home: ${java.home}" />
-    <echo message="eclipseStream: ${eclipseStream}" />
-    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}" />
-    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
-    <echo message="buildType: ${buildType}" />
-    <echo message="testSuite: ${testSuite}" />
+		<echo message="Variables in 'runTests2.xml'" />
+		<echo message="DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
+		<echo message="WORKSPACE: ${WORKSPACE}" />
+		<echo message="buildId: ${buildId}" />
+		<echo message="buildIdToUse: ${buildIdToUse}" />
+		<echo message="relengBaseBuilderDir: ${relengBaseBuilderDir}" />
+		<echo message="configurationDir: ${configurationDir}" />
+		<echo message="java.home: ${java.home}" />
+		<echo message="eclipseStream: ${eclipseStream}" />
+		<echo message="eclipseStreamMajor: ${eclipseStreamMajor}" />
+		<echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
+		<echo message="buildType: ${buildType}" />
+		<echo message="testSuite: ${testSuite}" />
 
 
-    <!-- there's nothing "automatic" about the local cache (so far). If specified
+		<!-- there's nothing "automatic" about the local cache (so far). If specified
       (such as on Hudson command line that executes this file, as, say, -DlocalCache=file:///shared/eclipse/localCache
       then all the downloads required must be already available there. It is intended
       to speed up local testing to avoid re-downloading files. -->
-    <!-- currently, following is dead code. Leaving for now as a reminder to
+		<!-- currently, following is dead code. Leaving for now as a reminder to
       allow localCache again, someday -->
-    <condition
+		<condition
       property="archiveLocation"
       value="${localCache}"
       else="${buildURL}">
-      <isset property="localCache" />
-    </condition>
+			<isset property="localCache" />
+		</condition>
 
-    <echo message="buildURL ${buildURL}" />
-    <echo message="archiveLocation ${archiveLocation}" />
-    <property
+		<echo message="buildURL ${buildURL}" />
+		<echo message="archiveLocation ${archiveLocation}" />
+		<property
       name="runTest2Initialized"
       value="true" />
 
-  </target>
+	</target>
 
-  <target
+	<target
     name="getPlatformIndependentZips"
     depends="init"
     unless="skipInstall">
 
-    <get
+		<get
       retries="5"
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-Automated-Tests-${buildIdToUse}.zip"
       dest="${testDir}/eclipse-Automated-Tests-${buildIdToUse}.zip" />
 
-  </target>
+	</target>
 
-  <target
+	<target
     name="getwinzips"
     depends="init, getPlatformIndependentZips"
     unless="skipInstall">
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-win32-${osgi.arch}.zip"
       dest="${executionDir}/eclipse-SDK-${buildIdToUse}-win32-${osgi.arch}.zip" />
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-platform-${buildIdToUse}-win32-${osgi.arch}.zip"
       dest="${executionDir}/eclipse-platform-${buildIdToUse}-win32-${osgi.arch}.zip" />
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-win32-${osgi.arch}.zip"
       dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-win32-${osgi.arch}.zip" />
-  </target>
-  <target
+	</target>
+	<target
     name="getlinzips"
     depends="init, getPlatformIndependentZips"
     unless="skipInstall">
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-linux-gtk-${osgi.arch}.tar.gz"
       dest="${executionDir}/eclipse-SDK-${buildIdToUse}-linux-gtk-${osgi.arch}.tar.gz" />
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-platform-${buildIdToUse}-linux-gtk-${osgi.arch}.tar.gz"
       dest="${executionDir}/eclipse-platform-${buildIdToUse}-linux-gtk-${osgi.arch}.tar.gz" />
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk-${osgi.arch}.tar.gz"
       dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk-${osgi.arch}.tar.gz" />
-  </target>
+	</target>
 
-  <target
+	<target
     name="getmacosx"
     depends="init, getPlatformIndependentZips"
     unless="skipInstall">
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg"
       dest="${executionDir}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg" />
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${archiveLocation}/eclipse-platform-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg"
       dest="${executionDir}/eclipse-platform-${buildIdToUse}-macosx-cocoa-${osgi.arch}.dmg" />
-    <get
+		<get
       verbose="${selectiveVerbose}"
       src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-${osgi.arch}.dmg"
       dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-${osgi.arch}.dmg" />
-  </target>
+	</target>
 
-  <target
+	<target
     name="initTargetPlatform"
     unless="testPlatform">
-    <condition
+		<condition
       property="testPlatform"
       value="windows">
-      <and>
-        <equals
+			<and>
+				<equals
           arg1="${osgi.os}"
           arg2="win32" />
-        <equals
+				<equals
           arg1="${osgi.ws}"
           arg2="win32" />
-      </and>
-    </condition>
+			</and>
+		</condition>
 
-    <condition
+		<condition
       property="testPlatform"
       value="linux">
-      <and>
-        <equals
+			<and>
+				<equals
           arg1="${osgi.os}"
           arg2="linux" />
-        <equals
+				<equals
           arg1="${osgi.ws}"
           arg2="gtk" />
-      </and>
-    </condition>
-    <condition
+			</and>
+		</condition>
+		<condition
       property="testPlatform"
       value="macosx">
-      <and>
-        <equals
+			<and>
+				<equals
           arg1="${osgi.os}"
           arg2="macosx" />
-        <equals
+				<equals
           arg1="${osgi.ws}"
           arg2="cocoa" />
-      </and>
-    </condition>
-    <echo message="[DEBUG] in runTest2.xml: os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
-    <echo message="[INFO] in runTest2.xml: testPlatform  ${testPlatform}" />
-  </target>
+			</and>
+		</condition>
+		<echo message="[DEBUG] in runTest2.xml: os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
+		<echo message="[INFO] in runTest2.xml: testPlatform  ${testPlatform}" />
+	</target>
 
-  <!-- Note that in getting the target platform, we nearly always get the
-    'buildId' version, the one we just built. But, in some cases, we use "baselinePerf"
-    version for performance regression testing. In that case, we still get the
+	<!-- Note that in getting the target platform, we nearly always get the
+    'buildId' version, the one we just built. We get the
     "buildId" version of tests ... the ones we just built ... only what we run
-    them on changes. When we do use 'baselinePerf', that is specified as 'true'
-    in Hudson job, which signals to use the baselinePerf version defined in 'streamSpecific.properties. -->
-  <target
+    them on changes. -->
+	<target
     name="downloadTargetPlatform"
     depends="init">
-    <!-- TODO: should add checks for checksum integrity on downloads. Perhaps
+		<!-- TODO: should add checks for checksum integrity on downloads. Perhaps
       use mirror URLs? (though, that'd not effect production) -->
-    <fail
+		<fail
       unless="testPlatform"
       message="testPlatform did not match any of the supported combinations of osgi.os, osgi.ws" />
-    <condition
+		<condition
       property="getArtifacts"
       value="getwinzips">
-      <equals
+			<equals
         arg1="${testPlatform}"
         arg2="windows" />
-    </condition>
-    <condition
+		</condition>
+		<condition
       property="getArtifacts"
       value="getlinzips">
-      <equals
+			<equals
         arg1="${testPlatform}"
         arg2="linux" />
-    </condition>
-    <condition
+		</condition>
+		<condition
       property="getArtifacts"
       value="getmacosx">
-      <equals
+			<equals
         arg1="${testPlatform}"
         arg2="macosx" />
-    </condition>
-    <echo message="getArtifacts ${getArtifacts}" />
-    <antcall target="${getArtifacts}" />
+		</condition>
+		<echo message="getArtifacts ${getArtifacts}" />
+		<antcall target="${getArtifacts}" />
 
-  </target>
+	</target>
 
-  <target name="initConfigurationDir">
-    <property
+	<target name="initConfigurationDir">
+		<property
       name="configurationDir"
       value="${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration" />
-  </target>
+	</target>
 
-  <target
+	<target
     name="initPlatformSpecificProperties"
     depends="initTargetPlatform, initConfigurationDir"
     unless="platformSpecificPropertiesInitialized">
-    <property
+		<property
       name="platformSpecificProperties"
       value="${configurationDir}/sdk.tests/testConfigs/${testPlatform}/platformSpecific.properties" />
-    <loadproperties>
-      <file file="${platformSpecificProperties}" />
-    </loadproperties>
-    
-    <property
+		<loadproperties>
+			<file file="${platformSpecificProperties}" />
+		</loadproperties>
+
+		<property
       name="platformSpecificPropertiesInitialized"
       value="true" />
-  </target>
+	</target>
 
-  <target
+	<target
     name="runTests2"
     depends="init, initConfigurationDir, downloadTargetPlatform">
 
-    <copy
+		<copy
       todir="${executionDir}"
       verbose="true">
-      <fileset dir="${configurationDir}/sdk.tests/testConfigs/${testPlatform}" />
-    </copy>
-    <copy
+			<fileset dir="${configurationDir}/sdk.tests/testConfigs/${testPlatform}" />
+		</copy>
+		<copy
       verbose="true"
       todir="${executionDir}"
       overwrite="true">
-      <fileset dir="${configurationDir}/sdk.tests/testScripts" />
-    </copy>
+			<fileset dir="${configurationDir}/sdk.tests/testScripts" />
+		</copy>
 
-    <echoproperties
+		<echoproperties
       description="Echo all properties in runTest2 after all is initialized, shortly before tests are ran."
       destfile="${WORKSPACE}/propertiesAllFromRunTest2.properties" />
 
-    <!-- TODO: seems this unzip could/should be moved to test.xml? To do once
+		<!-- TODO: seems this unzip could/should be moved to test.xml? To do once
       only, of course, if not already done. We (sort of) do in test.xml. See its
       setupRepo task. -->
-    <property
+		<property
       name="repoZip"
       value="${executionDir}/eclipse-junit-tests-${repoBuildIdToUse}.zip" />
-    <echo message="repoZip: ${repoZip}" />
-    <antcall target="unzipTestFramework" />
+		<echo message="repoZip: ${repoZip}" />
+		<antcall target="unzipTestFramework" />
 
-    <!-- We print these properties to a file primarily to capture variables
+		<!-- We print these properties to a file primarily to capture variables
       that might have been set in Hudson, which do not "survive" going through
       the bat or script files. ... Though, makes me wonder if we really need to
       do that? Seems we could call test.xml directly? In principle, we could call
       printProperty from anywhere, but seems best to centralize the function. -->
-    <antcall target="printProductionProperties" />
+		<antcall target="printProductionProperties" />
 
-  	<echo message="DEBUG ant.version: ${ant.version}" />
+		<echo message="DEBUG ant.version: ${ant.version}" />
 
-    <!-- following are all required by "runtests" ... used to be part of it,
+		<!-- following are all required by "runtests" ... used to be part of it,
       but wanted these variables to print out, even if merely testing scripts,
       but not actually running tests. -->
-    <condition
+		<condition
       property="executionArguments"
       value="/c ${testScript}">
-      <and>
-        <os family="windows" />
-      </and>
-    </condition>
-    <property
+			<and>
+				<os family="windows" />
+			</and>
+		</condition>
+		<property
       name="executionArguments"
       value="${testScript}" />
 
-    <echo message="=== properties in runTests2, for runTests executable:" />
-    <echo message="  = properties used in exec task:" />
-    <echo message="      executionDir ${executionDir}" />
-    <echo message="      testExecutable ${testExecutable}" />
-    <echo message="      testScript ${testScript}" />
-    <echo message="      executionArguments ${executionArguments}" />
-    <echo message="  = properties set as env variables:" />
-    <echo message="      propertiesFile: ${WORKSPACE}/production.properties" />
-    <echo message="      jvm: ${jvm}" />
-    <echo message="      testedPlatform: ${testedPlatform}" />
-    <echo message="      testedPlatformConfig: ${testedPlatformConfig}" />
+		<echo message="=== properties in runTests2, for runTests executable:" />
+		<echo message="  = properties used in exec task:" />
+		<echo message="      executionDir ${executionDir}" />
+		<echo message="      testExecutable ${testExecutable}" />
+		<echo message="      testScript ${testScript}" />
+		<echo message="      executionArguments ${executionArguments}" />
+		<echo message="  = properties set as env variables:" />
+		<echo message="      propertiesFile: ${WORKSPACE}/production.properties" />
+		<echo message="      jvm: ${jvm}" />
+		<echo message="      testedPlatform: ${testedPlatform}" />
+		<echo message="      testedPlatformConfig: ${testedPlatformConfig}" />
 
-    <antcall target="runtests" />
+		<antcall target="runtests" />
 
-  </target>
+	</target>
 
-  <target
+	<target
     name="printProductionProperties"
     depends="init">
-    <!-- here we want to print properties, such as passed in via Hudson, that
+		<!-- here we want to print properties, such as passed in via Hudson, that
       can be used later, by test.xml, but since it is started by as separate processes,
       there is no direct access to Hudson properties ... so we make them persistent.
       In many cases, the property will not be defined, in which case we do not
       want to write anything for that property (or, it will appear to have been
       set, even if set to an empty string). -->
 
-    <printProperty property="buildId" />
-    <printProperty property="buildIdToUse" />
-    <printProperty property="buildType" />
-    <printProperty property="eclipseStream" />
-    <printProperty property="previousReleaseVersion" />
-    <printProperty property="previousReleaseVersionRepo" />
-    <printProperty property="baselinePerf" />
-    <printProperty property="osgi.os" />
-    <printProperty property="osgi.ws" />
-    <printProperty property="osgi.arch" />
-    <printProperty property="DOWNLOAD_HOST" />
-    <printProperty property="ARCHIVE_HOST" />
-    <printProperty property="executionDir" />
-    <printProperty property="install" />
-    <printProperty property="eclipse-home" />
-    <printProperty property="isMacAppLayout" />
-    <printProperty property="configurationDir" />
-    <printProperty property="org.eclipse.core.net.prefs" />
-    <printProperty property="testSuite" />
-    <printProperty property="test.target" />
-    <printProperty property="testExecutable" />
-    <printProperty property="testScript" />
-    <printProperty property="jvm" />
-    <printProperty property="java.version" />
-    <printProperty property="javaMajorVersion" />
-    <printProperty property="testedPlatform" />
-    <printProperty property="testedPlatformConfig" />
-    <printProperty property="eclipse.perf.samples.out" />
-    <printProperty property="eclipse.perf.dbloc" />
-    <printProperty property="eclipse.perf.config" />
-    <printProperty property="eclipse.perf.assertAgainst" />
-    <printProperty property="currentUpdateSite" />
+		<printProperty property="buildId" />
+		<printProperty property="buildIdToUse" />
+		<printProperty property="buildType" />
+		<printProperty property="eclipseStream" />
+		<printProperty property="previousReleaseVersion" />
+		<printProperty property="previousReleaseVersionRepo" />
+		<printProperty property="osgi.os" />
+		<printProperty property="osgi.ws" />
+		<printProperty property="osgi.arch" />
+		<printProperty property="DOWNLOAD_HOST" />
+		<printProperty property="ARCHIVE_HOST" />
+		<printProperty property="executionDir" />
+		<printProperty property="install" />
+		<printProperty property="eclipse-home" />
+		<printProperty property="isMacAppLayout" />
+		<printProperty property="configurationDir" />
+		<printProperty property="org.eclipse.core.net.prefs" />
+		<printProperty property="testSuite" />
+		<printProperty property="test.target" />
+		<printProperty property="testExecutable" />
+		<printProperty property="testScript" />
+		<printProperty property="jvm" />
+		<printProperty property="java.version" />
+		<printProperty property="javaMajorVersion" />
+		<printProperty property="testedPlatform" />
+		<printProperty property="testedPlatformConfig" />
+		<printProperty property="currentUpdateSite" />
 
-  </target>
+	</target>
 
-  <target
+	<target
     name="initStreamSpecificProperties"
     depends="initConfigurationDir"
     unless="streamSpecificPropertiesSet">
-    <property file="${configurationDir}/streamSpecific.properties" />
-    <property
+		<property file="${configurationDir}/streamSpecific.properties" />
+		<property
       name="streamSpecificPropertiesSet"
       value="true" />
-  </target>
-  <target
+	</target>
+	<target
     name="initCurrentUpdateSite"
     depends="initDownloadHosts, initStreamVariables, initBuildId, initBuildType"
     unless="currentUpdateSite">
-    <property
+		<property
       name="currentUpdateSite"
       value="https://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
-  </target>
-  <target
+	</target>
+	<target
     name="checkInstallDir"
     if="install">
-    <echo message="[DEBUG] in test.xml: Found the value of install already set, to ${install}" />
-  </target>
+		<echo message="[DEBUG] in test.xml: Found the value of install already set, to ${install}" />
+	</target>
 
-  <target
+	<target
     name="initInstallDir"
     depends="initBuildId, initStreamSpecificProperties, checkInstallDir"
     unless="install">
-    <property
+		<property
       name="testDir"
       value="${WORKSPACE}/workarea/${buildId}" />
-    <echo message="[DEBUG] in runTests2.xml: testDir: ${testDir}" />
+		<echo message="[DEBUG] in runTests2.xml: testDir: ${testDir}" />
 
-    <property
+		<property
       name="executionDir"
       value="${testDir}/eclipse-testing" />
-    <mkdir dir="${executionDir}" />
-    <echo message="[DEBUG] in runTests2.xml: executionDir: ${executionDir}" />
+		<mkdir dir="${executionDir}" />
+		<echo message="[DEBUG] in runTests2.xml: executionDir: ${executionDir}" />
 
-    <!--default directory where test-eclipse-sdk will be installed -->
-    <property
+		<!--default directory where test-eclipse-sdk will be installed -->
+		<property
       name="install"
       value="${executionDir}/test-eclipse" />
-    <mkdir dir="${install}" />
-    <echo message="[DEBUG] in runTests2.xml: the value of install was set to: ${install}" />
-  </target>
+		<mkdir dir="${install}" />
+		<echo message="[DEBUG] in runTests2.xml: the value of install was set to: ${install}" />
+	</target>
 
 
-  <!-- eclipse-home set to be the folder that will later contain the plugins
+	<!-- eclipse-home set to be the folder that will later contain the plugins
     folder. Note: we have to set eclipse-home, rather than use "eclpse.home"
     or "eclipse.home.location" because at this point we are executing from the
     "setup" version of eclipse (aka basebuilder) not the actual version of eclipse
     we will later be testing. -->
-  <target
+	<target
     name="initEclipseHome"
     depends="initStreamSpecificProperties, initInstallDir, checkEclipseHome"
     unless="eclipse-home">
 
-    <condition
+		<condition
       property="eclipse-home"
       value="${install}/Eclipse.app/Contents/Eclipse"
       else="${install}/eclipse">
-      <and>
-        <os family="mac" />
-        <istrue value="${isMacAppLayout}" />
-      </and>
-    </condition>
-    <echo message="[DEBUG] in runTest2.xml the value of eclipse-home was set to: ${eclipse-home}" />
-  </target>
-  <!-- Intended to be called only from initEclipseHome, simply as extra information
+			<and>
+				<os family="mac" />
+				<istrue value="${isMacAppLayout}" />
+			</and>
+		</condition>
+		<echo message="[DEBUG] in runTest2.xml the value of eclipse-home was set to: ${eclipse-home}" />
+	</target>
+	<!-- Intended to be called only from initEclipseHome, simply as extra information
     for debugging -->
-  <target
+	<target
     name="checkEclipseHome"
     if="eclipse-home">
-    <echo message="[DEBUG] Found the value of eclipse-home already set, to ${eclipse-home}" />
-  </target>
+		<echo message="[DEBUG] Found the value of eclipse-home already set, to ${eclipse-home}" />
+	</target>
 
-  <macrodef name="printProperty">
-    <!-- the use of properyfile and local require at least Ant 1.8 -->
-    <attribute name="property" />
-    <sequential>
-      <echo message="DEBUG @{property}: ${@{property}}" />
-      <!-- for our use, 'del' operation won't typically delete anything, since
+	<macrodef name="printProperty">
+		<!-- the use of properyfile and local require at least Ant 1.8 -->
+		<attribute name="property" />
+		<sequential>
+			<echo message="DEBUG @{property}: ${@{property}}" />
+			<!-- for our use, 'del' operation won't typically delete anything, since
         would not have been there to begin with, but is an easy way to prevent an
         undefined property from being written -->
-      <local name="oper" />
-      <condition
+			<local name="oper" />
+			<condition
         property="oper"
         value="="
         else="del">
-        <isset property="@{property}" />
-      </condition>
-      <propertyfile file="${WORKSPACE}/production.properties">
-        <entry
+				<isset property="@{property}" />
+			</condition>
+			<propertyfile file="${WORKSPACE}/production.properties">
+				<entry
           key="@{property}"
           value="${@{property}}"
           operation="${oper}" />
-      </propertyfile>
-    </sequential>
-  </macrodef>
+			</propertyfile>
+		</sequential>
+	</macrodef>
 
 
-  <!-- This initStreamSpecificVariables target was copied from buildAll.xml
+	<!-- This initStreamSpecificVariables target was copied from buildAll.xml
     and does about exactly the same thing, purposely left close to original,
     though not as much is actually required. TODO: in future, pull out into one
     file, and reuse You can tell from comment, it is out dated. Its purpose,
@@ -516,377 +461,374 @@
     as a peer of eclipseBuilder, rather then us doing the checkout here, ourselves.
     Not sure which is easier, but current means Hudson job has to be set up with
     two git checkout steps, right version for maps (for 3.8 vs 4.2). -->
-  <target
+	<target
     name="initStreamSpecificVariables"
     unless="initStreamSpecificVariablesComplete"
     depends="initWorkspace,initBuildType,initConfigurationDir,initStreamVariables,initDownloadHosts">
-    <echo message="DEBUG: executing initStreamSpecificVariables" />
+		<echo message="DEBUG: executing initStreamSpecificVariables" />
 
-    <!-- these conditions used to be in "init". Conceptually seems right to
+		<!-- these conditions used to be in "init". Conceptually seems right to
       be in "stream specific" init (since their value depends on stream) but may
       have side effects?). This is really no longer relevant, as everything we
       build/tests comes from "drops4" ... but will leave in case we ever have a
       "drops5" ... or, have to back port tests to re-test 3.8! (Which, we probably
       do, for 3.8?) -->
-    <condition
+		<condition
       property="dropsDirSegment"
       value="drops4"
       else="drops">
-      <equals
+			<equals
         arg1="${eclipseStreamMajor}"
         arg2="4" />
-    </condition>
+		</condition>
 
-    <loadproperties srcFile="${configurationDir}/streamSpecific.properties" />
+		<loadproperties srcFile="${configurationDir}/streamSpecific.properties" />
 
-    <!-- echo a few typically expected properties, to make sure getting right
+		<!-- echo a few typically expected properties, to make sure getting right
       file -->
 
-    <echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
+		<echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
 
-    <echo message="previousReleaseLocation: ${previousReleaseLocation}" />
-    <echo message="previousReleaseVersion: ${previousReleaseVersion}" />
-    <echo message="previousReleaseVersionRepo: ${previousReleaseVersionRepo}" />
+		<echo message="previousReleaseLocation: ${previousReleaseLocation}" />
+		<echo message="previousReleaseVersion: ${previousReleaseVersion}" />
+		<echo message="previousReleaseVersionRepo: ${previousReleaseVersionRepo}" />
 
-    <property
+		<property
       name="initStreamSpecificVariablesComplete"
       value="true" />
-  </target>
+	</target>
 
-  <!-- DOWNLOAD_HOST and ARCHIVE_HOST can be defined on command line, if running
+	<!-- DOWNLOAD_HOST and ARCHIVE_HOST can be defined on command line, if running
     on local test environments. -->
-  <target
+	<target
     name="initDownloadHosts"
     unless="DOWNLOAD_HOST">
-    <!-- we assume if "DOWNLOAD_HOST" is defined, then ARCHIVE_HOST has been
+		<!-- we assume if "DOWNLOAD_HOST" is defined, then ARCHIVE_HOST has been
       defined also. -->
-    <property environment="env" />
-    <echo message="DEBUG: Found DOWNLOAD_HOST not defined. Setting in 'initDownloadHosts'" />
-    <echo message="DEBUG:      env.DOWNLOAD_HOST: ${env.DOWNLOAD_HOST}" />
-    <condition
+		<property environment="env" />
+		<echo message="DEBUG: Found DOWNLOAD_HOST not defined. Setting in 'initDownloadHosts'" />
+		<echo message="DEBUG:      env.DOWNLOAD_HOST: ${env.DOWNLOAD_HOST}" />
+		<condition
       property="DOWNLOAD_HOST"
       value="${env.DOWNLOAD_HOST}"
       else="download.eclipse.org">
-      <isset property="env.DOWNLOAD_HOST" />
-    </condition>
-    <condition
+			<isset property="env.DOWNLOAD_HOST" />
+		</condition>
+		<condition
       property="ARCHIVE_HOST"
       value="${env.ARCHIVE_HOST}"
       else="archive.eclipse.org">
-      <isset property="env.ARCHIVE_HOST" />
-    </condition>
-  </target>
+			<isset property="env.ARCHIVE_HOST" />
+		</condition>
+	</target>
 
-  <target
+	<target
     name="initWorkspace"
     unless="WORKSPACE">
-    <property environment="env" />
-    <condition
+		<property environment="env" />
+		<condition
       property="WORKSPACE"
       value="${env.WORKSPACE}"
       else="${basedir}">
-      <isset property="env.WORKSPACE" />
-    </condition>
-  </target>
+			<isset property="env.WORKSPACE" />
+		</condition>
+	</target>
 
 
-  <target
+	<target
     name="initBuildId"
     unless="buildId">
-    <!--property file that can contain the buildId, if not otherwise set -->
-    <property file="label.properties" />
-    <fail
+		<!--property file that can contain the buildId, if not otherwise set -->
+		<property file="label.properties" />
+		<fail
       unless="buildId"
       message="buildId (e.g I20140731-0800) needs to be provided to run the tests" />
-  </target>
+	</target>
 
-  <target name="initBuildType">
+	<target name="initBuildType">
 
-    <fail
+		<fail
       unless="buildId"
       message="buildId value must be provided by caller (such as 'I20120717-0800'" />
-    <!-- this "buildId check" may be overly strict, but best to start off strict
+		<!-- this "buildId check" may be overly strict, but best to start off strict
       for now, loosen in future if we start to find/have variety -->
-    <condition property="buildIdOK">
-      <matches
+		<condition property="buildIdOK">
+			<matches
         pattern="^[IMXYNPSRU]\d{8}-\d{4}$"
         string="${buildId}" />
-    </condition>
-    <fail
+		</condition>
+		<fail
       message="buildId variable had unexpected format. Should be of the form  [IMXYNPSRU] 8 digits '-' 4 digits, but was ${buildId}"
       unless="buildIdOK" />
 
-    <loadresource property="buildType">
-      <string value="${buildId}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="buildType: ${buildType}"/>
+		<loadresource property="buildType">
+			<string value="${buildId}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<echo message="buildType: ${buildType}"/>
 
-   <loadresource property="buildIdTimestamp">
-      <string value="${buildId}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\2\3"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
-    <fail unless="buildType" />
-  </target>
-  <!-- main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor
+		<loadresource property="buildIdTimestamp">
+			<string value="${buildId}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\2\3"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
+		<fail unless="buildType" />
+	</target>
+	<!-- main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor
     and eclipseStreamMinor Uses script, which requires Java 1.6 (or ... else
     gets complicated to setup) -->
-  <target
+	<target
     name="initStreamVariables"
     depends="initConfigurationDir"
     unless="streamVariablesInitialized">
-    <property file="${configurationDir}/streamSpecific.properties" />
-    <fail
+		<property file="${configurationDir}/streamSpecific.properties" />
+		<fail
       unless="eclipseStream"
       message="eclipseStream value must be provided by caller, such as '4.3' or '4.4.2." />
-    <condition property="streamOK">
-      <matches
+		<condition property="streamOK">
+			<matches
         pattern="\d\.\d(\.\d)?"
         string="${eclipseStream}" />
-    </condition>
-    <fail
+		</condition>
+		<fail
       message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
       unless="streamOK" />
 
-    <loadresource property="eclipseStreamMajor">
-      <string value="${eclipseStream}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+		<loadresource property="eclipseStreamMajor">
+			<string value="${eclipseStream}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
 
-    <loadresource property="eclipseStreamMinor">
-      <string value="${eclipseStream}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+		<loadresource property="eclipseStreamMinor">
+			<string value="${eclipseStream}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
 
-    <loadresource property="updateSiteSegment">
-      <string value="${eclipseStream}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1\.\2"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="updateSiteSegment: ${updateSiteSegment}"/>
+		<loadresource property="updateSiteSegment">
+			<string value="${eclipseStream}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1\.\2"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<echo message="updateSiteSegment: ${updateSiteSegment}"/>
 
-    <fail
+		<fail
       unless="eclipseStreamMajor"
       message="eclipseStreamMajor not defined or computable" />
-    <fail
+		<fail
       unless="eclipseStreamMinor"
       message="eclipseStreamMinor not defined or computable" />
-    <fail
+		<fail
       unless="updateSiteSegment"
       message="updateSiteSegment not defined or computable" />
-    <property
+		<property
       name="streamVariablesInitialized"
       value="true" />
 
-  </target>
+	</target>
 
-  <target
+	<target
     name="initBasicDirectories"
     depends="initWorkspace,initBuildId, initStreamSpecificProperties,initInstallDir, initEclipseHome, initPlatformSpecificProperties, setJavaMajorVersion"
     unless="basicDirectoriesInitialized">
 
-    <property environment="env" />
+		<property environment="env" />
 
-    <property
+		<property
       name="repoZip"
       value="${executionDir}/eclipse-junit-tests-${repoBuildIdToUse}.zip" />
-    <echo message="repoZip: ${repoZip}" />
+		<echo message="repoZip: ${repoZip}" />
 
-    <property
+		<property
       name="repoLocation"
       value="${executionDir}/testRepo" />
-    <echo message="repoLocation: ${repoLocation}" />
+		<echo message="repoLocation: ${repoLocation}" />
 
 
-    <property
+		<property
       name="platformLocation"
       value="${executionDir}/platformLocation" />
-    <mkdir dir="${platformLocation}" />
-    <echo message="platformLocation: ${platformLocation}" />
-    
-    <property
+		<mkdir dir="${platformLocation}" />
+		<echo message="platformLocation: ${platformLocation}" />
+
+		<property
       name="testedPlatformConfig"
       value="${osgi.os}.${osgi.ws}.${osgi.arch}" />
-    
-    <property
+
+		<property
       name="testedPlatform"
       value="${env.JOB_BASE_NAME}_${osgi.os}.${osgi.ws}.${osgi.arch}_${javaMajorVersion}" />
 
-    <!-- The directory that will contain all files containing information on
+		<!-- The directory that will contain all files containing information on
       the tests that ran. -->
-    <property
+		<property
       name="results"
       value="${executionDir}/results" />
-    <mkdir dir="${results}" />
-    <mkdir dir="${results}/xml" />
-    <mkdir dir="${results}/html" />
-    <echo message="results: ${results}" />
+		<mkdir dir="${results}" />
+		<mkdir dir="${results}/xml" />
+		<mkdir dir="${results}/html" />
+		<echo message="results: ${results}" />
 
-    <!--Directory for JUnit report output, console log output and .log content
+		<!--Directory for JUnit report output, console log output and .log content
       for each test suite. Overrides default in org.eclipse.test/library.xml -->
-    <property
+		<property
       name="junit-report-output"
       value="${results}/${testedPlatform}" />
-    <mkdir dir="${junit-report-output}" />
-    <echo message="junit-report-output: ${junit-report-output}" />
+		<mkdir dir="${junit-report-output}" />
+		<echo message="junit-report-output: ${junit-report-output}" />
 
-    <property
+		<property
       name="directorLogs"
       value="${results}/${testedPlatform}/directorLogs" />
-    <mkdir dir="${directorLogs}" />
-    <echo message="directorLogs: ${directorLogs}" />
-    
-    <property
-      name="eclipse.perf.samples.out"
-      value="${results}/${testedPlatform}-perf-samples.dat" />
-    <echo message="eclipse.perf.samples.out: ${eclipse.perf.samples.out}" />
-    
-    <property
+		<mkdir dir="${directorLogs}" />
+		<echo message="directorLogs: ${directorLogs}" />
+
+		<property
       name="basicDirectoriesInitialized"
       value="true" />
-    <echo message="basicDirectoriesInitialized" />
-  </target>
-  <!-- This task unzips the test framework that was built. It includes misc.
+		<echo message="basicDirectoriesInitialized" />
+	</target>
+	<!-- This task unzips the test framework that was built. It includes misc.
     files, the Test Framework proper, and a zipped up repo of the unit tests.
     We also do this in "testAll" scripts ...? TODO: investigate how to avoid
     doing there, if already done. -->
-  <target name="unzipTestFramework">
-    <fail unless="testDir" />
-    <fail unless="buildIdToUse" />
+	<target name="unzipTestFramework">
+		<fail unless="testDir" />
+		<fail unless="buildIdToUse" />
 
-    <property
+		<property
       name="testResults"
       value="${testDir}/testresults" />
-    <property
+		<property
       name="testFramework"
       value="${testDir}/eclipse-Automated-Tests-${buildIdToUse}.zip" />
 
-    <condition property="testFrameworkExists">
-      <available file="${testFramework}" />
-    </condition>
-    <fail unless="testFrameworkExists" />
+		<condition property="testFrameworkExists">
+			<available file="${testFramework}" />
+		</condition>
+		<fail unless="testFrameworkExists" />
 
-    <echo message="testFramework: ${testFramework}" />
-    <echo message="testDir: ${testDir}" />
-    <echo message="testResults: ${testResults}" />
+		<echo message="testFramework: ${testFramework}" />
+		<echo message="testDir: ${testDir}" />
+		<echo message="testResults: ${testResults}" />
 
-    <!--set up testing directory -->
-    <unzip
+		<!--set up testing directory -->
+		<unzip
       src="${testFramework}"
       dest="${testDir}"
       overwrite="false">
-      <patternset>
-        <exclude name="**/equinoxp2tests.properties" />
-        <exclude name="**/test.xml" />
-      </patternset>
-    </unzip>
-  </target>
+			<patternset>
+				<exclude name="**/equinoxp2tests.properties" />
+				<exclude name="**/test.xml" />
+			</patternset>
+		</unzip>
+	</target>
 
-  <target
+	<target
     name="runtests"
     depends="init"
     unless="env.TESTING_TEST_XML">
 
-    <mkdir dir="${executionDir}/results/consolelogs"/>
-    <chmod file="${executionDir}/${testScript}" perm="755"/>
-    <!--run the tests -->
-    <exec
+		<mkdir dir="${executionDir}/results/consolelogs"/>
+		<chmod file="${executionDir}/${testScript}" perm="755"/>
+		<!--run the tests -->
+		<exec
       dir="${executionDir}"
       executable="${testExecutable}"
       output="${executionDir}/results/consolelogs/${testedPlatform}_consolelog.txt">
-      <arg line="${executionArguments}" />
-      <arg line="-os ${osgi.os} -ws ${osgi.ws} -arch ${osgi.arch}"/>
-      <arg value="-vm"/><arg path="${jvm}"/>
-      <arg value="-properties"/><arg path="${WORKSPACE}/production.properties"/>
-      <arg value="${testSuite}" />
-      <env
+			<arg line="${executionArguments}" />
+			<arg line="-os ${osgi.os} -ws ${osgi.ws} -arch ${osgi.arch}"/>
+			<arg value="-vm"/>
+			<arg path="${jvm}"/>
+			<arg value="-properties"/>
+			<arg path="${WORKSPACE}/production.properties"/>
+			<arg value="${testSuite}" />
+			<env
         key="jvm"
         file="${jvm}" />
-      <env
+			<env
         key="testedPlatform"
         value="${testedPlatform}" />
-    </exec>
-  </target>
+		</exec>
+	</target>
 
-  <target
+	<target
     name="setJVMProperties"
     depends="initPlatformSpecificProperties,setJVMfromUserSpecified"
     unless="jvm">
-    <property
+		<property
       name="VMSource"
       value="VM used for tests, is same that invoked Ant: '${java.home}/bin/java' (that is, 'jvm' not specified by caller)." />
-    <echo message="VMSource: ${VMSource}" />
-    <condition
+		<echo message="VMSource: ${VMSource}" />
+		<condition
       property="jvm"
       value="${java.home}\bin\java.exe"
       else="${java.home}/bin/java">
-        <equals
+			<equals
           arg1="${testPlatform}"
           arg2="windows" />
-    </condition>
+		</condition>
 
-    <echo message="full output from 'java -version' of ${jvm} is" />
-    <exec
+		<echo message="full output from 'java -version' of ${jvm} is" />
+		<exec
       executable="${jvm}">
-      <arg line="-version" />
-    </exec>
-  </target>
-  <target
+			<arg line="-version" />
+		</exec>
+	</target>
+	<target
     name="setJVMfromUserSpecified"
     if="jvm">
 
-    <property
+		<property
       name="VMSource"
       value="VM used for tests, specified by caller: 'jvm'=${jvm}" />
-    <echo message="VMSource: ${VMSource}" />
-    <echo message="full output from 'java -version' of ${jvm} is" />
-    <exec
+		<echo message="VMSource: ${VMSource}" />
+		<echo message="full output from 'java -version' of ${jvm} is" />
+		<exec
       executable="${jvm}">
-      <arg line="-version" />
-    </exec>
-  </target>
+			<arg line="-version" />
+		</exec>
+	</target>
 
-  <!-- function to centralize how we get (that is, set) the value of 'javaMajorVersion'.
+	<!-- function to centralize how we get (that is, set) the value of 'javaMajorVersion'.
     (expected to be integer, such as 5,6,7,8,9, or will be "0" if the version
     could not be determined, for some reason. -->
-  <target
+	<target
     name="setJavaMajorVersion"
     depends="setJVMProperties"
     unless="javaMajorVersion">
 
-    <echo message="javaversion in setJavaMajorVersion: ${java.version}" />
-  	
-  	<loadresource property="javaMajorVersion">
-      <string value="${java.version}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="(\d+)[\.-].*" replace="\1"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="javaMajorVersion: ${javaMajorVersion}"/>
-  </target>
+		<echo message="javaversion in setJavaMajorVersion: ${java.version}" />
+
+		<loadresource property="javaMajorVersion">
+			<string value="${java.version}"/>
+			<filterchain>
+				<tokenfilter>
+					<replaceregex pattern="(\d+)[\.-].*" replace="\1"/>
+				</tokenfilter>
+			</filterchain>
+		</loadresource>
+		<echo message="javaMajorVersion: ${javaMajorVersion}"/>
+	</target>
 
 </project>
