@@ -625,12 +625,9 @@
 
     <property environment="env" />
 
-    <condition
-      property="repoBuildIdToUse"
-      value="${baselinePerfBuildId}"
-      else="${buildId}">
-      <istrue value="${baselinePerf}" />
-    </condition>
+    <property
+      name="repoBuildIdToUse"
+      value="${buildId}" />
     <property
       name="repoZip"
       value="${executionDir}/eclipse-junit-tests-${repoBuildIdToUse}.zip" />
@@ -671,11 +668,6 @@
     <mkdir dir="${directorLogs}" />
     <echo message="directorLogs: ${directorLogs}" />
     
-    <property
-      name="eclipse.perf.samples.out"
-      value="${results}/${testedPlatform}-perf-samples.dat" />
-    <echo message="eclipse.perf.samples.out: ${eclipse.perf.samples.out}" />
-
     <property
       name="basicDirectoriesInitialized"
       value="true" />
@@ -909,21 +901,12 @@
       append="true" />
   </target>
 
-  <!-- runtimeArchive is set to either current, just built SDK, or
-    if "baselinePerf" has been set to true, then that baselinePerf version is used,
-    such as for performance baselinePerf run. baselinePerf is set in Hudson
-    job.
-  -->
+  <!-- runtimeArchive is set to the current, just built SDK -->
   <target
     name="initPlatformAndRuntimeArchiveName"
     unless="runtimeArchive">
 
-    <condition
-      property="buildIdToUse"
-      value="${baselinePerfVersionLabel}"
-      else="${buildId}">
-      <istrue value="${baselinePerf}" />
-    </condition>
+    <property name="buildIdToUse" value="${buildId}"/>
     <echo message="Set runtimeArchive and platformArchive for os: ${os}, ws: ${ws}, arch: ${arch}" />
     <echo message="build id of runtimeArchive ${buildIdToUse}" />
     <condition
@@ -1015,20 +998,7 @@
           name="message"
           value="start @{testPlugin}" />
       </antcall>
-      <!--always use eclipse executable to launch tests with the exception of performance tests -->
-      <!--condition property="useEclipseExe" value="true">
-        <not>
-        <equals arg1="${test.target}" arg2="performance"/>
-        </not>
-        </condition -->
 
-      <condition
-        property="performance.target.present"
-        value="true">
-        <isset property="@{testPlugin}.has.performance.target" />
-      </condition>
-
-      <!--override the value of this property with performance if the tests run on performance machine -->
       <property
         name="test.target"
         value="junit" />
@@ -1146,134 +1116,6 @@
     <ant
       antfile="${eclipse-home}/plugins/${testPluginX}"
       dir="${eclipse-home}" />
-  </target>
-
-
-  <target
-    name="runSuitePerf"
-    depends="initStreamVariables"
-    if="pluginexists">
-    <echo message="testPluginX ${testPluginX}" />
-    <property
-      name="junit-stylesheet"
-      value="${executionDir}/JUNIT.XSL" />
-    <!--
-      TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
-      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM
-      value"?
-      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it
-      should. Perhaps needs tweak in Hudson job?
-      TODO: would have to compute these in runTest2.xml, to make part of production properties,
-      and phpproperties.php
-    -->
-    <!-- buildIdToUse equals either baselinePerfVersion or else equals buildId. In either case we want to collect the data -->
-    <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
-      Or, else will take large number of "baselines" averaged? -->
-
-    <condition
-      property="eclipse.perf.config"
-      value="build=${baselinePerfVersion}-${buildIdTimestamp};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
-      else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
-      <istrue value="${baselinePerf}" />
-    </condition>
-    <!--
-      This "assert" property works, in this context, because we run baseline first,
-      when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline
-      data.
-      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some
-      experiences makes me doubt that?
-      TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
-    -->
-    <condition
-      property="eclipse.perf.assertAgainst"
-      value="build=${baselinePerfVersion}-${buildIdTimestamp};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
-      <equals
-        arg1="${buildIdToUse}"
-        arg2="${buildId}" />
-    </condition>
-    <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
-    <condition
-      property="frameworkperfargs"
-      value="-DInternalWriteRawPerformanceData=${eclipse.perf.samples.out} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
-      else="-DInternalWriteRawPerformanceData=${eclipse.perf.samples.out} -Declipse.perf.config=${eclipse.perf.config}">
-      <isset property="eclipse.perf.assertAgainst" />
-    </condition>
-
-    <ant
-      antfile="${eclipse-home}/plugins/${testPluginX}"
-      dir="${eclipse-home}"
-      target="performance" />
-  </target>
-
-  <target
-    name="performance"
-    if="performance.target.present"
-    unless="skip.test"
-    depends="init">
-    <antcall target="setup" />
-    <property file="finalPluginsVersions.properties" />
-    <property
-      name="library-file"
-      value="${executionDir}/library.xml" />
-
-    <fileset
-      id="plugin.test"
-      dir="${eclipse-home}/plugins">
-      <filename name="${testPlugin}_*/test.xml" />
-    </fileset>
-    <property
-      name="plugintest"
-      refid="plugin.test" />
-    <echo>trying to find ${testPlugin}_*/test.xml</echo>
-    <condition
-      property="plugintest.present"
-      value="true">
-      <not>
-        <equals
-          arg1="${plugintest}"
-          arg2="" />
-      </not>
-    </condition>
-    <fileset
-      id="plugin.jar"
-      dir="${eclipse-home}/plugins">
-      <filename name="${testPlugin}_*.jar" />
-    </fileset>
-    <property
-      name="pluginjar"
-      refid="plugin.jar" />
-    <echo>trying to find ${testPlugin}_*.jar</echo>
-    <condition
-      property="pluginjar.present"
-      value="true">
-      <not>
-        <equals
-          arg1="${pluginjar}"
-          arg2="" />
-      </not>
-    </condition>
-    <antcall target="extractTestXml" />
-    <fileset
-      id="test.plugin.file"
-      dir="${eclipse-home}/plugins">
-      <filename name="${testPlugin}_*/test.xml" />
-    </fileset>
-    <property
-      name="testPluginX"
-      refid="test.plugin.file" />
-    <echo>trying to find ${testPluginX}</echo>
-    <condition
-      property="pluginexists"
-      value="true">
-      <not>
-        <equals
-          arg1="${testPluginX}"
-          arg2="" />
-      </not>
-    </condition>
-    <antcall target="runSuitePerf" />
-    <antcall target="genResults" />
   </target>
 
   <target name="genResults">
@@ -1782,63 +1624,6 @@
 
   </target>
 
-  <!-- This and all the performance specific targets
-    are temporary, just to help investigate which work, which
-    don't, etc. -->
-  <target
-    name="allPerformance"
-    depends="init">
-    <!-- There are 41 test suites to claim they have
-      performance targets. These "sub groups" are just
-      and attempt to help investigate which work, which don't, etc. -->
-    <antcall target="selectPerformance" />
-    <antcall target="otherPerformance" />
-
-
-  </target>
-  <!-- This and all the performance specific targets
-    are temporary, just to help investigate which work, which
-    don't, etc. Visually inspected each, and found these 21 do
-    have performance targets, which means there's about 20 that
-    have empty performance targets.
-  -->
-  <target
-    name="selectPerformance"
-    depends="init">
-    <antcall target="antui" />
-    <antcall target="compare" />
-    <antcall target="coreresources" />
-    <antcall target="coreruntime" />
-    <antcall target="jdtdebug" />
-    <antcall target="jdtui" />
-    <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=443233
-      <antcall target="osgi" />
-    -->
-    <antcall target="pdeui" />
-    <antcall target="pdeapitooling" />
-    <antcall target="swt" />
-    <antcall target="ua" />
-    <antcall target="uiforms" />
-    <antcall target="uiperformance" />
-    <!-- temp remove, we do not run these in unit tests? See bug 380553.
-      <antcall target="uircp" />
-    -->
-
-  </target>
-  <target
-    name="otherPerformance"
-    depends="init">
-    <!-- There is no performance tests for org.eclipse.equinox.p2.tests.ui
-      https://bugs.eclipse.org/bugs/show_bug.cgi?id=455137
-      It has an empty performance target.
-      <antcall target="equinoxp2ui" />
-    -->
-
-    <!-- These three ran but took longer an an hour, some memory issues with one of them? -->
-    <antcall target="jdtcoreperf" />
-    <antcall target="jdttext" />
-    <antcall target="jdtuirefactoring" />
-  </target>
   <target
     name="quickTests"
     depends="init">
