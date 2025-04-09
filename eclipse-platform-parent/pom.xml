@@ -44,7 +44,7 @@
     <buildId>${buildType}${buildTimestamp}</buildId>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-	<!-- releaseYear is used in copyright statements, etc.-->
+    <!-- releaseYear is used in copyright statements, etc.-->
     <releaseYear>2025</releaseYear>
     <releaseMonth>06</releaseMonth>
      <!--
@@ -1080,6 +1080,49 @@
                     </executions>
                 </plugin>
             </plugins>
+        </build>
+    </profile>
+    <profile>
+        <id>javac</id>
+        <build>
+            <pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.tycho</groupId>
+                        <artifactId>tycho-compiler-plugin</artifactId>
+                        <version>${tycho.version}</version>
+                        <configuration>
+                            <compilerArgs combine.self="override"></compilerArgs>
+                            <compilerId>javac</compilerId>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.tycho</groupId>
+                        <artifactId>tycho-p2-plugin</artifactId>
+                        <version>${tycho.version}</version>
+                        <configuration>
+                            <baselineReplace>none</baselineReplace>
+                            <baselineMode>disable</baselineMode>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.tycho.extras</groupId>
+                        <artifactId>tycho-p2-extras-plugin</artifactId>
+                        <version>${tycho.version}</version>
+                        <executions>
+                            <execution>
+                                <id>compare-attached-artifacts-with-release</id>
+                                <goals>
+                                    <goal>compare-version-with-baselines</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </pluginManagement>
         </build>
     </profile>
   </profiles>
