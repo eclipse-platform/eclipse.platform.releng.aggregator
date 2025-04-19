@@ -21,6 +21,11 @@ on:
         type: string
         required: false
         default: ''
+      working-directory:
+        description: Optional additional arguments to specify the directory in which maven build is executed
+        type: string
+        required: false
+        default: '.'
 
 permissions: {} # all none
 
@@ -56,6 +61,7 @@ jobs:
       with:
         attempt_delay: 200
         attempt_limit: 10
+        current_path: ${{ inputs.working-directory }}
         command: >
           mvn verify ${{ inputs.extra-maven-args }} -DskipTests -Dcompare-version-with-baselines.skip=false
           org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100
@@ -72,9 +78,11 @@ jobs:
           # Relevant files were staged, i.e. some version were changed
           
           # Read 'releaseNumberSDK' property as stream version
-          mvn help:evaluate -Dexpression=releaseNumberSDK --quiet '-Doutput=releaseNumberSDK-value.txt'
+          pushd ${{ inputs.working-directory }}
+          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt'
           streamVersion=$(<releaseNumberSDK-value.txt)
           rm -f releaseNumberSDK-value.txt
+          popd
           
           git config --global user.email '${{ inputs.botMail }}'
           git config --global user.name '${{ inputs.botName }}'
