@@ -1,5 +1,5 @@
 folder('Releng') {
-  description('Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.')
+	description('Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.')
 }
 
 pipelineJob('Releng/PublishToMaven'){
@@ -48,7 +48,7 @@ Snapshots are published to <a href="https://repo.eclipse.org/content/repositorie
 Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by publishing to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
 </li>
 </ul>
-	''')
+''')
 	}
 	definition {
 		cpsScm {
@@ -82,6 +82,94 @@ pipelineJob('Releng/prepareNextDevCycle'){
 				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
 			}
 			scriptPath('JenkinsJobs/Releng/prepareNextDevCycle.jenkinsfile')
+		}
+	}
+}
+
+pipelineJob('Releng/renameAndPromote'){
+	displayName('Rename and Promote')
+	description('''\
+This job does the "stage 1" or first part of a promotion.
+It renames the files for Equinox and Eclipse, creates an appropriate repo on 'downloads', rsync's everything to 'downloads', but leave everything "invisible" -- unless someone knows the exact URL.
+This allows two things. First, allows artifacts some time to "mirror" when that is needed.
+But also, allows the sites and repositories to be examined for correctness before making them visible to the world.
+The second (deferred) step that makes things visible works, in part, based on some output of this first step. Hence, they must "share a workspace".
+''')
+	parameters {
+		stringParam('DROP_ID', null, '''\
+The name (or, build id) of the build to rename and promote. Typically would be a value such as I20160530-2000 or M20160912-1000.
+It must match the name of the build on the build machine.
+		''')
+		stringParam('CHECKPOINT', null, 'M1, M3, RC1, RC2, RC3 etc (blank for final releases).')
+		stringParam('SIGNOFF_BUG', null, 'The issue that was used to "signoff" the checkpoint. If there are no unit test failures, this can be left blank. Otherwise a link is added to test page explaining that "failing unit tests have been investigated".')
+		stringParam('TRAIN_NAME', null, 'The name of the release stream, typically yyyy-mm. For example: 2022-09')
+		stringParam('STREAM', null, 'Needs to be all three files of primary version for the release, such as 4.7.1 or 4.8.0.')
+		stringParam('DL_TYPE', null, "This is the build type we are promoting TO. I-builds promote to 'S' until 'R'.")
+		stringParam('TAG', null, ''' For passing to the tagEclipseRelease job.
+R is used for release builds. For example: R4_25
+S is used for milestones and includes the milestone version. For example: S4_25_0_RC2
+''')
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/renameAndPromote.jenkinsfile')
+		}
+	}
+}
+
+pipelineJob('Releng/tagEclipseRelease'){
+	displayName('Tag Eclipse Release')
+	description('Tag promoted builds.')
+	parameters {
+		stringParam('tag', null, '''\
+R is used for release builds. For example: R4_25
+S is used for milestones and includes the milestone version. For example: S4_25_0_RC2
+''')
+		stringParam('buildID', null, 'I-build ID of the build that was promoted, for example: I20220831-1800')
+		stringParam('annotation', null, '''\
+GitHub issue to track tagging the release, for example:
+'https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/3058' - Tag Eclipse 4.36 release
+''')
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/tagEclipseRelease.jenkinsfile')
+		}
+	}
+}
+
+pipelineJob('Releng/makeVisible'){
+	displayName('Make Visible')
+	description('''\
+The first part of doing a promotion -- the Rename And Promote job -- creates some scripts that make this deferred "make visible" part possible.
+Therefore, they have to share a 'workspace', and the output of the first job must remain in place until its time to "make visible".
+''')
+	parameters {
+		stringParam('DROP_ID', null, '''\
+The name (or, build id) of the build to rename and promote. Typically would be a value such as I20160530-2000 or M20160912-1000.
+It must match the name of the build on the build machine.
+''')
+		stringParam('CHECKPOINT', null, 'M1, M3, RC1, RC2, RC3 etc (blank for final releases).')
+		stringParam('SIGNOFF_BUG', null, 'The issue that was used to "signoff" the checkpoint. If there are no unit test failures, this can be left blank. Otherwise a link is added to test page explaining that "failing unit tests have been investigated".')
+		stringParam('TRAIN_NAME', null, 'The name of the release stream, typically yyyy-mm. For example: 2022-09')
+		stringParam('STREAM', null, 'Needs to be all three files of primary version for the release, such as 4.7.1 or 4.8.0.')
+		stringParam('DL_TYPE', null, "This is the build type we are promoting TO. I-builds promote to 'S' until 'R'.")
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/makeVisible.jenkinsfile')
 		}
 	}
 }

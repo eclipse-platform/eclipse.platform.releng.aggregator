@@ -1,0 +1,25 @@
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 15, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	stages {
+		stage('Make visible') {
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh', 'github-bot-ssh']) {
+					sh '''
+						curl -o makeVisible.sh https://download.eclipse.org/eclipse/relengScripts/cje-production/promotion/makeVisible.sh
+						chmod +x makeVisible.sh
+						./makeVisible.sh
+					'''
+				}
+				build job: 'Releng/updateIndex', wait: false
+			}
+		}
+	}
+}
