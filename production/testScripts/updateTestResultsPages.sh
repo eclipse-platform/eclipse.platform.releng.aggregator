@@ -101,10 +101,6 @@ then
   exit 1
 fi
 
-JAVA_11_HOME=${JAVA_11_HOME:-/opt/public/common/java/openjdk/jdk-11_x64-latest}
-
-export JAVA_HOME=${JAVA_HOME:-${JAVA_11_HOME}}
-
 devJRE=$JAVA_HOME/jre/bin/java
 
 if [[ ! -n ${devJRE} && -x ${devJRE} ]]

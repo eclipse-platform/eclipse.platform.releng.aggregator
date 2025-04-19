@@ -25,7 +25,7 @@ source $1
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
 dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 latestRelDir=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
-java_home=/opt/public/common/java/openjdk/jdk-17_x64-latest/bin
+java_home=/opt/public/common/java/openjdk/jdk-21_x64-latest/bin
 
 pushd $CJE_ROOT/$UPDATES_DIR
 scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
