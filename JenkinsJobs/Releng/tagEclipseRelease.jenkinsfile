@@ -1,0 +1,56 @@
+pipeline {
+	options {
+		timestamps()
+		timeout(time: 15, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	stages {
+		stage('Checkout Submodules') {
+			steps {
+				sh '''
+					git fetch origin tag "${buildID}"
+					git checkout "${buildID}"
+					# Check out all submodules at the specified buildID
+					git submodule update --init --recursive --depth 1
+					
+					git config --global user.email 'releng-bot@eclipse.org'
+					git config --global user.name 'Eclipse Releng Bot'
+				'''
+			}
+		}
+		stage('Tag build') {
+			steps {
+				sshagent(['github-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						# Strip spaces from the buildID and tag
+						buildID=$(echo $buildID|tr -d ' ')
+						tag=$(echo $tag|tr -d ' ')
+						
+						#If build id or tag is empty we need to exit.
+						if [ -z "$buildID" ] || [ -z "$tag" ]; then
+							echo 'buildID or tag input is not specified'
+							exit 1
+						fi
+						
+						function tagBuild() {
+							pushURL=$(git config remote.origin.url)
+							if [[ "$pushURL" == http* ]]; then
+								# Change to SSH, if the configured URL uses HTTPS (we can only push with SSH)
+								pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
+							fi
+							git tag -a -m "${annotation}" ${tag} HEAD
+							# git push fails if the tag already exists
+							git push --verbose ${pushURL} tag ${tag}
+						}
+						tagBuild
+						export -f tagBuild
+						git submodule foreach 'tagBuild'
+					'''
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,34 @@
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 120, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	stages {
+		stage('Rename and Promote') {
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''#!/bin/bash -x
+						curl -o promoteSites.sh https://download.eclipse.org/eclipse/relengScripts/cje-production/promotion/promoteSites.sh
+						chmod +x promoteSites.sh
+						./promoteSites.sh
+					'''
+				}
+				build job: 'Releng/tagEclipseRelease', wait: true, propagate: true, parameters: [
+					string(name: 'tag', value: "${TAG}"),
+					string(name: 'buildID', value: "${DROP_ID}"),
+					string(name: 'annotation', value: "${ params.SIGNOFF_BUG ? 'https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/' + params.SIGNOFF_BUG : '' }")
+				]
+			}
+		}
+	}
+	post {
+		always {
+			archiveArtifacts '**/stage2output*/**'
+		}
+	}
+}
