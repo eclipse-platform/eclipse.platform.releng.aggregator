@@ -15,6 +15,11 @@ on:
         type: string
         required: false
         default: 'false'
+      extra-setup:
+        description: Optional command executed initially to perform additional setup of the build environment
+        type: string
+        required: false
+        default: ''
       mavenVersion:
         description: 'The version of Maven set up'
         type: string
@@ -58,6 +63,8 @@ jobs:
 
     name: Verify ${{ matrix.config.name }}
     steps:
+    - name: Enable git longpaths
+      run: git config --global core.longpaths true
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
@@ -86,6 +93,11 @@ jobs:
     - name: Install Maven parent locally
       uses: eclipse-platform/eclipse.platform.releng.aggregator/.github/actions/install-maven-parent-action@master
       if : inputs.without-EF-infra
+
+    - name: Additional setup
+      if: inputs.extra-setup
+      run: |
+        ${{ inputs.extra-setup }}
 
     - name: Build with Maven
       run: >-
