@@ -90,9 +90,8 @@ jobs:
         tycho-version: 4.0.12
 
     - name: Build with Maven
-      uses: coactions/setup-xvfb@6b00cf1889f4e1d5a48635647013c0508128ee1a
-      with:
-       run: >- 
+      run: >-
+        ${{ runner.os == 'Linux' && 'xvfb-run' || '' }}
         mvn --batch-mode --no-transfer-progress --show-version --update-snapshots --errors
         ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
         -Dcompare-version-with-baselines.skip=true
