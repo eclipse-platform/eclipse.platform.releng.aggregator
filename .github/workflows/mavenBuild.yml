@@ -15,11 +15,16 @@ on:
         type: string
         required: false
         default: 'false'
-      mavenVersion: 
+      mavenVersion:
         description: 'The version of Maven set up'
         type: string
         required: false
         default: '3.9.9'
+      without-EF-infra:
+        description: 'Whether to run this build without the need for EF-infrastructure (which is currently unavailable).'
+        type: boolean
+        required: false
+        default: true
 
 permissions: {}
 
@@ -68,6 +73,13 @@ jobs:
       uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
       with:
         maven-version: ${{ inputs.mavenVersion }}
+
+    - name: Install Maven parent locally
+      uses: eclipse-platform/eclipse.platform.releng.aggregator/.github/actions/install-maven-parent-action@master
+      if : inputs.without-EF-infra
+      with:
+        tycho-version: 4.0.12
+
     - name: Download the API Tools matcher
       uses: suisei-cn/actions-download-file@818d6b7dc8fe73f2f924b6241f2b1134ca1377d9 # v1.6.0
       id: api-tools-matcher
@@ -80,6 +92,7 @@ jobs:
       with:
        run: >- 
         mvn --batch-mode -V -U -e
+        ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
         -ntp
         -Dcompare-version-with-baselines.skip=false
         -Pbree-libs

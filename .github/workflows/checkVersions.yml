@@ -26,6 +26,11 @@ on:
         type: string
         required: false
         default: '.'
+      without-EF-infra:
+        description: 'Whether to run this build without the need for EF-infrastructure (which is currently unavailable).'
+        type: boolean
+        required: false
+        default: true
 
 permissions: {} # all none
 
@@ -51,6 +56,12 @@ jobs:
       with:
         maven-version: 3.9.9
 
+    - name: Install Maven parent locally
+      uses: eclipse-platform/eclipse.platform.releng.aggregator/.github/actions/install-maven-parent-action@master
+      if : inputs.without-EF-infra
+      with:
+        tycho-version: 4.0.12
+
     - name: Additional setup
       if: inputs.extra-setup-command
       run: |
@@ -66,6 +77,7 @@ jobs:
           mvn verify ${{ inputs.extra-maven-args }} -DskipTests -Dcompare-version-with-baselines.skip=false
           org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100
           --threads 1C --fail-at-end --batch-mode --no-transfer-progress --show-version
+          ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
 
     - name: Commit version increments, if any
       run: |
@@ -79,7 +91,8 @@ jobs:
           
           # Read 'releaseNumberSDK' property as stream version
           pushd ${{ inputs.working-directory }}
-          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt'
+          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt' \
+            ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
           streamVersion=$(<releaseNumberSDK-value.txt)
           rm -f releaseNumberSDK-value.txt
           popd
