@@ -1,0 +1,29 @@
+name: 'Install Maven parent and SDK target'
+description: 'Install the eclipse-parent pom.xml and Eclipse SDK target-platform into the local Maven cache in order to avoid the need for EF-infrastructure (which is currently unavailable).'
+inputs:
+  tycho-version:
+    description: 'The tycho release to use.'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout eclipse.platform.releng.aggregator
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      with:
+        repository: eclipse-platform/eclipse.platform.releng.aggregator
+        path: eclipse.platform.releng.aggregator
+        sparse-checkout: |
+          eclipse-platform-parent
+          eclipse.platform.releng.prereqs.sdk
+    - name: Install eclipse-parent poms
+      working-directory: eclipse.platform.releng.aggregator
+      shell: bash
+      run: |
+        cd eclipse-platform-parent
+        mvn clean install -B -ntp -Dtycho.version=${{ inputs.tycho-version }}
+        cd ..
+        cd eclipse.platform.releng.prereqs.sdk
+        mvn clean install -B -ntp -Dtycho.version=${{ inputs.tycho-version }}
+    - name: Remove eclipse.platform.releng.aggregator
+      shell: bash
+      run: 'rm -rf eclipse.platform.releng.aggregator'
