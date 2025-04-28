@@ -34,6 +34,11 @@ on:
 
 permissions: {} # all none
 
+env:
+  MAVEN_ARGS: >-
+    --batch-mode --no-transfer-progress
+    ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
+
 jobs:
   versions-check-and-increment:
     name: Check and increment service versions
@@ -59,8 +64,6 @@ jobs:
     - name: Install Maven parent locally
       uses: eclipse-platform/eclipse.platform.releng.aggregator/.github/actions/install-maven-parent-action@master
       if : inputs.without-EF-infra
-      with:
-        tycho-version: 4.0.12
 
     - name: Additional setup
       if: inputs.extra-setup-command
@@ -76,8 +79,7 @@ jobs:
         command: >
           mvn verify ${{ inputs.extra-maven-args }} -DskipTests -Dcompare-version-with-baselines.skip=false
           org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100
-          --threads 1C --fail-at-end --batch-mode --no-transfer-progress --show-version
-          ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
+          --threads 1C --fail-at-end --show-version
 
     - name: Commit version increments, if any
       run: |
@@ -91,8 +93,7 @@ jobs:
           
           # Read 'releaseNumberSDK' property as stream version
           pushd ${{ inputs.working-directory }}
-          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt' \
-            ${{ inputs.without-EF-infra && '-Dtycho.version=4.0.12' || '' }}
+          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt'
           streamVersion=$(<releaseNumberSDK-value.txt)
           rm -f releaseNumberSDK-value.txt
           popd
