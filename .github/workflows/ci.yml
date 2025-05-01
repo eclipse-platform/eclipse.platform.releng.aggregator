@@ -13,12 +13,8 @@ jobs:
   build:
     uses: ./.github/workflows/mavenBuild.yml
     with:
-      maven-goals: clean verify -Pbuild-individual-bundles -Pjavadoc -DskipTests -Dcbi-ecj-version=99.99 -Dtycho.version=4.0.13-SNAPSHOT
+      maven-goals: clean verify -Pjavadoc -DskipTests -Dcbi-ecj-version=99.99
       submodules: true
       extra-setup: |
         git submodule update --remote
         mvn clean install -U -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99
-        git clone --branch tycho-4.0.x --depth 1 https://github.com/eclipse-tycho/tycho.git 
-        pushd tycho
-        mvn clean install -DskipTests
-        popd
