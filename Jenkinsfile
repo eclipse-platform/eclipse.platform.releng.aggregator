@@ -43,7 +43,7 @@ pipeline {
 							latestCommitID=$(curl https://download.eclipse.org/eclipse/relengScripts/state)
 							git diff --name-only ${latestCommitID} HEAD \\
 								production/ scripts/ cje-production/ eclipse.platform.releng.tychoeclipsebuilder/
-							''', returnStdout: true).trim().isEmpty()
+							''', returnStdout: true).strip().isEmpty()
 					}
 				}
 			}
