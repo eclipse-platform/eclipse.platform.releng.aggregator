@@ -1,0 +1,20 @@
+name: Continuous Integration
+concurrency: 
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    uses: ./.github/workflows/mavenBuild.yml
+    with:
+      maven-goals: clean verify -Pjavadoc -DskipTests -Dcbi-ecj-version=99.99
+      submodules: true
+      extra-setup: |
+        git submodule update --remote
+        mvn clean install -U -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99
