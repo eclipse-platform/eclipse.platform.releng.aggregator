@@ -13,7 +13,7 @@ pipeline {
 		jdk 'temurin-jdk21-latest'
 	}
 	environment {
-		MAVEN_OPTS = '-Xmx3800m'
+		MAVEN_OPTS = '-Xmx4000m'
 	}
 	stages {
 		stage('Deploy parent-pom and SDK-target') {
