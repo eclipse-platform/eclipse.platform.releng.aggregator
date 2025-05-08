@@ -78,16 +78,28 @@ jobs:
       max-parallel: 1
       fail-fast: false
     steps:
+      - name: List number of open PRs
+        id: list-prs
+        run: |
+            json_output=$(gh pr list -l 'cleanup' -R $OWNER/$REPO -L 100 --json id)
+            echo "prs=$json_output" | tee -a "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        if: ${{ fromJson(steps.list-prs.outputs.prs)[9] == null }}
         with:
           fetch-depth: 0
           ref: master
       - name: Set up Maven
         uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+        if: ${{ fromJson(steps.list-prs.outputs.prs)[9] == null }}
         with:
           maven-version: ${{ inputs.mavenVersion }}
       - name: Set up JDK
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        if: ${{ fromJson(steps.list-prs.outputs.prs)[9] == null }}
         with:
           java-version: |
             8
@@ -98,17 +110,17 @@ jobs:
           cache: maven
       - name: Perform Cleanups on ${{ matrix.bundles }} 
         working-directory: ${{ matrix.bundles }}
-        if: ${{ inputs.do-cleanups }}
+        if: ${{ inputs.do-cleanups && fromJson(steps.list-prs.outputs.prs)[9] == null }}
         run: >-
           xvfb-run mvn -B -ntp tycho-cleancode:cleanup@cleanups
       - name: Perform QuickFixes on ${{ matrix.bundles }} 
         working-directory: ${{ matrix.bundles }}
-        if: ${{ inputs.do-quickfix }}
+        if: ${{ inputs.do-quickfix && fromJson(steps.list-prs.outputs.prs)[9] == null }}
         run: >-
           xvfb-run mvn -B -ntp tycho-cleancode:quickfix@quickfixes
       - name: Create final PR description
         working-directory: ${{ matrix.bundles }}/target
-        if: ${{ hashFiles(format('{0}/target/quickfix.md', matrix.bundles)) != '' }} || ${{ hashFiles(format('{0}/target/cleanups.md', matrix.bundles)) != '' }} 
+        if: ${{ hashFiles(format('{0}/target/quickfix.md', matrix.bundles)) != '' || hashFiles(format('{0}/target/cleanups.md', matrix.bundles)) != '' }} 
         run: >-
           cat *.md > pr.md
       - name: Create Pull Request
