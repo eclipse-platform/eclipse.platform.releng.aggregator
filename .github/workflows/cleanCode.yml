@@ -81,7 +81,7 @@ jobs:
       - name: List number of open PRs
         id: list-prs
         run: |
-            json_output=$(gh pr list -l 'cleanup' -R $OWNER/$REPO -L 100 --json id)
+            json_output=$(gh pr list -l 'cleanup' -R $OWNER/$REPO -L 20 --json id)
             echo "prs=$json_output" | tee -a "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ secrets.token }}
@@ -117,7 +117,7 @@ jobs:
         working-directory: ${{ matrix.bundles }}
         if: ${{ inputs.do-quickfix && fromJson(steps.list-prs.outputs.prs)[9] == null }}
         run: >-
-          xvfb-run mvn -B -ntp tycho-cleancode:quickfix@quickfixes
+          xvfb-run mvn -B -ntp -e tycho-cleancode:quickfix@quickfixes
       - name: Create final PR description
         working-directory: ${{ matrix.bundles }}/target
         if: ${{ hashFiles(format('{0}/target/quickfix.md', matrix.bundles)) != '' || hashFiles(format('{0}/target/cleanups.md', matrix.bundles)) != '' }} 
