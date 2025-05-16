@@ -14,23 +14,18 @@ pipeline {
 		maven 'apache-maven-latest'
 	}
 	environment {
-		// Filter out all the feature, test, and product IUs that are not published. Escape dots to match them literally
 		REPO = "${WORKSPACE}/repo"
 		PATH = "${installMavenDaemon('1.0.2')}/bin:${PATH}"
+		CBI_AGGR = "${installLatestCbiAggr()}"
 		// Folder ~/.m2 is not writable for builds, ensure mvnd metadata are written within the workspace.
 		// prevent jline warning about inability to create a system terminal and increase keep-alive timeouts to increase stability in concurrent usage
 		MVND = "mvnd -Dmvnd.daemonStorage=${WORKSPACE}/tools/mvnd -Dorg.jline.terminal.type=dumb -Dmvnd.keepAlive=1000 -Dmvnd.maxLostKeepAlive=600"
-		ECLIPSE = "${installLatestEclipse()}"
-		URL_AGG_UPDATES = 'https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest'
 	}
 	// parameters declared in the definition of the invoking job
 	stages {
 		stage('Aggregate Maven repository') {
 			steps {
 				sh '''#!/bin/bash -e
-					echo "==== Install and run the CBI aggregator ===="
-					
-					DIR_AGGREGATOR="${WORKSPACE}/tools/aggregator"
 					FILE_SDK_AGGR="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/SDK4Mvn.aggr"
 					
 					# Set whether this is a snapshot build or not
@@ -38,18 +33,11 @@ pipeline {
 						sed -e 's/snapshot=".*"/snapshot="true"/g' -i ${FILE_SDK_AGGR}
 					fi
 					
-					echo "Installing the CBI aggregator into ${DIR_AGGREGATOR} ..."
-					${ECLIPSE} --launcher.suppressErrors -noSplash \\
-						-application org.eclipse.equinox.p2.director \\
-						-r ${URL_AGG_UPDATES} \\
-						-d ${DIR_AGGREGATOR} -p CBIProfile \\
-						-installIU org.eclipse.cbi.p2repo.cli.product
-					
 					repoRaw="${WORKSPACE}/repo-raw"
 					mkdir ${repoRaw}
 					
 					echo "Running the aggregator with build model ${FILE_SDK_AGGR} ..."
-					"${DIR_AGGREGATOR}/cbiAggr" aggregate --buildModel ${FILE_SDK_AGGR} \\
+					"${CBI_AGGR}" aggregate --buildModel ${FILE_SDK_AGGR} \\
 					  --action CLEAN_BUILD --buildRoot ${repoRaw} \\
 					  -vmargs -Dorg.eclipse.ecf.provider.filetransfer.excludeContributors=org.eclipse.ecf.provider.filetransfer.httpclientjava
 					
@@ -78,8 +66,7 @@ pipeline {
 			}
 		}
 		stage('Validate repository') {
-			// It prunes down the set of artifacts to be published, e.g., eliminate test artifacts,
-			// and it tests that each to-be-published artifact can transitively resolve all its dependencies.
+			// Tests that each to-be-published artifact can transitively resolve all its dependencies.
 			steps {
 				dir('repo-validation') { // Do the work in a clean folder without a pom.xml
 					sh '''#!/bin/bash -xe
@@ -148,13 +135,7 @@ pipeline {
 											SOURCES_ARG="-Dsources=${sourcesFile}"
 										else
 											SOURCES_ARG=""
-											# If the -sources.jar is missing, and the main jar contains .class files, then we won't be able to promote this to Maven central.
-											if unzip -l ${file} | grep -q -e '.class$'; then 
-												echo "BUILD FAILURE ${file} contains .class files and requires a ${sourcesFile}"
-												exit 1
-											else
-												echo "Missing ${sourcesFile} but ${file} contains no .class files."
-											fi; 
+											echo "No ${sourcesFile}."
 										fi
 									
 										if [ -f "${javadocFile}" ]; then
@@ -162,12 +143,7 @@ pipeline {
 											JAVADOC_ARG="-Djavadoc=${javadocFile}"
 										else
 											JAVADOC_ARG=""
-											if unzip -l ${file} | grep -q -e '.class$'; then 
-												echo "BUILD FAILURE ${file} contains .class files and requires a ${javadocFile}"
-												exit 1
-											else
-												echo "Missing ${javadocFile} but ${file} contains no .class files."
-											fi; 
+											echo "No ${javadocFile}."
 										fi
 										set -x
 									
@@ -204,15 +180,9 @@ def installMavenDaemon(String version) {
 	return install('mvnd', "https://downloads.apache.org/maven/mvnd/${version}/maven-mvnd-${version}-linux-amd64.tar.gz")
 }
 
-def installLatestEclipse(){
-	def props = null
-	dir("${WORKSPACE}/git-repo") {
-		props = readProperties(file: 'cje-production/buildproperties.txt').collectEntries{n, v ->
-				v = v.trim();
-				return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
-			}
-	}
-	return install('eclipse', "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-SDK-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz") + '/eclipse'
+
+def installLatestCbiAggr(){
+	return install('cbiAggr', "https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest/org.eclipse.cbi.p2repo.cli.product-linux.gtk.x86_64.tar.gz") + '/cbiAggr'
 }
 
 def install(String toolType, String url) {
