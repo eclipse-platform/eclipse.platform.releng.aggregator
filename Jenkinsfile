@@ -13,14 +13,9 @@ pipeline {
 		jdk 'temurin-jdk21-latest'
 	}
 	environment {
-		MAVEN_OPTS = '-Xmx3800m'
+		MAVEN_OPTS = '-Xmx4000m'
 	}
 	stages {
-		stage('Use master') {
-			steps {
-				sh 'git submodule foreach "git fetch origin master; git checkout FETCH_HEAD"'
-			}
-		}
 		stage('Deploy parent-pom and SDK-target') {
 			when {
 				anyOf {
@@ -105,6 +100,7 @@ pipeline {
 						*/tests/target/work/data/.metadata/.*log,\
 						apiAnalyzer-workspace/.metadata/.*log,\
 						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*'
+					// To archive the built products, add to above's list: eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products/*
 				}
 			}
 		}

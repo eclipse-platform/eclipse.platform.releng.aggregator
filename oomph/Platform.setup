@@ -203,7 +203,7 @@
     </setupTask>
   </setupTask>
   <project name="platform"
-      label="Ant, Base, Debug, Runtime, Resources, Team, User Assistance, and Update">
+      label="Ant, Base, Debug, Runtime, Resources, Team, Terminal, User Assistance, and Update">
     <annotation
         source="http://www.eclipse.org/oomph/setup/ConfigurationReference">
       <reference
@@ -278,7 +278,7 @@
           <operand
               xsi:type="predicates:RepositoryPredicate"
               project="org.eclipse.platform"
-              relativePathPattern="platform/.*|releng/.*"/>
+              relativePathPattern="platform/.*|releng/.*|docs"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -394,6 +394,16 @@
               xsi:type="predicates:RepositoryPredicate"
               project="org.eclipse.team.core"
               relativePathPattern="team/bundles/.*"/>
+        </predicate>
+      </workingSet>
+      <workingSet
+          name="Platform Terminal">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:RepositoryPredicate"
+              project="org.eclipse.team.core"
+              relativePathPattern="terminal/.*"/>
         </predicate>
       </workingSet>
       <workingSet
@@ -978,8 +988,14 @@
           name="Platform Website">
         <requirement
             name="*"/>
+        <requirement
+            name="org.eclipse.oomph.util"/>
         <sourceLocator
             rootFolder="${github.clone.platform.website.location}"/>
+        <repositoryList>
+          <repository
+              url="https://download.eclipse.org/oomph/updates/latest"/>
+        </repositoryList>
       </targlet>
     </setupTask>
     <setupTask
@@ -990,8 +1006,14 @@
         <predicate
             xsi:type="predicates:AndPredicate">
           <operand
-              xsi:type="predicates:RepositoryPredicate"
-              project="eclipse"/>
+              xsi:type="predicates:OrPredicate">
+            <operand
+                xsi:type="predicates:NamePredicate"
+                pattern="org\.eclipse\..*\.docs"/>
+            <operand
+                xsi:type="predicates:RepositoryPredicate"
+                project="eclipse"/>
+          </operand>
         </predicate>
       </workingSet>
     </setupTask>

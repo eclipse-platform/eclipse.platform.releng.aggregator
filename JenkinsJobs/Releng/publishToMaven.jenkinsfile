@@ -10,108 +10,41 @@ pipeline {
 		label 'basic'
 	}
 	tools {
-		jdk 'temurin-jdk23-latest'
+		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
 	}
 	environment {
-		// Filter out all the feature, test, and product IUs that are not published. Escape dots to match them literally
-		EXCLUDED_ARTIFACTS = "${'.feature.group$|.feature.jar$|.test|org.eclipse.equinox.executable|org.eclipse.platform.ide|org.eclipse.sdk.ide|_root$'.replace('.', '\\.')}"
 		REPO = "${WORKSPACE}/repo"
 		PATH = "${installMavenDaemon('1.0.2')}/bin:${PATH}"
+		CBI_AGGR = "${installLatestCbiAggr()}"
 		// Folder ~/.m2 is not writable for builds, ensure mvnd metadata are written within the workspace.
 		// prevent jline warning about inability to create a system terminal and increase keep-alive timeouts to increase stability in concurrent usage
 		MVND = "mvnd -Dmvnd.daemonStorage=${WORKSPACE}/tools/mvnd -Dorg.jline.terminal.type=dumb -Dmvnd.keepAlive=1000 -Dmvnd.maxLostKeepAlive=600"
-		ECLIPSE = "${installLatestEclipse()}"
-		URL_AGG_UPDATES = 'https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest'
 	}
 	// parameters declared in the definition of the invoking job
 	stages {
 		stage('Aggregate Maven repository') {
 			steps {
 				sh '''#!/bin/bash -e
-					echo "==== Install and run the CBI aggregator ===="
-					
-					DIR_AGGREGATOR="${WORKSPACE}/tools/aggregator"
-					MAVEN_PUBLISH_BASE="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central"
-					FILE_SDK_AGGR="${MAVEN_PUBLISH_BASE}/SDK4Mvn.aggr"
+					FILE_SDK_AGGR="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/SDK4Mvn.aggr"
 					
 					# Set whether this is a snapshot build or not
 					if [ "${snapshotOrRelease}" = "-snapshot" ]; then
 						sed -e 's/snapshot=".*"/snapshot="true"/g' -i ${FILE_SDK_AGGR}
 					fi
 					
-					echo "Installing the CBI aggregator into ${DIR_AGGREGATOR} ..."
-					${ECLIPSE} --launcher.suppressErrors -noSplash \\
-						-application org.eclipse.equinox.p2.director \\
-						-r ${URL_AGG_UPDATES} \\
-						-d ${DIR_AGGREGATOR} -p CBIProfile \\
-						-installIU org.eclipse.cbi.p2repo.cli.product
-					
 					repoRaw="${WORKSPACE}/repo-raw"
 					mkdir ${repoRaw}
 					
 					echo "Running the aggregator with build model ${FILE_SDK_AGGR} ..."
-					"${DIR_AGGREGATOR}/cbiAggr" aggregate --buildModel ${FILE_SDK_AGGR} \\
+					"${CBI_AGGR}" aggregate --buildModel ${FILE_SDK_AGGR} \\
 					  --action CLEAN_BUILD --buildRoot ${repoRaw} \\
 					  -vmargs -Dorg.eclipse.ecf.provider.filetransfer.excludeContributors=org.eclipse.ecf.provider.filetransfer.httpclientjava
 					
 					mv ${repoRaw}/final ${REPO}
 					rm -rf ${repoRaw}
 					
-					echo "==== Enrich POMs ===="
-					# Add some required information to the generated poms:
-					# - dynamic content (retrieved mostly from MANIFEST.MF):
-					#   - name
-					#   - url
-					#   - scm connection, tag and url
-					# - semi dynamic
-					#   - developers (based on static map git-repo-base -> project leads)
-					# - static content
-					#   - license
-					#   - organization
-					#   - issue management
-					
-					enrichPomsSourceFile="${MAVEN_PUBLISH_BASE}/src/org/eclipse/platform/releng/maven/pom/EnrichPoms.java"
-					set -x
-					java ${enrichPomsSourceFile} ${REPO}/org/eclipse/{platform,jdt,pde}
-					set +x
-					
-					echo "==== Add Javadoc stubs ===="
-					
-					# (groupSimpleName, javadocArtifactGA)
-					function createJavadocs() {
-						group=${1}
-						jar="${1}-javadoc.jar"
-						artifact=${2}
-						if [ -r ${jar} ]; then
-							rm ${jar}
-						fi
-						echo -e "Corresponding javadoc can be found in artifact ${artifact}\\n" > README.txt
-						jar cf ${jar} README.txt
-						for pom in org/eclipse/${group}/*/*/*.pom; do
-							pomFolder=$(dirname ${pom})
-							# This is not working because EXCLUDED_ARTIFACTS_PATTERN is not defined and the empty string matches everything.
-							# if [[ ! $pomFolder =~ ${EXCLUDED_ARTIFACTS_PATTERN} ]]; then
-								javadoc=`echo ${pom} | sed -e "s|\\(.*\\)\\.pom|\\1-javadoc.jar|"`
-								cp ${jar} ${javadoc}
-							# fi
-						done	
-					}
-					
 					pushd ${REPO}
-					createJavadocs platform org.eclipse.platform:org.eclipse.platform.doc.isv
-					createJavadocs jdt org.eclipse.jdt:org.eclipse.jdt.doc.isv
-					createJavadocs pde org.eclipse.pde:org.eclipse.pde.doc.user
-					
-					
-					echo "==== Recalculate pom-file hashes ===="
-					
-					# Because the pom enhancer modified the poms the checksums are wrong which produces noisy warnings.
-					# So regenerate the sha1 for every pom.
-					for i in $(find org -name *.pom); do
-						echo "Recalculate checksum of $i"
-						sha1sum -b < $i | awk '{print $1}' > $i.sha1
-					done
 					
 					echo "========== Repo aggregation completed ========="
 					
@@ -119,9 +52,6 @@ pipeline {
 					for project in {platform,jdt,pde}; do
 						for pomPath in org/eclipse/${project}/*/*/*.pom; do
 							artifactId=$(basename $(dirname $(dirname ${pomPath})))
-							if [[ $artifactId =~ ${EXCLUDED_ARTIFACTS} ]]; then
-								continue # Skip excluded artifact
-							fi
 							version=$(basename $(dirname ${pomPath}))
 							groupPath=$(dirname $(dirname $(dirname ${pomPath})))
 							groupId=${groupPath//'/'/.}
@@ -136,8 +66,7 @@ pipeline {
 			}
 		}
 		stage('Validate repository') {
-			// It prunes down the set of artifacts to be published, e.g., eliminate test artifacts,
-			// and it tests that each to-be-published artifact can transitively resolve all its dependencies.
+			// Tests that each to-be-published artifact can transitively resolve all its dependencies.
 			steps {
 				dir('repo-validation') { // Do the work in a clean folder without a pom.xml
 					sh '''#!/bin/bash -xe
@@ -206,13 +135,7 @@ pipeline {
 											SOURCES_ARG="-Dsources=${sourcesFile}"
 										else
 											SOURCES_ARG=""
-											# If the -sources.jar is missing, and the main jar contains .class files, then we won't be able to promote this to Maven central.
-											if unzip -l ${file} | grep -q -e '.class$'; then 
-												echo "BUILD FAILURE ${file} contains .class files and requires a ${sourcesFile}"
-												exit 1
-											else
-												echo "Missing ${sourcesFile} but ${file} contains no .class files."
-											fi; 
+											echo "No ${sourcesFile}."
 										fi
 									
 										if [ -f "${javadocFile}" ]; then
@@ -220,12 +143,7 @@ pipeline {
 											JAVADOC_ARG="-Djavadoc=${javadocFile}"
 										else
 											JAVADOC_ARG=""
-											if unzip -l ${file} | grep -q -e '.class$'; then 
-												echo "BUILD FAILURE ${file} contains .class files and requires a ${javadocFile}"
-												exit 1
-											else
-												echo "Missing ${javadocFile} but ${file} contains no .class files."
-											fi; 
+											echo "No ${javadocFile}."
 										fi
 										set -x
 									
@@ -262,20 +180,14 @@ def installMavenDaemon(String version) {
 	return install('mvnd', "https://downloads.apache.org/maven/mvnd/${version}/maven-mvnd-${version}-linux-amd64.tar.gz")
 }
 
-def installLatestEclipse(){
-	def props = null
-	dir("${WORKSPACE}/git-repo") {
-		props = readProperties(file: 'cje-production/buildproperties.txt').collectEntries{n, v ->
-				v = v.trim();
-				return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
-			}
-	}
-	return install('eclipse', "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-SDK-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz") + '/eclipse'
+
+def installLatestCbiAggr(){
+	return install('cbiAggr', "https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest/org.eclipse.cbi.p2repo.cli.product-linux.gtk.x86_64.tar.gz") + '/cbiAggr'
 }
 
 def install(String toolType, String url) {
 	dir("${WORKSPACE}/tools/${toolType}") {
 		sh "curl -L ${url} | tar -xzf -"
-		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).trim()
 	}
 }

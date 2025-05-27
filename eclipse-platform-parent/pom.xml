@@ -44,7 +44,7 @@
     <buildId>${buildType}${buildTimestamp}</buildId>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-	<!-- releaseYear is used in copyright statements, etc.-->
+    <!-- releaseYear is used in copyright statements, etc.-->
     <releaseYear>2025</releaseYear>
     <releaseMonth>06</releaseMonth>
      <!--
@@ -73,7 +73,7 @@
     <releaseNumberSDK>${releaseVersion}</releaseNumberSDK>
     <releaseNumberPlatform>${releaseVersion}</releaseNumberPlatform>
 
-    <tycho.version>4.0.13-SNAPSHOT</tycho.version>
+    <tycho.version>4.0.13</tycho.version>
 
     <cbi-plugins.version>1.5.2</cbi-plugins.version>
     <surefire.version>3.5.3</surefire.version>
@@ -585,6 +585,17 @@
                         <cleanup.always_use_blocks>true</cleanup.always_use_blocks>
                         <!-- Use pattern matching for instanceof -->
                         <cleanup.instanceof>true</cleanup.instanceof>
+                        <!-- Remove unnecessary array creation -->
+                        <cleanup.remove_unnecessary_array_creation>true</cleanup.remove_unnecessary_array_creation>
+                        <!-- Remove unnecessary suppress warning tokens -->
+                        <cleanup.remove_unnecessary_suppress_warnings>true</cleanup.remove_unnecessary_suppress_warnings>
+						<!-- Remove unnecessary whitespace-->
+                        <cleanup.remove_trailing_whitespaces>true</cleanup.remove_trailing_whitespaces>
+                        <cleanup.remove_trailing_whitespaces_all>true</cleanup.remove_trailing_whitespaces_all>
+                        <cleanup.remove_trailing_whitespaces_ignore_empty>false</cleanup.remove_trailing_whitespaces_ignore_empty>
+                        <!-- Removes unused imports -->
+                        <cleanup.remove_unused_imports>true</cleanup.remove_unused_imports>
+                        <cleanup.organize_imports>false</cleanup.organize_imports>
                     </cleanUpProfile>
                 </configuration>
             </execution>
@@ -953,8 +964,6 @@
                              </apiToolsRepository>
                              <skip>${skipAPIAnalysis}</skip>
                              <skipIfReplaced>false</skipIfReplaced>
-                             <logDirectory>${compileLogDir}</logDirectory>
-                             <enhanceLogs>true</enhanceLogs>
                              <printProblems>${printApiMessages}</printProblems>
                              <runAsJob>false</runAsJob>
                         </configuration>
@@ -1080,6 +1089,49 @@
                     </executions>
                 </plugin>
             </plugins>
+        </build>
+    </profile>
+    <profile>
+        <id>javac</id>
+        <build>
+            <pluginManagement>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.tycho</groupId>
+                        <artifactId>tycho-compiler-plugin</artifactId>
+                        <version>${tycho.version}</version>
+                        <configuration>
+                            <compilerArgs combine.self="override"></compilerArgs>
+                            <compilerId>javac</compilerId>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.tycho</groupId>
+                        <artifactId>tycho-p2-plugin</artifactId>
+                        <version>${tycho.version}</version>
+                        <configuration>
+                            <baselineReplace>none</baselineReplace>
+                            <baselineMode>disable</baselineMode>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.tycho.extras</groupId>
+                        <artifactId>tycho-p2-extras-plugin</artifactId>
+                        <version>${tycho.version}</version>
+                        <executions>
+                            <execution>
+                                <id>compare-attached-artifacts-with-release</id>
+                                <goals>
+                                    <goal>compare-version-with-baselines</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </pluginManagement>
         </build>
     </profile>
   </profiles>

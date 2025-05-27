@@ -208,7 +208,6 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     - Update the last release build versions in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties)
     - Update the previousReleaseVersion in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties)
     - Update the name of the copied files in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh)
-    - Update baselineCode in [production/testScripts/updateTestResultsPages.sh](production/testScripts/updateTestResultsPages.sh)
 **General Cleanup**
   - In [eclipse.platform.common] search for and clear out all of the forceQualifierUpdate.txt files.  
     The context here is that the doc builds only check for changes in this repo and so these files need to be changed to trigger a full rebuild.
