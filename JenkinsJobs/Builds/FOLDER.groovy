@@ -19,7 +19,7 @@ for (STREAM in config.Streams){
 # - - - Integration Eclipse SDK builds - - - 
 # 2025-06 Release Schedule
 # Normal : 6 PM every day (1/6 - 2/9)
-0 18 * * *
+# 0 18 * * *
 
 
 # RC Schedule 
@@ -57,7 +57,7 @@ pipelineJob('Builds/Build-Docker-images'){
 		cpsScm {
 			lightweight(true)
 			scm {
-				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'R4_36_maintenance')
 			}
 			scriptPath('JenkinsJobs/Builds/DockerImagesBuild.jenkinsfile')
 		}
