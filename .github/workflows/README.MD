@@ -36,7 +36,7 @@ It checks all artifacts that match the provided range and suggest a lower bound 
 
 Workflow that could be used as a timed action to check if any automatic code cleanup can be performed.
 Actions to perform must be defined in the configuration of the [quickfix-and-cleanup-mojo](https://github.com/eclipse-tycho/tycho/blob/main/RELEASE_NOTES.md#new-quickfix-and-cleanup-mojo)
-that is called by this action. For this purpose it uses the follwoing execution ids `cleanups` and `quickfixes`
+that is called by this action. For this purpose it uses the follwoing execution ids `cleanups`, `quickfixes` and `manifest`.
 
 ## updateTarget.yml
 
