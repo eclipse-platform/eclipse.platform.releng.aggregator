@@ -14,13 +14,18 @@ on:
       do-cleanups:
         description: Configures if cleanup actions should be performed
         required: false
-        default: true
+        default: false
         type: boolean
       do-quickfix:
         description: Configures if quickfix actions should be performed
         required: false
-        default: true
+        default: false
         type: boolean
+      do-manifest:
+          description: Configures if organize manifest actions should be performed
+          required: false
+          default: false
+          type: boolean
       submodules:
         description: |
           Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
@@ -112,15 +117,20 @@ jobs:
         working-directory: ${{ matrix.bundles }}
         if: ${{ inputs.do-cleanups && fromJson(steps.list-prs.outputs.prs)[9] == null }}
         run: >-
-          xvfb-run mvn -B -ntp tycho-cleancode:cleanup@cleanups
+          xvfb-run mvn -U -B -ntp tycho-cleancode:cleanup@cleanups
       - name: Perform QuickFixes on ${{ matrix.bundles }} 
         working-directory: ${{ matrix.bundles }}
         if: ${{ inputs.do-quickfix && fromJson(steps.list-prs.outputs.prs)[9] == null }}
         run: >-
-          xvfb-run mvn -B -ntp -e tycho-cleancode:quickfix@quickfixes
+          xvfb-run mvn -U -B -ntp -e tycho-cleancode:quickfix@quickfixes
+      - name: Perform Organize Manifest on ${{ matrix.bundles }} 
+        working-directory: ${{ matrix.bundles }}
+        if: ${{ inputs.do-manifest && fromJson(steps.list-prs.outputs.prs)[9] == null }}
+        run: >-
+          xvfb-run mvn -U -B -ntp -e tycho-cleancode:manifest@manifest
       - name: Create final PR description
         working-directory: ${{ matrix.bundles }}/target
-        if: ${{ hashFiles(format('{0}/target/quickfix.md', matrix.bundles)) != '' || hashFiles(format('{0}/target/cleanups.md', matrix.bundles)) != '' }} 
+        if: ${{ hashFiles(format('{0}/target/quickfix.md', matrix.bundles)) != '' || hashFiles(format('{0}/target/cleanups.md', matrix.bundles)) != '' || hashFiles(format('{0}/target/organizeManifest.md', matrix.bundles)) != '' }} 
         run: >-
           cat *.md > pr.md
       - name: Create Pull Request
@@ -139,3 +149,4 @@ jobs:
           author: ${{ inputs.author }}
           add-paths: |
             **/*.java
+            **/*.MF
