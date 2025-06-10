@@ -19,7 +19,7 @@ for (STREAM in config.Streams){
 # - - - Integration Eclipse SDK builds - - - 
 # 2025-09 Release Schedule
 # Normal : 6 PM every day (11/6 - 27/8)
-# 0 18 * * *
+0 18 * * *
 
 
 # RC Schedule 
