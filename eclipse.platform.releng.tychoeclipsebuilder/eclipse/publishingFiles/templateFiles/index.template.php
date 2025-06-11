@@ -112,7 +112,7 @@ else {
 // Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
 // And, are added by the promotion scripts, as long as we keep same conventions.
 if (isset ($ACK_ID)) {
-  echo "<a href=\"https://www.eclipse.org/eclipse/development/acknowledgements.html?file=acknowledgements_${ACK_ID}.html\">Acknowledgments</a><br>\n";
+  echo "<a href=\"https://eclipse.dev/eclipse/markdown/?f=news/${ACK_ID}/acknowledgements.md\">Acknowledgments</a><br>\n";
 }
 if (isset ($README_ID)) {
   echo "<a href=\"https://www.eclipse.org/eclipse/development/readme.html?file=readme_eclipse_${README_ID}.html\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
