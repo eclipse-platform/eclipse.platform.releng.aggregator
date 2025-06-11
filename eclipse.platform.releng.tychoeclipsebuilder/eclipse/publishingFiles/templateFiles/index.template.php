@@ -103,11 +103,11 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 // $NEWS_ID needs to be added to buildproperties.php, such as $NEWS_ID="4.5/M4";
 // Once ready to display it.
 if (isset ($NEWS_ID)) {
-  echo "<a href=\"https://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a><br>\n";
+  echo "<a href=\"https://eclipse.dev/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a><br>\n";
 }
 else {
 // Show N&N link on the I-Build download page
-  echo "<a href=\"https://www.eclipse.org/eclipse/news/${STREAMMajor}.${STREAMMinor}/\">New and Noteworthy</a><br>\n";
+  echo "<a href=\"https://eclipse.dev/eclipse/news/${STREAMMajor}.${STREAMMinor}/\">New and Noteworthy</a><br>\n";
 }
 // Similar for $ACK_ID and $README_ID, but they are added only for 'R builds',
 // And, are added by the promotion scripts, as long as we keep same conventions.
@@ -115,9 +115,9 @@ if (isset ($ACK_ID)) {
   echo "<a href=\"https://eclipse.dev/eclipse/markdown/?f=news/${ACK_ID}/acknowledgements.md\">Acknowledgments</a><br>\n";
 }
 if (isset ($README_ID)) {
-  echo "<a href=\"https://www.eclipse.org/eclipse/development/readme.html?file=readme_eclipse_${README_ID}.html\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
+  echo "<a href=\"https://eclipse.dev/eclipse/development/readme.html?file=readme_eclipse_${README_ID}.html\">Eclipse Project ${BUILD_ID} Readme</a><br>\n";
 }
-echo "<a href=\"https://www.eclipse.org/eclipse/development/plans.html?file=plans/eclipse_project_plan_${STREAMMajor}_${STREAMMinor}.xml\">Eclipse Project Plan</a><br>\n";
+echo "<a href=\"https://eclipse.dev/eclipse/development/plans.html?file=plans/eclipse_project_plan_${STREAMMajor}_${STREAMMinor}.xml\">Eclipse Project Plan</a><br>\n";
 
 if (isset ($BUILD_FAILED) ) {
   echo "<h2>Build Failed</h2><p>See <a href=\"buildlogs.php\">logs</a>.</p>\n";
@@ -289,7 +289,7 @@ else {
 
   <h3>Related Links</h3>
   <ul class="midlist">
-    <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments.</a></li>
+    <li><a href="https://eclipse.dev/eclipse/development/plans/eclipse_project_plan_<?php echo $STREAMMajor; ?>_<?php echo $STREAMMinor; ?>.xml#target_environments">Target Platforms and Environments.</a></li>
     <li><a href="gitLog.php">Git log.</a></li>
     <li><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
   </ul>
