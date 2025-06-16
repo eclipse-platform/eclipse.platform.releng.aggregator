@@ -95,7 +95,7 @@ jobs:
     - name: Find existing information comment
       uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
       id: search-comment
-      if: steps.fetch-patch.outputs.pull_request_number
+      if: always() && steps.fetch-patch.outputs.pull_request_number
       with:
         body-regex: '^${{ env.COMMENT_FIRST_LINE }}'
         issue-number: ${{ steps.fetch-patch.outputs.pull_request_number }}
@@ -113,13 +113,21 @@ jobs:
           const fs = require('fs')
           const fileList = process.env.FILELIST
           if (fileList) { // if list is empty, no versions were changed
+            const prNumber = '${{ steps.fetch-patch.outputs.pull_request_number }}'
+            const pr = await github.rest.pulls.get({
+               pull_number: prNumber,
+               ...context.repo
+            })
+            const applyChangeMessagePart = pr.data.maintainer_can_modify
+              ? "An additional commit containing all the necessary changes was pushed to the top of this PR's branch. To obtain these changes (for example if you want to push more changes) either fetch from your fork or apply the _git patch_."
+              : ":warning: :construction: **This PR cannot be modified by maintainers** because edits are disabled or it is created from an organization repository. To obtain the required changes apply the _git patch_ manually as additional commit."
             const commentBody = `
           ${{ env.COMMENT_FIRST_LINE }}.
           Therefore the following files need a version increment:
           \`\`\`
           ${fileList}
           \`\`\`
-          An additional commit containing all the necessary changes was pushed to the top of this PR's branch. To obtain these changes (for example if you want to push more changes) either fetch from your fork or apply the _git patch_.
+          ${applyChangeMessagePart}
           <details>
           <summary>Git patch</summary>
           
@@ -130,7 +138,6 @@ jobs:
           
           Further information are available in [Common Build Issues - Missing version increments](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/wiki/Common-Build-Issues#missing-version-increments).
           `.trim()
-            const prNumber = '${{ steps.fetch-patch.outputs.pull_request_number }}'
             const existingCommentId = '${{ steps.search-comment.outputs.comment-id  }}'
             if (existingCommentId) {
               github.rest.issues.updateComment({...context.repo, comment_id: existingCommentId, body: commentBody })
