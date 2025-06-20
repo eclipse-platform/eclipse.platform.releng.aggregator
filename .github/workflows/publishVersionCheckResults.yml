@@ -104,7 +104,7 @@ jobs:
 
     - name: Add or update information comment
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-      if: always()
+      if: always() && steps.search-patch.outputs.result
       env:
         FILELIST: ${{ steps.git-commit.outputs.file-list }}
       with:
@@ -120,7 +120,7 @@ jobs:
             })
             const applyChangeMessagePart = pr.data.maintainer_can_modify
               ? "An additional commit containing all the necessary changes was pushed to the top of this PR's branch. To obtain these changes (for example if you want to push more changes) either fetch from your fork or apply the _git patch_."
-              : ":warning: :construction: **This PR cannot be modified by maintainers** because edits are disabled or it is created from an organization repository. To obtain the required changes apply the _git patch_ manually as additional commit."
+              : "> [!WARNING]\n> :construction: **This PR cannot be modified by maintainers** because edits are disabled or it is created from an organization repository. To obtain the required changes apply the _git patch_ manually as an additional commit."
             const commentBody = `
           ${{ env.COMMENT_FIRST_LINE }}.
           Therefore the following files need a version increment:
