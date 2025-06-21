@@ -183,7 +183,6 @@ Previously they were created in ther own job:
 #### **Version Updates:**
   - Running the [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job will update pom and product versions for the Eclipse repositories and submit pull requests for the changes.  
   This is still a work in progress so if there are any issues or a repo gets missed you can fall back to the old process below:   
-  If you cloned eclipse.platform.releng.aggregator's submodules you can fix the set version and run [updateProductVersion.sh](scripts/updateProductVersion.sh) to update most of the versions.  
   Once that's done it's easiest to just grep for the previous release version or stream number to find the remaining instances that need to be updated, then commit the changes in a new branch for each repo.   
   - **Update version number in mac's Eclipse.app**
     - In [eclipse-equinox/equinox](https://github.com/eclipse-equinox/equinox) update the versions in the Info.plist for both architectures under `eclipse-equinox/equinox/features/org.eclipse.equinox.executable.feature/bin/cocoa/macosx`
