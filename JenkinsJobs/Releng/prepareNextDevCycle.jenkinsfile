@@ -110,9 +110,6 @@ pipeline {
 				replaceInFile('production/testScripts/configuration/streamSpecific.properties', [
 					"for ${PREVIOUS_RELEASE_VERSION}.0 builds" : "for ${NEXT_RELEASE_VERSION}.0 builds",
 				])
-				replaceAllInFile('scripts/updateProductVersion.sh', [
-					's/\\d+.\\d+.0/\\d+.\\d+.0/g' : "g|s/${PREVIOUS_RELEASE_VERSION}.0/${NEXT_RELEASE_VERSION}.0/g",
-				])
 				
 				commitAllChangesExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
 			}
@@ -143,6 +140,41 @@ pipeline {
 					'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${PREVIOUS_RELEASE_VERSION}-I-builds",
 				])
 				commitAllChangesExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
+			}
+		}
+		stage('Validate and list changes') {
+			steps {
+				sh '''
+					function printLatestGitHistory() {
+						git log origin/master..HEAD --patch-with-stat --summary
+					}
+					printLatestGitHistory
+					export -f printLatestGitHistory
+					git submodule foreach 'printLatestGitHistory'
+				'''
+				// Run simple clean build to verify that at least all parent versions are updated correctly
+				sh 'mvn clean'
+				// search for leftover occurrences of the previous release version
+				sh '''#!/bin/bash -e
+					matchingFiles=$(grep --recursive --files-with-matches \
+						--include pom.xml \
+						--include MANIFEST.MF \
+						--include feature.xml \
+						--include \\*.product \
+						--fixed-strings "${PREVIOUS_RELEASE_VERSION}")
+					# The eclipse-platform-parent/pom.xml contains the previous version in the baseline repository variable
+					if [[ -z "${matchingFiles}" ]] || [[ "${matchingFiles}" == 'eclipse-platform-parent/pom.xml' ]]; then
+						echo "No unexpected references to previous version ${PREVIOUS_RELEASE_VERSION} found:"
+						exit 0
+					else
+						echo "References to previous version ${PREVIOUS_RELEASE_VERSION} found:"
+						for f in ${matchingFiles}; do
+							echo "In file ${f}"
+							grep "${PREVIOUS_RELEASE_VERSION}" "${f}"
+						done
+						exit 1
+					fi
+				'''
 			}
 		}
 		stage ('Create and update Stream Repos') {
@@ -318,7 +350,11 @@ def replaceInFile(String filePath, Map<String,String> replacements) {
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
 	def content = readFile(filePath)
 	for (entry in replacements) {
-		content = content.replaceAll(entry.key, entry.value)
+		def newContent = content.replaceAll(entry.key, entry.value)
+		if (newContent == content && !(content =~ entry.key)) { // pattern matches, but the replacement is equal to the current content
+			error("Pattern not found in file '${filePath}': ${entry.key}")
+		}
+		content = newContent
 	}
 	writeFile(file:filePath, text: content)
 }
