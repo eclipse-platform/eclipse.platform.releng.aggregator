@@ -88,12 +88,6 @@ pipeline {
 				'''
 			}
 		}
-		/*TODO: Test:
-			- If deploying the parent POM works
-			- If pushing works to aggr and submodules (e.g. pde)
-			- if creation of milestones works in aggr-repo and submodules (e.g. PDE)
-			- if PR createion works in aggr-repo and submodules (e.g. PDE)
-		*/
 		stage('Update Maven Version') {
 			environment {
 				MAVEN_ARGS = '-U -B -ntp'
@@ -215,8 +209,14 @@ pipeline {
 						- Updating the previous release version to the current Release-Candidate: `${PREVIOUS_RELEASE_CANDIDATE_ID}`
 						""".stripIndent(), prBranch)
 						
-					def submoduleURLs = sh(script: "git submodule foreach --quiet 'git config remote.origin.url'", returnStdout: true).trim().split('\\s')
-					for (submoduleURL in submoduleURLs) {
+					def submodulePaths = sh(script: "git submodule --quiet foreach 'echo \$sm_path'", returnStdout: true).trim().split('\\s')
+					for (submodulePath in submodulePaths) {
+						def diff = sh(script:"cd ${submodulePath} && git diff HEAD origin/master --shortstat", returnStdout: true).trim()
+						if (diff.isEmpty()) {
+							echo "Skipping submodule without changes: ${submodulePath}"
+							continue
+						}
+						def submoduleURL = sh(script: "cd ${submodulePath} && git config remote.origin.url", returnStdout: true).trim()
 						// Extract repository path from e.g.: https://github.com/eclipse-platform/eclipse.platform.git
 						def expectedPrefix = 'https://github.com/'
 						def expectedSuffix = '.git'
@@ -242,8 +242,16 @@ pipeline {
 					def organisations = [ 'eclipse-platform', 'eclipse-jdt', 'eclipse-pde', 'eclipse-equinox' ]
 					for (organisation in organisations) {
 						def repositories = listReposOfOrganization(organisation)
-						echo "${organisation} repositories: ${repositories}"
-						for (repository in repositories) {
+						echo "${organisation} repositories: ${repositories.name}"
+						for (repositoryData in repositories) {
+							def repository = repositoryData.name
+							if (repositoryData.archived) {
+								echo "Skipping archived repository: ${repository}"
+								continue
+							} else if ('.eclipsefdn'.equals(repository)) {
+								echo "Skipping .eclipsefdn repository of : ${organisation}"
+								continue
+							}
 							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M1",  "${NEXT_RELEASE_VERSION} Milestone 1",         "${M1_DATE}")
 							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M2",  "${NEXT_RELEASE_VERSION} Milestone 2",         "${M2_DATE}")
 							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M3",  "${NEXT_RELEASE_VERSION} Milestone 3",         "${M3_DATE}")
@@ -291,7 +299,7 @@ def listReposOfOrganization(String orga) {
 	if (!(response instanceof List) && (response.errors || (response.status && response.status != 201))) {
 		error "Response contains errors:\n${response}"
 	}
-	return response.name
+	return response
 }
 
 /**
@@ -310,8 +318,6 @@ def createMilestone(String orga, String repo, String msTitle, String msDescripti
 		} else {
 			error "Response contains errors:\n${response}"
 		}
-	} else {
-		echo 'Created successfully'
 	}
 }
 
