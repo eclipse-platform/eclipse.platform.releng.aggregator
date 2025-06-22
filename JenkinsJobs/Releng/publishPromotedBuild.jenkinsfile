@@ -12,6 +12,11 @@ pipeline {
 		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
 	}
+	environment {
+		// Download Server locations (seldomly change)
+		DOWNLOAD_ROOT = '/home/data/httpd/download.eclipse.org'
+		ARCHIVE_ROOT = '/home/data/httpd/archive.eclipse.org'
+	}
 	stages {
 		stage('Process Input') {
 			steps {
@@ -62,9 +67,6 @@ pipeline {
 			steps {
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
-						# Build machine locations (would very seldom change)
-						DOWNLOAD_ROOT=${DOWNLOAD_ROOT:-/home/data/httpd/download.eclipse.org}
-						ARCHIVE_ROOT=${ARCHIVE_ROOT:-/home/data/httpd/archive.eclipse.org} 
 						ROOT_LOCATIONS=("${DOWNLOAD_ROOT}")
 						if [[ "${RELEASE_TYPE}" == 'R' ]]; then
 							ROOT_LOCATIONS+=("${ARCHIVE_ROOT}")
@@ -98,6 +100,25 @@ pipeline {
 					string(name: 'sizeLimit', value: '1'), // Clear all previous children
 					string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/"),
 				]
+				
+				// Update html redirect to latest release updates repository
+				writeFile(file: 'index.html', text: """\
+					<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+					<html>
+						<head>
+							<title>Eclipse</title>
+							<meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
+							<meta http-equiv="REFRESH" content="0;url=https://download.eclipse.org/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/" />
+						</head>
+						<body>
+							This page will redirect to the <a href="https://download.eclipse.org/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/">Eclipse latest release</a> repository.
+						</body>
+					</html>
+				""".stripIndent())
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh 'scp index.html genie.releng@projects-storage.eclipse.org:${DOWNLOAD_ROOT}/eclipse/updates/'
+				}
+				//TODO: Trigger clean-up cleanupReleaseArtifacts without Y-build clean-up. Or just add a parameter to ask if there is a java release soon.
 			}
 		}
 		stage('Send announcement mail') {

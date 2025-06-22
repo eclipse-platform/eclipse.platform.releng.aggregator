@@ -1,0 +1,136 @@
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 15, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	environment {
+		// Download Server locations (would very seldom change)
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
+		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+		
+		SSH = 'ssh genie.releng@projects-storage.eclipse.org'
+		
+		EQUINOX_RETENTION_COUNT = '3' // Keep the three most recent builds
+		ECLIPSE_MINIMAL_RETENTION_DAYS = '5' // Minimal number of days for which a drop should be retained
+		ECLIPSE_MINIMAL_RETENTION_COUNT = '4' // Minimal number of drops to retain regardless of their age
+	}
+	stages {
+		stage('Checkout SCM') {
+			steps {
+				checkout scm
+				script {
+					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					def buildProperties = readProperties(file: 'cje-production/buildproperties.txt')
+					devVersionMajor = buildProperties.STREAMMajor.replace('"','').toInteger() // Remove surrounding quotes
+					devVersionMinor = buildProperties.STREAMMinor.replace('"','').toInteger() // Remove surrounding quotes
+					devVersionService = buildProperties.STREAMService.replace('"','').toInteger() // Remove surrounding quotes
+				}
+			}
+		}
+		stage('Clean up builds') {
+			parallel {
+				stage('Equinox') {
+					steps {
+						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							script {
+								for (buildType in ['I', 'Y']) {
+								def builds = utilities.listSubDirectoriesOnRemote("${EP_EQUINOX_DROPS}", "-name '${buildType}*'") // sorted in ascending order
+								if (env.EQUINOX_RETENTION_COUNT.toInteger() < builds.size()) {
+									for (buildDir in builds.subList(0, builds.size() - env.EQUINOX_RETENTION_COUNT.toInteger())) {
+										sh "$SSH rm -rf ${EP_EQUINOX_DROPS}/${buildDir}"
+									}
+								} else {
+									echo 'Nothing to clean.'
+								}
+								}
+							}
+						}
+					}
+				}
+				stage('Eclipse I-builds') {
+					steps {
+						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							cleanUpBuildDropsOfCurrentStream('I')
+						}
+						build job: 'Releng/updateIndex', wait: false
+					}
+				}
+				stage('Eclipse Y-builds') {
+					steps {
+						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							cleanUpBuildDropsOfCurrentStream('Y')
+							//TODO: or just keep the last 5? Y-build drops regardless of their version.
+							// If there is a new Java release soon after the Eclipse release the Y-build remains on the old Y-build any ways and produces new builds until the release
+							// If there is no new Java release soon (usually on even Eclipse versions), there won't be Y-builds on the maintanance branch anyways.
+							// In release clean-ups the Y-build drops should then not be touched at all.
+						}
+					}
+				}
+			}
+			post {
+				success {
+					build job: 'Releng/updateIndex', wait: false
+				}
+			}
+		}
+	}
+}
+
+@groovy.transform.Field
+def utilities = null
+@groovy.transform.Field
+def int devVersionMajor = null
+@groovy.transform.Field
+def int devVersionMinor = null
+@groovy.transform.Field
+def int devVersionService = null
+
+def cleanUpBuildDropsOfCurrentStream(String buildType) {
+	// Among all builds older than minimal retention time, keep only the first stable build of each week (starting Monday) and delete all others.
+	// But keep at least the minimal retention count of builds regardless of their age and all of those younger than the minimal retention time.
+	
+	def oldBuilds = utilities.listSubDirectoriesOnRemote("${EP_ECLIPSE_DROPS}", "-ctime +${ECLIPSE_MINIMAL_RETENTION_DAYS} -name '${buildType}*'", devVersionMajor, devVersionMinor, devVersionService) // sort ascending to start with Mondays
+	echo "Old ${buildType}-Builds: ${oldBuilds}"
+	def allBuilds = utilities.listSubDirectoriesOnRemote("${EP_ECLIPSE_DROPS}", "-name '${buildType}*'", devVersionMajor, devVersionMinor, devVersionService).reverse() // sort descending to start with latest
+	echo "Number of ${buildType}-builds before cleaning: ${allBuilds.size()}"
+	def toRetain = allBuilds.subList(0, Math.min(allBuilds.size(), env.ECLIPSE_MINIMAL_RETENTION_COUNT.toInteger())).toSet().sort()
+	echo "Minimally retained ${buildType}-Builds: ${toRetain}"
+	def Set<Integer> retainedWeeks = []
+	for (oldBuild in oldBuilds) {
+		if (toRetain.contains(oldBuild)) {
+			echo "Not removed (since one of 4 newest, even though old): ${oldBuild}"
+			continue;
+		}
+		def weekOfYear = parseWeekOfYear(oldBuild)
+		if (!retainedWeeks.contains(weekOfYear)) {
+			def isUnstable = sh(script: """$SSH "if [ -f '${EP_ECLIPSE_DROPS}/${oldBuild}/buildUnstable' ]; then echo 'true'; fi" """, returnStdout: true).toBoolean()
+			if (!isUnstable) {
+				retainedWeeks.add(weekOfYear) // Retain the first stable build of a week
+				echo "Retain stable build ${oldBuild} for week ${weekOfYear}"
+				continue;
+			} else {
+				echo "Ignore unstable build ${oldBuild} to be retained for week ${weekOfYear}"
+			}
+		}
+		sh "$SSH rm -rf ${EP_ECLIPSE_DROPS}/${oldBuild}"
+	}
+	def nbuilds = utilities.listSubDirectoriesOnRemote("${EP_ECLIPSE_DROPS}", "-name '${buildType}*'", devVersionMajor, devVersionMinor, devVersionService).size()
+	echo "Number of ${buildType}-builds after cleaning: ${nbuilds}"
+}
+
+@NonCPS
+private int parseWeekOfYear(String iBuildId) {
+	def idMatcher = iBuildId =~ /I(?<date>\d{8})-(?<time>\d{4})/
+	if (!idMatcher.matches()) {
+		error "buildID: ${iBuildId}, does not match the expected pattern."
+	}
+	def date = idMatcher.group('date')
+	def localDate = java.time.LocalDate.parse("${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}")
+	return localDate.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+}
