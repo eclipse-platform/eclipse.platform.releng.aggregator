@@ -1,0 +1,142 @@
+
+def int EQUINOX_RETENTION_COUNT = 3 // Keep the three most recent builds
+def int ECLIPSE_I_BUILD_RETENTION_DAYS = 5 // Minimal number of days for which a drop should be retained
+def int ECLIPSE_I_BUILD_RETENTION_COUNT = 4 // Minimal number of drops to retain regardless of their age
+def int ECLIPSE_Y_BUILD_RETENTION_COUNT = 9 // Number of drops retained for Y-builds (corresponds to builds of three consecutive weeks)
+
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 15, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	environment {
+		// Download Server locations (would very seldom change)
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
+		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+		
+		SSH = 'ssh genie.releng@projects-storage.eclipse.org'
+	}
+	stages {
+		stage('Checkout SCM') {
+			steps {
+				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
+					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+					[path: 'JenkinsJobs/shared/utilities.groovy'],
+					[path: 'cje-production/buildproperties.txt'],
+				])])
+				script {
+					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities.setDryRun(false)
+					def buildProperties = readProperties(file: 'cje-production/buildproperties.txt')
+					devVersionMajor = buildProperties.STREAMMajor.replace('"','').toInteger() // Remove surrounding quotes
+					devVersionMinor = buildProperties.STREAMMinor.replace('"','').toInteger() // Remove surrounding quotes
+					devVersionService = buildProperties.STREAMService.replace('"','').toInteger() // Remove surrounding quotes
+				}
+			}
+		}
+		stage('Clean up builds') {
+			parallel {
+				stage('Equinox') {
+					steps {
+						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							removeSurplusBuildDrops("${EP_EQUINOX_DROPS}", 'I', EQUINOX_RETENTION_COUNT)
+							removeSurplusBuildDrops("${EP_EQUINOX_DROPS}", 'Y', EQUINOX_RETENTION_COUNT)
+						}
+					}
+				}
+				stage('Eclipse I-builds') {
+					steps {
+						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							removeOldBuildDropsOfCurrentStream("${EP_ECLIPSE_DROPS}", 'I', ECLIPSE_I_BUILD_RETENTION_DAYS, ECLIPSE_I_BUILD_RETENTION_COUNT)
+						}
+					}
+				}
+				stage('Eclipse Y-builds') {
+					steps {
+						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							removeSurplusBuildDrops("${EP_ECLIPSE_DROPS}", 'Y', ECLIPSE_Y_BUILD_RETENTION_COUNT)
+						}
+					}
+				}
+			}
+			post {
+				success {
+					build job: 'Releng/updateIndex', wait: false
+				}
+			}
+		}
+	}
+}
+
+@groovy.transform.Field
+def utilities = null
+@groovy.transform.Field
+def int devVersionMajor = null
+@groovy.transform.Field
+def int devVersionMinor = null
+@groovy.transform.Field
+def int devVersionService = null
+
+def removeSurplusBuildDrops(String remoteDirectory, String buildType, int retentionCount) {
+	def drops = utilities.listBuildDropDirectoriesOnRemote(remoteDirectory, "${buildType}*") // sorted in ascending order
+	if (retentionCount < drops.size()) {
+		utilities.removeDropsOnRemote(remoteDirectory, drops.subList(0, drops.size() - retentionCount))
+	} else {
+		echo "Nothing to clean in ${remoteDirectory} with pattern '${buildType}*'. Found only ${drops}, not exceeding the threshold of ${retentionCount}."
+	}
+}
+
+def removeOldBuildDropsOfCurrentStream(String remoteDirectory, String buildType, int retentionDays, int retentionCount) {
+	// Among all builds older than minimal retention time, keep only the first stable build of each week (starting Monday) and delete all others.
+	// But keep at least the minimal retention count of builds regardless of their age and all of those younger than the minimal retention time.
+	def retentionThresholdDate = java.time.LocalDate.now().minusDays(retentionDays)
+	def allBuilds = utilities.listBuildDropDirectoriesOnRemote(remoteDirectory, "${buildType}*",
+		devVersionMajor, devVersionMinor, devVersionService).sort() // sort ascending to start with Mondays
+	echo "Number of ${buildType}-builds before cleaning: ${allBuilds.size()}"
+	def oldBuilds = allBuilds.findAll{ b -> parseDate(b) < retentionThresholdDate} // sorted ascendingly to start with Mondays
+	// Keep the specified count of latest builds
+	def toRetain = allBuilds.subList(Math.max(allBuilds.size() - retentionCount, 0), allBuilds.size()).toSet()
+	echo "Old ${buildType}-Builds: ${oldBuilds}"
+	echo "Minimally retained ${buildType}-Builds: ${toRetain}"
+	def Set<Integer> retainedWeeks = []
+	def toRemove = []
+	for (oldBuild in oldBuilds) {
+		if (toRetain.contains(oldBuild)) {
+			echo "Not removed (since one of the ${retentionCount} newest builds, even though old): ${oldBuild}"
+			continue;
+		}
+		def weekOfYear = parseDate(oldBuild).get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+		if (!retainedWeeks.contains(weekOfYear)) {
+			def isUnstable = sh(script: """$SSH "if [ -f '${remoteDirectory}/${oldBuild}/buildUnstable' ]; then echo 'true'; fi" """, returnStdout: true).toBoolean()
+			if (!isUnstable) {
+				retainedWeeks.add(weekOfYear) // Retain the first stable build of a week
+				echo "Retain stable build ${oldBuild} for week ${weekOfYear}"
+				continue;
+			} else {
+				echo "Ignore unstable build ${oldBuild} to be retained for week ${weekOfYear}"
+			}
+		}
+		toRemove.add(oldBuild)
+	}
+	if (!toRemove.isEmpty()) {
+		utilities.removeDropsOnRemote(remoteDirectory, toRemove)
+	} else {
+		echo "Nothing to clean in ${remoteDirectory} with pattern '${buildType}*' and retention of at least ${retentionDays} days and ${retentionCount} builds."
+	}
+}
+
+@NonCPS
+def parseDate(String iBuildId) {
+	def idMatcher = iBuildId =~ /I(?<date>\d{8})-(?<time>\d{4})/
+	if (!idMatcher.matches()) {
+		error "buildID: ${iBuildId}, does not match the expected pattern."
+	}
+	def date = idMatcher.group('date')
+	return java.time.LocalDate.of(date.substring(0, 4).toInteger(), date.substring(4, 6).toInteger(), date.substring(6, 8).toInteger())
+}

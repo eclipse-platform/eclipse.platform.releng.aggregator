@@ -1,0 +1,122 @@
+def int RELEASE_RETENTION_COUNT = 3
+
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 30, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	environment {
+		// Download Server locations (seldomly change)
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
+		EP_ECLIPSE_UPDATES = "${EP_ROOT}/eclipse/updates"
+		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+		
+		SSH = 'ssh genie.releng@projects-storage.eclipse.org'
+	}
+	stages {
+		stage('Checkout SCM') {
+			steps {
+				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
+					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+					[path: 'JenkinsJobs/shared/utilities.groovy'],
+				])])
+				script {
+					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities.setDryRun(false)
+				}
+			}
+		}
+		stage('Cleanup old release artifacts') {
+			steps {
+				script {
+					sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+						def allDrops = utilities.listBuildDropDirectoriesOnRemote("${EP_ECLIPSE_DROPS}")
+						echo "Eclipse drops before clean-up: ${allDrops}"
+						def allReleases = allDrops.findAll{ d -> d.startsWith('R-')}.sort().reverse() // sort in descending order
+						
+						def releaseVersions = allReleases.collectEntries{ release ->
+							def matcher = release =~ /R-(?<version>(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?)-(?<date>\d{8})\d{4}/
+							if (!matcher.matches()) {
+								error "releaseID: ${release}, does not match the expected pattern."
+							}
+							return [ (release): [ 'version': matcher.group('version'),
+								'major': matcher.group('major').toInteger(),
+								'minor': matcher.group('minor').toInteger(),
+								'service': matcher.group('service')?.toInteger() ?: 0,
+								'date': matcher.group('date').toInteger()]]
+						}
+						echo "Derived release data: ${releaseVersions}"
+						def latestMinorRelease = allReleases.find{ r -> releaseVersions[r].service == 0}
+						
+						// --- Eclipse downloads ---
+						def removedEclipseDrops = collectReleaseAndStableBuildDropsToRemove(releaseVersions, RELEASE_RETENTION_COUNT)
+						echo "Eclipse drops to be removed: ${removedEclipseDrops}"
+						utilities.removeDropsOnRemote("${EP_ECLIPSE_DROPS}", removedEclipseDrops)
+						
+						releaseVersions.each{ release, version ->  // Remove I-builds of release
+							def iBuildsOfRelease = utilities.listBuildDropDirectoriesOnRemote("${EP_ECLIPSE_DROPS}", "I*",
+								version.major, version.minor, version.service)
+							echo "I-build drops to remove for release ${release}: ${iBuildsOfRelease}"
+							if (!iBuildsOfRelease.isEmpty()) {
+								utilities.removeDropsOnRemote("${EP_ECLIPSE_DROPS}", iBuildsOfRelease)
+							}
+						} // Y-build drops are deleted continuously based on their count, nothing to do here
+						
+						// --- Update sites ---
+						def removedUpdateSites = []
+						releaseVersions.each{ release, versions ->
+							removedUpdateSites.add("${versions.version}-I-builds")
+							if (release != latestMinorRelease) {
+								// Keep Y-build p2-repositories for the latest release
+								removedUpdateSites.add("${versions.version}-Y-builds")
+							}
+							//TODO: maybe only keep the last 10 or so children, if this is the latest release? Regardless of a new Java-release is close or not
+						}
+						utilities.removeDropsOnRemote("${EP_ECLIPSE_UPDATES}", removedUpdateSites)
+						
+						// --- Equinox downloads ---
+						// Assume Eclipse and Equinox are in sync with respect to retained releases
+						def removedEquinoxDrops = collectReleaseAndStableBuildDropsToRemove(releaseVersions, RELEASE_RETENTION_COUNT)
+						echo "Equinox drops to be removed: ${removedEquinoxDrops}"
+						utilities.removeDropsOnRemote("${EP_EQUINOX_DROPS}", removedEquinoxDrops)
+					}
+				}
+				build job: 'Releng/updateIndex', wait: false
+			}
+		}
+	}
+}
+
+@groovy.transform.Field
+def utilities = null
+
+@NonCPS
+def collectReleaseAndStableBuildDropsToRemove(Map<String, Map<String, Object>> releases, int minorReleaseRetentionCount) {
+	def toRemove = []
+	int encounteredMinorReleases = 0
+	// sort according to release date, in descending order (minor releases have strictly order dates, but service releases are out of order)
+	// Keep service release drops as long as any major/minor release that is relesed before it (in time not version!) is kept,
+	// but don't count service releases. This way service releases are deleted over time automatically without occuping space of major/minor releases.
+	def sortedReleases = releases.keySet().toSorted({ a, b -> releases[a].date.compareTo(releases[b].date)}).reverse() // check in descending order
+	for (release in sortedReleases) {
+		if (releases[release].service == 0) {
+			encounteredMinorReleases++ // release is a minor or major release
+		} // keep all releases up to the defined threshold of encountered major/minor releases (service releases in-between aren't counted)
+		if (minorReleaseRetentionCount < encounteredMinorReleases) {
+			toRemove.add(release)
+		}
+	}
+	if (toRemove.isEmpty()) {
+		println('No releases to remove')
+	}
+	// Delete stable builds of all releases (not relevant after a release anymore)
+	toRemove += releases.keySet().collect{ r -> "S-${releases[r].version}M*"}
+	toRemove += releases.keySet().collect{ r -> "S-${releases[r].version}RC*"}
+	return toRemove
+}

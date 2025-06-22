@@ -71,4 +71,37 @@ private void gitPush(String refSpec, boolean force) {
 	}
 }
 
+def List<String> listBuildDropDirectoriesOnRemote(String remoteDirectory, String dropNamePattern = "*", int major = 0, int minor = 0, int service = 0) {
+	def versionFilter = major == 0 ? '' :"""\
+		| xargs grep -l 'STREAMMinor=\\"${minor}\\"' \
+		| xargs grep -l 'STREAMMajor=\\"${major}\\"' \
+		| xargs grep -l 'STREAMService=\\"${service}\\"' \
+	""".trim()
+	def result = sh(script: """ssh genie.releng@projects-storage.eclipse.org "cd ${remoteDirectory} && \
+		find -maxdepth 2 -type f -path './${dropNamePattern}/buildproperties.txt' \
+		${versionFilter} | xargs dirname | sort -u"
+	""", returnStdout: true).trim()
+	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.startsWith('./') ? d.substring(2) : d }
+}
+
+private void removeDropsOnRemote(String remoteDirectory, List<String> drops) {
+	def paths = drops.collect{ r -> "${remoteDirectory}/${r}"}.join(' ')
+	// The main portion of the script is executed on the storage server
+	// References to locally defined variables required double escaping,
+	// they are escaped for Groovy and the string in the script as they are to be interpreted at the target server.
+	// In general this section is very fragile! Only change with great caution and extensive testing!
+	sh """ssh genie.releng@projects-storage.eclipse.org "
+		for dropDir in ${paths}; do
+			if [ ! -d \\"\\\${dropDir}\\" ]; then
+				echo \\"Skip not existing directory: \\\${dropDir}\\"
+			elif [ ! -f \\"\\\${dropDir}/buildKeep\\" ]; then
+				echo \\"Remove directory \\\${dropDir}\\"
+				${ IS_DRY_RUN ? 'echo __' : ''}rm -rf \\"\\\${dropDir}\\"
+			else
+				echo \\"Keep drop marked to be kept: \\\${dropDir}\\"
+			fi
+		done "
+	"""
+}
+
 return this

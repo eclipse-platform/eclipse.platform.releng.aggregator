@@ -57,12 +57,14 @@ pipelineJob('Builds/Build-Docker-images'){
 
 pipelineJob('Builds/mark-build'){
 	displayName("Mark build")
-	description("Mark a build as stable or unstable.")
+	description("Mark a build as stable/unstable or to (not to) be kept indefinitely.")
 	parameters {
 		stringParam('buildId', null, "ID of the build to be marked.")
 		choiceParam('markAs', [
 			'STABLE',
 			'UNSTABLE',
+			'RETAINED_INDEFINITELY',
+			'NOT_RETAINED',
 		], 'The kind of marker to apply to (respectively remove from) the specified build.')
 		stringParam('issueURL', null, 'URL of the causing Github issue or PR (<em>only relevant if the build is marked as unstable<em>).')
 	}
