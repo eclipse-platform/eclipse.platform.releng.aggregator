@@ -50,8 +50,6 @@
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
      * **After RC1**
        * Comment on EMF, ECF and Orbit issues to ask for final release builds.
-     * **After RC2**
-       * (optional) Disable the automatic [nightly cleanup](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) of I-builds
 
 ## GA Releases 
 Tasks to be completed after RC2
@@ -112,16 +110,6 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
       - Make sure the name of the deployment you are about to release matches the tag and timestamp of the final release repository.
         E.g for a P2 repo with id `R-4.36-202505281830` the deploymenets should be named `PLATFORM_R-4.36-202505281830`, `PDE_R-4.36-202505281830` or `JDT_R-4.36-202505281830` respectivly.
       - If you do not have an account on `central.sonatype.com` for performing the rest of the release request one by creating an [EF Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) issue to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
-
-### **Post Release Tasks:**
-  * #### **Clean up intermediate artifacts** 
-    - To clean up specific artifacts from the old stream (milestones, I-builds and old releases) run the [Cleanup Release Artifacts](https://ci.eclipse.org/releng/job/Releng/job/cleanupReleaseArtifacts/) job. 
-    - `release_to_clean` is the release that was just published.
-    - `release_build` is the I-build that was promoted, this is used as a landmark to the build will clear out all previous I-builds.
-    - `release_to_remove` only the last 3 major releases are kept on the download page, so if 4.25 was promoted then remove 4.22.
-    - For the Y and P build parameters it's important to know whether or not Y and P builds were run during the release. Since they correspond to java releases on a 6 month cycle, typically they are built in odd-numbered releases.  
-    The existing builds are kept for one release, then cleaned up before the next stream that will have Y and P builds. it's convoluted and I dont want to type it out. Remove Y builds on even releases. 
-    - If something doesn't get cleaned up properly you can use  Use the [list artifacts](https://ci.eclipse.org/releng/view/Cleanup/job/list_artifacts_from_download_server/) job to generate ta list of what's on the download server and either create a new job to clean it up or update and rerun the cleanup job as appropriate.
 
 ### **Preparation for the next Release**
   After RC2 create an issue to track preparation work for the next stream (see [Preparation work for 4.25 (2022-09)](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284)).

@@ -43,14 +43,26 @@ pipeline {
 								echo "<p>This build is marked unstable due to <a href='${issueURL}'>${label}</a>.</p>" > buildUnstable
 								scp buildUnstable genie.releng@projects-storage.eclipse.org:${EP_BUILD_DROP}/buildUnstable
 							;;
+							RETAINED_INDEFINITELY)
+								#Add keep tag
+								ssh genie.releng@projects-storage.eclipse.org touch ${EP_BUILD_DROP}/buildKeep
+							;;
+							NOT_RETAINED)
+								#Remove keep tag
+								ssh genie.releng@projects-storage.eclipse.org rm -f ${EP_BUILD_DROP}/buildKeep
+							;;
 						esac
 					'''
 				}
 				build job: 'Releng/updateIndex', wait: false
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
-					string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-I-builds"),
-					string(name: "${params.markAs == 'STABLE' ? 'add' : 'remove'}", value: "${buildId}")
-				]
+				script {
+					if (params.markAs == 'STABLE' || params.markAs == 'UNSTABLE') {
+						build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+							string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-I-builds"),
+							string(name: "${params.markAs == 'STABLE' ? 'add' : 'remove'}", value: "${buildId}")
+						]
+					}
+				}
 			}
 		}
 	}
