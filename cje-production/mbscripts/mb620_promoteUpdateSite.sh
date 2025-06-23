@@ -22,6 +22,7 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
+compositeTargetSize=3
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
 dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 latestRelDir=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4
@@ -48,7 +49,35 @@ epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-c
 ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
 
 #get requisite tools
-ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://download.eclipse.org/eclipse/relengScripts/cje-production/scripts/addToComposite.xml
+# Enhance the addToComposite ANT script to remove the oldest/earliest children to ensure the target-size is not exceeded
+scp genie.releng@projects-storage.eclipse.org:${dropsPath}/compositeArtifacts.jar compositeArtifacts.jar
+#Unzip compositeArtifacts.xml and read the current children from it
+currentChildren=$(unzip -p compositeArtifacts.jar compositeArtifacts.xml |\
+	xmllint - --xpath '/repository/children/child/@location' |\
+	sed --expression 's|location="||g' --expression 's|"||g')
+rm compositeArtifacts.jar
+childrenArray=(${currentChildren})
+echo "Current children of composite repository: ${childrenArray[@]}"
+
+addToComposite_xml=$(curl https://download.eclipse.org/eclipse/relengScripts/cje-production/scripts/addToComposite.xml)
+extraTasksMarker='<!--EXTRA_TASKS-->'
+
+# One more child is about to be added to the composite.
+# Remove those children from the beginning of the list if the target-size would be exceeded.
+removalCount=$(( ${#childrenArray[@]} + 1 - compositeTargetSize ))
+if [ "${removalCount}" -gt 0 ]; then
+	childrenToRemove="${childrenArray[@]:0:${removalCount}}"
+	echo "Remove from composite repsitory: ${childrenToRemove}"
+	extraAntTask=''
+	for child in ${childrenToRemove}; do
+		extraAntTask+="<remove><repository location=\\\"${child}\\\"/></remove>\\n            "
+	done
+	addToComposite_xml=$(cat <<<"${addToComposite_xml}" | sed --expression "s|${extraTasksMarker}|${extraAntTask}|g")
+else
+	echo "Composite p2-repository contains only ${#childrenArray[@]} children and adding one will not exceed its target size of ${compositeTargetSize}: ${dropsPath}"
+fi
+
+ssh genie.releng@projects-storage.eclipse.org "cat<<<'${addToComposite_xml}' > ${workspace}/addToComposite.xml"
 
 #triggering ant runner
 baseBuilderDir=${workspace}/eclipse
