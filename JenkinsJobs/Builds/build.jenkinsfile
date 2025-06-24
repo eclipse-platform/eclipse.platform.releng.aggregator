@@ -280,6 +280,17 @@ spec:
                         ./mb620_promoteUpdateSite.sh $CJE_ROOT/buildproperties.shsource
                       '''
                   }
+					script {
+						if ("${COMPARATOR_ERRORS_SUBJECT}" != '' && "$BUILD_TYPE" == "I") {
+							echo 'Skip adding unstable build to composite repository.'
+							return
+						}
+						build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+							string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-I-builds"),
+							string(name: 'add', value: "${BUILD_IID}"),
+							string(name: 'sizeLimit', value: '3')
+						]
+					}
 				}
 			}
 		}
