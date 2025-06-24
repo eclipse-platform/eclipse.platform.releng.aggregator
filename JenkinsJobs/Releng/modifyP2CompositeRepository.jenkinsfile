@@ -1,0 +1,130 @@
+pipeline {
+	options {
+		disableConcurrentBuilds() // prevent concurrent updates of the same repository
+		timestamps()
+		skipDefaultCheckout()
+		timeout(time: 15, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'ubuntu-2404'
+	}
+	tools {
+		jdk 'temurin-jdk21-latest'
+	}
+	environment {
+		ECLIPSE_EXE = installLatestReleasedEclipsePlatformProduct()
+	}
+	stages {
+		stage('Check Composites Validity') {
+			steps {
+				sh '''
+					for repo in ${add//,/ }; do
+						if [[ $repo != http* ]]; then
+							repo="https://download.eclipse.org/${repositoryPath}/${repo}"
+						fi
+						echo "Validate content consistency of: ${repo}"
+						${ECLIPSE_EXE} -nosplash -consolelog --launcher.suppressErrors -application org.eclipse.equinox.p2.director -repository "${repo}" -list
+					done
+				'''
+			}
+		}
+		stage('Update composite repository') {
+			environment {
+				ANT_TASK_NAME = 'modifyComposite'
+				OUTPUT_PATH = 'output-repository'
+			}
+			steps {
+				script {
+					sh "curl -o compositeArtifacts.jar https://download.eclipse.org/${repositoryPath}/compositeArtifacts.jar"
+					def childenXPathSet = sh(script: '''#!/bin/sh +xe
+						unzip -p compositeArtifacts.jar compositeArtifacts.xml |\
+							xmllint - --xpath '/repository/children/child/@location'
+						exit 0
+						''', returnStdout: true).trim()
+					def compositeChildren = 'XPath set is empty' == childenXPathSet ? []
+						: parseList(childenXPathSet, '\\s+')
+							.collect{c -> c.startsWith('location="') && c.endsWith('"') ? c.substring(10, c.length() - 1) : null}
+							.findAll{c -> c != null}
+					
+					echo "Current children: ${compositeChildren}"
+					def toAdd = parseList(params.add, ',').unique()
+					def toRemove = parseList(params.remove, ',').unique()
+					toRemove = toRemove.findAll{e -> compositeChildren.contains(e)}
+					
+					if (params.sizeLimit) {
+						def sizeRestrictionRemovals = compositeChildren.size() + toAdd.size() - toRemove.size() - Integer.parseInt(params.sizeLimit)
+						if (sizeRestrictionRemovals > 0) {
+							toRemove += compositeChildren.subList(0, sizeRestrictionRemovals)
+						}
+					}
+					echo "Children added: ${toAdd}"
+					echo "Children removed: ${toRemove}"
+					if (compositeChildren.size() + toAdd.size() - toRemove.size() == 0) {
+						error('All children are removed and composite repository becomes empty.')
+					}
+					def modifyComposite_xml = """\
+					<?xml version="1.0" encoding="UTF-8"?>
+					<project default="${ANT_TASK_NAME}" basedir=".">
+						<target name="${ANT_TASK_NAME}">
+							<p2.composite.repository>
+								<source location="https://download.eclipse.org/${repositoryPath}" />
+								<repository location="${OUTPUT_PATH}" />
+					""".stripIndent()
+					for (child in toAdd) {
+						modifyComposite_xml += """			<add><repository location="${child}"/></add>\n"""
+					}
+					for (child in toRemove) {
+						modifyComposite_xml += """			<remove><repository location="${child}"/></remove>\n"""
+					}
+					modifyComposite_xml+= '''\
+							</p2.composite.repository>
+						</target>
+					</project>
+					'''.stripIndent()
+					writeFile(file: "${ANT_TASK_NAME}.xml", text: modifyComposite_xml)
+					
+					sh '''
+						${ECLIPSE_EXE} -nosplash -consolelog --launcher.suppressErrors -debug -data ./eclipse-ws \
+							-application org.eclipse.ant.core.antRunner -file "${ANT_TASK_NAME}.xml" "${ANT_TASK_NAME}"
+					'''
+					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+						sh '''
+							epDownloadsDir='/home/data/httpd/download.eclipse.org'
+							scp -r ${OUTPUT_PATH}/* "genie.releng@projects-storage.eclipse.org:${epDownloadsDir}/${repositoryPath}"
+						'''
+					}
+				}
+			}
+		}
+	}
+	post {
+		always {
+			archiveArtifacts allowEmptyArchive: true, artifacts: '**/*', excludes: 'tools/**/*'
+		}
+	}
+}
+
+@NonCPS
+def parseList(String str, String delimiterPattern) {
+	return str !=null && !str.trim().isEmpty() ? str.trim().split(delimiterPattern).collect{c -> c.trim()} : []
+}
+
+def installLatestReleasedEclipsePlatformProduct() {
+	sh 'curl -o buildproperties.txt https://download.eclipse.org/eclipse/relengScripts/cje-production/buildproperties.txt'
+	def eclipseURL = sh(script: '''#!/bin/sh +xe
+		source ./buildproperties.txt
+		#TODO: Remove this after the next release!
+		PREVIOUS_RELEASE_ID='S-4.37M1-202507031800'
+		PREVIOUS_RELEASE_VER='4.37M1'
+		echo "https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
+	''', returnStdout: true).trim()
+	return install('eclipse-platform', eclipseURL) + '/eclipse'
+}
+
+def install(String toolType, String url) {
+	dir("${WORKSPACE}/tools/${toolType}") {
+		sh "curl -L ${url} | tar -xzf -"
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).trim()
+	}
+}
