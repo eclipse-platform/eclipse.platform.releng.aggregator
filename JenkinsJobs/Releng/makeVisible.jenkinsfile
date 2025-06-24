@@ -62,42 +62,10 @@ pipeline {
 				environment name: 'RELEASE_TYPE', value: 'R'
 			}
 			steps {
-				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-					sh '''
-						#Repository will be available only for R builds. add it to composite
-						epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
-						dropsPath=${epDownloadDir}/downloads/drops4
-						workingDir=${epDownloadDir}/workingDir
-							
-						workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
-							
-						ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
-							
-						ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
-						ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
-							
-						#get latest Eclipse platform product
-						epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
-						ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
-							
-						#get requisite tools
-						ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://download.eclipse.org/eclipse/relengScripts/cje-production/scripts/addToComposite.xml
-							
-						#triggering ant runner
-						baseBuilderDir=${workspace}/eclipse
-						javaCMD=/opt/public/common/java/openjdk/jdk-21_x64-latest/bin/java
-						launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
-							
-						repoDir=/"home/data/httpd/download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}"
-							
-						devWorkspace=${workspace}/workspace-antRunner
-						devArgs=-Xmx512m
-						extraArgs="addToComposite -Drepodir=${repoDir} -Dcomplocation=${RELEASE_ID}"
-						ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devWorkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/addToComposite.xml ${extraArgs} -vmargs $devArgs
-							
-						ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
-					'''
-				}
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}"),
+					string(name: 'add', value: "${RELEASE_ID}")
+				]
 			}
 		}
 	}

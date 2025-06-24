@@ -164,8 +164,8 @@ pipeline {
 			}
 		}
 		stage ('Create New Stream Repos') {
-			environment {
-				ECLIPSE_EXE = installEclipsePlatformProduct("${PREVIOUS_RELEASE_CANDIDATE_ID}", "${PREVIOUS_RELEASE_CANDIDATE_TAG}")
+			when {
+				not { expression { params.DRY_RUN } }
 			}
 			steps {
 				dir("${WORKSPACE}/target/repositories") {
@@ -174,28 +174,16 @@ pipeline {
 							epUpdatesDir='/home/data/httpd/download.eclipse.org/eclipse/updates'
 							templateRepo="${epUpdatesDir}/template_repo"
 							
-							releaseRepoName="${NEXT_RELEASE_VERSION}"
-							iBuildRepoName="${NEXT_RELEASE_VERSION}-I-builds"
-							yBuildRepoName="${NEXT_RELEASE_VERSION}-Y-builds"
-							previousRCRepo="https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/"
-							
-							# Copy the repo-template to this workspace to create the new I-build repo from it,
-							# then add the previous release RC as only child and copy the resulting repo back to the download-server
-							curl -o addToComposite.xml https://download.eclipse.org/eclipse/relengScripts/cje-production/scripts/addToComposite.xml
-							scp -r genie.releng@projects-storage.eclipse.org:${templateRepo} template_repo/
-							cp -r template_repo ${iBuildRepoName}
-							
-							taskName='addToComposite'
-							${ECLIPSE_EXE} -nosplash -consolelog -debug -data ./eclipse-ws \
-								-application org.eclipse.ant.core.antRunner -file ${taskName}.xml \
-								${taskName} -Drepodir=$(pwd)/${iBuildRepoName} -Dcomplocation=${previousRCRepo}
-							if [[ ${DRY_RUN} == 'false' ]]; then
-								scp -r ${iBuildRepoName} genie.releng@projects-storage.eclipse.org:${epUpdatesDir}/${iBuildRepoName}
-								ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${yBuildRepoName}
-								ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${releaseRepoName}
-							fi
+							ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${NEXT_RELEASE_VERSION}-I-builds
+							ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${NEXT_RELEASE_VERSION}-Y-builds
+							ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${NEXT_RELEASE_VERSION}
 						'''
 					}
+					build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+						string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds"),
+						string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/")
+						// Size-limit is not relevant, the repository is initially empty.
+					]
 				}
 			}
 		}
@@ -340,20 +328,6 @@ def commitAllChangesExcludingSubmodules(String commitMessage) {
 			git restore --staged $(git submodule foreach --quiet 'echo $sm_path')
 			git commit --message "${COMMIT_MESSAGE}"
 		'''
-	}
-}
-
-// build tools
-
-def installEclipsePlatformProduct(String releaseID, String releaseVersion){
-	def eclipseURL = "https://download.eclipse.org/eclipse/downloads/drops4/${releaseID}/eclipse-platform-${releaseVersion}-linux-gtk-x86_64.tar.gz"
-	return install('eclipse-platform', eclipseURL) + '/eclipse'
-}
-
-def install(String toolType, String url) {
-	dir("${WORKSPACE}/target/tools/${toolType}") {
-		sh "curl -L ${url} | tar -xzf -"
-		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).trim()
 	}
 }
 
