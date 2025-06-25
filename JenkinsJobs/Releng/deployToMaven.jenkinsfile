@@ -95,6 +95,7 @@ pipeline {
 					stage('Deploy project to Maven'){
 						environment {
 							SETTINGS = "/home/jenkins/.m2/settings-deploy-ossrh-${PROJECT == 'platform' ? 'releng': PROJECT}.xml"
+							SONATYPE_BEARER_TOKEN = credentials("central-sonatype-bearer-token-${PROJECT}")
 							// The location of the temporarily file that contains the secret file content
 							// (see https://www.jenkins.io/doc/book/pipeline/syntax/#supported-credentials-type):
 							KEYRING = credentials("secret-subkeys-${PROJECT == 'platform' ? 'releng': PROJECT}.asc")
@@ -109,8 +110,7 @@ pipeline {
 									for pomFile in $(cat "${WORKSPACE}/artifacts-${PROJECT}.txt"); do
 										set +x
 										pomFolder=$(dirname ${pomFile})
-										version=$(basename ${pomFolder})
-										if [[ $version == *-SNAPSHOT ]]; then
+										if [ "${DEPLOYMENT_TYPE}" != 'release' ]; then
 											URL=https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 											REPO_ID=repo.eclipse.org # server-id in the settings.xml, used for authentication
 											MAVEN_CENTRAL_URL=https://repo1.maven.org/maven2/${pomFolder%-SNAPSHOT}
@@ -119,8 +119,7 @@ pipeline {
 												echo "The released version of file "${pomFile}" is already present at $MAVEN_CENTRAL_URL."
 											fi
 										else
-											URL=https://oss.sonatype.org/service/local/staging/deploy/maven2/
-											REPO_ID=ossrh # server-id in the settings.xml, used for authentication
+											URL=file://$(pwd)
 											MAVEN_CENTRAL_URL=https://repo1.maven.org/maven2/${pomFolder}
 											echo "Checking ${MAVEN_CENTRAL_URL}"
 											if curl --output /dev/null --silent --head --fail "$MAVEN_CENTRAL_URL"; then
@@ -160,6 +159,44 @@ pipeline {
 											${SOURCES_ARG} ${JAVADOC_ARG}
 									done
 								'''
+								script {
+									if ("${DEPLOYMENT_TYPE}" == 'release') {
+										// Documentation of the Central Portal Publisher API 
+										// - https://central.sonatype.org/publish/publish-portal-api
+										// - https://central.sonatype.com/api-doc
+										sh 'zip -r "${PROJECT}-artifacts.zip" "org/eclipse/${PROJECT}"'
+										def deploymentId = sh(returnStdout: true, script: '''
+											curl --request POST \
+												--verbose \
+												--header "Authorization: Bearer ${SONATYPE_BEARER_TOKEN}" \
+												--header 'accept: text/plain' \
+												--header 'Content-Type: multipart/form-data' \
+												--form "bundle=@${PROJECT}-artifacts.zip" \
+												'https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED'
+										''')
+										writeFile(file: "${WORKSPACE}/deploymentId-${PROJECT}.txt", text: "${deploymentId}")
+										waitUntil(initialRecurrencePeriod: 5_000) {
+											// See https://central.sonatype.org/publish/publish-portal-api/#verify-status-of-the-deployment
+											def deploymentStatusResponse = sh(returnStdout: true, script: """
+												curl --request POST \
+													--verbose \
+													--header "Authorization: Bearer \${SONATYPE_BEARER_TOKEN}" \
+													--header 'accept: application/json' \
+													"https://central.sonatype.com/api/v1/publisher/status?id=${deploymentId}"
+											""").trim()
+											def deploymentStatus = readJSON(text: deploymentStatusResponse, returnPojo: true)
+											if (deploymentStatus.deploymentState == 'VALIDATED' && !deploymentStatus.errors) {
+												echo "Upload to Maven Central Portal successful:\n${groovy.json.JsonOutput.prettyPrint(deploymentStatusResponse)}"
+												return true
+											} else if(deploymentStatus.deploymentState == 'PENDING' || deploymentStatus.deploymentState == 'VALIDATING') {
+												echo "Upload is being processed: ${deploymentStatus.deploymentState}"
+												return false
+											} else {
+												error "Upload failed or has an unexpected status:\n${groovy.json.JsonOutput.prettyPrint(deploymentStatusResponse)}"
+											}
+										}
+									}
+								}
 							}
 						}
 					}
@@ -171,7 +208,7 @@ pipeline {
 		always {
 			archiveArtifacts allowEmptyArchive: true, artifacts: '\
 				repo/**, \
-				coordinates*.txt, artifacts*.txt'
+				coordinates*.txt, artifacts*.txt, deploymentId-*.txt'
 		}
 		failure {
 			emailext subject: "Publication of Maven artifacts failed",
