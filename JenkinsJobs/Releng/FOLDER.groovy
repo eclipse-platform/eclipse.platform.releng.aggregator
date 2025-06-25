@@ -15,7 +15,7 @@ then deploys the artifacts for <code>Eclipse-Platform</code>, <code>JDT</code>, 
 Snapshots are deployed to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
 </li>
 <li>
-Releases are deployed to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by deploying to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
+Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> through the <a href="https://central.sonatype.org/publish/publish-portal-guide/">Central Portal</a>.
 </li>
 </ul>
 <p>
@@ -31,7 +31,7 @@ If left blank (not recommended), the latest I-build is deployed.
 Snapshots are deployed to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
 </li>
 <li>
-Releases are deployed to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by deploying to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
+Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> through the <a href="https://central.sonatype.org/publish/publish-portal-guide/">Central Portal</a>.
 </li>
 </ul>
 ''')
