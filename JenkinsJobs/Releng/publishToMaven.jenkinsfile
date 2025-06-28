@@ -1,9 +1,8 @@
-
 pipeline {
 	options {
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
-		buildDiscarder(logRotator(numToKeepStr:'10'))
+		buildDiscarder(logRotator(numToKeepStr:'10', artifactNumToKeepStr:'2'))
 		checkoutToSubdirectory('git-repo')
 	}
 	agent {
@@ -12,10 +11,10 @@ pipeline {
 	tools {
 		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
+		maven 'maven-daemon'
 	}
 	environment {
 		REPO = "${WORKSPACE}/repo"
-		PATH = "${installMavenDaemon('1.0.2')}/bin:${PATH}"
 		CBI_AGGR = "${installLatestCbiAggr()}"
 		// Folder ~/.m2 is not writable for builds, ensure mvnd metadata are written within the workspace.
 		// prevent jline warning about inability to create a system terminal and increase keep-alive timeouts to increase stability in concurrent usage
@@ -168,19 +167,13 @@ pipeline {
 				repo/**, \
 				coordinates*.txt, artifacts*.txt'
 		}
-		unsuccessful {
+		failure {
 			emailext subject: "Publication of Maven artifacts failed",
 				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
 				to: 'platform-releng-dev@eclipse.org', from:'genie.releng@eclipse.org'
 		}
 	}
 }
-
-def installMavenDaemon(String version) {
-	// Temporary workaround, until https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/6241#note_4109878 is really resolved
-	return install('mvnd', 'https://download.eclipse.org/oomph/archive/maven-mvnd-1.0.2-linux-amd64.tar.gz')
-}
-
 
 def installLatestCbiAggr(){
 	return install('cbiAggr', "https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest/org.eclipse.cbi.p2repo.cli.product-linux.gtk.x86_64.tar.gz") + '/cbiAggr'
