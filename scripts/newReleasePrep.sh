@@ -31,7 +31,6 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 - - [ ] Update "Brances" in JobDSL.json to move ${PREV_MAJOR}.${PREV_MINOR}-I builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - - [ ] Add R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch to parent pom and target sdk deployment jobs
 - - [ ] Update I-build triggers with dates for ${NEXT_STREAM} milestone
-- [ ] Configure SWT build scripts for ${NEXT_STREAM}
 - [ ] Splash Screen for ${NEXT_STREAM} (${NEXT_TRAIN})
 - [ ] Create ${NEXT_STREAM}-I-builds repo
 - [ ] Run [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job and submit the created changes
