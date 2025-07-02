@@ -54,9 +54,8 @@
            4. Update the Location property to the "Specific repository for building against" in the mailtemplate.txt from promotion.
            5. Commit Simrel updates to Gerrit
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
-       * Make the build visible
-         - Run the [Make Visible](https://ci.eclipse.org/releng/job/Releng/job/makeVisible/) job in Releng jenkins to make the promoted build visible on the download page.
-         - Parameters should match `Rename and Promote` job
+       * Run the [Make Visible](https://ci.eclipse.org/releng/job/Releng/job/makeVisible/) job in Releng jenkins to make the promoted build visible on the download page.
+         - `releaseBuildID`: the full id of the milestone, release-candidate or release build to make visible, e.g. `S-4.26M1-202209281800` or `R-4.36-202505281830`
        * Send email that the M1 build is available
          - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/Releng/job/renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
          - Make sure to mention that the Master branch is now again open for development.
