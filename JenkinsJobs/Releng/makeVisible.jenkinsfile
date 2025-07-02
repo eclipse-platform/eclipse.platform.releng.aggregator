@@ -9,16 +9,95 @@ pipeline {
 		label 'basic'
 	}
 	stages {
-		stage('Make visible') {
+		stage('Process Input') {
 			steps {
-				sshagent(['projects-storage.eclipse.org-bot-ssh', 'github-bot-ssh']) {
-					sh '''
-						curl -o makeVisible.sh https://download.eclipse.org/eclipse/relengScripts/cje-production/promotion/makeVisible.sh
-						chmod +x makeVisible.sh
-						./makeVisible.sh
+				script {
+					if (!params.releaseBuildID) {
+						error "Required parameter 'releaseBuildID' is not defined."
+					}
+					env.RELEASE_ID = params.releaseBuildID.trim()
+					def releaseIDMatcher = RELEASE_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(.\d+)?((M|RC)\d+[a-z]?)?-\d{12}/
+					if (!releaseIDMatcher.matches()) {
+						error "releaseID: ${RELEASE_ID}, does not match the expected pattern."
+					}
+					env.RELEASE_TYPE = releaseIDMatcher.group('type')
+					env.RELEASE_VERSION_MAJOR = releaseIDMatcher.group('major')
+					env.RELEASE_VERSION_MINOR = releaseIDMatcher.group('minor')
+					dropIDMatcher = null // release matcher as it's not serializable
+				}
+				sh '''
+					echo 'Input parameters read successfully'
+					echo "RELEASE_ID='$RELEASE_ID'"
+					echo "RELEASE_TYPE='$RELEASE_TYPE'"
+					echo "RELEASE_VERSION_MAJOR='$RELEASE_VERSION_MAJOR'"
+					echo "RELEASE_VERSION_MINOR='$RELEASE_VERSION_MINOR'"
+				'''
+			}
+		}
+		stage('Make Download page visible') {
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						# Build machine locations (would very seldom change)
+						DOWNLOAD_ROOT=${DOWNLOAD_ROOT:-/home/data/httpd/download.eclipse.org}
+						ARCHIVE_ROOT=${ARCHIVE_ROOT:-/home/data/httpd/archive.eclipse.org} 
+						ECLIPSE_MARKER="eclipse/downloads/drops4/${RELEASE_ID}/buildHidden"
+						EQUINOX_MARKER="equinox/drops/${RELEASE_ID}/buildHidden"
+						SSH_PREFIX="ssh genie.releng@projects-storage.eclipse.org"
+						
+						${SSH_PREFIX} rm --force "${DOWNLOAD_ROOT}/${ECLIPSE_MARKER}"
+						${SSH_PREFIX} rm --force "${DOWNLOAD_ROOT}/${EQUINOX_MARKER}"
+						
+						if [[ "${RELEASE_TYPE}" == 'R' ]]; then
+							${SSH_PREFIX} rm --force "${ARCHIVE_ROOT}/${ECLIPSE_MARKER}"
+							${SSH_PREFIX} rm --force "${ARCHIVE_ROOT}/${EQUINOX_MARKER}"
+						fi
 					'''
 				}
 				build job: 'Releng/updateIndex', wait: false
+			}
+		}
+		stage('Make Release Repository visible') {
+			when {
+				environment name: 'RELEASE_TYPE', value: 'R'
+			}
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''
+						#Repository will be available only for R builds. add it to composite
+						epDownloadDir=/home/data/httpd/download.eclipse.org/eclipse
+						dropsPath=${epDownloadDir}/downloads/drops4
+						workingDir=${epDownloadDir}/workingDir
+							
+						workspace=${workingDir}/${JOB_NAME}-${BUILD_NUMBER}
+							
+						ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+							
+						ssh genie.releng@projects-storage.eclipse.org mkdir -p ${workspace}
+						ssh genie.releng@projects-storage.eclipse.org cd ${workspace}
+							
+						#get latest Eclipse platform product
+						epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${dropsPath}/R-*|sort|tail -1)
+						ssh genie.releng@projects-storage.eclipse.org tar -C ${workspace} -xzf ${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz
+							
+						#get requisite tools
+						ssh genie.releng@projects-storage.eclipse.org wget -O ${workspace}/addToComposite.xml https://download.eclipse.org/eclipse/relengScripts/cje-production/scripts/addToComposite.xml
+							
+						#triggering ant runner
+						baseBuilderDir=${workspace}/eclipse
+						javaCMD=/opt/public/common/java/openjdk/jdk-21_x64-latest/bin/java
+						launcherJar=$(ssh genie.releng@projects-storage.eclipse.org find ${baseBuilderDir}/. -name "org.eclipse.equinox.launcher_*.jar" | sort | head -1 )
+							
+						repoDir=/"home/data/httpd/download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}"
+							
+						devWorkspace=${workspace}/workspace-antRunner
+						devArgs=-Xmx512m
+						extraArgs="addToComposite -Drepodir=${repoDir} -Dcomplocation=${RELEASE_ID}"
+						ssh genie.releng@projects-storage.eclipse.org  ${javaCMD} -jar ${launcherJar} -nosplash -consolelog -debug -data $devWorkspace -application org.eclipse.ant.core.antRunner -file ${workspace}/addToComposite.xml ${extraArgs} -vmargs $devArgs
+							
+						ssh genie.releng@projects-storage.eclipse.org rm -rf ${workingDir}/${JOB_NAME}*
+					'''
+				}
 			}
 		}
 	}
