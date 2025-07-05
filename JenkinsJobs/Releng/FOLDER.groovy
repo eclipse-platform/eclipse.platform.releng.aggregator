@@ -61,6 +61,26 @@ Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">
 	}
 }
 
+pipelineJob('Releng/modifyP2CompositeRepository'){
+	displayName('Modify P2 composite repository')
+	description('Add or remove children from an Eclipse-P2 composite repository.')
+	parameters {
+		stringParam('repositoryPath', null, "Relative repository path from https://download.eclipse.org/. E.g. 'eclipse/updates/4.37-I-builds'")
+		stringParam('add', null, 'Comma separated list of children to add. May be empty')
+		stringParam('remove', null, 'Comma separated list of children to remove. May be empty')
+		stringParam('sizeLimit', null, 'The maximum number of childrem of the modified composite. If the')
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/modifyP2CompositeRepository.jenkinsfile')
+		}
+	}
+}
+
 pipelineJob('Releng/prepareNextDevCycle'){
 	displayName('Prepare Next Development Cycle')
 	description('Perform all steps to prepare the next development cycle of Eclipse.')
