@@ -62,7 +62,7 @@ Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">
 }
 
 pipelineJob('Releng/modifyP2CompositeRepository'){
-	displayName('Modify P2 composite repository')
+	displayName('Modify P2 Composite Repository')
 	description('Add or remove children from an Eclipse-P2 composite repository.')
 	parameters {
 		stringParam('repositoryPath', null, "Relative repository path from https://download.eclipse.org/. E.g. 'eclipse/updates/4.37-I-builds'")
