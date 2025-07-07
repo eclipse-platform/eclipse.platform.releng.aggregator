@@ -21,7 +21,7 @@
      * All milestone releases are 'lightweight', meaning there is no announcement or signoff.
      No additional builds need to be run, just the daily I-build at 6PM EST.
      Thursdays build is promoted to simrel on friday (unless there are problems with Thursdays build, in which case promote Wednesdays) and the compiler is updated if necessary,
-     but the `Promote` and `Make Visible` jobs don't need to be run.
+     but the `Promote Build` and `Publish Promoted Build` jobs don't need to be run.
    - **Wednesday**:
      * Verify that EMF, ECF and Orbit contributions have been included (if applicable).
      * Final release candidate build runs at 6PM EST.
@@ -35,7 +35,7 @@
        * Just [1 line](https://www.eclipse.org/lists/platform-releng-dev/msg38086.html) asking for sign off on the GitHub issue created in the previous step.
    - **Friday**:
      * **Promote** the release candidate (if go).
-       * Run the [Rename and Promote](https://ci.eclipse.org/releng/job/Releng/job/renameAndPromote/) job in Jenkins
+       * Run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job in Jenkins
          - DROP_ID: Release candidate build ID (make sure there is no space before or after the ID).
          - CHECKPOINT: M1 etc (blank for final releases)
          - SIGNOFF_BUG: Needs to be updated to sign-off issue (numeric part only)
@@ -43,7 +43,7 @@
          - STREAM: 4.24.0 etc
          - DL_TYPE: S is used to promote I-builds.
          - TAG: Parameter should match stream version, i.e `S4_30_0_RC1` etc
-         - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/Releng/job/renameAndPromote/lastSuccessfulBuild/artifact/) and have it ready.
+         - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/lastSuccessfulBuild/artifact/) and have it ready.
          - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
        * Contribute to SimRel
          - If you have not already set up SimRel you can do so using Auto Launch [here](https://www.eclipse.org/setups/installer/?url=https://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/interim/SimultaneousReleaseTrainConfiguration.setup&show=true)
@@ -54,10 +54,10 @@
            4. Update the Location property to the "Specific repository for building against" in the mailtemplate.txt from promotion.
            5. Commit Simrel updates to Gerrit
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
-       * Run the [Make Visible](https://ci.eclipse.org/releng/job/Releng/job/makeVisible/) job in Releng jenkins to make the promoted build visible on the download page.
-         - `releaseBuildID`: the full id of the milestone, release-candidate or release build to make visible, e.g. `S-4.26M1-202209281800` or `R-4.36-202505281830`
+       * Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
+         - `releaseBuildID`: the full id of the milestone, release-candidate or release build to publish, e.g. `S-4.26M1-202209281800` or `R-4.36-202505281830`
        * Send email that the M1 build is available
-         - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/Releng/job/renameAndPromote/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
+         - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
          - Make sure to mention that the Master branch is now again open for development.
        * For **Milestone builds** return the I-builds to the normal schedule.
      * **After RC1**
@@ -104,7 +104,7 @@ The actual steps to release
 
 **Friday**
   * #### **Promote to GA**
-    - After Simrel declares RC2 (usually the Friday before release) run the [Rename and Promote](https://ci.eclipse.org/releng/job/Releng/job/renameAndPromote/) job to promote RC2 (or RC2a). If the [daily cleanup for old builds](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) job was not disabled and the original I-build is no longer available you can use the promoted RC2 build.
+    - After Simrel declares RC2 (usually the Friday before release) run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a). If the [daily cleanup for old builds](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) job was not disabled and the original I-build is no longer available you can use the promoted RC2 build.
       - Change the DL_TYPE from S to R.  
       - TAG will be set to R as well, for example `R4_27` 
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.

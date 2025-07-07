@@ -15,10 +15,10 @@ pipeline {
 					if (!params.releaseBuildID) {
 						error "Required parameter 'releaseBuildID' is not defined."
 					}
-					env.RELEASE_ID = params.releaseBuildID.trim()
-					def releaseIDMatcher = RELEASE_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(.\d+)?((M|RC)\d+[a-z]?)?-\d{12}/
+					env.RELEASE_BUILD_ID = params.releaseBuildID.trim()
+					def releaseIDMatcher = env.RELEASE_BUILD_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?((M|RC)\d+[a-z]?)?-\d{12}/
 					if (!releaseIDMatcher.matches()) {
-						error "releaseID: ${RELEASE_ID}, does not match the expected pattern."
+						error "releaseID: ${RELEASE_BUILD_ID}, does not match the expected pattern."
 					}
 					env.RELEASE_TYPE = releaseIDMatcher.group('type')
 					env.RELEASE_VERSION_MAJOR = releaseIDMatcher.group('major')
@@ -27,31 +27,31 @@ pipeline {
 				}
 				sh '''
 					echo 'Input parameters read successfully'
-					echo "RELEASE_ID='$RELEASE_ID'"
+					echo "RELEASE_BUILD_ID='$RELEASE_BUILD_ID'"
 					echo "RELEASE_TYPE='$RELEASE_TYPE'"
 					echo "RELEASE_VERSION_MAJOR='$RELEASE_VERSION_MAJOR'"
 					echo "RELEASE_VERSION_MINOR='$RELEASE_VERSION_MINOR'"
 				'''
 			}
 		}
-		stage('Make Download page visible') {
+		stage('Make Download Page visible') {
 			steps {
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
 						# Build machine locations (would very seldom change)
 						DOWNLOAD_ROOT=${DOWNLOAD_ROOT:-/home/data/httpd/download.eclipse.org}
 						ARCHIVE_ROOT=${ARCHIVE_ROOT:-/home/data/httpd/archive.eclipse.org} 
-						ECLIPSE_MARKER="eclipse/downloads/drops4/${RELEASE_ID}/buildHidden"
-						EQUINOX_MARKER="equinox/drops/${RELEASE_ID}/buildHidden"
-						SSH_PREFIX="ssh genie.releng@projects-storage.eclipse.org"
-						
-						${SSH_PREFIX} rm --force "${DOWNLOAD_ROOT}/${ECLIPSE_MARKER}"
-						${SSH_PREFIX} rm --force "${DOWNLOAD_ROOT}/${EQUINOX_MARKER}"
-						
+						ROOT_LOCATIONS=("${DOWNLOAD_ROOT}")
 						if [[ "${RELEASE_TYPE}" == 'R' ]]; then
-							${SSH_PREFIX} rm --force "${ARCHIVE_ROOT}/${ECLIPSE_MARKER}"
-							${SSH_PREFIX} rm --force "${ARCHIVE_ROOT}/${EQUINOX_MARKER}"
+							ROOT_LOCATIONS+=("${ARCHIVE_ROOT}")
 						fi
+						MARKER_FILES=("eclipse/downloads/drops4/${RELEASE_BUILD_ID}/buildHidden" "equinox/drops/${RELEASE_BUILD_ID}/buildHidden")
+						
+						for rootLocation in "${ROOT_LOCATIONS[@]}"; do
+							for markerFile in "${MARKER_FILES[@]}"; do
+								ssh genie.releng@projects-storage.eclipse.org rm --force "${rootLocation}/${markerFile}"
+							done
+						done
 					'''
 				}
 				build job: 'Releng/updateIndex', wait: false
@@ -64,7 +64,7 @@ pipeline {
 			steps {
 				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}"),
-					string(name: 'add', value: "${RELEASE_ID}")
+					string(name: 'add', value: "${RELEASE_BUILD_ID}")
 				]
 			}
 		}
