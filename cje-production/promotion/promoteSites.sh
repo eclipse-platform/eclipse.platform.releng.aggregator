@@ -235,268 +235,10 @@ function addRepoProperties ()
   ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vmargs ${MIRRORS_URL_ARG} -Dp2ArtifactRepositoryName="${ART_REPO_NAME}" -Dp2MetadataRepositoryName="${CON_REPO_NAME}" ${ART_REPO_ARG} ${CON_REPO_ARG}
 }
 
-DROP_ID=$(echo $DROP_ID|tr -d ' ')
-
-if [[ -z "${DROP_ID}" ]]
-then
-  echo -e "\n\t[ERROR] DROP_ID must be defined for ${0##*/}"
-  exit 1
-else
-  export DROP_ID
-  echo -e "\n\t[INFO] DROP_ID: $DROP_ID"  
-fi
-
 # Extract WEBTOOLS_REPO and other variables from buildproperties.shsource for the build
-wget -O ${WORKSPACE}/buildproperties.shsource https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.shsource
 source ${WORKSPACE}/buildproperties.shsource
 
-# CHECKPOINT is the code for either milestone (M1, M2, ...) 
-# or release candidate (RC1, RC2, ...). 
-# It should be empty for the final release.
-CHECKPOINT=$(echo $CHECKPOINT|tr -d ' ')
-if [[ -z "${CHECKPOINT}" ]]
-then
-  echo -e "\n\t[WARNING] CHECKPOINT was blank in ${0##*/}"
-else
-  export CHECKPOINT
-  echo -e "\n\t[INFO] CHECKPOINT: $CHECKPOINT"  
-fi
-
-# This SIGNOFF_BUG should not be defined, if there are no errors in JUnit tests.
-SIGNOFF_BUG=$(echo $SIGNOFF_BUG|tr -d ' ')
-if [[ -z "${SIGNOFF_BUG}" ]]
-then
-  echo -e "\n\t[WARNING] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined."
-  echo -e "\t\tCan be added by hand to buildproperties.php in drop site, if in fact there were errors, and simply forgot to specify."
-else
-  export SIGNOFF_BUG
-  echo -e "\t\t[INFO] SIGNOFF_BUG: $SIGNOFF_BUG"
-fi
-
-
-TRAIN_NAME=$(echo $TRAIN_NAME|tr -d ' ')
-if [[ -z "${TRAIN_NAME}" ]]
-then
-  echo -e "\n\t[ERROR] TRAIN_NAME must be defined for ${0##*/}"
-  exit 1
-else
-  export TRAIN_NAME
-  echo -e "\n\t[INFO] TRAIN_NAME: $TRAIN_NAME"  
-fi
-
-# STREAM is the three digit release number, such as 4.7.0 or 4.6.1.
-STREAM=$(echo $STREAM|tr -d ' ')
-if [[ -z "${STREAM}" ]]
-then
-  echo -e "\n\t[ERROR] STREAM must be defined for ${0##*/}"
-  exit 1
-else
-  export STREAM
-  echo -e "\n\t[INFO] STREAM: $STREAM"  
-fi
-
-# DL_TYPE ("download type") is the build type we are naming 
-# the build *TO*
-# for main line (master) code, it is always 'S' (from I-build) until it's 'R'
-#export DL_TYPE=S
-#export DL_TYPE=R
-DL_TYPE=$(echo $DL_TYPE|tr -d ' ')
-if [[ -z "${DL_TYPE}" ]]
-then
-  echo -e "\n\t[ERROR] DL_TYPE must be defined for ${0##*/}"
-  exit 1
-else
-  # Could probably define default - or validate! - based on first letter of DROP_ID
-  # M --> M
-  # I --> S
-  export DL_TYPE
-  echo -e "\n\t[INFO] DL_TYPE: $DL_TYPE"  
-fi
-
-SSH_PREFIX="ssh genie.releng@projects-storage.eclipse.org"
-export STAGE2DIRSEG=stage2output${TRAIN_NAME}${CHECKPOINT}
-export CL_SITE=${WORKSPACE}/${STAGE2DIRSEG}
-mkdir -p "${CL_SITE}"
-
 # Main promotion scripts starts here
-
-if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
-then
-  export BUILD_MAJOR=${BASH_REMATCH[1]}
-  export BUILD_MINOR=${BASH_REMATCH[2]}
-  export BUILD_SERVICE=${BASH_REMATCH[3]}
-else
-  echo "STREAM must contain major, minor, and service versions, such as 4.3.0"
-  echo "    but found ${STREAM}"
-  exit 1
-fi
-
-# regex section
-# BUILD_TYPE is the prefix of the build --
-# that is, for what we are renaming the build FROM
-PATTERN="^([MI])([[:digit:]]{8})-([[:digit:]]{4})$"
-if [[ "${DROP_ID}" =~ $PATTERN ]]
-then
-  export BUILD_TYPE=${BASH_REMATCH[1]}
-  export REPO_BUILD_TYPE=${BUILD_TYPE}
-  export BUILD_TIMESTAMP=${BASH_REMATCH[2]}${BASH_REMATCH[3]}
-  # Label and ID are the same, in this case
-  export BUILD_LABEL=$DROP_ID
-  export BUILD_LABEL_EQ=$DROP_ID
-  export DROP_ID_EQ=$DROP_ID
-  export REPO_ID=$DROP_ID
-else
-  PATTERN="^(S)-([[:digit:]]{1})\.([[:digit:]]{2})(.*)-([[:digit:]]{8})([[:digit:]]{4})$"
-  if [[ "${DROP_ID}" =~ $PATTERN ]]
-  then
-    export BUILD_TYPE=${BASH_REMATCH[1]}
-    export REPO_BUILD_TYPE=I
-    export BUILD_TIMESTAMP=${BASH_REMATCH[5]}${BASH_REMATCH[6]}
-    # Label and ID are the same, in this case
-    export BUILD_LABEL=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
-    export BUILD_LABEL_EQ=${BASH_REMATCH[2]}.${BASH_REMATCH[3]}${BASH_REMATCH[4]}
-    export DROP_ID_EQ=$DROP_ID
-    export REPO_ID=I${BASH_REMATCH[5]}-${BASH_REMATCH[6]}
-  else
-    echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
-    exit 1
-  fi
-fi
-
-# For initial releases, do not include service in label
-if [[ "${BUILD_SERVICE}" == "0" ]]
-then
-  export DL_LABEL=${BUILD_MAJOR}.${BUILD_MINOR}${CHECKPOINT}
-else
-  export DL_LABEL=${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_SERVICE}${CHECKPOINT}
-fi
-
-export DL_LABEL_EQ=${DL_LABEL}
-
-# This is DL_DROP_ID for Eclipse. The one for equinox has DL_LABEL_EQ in middle.
-export DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
-export DL_DROP_ID_EQ=${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}
-
-# for I builds, stable and RCs go to in milestones
-# for M builds, even RCs also go in <version>-M-builds
-case ${DL_TYPE} in
-  "S" )
-    export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}milestones
-    if [[ "${CHECKPOINT}" =~ ^M.*$ ]]
-    then
-      export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-    fi
-    # except for RC4. Since it it intended to be "final" we include the variables
-    # just like they were for an "R" build. (See bug 495252).
-    # to accomidate "respins", we use a regex so that adding an "a" or "b",
-    # will still match.
-    RCPATH=^RC.[abcd]?$
-    if [[ "${CHECKPOINT}" =~  $RCPATH ]]
-    then
-      export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-      export ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-      export README_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-    fi
-    ;;
-  "R" )
-    export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
-    export NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-    export ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-    export README_ID=${BUILD_MAJOR}.${BUILD_MINOR}
-    ;;
-  *)
-    echo -e "\n\tERROR: case statement for repo output did not match any pattern."
-    echo -e   "\t       Not written to handle DL_TYPE of ${DL_TYPE}\n"
-    exit 1
-esac
-
-export HIDE_SITE=true
-# Build machine locations (would very seldom change)
-export BUILD_ROOT=${BUILD_ROOT:-/home/data/httpd/download.eclipse.org}
-export BUILD_REPO_ORIGINAL=${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds
-export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/eclipse/updates/${BUILD_REPO_ORIGINAL}
-
-export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/eclipse/downloads/drops4
-export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/equinox/drops
-
-# Eclipse Drop Site (final segment)
-export ECLIPSE_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
-# Equinox Drop Site (final segment)
-export EQUINOX_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}
-
-export INITIAL_MAIL_LINES="We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates."
-export CLOSING_MAIL_LINES="Thank you to everyone who made this checkpoint possible."
-
-echo -e "\n\t[INFO] INITIAL_MAIL_LINES: $INITIAL_MAIL_LINES"  
-echo -e "\n\t[INFO] CLOSING_MAIL_LINES: $CLOSING_MAIL_LINES"  
-
-printf "\n\t%s\n\n" "Promoted on: $( date )" > "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "DROP_ID" "$DROP_ID" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "BUILD_LABEL" "$BUILD_LABEL" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "DROP_ID_EQ" "$DROP_ID_EQ" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "BUILD_LABEL_EQ" "$BUILD_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
-printf "\n" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "DL_TYPE" "$DL_TYPE" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "DL_LABEL" "$DL_LABEL" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "DL_LABEL_EQ" "$DL_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "ECLIPSE_DL_DROP_DIR_SEGMENT" "$ECLIPSE_DL_DROP_DIR_SEGMENT" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "EQUINOX_DL_DROP_DIR_SEGMENT" "$EQUINOX_DL_DROP_DIR_SEGMENT" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s" "REPO_SITE_SEGMENT" "$REPO_SITE_SEGMENT" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%20s%25s\n" "HIDE_SITE" "${HIDE_SITE}" >> "${CL_SITE}/checklist.txt"
-
-printf "\t%s\n" "Eclipse downloads:" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
-
-if [[ "${DL_TYPE}" == "R" ]]
-then
-  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/checklist.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
-
-  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/checklist.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
-else
-  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/checklist.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/" >> "${CL_SITE}/checklist.txt"
-
-  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/checklist.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/${DROP_ID}/" >> "${CL_SITE}/checklist.txt"
-fi
-
-printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
-
-# mail template
-
-# start with empty line, and '>' to be sure re-created if exists already.
-printf "\n" > "${CL_SITE}/mailtemplate.txt"
-
-printf "\n%s\n\n" "${INITIAL_MAIL_LINES}" >> "${CL_SITE}/mailtemplate.txt"
-
-printf "\t%s\n" "Eclipse downloads:" >> "${CL_SITE}/mailtemplate.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
-
-printf "\t%s\n" "New and Noteworthy:" >> "${CL_SITE}/mailtemplate.txt"
-printf "\t%s\n\n" "https://www.eclipse.org/eclipse/news/${NEWS_ID}/" >> "${CL_SITE}/mailtemplate.txt"
-
-if [[ "${DL_TYPE}" == "R" ]]
-then
-  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/mailtemplate.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
-
-  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/mailtemplate.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
-else
-  printf "\t%s\n" "Update existing (non-production) installs:" >> "${CL_SITE}/mailtemplate.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/" >> "${CL_SITE}/mailtemplate.txt"
-
-  printf "\t%s\n" "Specific repository good for building against:" >> "${CL_SITE}/mailtemplate.txt"
-  printf "\t%s\n\n" "https://download.eclipse.org/eclipse/updates/${BUILD_REPO_ORIGINAL}/${DROP_ID}/" >> "${CL_SITE}/mailtemplate.txt"
-fi
-
-printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/mailtemplate.txt"
-printf "\t%s\n\n" "https://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/mailtemplate.txt"
-
-printf "\n\n%s\n" "${CLOSING_MAIL_LINES}" >> "${CL_SITE}/mailtemplate.txt"
 
 #Take backup of current build
 LOCAL_EP_DIR=${WORKSPACE}/eclipse
@@ -552,7 +294,7 @@ pushd ${LOCAL_EQ_DIR}
   fi
 
   printf "\n\t%s\n" "Promoting Equinox"
-  scp -r ${LOCAL_EQ_DIR}/${DL_DROP_ID_EQ} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/equinox/drops/
+  scp -r ${LOCAL_EQ_DIR}/${DL_DROP_ID_EQ} genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_EQ}/
 
   if [[ "${DL_TYPE}" == "R" ]]
   then
@@ -572,7 +314,7 @@ pushd ${LOCAL_EP_DIR}
   fi
 
   printf "\n\t%s\n" "Promoting Platform"
-  scp -r ${LOCAL_EP_DIR}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/
+  scp -r ${LOCAL_EP_DIR}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_DL}/
 
   if [[ "${DL_TYPE}" == "R" ]]
   then
@@ -590,6 +332,6 @@ then
     BUILDMACHINE_SITE=${LOCAL_REPO}/${REPO_ID}
     addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
     mv ${REPO_ID} ${DL_DROP_ID}
-    scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
+    scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_ROOT}/updates/${REPO_SITE_SEGMENT}
   popd
 fi

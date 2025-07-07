@@ -112,12 +112,6 @@ It must match the name of the build on the build machine.
 		stringParam('CHECKPOINT', null, 'M1, M3, RC1, RC2, RC3 etc (blank for final releases).')
 		stringParam('SIGNOFF_BUG', null, 'The issue that was used to "signoff" the checkpoint. If there are no unit test failures, this can be left blank. Otherwise a link is added to test page explaining that "failing unit tests have been investigated".')
 		stringParam('TRAIN_NAME', null, 'The name of the release stream, typically yyyy-mm. For example: 2022-09')
-		stringParam('STREAM', null, 'Needs to be all three files of primary version for the release, such as 4.7.1 or 4.8.0.')
-		stringParam('DL_TYPE', null, "This is the build type we are promoting TO. I-builds promote to 'S' until 'R'.")
-		stringParam('TAG', null, ''' For passing to the tagEclipseRelease job.
-R is used for release builds. For example: R4_25
-S is used for milestones and includes the milestone version. For example: S4_25_0_RC2
-''')
 	}
 	definition {
 		cpsScm {

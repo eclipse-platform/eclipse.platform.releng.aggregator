@@ -40,9 +40,6 @@
          - CHECKPOINT: M1 etc (blank for final releases)
          - SIGNOFF_BUG: Needs to be updated to sign-off issue (numeric part only)
          - TRAIN_NAME: Whenever the current GA release is planned for (formatted 4 digit year - 2 digit month, i.e `2022-06`)
-         - STREAM: 4.24.0 etc
-         - DL_TYPE: S is used to promote I-builds.
-         - TAG: Parameter should match stream version, i.e `S4_30_0_RC1` etc
          - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/lastSuccessfulBuild/artifact/) and have it ready.
          - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
        * Contribute to SimRel
