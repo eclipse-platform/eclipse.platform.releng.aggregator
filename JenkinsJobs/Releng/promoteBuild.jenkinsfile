@@ -8,9 +8,122 @@ pipeline {
 	agent {
 		label 'basic'
 	}
+	environment {
+		HIDE_SITE = 'true'
+		// Download Server locations (would very seldom change)
+		BUILD_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_ROOT = "${BUILD_ROOT}/eclipse"
+		EP_EQUINOX_ROOT = "${BUILD_ROOT}/equinox"
+	}
 	stages {
-		stage('Rename and Promote') {
+		stage('Process input') {
 			steps {
+				script {
+					env.DROP_ID = readParameter('DROP_ID')
+					if (!"${DROP_ID}") {
+						error("Parameter 'DROP_ID' is not specified")
+					}
+					env.CHECKPOINT = readParameter('CHECKPOINT')
+					env.SIGNOFF_BUG = readParameter('SIGNOFF_BUG')
+					env.TRAIN_NAME = readParameter('TRAIN_NAME')
+					if (!"${TRAIN_NAME}") {
+						error("Parameter 'TRAIN_NAME' is not specified")
+					}
+					def idMatcher = null
+					if ((idMatcher = env.DROP_ID =~ /(?<type>I)(?<date>\d{8})-(?<time>\d{4})/).matches()) {
+						assignEnvVariable('BUILD_LABEL', "${DROP_ID}")
+					} else if ((idMatcher = env.DROP_ID =~ /(?<type>S)-(?<major>\d+)\.(?<minor>\d+)(?<service>\.\d+)?((M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/).matches()) {
+						assignEnvVariable('BUILD_LABEL', idMatcher.group('major') + '.' + idMatcher.group('minor') + (idMatcher.group('service') ?: ''))
+						if ("${CHECKPOINT}") {
+							error "Stable build DROP_ID=${DROP_ID} may only be promoted to release CHECKPOINT, which therefore must be empty: ${CHECKPOINT}"
+						}
+					} else {
+						error "DROP_ID, ${DROP_ID}, did not match any expected pattern."
+					}
+					assignEnvVariable('BUILD_TYPE', idMatcher.group('type'))
+					assignEnvVariable('REPO_BUILD_TYPE', 'I')
+					assignEnvVariable('BUILD_TIMESTAMP', idMatcher.group('date') + idMatcher.group('time'))
+					assignEnvVariable('REPO_ID', "I${idMatcher.group('date')}-${idMatcher.group('time')}")
+					idMatcher = null // release matcher as it's not serializable
+					
+					assignEnvVariable('BUILD_LABEL_EQ', "${BUILD_LABEL}")
+					assignEnvVariable('DROP_ID_EQ', "${DROP_ID}")
+					
+					sh 'curl -o buildproperties.shsource --fail https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.shsource'
+					def STREAM = sh(returnStdout: true, script: 'source ./buildproperties.shsource && echo ${STREAM}').trim()
+					def versionMatcher = STREAM =~ /(?<major>\d+)\.(?<minor>\d+).(?<service>\d+)/
+					if (!versionMatcher.matches()) {
+						error "STREAM must contain major, minor, and service versions, such as '4.37.0', but found: ${STREAM}"
+					}
+					assignEnvVariable('BUILD_MAJOR', versionMatcher.group('major'))
+					assignEnvVariable('BUILD_MINOR', versionMatcher.group('minor'))
+					assignEnvVariable('BUILD_SERVICE', versionMatcher.group('service'))
+					versionMatcher = null // release matcher as it's not serializable
+					
+					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
+						assignEnvVariable('DL_TYPE', 'S')
+						// REPO_SITE_SEGMENT variale not used in this case
+					} else if(!"${CHECKPOINT}") { // release promotion
+						assignEnvVariable('DL_TYPE', 'R')
+						assignEnvVariable('REPO_SITE_SEGMENT', "${BUILD_MAJOR}.${BUILD_MINOR}")
+					} else {
+						error "CHECKPOINT, ${CHECKPOINT}, did not match any expected pattern."
+					}
+					assignEnvVariable('NEWS_ID', "${BUILD_MAJOR}.${BUILD_MINOR}")
+					
+					assignEnvVariable('DL_LABEL', "${BUILD_SERVICE}" == '0' // For initial releases, do not include service in label
+						? "${BUILD_MAJOR}.${BUILD_MINOR}${CHECKPOINT}"
+						: "${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_SERVICE}${CHECKPOINT}"
+					)
+					assignEnvVariable('DL_LABEL_EQ', "${DL_LABEL}")
+					
+					// This is DL_DROP_ID for Eclipse. The one for equinox has DL_LABEL_EQ in middle.
+					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}")
+					assignEnvVariable('DL_DROP_ID_EQ', "${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}")
+					
+					if (!env.SIGNOFF_BUG) {
+						echo '''\
+							[WARNING] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined.
+							Can be added by hand to buildproperties.php in drop site, if in fact there were errors, and simply forgot to specify.
+						'''.stripIndent()
+					}
+					
+					def serviceVersionSegment = (env.CHECKPOINT || env.BUILD_SERVICE != '0') ? ('_' + env.BUILD_SERVICE) : ''
+					assignEnvVariable('TAG', "${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}${serviceVersionSegment}${env.CHECKPOINT ? ('_' + env.CHECKPOINT) : ''}")
+				}
+			}
+		}
+		stage('Rename and Promote') {
+			environment {
+				BUILDMACHINE_BASE_DL = "${EP_ECLIPSE_ROOT}/downloads/drops4"
+				BUILDMACHINE_BASE_EQ = "${EP_EQUINOX_ROOT}/drops"
+				BUILD_REPO_ORIGINAL = "${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds"
+				BUILDMACHINE_BASE_SITE = "${EP_ECLIPSE_ROOT}/updates/${BUILD_REPO_ORIGINAL}"
+				// Eclipse and Equinox drop Site (final segment)
+				ECLIPSE_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}"
+				EQUINOX_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}"
+			}
+			steps {
+				writeFile(file: "${WORKSPACE}/stage2output${TRAIN_NAME}${CHECKPOINT}/mailtemplate.txt", text: """\
+					We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates.
+					
+						Eclipse downloads:
+						https://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/
+						
+						New and Noteworthy:
+						https://www.eclipse.org/eclipse/news/${NEWS_ID}/
+						
+						Update existing (non-production) installs:
+						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? REPO_SITE_SEGMENT : BUILD_REPO_ORIGINAL}/
+						
+						Specific repository good for building against:
+						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? (REPO_SITE_SEGMENT + '/' + ECLIPSE_DL_DROP_DIR_SEGMENT) : (BUILD_REPO_ORIGINAL + '/' + DROP_ID)}/
+						
+						Equinox specific downloads:
+						https://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/
+					
+					Thank you to everyone who made this checkpoint possible.
+				""".stripIndent())
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -x
 						curl -o promoteSites.sh https://download.eclipse.org/eclipse/relengScripts/cje-production/promotion/promoteSites.sh
@@ -31,4 +144,20 @@ pipeline {
 			archiveArtifacts '**/stage2output*/**'
 		}
 	}
+}
+
+@NonCPS
+def assignEnvVariable(String name, String value) {
+	env."${name}" = value
+	println("${name}=${value}")
+}
+
+@NonCPS
+def readParameter(String name) {
+	//TODO: let jenkins trim the parameters
+	def value = (params[name] ?: '').trim()
+	if (value) {
+		println("${name}: ${value}")
+	}
+	return value
 }
