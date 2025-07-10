@@ -298,10 +298,12 @@ spec:
 			steps {
 				script {
 					for (c in BUILD.testConfigurations) {
-						build job: "${BUILD.testJobFolder}/${BUILD.testPrefix}-${c.os}-${c.arch}-java${c.javaVersion}", parameters: [string(name: 'buildId', value: "${BUILD_IID}")], wait: false
+						build job: "${BUILD.testJobFolder}/${BUILD.testPrefix}-${c.os}-${c.arch}-java${c.javaVersion}", wait: false, parameters: [
+							string(name: 'buildId', value: "${BUILD_IID}")
+						]
 					}
 				}
-				build job: 'SmokeTests/Start-smoke-tests', parameters: [string(name: 'buildId', value: "${BUILD_IID}")], wait: false
+				build job: 'SmokeTests/Start-smoke-tests', wait: false, parameters: [string(name: 'buildId', value: "${BUILD_IID}")]
 			}
 		}
 		stage('Trigger publication to Maven snapshots repo') {
@@ -314,7 +316,10 @@ spec:
 				}
 			}
 			steps {
-				build job: 'Releng/PublishToMaven', parameters: [string(name: 'snapshotOrRelease', value: '-snapshot')], wait: false
+				build job: 'Releng/PublishToMaven', wait: false, parameters: [
+					string(name: 'snapshotOrRelease', value: 'snapshot'),
+					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_IID}")
+				]
 			}
 		}
 	}

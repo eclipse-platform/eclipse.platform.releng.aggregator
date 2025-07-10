@@ -27,8 +27,12 @@ pipeline {
 				sh '''#!/bin/bash -e
 					FILE_SDK_AGGR="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/SDK4Mvn.aggr"
 					
+					# Set the specified source repository
+					if [ -n "${sourceRepository}" ]; then
+						sed -e "s|<repositories location=\\".*\\">|<repositories location=\\"${sourceRepository}\\">|" -i ${FILE_SDK_AGGR}
+					fi
 					# Set whether this is a snapshot build or not
-					if [ "${snapshotOrRelease}" = "-snapshot" ]; then
+					if [ "${snapshotOrRelease}" != 'release' ]; then
 						sed -e 's/snapshot=".*"/snapshot="true"/g' -i ${FILE_SDK_AGGR}
 					fi
 					
@@ -134,7 +138,7 @@ pipeline {
 											SOURCES_ARG="-Dsources=${sourcesFile}"
 										else
 											SOURCES_ARG=""
-											echo "No ${sourcesFile}."
+											echo "Missing sources file ${sourcesFile}."
 										fi
 									
 										if [ -f "${javadocFile}" ]; then
@@ -142,7 +146,7 @@ pipeline {
 											JAVADOC_ARG="-Djavadoc=${javadocFile}"
 										else
 											JAVADOC_ARG=""
-											echo "No ${javadocFile}."
+											echo "Missing JavaDoc file ${javadocFile}."
 										fi
 										set -x
 									
