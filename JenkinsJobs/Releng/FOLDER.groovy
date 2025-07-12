@@ -21,8 +21,11 @@ Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">
 <p>
 ''')
 	parameters { // Define parameters in job configuration to make them available even for the very first build after this job was (re)created.
-		choiceParam('snapshotOrRelease', ['snapshot' /*default*/, 'release'], '''\
-If this is the publication of a snapshot or a release build. 
+		stringParam('sourceRepository', null, '''\
+The URL of the source P2 repository to be published.<br>
+For a snapshot publication, the 4.x-I-Builds child repository of the specific build should be specified, e.g. 'https://download.eclipse.org/eclipse/updates/4.37-I-builds/I20250710-1800/'<br>
+<b>To deploy a <em>Release</em>, the corresponding release repository should be specified</b>, e.g. 'https://download.eclipse.org/eclipse/updates/4.36/R-4.36-202505281830/'<br>
+If left blank (not recommended), the latest I-build is published.
 <ul>
 <li>
 Snapshots are published to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
@@ -31,12 +34,6 @@ Snapshots are published to <a href="https://repo.eclipse.org/content/repositorie
 Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by publishing to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
 </li>
 </ul>
-''')
-		stringParam('sourceRepository', null, '''\
-The URL of the source P2 repository to be published.<br>
-<b>If this is a <em>release</em> publication, the corresponding release repository should be specified</b>, e.g. 'https://download.eclipse.org/eclipse/updates/4.36/R-4.36-202505281830/'<br>
-For a snapshot publication, the 4.x-I-Builds child repository of the specific build should be specified, e.g. 'https://download.eclipse.org/eclipse/updates/4.37-I-builds/I20250710-1800/'<br>
-If left blank (not recommended), the latest I-build is published.
 ''')
 	}
 	definition {

@@ -110,7 +110,8 @@ The actual steps to release
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
   * #### **Publish to Maven central**
     - Publishing to maven should happen by at least Tuesday before the release since there is up to a 24 hour delay for the maven mirrors.
-    - Run the [Publish to Maven](https://ci.eclipse.org/releng/job/Releng/job/PublishToMaven/) job in jenkins with the `release` parameter and the release build as `sourceRepository`.
+    - Run the [Publish to Maven](https://ci.eclipse.org/releng/job/Releng/job/PublishToMaven/) job in Jenkins with the release build as `sourceRepository`.
+      - About a minute after triggering the job, Jenkins will ask for confirmation on the console, if the specified build should really be deployed to Maven-Central staging.
     - Once that publish job has completed successfully, log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
       - If you do not have an account on oss.sonatype.org for performing the rest of the release request one by creating an issue like https://issues.sonatype.org/browse/OSSRH-43870 to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
   * **Contribute to SimRel**
@@ -134,8 +135,6 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     - For the Y and P build parameters it's important to know whether or not Y and P builds were run during the release. Since they correspond to java releases on a 6 month cycle, typically they are built in odd-numbered releases.  
     The existing builds are kept for one release, then cleaned up before the next stream that will have Y and P builds. it's convoluted and I dont want to type it out. Remove Y builds on even releases. 
     - If something doesn't get cleaned up properly you can use  Use the [list artifacts](https://ci.eclipse.org/releng/view/Cleanup/job/list_artifacts_from_download_server/) job to generate ta list of what's on the download server and either create a new job to clean it up or update and rerun the cleanup job as appropriate.
-  * **Set Maven to Publish to I-builds**
-    - Update [SDK4Mvn.aggr](https://github.com/eclipse-platform/eclipse.platform.releng/blob/master/publish-to-maven-central/SDK4Mvn.aggr) and point it to the new streams I-builds.
   * **Set Previous Release to GA** 
     - Everything that was updated to RC2 (see below) should now use the released build.
 
