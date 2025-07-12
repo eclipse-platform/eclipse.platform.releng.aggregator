@@ -108,11 +108,11 @@ The actual steps to release
       - Change the DL_TYPE from S to R.  
       - TAG will be set to R as well, for example `R4_27` 
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
-  * #### **Publish to Maven central**
-    - Publishing to maven should happen by at least Tuesday before the release since there is up to a 24 hour delay for the maven mirrors.
-    - Run the [Publish to Maven](https://ci.eclipse.org/releng/job/Releng/job/PublishToMaven/) job in Jenkins with the release build as `sourceRepository`.
+  * #### **Deploy to Maven central**
+    - Deploying to maven should happen by at least Tuesday before the release since there is up to a 24 hour delay for the maven mirrors.
+    - Run the [Deploy to Maven](https://ci.eclipse.org/releng/job/Releng/job/deployToMaven/) job in Jenkins with the release build as `sourceRepository`.
       - About a minute after triggering the job, Jenkins will ask for confirmation on the console, if the specified build should really be deployed to Maven-Central staging.
-    - Once that publish job has completed successfully, log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
+    - Once that deploy-job has completed successfully, log into https://oss.sonatype.org/#stagingRepositories and close the Platform, JDT and PDE repositories.
       - If you do not have an account on oss.sonatype.org for performing the rest of the release request one by creating an issue like https://issues.sonatype.org/browse/OSSRH-43870 to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
   * **Contribute to SimRel**
     - If SimRel is not updated before the I-builds are cleaned up (specifically the build for RC2/GA) it will break. 

@@ -2,36 +2,36 @@ folder('Releng') {
 	description('Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.')
 }
 
-pipelineJob('Releng/PublishToMaven'){
-	displayName('Publish to Maven')
+pipelineJob('Releng/deployToMaven'){
+	displayName('Deploy to Maven')
 	description('''\
 <p>
 This job uses the <a href="https://github.com/eclipse-cbi/p2repo-aggregator">CBI aggregator</a> to produce a Maven-compatible repository 
-with contents as specified by the <a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse.platform.releng/publish-to-maven-central/SDK4Mvn.aggr">SDK4Mvn.aggr</a> and
-then publishes the artifacts for <code>Eclipse-Platform</code>, <code>JDT</code>, <code>Equinox</code> and <code>PDE</code> from the output:
+with contents as specified by the <a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse.platform.releng/deploy-to-maven/SDK4Mvn.aggr">SDK4Mvn.aggr</a> and
+then deploys the artifacts for <code>Eclipse-Platform</code>, <code>JDT</code>, <code>Equinox</code> and <code>PDE</code> from the output:
 </p>
 <ul>
 <li>
-Snapshots are published to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
+Snapshots are deployed to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
 </li>
 <li>
-Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by publishing to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
+Releases are deployed to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by deploying to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
 </li>
 </ul>
 <p>
 ''')
 	parameters { // Define parameters in job configuration to make them available even for the very first build after this job was (re)created.
 		stringParam('sourceRepository', null, '''\
-The URL of the source P2 repository to be published.<br>
-For a snapshot publication, the 4.x-I-Builds child repository of the specific build should be specified, e.g. 'https://download.eclipse.org/eclipse/updates/4.37-I-builds/I20250710-1800/'<br>
+The URL of the source P2 repository to be deployed.<br>
+To deploy a snapshot, the 4.x-I-Builds child repository of the specific build should be specified, e.g. 'https://download.eclipse.org/eclipse/updates/4.37-I-builds/I20250710-1800/'<br>
 <b>To deploy a <em>Release</em>, the corresponding release repository should be specified</b>, e.g. 'https://download.eclipse.org/eclipse/updates/4.36/R-4.36-202505281830/'<br>
-If left blank (not recommended), the latest I-build is published.
+If left blank (not recommended), the latest I-build is deployed.
 <ul>
 <li>
-Snapshots are published to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
+Snapshots are deployed to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
 </li>
 <li>
-Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by publishing to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
+Releases are deployed to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> by deploying to a <a href="https://oss.sonatype.org/#stagingRepositories">staging repository</a>.
 </li>
 </ul>
 ''')
@@ -42,7 +42,7 @@ Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">
 			scm {
 				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
 			}
-			scriptPath('JenkinsJobs/Releng/publishToMaven.jenkinsfile')
+			scriptPath('JenkinsJobs/Releng/deployToMaven.jenkinsfile')
 		}
 	}
 }
