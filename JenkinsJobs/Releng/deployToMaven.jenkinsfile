@@ -26,7 +26,7 @@ pipeline {
 		stage('Aggregate Maven repository') {
 			steps {
 				sh '''#!/bin/bash -xe
-					FILE_SDK_AGGR="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/SDK4Mvn.aggr"
+					FILE_SDK_AGGR="${WORKSPACE}/git-repo/eclipse.platform.releng/deploy-to-maven/SDK4Mvn.aggr"
 					
 					# Set the specified source repository
 					if [ -n "${sourceRepository}" ]; then
@@ -71,7 +71,7 @@ pipeline {
 			}
 		}
 		stage('Validate repository') {
-			// Tests that each to-be-published artifact can transitively resolve all its dependencies.
+			// Tests that each to-be deployed artifact can transitively resolve all its dependencies.
 			steps {
 				dir('repo-validation') { // Do the work in a clean folder without a pom.xml
 					sh '''#!/bin/bash -xe
@@ -83,7 +83,7 @@ pipeline {
 				}
 			}
 		}
-		stage('Publish artifacts to Maven-Central') {
+		stage('Deploy artifacts') {
 			matrix {
 				axes {
 					axis { // environment variable is also used by called scripts!
@@ -92,7 +92,7 @@ pipeline {
 					}
 				}
 				stages {
-					stage('Publish project to Maven'){
+					stage('Deploy project to Maven'){
 						environment {
 							SETTINGS = "/home/jenkins/.m2/settings-deploy-ossrh-${PROJECT == 'platform' ? 'releng': PROJECT}.xml"
 							// The location of the temporarily file that contains the secret file content
@@ -101,7 +101,7 @@ pipeline {
 							MAVEN_GPG_PASSPHRASE = credentials("secret-subkeys-${PROJECT == 'platform' ? 'releng': PROJECT}.asc-passphrase")
 						}
 						steps {
-							dir("publish-${PROJECT}"){
+							dir("deploy-${PROJECT}"){
 								sh '''#!/bin/sh -xe
 									# Copy configuration pom into clean directory to stop maven from finding the .mvn folder of this git-repository
 									cp "${WORKSPACE}/git-repo/eclipse-platform-parent/pom.xml" eclipse-parent-pom.xml

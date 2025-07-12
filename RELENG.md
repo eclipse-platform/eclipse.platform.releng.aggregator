@@ -29,7 +29,7 @@ Adding a job to Jenkins should be as easy as adding a new groovy file to git, bu
 
 * **No dashes in filenames**, it breaks JobDSL. If there was a `-` in the job name I changed it to `_` in the file name.
 * **Job Names**
-  - No spaces, this is just for the good of scripts etc. The job NAME is used in the url, but you can always add a `displayName` field if you want the job to appear with a more natural looking name on the page. See (Releng/PublishToMaven)[JenkinsJobs/Releng/FOLDER.groovy] as an example.
+  - No spaces, this is just for the good of scripts etc. The job NAME is used in the url, but you can always add a `displayName` field if you want the job to appear with a more natural looking name on the page. See (Releng/deployToMaven)[JenkinsJobs/Releng/FOLDER.groovy] as an example.
   - The folder needs to be part of the job name, otherwise Jenkins will just create the job at the dashboard level.
 * **job vs pipelineJob**
   - Anything that can build on a regular jenkins node or via an available lable uses the (job)[https://jenkinsci.github.io/job-dsl-plugin/#path/job] template.
