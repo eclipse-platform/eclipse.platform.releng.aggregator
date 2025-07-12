@@ -14,6 +14,7 @@ pipeline {
 		maven 'maven-daemon'
 	}
 	environment {
+		DEPLOYMENT_TYPE = determineDeploymentType()
 		REPO = "${WORKSPACE}/repo"
 		CBI_AGGR = "${installLatestCbiAggr()}"
 		// Folder ~/.m2 is not writable for builds, ensure mvnd metadata are written within the workspace.
@@ -24,7 +25,7 @@ pipeline {
 	stages {
 		stage('Aggregate Maven repository') {
 			steps {
-				sh '''#!/bin/bash -e
+				sh '''#!/bin/bash -xe
 					FILE_SDK_AGGR="${WORKSPACE}/git-repo/eclipse.platform.releng/publish-to-maven-central/SDK4Mvn.aggr"
 					
 					# Set the specified source repository
@@ -32,7 +33,7 @@ pipeline {
 						sed -e "s|<repositories location=\\".*\\">|<repositories location=\\"${sourceRepository}\\">|" -i ${FILE_SDK_AGGR}
 					fi
 					# Set whether this is a snapshot build or not
-					if [ "${snapshotOrRelease}" != 'release' ]; then
+					if [ "${DEPLOYMENT_TYPE}" != 'release' ]; then
 						sed -e 's/snapshot=".*"/snapshot="true"/g' -i ${FILE_SDK_AGGR}
 					fi
 					
@@ -49,6 +50,7 @@ pipeline {
 					
 					pushd ${REPO}
 					
+					set +x
 					echo "========== Repo aggregation completed ========="
 					
 					# Find all the artifact folders for all projects
@@ -176,6 +178,15 @@ pipeline {
 				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
 				to: 'platform-releng-dev@eclipse.org', from:'genie.releng@eclipse.org'
 		}
+	}
+}
+
+def determineDeploymentType() {
+	if ("${sourceRepository}".trim() =~ /\/(?<version>\d+\.\d+)\/R-\k<version>(\.\d+)?-\d{12}(\/)?$/) {
+		input message: 'The specified P2 repository is a release and will be deployed to Maven-Central.', ok : 'Proceed deploying to Maven-Central'
+		return 'release'
+	} else {
+		return 'snapshot'
 	}
 }
 
