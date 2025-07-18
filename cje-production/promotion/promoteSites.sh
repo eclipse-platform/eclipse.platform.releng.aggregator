@@ -235,6 +235,87 @@ function addRepoProperties ()
   ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vmargs ${MIRRORS_URL_ARG} -Dp2ArtifactRepositoryName="${ART_REPO_NAME}" -Dp2MetadataRepositoryName="${CON_REPO_NAME}" ${ART_REPO_ARG} ${CON_REPO_ARG}
 }
 
+function createXZ
+{
+  BUILDMACHINE_SITE=$1
+
+  CONTENT_JAR_FILE="${BUILDMACHINE_SITE}/content.jar"
+  if [[ ! -e "${CONTENT_JAR_FILE}" ]]
+  then
+    echo -e "\n\tERROR: content.jar file did not exist at ${BUILDMACHINE_SITE}."
+    return 1
+  fi
+  ARTIFACTS_JAR_FILE="${BUILDMACHINE_SITE}/artifacts.jar"
+  if [[ ! -e "${ARTIFACTS_JAR_FILE}" ]]
+  then
+    echo -e "\n\tERROR: artifacts.jar file did not exist at ${BUILDMACHINE_SITE}."
+    return 1
+  fi
+
+  # Notice we overwrite the XML files, if they already exists.
+  unzip -q -o "${CONTENT_JAR_FILE}" -d "${BUILDMACHINE_SITE}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: could not unzip ${CONTENT_JAR_FILE}."
+    return $RC
+  fi
+  # Notice we overwrite the XML files, if they already exists.
+  unzip -q -o "${ARTIFACTS_JAR_FILE}" -d "${BUILDMACHINE_SITE}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: could not unzip ${ARTIFACTS_JAR_FILE}."
+    return $RC
+  fi
+
+  CONTENT_XML_FILE="${BUILDMACHINE_SITE}/content.xml"
+  ARTIFACTS_XML_FILE="${BUILDMACHINE_SITE}/artifacts.xml"
+  # We will check the content.xml and artifacts.xml files really exists. In some strange world, the jars could contain something else.
+  if [[ ! -e "${CONTENT_XML_FILE}" || ! -e "${ARTIFACTS_XML_FILE}" ]]
+  then
+    echo -e "\n\tERROR: content.xml or artifacts.xml file did not exist as expected at ${BUILDMACHINE_SITE}."
+    return 1
+  fi
+
+  # finally, compress them, using "extra effort"
+  # Notice we use "force" to over write any existing file, presumably there from a previous run?
+  XZ_EXE=$(which xz)
+  if [[ $? != 0 || -z "${XZ_EXE}" ]]
+  then
+    echo -e "\n\tERROR: xz executable did not exist."
+    return 1
+  fi
+  echo -e "\n\tXZ compression of ${CONTENT_XML_FILE} ... "
+  $XZ_EXE -e --force "${CONTENT_XML_FILE}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: could not compress, using $XZ_EXE -e ${CONTENT_XML_FILE}."
+    return $RC
+  fi
+
+  echo -e "\tXZ compression of ${ARTIFACTS_XML_FILE} ... "
+  $XZ_EXE -e --force "${ARTIFACTS_XML_FILE}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: could not compress, using $XZ_EXE -e ${ARTIFACTS_XML_FILE}."
+    return $RC
+  fi
+
+
+  # Notice we just write over any existing p2.index file.
+  # May want to make backup of this and other files, for production use.
+  P2_INDEX_FILE="${BUILDMACHINE_SITE}/p2.index"
+  echo "version=1" > "${P2_INDEX_FILE}"
+  echo "metadata.repository.factory.order= content.xml.xz,content.xml,!" >> "${P2_INDEX_FILE}"
+  echo "artifact.repository.factory.order= artifacts.xml.xz,artifacts.xml,!" >> "${P2_INDEX_FILE}"
+  echo -e "\tCreated ${P2_INDEX_FILE}"
+
+  return 0
+}
+
 DROP_ID=$(echo $DROP_ID|tr -d ' ')
 
 if [[ -z "${DROP_ID}" ]]
@@ -589,6 +670,7 @@ then
   pushd ${LOCAL_REPO}
     BUILDMACHINE_SITE=${LOCAL_REPO}/${REPO_ID}
     addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
+    createXZ ${BUILDMACHINE_SITE}
     mv ${REPO_ID} ${DL_DROP_ID}
     scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
   popd
