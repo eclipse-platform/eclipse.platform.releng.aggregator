@@ -15,7 +15,8 @@ RUN apt-get update -qq && apt-get install -qq -y \
       git \
       libgtk-3-dev \
       freeglut3-dev \
-      webkit2gtk-driver
+      webkit2gtk-driver \
+      gcc-aarch64-linux-gnu
 
 ENV HOME=/home/swtbuild
 ENV DISPLAY :0
