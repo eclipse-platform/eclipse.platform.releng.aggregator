@@ -161,6 +161,12 @@ pipeline {
 								'''
 								script {
 									if ("${DEPLOYMENT_TYPE}" == 'release') {
+										def repoTag = "${sourceRepository}".trim()
+										if (repoTag.endsWith('/')) {
+											repoTag = repoTag.substring(0, repoTag.length() - 1)
+										}
+										env.REPO_TAG = repoTag.substring(repoTag.lastIndexOf('/') + 1, repoTag.length())
+										
 										// Documentation of the Central Portal Publisher API 
 										// - https://central.sonatype.org/publish/publish-portal-api
 										// - https://central.sonatype.com/api-doc
@@ -172,7 +178,7 @@ pipeline {
 												--header 'accept: text/plain' \
 												--header 'Content-Type: multipart/form-data' \
 												--form "bundle=@${PROJECT}-artifacts.zip" \
-												'https://central.sonatype.com/api/v1/publisher/upload?publishingType=USER_MANAGED'
+												"https://central.sonatype.com/api/v1/publisher/upload?name=${PROJECT^^}_${REPO_TAG}&publishingType=USER_MANAGED"
 										''')
 										writeFile(file: "${WORKSPACE}/deploymentId-${PROJECT}.txt", text: "${deploymentId}")
 										waitUntil(initialRecurrencePeriod: 5_000) {
