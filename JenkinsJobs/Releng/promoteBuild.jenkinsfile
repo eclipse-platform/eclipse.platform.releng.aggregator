@@ -27,11 +27,6 @@ pipeline {
 					}
 					env.CHECKPOINT = readParameter('CHECKPOINT')
 					env.SIGNOFF_BUG = readParameter('SIGNOFF_BUG')
-					env.TRAIN_NAME = readParameter('TRAIN_NAME')
-					//TODO: record the train in buildproperties.shsource and read it here
-					if (!"${TRAIN_NAME}") {
-						error("Parameter 'TRAIN_NAME' is not specified")
-					}
 					def idMatcher = null
 					if ((idMatcher = env.DROP_ID =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
 						assignEnvVariable('BUILD_LABEL', "${DROP_ID}")
@@ -58,14 +53,10 @@ pipeline {
 					assignEnvVariable('BUILD_SERVICE', versionMatcher.group('service'))
 					versionMatcher = null // release matcher as it's not serializable
 					
-					assignEnvVariable('BUILD_REPO_ORIGINAL', "${BUILD_MAJOR}.${BUILD_MINOR}-I-builds")
-					
 					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
 						assignEnvVariable('DL_TYPE', 'S')
-						// REPO_SITE_SEGMENT variale not used in this case
 					} else if (!"${CHECKPOINT}") { // release promotion
 						assignEnvVariable('DL_TYPE', 'R')
-						assignEnvVariable('REPO_SITE_SEGMENT', "${BUILD_MAJOR}.${BUILD_MINOR}")
 					} else {
 						error "CHECKPOINT, ${CHECKPOINT}, did not match any expected pattern."
 					}
@@ -93,6 +84,9 @@ pipeline {
 			steps {
 				dir("${WORKSPACE}/repository") {
 					checkout scm
+					script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+						githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+					}
 					sh '''#!/bin/bash -xe
 						git fetch origin tag "${REPO_ID}"
 						git checkout "${REPO_ID}"
@@ -107,26 +101,6 @@ pipeline {
 		}
 		stage('Move and rename Pages') {
 			steps {
-				writeFile(file: "${WORKSPACE}/stage2output${TRAIN_NAME}${CHECKPOINT}/mailtemplate.txt", text: """\
-					We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates.
-					
-						Eclipse downloads:
-						https://download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/
-						
-						New and Noteworthy:
-						https://www.eclipse.org/eclipse/news/${BUILD_MAJOR}.${BUILD_MINOR}/
-						
-						Update existing (non-production) installs:
-						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? REPO_SITE_SEGMENT : BUILD_REPO_ORIGINAL}/
-						
-						Specific repository good for building against:
-						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? (REPO_SITE_SEGMENT + '/' + DL_DROP_ID) : (BUILD_REPO_ORIGINAL + '/' + DROP_ID)}/
-						
-						Equinox specific downloads:
-						https://download.eclipse.org/equinox/drops/${DL_DROP_ID}/
-					
-					Thank you to everyone who made this checkpoint possible.
-				""".stripIndent())
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					
 					echo 'Promote Equinox'
@@ -186,8 +160,8 @@ pipeline {
 				dir("${WORKSPACE}/updates") {
 					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 						sh '''#!/bin/bash -xe
-							sourceRepo="eclipse/updates/${BUILD_REPO_ORIGINAL}/${REPO_ID}"
-							targetRepo="eclipse/updates/${REPO_SITE_SEGMENT}/${DL_DROP_ID}"
+							sourceRepo="eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}-I-builds/${REPO_ID}"
+							targetRepo="eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}"
 							ssh genie.releng@projects-storage.eclipse.org cp -r "${EP_ROOT}/${sourceRepo}/." "${EP_ROOT}/${targetRepo}"
 							
 							MIRRORS_URL="https://www.eclipse.org/downloads/download.php?file=/${targetRepo}"
@@ -204,28 +178,44 @@ pipeline {
 				}
 			}
 		}
+		stage('Stage for Maven-Central') {
+			when {
+				environment name: 'DL_TYPE', value: 'R'
+			}
+			steps {
+				build job: 'Releng/deployToMaven', wait: true, propagate: true, parameters: [
+					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}/")
+				]
+			}
+		}
+		stage('Update acknowledgements') {
+			environment {
+				GITHUB_BOT_TOKEN = credentials('github-bot-token')
+			}
+			steps {
+				script {
+					githubAPI.triggerWorkflow('eclipse-platform/www.eclipse.org-eclipse', 'generateAcknowledgements.yml', [ 'eclipse-version': "${BUILD_MAJOR}.${BUILD_MINOR}" ])
+				}
+			}
+		}
+		stage('Trigger publication') {
+			when {
+				not {
+					environment name: 'DL_TYPE', value: 'R'
+				}
+			}
+			steps {
+				build job: 'Releng/publishPromotedBuild', wait: true, propagate: true, parameters: [
+					string(name: 'releaseBuildID', value: "${DL_DROP_ID}")
+				]
+			}
+		}
 	}
 	post {
 		always {
 			archiveArtifacts artifacts: '**/*', excludes: 'repository/**'
 		}
 	}
-}
-
-@NonCPS
-def assignEnvVariable(String name, String value) {
-	env."${name}" = value
-	println("${name}=${value}")
-}
-
-@NonCPS
-def readParameter(String name) {
-	//TODO: let jenkins trim the parameters
-	def value = (params[name] ?: '').trim()
-	if (value) {
-		println("${name}: ${value}")
-	}
-	return value
 }
 
 def renameBuildDrop(String baseDropPath, String oldDropID, String oldBuildLabel, String newDropID, String newBuildLabel, Closure extraTasks=null) {
@@ -301,4 +291,21 @@ EOF
 			ssh genie.releng@projects-storage.eclipse.org cp -r '${targetPath}' /home/data/httpd/archive.eclipse.org/${baseDropPath}/
 		fi
 	"""
+}
+
+@groovy.transform.Field
+def githubAPI = null
+
+@NonCPS
+def readParameter(String name) {
+	//TODO: let jenkins trim the parameters
+	def value = (params[name] ?: '').trim()
+	println("${name}: ${value}")
+	return value
+}
+
+@NonCPS
+def assignEnvVariable(String name, String value) {
+	env."${name}" = value
+	println("${name}=${value}")
 }
