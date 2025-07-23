@@ -8,6 +8,10 @@ pipeline {
 	agent {
 		label 'basic'
 	}
+	tools {
+		jdk 'temurin-jdk21-latest'
+		maven 'apache-maven-latest'
+	}
 	stages {
 		stage('Process Input') {
 			steps {
@@ -15,23 +19,40 @@ pipeline {
 					if (!params.releaseBuildID) {
 						error "Required parameter 'releaseBuildID' is not defined."
 					}
-					env.RELEASE_BUILD_ID = params.releaseBuildID.trim()
-					def releaseIDMatcher = env.RELEASE_BUILD_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?((M|RC)\d+[a-z]?)?-\d{12}/
-					if (!releaseIDMatcher.matches()) {
+					assignEnvVariable('RELEASE_BUILD_ID', params.releaseBuildID.trim())
+					def idMatcher = env.RELEASE_BUILD_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
+					if (!idMatcher.matches()) {
 						error "releaseID: ${RELEASE_BUILD_ID}, does not match the expected pattern."
 					}
-					env.RELEASE_TYPE = releaseIDMatcher.group('type')
-					env.RELEASE_VERSION_MAJOR = releaseIDMatcher.group('major')
-					env.RELEASE_VERSION_MINOR = releaseIDMatcher.group('minor')
-					dropIDMatcher = null // release matcher as it's not serializable
+					assignEnvVariable('RELEASE_TYPE', idMatcher.group('type'))
+					assignEnvVariable('RELEASE_VERSION_MAJOR', idMatcher.group('major'))
+					assignEnvVariable('RELEASE_VERSION_MINOR', idMatcher.group('minor'))
+					assignEnvVariable('CHECKPOINT', idMatcher.group('checkpoint') ?: 'GA')
+					def buildId = "I${idMatcher.group('date')}-${idMatcher.group('time')}"
+					idMatcher = null // release matcher as it's not serializable
+					
+					if (env.RELEASE_TYPE == 'R') {
+						assignEnvVariable('REPOSITORY_PATH', "${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/${RELEASE_BUILD_ID}")
+					} else if (env.RELEASE_TYPE == 'S') {
+						assignEnvVariable('REPOSITORY_PATH', "${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}-I-builds/${buildId}")
+					} else {
+						error "RELEASE_TYPE, ${RELEASE_TYPE}, did not match any expected pattern."
+					}
+					
+					sh """
+							git clone --depth=1 --filter=tree:0 --no-checkout --branch=${buildId} https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
+							cd eclipse.platform.releng.aggregator
+							git sparse-checkout set --no-cone eclipse-platform-parent/pom.xml
+							git checkout
+							
+							mvn -f eclipse-platform-parent help:evaluate -Dexpression=releaseName '-Doutput=${WORKSPACE}/releaseName-value.txt' \
+								--batch-mode --no-transfer-progress --no-snapshot-updates
+					"""
+					assignEnvVariable('TRAIN_NAME', readFile('releaseName-value.txt').trim())
+					if (!env.TRAIN_NAME) {
+						error "TRAIN_NAME is empty."
+					}
 				}
-				sh '''
-					echo 'Input parameters read successfully'
-					echo "RELEASE_BUILD_ID='$RELEASE_BUILD_ID'"
-					echo "RELEASE_TYPE='$RELEASE_TYPE'"
-					echo "RELEASE_VERSION_MAJOR='$RELEASE_VERSION_MAJOR'"
-					echo "RELEASE_VERSION_MINOR='$RELEASE_VERSION_MINOR'"
-				'''
 			}
 		}
 		stage('Make Download Page visible') {
@@ -76,5 +97,43 @@ pipeline {
 				]
 			}
 		}
+		stage('Send announcement mail') {
+			steps {
+				emailext subject: "Eclipse and Equinox ${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR} (${TRAIN_NAME}) ${CHECKPOINT} is available",
+					body: ("""\
+					Hello everyone,
+					
+					We are pleased to announce that Eclipse and Equinox ${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR} ${CHECKPOINT} (for ${TRAIN_NAME}) is available for download and updates.
+					
+						Eclipse downloads:
+						https://download.eclipse.org/eclipse/downloads/drops4/${RELEASE_BUILD_ID}/
+						
+						New and Noteworthy:
+						https://www.eclipse.org/eclipse/news/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/
+						
+						Update existing (non-production) installs:
+						https://download.eclipse.org/eclipse/updates/${REPOSITORY_PATH.substring(0, REPOSITORY_PATH.lastIndexOf('/'))}/
+						
+						Specific repository good for building against:
+						https://download.eclipse.org/eclipse/updates/${REPOSITORY_PATH}/
+						
+						Equinox specific downloads:
+						https://download.eclipse.org/equinox/drops/${RELEASE_BUILD_ID}/
+					
+					Thank you to everyone who made this checkpoint possible.
+					
+					Best regards,
+					
+					The Eclipse contributors
+					""").stripIndent(), mimeType: 'text/plain', from:'genie.releng@eclipse.org',
+					to: "platform-releng-dev@eclipse.org eclipse-dev@eclipse.org platform-dev@eclipse.org equinox-dev@eclipse.org jdt-dev@eclipse.org pde-dev@eclipse.org"
+			}
+		}
 	}
+}
+
+@NonCPS
+def assignEnvVariable(String name, String value) {
+	env."${name}" = value
+	println("${name}=${value}")
 }

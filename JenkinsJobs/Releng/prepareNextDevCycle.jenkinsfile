@@ -81,6 +81,10 @@ pipeline {
 		stage('Checkout SCM') {
 			steps {
 				checkout scm
+				script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+					githubAPI.setDryRun(params.DRY_RUN)
+				}
 				sh '''
 					git submodule update --init --recursive
 					git config --global user.email 'releng-bot@eclipse.org'
@@ -240,7 +244,7 @@ pipeline {
 				script {
 					def prHeadline = "Prepare ${NEXT_RELEASE_VERSION} development"
 					def prBranch = "prepare_R${NEXT_RELEASE_VERSION}"
-					def aggregatorPreparationPR = createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator', prHeadline, """\
+					def aggregatorPreparationPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator', prHeadline, """\
 						Prepare development of Eclipse ${NEXT_RELEASE_VERSION}.
 						This includes:
 						- Updating the version of the Maven parent, all references to it and the Eclipse products to `${NEXT_RELEASE_VERSION}`
@@ -263,7 +267,7 @@ pipeline {
 							error "Unexpected of submodule URL: ${submoduleURL}"
 						}
 						def repoName = submoduleURL.substring(expectedPrefix.length(), submoduleURL.length() - expectedSuffix.length())
-						createPullRequest(repoName, prHeadline, """\
+						githubAPI.createPullRequest(repoName, prHeadline, """\
 							Prepare development of Eclipse ${NEXT_RELEASE_VERSION}.
 							This complements:
 							- ${aggregatorPreparationPR}
@@ -280,7 +284,7 @@ pipeline {
 				script {
 					def organisations = [ 'eclipse-platform', 'eclipse-jdt', 'eclipse-pde', 'eclipse-equinox' ]
 					for (organisation in organisations) {
-						def repositories = listReposOfOrganization(organisation)
+						def repositories = githubAPI.listReposOfOrganization(organisation)
 						echo "${organisation} repositories: ${repositories.name}"
 						for (repositoryData in repositories) {
 							def repository = repositoryData.name
@@ -291,12 +295,12 @@ pipeline {
 								echo "Skipping .eclipsefdn repository of : ${organisation}"
 								continue
 							}
-							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M1",  "${NEXT_RELEASE_VERSION} Milestone 1",         "${M1_DATE}")
-							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M2",  "${NEXT_RELEASE_VERSION} Milestone 2",         "${M2_DATE}")
-							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M3",  "${NEXT_RELEASE_VERSION} Milestone 3",         "${M3_DATE}")
-							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} RC1", "${NEXT_RELEASE_VERSION} Release Candidate 1", "${RC1_DATE}")
-							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} RC2", "${NEXT_RELEASE_VERSION} Release Candidate 2", "${RC2_DATE}")
-							createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION}",     "${NEXT_RELEASE_VERSION} Release",             "${GA_DATE}")
+							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M1",  "${NEXT_RELEASE_VERSION} Milestone 1",         "${M1_DATE}")
+							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M2",  "${NEXT_RELEASE_VERSION} Milestone 2",         "${M2_DATE}")
+							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M3",  "${NEXT_RELEASE_VERSION} Milestone 3",         "${M3_DATE}")
+							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} RC1", "${NEXT_RELEASE_VERSION} Release Candidate 1", "${RC1_DATE}")
+							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} RC2", "${NEXT_RELEASE_VERSION} Release Candidate 2", "${RC2_DATE}")
+							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION}",     "${NEXT_RELEASE_VERSION} Release",             "${GA_DATE}")
 						}
 					}
 				}
@@ -304,6 +308,9 @@ pipeline {
 		}
 	}
 }
+
+@groovy.transform.Field
+def githubAPI = null
 
 // --- utility methods
 
@@ -333,69 +340,4 @@ def commitAllChangesExcludingSubmodules(String commitMessage) {
 			git commit --message "${COMMIT_MESSAGE}"
 		'''
 	}
-}
-
-// Github API interactions
-
-def listReposOfOrganization(String orga) {
-	def response = queryGithubAPI('', "orgs/${orga}/repos", null)
-	if (!(response instanceof List) && (response.errors || (response.status && response.status != 201))) {
-		error "Response contains errors:\n${response}"
-	}
-	return response
-}
-
-/**
- * Create a new milestone.
- * @param msDueDay the milestone's due-date, format: YYYY-MM-DD
- */
-def createMilestone(String orga, String repo, String msTitle, String msDescription, String msDueDay) {
-	echo "In ${orga}/${repo} create milestone: ${msTitle} due on ${msDueDay}"
-	def params = [title: msTitle, description: msDescription, due_on: "${msDueDay}T23:59:59Z"]
-	def response = queryGithubAPI('-X POST', "repos/${orga}/${repo}/milestones", params)
-	if (response?.errors || (response?.status && response.status != 201)) {
-		if (response.errors && response.errors[0]?.code == 'already_exists') {
-			echo 'Milestone already exists and is not modified'
-			// TODO: update milestone in this case: https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#update-a-milestone
-			// Usefull if e.g. the dates are wrongly read from the calendar
-		} else {
-			error "Response contains errors:\n${response}"
-		}
-	}
-}
-
-/**
- * Create a PR in the specified repo, from a branch that is expected to reside in the same repository.
- */
-def createPullRequest(String orgaSlashRepo, String prTitle, String prBody, String headBranch, String baseBranch = 'master') {
-	echo "In ${orgaSlashRepo} create PR: '${prTitle}' on branch ${headBranch}"
-	def params = [title: prTitle, body: prBody, head: headBranch, base: baseBranch]
-	def response = queryGithubAPI('-X POST',"repos/${orgaSlashRepo}/pulls", params)
-	if (response?.errors || (response?.status && response.status != 201)) {
-		error "Response contains errors:\n${response}"
-	}
-	return response?.html_url
-}
-
-def queryGithubAPI(String method, String endpoint, Map<String, String> queryParameters) {
-	def query = """\
-		curl -L ${method} \
-			-H "Accept: application/vnd.github+json" \
-			-H "Authorization: Bearer \${GITHUB_BOT_TOKEN}" \
-			-H "X-GitHub-Api-Version: 2022-11-28" \
-			https://api.github.com/${endpoint} \
-		""".stripIndent()
-	if (queryParameters != null) {
-		def params = writeJSON(json: queryParameters, returnText: true)
-		query += "-d '" + params + "'"
-	}
-	if (params.DRY_RUN && !method.isEmpty()) {
-		echo "Query (not send): ${query}"
-		return null
-	}
-	def response = sh(script: query, returnStdout: true)
-	if (response == null || response.isEmpty()) {
-		error 'Response is null or empty. This commonly indicates: HTTP/1.1 500 Internal Server Error'
-	}
-	return readJSON(text: response)
 }

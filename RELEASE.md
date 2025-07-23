@@ -36,11 +36,10 @@
    - **Friday**:
      * **Promote** the release candidate (if go).
        * Run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job in Jenkins
-         - DROP_ID: Release candidate build ID (make sure there is no space before or after the ID).
-         - CHECKPOINT: M1 etc (blank for final releases)
-         - SIGNOFF_BUG: Needs to be updated to sign-off issue (numeric part only)
-         - TRAIN_NAME: Whenever the current GA release is planned for (formatted 4 digit year - 2 digit month, i.e `2022-06`)
-         - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/lastSuccessfulBuild/artifact/) and have it ready.
+         - `DROP_ID`: ID of the build to promote, e.g.: `I20250817-1800`
+         - `CHECKPOINT`: M1 etc. (blank for final releases)
+         - `SIGNOFF_BUG`: Needs to be updated to sign-off issue (numeric part only)
+         - For Milestones/RC promotions, this should automatically run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job to make the promoted build immediatly visible on the download page.
        * Contribute to SimRel
          - If you have not already set up SimRel you can do so using Auto Launch [here](https://www.eclipse.org/setups/installer/?url=https://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/interim/SimultaneousReleaseTrainConfiguration.setup&show=true)
          - Clone [org.eclipse.simrel.build](https://git.eclipse.org/c/simrel/org.eclipse.simrel.build.git) (Should have been done by the installer during set up, but make sure you have latest).
@@ -50,11 +49,6 @@
            4. Update the Location property to the "Specific repository for building against" in the mailtemplate.txt from promotion.
            5. Commit Simrel updates to Gerrit
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
-       * Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
-         - `releaseBuildID`: the full id of the milestone, release-candidate or release build to publish, e.g. `S-4.26M1-202209281800` or `R-4.36-202505281830`
-       * Send email that the M1 build is available
-         - Use the mail template from the promotion build [artifacts](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/lastSuccessfulBuild/artifact/) in Jenkins to get the download urls.
-         - Make sure to mention that the Master branch is now again open for development.
        * For **Milestone builds** return the I-builds to the normal schedule.
      * **After RC1**
        * Leave the I-builds running on the milestone schedule for RC2. 
@@ -100,16 +94,9 @@ The actual steps to release
 
 **Friday**
   * #### **Promote to GA**
-    - After Simrel declares RC2 (usually the Friday before release) run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a). If the [daily cleanup for old builds](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) job was not disabled and the original I-build is no longer available you can use the promoted RC2 build.
-      - Change the DL_TYPE from S to R.  
-      - TAG will be set to R as well, for example `R4_27` 
+    - After Simrel declares RC2 (usually the Friday before release) run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a).
+      - `DROP_ID`: Final delease candidate's ID, e.g.: `S-4.36RC2-202505281830/`
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
-  * #### **Deploy to Maven central**
-    - Deploying to maven should happen by at least Tuesday before the release since there is up to a 24 hour delay for the maven mirrors.
-    - Run the [Deploy to Maven](https://ci.eclipse.org/releng/job/Releng/job/deployToMaven/) job in Jenkins with the release build as `sourceRepository`.
-      - About a minute after triggering the job, Jenkins will ask for confirmation on the console, if the specified build should really be deployed to Maven-Central staging.
-    - Once that deploy-job has completed successfully, log into https://central.sonatype.com/ and close the `Platform`, `JDT` and `PDE` repositories.
-      - If you do not have an account on `central.sonatype.com` for performing the rest of the release request one by creating an [EF Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) issue to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
   * **Contribute to SimRel**
     - If SimRel is not updated before the I-builds are cleaned up (specifically the build for RC2/GA) it will break. 
 
@@ -117,10 +104,15 @@ The actual steps to release
 The release is scheduled for 10AM EST. Typically the jobs are scheduled beforehand and run automatically.
 
   * **Make the Release Visible**
-    - Same process as for a milestone but with release versions.
+    - Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
+      - `releaseBuildID`: the full id of the release build to publish, e.g. `R-4.36-202505281830`
   * **Complete Publication to Maven Central**
-    - Go to https://oss.sonatype.org/#stagingRepositories and "Release" the three staging repositories.
-  * **Send the Announcement Email**
+    - The final release to Maven-Central should happen latest by Tuesday before the release since there is up to a 24 hour delay for the Maven mirrors.
+    - The artifacts have been deployed into a Maven-Central _staging_ repository by the `Promote Build` job when the RC was promoted to GA release.
+    - Login to https://central.sonatype.com/ and "Release" the three staging repositories for `Platform`, `JDT` and `PDE` by closing them.
+      - Make sure the name of the deployment you are about to release matches the tag and timestamp of the final release repository.
+        E.g for a P2 repo with id `R-4.36-202505281830` the deploymenets should be named `PLATFORM_R-4.36-202505281830`, `PDE_R-4.36-202505281830` or `JDT_R-4.36-202505281830` respectivly.
+      - If you do not have an account on `central.sonatype.com` for performing the rest of the release request one by creating an [EF Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) issue to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
 
 ### **Post Release Tasks:**
   * #### **Clean up intermediate artifacts** 
