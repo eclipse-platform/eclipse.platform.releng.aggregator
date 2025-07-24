@@ -11,9 +11,13 @@ pipeline {
 	environment {
 		HIDE_SITE = 'true'
 		// Download Server locations (would very seldom change)
-		BUILD_ROOT = '/home/data/httpd/download.eclipse.org'
-		EP_ECLIPSE_ROOT = "${BUILD_ROOT}/eclipse"
-		EP_EQUINOX_ROOT = "${BUILD_ROOT}/equinox"
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_ROOT = "${EP_ROOT}/eclipse"
+		EP_EQUINOX_ROOT = "${EP_ROOT}/equinox"
+	}
+	tools {
+		jdk 'temurin-jdk21-latest'
+		maven 'apache-maven-latest'
 	}
 	stages {
 		stage('Process input') {
@@ -60,6 +64,8 @@ pipeline {
 					assignEnvVariable('BUILD_SERVICE', versionMatcher.group('service'))
 					versionMatcher = null // release matcher as it's not serializable
 					
+					assignEnvVariable('BUILD_REPO_ORIGINAL', "${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds")
+					
 					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
 						assignEnvVariable('DL_TYPE', 'S')
 						// REPO_SITE_SEGMENT variale not used in this case
@@ -97,8 +103,6 @@ pipeline {
 			environment {
 				BUILDMACHINE_BASE_DL = "${EP_ECLIPSE_ROOT}/downloads/drops4"
 				BUILDMACHINE_BASE_EQ = "${EP_EQUINOX_ROOT}/drops"
-				BUILD_REPO_ORIGINAL = "${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds"
-				BUILDMACHINE_BASE_SITE = "${EP_ECLIPSE_ROOT}/updates/${BUILD_REPO_ORIGINAL}"
 				// Eclipse and Equinox drop Site (final segment)
 				ECLIPSE_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}"
 				EQUINOX_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}"
@@ -136,6 +140,38 @@ pipeline {
 					string(name: 'buildID', value: "${DROP_ID}"),
 					string(name: 'annotation', value: "${ params.SIGNOFF_BUG ? 'https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/' + params.SIGNOFF_BUG : '' }")
 				]
+			}
+		}
+		stage('Promote P2 Repository') {
+			when {
+				environment name: 'DL_TYPE', value: 'R'
+			}
+			steps {
+				dir("${WORKSPACE}/updates") {
+					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+						sh '''#!/bin/bash -xe
+							git clone --depth=1 --filter=tree:0 --no-checkout --branch=master https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
+							pushd eclipse.platform.releng.aggregator
+							git sparse-checkout set --no-cone eclipse-platform-parent/pom.xml
+							git checkout
+							popd
+							
+							sourceRepo="eclipse/updates/${BUILD_REPO_ORIGINAL}/${REPO_ID}"
+							targetRepo="eclipse/updates/${REPO_SITE_SEGMENT}/${DL_DROP_ID}"
+							ssh genie.releng@projects-storage.eclipse.org cp -r "${EP_ROOT}/${sourceRepo}/." "${EP_ROOT}/${targetRepo}"
+							
+							MIRRORS_URL="https://www.eclipse.org/downloads/download.php?file=/${targetRepo}"
+							mvn tycho-p2-repository:modify-repository-properties -Pp2-repository-modification \\
+								--file eclipse.platform.releng.aggregator/eclipse-platform-parent/ \\
+								-Dp2.repository.location=https://download.eclipse.org/${sourceRepo}/ \\
+								-Dp2.repository.output=$(pwd)/output \\
+								-Dp2.repository.kind=artifact \\
+								-Dp2.repository.mirrorsURL=${MIRRORS_URL}
+							
+							scp output/artifacts.* genie.releng@projects-storage.eclipse.org:${EP_ROOT}/${targetRepo}
+						'''
+					}
+				}
 			}
 		}
 	}

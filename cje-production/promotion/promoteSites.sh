@@ -188,65 +188,13 @@ function renameBuild ()
   done
 }
 
-function createBaseBuilder ()
-{
-  epRelDir=$(ssh genie.releng@projects-storage.eclipse.org ls -d --format=single-column ${BUILDMACHINE_BASE_DL}/R-*|sort|tail -1)
-  BASEBUILDER_DIR=${WORKSPACE}/basebuilder
-  export BASEBUILDER_DIR
-  mkdir -p ${BASEBUILDER_DIR}
-  mkdir -p ${WORKSPACE}/tempEclipse
-  pushd ${WORKSPACE}/tempEclipse
-    scp genie.releng@projects-storage.eclipse.org:${epRelDir}/eclipse-platform-*-linux-gtk-x86_64.tar.gz eclipse-platform.tar.gz
-    tar xvzf eclipse-platform.tar.gz
-    ${WORKSPACE}/tempEclipse/eclipse/eclipse -nosplash \
-        -debug -consolelog -data ${WORKSPACE}/workspace-toolsinstall \
-        -application org.eclipse.equinox.p2.director \
-        -repository "https://download.eclipse.org/eclipse/updates/latest/","https://download.eclipse.org/eclipse/updates/buildtools/",${WEBTOOLS_REPO} \
-        -installIU org.eclipse.platform.ide,org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.wtp.releng.tools.feature.feature.group \
-        -destination ${BASEBUILDER_DIR} \
-        -profile SDKProfile
-  popd
-  export ECLIPSE_EXE=${BASEBUILDER_DIR}/eclipse
-  rm -rf ${WORKSPACE}/tempEclipse
-}
-
-function addRepoProperties ()
-{
-  APP_NAME=org.eclipse.wtp.releng.tools.addRepoProperties 
-  devworkspace=${devworkspace:-${WORKSPACE}/workspaceAddRepoProperties}
-
-  REPO=$1
-  REPO_TYPE=$2
-  BUILD_ID=$3
-
-  createBaseBuilder
-  MIRRORURL=/eclipse/updates/${REPO_TYPE}/${BUILD_ID} 
-  MIRRORURL_ARG="https://www.eclipse.org/downloads/download.php?format=xml&file=${MIRRORURL}"
-
-  ART_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
-  CON_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
-
-  MIRRORS_URL_ARG=-Dp2MirrorsURL=${MIRRORURL_ARG}
-  ART_REPO_ARG=-DartifactRepoDirectory=${REPO}
-  CON_REPO_ARG=-DmetadataRepoDirectory=${REPO}
-  ART_REPO_NAME_ARG=-Dp2ArtifactRepositoryName=\"${ART_REPO_NAME}\"
-  CON_REPO_NAME_ARG=-Dp2MetadataRepositoryName=\"${CON_REPO_NAME}\"
-
-  ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vmargs ${MIRRORS_URL_ARG} -Dp2ArtifactRepositoryName="${ART_REPO_NAME}" -Dp2MetadataRepositoryName="${CON_REPO_NAME}" ${ART_REPO_ARG} ${CON_REPO_ARG}
-}
-
-# Extract WEBTOOLS_REPO and other variables from buildproperties.shsource for the build
-source ${WORKSPACE}/buildproperties.shsource
-
 # Main promotion scripts starts here
 
 #Take backup of current build
 LOCAL_EP_DIR=${WORKSPACE}/eclipse
 LOCAL_EQ_DIR=${WORKSPACE}/equinox
-LOCAL_REPO=${WORKSPACE}/updates
 mkdir -p ${LOCAL_EP_DIR}
 mkdir -p ${LOCAL_EQ_DIR}
-mkdir -p ${LOCAL_REPO}
 
 pushd ${LOCAL_EP_DIR}
 scp -r genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_DL}/${DROP_ID} .
@@ -254,10 +202,6 @@ popd
 
 pushd ${LOCAL_EQ_DIR}
 scp -r genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_EQ}/${DROP_ID_EQ} .
-popd
-
-pushd ${LOCAL_REPO}
-scp -r genie.releng@projects-storage.eclipse.org:${BUILDMACHINE_BASE_SITE}/${REPO_ID} .
 popd
 
 # ### Begins the point of making modifications to the build ###
@@ -323,15 +267,3 @@ pushd ${LOCAL_EP_DIR}
   fi
 
 popd
-
-
-#Promote Repository
-if [[ "${DL_TYPE}" == "R" ]]
-then
-  pushd ${LOCAL_REPO}
-    BUILDMACHINE_SITE=${LOCAL_REPO}/${REPO_ID}
-    addRepoProperties ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_DROP_ID}
-    mv ${REPO_ID} ${DL_DROP_ID}
-    scp -r ${LOCAL_REPO}/${DL_DROP_ID} genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_ROOT}/updates/${REPO_SITE_SEGMENT}
-  popd
-fi
