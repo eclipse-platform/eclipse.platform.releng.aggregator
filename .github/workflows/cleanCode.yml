@@ -1,3 +1,15 @@
+###############################################################################
+# Copyright (c) 2025 Contributors to Eclipse Foundation
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# https://www.eclipse.org/legal/epl-2.0/.
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#     see git history
+###############################################################################
 name: Automatic Code Cleanups
 on:
   workflow_call:
@@ -26,6 +38,11 @@ on:
           required: false
           default: false
           type: boolean
+      branch: 
+        description: 'The branch to clean'
+        type: string
+        required: false
+        default: 'master'
       submodules:
         description: |
           Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
@@ -53,7 +70,7 @@ jobs:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       with:
         fetch-depth: 0
-        ref: master
+        ref: ${{ inputs.branch }}
         submodules: ${{ inputs.submodules }}
     - name: List all bundles
       id: list-bundles
