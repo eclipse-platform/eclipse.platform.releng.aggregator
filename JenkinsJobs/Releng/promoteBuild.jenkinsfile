@@ -12,8 +12,6 @@ pipeline {
 		HIDE_SITE = 'true'
 		// Download Server locations (would very seldom change)
 		EP_ROOT = '/home/data/httpd/download.eclipse.org'
-		EP_ECLIPSE_ROOT = "${EP_ROOT}/eclipse"
-		EP_EQUINOX_ROOT = "${EP_ROOT}/equinox"
 	}
 	tools {
 		jdk 'temurin-jdk21-latest'
@@ -30,28 +28,24 @@ pipeline {
 					env.CHECKPOINT = readParameter('CHECKPOINT')
 					env.SIGNOFF_BUG = readParameter('SIGNOFF_BUG')
 					env.TRAIN_NAME = readParameter('TRAIN_NAME')
+					//TODO: record the train in buildproperties.shsource and read it here
 					if (!"${TRAIN_NAME}") {
 						error("Parameter 'TRAIN_NAME' is not specified")
 					}
 					def idMatcher = null
-					if ((idMatcher = env.DROP_ID =~ /(?<type>I)(?<date>\d{8})-(?<time>\d{4})/).matches()) {
+					if ((idMatcher = env.DROP_ID =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
 						assignEnvVariable('BUILD_LABEL', "${DROP_ID}")
-					} else if ((idMatcher = env.DROP_ID =~ /(?<type>S)-(?<major>\d+)\.(?<minor>\d+)(?<service>\.\d+)?((M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/).matches()) {
-						assignEnvVariable('BUILD_LABEL', idMatcher.group('major') + '.' + idMatcher.group('minor') + (idMatcher.group('service') ?: ''))
+					} else if ((idMatcher = env.DROP_ID =~ /S-(?<label>\d+\.\d+(\.\d+)?(M|RC)\d+[a-z]?)-(?<date>\d{8})(?<time>\d{4})/).matches()) {
+						assignEnvVariable('BUILD_LABEL', idMatcher.group('label'))
 						if ("${CHECKPOINT}") {
 							error "Stable build DROP_ID=${DROP_ID} may only be promoted to release CHECKPOINT, which therefore must be empty: ${CHECKPOINT}"
 						}
 					} else {
 						error "DROP_ID, ${DROP_ID}, did not match any expected pattern."
 					}
-					assignEnvVariable('BUILD_TYPE', idMatcher.group('type'))
-					assignEnvVariable('REPO_BUILD_TYPE', 'I')
-					assignEnvVariable('BUILD_TIMESTAMP', idMatcher.group('date') + idMatcher.group('time'))
+					def buildTimestamp = idMatcher.group('date') + idMatcher.group('time')
 					assignEnvVariable('REPO_ID', "I${idMatcher.group('date')}-${idMatcher.group('time')}")
 					idMatcher = null // release matcher as it's not serializable
-					
-					assignEnvVariable('BUILD_LABEL_EQ', "${BUILD_LABEL}")
-					assignEnvVariable('DROP_ID_EQ', "${DROP_ID}")
 					
 					sh 'curl -o buildproperties.shsource --fail https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.shsource'
 					def STREAM = sh(returnStdout: true, script: 'source ./buildproperties.shsource && echo ${STREAM}').trim()
@@ -64,81 +58,89 @@ pipeline {
 					assignEnvVariable('BUILD_SERVICE', versionMatcher.group('service'))
 					versionMatcher = null // release matcher as it's not serializable
 					
-					assignEnvVariable('BUILD_REPO_ORIGINAL', "${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds")
+					assignEnvVariable('BUILD_REPO_ORIGINAL', "${BUILD_MAJOR}.${BUILD_MINOR}-I-builds")
 					
 					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
 						assignEnvVariable('DL_TYPE', 'S')
 						// REPO_SITE_SEGMENT variale not used in this case
-					} else if(!"${CHECKPOINT}") { // release promotion
+					} else if (!"${CHECKPOINT}") { // release promotion
 						assignEnvVariable('DL_TYPE', 'R')
 						assignEnvVariable('REPO_SITE_SEGMENT', "${BUILD_MAJOR}.${BUILD_MINOR}")
 					} else {
 						error "CHECKPOINT, ${CHECKPOINT}, did not match any expected pattern."
 					}
-					assignEnvVariable('NEWS_ID', "${BUILD_MAJOR}.${BUILD_MINOR}")
 					
 					assignEnvVariable('DL_LABEL', "${BUILD_SERVICE}" == '0' // For initial releases, do not include service in label
 						? "${BUILD_MAJOR}.${BUILD_MINOR}${CHECKPOINT}"
 						: "${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_SERVICE}${CHECKPOINT}"
 					)
-					assignEnvVariable('DL_LABEL_EQ', "${DL_LABEL}")
-					
-					// This is DL_DROP_ID for Eclipse. The one for equinox has DL_LABEL_EQ in middle.
-					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}")
-					assignEnvVariable('DL_DROP_ID_EQ', "${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}")
+					// This is DL_DROP_ID for Eclipse and Equinox
+					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${buildTimestamp}")
 					
 					if (!env.SIGNOFF_BUG) {
 						echo '''\
 							[WARNING] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined.
 							Can be added by hand to buildproperties.php in drop site, if in fact there were errors, and simply forgot to specify.
 						'''.stripIndent()
+					} else if (env.SIGNOFF_BUG ==~ '\\d+') {
+						assignEnvVariable('SIGNOFF_BUG', "https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/${SIGNOFF_BUG}")
 					}
+					assignEnvVariable('SIGNOFF_BUG_LABEL', env.SIGNOFF_BUG.replace('https://github.com/','').replace('/issues/','#'))
 					
 					def serviceVersionSegment = (env.CHECKPOINT || env.BUILD_SERVICE != '0') ? ('_' + env.BUILD_SERVICE) : ''
 					assignEnvVariable('TAG', "${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}${serviceVersionSegment}${env.CHECKPOINT ? ('_' + env.CHECKPOINT) : ''}")
 				}
 			}
 		}
-		stage('Rename and Promote') {
-			environment {
-				BUILDMACHINE_BASE_DL = "${EP_ECLIPSE_ROOT}/downloads/drops4"
-				BUILDMACHINE_BASE_EQ = "${EP_EQUINOX_ROOT}/drops"
-				// Eclipse and Equinox drop Site (final segment)
-				ECLIPSE_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}"
-				EQUINOX_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}"
-			}
+		stage('Move and rename Pages') {
 			steps {
 				writeFile(file: "${WORKSPACE}/stage2output${TRAIN_NAME}${CHECKPOINT}/mailtemplate.txt", text: """\
 					We are pleased to announce that ${TRAIN_NAME} ${CHECKPOINT} is available for download and updates.
 					
 						Eclipse downloads:
-						https://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/
+						https://download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/
 						
 						New and Noteworthy:
-						https://www.eclipse.org/eclipse/news/${NEWS_ID}/
+						https://www.eclipse.org/eclipse/news/${BUILD_MAJOR}.${BUILD_MINOR}/
 						
 						Update existing (non-production) installs:
 						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? REPO_SITE_SEGMENT : BUILD_REPO_ORIGINAL}/
 						
 						Specific repository good for building against:
-						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? (REPO_SITE_SEGMENT + '/' + ECLIPSE_DL_DROP_DIR_SEGMENT) : (BUILD_REPO_ORIGINAL + '/' + DROP_ID)}/
+						https://download.eclipse.org/eclipse/updates/${DL_TYPE == 'R' ? (REPO_SITE_SEGMENT + '/' + DL_DROP_ID) : (BUILD_REPO_ORIGINAL + '/' + DROP_ID)}/
 						
 						Equinox specific downloads:
-						https://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/
+						https://download.eclipse.org/equinox/drops/${DL_DROP_ID}/
 					
 					Thank you to everyone who made this checkpoint possible.
 				""".stripIndent())
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-					sh '''#!/bin/bash -x
-						curl -o promoteSites.sh https://download.eclipse.org/eclipse/relengScripts/cje-production/promotion/promoteSites.sh
-						chmod +x promoteSites.sh
-						./promoteSites.sh
-					'''
+					
+					echo 'Promote Equinox'
+					dir("${WORKSPACE}/equinox") {
+						renameBuildDrop('equinox/drops', "${DROP_ID}", "${BUILD_LABEL}", "${DL_DROP_ID}", "${DL_LABEL}")
+					}
+					
+					echo 'Promote Eclipse'
+					dir("${WORKSPACE}/eclipse") {
+						renameBuildDrop('eclipse/downloads/drops4', "${DROP_ID}", "${BUILD_LABEL}", "${DL_DROP_ID}", "${DL_LABEL}") {
+							sh '''
+								echo "\\$NEWS_ID = \\"${BUILD_MAJOR}.${BUILD_MINOR}\\";" >> 'buildproperties.php'
+								echo "\\$ACK_ID = \\"${BUILD_MAJOR}.${BUILD_MINOR}\\";" >> 'buildproperties.php'
+								echo "\\$README_ID = \\"${BUILD_MAJOR}.${BUILD_MINOR}\\";" >> 'buildproperties.php'
+								
+								# SIGNOFF_BUG should not be defined if there are no JUnit failures to investigate and explain
+								if [[ -n "${SIGNOFF_BUG}" ]]; then
+									echo -e "<p>Any unit test failures below have been investigated and found to be test-related and do not affect the quality of the build.\\nSee the sign-off page <a href=\\"${SIGNOFF_BUG}\\">${SIGNOFF_BUG_LABEL}</a> for details.</p>" > 'testNotes.html'
+								fi
+							'''
+						}
+					}
 				}
 				build job: 'Releng/tagEclipseRelease', wait: true, propagate: true, parameters: [
 					string(name: 'tag', value: "${TAG}"),
 					string(name: 'buildID', value: "${DROP_ID}"),
-					string(name: 'annotation', value: "${ params.SIGNOFF_BUG ? 'https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/' + params.SIGNOFF_BUG : '' }")
+					string(name: 'annotation', value: "${SIGNOFF_BUG}")
 				]
 			}
 		}
@@ -177,7 +179,7 @@ pipeline {
 	}
 	post {
 		always {
-			archiveArtifacts '**/stage2output*/**'
+			archiveArtifacts '**/*'
 		}
 	}
 }
@@ -196,4 +198,79 @@ def readParameter(String name) {
 		println("${name}: ${value}")
 	}
 	return value
+}
+
+def renameBuildDrop(String baseDropPath, String oldDropID, String oldBuildLabel, String newDropID, String newBuildLabel, Closure extraTasks=null) {
+	def sourcePath="${EP_ROOT}/${baseDropPath}/${oldDropID}"
+	def targetPath="${EP_ROOT}/${baseDropPath}/${newDropID}"
+	
+	sh """#!/bin/bash -xe
+		
+		# Copy drop-directory to new location
+		ssh genie.releng@projects-storage.eclipse.org mkdir -p '${targetPath}'
+		if [[ "${HIDE_SITE}" == "true" ]]; then
+			# Create this marker first to ensure the page is never without
+			ssh genie.releng@projects-storage.eclipse.org touch '${targetPath}/buildHidden'
+		fi
+		ssh genie.releng@projects-storage.eclipse.org cp -r '${sourcePath}/.' '${targetPath}'
+		
+		# Rename files
+		echo 'Rename files at new location from *${oldBuildLabel}* to *${newBuildLabel}*.'
+		# References to locally defined variables required double escaping
+		# because they are escaped for groovy and the bash HERE document.
+		# In general this section is very fragile! Only change with great caution and extensive testing!
+		ssh genie.releng@projects-storage.eclipse.org << EOF
+			set -xe
+			cd "${targetPath}"
+			files=\\\$(find . -mindepth 1 -maxdepth 2 -name "*${oldBuildLabel}*" -print)
+			echo " \\\$(echo "\\\$files" | wc -l) files found to rename."
+			
+			for file in \\\${files}; do
+				if [[ \\\$file =~ (.*)(${oldBuildLabel})(.*) ]]; then
+					mv "\\\$file" "\\\${BASH_REMATCH[1]}${newBuildLabel}\\\${BASH_REMATCH[3]}"
+				fi
+			done
+#DO NOT INDENT EOF!
+EOF
+		
+		#Update checksums to new filenames
+		ssh genie.releng@projects-storage.eclipse.org sed --in-place --expression 's/${oldBuildLabel}/${newBuildLabel}/g' ${targetPath}/checksum/*
+	"""
+	
+	// Update buildproperties.php to new names
+	def newTypeName = null
+	if ("${DL_TYPE}" == 'R') {
+		newTypeName = 'Release'
+	} else if (newBuildLabel.contains('RC')) {
+		newTypeName = 'Release Candidate'
+	} else if ("${DL_TYPE}" == 'S') {
+		newTypeName = 'Stable'
+	} else {
+		error "Unexpected DL_TYPE value, ${DL_TYPE}"
+	}
+	def newProperties = [
+		BUILD_ID: "${newBuildLabel}",
+		BUILD_TYPE: "${DL_TYPE}",
+		BUILD_TYPE_NAME: "${newTypeName}",
+		BUILD_DIR_SEG: "${newDropID}",
+		EQ_BUILD_DIR_SEG: "${newDropID}",
+	]
+	def buildPropertiesPHP = sh(returnStdout: true, script: "ssh genie.releng@projects-storage.eclipse.org cat ${sourcePath}/buildproperties.php")
+	for (entry in newProperties) {
+		buildPropertiesPHP = buildPropertiesPHP.replaceFirst('\\$' + entry.key + ' = "[^"]+"', '\\$' + entry.key + ' = "' + entry.value + '"')
+	}
+	writeFile(file: 'buildproperties.php', text: buildPropertiesPHP)
+	
+	if (extraTasks) {
+		extraTasks()
+	}
+	sh """#!/bin/bash -xe
+		# Copy locally modified files to the download server
+		scp -r . genie.releng@projects-storage.eclipse.org:${targetPath}/
+		
+		if [[ '${DL_TYPE}' == 'R' ]]; then
+			echo 'Creating archive'
+			ssh genie.releng@projects-storage.eclipse.org cp -r '${targetPath}' /home/data/httpd/archive.eclipse.org/${baseDropPath}/
+		fi
+	"""
 }
