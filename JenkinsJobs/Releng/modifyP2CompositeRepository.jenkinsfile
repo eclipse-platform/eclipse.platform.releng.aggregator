@@ -24,9 +24,10 @@ pipeline {
 							repo="https://download.eclipse.org/${repositoryPath}/${repo}"
 						fi
 						echo "Validate content consistency of: ${repo}"
-						${ECLIPSE_EXE} -nosplash -consolelog --launcher.suppressErrors -application org.eclipse.equinox.p2.director -repository "${repo}" -list
+						${ECLIPSE_EXE} -application org.eclipse.equinox.p2.director -repository "${repo}" -list
 					done
 				'''
+				// The resulting composite repository is not tested as it might not exist yet.
 			}
 		}
 		stage('Update composite repository') {
@@ -36,21 +37,25 @@ pipeline {
 			}
 			steps {
 				script {
-					sh "curl -o compositeArtifacts.jar https://download.eclipse.org/${repositoryPath}/compositeArtifacts.jar"
-					def childenXPathSet = sh(script: '''#!/bin/sh +xe
-						unzip -p compositeArtifacts.jar compositeArtifacts.xml |\
-							xmllint - --xpath '/repository/children/child/@location'
-						exit 0
-						''', returnStdout: true).trim()
-					def compositeChildren = 'XPath set is empty' == childenXPathSet ? []
-						: parseList(childenXPathSet, '\\s+')
-							.collect{c -> c.startsWith('location="') && c.endsWith('"') ? c.substring(10, c.length() - 1) : null}
-							.findAll{c -> c != null}
+					def boolean sourceRepositoryExists = sh(script: "curl --fail -o compositeArtifacts.jar https://download.eclipse.org/${repositoryPath}/compositeArtifacts.jar", returnStatus: true) == 0
+					def compositeChildren = []
+					if (sourceRepositoryExists) {
+						def childenXPathSet = sh(script: '''#!/bin/sh +xe
+							unzip -p compositeArtifacts.jar compositeArtifacts.xml |\
+								xmllint - --xpath '/repository/children/child/@location'
+							exit 0
+							''', returnStdout: true).trim()
+						compositeChildren = 'XPath set is empty' == childenXPathSet ? []
+							: parseList(childenXPathSet, '\\s+')
+								.collect{c -> c.startsWith('location="') && c.endsWith('"') ? c.substring(10, c.length() - 1) : null}
+								.findAll{c -> c != null}
+					}
 					
 					echo "Current children: ${compositeChildren}"
 					def toAdd = parseList(params.add, ',').unique()
 					def toRemove = parseList(params.remove, ',').unique()
 					toRemove = toRemove.findAll{e -> compositeChildren.contains(e)}
+					def repositoryName = params.repositoryName.trim()
 					
 					if (params.sizeLimit) {
 						def sizeRestrictionRemovals = compositeChildren.size() + toAdd.size() - toRemove.size() - Integer.parseInt(params.sizeLimit)
@@ -60,7 +65,7 @@ pipeline {
 					}
 					echo "Children added: ${toAdd}"
 					echo "Children removed: ${toRemove}"
-					if (compositeChildren.size() + toAdd.size() - toRemove.size() == 0) {
+					if (!toRemove.isEmpty() && compositeChildren.size() + toAdd.size() - toRemove.size() == 0) {
 						error('All children are removed and composite repository becomes empty.')
 					}
 					def modifyComposite_xml = """\
@@ -68,9 +73,11 @@ pipeline {
 					<project default="${ANT_TASK_NAME}" basedir=".">
 						<target name="${ANT_TASK_NAME}">
 							<p2.composite.repository>
-								<source location="https://download.eclipse.org/${repositoryPath}" />
-								<repository location="${OUTPUT_PATH}" />
+								<repository location="${OUTPUT_PATH}" ${repositoryName ? ('name="' + repositoryName + '"') :''}/>
 					""".stripIndent()
+					if (sourceRepositoryExists) {
+						modifyComposite_xml +="""			<source location="https://download.eclipse.org/${repositoryPath}" />"""
+					}
 					for (child in toAdd) {
 						modifyComposite_xml += """			<add><repository location="${child}"/></add>\n"""
 					}
@@ -85,12 +92,33 @@ pipeline {
 					writeFile(file: "${ANT_TASK_NAME}.xml", text: modifyComposite_xml)
 					
 					sh '''
-						${ECLIPSE_EXE} -nosplash -consolelog --launcher.suppressErrors -debug -data ./eclipse-ws \
+						${ECLIPSE_EXE} -debug -data ./eclipse-ws \
 							-application org.eclipse.ant.core.antRunner -file "${ANT_TASK_NAME}.xml" "${ANT_TASK_NAME}"
+					'''
+					//TODO: Let p2 produce p2.index file
+					writeFile(file: "${OUTPUT_PATH}/p2.index", text: """\
+					#${new Date()}
+					version=1
+					metadata.repository.factory.order=compositeContent.xml,\\!
+					artifact.repository.factory.order=compositeArtifacts.xml,\\!
+					""".stripIndent())
+					
+					// The composite files are somehow not compressed if the repository is empty...
+					sh '''
+						cd "${OUTPUT_PATH}"
+						if [[ -f compositeArtifacts.xml ]]; then
+							zip compositeArtifacts.jar compositeArtifacts.xml
+							rm compositeArtifacts.xml
+						fi
+						if [[ -f compositeContent.xml ]]; then
+							zip compositeContent.jar compositeContent.xml
+							rm compositeContent.xml
+						fi
 					'''
 					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 						sh '''
 							epDownloadsDir='/home/data/httpd/download.eclipse.org'
+							ssh genie.releng@projects-storage.eclipse.org mkdir -p "${epDownloadsDir}/${repositoryPath}"
 							scp -r ${OUTPUT_PATH}/* "genie.releng@projects-storage.eclipse.org:${epDownloadsDir}/${repositoryPath}"
 						'''
 					}
@@ -115,11 +143,11 @@ def installLatestReleasedEclipsePlatformProduct() {
 	def eclipseURL = sh(script: '''#!/bin/sh +xe
 		source ./buildproperties.txt
 		#TODO: Remove this after the next release!
-		PREVIOUS_RELEASE_ID='S-4.37M1-202507031800'
-		PREVIOUS_RELEASE_VER='4.37M1'
+		PREVIOUS_RELEASE_ID='S-4.37M3-202508141800'
+		PREVIOUS_RELEASE_VER='4.37M3'
 		echo "https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
 	''', returnStdout: true).trim()
-	return install('eclipse-platform', eclipseURL) + '/eclipse'
+	return install('eclipse-platform', eclipseURL) + '/eclipse -nosplash --launcher.suppressErrors -consolelog'
 }
 
 def install(String toolType, String url) {

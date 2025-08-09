@@ -163,28 +163,39 @@ pipeline {
 				commitAllChangesExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
 			}
 		}
-		stage ('Create New Stream Repos') {
+		stage ('Create and update Stream Repos') {
 			when {
 				not { expression { params.DRY_RUN } }
 			}
 			steps {
-				dir("${WORKSPACE}/target/repositories") {
-					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-						sh '''#!/bin/bash -xe
-							epUpdatesDir='/home/data/httpd/download.eclipse.org/eclipse/updates'
-							templateRepo="${epUpdatesDir}/template_repo"
-							
-							ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${NEXT_RELEASE_VERSION}-I-builds
-							ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${NEXT_RELEASE_VERSION}-Y-builds
-							ssh genie.releng@projects-storage.eclipse.org cp -r ${templateRepo} ${epUpdatesDir}/${NEXT_RELEASE_VERSION}
-						'''
-					}
-					build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
-						string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds"),
-						string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/")
-						// Size-limit is not relevant, the repository is initially empty.
-					]
-				}
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds"),
+					string(name: 'repositoryName', value: "Eclipse ${NEXT_RELEASE_VERSION} integration builds"),
+					string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/")
+					// Size-limit is not relevant, the repository is initially empty.
+				]
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}-Y-builds"),
+					string(name: 'repositoryName', value: "Eclipse ${NEXT_RELEASE_VERSION} Beta Java builds")
+				]
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}"),
+					string(name: 'repositoryName', value: "Eclipse ${NEXT_RELEASE_VERSION} release")
+				]
+				// Update generic composite repositories for I/Y-builds (clearing all previous children)
+				// Note: The stream number is not in the 'name', because once a 'name' is defined in Eclipse's UI, it does not change.
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/I-builds"),
+					string(name: 'repositoryName', value: "Eclipse latest integration builds"),
+					string(name: 'sizeLimit', value: '1'), // Clear all previous children
+					string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds/"),
+				]
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/Y-builds"),
+					string(name: 'repositoryName', value: "Eclipse latest Beta Java builds"),
+					string(name: 'sizeLimit', value: '1'), // Clear all previous children
+					string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${NEXT_RELEASE_VERSION}-Y-builds/"),
+				]
 			}
 		}
 		stage('Deploy parent-pom and SDK-target') {
@@ -290,13 +301,6 @@ pipeline {
 					}
 				}
 			}
-		}
-	}
-	post {
-		always {
-			archiveArtifacts allowEmptyArchive: true, artifacts: '\
-				target/repositories/**,\
-				'
 		}
 	}
 }

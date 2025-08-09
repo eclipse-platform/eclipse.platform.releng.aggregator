@@ -206,12 +206,6 @@ Previously they were created in ther own job:
 **General Cleanup**
   - In [eclipse.platform.common] search for and clear out all of the forceQualifierUpdate.txt files.  
     The context here is that the doc builds only check for changes in this repo and so these files need to be changed to trigger a full rebuild.
-* #### **Create Generic Composites**
-   - After First Stable Ibuild move Generic repos to next stream.
-   - Run the [Create Generic Composites](https://ci.eclipse.org/releng/job/Releng/job/createGenericComposites/) job to recreate the generic build repos for the next release. 
-      - `currentStream`: To clarify this is the next stream, not the one currently being released. If you are releasing 4.32, the 'current' stream is 4.33 so that repos are created for it.
-      - `previousStream`: The stream being released, which needs to be removed.  
-      - For reference, the generic repositories created are for the [latest GA release](https://download.eclipse.org/eclipse/updates/latest/) and the current (ongoing) [I-builds](https://download.eclipse.org/eclipse/updates/I-builds/), [Y-builds](https://download.eclipse.org/eclipse/updates/Y-builds/) and [P-builds](https://download.eclipse.org/eclipse/updates/P-builds/). 
 
 **RC2a Release**
   * Sometimes there is a critical issue that requires a fix, if it's decided that one is needed then an RC2a (followed by RC2b, RC2c etc if necessary) is built from the maintenance branch and promoted using the RC2 process.
