@@ -60,6 +60,8 @@ pipeline {
 					assignEnvVariable('BUILD_SERVICE', versionMatcher.group('service'))
 					versionMatcher = null // release matcher as it's not serializable
 					
+					assignEnvVariable('BUILD_REPO_ORIGINAL', "${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds")
+					
 					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
 						assignEnvVariable('DL_TYPE', 'S')
 						// REPO_SITE_SEGMENT variale not used in this case
@@ -97,8 +99,6 @@ pipeline {
 			environment {
 				BUILDMACHINE_BASE_DL = "${EP_ECLIPSE_ROOT}/downloads/drops4"
 				BUILDMACHINE_BASE_EQ = "${EP_EQUINOX_ROOT}/drops"
-				BUILD_REPO_ORIGINAL = "${BUILD_MAJOR}.${BUILD_MINOR}-${REPO_BUILD_TYPE}-builds"
-				BUILDMACHINE_BASE_SITE = "${EP_ECLIPSE_ROOT}/updates/${BUILD_REPO_ORIGINAL}"
 				// Eclipse and Equinox drop Site (final segment)
 				ECLIPSE_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}"
 				EQUINOX_DL_DROP_DIR_SEGMENT = "${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}"
@@ -136,6 +136,36 @@ pipeline {
 					string(name: 'buildID', value: "${DROP_ID}"),
 					string(name: 'annotation', value: "${ params.SIGNOFF_BUG ? 'https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/' + params.SIGNOFF_BUG : '' }")
 				]
+			}
+		}
+		stage('Promote P2 Repository') {
+			when {
+				environment name: 'DL_TYPE', value: 'R'
+			}
+			steps {
+				dir("${WORKSPACE}/updates") {
+					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+						sh '''#!/bin/bash -xe
+							MIRROR_URL="https://www.eclipse.org/downloads/download.php?format=xml&file=/eclipse/updates/${REPO_SITE_SEGMENT}/${DL_DROP_ID}"
+							sourceRepository="${EP_ECLIPSE_ROOT}/updates/${BUILD_REPO_ORIGINAL}/${REPO_ID}"
+							targetRepository="${EP_ECLIPSE_ROOT}/updates/${REPO_SITE_SEGMENT}/${DL_DROP_ID}"
+							ssh genie.releng@projects-storage.eclipse.org cp -r ${sourceRepository}/. ${targetRepository}
+							
+							JAR_FILE='artifacts.jar'
+							XML_FILE='artifacts.xml'
+							scp -r genie.releng@projects-storage.eclipse.org:${targetRepository}/${JAR_FILE} .
+							
+							jar --extract "--file=${JAR_FILE}"
+							sed -i --expression "s|<p2_mirrorsURL_PLACEHOLDER></p2_mirrorsURL_PLACEHOLDER>|${MIRROR_URL}|g" "${XML_FILE}"
+							
+							jar --create --no-manifest --file=${JAR_FILE} "${XML_FILE}"
+							xz --extreme --force --keep "${XML_FILE}"
+							
+							scp "${JAR_FILE}" genie.releng@projects-storage.eclipse.org:${targetRepository}
+							scp "${XML_FILE}.xz" genie.releng@projects-storage.eclipse.org:${targetRepository}
+						'''
+					}
+				}
 			}
 		}
 	}
