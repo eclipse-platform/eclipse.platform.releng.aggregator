@@ -58,6 +58,7 @@ pipelineJob('Releng/modifyP2CompositeRepository'){
 The maximum number of childrem the modified composite should contain.
 If the total number of children exceeds this limit (after adding new ones), a corresponding number of children is removed from the beginning of the list.
 ''')
+		stringParam('repositoryName', null, 'Optional name attribute of the composite repository to set (if blank the name is not changed)')
 	}
 	definition {
 		cpsScm {
