@@ -41,7 +41,6 @@
          - SIGNOFF_BUG: Needs to be updated to sign-off issue (numeric part only)
          - TRAIN_NAME: Whenever the current GA release is planned for (formatted 4 digit year - 2 digit month, i.e `2022-06`)
          - After the build  find and open the mail template [artifact](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/lastSuccessfulBuild/artifact/) and have it ready.
-         - This should automatically run [tag Eclipse release](https://ci.eclipse.org/releng/job/Releng/job/tagEclipseRelease/) to tag the source code.
        * Contribute to SimRel
          - If you have not already set up SimRel you can do so using Auto Launch [here](https://www.eclipse.org/setups/installer/?url=https://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/interim/SimultaneousReleaseTrainConfiguration.setup&show=true)
          - Clone [org.eclipse.simrel.build](https://git.eclipse.org/c/simrel/org.eclipse.simrel.build.git) (Should have been done by the installer during set up, but make sure you have latest).

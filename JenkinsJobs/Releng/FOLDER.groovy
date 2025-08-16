@@ -124,31 +124,6 @@ It must match the name of the build on the build machine.
 	}
 }
 
-pipelineJob('Releng/tagEclipseRelease'){
-	displayName('Tag Eclipse Release')
-	description('Tag promoted builds.')
-	parameters {
-		stringParam('tag', null, '''\
-R is used for release builds. For example: R4_25
-S is used for milestones and includes the milestone version. For example: S4_25_0_RC2
-''')
-		stringParam('buildID', null, 'I-build ID of the build that was promoted, for example: I20220831-1800')
-		stringParam('annotation', null, '''\
-GitHub issue to track tagging the release, for example:
-'https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/3058' - Tag Eclipse 4.36 release
-''')
-	}
-	definition {
-		cpsScm {
-			lightweight(true)
-			scm {
-				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
-			}
-			scriptPath('JenkinsJobs/Releng/tagEclipseRelease.jenkinsfile')
-		}
-	}
-}
-
 pipelineJob('Releng/publishPromotedBuild'){
 	displayName('Publish Promoted Build')
 	description('''\

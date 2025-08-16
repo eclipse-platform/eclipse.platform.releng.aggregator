@@ -86,9 +86,22 @@ pipeline {
 						assignEnvVariable('SIGNOFF_BUG', "https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/${SIGNOFF_BUG}")
 					}
 					assignEnvVariable('SIGNOFF_BUG_LABEL', env.SIGNOFF_BUG.replace('https://github.com/','').replace('/issues/','#'))
-					
-					def serviceVersionSegment = (env.CHECKPOINT || env.BUILD_SERVICE != '0') ? ('_' + env.BUILD_SERVICE) : ''
-					assignEnvVariable('TAG', "${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}${serviceVersionSegment}${env.CHECKPOINT ? ('_' + env.CHECKPOINT) : ''}")
+				}
+			}
+		}
+		stage('Checkout Git') {
+			steps {
+				dir("${WORKSPACE}/repository") {
+					checkout scm
+					sh '''#!/bin/bash -xe
+						git fetch origin tag "${REPO_ID}"
+						git checkout "${REPO_ID}"
+						# Check out all submodules at the specified REPO_ID
+						git submodule update --init --recursive --depth 1
+						
+						git config --global user.email 'releng-bot@eclipse.org'
+						git config --global user.name 'Eclipse Releng Bot'
+					'''
 				}
 			}
 		}
@@ -137,11 +150,32 @@ pipeline {
 						}
 					}
 				}
-				build job: 'Releng/tagEclipseRelease', wait: true, propagate: true, parameters: [
-					string(name: 'tag', value: "${TAG}"),
-					string(name: 'buildID', value: "${DROP_ID}"),
-					string(name: 'annotation', value: "${SIGNOFF_BUG}")
-				]
+			}
+		}
+		stage('Tag Build') {
+			environment {
+				TAG = "${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}${(CHECKPOINT || BUILD_SERVICE != '0') ? ('_' + BUILD_SERVICE) : ''}${CHECKPOINT ? ('_' + CHECKPOINT) : ''}"
+			}
+			steps {
+				dir("${WORKSPACE}/repository") {
+					sshagent(['github-bot-ssh']) {
+						sh '''#!/bin/bash -xe
+							function tagBuild() {
+								pushURL=$(git config remote.origin.url)
+								if [[ "$pushURL" == http* ]]; then
+									# Change to SSH, if the configured URL uses HTTPS (we can only push with SSH)
+									pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
+								fi
+								git tag -a -m "${SIGNOFF_BUG}" ${TAG} HEAD
+								# git push fails if the tag already exists
+								git push --verbose ${pushURL} tag ${TAG}
+							}
+							tagBuild
+							export -f tagBuild
+							git submodule foreach 'tagBuild'
+						'''
+					}
+				}
 			}
 		}
 		stage('Promote P2 Repository') {
@@ -152,19 +186,13 @@ pipeline {
 				dir("${WORKSPACE}/updates") {
 					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 						sh '''#!/bin/bash -xe
-							git clone --depth=1 --filter=tree:0 --no-checkout --branch=master https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-							pushd eclipse.platform.releng.aggregator
-							git sparse-checkout set --no-cone eclipse-platform-parent/pom.xml
-							git checkout
-							popd
-							
 							sourceRepo="eclipse/updates/${BUILD_REPO_ORIGINAL}/${REPO_ID}"
 							targetRepo="eclipse/updates/${REPO_SITE_SEGMENT}/${DL_DROP_ID}"
 							ssh genie.releng@projects-storage.eclipse.org cp -r "${EP_ROOT}/${sourceRepo}/." "${EP_ROOT}/${targetRepo}"
 							
 							MIRRORS_URL="https://www.eclipse.org/downloads/download.php?file=/${targetRepo}"
 							mvn tycho-p2-repository:modify-repository-properties -Pp2-repository-modification \\
-								--file eclipse.platform.releng.aggregator/eclipse-platform-parent/ \\
+								--file ${WORKSPACE}/repository/eclipse-platform-parent/pom.xml \\
 								-Dp2.repository.location=https://download.eclipse.org/${sourceRepo}/ \\
 								-Dp2.repository.output=$(pwd)/output \\
 								-Dp2.repository.kind=artifact \\
@@ -179,7 +207,7 @@ pipeline {
 	}
 	post {
 		always {
-			archiveArtifacts '**/*'
+			archiveArtifacts artifacts: '**/*', excludes: 'repository/**'
 		}
 	}
 }
