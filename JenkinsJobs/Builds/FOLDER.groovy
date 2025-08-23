@@ -24,8 +24,8 @@ for (STREAM in config.Streams){
 
 # RC Schedule 
 # Post M3, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-# 0 6 15-27 8 5-7,1-3
-# 0 18 15-27 8 5-7,1-3
+0 6 15-27 8 5-7,1-3
+0 18 15-27 8 5-7,1-3
 ''')
 					}
 				}
