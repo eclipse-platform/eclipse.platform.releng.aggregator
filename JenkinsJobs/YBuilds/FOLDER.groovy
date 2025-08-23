@@ -18,7 +18,7 @@ for (STREAM in config.Streams){
 # format: Minute Hour Day Month Day of the week (0-7)
 
 #Daily Y-build
-0 10 * * 2,4,6
+0 10 * * *
 #milestone week
 #0 6 * * 2
 #0 6 * * 4
