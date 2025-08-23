@@ -47,7 +47,7 @@ It has the follwoing inputs:
 - token - token to use to create the PR while this action can work with the default github token, it is recommended to use a PAT if used as a timed action because otherwhise PR checks can't run, see [here](https://github.com/marketplace/actions/create-pull-request#token) for details.
 - path - path to a project that contains the target to update
 
-and exspect that the pom configures an execution named `update-target` for its configuration, or otherwhise is running with the defaults. 
+and expects that the pom configures an execution named `update-target` for its configuration, or otherwhise is running with the defaults.
 An example might look like this:
 
 ```
@@ -72,7 +72,7 @@ See the [tycho-version-bump:update-target](https://tycho.eclipseprojects.io/doc/
 
 ## checkVersions.yml
 
-A workflow that checks for required but missing service-version increment for projects that are changed for the first time in the current development-cycle and applies them.
+A workflow that checks for required but missing service-version increments for projects that are changed for the first time in the current development-cycle and applies them.
 It creates a git-commit with the required changes applied.
 
 ## publishVersionCheckResults.yml
