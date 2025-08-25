@@ -53,6 +53,7 @@ pipeline {
 					}
 					assignEnvVariable('NEXT_RELEASE_YEAR', gaDate.year.toString())
 					assignEnvVariable('NEXT_RELEASE_MONTH', String.format("%02d", gaDate.monthValue))
+					assignEnvVariable('NEXT_RELEASE_NAME', "${NEXT_RELEASE_YEAR}-${NEXT_RELEASE_MONTH}")
 				}
 			}
 		}
@@ -83,7 +84,16 @@ pipeline {
 						-DnewReleaseVersion=${NEXT_RELEASE_VERSION} \
 						-DnewReleaseYear=${NEXT_RELEASE_YEAR} \
 						-DnewReleaseMonth=${NEXT_RELEASE_MONTH}
-					
+				'''
+				replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/platform.product', [
+					"eclipse/updates/${PREVIOUS_RELEASE_VERSION}" : "eclipse/updates/${NEXT_RELEASE_VERSION}",
+					/releases\/20\d\d-\d\d" name="20\d\d-\d\d"/ : /releases\/${NEXT_RELEASE_NAME}" name="${NEXT_RELEASE_NAME}"/,
+				])
+				replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/sdk.product', [
+					"eclipse/updates/${PREVIOUS_RELEASE_VERSION}" : "eclipse/updates/${NEXT_RELEASE_VERSION}",
+					/releases\/20\d\d-\d\d" name="20\d\d-\d\d"/ : /releases\/${NEXT_RELEASE_NAME}" name="${NEXT_RELEASE_NAME}"/,
+				])
+				sh '''
 					git commit --all --message "Prepare Release ${NEXT_RELEASE_VERSION}"
 					git submodule foreach 'git commit --all --message "Update release version for ${NEXT_RELEASE_VERSION}" & echo done'
 				'''
