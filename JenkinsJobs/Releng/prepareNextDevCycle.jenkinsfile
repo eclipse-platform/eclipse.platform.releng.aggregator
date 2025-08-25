@@ -2,7 +2,7 @@
 pipeline {
 	options {
 		timestamps()
-		timeout(time: 60, unit: 'MINUTES')
+		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 		skipDefaultCheckout()
 	}
@@ -18,63 +18,41 @@ pipeline {
 		stage('Process Input') {
 			steps {
 				script {
-					def nextVersionMatcher = params.NEXT_RELEASE_VERSION =~ /(?<major>\d+)\.(?<minor>\d+)/
+					echo "DRY_RUN: ${DRY_RUN}"
+					env.NEXT_RELEASE_VERSION = readParameter('NEXT_RELEASE_VERSION')
+					def nextVersionMatcher = env.NEXT_RELEASE_VERSION =~ /(?<major>\d+)\.(?<minor>\d+)/
 					if (!nextVersionMatcher.matches()) {
-						error "Unexpected format for NEXT_RELEASE_VERSION: ${params.NEXT_RELEASE_VERSION}"
+						error "Unexpected format for NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
 					}
-					env.NEXT_RELEASE_VERSION_MAJOR = nextVersionMatcher.group('major')
-					env.NEXT_RELEASE_VERSION_MINOR = nextVersionMatcher.group('minor')
+					assignEnvVariable('NEXT_RELEASE_VERSION_MAJOR', nextVersionMatcher.group('major'))
+					assignEnvVariable('NEXT_RELEASE_VERSION_MINOR', nextVersionMatcher.group('minor'))
 					nextVersionMatcher = null // release matcher as it's not serializable
 					
-					def previousVersionMatcher = params.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(S|R)-(?<major>\d+)\.(?<minor>\d+)(?<kind>M1|M2|M3|RC1|RC2)?-(?<timestamp>\d{12})/
-					if (!previousVersionMatcher.matches()) {
-						error "Unexpected format for PREVIOUS_RELEASE_CANDIDATE_ID: ${params.PREVIOUS_RELEASE_CANDIDATE_ID}"
+					env.PREVIOUS_RELEASE_CANDIDATE_ID = readParameter('PREVIOUS_RELEASE_CANDIDATE_ID')
+					def previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(S|R)-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
+					if (!previousIdMatcher.matches()) {
+						error "Unexpected format for PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
 					}
-					env.PREVIOUS_RELEASE_VERSION_MAJOR = previousVersionMatcher.group('major')
-					env.PREVIOUS_RELEASE_VERSION_MINOR = previousVersionMatcher.group('minor')
-					env.PREVIOUS_RELEASE_VERSION = "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}"
-					env.PREVIOUS_RELEASE_CANDIDATE_TAG = "${PREVIOUS_RELEASE_VERSION}" + previousVersionMatcher.group('kind')
-					def previousReleaseTimestamp = previousVersionMatcher.group('timestamp')
-					env.PREVIOUS_RELEASE_CANDIDATE_I_BUILD = "I${previousReleaseTimestamp.substring(0,8)}-${previousReleaseTimestamp.substring(8,12)}"
-					previousVersionMatcher = null // release matcher as it's not serializable
+					assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', previousIdMatcher.group('major'))
+					assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', previousIdMatcher.group('minor'))
+					assignEnvVariable('PREVIOUS_RELEASE_VERSION', "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}")
+					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_VERSION}${previousIdMatcher.group('checkpoint')}")
+					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousIdMatcher.group('date')}-${previousIdMatcher.group('time')}")
+					previousIdMatcher = null // release matcher as it's not serializable
 					
 					//TODO: Read the dates from the calender instead of provide a structured document somewhere?
 					// E.g. next to: https://github.com/eclipse-simrel/.github/blob/main/wiki/SimRel/2025-09.md
-					def m1Date = parseDate(params.M1_DATE)
-					def m2Date = parseDate(params.M2_DATE)
-					def m3Date = parseDate(params.M3_DATE)
-					def rc1Date = parseDate(params.RC1_DATE)
-					def rc2Date = parseDate(params.RC2_DATE)
-					def gaDate = parseDate(params.GA_DATE)
-					if (!(m1Date < m2Date && m2Date < m3Date && m3Date < rc1Date && rc1Date < rc2Date && rc1Date < gaDate)) {
-						error "Dates are not in strictly ascending order: ${params.M1_DATE}, ${params.M2_DATE}, ${params.M3_DATE}, ${params.RC1_DATE}, ${params.RC2_DATE}, ${params.GA_DATE}"
+					def m1Date = parseDate(readParameter('M1_DATE'))
+					def m2Date = parseDate(readParameter('M2_DATE'))
+					def m3Date = parseDate(readParameter('M3_DATE'))
+					def rc1Date = parseDate(readParameter('RC1_DATE'))
+					def rc2Date = parseDate(readParameter('RC2_DATE'))
+					def gaDate = parseDate(readParameter('GA_DATE'))
+					if (!(m1Date < m2Date && m2Date < m3Date && m3Date < rc1Date && rc1Date < rc2Date && rc2Date < gaDate)) {
+						error "Dates are not in strictly ascending order: ${M1_DATE}, ${M2_DATE}, ${M3_DATE}, ${RC1_DATE}, ${RC2_DATE}, ${GA_DATE}"
 					}
-					env.NEXT_RELEASE_YEAR = gaDate.year
-					env.NEXT_RELEASE_MONTH = String.format("%02d", gaDate.monthValue)
-					sh '''#!/bin/sh +x
-						echo 'Input parameters read successfully'
-						echo "DRY_RUN='$DRY_RUN'"
-						echo ''
-						echo "NEXT_RELEASE_VERSION='$NEXT_RELEASE_VERSION'"
-						echo "NEXT_RELEASE_VERSION_MAJOR='$NEXT_RELEASE_VERSION_MAJOR'"
-						echo "NEXT_RELEASE_VERSION_MINOR='$NEXT_RELEASE_VERSION_MINOR'"
-						echo ''
-						echo "PREVIOUS_RELEASE_CANDIDATE_ID='$PREVIOUS_RELEASE_CANDIDATE_ID'"
-						echo "PREVIOUS_RELEASE_VERSION='$PREVIOUS_RELEASE_VERSION'"
-						echo "PREVIOUS_RELEASE_VERSION_MAJOR='$PREVIOUS_RELEASE_VERSION_MAJOR'"
-						echo "PREVIOUS_RELEASE_VERSION_MINOR='$PREVIOUS_RELEASE_VERSION_MINOR'"
-						echo "PREVIOUS_RELEASE_CANDIDATE_TAG='$PREVIOUS_RELEASE_CANDIDATE_TAG'"
-						echo "PREVIOUS_RELEASE_CANDIDATE_I_BUILD='$PREVIOUS_RELEASE_CANDIDATE_I_BUILD'"
-						echo ''
-						echo "M1_DATE='$M1_DATE'"
-						echo "M2_DATE='$M2_DATE'"
-						echo "M3_DATE='$M3_DATE'"
-						echo "RC1_DATE='$RC1_DATE'"
-						echo "RC2_DATE='$RC2_DATE'"
-						echo "GA_DATE='$GA_DATE'"
-						echo "NEXT_RELEASE_YEAR='$NEXT_RELEASE_YEAR'"
-						echo "NEXT_RELEASE_MONTH='$NEXT_RELEASE_MONTH'"
-					'''
+					assignEnvVariable('NEXT_RELEASE_YEAR', gaDate.year.toString())
+					assignEnvVariable('NEXT_RELEASE_MONTH', String.format("%02d", gaDate.monthValue))
 				}
 			}
 		}
@@ -313,6 +291,20 @@ pipeline {
 def githubAPI = null
 
 // --- utility methods
+
+@NonCPS
+def readParameter(String name) {
+	//TODO: let jenkins trim the parameters
+	def value = (params[name] ?: '').trim()
+	println("${name}: ${value}")
+	return value
+}
+
+@NonCPS
+def assignEnvVariable(String name, String value) {
+	env."${name}" = value
+	println("${name}=${value}")
+}
 
 @NonCPS
 def parseDate(String dateString) {
