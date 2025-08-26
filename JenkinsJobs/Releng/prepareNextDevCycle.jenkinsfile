@@ -58,6 +58,17 @@ pipeline {
 					assignEnvVariable('NEXT_RELEASE_MONTH', String.format("%02d", gaDate.monthValue))
 					assignEnvVariable('NEXT_RELEASE_NAME', "${NEXT_RELEASE_YEAR}-${NEXT_RELEASE_MONTH}")
 					assignEnvVariable('MAINTENANCE_BRANCH', "R${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}_maintenance")
+					
+					// Compute new build schedule
+					def now = java.time.LocalDate.now()
+					def rcEnd = rc2Date.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
+					def lastCompleteMonth = rcEnd.monthValue - 1
+					// Consider end-of-year overflows
+					def completeMonths = (now.monthValue < lastCompleteMonth) ? "${now.monthValue}-${lastCompleteMonth}" : "${now.monthValue}-12,1-${lastCompleteMonth}"
+					assignEnvVariable('I_BUILD_SCHEDULE', """\
+						0 18 * ${completeMonths} *
+						0 18 1-${rcEnd.dayOfMonth} ${rcEnd.monthValue} *
+					""".stripIndent().trim())
 				}
 			}
 		}
@@ -135,6 +146,12 @@ pipeline {
 				])
 				replaceInFile('production/testScripts/configuration/streamSpecific.properties', [
 					"for ${PREVIOUS_RELEASE_VERSION}.0 builds" : "for ${NEXT_RELEASE_VERSION}.0 builds",
+				])
+				replaceInFile('JenkinsJobs/JobDSL.json', [
+					/"${PREVIOUS_RELEASE_VERSION}"/ : /"${NEXT_RELEASE_VERSION}"/,
+				])
+				replaceAllInFile('JenkinsJobs/Builds/FOLDER.groovy', [
+					"(?<prefix># Schedule:.*\\R)(?s).*(?<suffix>\\R'''\\))" : "\${prefix}${I_BUILD_SCHEDULE}\${suffix}",
 				])
 				
 				commitAllChangesExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")

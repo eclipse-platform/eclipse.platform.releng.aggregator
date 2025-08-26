@@ -5,7 +5,6 @@
 ## Milestone and RC Releases
 
 ### Friday before release week:
- * Update [I-builds job definition](JenkinsJobs/Builds/FOLDER.groovy) to build on the milestone schedule (Twice daily at 06:00 EST and 18:00 EST except Thursday).
  * Create or update prerequisite issues for tracking ECF, EMF and Orbit
  * Send reminder email for upcoming RC week to platform-releng-dev@eclipse.org, platform-dev@eclipse.org, eclipse-dev@eclipse.org and equinox-dev@eclipse.org
    * [Example from 4.30 RC1](https://www.eclipse.org/lists/platform-dev/msg03924.html) but the usual schedule:
@@ -49,9 +48,7 @@
            4. Update the Location property to the "Specific repository for building against" in the mailtemplate.txt from promotion.
            5. Commit Simrel updates to Gerrit
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
-       * For **Milestone builds** return the I-builds to the normal schedule.
      * **After RC1**
-       * Leave the I-builds running on the milestone schedule for RC2. 
        * Comment on EMF, ECF and Orbit issues to ask for final release builds.
      * **After RC2**
        * (optional) Disable the automatic [nightly cleanup](https://ci.eclipse.org/releng/job/Cleanup/job/dailyCleanOldBuilds/) of I-builds
@@ -165,12 +162,12 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
   - Issue for the 2023 releases is [https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2336](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2336)
   
 #### **Update Jenkins for the next Release:**
-  - Edit the [JobDSL.json](JenkinsJobs/JobDSL.json)
-      * Add the next release version to the `Streams` key item.
-      * In the `branches` item update the current release to map to the maintenance branch and add a new key:value pair mapping the next release to master.
   - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.  
-    This should move the current I-builds to run on the maintenance branch and create new I-builds for the next release.
-    Performance and Unit tests should also be generated for the new release automatically.
+    But until the preparation work has completed, the new I-builds should not be triggered in order to avoid undesired interference. To ensure this, either
+    - Run the `Create Jobs` job only after all preparation work is reviewed and submitted and the first I-build can run.
+    - Disable the new `I-build` job until it's ready to run it the first time.
+      In order to investigate the state of the I-build it's probably also good to disable the job again after the first I-build has completed, until the master is open for regular development.
+  - Move the previous (still existing) I-Build job to run on the maintenance branch (and remove it's cron trigger). That job can be deleted (together with its test jobs), when we are sure RC respins won't happen anymore.
 
 #### **Create Git Milestones for the next Release:**
 

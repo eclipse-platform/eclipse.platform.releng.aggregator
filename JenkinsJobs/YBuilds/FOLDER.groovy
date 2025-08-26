@@ -15,15 +15,10 @@ for (STREAM in config.Streams){
 				triggers {
 					cron {
 						spec('''TZ=America/Toronto
-# format: Minute Hour Day Month Day of the week (0-7)
-
-#Daily Y-build
-0 10 * * *
-#milestone week
-#0 6 * * 2
-#0 6 * * 4
-#
-#0 2 21 7 4
+# Format: Minute Hour Day Month Day-of-week (1-7)
+# - - - Beta Java Eclipse SDK builds - - - 
+# Schedule: 10 AM every second day
+0 10 * * 2,4,6
 ''')
 					}
 				}
