@@ -131,8 +131,6 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
   - A script to create this issue exists [here](scripts/newReleasePrep.sh) for those who have the hub cli tool installed. The process has been in flux recently so please update the script if necessary, but it provides a helpful template since most tasks in the previous release's issue become links.
 
 #### **Maintenance Branches:**
-  * **Maintenance Branch Creation:**
-    - Create the branch from RC2 using the [create maintenance branch](https://ci.eclipse.org/releng/job/Releng/job/createMaintenanceBranch/) job in the Eclipse Platform Releng Jenkins.
   * **Update maintenance branch with release version**
     - Once the I-build repo is removed for the previous release the maintenance branch will have to use the release location, i.e. any references to `https://download.eclipse.org/eclipse/updates/4.25-I-builds/` will need to be updated to `https://download.eclipse.org/eclipse/updates/4.26/R-4.26-202211231800/`
     - Functionally this means:

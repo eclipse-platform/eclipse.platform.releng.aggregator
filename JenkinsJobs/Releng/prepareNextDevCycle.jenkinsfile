@@ -29,15 +29,18 @@ pipeline {
 					nextVersionMatcher = null // release matcher as it's not serializable
 					
 					env.PREVIOUS_RELEASE_CANDIDATE_ID = readParameter('PREVIOUS_RELEASE_CANDIDATE_ID')
-					def previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(S|R)-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
+					def previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
 					if (!previousIdMatcher.matches()) {
 						error "Unexpected format for PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
 					}
+					def checkpoint = previousIdMatcher.group('checkpoint')
+					def previousReleaseVersionService = previousIdMatcher.group('service') ?: '0'
 					assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', previousIdMatcher.group('major'))
 					assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', previousIdMatcher.group('minor'))
 					assignEnvVariable('PREVIOUS_RELEASE_VERSION', "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}")
-					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_VERSION}${previousIdMatcher.group('checkpoint')}")
+					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_VERSION}${checkpoint}")
 					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousIdMatcher.group('date')}-${previousIdMatcher.group('time')}")
+					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${previousIdMatcher.group('type')}${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}${(checkpoint || previousReleaseVersionService != '0') ? ('_' + previousReleaseVersionService) : ''}${checkpoint ? ('_' + checkpoint) : ''}")
 					previousIdMatcher = null // release matcher as it's not serializable
 					
 					//TODO: Read the dates from the calender instead of provide a structured document somewhere?
@@ -54,6 +57,7 @@ pipeline {
 					assignEnvVariable('NEXT_RELEASE_YEAR', gaDate.year.toString())
 					assignEnvVariable('NEXT_RELEASE_MONTH', String.format("%02d", gaDate.monthValue))
 					assignEnvVariable('NEXT_RELEASE_NAME', "${NEXT_RELEASE_YEAR}-${NEXT_RELEASE_MONTH}")
+					assignEnvVariable('MAINTENANCE_BRANCH', "R${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}_maintenance")
 				}
 			}
 		}
@@ -64,10 +68,22 @@ pipeline {
 					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
 					githubAPI.setDryRun(params.DRY_RUN)
 				}
-				sh '''
-					git submodule update --init --recursive
+				sh '''#!/bin/bash -xe
+					git submodule update --init --recursive --remote
 					git config --global user.email 'releng-bot@eclipse.org'
 					git config --global user.name 'Eclipse Releng Bot'
+					
+					# Create maintenance branch (at RC) and checkout master (to allow switching branches)
+					function createBranches() {
+						git checkout -B master HEAD
+						git fetch origin tag "${PREVIOUS_RELEASE_CANDIDATE_GIT_TAG}"
+						git branch ${MAINTENANCE_BRANCH} ${PREVIOUS_RELEASE_CANDIDATE_GIT_TAG}
+						git reflog show master
+						git reflog show ${MAINTENANCE_BRANCH}
+					}
+					createBranches
+					export -f createBranches
+					git submodule foreach 'createBranches'
 				'''
 			}
 		}
@@ -162,15 +178,53 @@ pipeline {
 				'''
 			}
 		}
+		stage('Prepare maintenance branch') {
+			steps {
+				// Apply the following changes at a preparation branch, starting at the maintenance branch (to create a PR later)
+				sh 'git checkout -b prepareMaintenance ${MAINTENANCE_BRANCH}'
+				
+				replaceInFile('JenkinsJobs/JobDSL.json', [
+					"\"${PREVIOUS_RELEASE_VERSION}\": \"master\"" : "\"${PREVIOUS_RELEASE_VERSION}\": \"${MAINTENANCE_BRANCH}\"",
+				])
+				replaceInFile('JenkinsJobs/Builds/build.jenkinsfile', [
+					"typeName: 'Integration' , branchLabel: 'master'" : "typeName: 'Integration' , branchLabel: '${MAINTENANCE_BRANCH}'",
+				])
+				replaceInFile('JenkinsJobs/Builds/DockerImagesBuild.jenkinsfile', [
+					'-b master' : "-b ${MAINTENANCE_BRANCH}",
+				])
+				replaceAllInFile('JenkinsJobs/Builds/FOLDER.groovy', [
+					"spec\\('''(?s).+?'''\\)" : "spec('')",
+					"'master'" : "'${MAINTENANCE_BRANCH}'",
+				])
+				replaceInFile('cje-production/buildproperties.txt', [
+					'BRANCH="master"' : "BRANCH=\"${MAINTENANCE_BRANCH}\"",
+				])
+				replaceInFile('cje-production/streams/repositories_java25.txt', [
+					': master' : ": ${MAINTENANCE_BRANCH}",
+				])
+				replaceInFile('cje-production/streams/repositories_master.txt', [
+					': master' : ": ${MAINTENANCE_BRANCH}",
+				])
+				sh "mv cje-production/streams/repositories_master.txt cje-production/streams/repositories_${MAINTENANCE_BRANCH}.txt"
+				
+				commitAllChangesExcludingSubmodules("Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch")
+				
+				// Switch back to master for subsequent parts of this pipeline
+				sh 'git checkout master'
+			}
+		}
 		stage('Validate and list changes') {
 			steps {
 				sh '''
 					function printLatestGitHistory() {
-						git log origin/master..HEAD --patch-with-stat --summary
+						git log origin/master..master --patch-with-stat --summary
 					}
 					printLatestGitHistory
 					export -f printLatestGitHistory
 					git submodule foreach 'printLatestGitHistory'
+					
+					echo 'Print history of maintenance branch'
+					git log refs/tags/${PREVIOUS_RELEASE_CANDIDATE_GIT_TAG}..prepareMaintenance --patch-with-stat --summary
 				'''
 				// Run simple clean build to verify that at least all parent versions are updated correctly
 				sh 'mvn clean'
@@ -247,7 +301,7 @@ pipeline {
 		stage('Push preparation branches') {
 			steps {
 				sshagent (['github-bot-ssh']) {
-					sh '''#!/bin/bash -x
+					sh '''#!/bin/bash -xe
 						function pushNewCommitsToPreparationBranch() {
 							pushURL=$(git config remote.origin.url)
 							# Switch to SSH, if the configured URL uses HTTPS (we can only push with SSH)
@@ -257,11 +311,16 @@ pipeline {
 							if [[ ${DRY_RUN} == 'true' ]]; then
 								dryRunFlag='--dry-run'
 							fi
-							git push ${dryRunFlag} ${pushURL} HEAD:refs/heads/prepare_R${NEXT_RELEASE_VERSION}
+							git push ${dryRunFlag} ${pushURL} "master:refs/heads/prepare-R${NEXT_RELEASE_VERSION}"
+							git push ${dryRunFlag} ${pushURL} "${MAINTENANCE_BRANCH}:refs/heads/${MAINTENANCE_BRANCH}"
 						}
 						pushNewCommitsToPreparationBranch
 						export -f pushNewCommitsToPreparationBranch
 						git submodule foreach 'pushNewCommitsToPreparationBranch'
+						
+						# Push preparation of the maintenance to a separate branch (not directly to the maintenance branch),
+						# to enable creating a PR against the maintenance branch from it.
+						git push ${dryRunFlag} ${pushURL} "prepareMaintenance:refs/heads/prepare-${MAINTENANCE_BRANCH}"
 					'''
 				}
 			}
@@ -273,7 +332,7 @@ pipeline {
 			steps {
 				script {
 					def prHeadline = "Prepare ${NEXT_RELEASE_VERSION} development"
-					def prBranch = "prepare_R${NEXT_RELEASE_VERSION}"
+					def prBranch = "prepare-R${NEXT_RELEASE_VERSION}"
 					def aggregatorPreparationPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator', prHeadline, """\
 						Prepare development of Eclipse ${NEXT_RELEASE_VERSION}.
 						This includes:
@@ -284,7 +343,7 @@ pipeline {
 						
 					def submodulePaths = sh(script: "git submodule --quiet foreach 'echo \$sm_path'", returnStdout: true).trim().split('\\s')
 					for (submodulePath in submodulePaths) {
-						def diff = sh(script:"cd ${submodulePath} && git diff HEAD origin/master --shortstat", returnStdout: true).trim()
+						def diff = sh(script:"cd ${submodulePath} && git diff master origin/master --shortstat", returnStdout: true).trim()
 						if (diff.isEmpty()) {
 							echo "Skipping submodule without changes: ${submodulePath}"
 							continue
@@ -303,6 +362,14 @@ pipeline {
 							- ${aggregatorPreparationPR}
 							""".stripIndent(), prBranch)
 					}
+					// Create maintenance branch preparation PR
+					githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
+						"Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch", """\
+						Prepare the maintenance branch for the ${PREVIOUS_RELEASE_VERSION} release.
+						
+						This completes the preparation of the subsequent ${NEXT_RELEASE_VERSION} release:
+						- ${aggregatorPreparationPR}
+						""".stripIndent(),"prepare-${MAINTENANCE_BRANCH}", "${MAINTENANCE_BRANCH}")
 				}
 			}
 		}
