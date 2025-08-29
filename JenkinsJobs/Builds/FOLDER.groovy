@@ -17,8 +17,8 @@ for (STREAM in config.Streams){
 # Format: Minute Hour Day Month Day-of-week (1-7)
 # - - - Integration Eclipse SDK builds - - - 
 # Schedule: 6 PM every day until end of RC2
-0 18 * 5-7 *
-0 18 1-27 8 *
+0 18 * 8-10 *
+0 18 1-26 11 *
 ''')
 					}
 				}
