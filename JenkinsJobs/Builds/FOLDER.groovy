@@ -19,13 +19,13 @@ for (STREAM in config.Streams){
 # - - - Integration Eclipse SDK builds - - - 
 # 2025-09 Release Schedule
 # Normal : 6 PM every day (11/6 - 27/8)
-0 18 * * *
+# 0 18 * * *
 
 
 # RC Schedule 
 # Post M3, no nightlies, I-builds only. (Be sure to "turn off" for tests and sign off days)
-0 6 15-27 8 5-7,1-3
-0 18 15-27 8 5-7,1-3
+# 0 6 15-27 8 5-7,1-3
+# 0 18 15-27 8 5-7,1-3
 ''')
 					}
 				}
