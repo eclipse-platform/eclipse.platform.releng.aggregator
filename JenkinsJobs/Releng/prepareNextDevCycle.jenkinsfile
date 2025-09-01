@@ -185,6 +185,24 @@ pipeline {
 				commitAllChangesExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
 			}
 		}
+		stage('Clear Qualifier-update files') {
+			steps {
+				dir('eclipse.platform.common/bundles') {
+					sh '''
+						# Clear content of all forceQualifierUpdate files in this directory
+						for file in */forceQualifierUpdate.txt; do
+							> "$file"
+						done
+						# Commit cleared files, if there was content to remove
+						if [ -n "$(git diff --shortstat .)" ] ; then
+							git commit --message "Clean forceQualifierUpdate files of doc bundles for ${NEXT_RELEASE_VERSION} development" .
+						else
+							echo 'The forceQualifierUpdate files of all doc bundles are already empty. Nothing to do.'
+						fi
+					'''
+				}
+			}
+		}
 		stage('Apply individual updates') {
 			environment {
 				UPDATE_SCRIPT = 'prepareNextDevCycle.sh'
