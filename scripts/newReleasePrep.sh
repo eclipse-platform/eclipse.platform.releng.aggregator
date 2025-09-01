@@ -32,7 +32,6 @@ BODY="This preparation work involves the following tasks. For previous bug pleas
 - [ ] Create ${NEXT_STREAM}-I-builds repo
 - [ ] Run [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job and submit the created changes
 - [ ] Update version number in Mac's Eclipse.app for ${NEXT_STREAM}
-- [ ] Clean forceQualifierUpdate files for doc bundles
 - [ ] Update builds and repo cleanup scripts for ${NEXT_STREAM}
 - [ ] Update check composites script to verify ${NEXT_STREAM} repositories
 - [ ] Update Comparator repo and eclipse run repo to ${NEXT_STREAM}-I-builds repo
