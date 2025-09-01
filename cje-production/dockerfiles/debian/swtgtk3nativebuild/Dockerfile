@@ -1,4 +1,4 @@
-FROM debian:10
+FROM debian:11
 
 ### user name recognition at runtime w/ an arbitrary uid - for OpenShift deployments
 COPY scripts/uid_entrypoint /usr/local/bin/uid_entrypoint
