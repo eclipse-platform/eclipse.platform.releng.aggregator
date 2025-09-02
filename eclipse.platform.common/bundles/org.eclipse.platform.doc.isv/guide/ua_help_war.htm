@@ -1,11 +1,10 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2020. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<meta http-equiv="Content-Style-Type" content="text/css">
-<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
-<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"></script>
+<meta charset="utf-8">
+<link rel="STYLESHEET" href="../book.css" type="text/css">
+<script src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
 <title>Deploying the information center as a Web Archive</title>
 </head>
 <body>
@@ -18,30 +17,30 @@ The instructions below assume a Tomcat server has been installed, but with minor
 </p>
 
 <ul>
-<li>Clone the <tt>eclipse.platform.ua</tt> repository
+<li>Clone the <code>eclipse.platform.ua</code> repository
 <pre>git clone https://git.eclipse.org/r/platform/eclipse.platform.ua.git</pre>
 </li>
-<li>In the Git repository locate the <tt>infocenter-web</tt> directory and underneath that there will be two directories titled <tt>infocenter-app</tt> and <tt>infocenter-product</tt>.</li>
+<li>In the Git repository locate the <code>infocenter-web</code> directory and underneath that there will be two directories titled <code>infocenter-app</code> and <code>infocenter-product</code>.</li>
 <li>Make sure you have the "m2e - Maven Integration for Eclipse" feature installed in your Eclipse IDE.</li>
-<li>Import the <tt>infocenter-web</tt> Maven project using <i>File->Import->Existing Project</i>.</li>
-<li>Add some documentation plugins to the <tt>infocenter-web/infocenter-app/src/main/webapp/WEB-INF/plugins directory</tt>.</li>
-<li>Register the plugins in <tt>infocenter-web/infocenter-app/src/main/webapp/WEB-INF/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info</tt></li>
+<li>Import the <code>infocenter-web</code> Maven project using <i>File->Import->Existing Project</i>.</li>
+<li>Add some documentation plugins to the <code>infocenter-web/infocenter-app/src/main/webapp/WEB-INF/plugins directory</code>.</li>
+<li>Register the plugins in <code>infocenter-web/infocenter-app/src/main/webapp/WEB-INF/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info</code></li>
 <li>Install required Maven POMs from Eclipse Platform:
 <pre>
 git clone -q --depth 1 https://git.eclipse.org/r/platform/eclipse.platform.releng.aggregator &amp;&amp; mvn install -N -f eclipse.platform.releng.aggregator/eclipse-platform-parent &amp;&amp; mvn install -N -f eclipse.platform.releng.aggregator/eclipse.platform.releng.prereqs.sdk
 </pre>
-<li>Execute a Maven build in <tt>infocenter-web</tt><br/>
+<li>Execute a Maven build in <code>infocenter-web</code><br/>
   <ul>
-  <li>Either within Eclipse, right-click on <tt>infocenter-build.launch</tt> and select <i>Run As -> infocenter-build</i><br/></li>
-  <li>Or from command-line using the command <tt>mvnw</tt></li>
+  <li>Either within Eclipse, right-click on <code>infocenter-build.launch</code> and select <i>Run As -> infocenter-build</i><br/></li>
+  <li>Or from command-line using the command <code>mvnw</code></li>
   </ul>
 </li>
-<li>For Tomcat only. In <tt>conf/server.xml</tt> add <tt>URIEncoding="UTF-8"</tt> to the <tt>connector</tt> element, for example <pre>&lt;Connector port="8080" URIEncoding="UTF-8" etc.&gt;</pre> 
+<li>For Tomcat only. In <code>conf/server.xml</code> add <code>URIEncoding="UTF-8"</code> to the <code>connector</code> element, for example <pre>&lt;Connector port="8080" URIEncoding="UTF-8" etc.&gt;</pre> 
 If this step is not performed search will fail if the search term contains non ASCII characters.</li>
 <li>Start Tomcat and see the help system start up. The default URL is <a href="http://localhost:8080/help/">http://localhost:8080/help/</a>.</li>
 </ul>
 
-Notes: If you look in the <tt>config.ini</tt> the <tt>help.war</tt> file under directory <tt>help/WEB_INF/configuration</tt> you will notice the line <tt>eclipse.product=org.eclipse.productname</tt>.
+Notes: If you look in the <code>config.ini</code> the <code>help.war</code> file under directory <code>help/WEB_INF/configuration</code> you will notice the line <code>eclipse.product=org.eclipse.productname</code>.
 If your product has help system customizations in a product plugin you can activate these by changing this line to point to your product plugin.
 
 <h3>Troubleshooting</h3>
@@ -49,14 +48,14 @@ If your product has help system customizations in a product plugin you can activ
 <h4>HTTP 404 With Message "BridgeServlet: /help/"</h4>
 
 <p>
-In the <tt>web.xml</tt> activate the init parameter <tt>enableFrameworkControls</tt>. This enables endpoints to control the embedded OSGi container. Call <a href="http://localhost:8080/help/sp_test">http://localhost:8080/help/sp_test</a>.
+In the <code>web.xml</code> activate the init parameter <code>enableFrameworkControls</code>. This enables endpoints to control the embedded OSGi container. Call <a href="http://localhost:8080/help/sp_test">http://localhost:8080/help/sp_test</a>.
 </p>
 <p>
-You should see the message "<tt>Servlet delegate registered - org.eclipse.equinox.http.servlet.HttpServiceServlet</tt>". You may instead see the message "<tt>Servlet delegate not registered.</tt>". 
-This indicates that bundle activator from bundle <tt>org.eclipse.equinox.http.servletbridge</tt> was not started or that it accesses a different instance of class <tt>org.eclipse.equinox.servletbridge.BridgeServlet</tt>.
+You should see the message "<code>Servlet delegate registered - org.eclipse.equinox.http.servlet.HttpServiceServlet</code>". You may instead see the message "<code>Servlet delegate not registered.</code>". 
+This indicates that bundle activator from bundle <code>org.eclipse.equinox.http.servletbridge</code> was not started or that it accesses a different instance of class <code>org.eclipse.equinox.servletbridge.BridgeServlet</code>.
 </p>
 <p>
-For all available framework control endpoints refer to <tt>org.eclipse.equinox.servletbridge.BridgeServlet.serviceFrameworkControls(HttpServletRequest, HttpServletResponse)</tt>.
+For all available framework control endpoints refer to <code>org.eclipse.equinox.servletbridge.BridgeServlet.serviceFrameworkControls(HttpServletRequest, HttpServletResponse)</code>.
 </p>
 
 </body>
