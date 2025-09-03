@@ -69,6 +69,9 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		query += "-d '" + params + "'"
 	}
 	if (IS_DRY_RUN && !method.isEmpty()) {
+		if (!env.GITHUB_BOT_TOKEN) {
+			error 'Required GITHUB_BOT_TOKEN not set'
+		}
 		echo "Query (not send): ${query}"
 		return null
 	}

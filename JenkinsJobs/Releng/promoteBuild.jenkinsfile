@@ -67,6 +67,7 @@ pipeline {
 					)
 					// This is DL_DROP_ID for Eclipse and Equinox
 					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${buildTimestamp}")
+					assignEnvVariable('MAINTENANCE_BRANCH', "R${BUILD_MAJOR}_${BUILD_MINOR}_maintenance")
 					
 					if (!env.SIGNOFF_BUG) {
 						echo '''\
@@ -79,14 +80,20 @@ pipeline {
 				}
 			}
 		}
-		stage('Checkout Git') {
+		stage('Checkout SCM') {
 			steps {
 				dir("${WORKSPACE}/repository") {
 					checkout scm
 					script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+						utilities = load "JenkinsJobs/shared/utilities.groovy"
 						githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
 					}
 					sh '''#!/bin/bash -xe
+						git branch --force master HEAD
+						git fetch origin "refs/heads/${MAINTENANCE_BRANCH}"
+						git reflog show master
+						git reflog show "origin/${MAINTENANCE_BRANCH}"
+						
 						git fetch origin tag "${REPO_ID}"
 						git checkout "${REPO_ID}"
 						# Check out all submodules at the specified REPO_ID
@@ -185,6 +192,108 @@ pipeline {
 				build job: 'Releng/deployToMaven', wait: true, propagate: true, parameters: [
 					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}/")
 				]
+			}
+		}
+		stage('Update build configurations') {
+			when {
+				environment name: 'DL_TYPE', value: 'R'
+			}
+			environment {
+				RELEASE_P2_REPOSITORY = "https://download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}/"
+			}
+			steps {
+				dir("${WORKSPACE}/repository") {
+					script { // Update the master branch
+						sh 'git checkout master'
+						sh '''
+							mvn -f eclipse-platform-parent/pom.xml org.eclipse.tycho:tycho-versions-plugin:set-property \
+								-Dproperties=previous-release.baseline \
+								-DnewPrevious-release.baseline="${RELEASE_P2_REPOSITORY}"
+						'''
+						utilities.replaceAllInFile('cje-production/buildproperties.txt', [
+							'BASEBUILDER_TAG=".*?"' : "BASEBUILDER_TAG=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
+							'API_PREV_REF_LABEL=".*?"' : "API_PREV_REF_LABEL=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
+							'PREVIOUS_RELEASE_VER=".*?"' : "PREVIOUS_RELEASE_VER=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
+							'PREVIOUS_RELEASE_REPO_ID=".*?"' : "PREVIOUS_RELEASE_REPO_ID=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
+							'BASEBUILD_ID=".*?"' : "BASEBUILD_ID=\"${DL_DROP_ID}\"",
+							'PREVIOUS_RELEASE_ID=".*?"' : "PREVIOUS_RELEASE_ID=\"${DL_DROP_ID}\"",
+						])
+						utilities.replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties', [
+							'eclipse-platform-\\d+.\\d+[^-]*?-' : "eclipse-platform-${BUILD_MAJOR}.${BUILD_MINOR}-",
+							'org.eclipse.equinox.p2.tests.last.release.build.repo=.*' : "org.eclipse.equinox.p2.tests.last.release.build.repo=https://download.eclipse.org/equinox/drops/${DL_DROP_ID}/",
+						])
+						utilities.replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties', [
+							'previousReleaseVersion=.*' : "previousReleaseVersion=${BUILD_MAJOR}.${BUILD_MINOR}",
+						])
+						utilities.replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh', [
+							'R\\/R-\\d+.\\d+-\\d{12}' : "R/${DL_DROP_ID}",
+							'-\\d+.\\d+-linux-gtk-' : "-${BUILD_MAJOR}.${BUILD_MINOR}-linux-gtk-",
+						])
+						utilities.replaceAllInFile('production/testScripts/configuration/streamSpecific.properties', [
+							'previousReleaseLocation=.*' : 'previousReleaseLocation=https://\\${DOWNLOAD_HOST}/eclipse/downloads/drops4/' + DL_DROP_ID + '/',
+							'previousReleaseVersion=.*' : "previousReleaseVersion=${BUILD_MAJOR}.${BUILD_MINOR}",
+							'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${BUILD_MAJOR}.${BUILD_MINOR}",
+						])
+						
+						utilities.commitAllChangesExcludingSubmodules("Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts")
+					}
+					script { // Update the maintenance branch
+						sh 'git checkout -b updateMaintenance "origin/${MAINTENANCE_BRANCH}"'
+						def ecjManifest = sh(script: "curl https://raw.githubusercontent.com/eclipse-jdt/eclipse.jdt.core/refs/tags/${REPO_ID}/org.eclipse.jdt.core.compiler.batch/META-INF/MANIFEST.MF", returnStdout: true).trim()
+						def bundleVersion = readManifest(text: ecjManifest).main['Bundle-Version']
+						def ecjVersion = bundleVersion.substring(0, bundleVersion.indexOf('.qualifier'))
+						sh """
+							mvn -f eclipse-platform-parent/pom.xml org.eclipse.tycho:tycho-versions-plugin:set-property \
+								-Dproperties=eclipse-sdk-repo,previous-release.baseline,cbi-ecj-version \
+								-DnewEclipse-sdk-repo="${RELEASE_P2_REPOSITORY}" \
+								-DnewPrevious-release.baseline="${RELEASE_P2_REPOSITORY}" \
+								-DnewCbi-ecj-version="${ecjVersion}"
+						"""
+						utilities.replaceAllInFile('cje-production/buildproperties.txt', [
+							'ECLIPSE_RUN_REPO="https://download.eclipse.org/eclipse/updates/.*"' : "ECLIPSE_RUN_REPO=\"${RELEASE_P2_REPOSITORY}\"",
+						])
+						
+						utilities.commitAllChangesExcludingSubmodules("Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes")
+					}
+					// Switch back to master for subsequent parts of this pipeline
+					sh 'git checkout master'
+					
+					// Display created commits
+					sh '''#!/bin/bash -xe
+						git log origin/master..master --patch-with-stat --summary
+						git log origin/${MAINTENANCE_BRANCH}..updateMaintenance --patch-with-stat --summary
+					'''
+					sshagent(['github-bot-ssh']) {
+						sh '''#!/bin/bash -xe
+							pushURL=$(git config remote.origin.url)
+							# Switch to SSH, if the configured URL uses HTTPS (we can only push with SSH)
+							if [[ "$pushURL" == http* ]]; then
+								pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
+							fi
+							
+							git push ${pushURL} "master:refs/heads/update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}"
+							git push ${pushURL} "updateMaintenance:refs/heads/update-${MAINTENANCE_BRANCH}"
+						'''
+					}
+					// Create PRs agains the master and maintenance branch
+					script { withEnv(['GITHUB_BOT_TOKEN=' + credentials('github-bot-token')]) {
+						def masterPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
+							"Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts", """\
+							Update the the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release version.
+							
+							**This should not be submitted before ${BUILD_MAJOR}.${BUILD_MINOR} is finally released.**
+							""".stripIndent(),"update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}", 'master')
+						
+						githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
+							"Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes", """\
+							Update the the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release version.
+							This complements:
+							- ${masterPR}
+							
+							**This should not be submitted before ${BUILD_MAJOR}.${BUILD_MINOR} is finally released.**
+							""".stripIndent(),"update-${MAINTENANCE_BRANCH}", "${MAINTENANCE_BRANCH}")
+					}}
+				}
 			}
 		}
 		stage('Update acknowledgements') {
@@ -292,6 +401,8 @@ EOF
 	"""
 }
 
+@groovy.transform.Field
+def utilities = null
 @groovy.transform.Field
 def githubAPI = null
 

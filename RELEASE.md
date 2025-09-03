@@ -93,6 +93,8 @@ The actual steps to release
   * #### **Promote to GA**
     - After Simrel declares RC2 (usually the Friday before release) run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a).
       - `DROP_ID`: Final delease candidate's ID, e.g.: `S-4.36RC2-202505281830/`
+      - This will create pull requests to update the build configuration on the master and corresponding maintenance branch to the promoted release.
+        - Only submit them AFTER the release was finally published.
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
   * **Contribute to SimRel**
     - If SimRel is not updated before the I-builds are cleaned up (specifically the build for RC2/GA) it will break. 
@@ -120,28 +122,10 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
     - For the Y and P build parameters it's important to know whether or not Y and P builds were run during the release. Since they correspond to java releases on a 6 month cycle, typically they are built in odd-numbered releases.  
     The existing builds are kept for one release, then cleaned up before the next stream that will have Y and P builds. it's convoluted and I dont want to type it out. Remove Y builds on even releases. 
     - If something doesn't get cleaned up properly you can use  Use the [list artifacts](https://ci.eclipse.org/releng/view/Cleanup/job/list_artifacts_from_download_server/) job to generate ta list of what's on the download server and either create a new job to clean it up or update and rerun the cleanup job as appropriate.
-  * **Set Previous Release to GA** 
-    - Everything that was updated to RC2 (see below) should now use the released build.
 
 ### **Preparation for the next Release**
   After RC2 create an issue to track preparation work for the next stream (see [Preparation work for 4.25 (2022-09)](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/284)).
   - A script to create this issue exists [here](scripts/newReleasePrep.sh) for those who have the hub cli tool installed. The process has been in flux recently so please update the script if necessary, but it provides a helpful template since most tasks in the previous release's issue become links.
-
-#### **Maintenance Branches:**
-  * **Update maintenance branch with release version**
-    - Once the I-build repo is removed for the previous release the maintenance branch will have to use the release location, i.e. any references to `https://download.eclipse.org/eclipse/updates/4.25-I-builds/` will need to be updated to `https://download.eclipse.org/eclipse/updates/4.26/R-4.26-202211231800/`
-    - Functionally this means:
-      - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
-      - Update `eclipse-sdk-repo` in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
-    - This step can be prepared ahead of time but can't be merged until the release build has been promoted and the update site exists.
-     * **Update ECJ compiler** in the platform build (if it needs to be updated).
-       * To find the new *unqualified* compiler version:
-         - Go to the update site for the release candidate
-         - Click `plugins`
-         - Find the *unqualified* version of the artifact `org.eclipse.jdt.core.complier.batch_${ecjversion}.jar`, i.e. the version consisting only of the _major_._minor_._service_ part, but without qualifier.
-         It's the version of the `org.eclipse.jdt:ecj` artifact at Maven-Central, about to be relased.
-       * Update the `cbi-ecj-version` in [eclipse.platform.releng.aggregator/eclipse-platform-parent/pom.xml](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse-platform-parent/pom.xml)
-       to the exact version of the to be released`org.eclipse.jdt.core.complier.batch` bundle, e.g.: `3.40.0`
 
 #### **Update the Build Calendar:**
   - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).
