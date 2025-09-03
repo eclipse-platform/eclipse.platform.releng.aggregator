@@ -76,6 +76,7 @@ pipeline {
 			steps {
 				checkout scm
 				script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+					utilities = load "JenkinsJobs/shared/utilities.groovy"
 					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
 					githubAPI.setDryRun(params.DRY_RUN)
 				}
@@ -154,7 +155,7 @@ pipeline {
 					"(?<prefix># Schedule:.*\\R)(?s).*(?<suffix>\\R'''\\))" : "\${prefix}${I_BUILD_SCHEDULE}\${suffix}",
 				])
 				
-				commitAllChangesExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
+				utilities.commitAllChangesExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
 			}
 		}
 		stage('Move previous version to current RC') {
@@ -182,7 +183,7 @@ pipeline {
 					'previousReleaseVersion=.*' : "previousReleaseVersion=${PREVIOUS_RELEASE_CANDIDATE_TAG}",
 					'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${PREVIOUS_RELEASE_VERSION}-I-builds",
 				])
-				commitAllChangesExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
+				utilities.commitAllChangesExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
 			}
 		}
 		stage('Clear Qualifier-update files') {
@@ -242,7 +243,7 @@ pipeline {
 				])
 				sh "mv cje-production/streams/repositories_master.txt cje-production/streams/repositories_${MAINTENANCE_BRANCH}.txt"
 				
-				commitAllChangesExcludingSubmodules("Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch")
+				utilities.commitAllChangesExcludingSubmodules("Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch")
 				
 				// Switch back to master for subsequent parts of this pipeline
 				sh 'git checkout master'
@@ -442,6 +443,8 @@ pipeline {
 }
 
 @groovy.transform.Field
+def utilities = null
+@groovy.transform.Field
 def githubAPI = null
 
 // --- utility methods
@@ -466,28 +469,9 @@ def parseDate(String dateString) {
 }
 
 def replaceInFile(String filePath, Map<String,String> replacements) {
-	replaceAllInFile(filePath, replacements.collectEntries{ k, v -> [java.util.regex.Pattern.quote(k), v] });
+	utilities.replaceInFile(filePath, replacements)
 }
 
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
-	def content = readFile(filePath)
-	for (entry in replacements) {
-		def newContent = content.replaceAll(entry.key, entry.value)
-		if (newContent == content && !(content =~ entry.key)) { // pattern matches, but the replacement is equal to the current content
-			error("Pattern not found in file '${filePath}': ${entry.key}")
-		}
-		content = newContent
-	}
-	writeFile(file:filePath, text: content)
-}
-
-def commitAllChangesExcludingSubmodules(String commitMessage) {
-	withEnv(["COMMIT_MESSAGE=${commitMessage}"]) {
-		sh '''
-			#Commit all changes, except for the updated sub-modules here
-			git add --all
-			git restore --staged $(git submodule foreach --quiet 'echo $sm_path')
-			git commit --message "${COMMIT_MESSAGE}"
-		'''
-	}
+	utilities.replaceAllInFile(filePath, replacements)
 }
