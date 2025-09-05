@@ -265,8 +265,7 @@ pipeline {
 							git push --force ${pushURL} "updateMaintenance:refs/heads/update-${MAINTENANCE_BRANCH}"
 						'''
 					}
-					// Create PRs agains the master and maintenance branch
-					script { withEnv(['GITHUB_BOT_TOKEN=' + credentials('github-bot-token')]) {
+					script { // Create PRs agains the master and maintenance branch
 						def masterPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
 							"Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts", """\
 							Update the the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release version.
@@ -282,7 +281,7 @@ pipeline {
 							
 							**This should not be submitted before ${BUILD_MAJOR}.${BUILD_MINOR} is finally released.**
 							""".stripIndent(),"update-${MAINTENANCE_BRANCH}", "${MAINTENANCE_BRANCH}", /*skipExistingPR*/ true)
-					}}
+					}
 				}
 			}
 		}
@@ -297,9 +296,6 @@ pipeline {
 			}
 		}
 		stage('Update acknowledgements') {
-			environment {
-				GITHUB_BOT_TOKEN = credentials('github-bot-token')
-			}
 			steps {
 				script {
 					githubAPI.triggerWorkflow('eclipse-platform/www.eclipse.org-eclipse', 'generateAcknowledgements.yml', [ 'eclipse-version': "${BUILD_MAJOR}.${BUILD_MINOR}" ])

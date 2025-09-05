@@ -73,13 +73,12 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		query += "-d '" + params + "'"
 	}
 	if (IS_DRY_RUN && !method.isEmpty()) {
-		if (!env.GITHUB_BOT_TOKEN) {
-			error 'Required GITHUB_BOT_TOKEN not set'
-		}
 		echo "Query (not send): ${query}"
 		return null
 	}
-	def response = sh(script: query, returnStdout: true)
+	def response = withCredentials([string(credentialsId: 'github-bot-token', variable: 'GITHUB_BOT_TOKEN')]) {
+		return sh(script: query, returnStdout: true)
+	}
 	if (response == null || response.isEmpty()) {
 		if (allowEmptyReponse) {
 			return null
