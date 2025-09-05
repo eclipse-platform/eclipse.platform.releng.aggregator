@@ -148,7 +148,7 @@ pipeline {
 								fi
 								git tag -a -m "${SIGNOFF_BUG}" ${TAG} HEAD
 								# git push fails if the tag already exists
-								git push --verbose ${pushURL} tag ${TAG}
+								git push --force --verbose ${pushURL} tag ${TAG}
 							}
 							tagBuild
 							export -f tagBuild
@@ -261,8 +261,8 @@ pipeline {
 								pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
 							fi
 							
-							git push ${pushURL} "master:refs/heads/update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}"
-							git push ${pushURL} "updateMaintenance:refs/heads/update-${MAINTENANCE_BRANCH}"
+							git push --force ${pushURL} "master:refs/heads/update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}"
+							git push --force ${pushURL} "updateMaintenance:refs/heads/update-${MAINTENANCE_BRANCH}"
 						'''
 					}
 					// Create PRs agains the master and maintenance branch
