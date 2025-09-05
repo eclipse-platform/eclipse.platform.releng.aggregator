@@ -22,16 +22,25 @@ on:
         required: false
         default: ''
       working-directory:
-        description: Optional additional arguments to specify the directory in which maven build is executed
+        description: Optional, comma-separated list of directories in which this version-check is executed
         type: string
         required: false
         default: '.'
+      submodules:
+        description: |
+          Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules.
+          When the `ssh-key` input is not provided, SSH URLs beginning with `git@github.com:` are converted to HTTPS.
+          The value is just passed as it is to the checkout action: https://github.com/actions/checkout#usage
+        type: string
+        required: false
+        default: 'false'
 
 permissions: {} # all none
 
 env:
   MAVEN_ARGS: >-
     --batch-mode --no-transfer-progress
+  WORKING_DIRECTORIES: ${{ inputs.working-directory }}
 
 jobs:
   versions-check-and-increment:
@@ -42,6 +51,7 @@ jobs:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         fetch-depth: 0 # required for jgit timestamp provider to work
+        submodules: ${{ inputs.submodules }}
 
     - name: Set up Java
       uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
@@ -73,11 +83,14 @@ jobs:
       with:
         attempt_delay: 200
         attempt_limit: 10
-        current_path: ${{ inputs.working-directory }}
-        command: >
-          mvn verify ${{ inputs.extra-maven-args }} -DskipTests -Dcompare-version-with-baselines.skip=false
-          org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100
-          --update-snapshots --threads 1C --fail-at-end --show-version
+        command: |
+          for dir in ${WORKING_DIRECTORIES//,/ }; do
+            pushd $dir
+              mvn verify ${{ inputs.extra-maven-args }} -DskipTests -Dcompare-version-with-baselines.skip=false \
+                org.eclipse.tycho:tycho-versions-plugin:bump-versions -Dtycho.bump-versions.increment=100 \
+                --update-snapshots --threads 1C --fail-at-end --show-version
+            popd
+          done
 
     - name: Commit version increments, if any
       run: |
@@ -90,7 +103,7 @@ jobs:
           # Relevant files were staged, i.e. some version were changed
           
           # Read 'releaseNumberSDK' property as stream version
-          pushd ${{ inputs.working-directory }}
+          pushd "${WORKING_DIRECTORIES%%,*}"
           mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt'
           streamVersion=$(<releaseNumberSDK-value.txt)
           rm -f releaseNumberSDK-value.txt
