@@ -184,16 +184,6 @@ pipeline {
 				}
 			}
 		}
-		stage('Stage for Maven-Central') {
-			when {
-				environment name: 'DL_TYPE', value: 'R'
-			}
-			steps {
-				build job: 'Releng/deployToMaven', wait: true, propagate: true, parameters: [
-					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}/")
-				]
-			}
-		}
 		stage('Update build configurations') {
 			when {
 				environment name: 'DL_TYPE', value: 'R'
@@ -294,6 +284,16 @@ pipeline {
 							""".stripIndent(),"update-${MAINTENANCE_BRANCH}", "${MAINTENANCE_BRANCH}")
 					}}
 				}
+			}
+		}
+		stage('Stage to Maven-Central') {
+			when {
+				environment name: 'DL_TYPE', value: 'R'
+			}
+			steps {
+				build job: 'Releng/deployToMaven', wait: true, propagate: true, parameters: [
+					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}/")
+				]
 			}
 		}
 		stage('Update acknowledgements') {
