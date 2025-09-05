@@ -146,8 +146,8 @@ pipeline {
 									# Change to SSH, if the configured URL uses HTTPS (we can only push with SSH)
 									pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
 								fi
-								git tag -a -m "${SIGNOFF_BUG}" ${TAG} HEAD
-								# git push fails if the tag already exists
+								# Enforce the (re-)creation of the tag in case of a very late respin
+								git tag --force -a -m "${SIGNOFF_BUG}" ${TAG} HEAD
 								git push --force --verbose ${pushURL} tag ${TAG}
 							}
 							tagBuild
