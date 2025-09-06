@@ -75,7 +75,11 @@ pipelineJob('Releng/prepareNextDevCycle'){
 	displayName('Prepare Next Development Cycle')
 	description('Perform all steps to prepare the next development cycle of Eclipse.')
 	parameters {
-		booleanParam('DRY_RUN', true, 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
+		booleanParam('DRY_RUN', true, '''\
+If enabled, the final publication of all changes is skipped respectivly all changes at the download-server happen in a 'try-out' area at https://download.eclipse.org/eclipse/try-outs/.
+This area is cleaned on each dry-run and should be cleaned after a try-out session is completed.
+Useful for debugging and to very that the pipeline behaves as intended.
+''')
 		stringParam('NEXT_RELEASE_VERSION', null, 'Version of the release to prepare, for example: 4.37')
 		stringParam('PREVIOUS_RELEASE_CANDIDATE_ID', null, 'Id of the current release-candiate for the previous release, for example: S-4.36RC2-202505281830')
 		stringParam('M1_DATE', null, 'Milestone 1 end date in the format yyyy-mm-dd, for example: 2025-07-04')
@@ -106,6 +110,7 @@ But also, allows the sites and repositories to be examined for correctness befor
 The second (deferred) step that makes things visible works, in part, based on some output of this first step. Hence, they must "share a workspace".
 ''')
 	parameters {
+		booleanParam('DRY_RUN', true, 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
 		stringParam('DROP_ID', null, '''\
 The name (or, build id) of the build to promote. Typically would be a value such as 'I20250714-1800'.
 It must match the name of the build on the build machine.
