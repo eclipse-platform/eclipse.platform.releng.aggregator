@@ -88,6 +88,7 @@ pipeline {
 					checkout scm
 					script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
 						utilities = load "JenkinsJobs/shared/utilities.groovy"
+						utilities.setDryRun(params.DRY_RUN)
 						githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
 						githubAPI.setDryRun(params.DRY_RUN)
 					}
@@ -144,25 +145,12 @@ pipeline {
 			}
 			steps {
 				dir("${WORKSPACE}/repository") {
-					sshagent(['github-bot-ssh']) {
-						sh '''#!/bin/bash -xe
-							function tagBuild() {
-								pushURL=$(git config remote.origin.url)
-								if [[ "$pushURL" == http* ]]; then
-									# Change to SSH, if the configured URL uses HTTPS (we can only push with SSH)
-									pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
-								fi
-								if [[ ${DRY_RUN} == 'true' ]]; then
-									dryRunFlag='--dry-run'
-								fi
-								# Enforce the (re-)creation of the tag in case of a very late respin
-								git tag --force -a -m "${SIGNOFF_BUG}" ${TAG} HEAD
-								git push --force --verbose ${dryRunFlag} ${pushURL} tag ${TAG}
-							}
-							tagBuild
-							export -f tagBuild
-							git submodule foreach 'tagBuild'
-						'''
+					script {
+						utilities.runHereAndForEachGitSubmodule{
+							// Enforce the (re-)creation of the tag in case of a very late respin
+							sh 'git tag --force --annotate --message="${SIGNOFF_BUG}" ${TAG} HEAD'
+							utilities.gitPushTag("${TAG}", /*force*/ true)
+						}
 					}
 				}
 			}
@@ -263,21 +251,10 @@ pipeline {
 						git log origin/master..master --patch-with-stat --summary
 						git log origin/${MAINTENANCE_BRANCH}..updateMaintenance --patch-with-stat --summary
 					'''
-					sshagent(['github-bot-ssh']) {
-						sh '''#!/bin/bash -xe
-							pushURL=$(git config remote.origin.url)
-							# Switch to SSH, if the configured URL uses HTTPS (we can only push with SSH)
-							if [[ "$pushURL" == http* ]]; then
-								pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
-							fi
-							if [[ ${DRY_RUN} == 'true' ]]; then
-								dryRunFlag='--dry-run'
-							fi
-							git push --force ${dryRunFlag} ${pushURL} "master:refs/heads/update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}"
-							git push --force ${dryRunFlag} ${pushURL} "updateMaintenance:refs/heads/update-${MAINTENANCE_BRANCH}"
-						'''
-					}
-					script { // Create PRs agains the master and maintenance branch
+					script { // Push branches and create PRs agains the master and maintenance branch
+						utilities.gitPushBranch('master', "update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}", /*force*/ true)
+						utilities.gitPushBranch('updateMaintenance', "update-${MAINTENANCE_BRANCH}", /*force*/ true)
+						
 						def masterPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
 							"Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts", """\
 							Update the the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release version.

@@ -87,6 +87,7 @@ pipeline {
 				checkout scm
 				script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
 					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities.setDryRun(params.DRY_RUN)
 					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
 					githubAPI.setDryRun(params.DRY_RUN)
 				}
@@ -344,28 +345,14 @@ pipeline {
 		}
 		stage('Push preparation branches') {
 			steps {
-				sshagent (['github-bot-ssh']) {
-					sh '''#!/bin/bash -xe
-						function pushNewCommitsToPreparationBranch() {
-							pushURL=$(git config remote.origin.url)
-							# Switch to SSH, if the configured URL uses HTTPS (we can only push with SSH)
-							if [[ "$pushURL" == http* ]]; then
-								pushURL=$(echo $pushURL|sed --expression 's|https://github.com/|git@github.com:|')
-							fi
-							if [[ ${DRY_RUN} == 'true' ]]; then
-								dryRunFlag='--dry-run'
-							fi
-							git push ${dryRunFlag} ${pushURL} "master:refs/heads/prepare-R${NEXT_RELEASE_VERSION}"
-							git push ${dryRunFlag} ${pushURL} "${MAINTENANCE_BRANCH}:refs/heads/${MAINTENANCE_BRANCH}"
-						}
-						pushNewCommitsToPreparationBranch
-						export -f pushNewCommitsToPreparationBranch
-						git submodule foreach 'pushNewCommitsToPreparationBranch'
-						
-						# Push preparation of the maintenance to a separate branch (not directly to the maintenance branch),
-						# to enable creating a PR against the maintenance branch from it.
-						git push ${dryRunFlag} ${pushURL} "prepareMaintenance:refs/heads/prepare-${MAINTENANCE_BRANCH}"
-					'''
+				script {
+					utilities.runHereAndForEachGitSubmodule{
+						utilities.gitPushBranch('master', "prepare-R${NEXT_RELEASE_VERSION}")
+						utilities.gitPushBranch("${MAINTENANCE_BRANCH}", "${MAINTENANCE_BRANCH}")
+					}
+					// Push preparation of the maintenance to a separate branch (not directly to the maintenance branch),
+					// to enable creating a PR against the maintenance branch from it.
+					utilities.gitPushBranch('prepareMaintenance', "prepare-${MAINTENANCE_BRANCH}")
 				}
 			}
 		}
@@ -382,14 +369,13 @@ pipeline {
 						- Updating the previous release version to the current Release-Candidate: `${PREVIOUS_RELEASE_CANDIDATE_ID}`
 						""".stripIndent(), prBranch)
 					
-					def submodulePaths = sh(script: "git submodule --quiet foreach 'echo \$sm_path'", returnStdout: true).trim().split('\\s')
-					for (submodulePath in submodulePaths) {
-						def diff = sh(script:"cd ${submodulePath} && git diff master origin/master --shortstat", returnStdout: true).trim()
+					utilities.forEachGitSubmodule{ submodulePath ->
+						def diff = sh(script:"git diff master origin/master --shortstat", returnStdout: true).trim()
 						if (diff.isEmpty()) {
 							echo "Skipping submodule without changes: ${submodulePath}"
-							continue
+							return
 						}
-						def submoduleURL = sh(script: "cd ${submodulePath} && git config remote.origin.url", returnStdout: true).trim()
+						def submoduleURL = sh(script: "git config remote.origin.url", returnStdout: true).trim()
 						// Extract repository path from e.g.: https://github.com/eclipse-platform/eclipse.platform.git
 						def expectedPrefix = 'https://github.com/'
 						def expectedSuffix = '.git'
