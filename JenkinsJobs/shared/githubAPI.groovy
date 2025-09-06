@@ -1,6 +1,6 @@
 
 @groovy.transform.Field
-def boolean IS_DRY_RUN = false
+def boolean IS_DRY_RUN = true
 
 def setDryRun(boolean isDryRun) {
 	IS_DRY_RUN = isDryRun
