@@ -9,7 +9,6 @@ pipeline {
 		label 'basic'
 	}
 	environment {
-		HIDE_SITE = 'true'
 		// Download Server locations (would very seldom change)
 		EP_ROOT = '/home/data/httpd/download.eclipse.org'
 	}
@@ -42,16 +41,11 @@ pipeline {
 					assignEnvVariable('REPO_ID', "I${idMatcher.group('date')}-${idMatcher.group('time')}")
 					idMatcher = null // release matcher as it's not serializable
 					
-					sh 'curl -o buildproperties.shsource --fail https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.shsource'
-					def STREAM = sh(returnStdout: true, script: 'source ./buildproperties.shsource && echo ${STREAM}').trim()
-					def versionMatcher = STREAM =~ /(?<major>\d+)\.(?<minor>\d+).(?<service>\d+)/
-					if (!versionMatcher.matches()) {
-						error "STREAM must contain major, minor, and service versions, such as '4.37.0', but found: ${STREAM}"
-					}
-					assignEnvVariable('BUILD_MAJOR', versionMatcher.group('major'))
-					assignEnvVariable('BUILD_MINOR', versionMatcher.group('minor'))
-					assignEnvVariable('BUILD_SERVICE', versionMatcher.group('service'))
-					versionMatcher = null // release matcher as it's not serializable
+					def buildPropertiesTxt = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.txt", returnStdout: true)
+					def buildProperties = readProperties(text: buildPropertiesTxt)
+					assignEnvVariable('BUILD_MAJOR', buildProperties.STREAMMajor.replace('"','')) // Remove surrounding quotes
+					assignEnvVariable('BUILD_MINOR', buildProperties.STREAMMinor.replace('"','')) // Remove surrounding quotes
+					assignEnvVariable('BUILD_SERVICE', buildProperties.STREAMService.replace('"','')) // Remove surrounding quotes
 					
 					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
 						assignEnvVariable('DL_TYPE', 'S')
@@ -90,9 +84,12 @@ pipeline {
 					}
 					sh '''#!/bin/bash -xe
 						git branch --force master HEAD
-						git fetch origin "refs/heads/${MAINTENANCE_BRANCH}"
-						git reflog show master
-						git reflog show "origin/${MAINTENANCE_BRANCH}"
+						if [[ "${DL_TYPE}" == 'R' ]]; then
+							git fetch origin "refs/heads/${MAINTENANCE_BRANCH}"
+							
+							git reflog show master
+							git reflog show "origin/${MAINTENANCE_BRANCH}"
+						fi
 						
 						git fetch origin tag "${REPO_ID}"
 						git checkout "${REPO_ID}"
@@ -196,7 +193,7 @@ pipeline {
 					script { // Update the master branch
 						sh 'git checkout master'
 						sh '''
-							mvn -f eclipse-platform-parent/pom.xml org.eclipse.tycho:tycho-versions-plugin:set-property \
+							mvn -f eclipse-platform-parent/pom.xml tycho-versions:set-property \
 								-Dproperties=previous-release.baseline \
 								-DnewPrevious-release.baseline="${RELEASE_P2_REPOSITORY}"
 						'''
@@ -225,15 +222,15 @@ pipeline {
 							'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${BUILD_MAJOR}.${BUILD_MINOR}",
 						])
 						
-						utilities.commitAllChangesExcludingSubmodules("Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts")
+						utilities.gitCommitAllExcludingSubmodules("Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts")
 					}
 					script { // Update the maintenance branch
 						sh 'git checkout -b updateMaintenance "origin/${MAINTENANCE_BRANCH}"'
-						def ecjManifest = sh(script: "curl https://raw.githubusercontent.com/eclipse-jdt/eclipse.jdt.core/refs/tags/${REPO_ID}/org.eclipse.jdt.core.compiler.batch/META-INF/MANIFEST.MF", returnStdout: true).trim()
+						def ecjManifest = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-jdt/eclipse.jdt.core/refs/tags/${REPO_ID}/org.eclipse.jdt.core.compiler.batch/META-INF/MANIFEST.MF", returnStdout: true).trim()
 						def bundleVersion = readManifest(text: ecjManifest).main['Bundle-Version']
 						def ecjVersion = bundleVersion.substring(0, bundleVersion.indexOf('.qualifier'))
 						sh """
-							mvn -f eclipse-platform-parent/pom.xml org.eclipse.tycho:tycho-versions-plugin:set-property \
+							mvn -f eclipse-platform-parent/pom.xml tycho-versions:set-property \
 								-Dproperties=eclipse-sdk-repo,previous-release.baseline,cbi-ecj-version \
 								-DnewEclipse-sdk-repo="${RELEASE_P2_REPOSITORY}" \
 								-DnewPrevious-release.baseline="${RELEASE_P2_REPOSITORY}" \
@@ -243,7 +240,7 @@ pipeline {
 							'ECLIPSE_RUN_REPO="https://download.eclipse.org/eclipse/updates/.*"' : "ECLIPSE_RUN_REPO=\"${RELEASE_P2_REPOSITORY}\"",
 						])
 						
-						utilities.commitAllChangesExcludingSubmodules("Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes")
+						utilities.gitCommitAllExcludingSubmodules("Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes")
 					}
 					// Switch back to master for subsequent parts of this pipeline
 					sh 'git checkout master'
@@ -330,10 +327,9 @@ def renameBuildDrop(String baseDropPath, String oldDropID, String oldBuildLabel,
 		
 		# Copy drop-directory to new location
 		ssh genie.releng@projects-storage.eclipse.org mkdir -p '${targetPath}'
-		if [[ "${HIDE_SITE}" == "true" ]]; then
-			# Create this marker first to ensure the page is never without
-			ssh genie.releng@projects-storage.eclipse.org touch '${targetPath}/buildHidden'
-		fi
+		# Create this marker first to ensure the page is never without
+		ssh genie.releng@projects-storage.eclipse.org touch '${targetPath}/buildHidden'
+		
 		ssh genie.releng@projects-storage.eclipse.org cp -r '${sourcePath}/.' '${targetPath}'
 		
 		# Rename files

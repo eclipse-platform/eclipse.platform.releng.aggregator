@@ -15,7 +15,7 @@ def replaceAllInFile(String filePath, Map<String,String> replacements) {
 	writeFile(file:filePath, text: content)
 }
 
-def commitAllChangesExcludingSubmodules(String commitMessage) {
+def gitCommitAllExcludingSubmodules(String commitMessage) {
 	withEnv(["COMMIT_MESSAGE=${commitMessage}"]) {
 		sh '''
 			#Commit all changes, except for the updated sub-modules here
