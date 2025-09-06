@@ -29,18 +29,28 @@ pipeline {
 					nextVersionMatcher = null // release matcher as it's not serializable
 					
 					env.PREVIOUS_RELEASE_CANDIDATE_ID = readParameter('PREVIOUS_RELEASE_CANDIDATE_ID')
-					def previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
-					if (!previousIdMatcher.matches()) {
+					def previousIdMatcher = null
+					if ((previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/).matches()) {
+						def checkpoint = previousIdMatcher.group('checkpoint')
+						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', previousIdMatcher.group('major'))
+						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', previousIdMatcher.group('minor'))
+						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}${checkpoint}")
+						def previousServiceVersion = previousIdMatcher.group('service') ?: '0'
+						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${previousIdMatcher.group('type')}${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}${(checkpoint || previousServiceVersion != '0') ? ('_' + previousServiceVersion) : ''}${checkpoint ? ('_' + checkpoint) : ''}")
+						
+					} else if ((previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
+						def buildPropertiesTxt = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_CANDIDATE_ID}/buildproperties.txt", returnStdout: true)
+						def buildProperties = readProperties(text: buildPropertiesTxt)
+						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', buildProperties.STREAMMajor.replace('"','')) // Remove surrounding quotes
+						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', buildProperties.STREAMMinor.replace('"','')) // Remove surrounding quotes
+						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
+						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
+						
+					} else {
 						error "Unexpected format for PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
 					}
-					def checkpoint = previousIdMatcher.group('checkpoint')
-					def previousReleaseVersionService = previousIdMatcher.group('service') ?: '0'
-					assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', previousIdMatcher.group('major'))
-					assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', previousIdMatcher.group('minor'))
 					assignEnvVariable('PREVIOUS_RELEASE_VERSION', "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}")
-					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_VERSION}${checkpoint}")
 					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousIdMatcher.group('date')}-${previousIdMatcher.group('time')}")
-					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${previousIdMatcher.group('type')}${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}${(checkpoint || previousReleaseVersionService != '0') ? ('_' + previousReleaseVersionService) : ''}${checkpoint ? ('_' + checkpoint) : ''}")
 					previousIdMatcher = null // release matcher as it's not serializable
 					
 					//TODO: Read the dates from the calender instead of provide a structured document somewhere?
@@ -100,14 +110,11 @@ pipeline {
 			}
 		}
 		stage('Update Maven Version') {
-			environment {
-				MAVEN_ARGS = '-U -B -ntp'
-			}
 			steps {
 				sh '''
 					mvn org.eclipse.tycho:tycho-versions-plugin:set-version \
 						-DnewVersion=${NEXT_RELEASE_VERSION}.0-SNAPSHOT
-					mvn -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:set-property \
+					mvn -f eclipse-platform-parent/pom.xml tycho-versions:set-property \
 						-Dproperties=releaseVersion,releaseYear,releaseMonth \
 						-DnewReleaseVersion=${NEXT_RELEASE_VERSION} \
 						-DnewReleaseYear=${NEXT_RELEASE_YEAR} \
@@ -155,13 +162,13 @@ pipeline {
 					"(?<prefix># Schedule:.*\\R)(?s).*(?<suffix>\\R'''\\))" : "\${prefix}${I_BUILD_SCHEDULE}\${suffix}",
 				])
 				
-				utilities.commitAllChangesExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
+				gitCommitAllExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
 			}
 		}
 		stage('Move previous version to current RC') {
 			steps {
 				sh '''
-					mvn -f eclipse-platform-parent/pom.xml --non-recursive org.eclipse.tycho:tycho-versions-plugin:set-property \
+					mvn -f eclipse-platform-parent/pom.xml tycho-versions:set-property \
 						-Dproperties=previous-release.baseline \
 						"-DnewPrevious-release.baseline=https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/"
 				'''
@@ -183,7 +190,8 @@ pipeline {
 					'previousReleaseVersion=.*' : "previousReleaseVersion=${PREVIOUS_RELEASE_CANDIDATE_TAG}",
 					'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${PREVIOUS_RELEASE_VERSION}-I-builds",
 				])
-				utilities.commitAllChangesExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
+				
+				gitCommitAllExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
 			}
 		}
 		stage('Clear Qualifier-update files') {
@@ -243,7 +251,7 @@ pipeline {
 				])
 				sh "mv cje-production/streams/repositories_master.txt cje-production/streams/repositories_${MAINTENANCE_BRANCH}.txt"
 				
-				utilities.commitAllChangesExcludingSubmodules("Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch")
+				gitCommitAllExcludingSubmodules("Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch")
 				
 				// Switch back to master for subsequent parts of this pipeline
 				sh 'git checkout master'
@@ -274,7 +282,7 @@ pipeline {
 						--fixed-strings "${PREVIOUS_RELEASE_VERSION}")
 					# The eclipse-platform-parent/pom.xml contains the previous version in the baseline repository variable
 					if [[ -z "${matchingFiles}" ]] || [[ "${matchingFiles}" == 'eclipse-platform-parent/pom.xml' ]]; then
-						echo "No unexpected references to previous version ${PREVIOUS_RELEASE_VERSION} found:"
+						echo "No unexpected references to previous version ${PREVIOUS_RELEASE_VERSION} found."
 						exit 0
 					else
 						echo "References to previous version ${PREVIOUS_RELEASE_VERSION} found:"
@@ -373,7 +381,7 @@ pipeline {
 						- Updating the release version to `${NEXT_RELEASE_VERSION}` across build scripts
 						- Updating the previous release version to the current Release-Candidate: `${PREVIOUS_RELEASE_CANDIDATE_ID}`
 						""".stripIndent(), prBranch)
-						
+					
 					def submodulePaths = sh(script: "git submodule --quiet foreach 'echo \$sm_path'", returnStdout: true).trim().split('\\s')
 					for (submodulePath in submodulePaths) {
 						def diff = sh(script:"cd ${submodulePath} && git diff master origin/master --shortstat", returnStdout: true).trim()
@@ -468,4 +476,8 @@ def replaceInFile(String filePath, Map<String,String> replacements) {
 
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
 	utilities.replaceAllInFile(filePath, replacements)
+}
+
+def gitCommitAllExcludingSubmodules(String commitMessage) {
+	utilities.gitCommitAllExcludingSubmodules(commitMessage)
 }

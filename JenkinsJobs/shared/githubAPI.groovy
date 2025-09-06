@@ -9,7 +9,7 @@ def setDryRun(boolean isDryRun) {
 /** Returns a list of all repositories in the specified organization.*/
 def listReposOfOrganization(String orga) {
 	def response = queryGithubAPI('', "orgs/${orga}/repos", null)
-	if (!(response instanceof List) && (response.errors || (response.status && response.status != 201))) {
+	if (!(response instanceof List) && isFailed(response, 201)) {
 		error "Response contains errors:\n${response}"
 	}
 	return response
@@ -23,7 +23,7 @@ def createMilestone(String orga, String repo, String msTitle, String msDescripti
 	echo "In ${orga}/${repo} create milestone: ${msTitle} due on ${msDueDay}"
 	def params = [title: msTitle, description: msDescription, due_on: "${msDueDay}T23:59:59Z"]
 	def response = queryGithubAPI('-X POST', "repos/${orga}/${repo}/milestones", params)
-	if (response?.errors || (response?.status && response.status != 201)) {
+	if (isFailed(response, 201)) {
 		if (response.errors && response.errors[0]?.code == 'already_exists') {
 			echo 'Milestone already exists and is not modified'
 			// TODO: update milestone in this case: https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#update-a-milestone
@@ -41,7 +41,7 @@ def createPullRequest(String orgaSlashRepo, String prTitle, String prBody, Strin
 	echo "In ${orgaSlashRepo} create PR: '${prTitle}' on branch ${headBranch}"
 	def params = [title: prTitle, body: prBody, head: headBranch, base: baseBranch]
 	def response = queryGithubAPI('-X POST',"repos/${orgaSlashRepo}/pulls", params)
-	if (response?.errors || (response?.status && response.status != 201)) {
+	if (isFailed(response, 201)) {
 		if (skipExistingPR && response.errors[0]?.message?.contains('pull request already exists')) {
 			echo "Ignoring failure to create pull request: ${response.errors[0].message}"
 			return null; // PR already exists and the caller asked to ignore this error
@@ -55,7 +55,7 @@ def triggerWorkflow(String orgaSlashRepo, String workflowId, Map<String, String>
 	echo "In ${orgaSlashRepo} trigger workflow '${workflowId}' on branch ${referenceBranch} with inputs ${inputs}"
 	def params = ['ref': referenceBranch, 'inputs': inputs]
 	def response = queryGithubAPI('-X POST',"repos/${orgaSlashRepo}/actions/workflows/${workflowId}/dispatches", params, true)
-	if (response?.errors || (response?.status && response.status != 204)) {
+	if (isFailed(response, 204)) {
 		error "Response contains errors:\n${response}"
 	}
 }
@@ -86,6 +86,10 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		error 'Response is null or empty. This commonly indicates: HTTP/1.1 500 Internal Server Error'
 	}
 	return readJSON(text: response)
+}
+
+private boolean isFailed(Map response, int successCode) {
+	return response?.errors || (response?.status && response.status?.toInteger() != successCode)
 }
 
 return this
