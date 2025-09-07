@@ -37,11 +37,15 @@ def createMilestone(String orga, String repo, String msTitle, String msDescripti
 /**
  * Create a PR in the specified repo, from a branch that is expected to reside in the same repository.
  */
-def createPullRequest(String orgaSlashRepo, String prTitle, String prBody, String headBranch, String baseBranch = 'master') {
+def createPullRequest(String orgaSlashRepo, String prTitle, String prBody, String headBranch, String baseBranch = 'master', boolean skipExistingPR = false) {
 	echo "In ${orgaSlashRepo} create PR: '${prTitle}' on branch ${headBranch}"
 	def params = [title: prTitle, body: prBody, head: headBranch, base: baseBranch]
 	def response = queryGithubAPI('-X POST',"repos/${orgaSlashRepo}/pulls", params)
 	if (response?.errors || (response?.status && response.status != 201)) {
+		if (skipExistingPR && response.errors[0]?.message?.contains('pull request already exists')) {
+			echo "Ignoring failure to create pull request: ${response.errors[0].message}"
+			return null; // PR already exists and the caller asked to ignore this error
+		}
 		error "Response contains errors:\n${response}"
 	}
 	return response?.html_url
