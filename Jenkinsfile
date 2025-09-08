@@ -16,6 +16,14 @@ pipeline {
 		MAVEN_OPTS = '-Xmx4000m'
 	}
 	stages {
+		stage('Update submodules to latest') {
+			when {
+				not { branch 'R*_maintenance' }
+			}
+			steps {
+				sh 'git submodule update --remote'
+			}
+		}
 		stage('Deploy parent-pom and SDK-target') {
 			when {
 				anyOf {
