@@ -3,7 +3,6 @@ This is the location where we will develop production scripts for use on Cloudbe
 Here are some ground rules
 1. Each script starts with mb<xxx>_<scriptname>.sh. xxx is a 3 digit number
 	000-099 - preparing build environment like setting environment variables etc.
-	100-199 - cloning repos and preparing them with right branches/tags and tagging(git operations)
 	200-299 - Maven operations(Updating pom with versions from manifest, create tar ball, build SDK/patch etc)
 	300-399 - gather parts (collecting different artifacts into a temporary build location)
 	500-599 - Generate build reports (running p2.repo.analyzers and dirt report, jdeps reports etc)
