@@ -34,6 +34,7 @@ spec:
 	environment {
 		MAVEN_OPTS = '-Xmx4G'
 		CJE_ROOT = "${WORKSPACE}/cje-production"
+		AGG_DIR = 'gitCache/eclipse.platform.releng.aggregator'
 		logDir = "$CJE_ROOT/buildlogs"
 	}
 	stages {
@@ -71,6 +72,112 @@ spec:
 				}
 			}
 		}
+		stage('Clone and tag Build Inputs') {
+			steps {
+				sshagent (['github-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						source $CJE_ROOT/buildproperties.shsource
+						
+						git config --global user.email 'releng-bot@eclipse.org'
+						git config --global user.name 'Eclipse Releng Bot'
+						
+						# Clone this repo and all submodules into the 'AGG_DIR' directory
+						git clone --branch=$BRANCH --recursive \
+							git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git "$CJE_ROOT/$AGG_DIR"
+						
+						cd "$CJE_ROOT/$AGG_DIR"
+						
+						git submodule foreach 'git fetch; SUBMODULE_BRANCH=$(grep $name: $CJE_ROOT/streams/repositories_$PATCH_OR_BRANCH_LABEL.txt | cut -f2 -d\\ ); SUBMODULE_BRANCH=${SUBMODULE_BRANCH:-$BRANCH}; echo Checking out $SUBMODULE_BRANCH; git checkout $SUBMODULE_BRANCH; git pull'
+						
+						# Create 'Build input' commit (considering commits potentially submitted to the aggregator BRANCH in the meantime)
+						git checkout $BRANCH
+						git pull
+						git commit --all --message="Build input for build $BUILD_ID" || echo 'No submodule changes'
+						
+						if [ "${BUILD_TYPE}" == "I" ]; then
+							git push --verbose origin $BRANCH
+						fi
+					'''
+				}
+				dir("${CJE_ROOT}/${AGG_DIR}") {
+					sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+						// Try to find the last tag of the current build type that is available as a promoted build
+						// by checking the most recent 5 tags and seeing if an update site for it exists
+						sh '''#!/bin/bash -xe
+							source $CJE_ROOT/buildproperties.shsource
+							updateSiteRootPath=/home/data/httpd/download.eclipse.org/eclipse/updates/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
+							lastTagList=$(git tag --list "${BUILD_TYPE}*" | tail -n5 | tac)
+							for lt in $lastTagList ; do
+								if ssh genie.releng@projects-storage.eclipse.org test -d ${updateSiteRootPath}/${lt} ; then
+									echo "$lt" > 'lastTag'
+									exit 0
+								fi
+							done
+							# if no build is promoted yet, then just fallback to the last tag of the current build type
+							git describe --tags --match "${BUILD_TYPE}*" --abbrev=0 > 'lastTag'
+						'''
+					}
+					script { // Check for changes and abort if nothing changed since the last build
+						def boolean isScheduledBuild = !currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').isEmpty()
+						if (isScheduledBuild && sh(script: 'git diff $(cat "${WORKSPACE}/lastTag")..HEAD --name-only', returnStdout: true).trim().isEmpty()) {
+							emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - Build skipped", body: """\
+								No changes have been made since the last successful ${BUILD_TYPE}-Build and therefore this scheduled build was skipped:
+								${BUILD_URL}console
+								""".stripIndent(), mimeType: 'text/plain',
+								to: "${MAILING_LIST}", from: 'genie.releng@eclipse.org'
+							currentBuild.result = 'ABORTED'
+							error('Abort scheduled build due to no changes')
+						}
+					}
+					// Git tagging
+					sshagent (['github-bot-ssh']) {
+						sh '''#!/bin/bash -xe
+							source $CJE_ROOT/buildproperties.shsource
+							function toPushRepo() {
+								from="$1"
+								echo $(sed --expression 's,https://github.com/,git@github.com:,' <<< $from)
+							}
+							export -f toPushRepo
+							git submodule foreach 'if grep "^${name}:" $CJE_ROOT/streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; PUSH_URL="$(toPushRepo $(git config --get remote.origin.url))"; git push --verbose $PUSH_URL $BUILD_ID; else echo Skipping $name; fi || :'
+							git tag $BUILD_ID
+							git push --verbose origin $BUILD_ID
+						'''
+					}
+					// Git log creation
+					sh '''#!/bin/bash -xe
+						source $CJE_ROOT/buildproperties.shsource
+						reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M)
+						export lastTag=$(cat lastTag)
+						if [[ -n "$lastTag" ]]; then
+							export gitLogFile="$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html"
+							mkdir -p $(dirname "${gitLogFile}")
+							
+							echo -e "<h2>Git log from $lastTag (previous) to $BUILD_ID (current)</h2>" > $gitLogFile
+							echo -e "<h2>The tagging, and this report, were done at about $reportTimestamp</h2>" >> $gitLogFile
+							
+							function createGitLog() {
+								gitURL=$(git config remote.origin.url | sed --expression 's,git@github.com:,https://github.com/,' | sed 's/\\.git$//')
+								gitName="${gitURL##*/}"
+								gitLog=$(git log $lastTag..$BUILD_ID --date=short --format=format:"<tr><td class=\"datecell\">%cd</td><td class=\"commitcell\"><a href=\"${gitURL}/commit/%H\">%s</a></td><td class=\"authorcell\">%aN</td></tr>")
+								if [ -n "$gitLog" ]; then
+									echo "Record changes in ${gitName}"
+									echo "<table><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: ${gitName}</th></tr>" >> $gitLogFile
+									echo "<tr> <th class=\"datecell\">Date</th> <th class=\"commitcell\">Commit message</th> <th class=\"authorcell\">Author</th> </tr>" >> $gitLogFile
+									echo "${gitLog}" >> $gitLogFile
+									echo "</tbody></table><br><br>" >> $gitLogFile
+									echo '' >> $gitLogFile
+								fi
+							}
+							export -f createGitLog
+							createGitLog
+							git submodule foreach 'createGitLog'
+						else
+							echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > $gitLogFile
+						fi
+					'''
+				}
+			}
+		}
 	  stage('Create Base builder'){
           steps {
 				dir("${CJE_ROOT}/mbscripts") {
@@ -94,47 +201,6 @@ spec:
                   }
 				}
 			}
-		}
-	  stage('Clone Repositories'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent(['github-bot-ssh']) {
-                    sh '''
-                        set -eo pipefail
-                        git config --global user.email 'releng-bot@eclipse.org'
-                        git config --global user.name 'Eclipse Releng Bot'
-                        ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
-                    '''
-                  }
-				}
-			}
-		}
-	  stage('Tag Build Inputs'){
-          environment {
-            ABORT_IF_NO_CHANGES = "${!currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').isEmpty()}" // true, if triggered by timer
-          }
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent (['github-bot-ssh', 'projects-storage.eclipse.org-bot-ssh']) {
-                    sh '''
-                        set -xeo pipefail
-                        ./mb110_tagBuildInputs.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb110_tagBuildInputs.sh.log
-                    '''
-                  }
-				}
-                  script {
-                    if (env.ABORT_IF_NO_CHANGES && fileExists("${WORKSPACE}/noChanges")) {
-						emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - Build skipped",
-							body: """\
-							No changes have been made since the last successful ${BUILD_TYPE}-Build and therefore this scheduled build was skipped:
-							${BUILD_URL}console
-							""".stripIndent(), mimeType: 'text/plain',
-							to: "${BUILD.mailingList}", from: 'genie.releng@eclipse.org'
-                      currentBuild.result = 'ABORTED'
-                      error('Abort scheduled build due to no changes')
-                    }
-                  }
-            }
 		}
 	  stage('Aggregator maven build'){
 	      environment {
