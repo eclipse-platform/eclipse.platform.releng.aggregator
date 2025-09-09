@@ -16,7 +16,7 @@
 # USAGE: fn-write-property VAR_NAME
 #   VAR_NAME: Variable name to write as "variable=value" form
 # This script assumes the following variables have been defined and are pointing
-# to an appropriate file (see master-build.sh):
+# to an appropriate file:
 # BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
 # BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
 # BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
@@ -30,79 +30,4 @@ fn-write-property ()
   echo "export $1=$2" >> $BUILD_ENV_FILE
   echo "\$$1 = $2;" >> $BUILD_ENV_FILE_PHP
   echo "$1 = $2" >> $BUILD_ENV_FILE_PROP
-}
-
-# this function executes command passed as command line parameter and
-# if that command fails it exit with the same error code as the failed command
-fn-run-command ()
-{
-  $*
-  returnCode=$?
-  if [ $returnCode != 0 ]; then
-    echo "Execution of \"$*\" failed with return code : $returnCode"
-    exit $returnCode
-  fi
-}
-
-fn-notarize-macbuild ()
-{
-  set -x
-  BUILD_DIR="$1"; shift
-  DMG="$1"; shift
-
-  pushd "$BUILD_DIR" || exit 5
-
-  PRIMARY_BUNDLE_ID="${DMG//-macosx-cocoa-x86_64.dmg/}"
-
-  retryCount=3
-  while [ ${retryCount} -gt 0 ]; do
-
-    RAW_RESPONSE=$(curl -sS --write-out "\n%{http_code}" -X POST -F file=@"${DMG}" -F 'options={"primaryBundleId": "'"${PRIMARY_BUNDLE_ID}"'", "staple": true};type=application/json' https://cbi.eclipse.org/macos/xcrun/notarize || : )
-
-    RESPONSE=$(head -n-1 <<<"${RAW_RESPONSE}")
-    STATUS_CODE=$(tail -n1 <<<"${RAW_RESPONSE}")
-
-    if [[ "${STATUS_CODE}" != "200" ]]; then
-      echo "Bad response from the server (status=${STATUS_CODE})"
-      echo "${RESPONSE}"
-      retryCount=$((retryCount - 1))
-      if [ $retryCount -eq 0 ]; then
-        echo "Notarization failed 3 times. Exiting"
-        exit 1
-      else
-        echo "Retrying..."
-        sleep 2
-      fi
-    fi
-
-    UUID=$(echo "$RESPONSE" | grep -Po '"uuid"\s*:\s*"\K[^"]+' || : )
-    STATUS=$(echo "$RESPONSE" | grep -Po '"status"\s*:\s*"\K[^"]+' || : )
-
-    while [[ ${STATUS} == 'IN_PROGRESS' ]]; do
-      sleep 1m
-      RESPONSE=$(curl -sS "https://cbi.eclipse.org/macos/xcrun/${UUID}/status")
-      STATUS=$(echo "$RESPONSE" | grep -Po '"status"\s*:\s*"\K[^"]+' || : )
-    done
-
-    if [[ ${STATUS} != 'COMPLETE' ]]; then
-      echo "Notarization failed: ${RESPONSE}"
-      retryCount=$((retryCount - 1))
-      if [ $retryCount -eq 0 ]; then
-        echo "Notarization failed 3 times. Exiting"
-        exit 1
-      else
-        echo "Retrying..."
-        sleep 2
-      fi
-    else
-      break
-    fi
-
-  done
-
-  rm "${DMG}"
-
-  curl -sSJO "https://cbi.eclipse.org/macos/xcrun/${UUID}/download"
-  popd || exit 5
-  set +x
 }
