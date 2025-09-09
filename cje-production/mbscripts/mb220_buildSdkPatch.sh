@@ -47,5 +47,4 @@ mvn clean verify -DskipTests=true ${MVN_ARGS} \
   -DbuildId=$BUILD_ID \
   -Dcbi-ecj-version=99.99 \
   -e \
-  -T 1C \
-  ${JAVA_DOC_TOOL}
+  -T 1C
