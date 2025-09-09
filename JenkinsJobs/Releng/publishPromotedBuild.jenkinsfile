@@ -44,11 +44,14 @@ pipeline {
 							cd eclipse.platform.releng.aggregator
 							git sparse-checkout set --no-cone eclipse-platform-parent/pom.xml
 							git checkout
-							
-							mvn -f eclipse-platform-parent help:evaluate -Dexpression=releaseName '-Doutput=${WORKSPACE}/releaseName-value.txt' \
-								--batch-mode --no-transfer-progress --no-snapshot-updates
 					"""
-					assignEnvVariable('TRAIN_NAME', readFile('releaseName-value.txt').trim())
+					def eclipseParentPOM = readFile('eclipse.platform.releng.aggregator/eclipse-platform-parent/pom.xml')
+					def yearMatcher = eclipseParentPOM =~ /<releaseYear>(?<year>\d+)<\/releaseYear>/
+					def monthMatcher = eclipseParentPOM =~ /<releaseMonth>(?<month>\d+)<\/releaseMonth>/
+					if (!yearMatcher.find() || !monthMatcher.find()) {
+						error "Eclipse Parent POM does not contain releaseYear or releaseMonth"
+					}
+					assignEnvVariable('TRAIN_NAME', yearMatcher.group('year') + '-' + monthMatcher.group('month'))
 					if (!env.TRAIN_NAME) {
 						error "TRAIN_NAME is empty."
 					}
