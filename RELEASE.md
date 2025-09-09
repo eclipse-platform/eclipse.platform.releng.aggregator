@@ -170,7 +170,6 @@ Previously they were created in ther own job:
     - Update previous-release.baseline in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
     - Update the last release build versions in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties)
     - Update the previousReleaseVersion in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties)
-    - Update the name of the copied files in [eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh](eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/getPreviousRelease.sh)
 
 **RC2a Release**
   * Sometimes there is a critical issue that requires a fix, if it's decided that one is needed then an RC2a (followed by RC2b, RC2c etc if necessary) is built from the maintenance branch and promoted using the RC2 process.
