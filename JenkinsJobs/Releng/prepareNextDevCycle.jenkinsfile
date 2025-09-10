@@ -284,7 +284,6 @@ pipeline {
 							build.branch = env.MAINTENANCE_BRANCH
 							build.schedule = ''
 						}
-						builds.I.branchLabel = env.MAINTENANCE_BRANCH
 					}
 				}
 				replaceInFile('JenkinsJobs/Builds/dockerImages.jenkinsfile', [
@@ -293,13 +292,9 @@ pipeline {
 				replaceInFile('cje-production/buildproperties.txt', [
 					'BRANCH="master"' : "BRANCH=\"${MAINTENANCE_BRANCH}\"",
 				])
-				replaceInFile('cje-production/streams/repositories_java25.txt', [
-					': master' : ": ${MAINTENANCE_BRANCH}",
+				replaceAllInFile('.gitmodules', [
+					'branch\\s*=\\s*master' : "branch = ${MAINTENANCE_BRANCH}",
 				])
-				replaceInFile('cje-production/streams/repositories_master.txt', [
-					': master' : ": ${MAINTENANCE_BRANCH}",
-				])
-				sh "mv cje-production/streams/repositories_master.txt cje-production/streams/repositories_${MAINTENANCE_BRANCH}.txt"
 				
 				gitCommitAllExcludingSubmodules("Move ${PREVIOUS_RELEASE_VERSION}-I builds to ${MAINTENANCE_BRANCH} branch")
 				

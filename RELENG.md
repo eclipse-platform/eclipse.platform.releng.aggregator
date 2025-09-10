@@ -54,8 +54,7 @@ When the JDT team is ready they will raise an issue to create new Y builds and s
 
 **Things to Do:**
   * Update the Y-build configuration in the (buildConfigurations.json)[JenkinsJobs/buildConfigurations.json]
-    - Update `branchLabel` and `typeName` to the name of the new java version.
+    - Update `typeName` to the name of the new java version.
     - Remove the disablement of the current stream in the Y-build configuration (should be the only Y-build stream).
+    - Update `branches` to point to the new BETA branch.
     - Add unit tests for the new java version and remove old ones.
-  * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
-    - Repos without a `BETA_JAVA##` branch should be set to master

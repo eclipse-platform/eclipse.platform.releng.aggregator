@@ -49,7 +49,7 @@ spec:
 					def configurations = readJSON(file: "${WORKSPACE}/JenkinsJobs/buildConfigurations.json")
 					BUILD = configurations["${BUILD_TYPE}"]
 					assignEnvVariable('BUILD_TYPE_NAME', BUILD.typeName)
-					assignEnvVariable('PATCH_OR_BRANCH_LABEL', BUILD.branchLabel)
+					assignEnvVariable('GIT_SUBMODULE_BRANCHES', BUILD.branches ? BUILD.branches.collect{ name, branch -> "${name}:${branch}" }.join(',') : '')
 					assignEnvVariable('TEST_NAME_PREFIX', "ep${matcher.group('major')}${matcher.group('minor')}${BUILD_TYPE}-unit")
 					assignEnvVariable('TEST_CONFIGURATIONS_EXPECTED', BUILD.tests.collect{ c ->
 						"${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
@@ -82,12 +82,21 @@ spec:
 						git config --global user.name 'Eclipse Releng Bot'
 						
 						# Clone this repo and all submodules into the 'AGG_DIR' directory
-						git clone --branch=$BRANCH --recursive \
+						git clone --branch=$BRANCH --recurse-submodules --remote-submodules \
 							git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git "$CJE_ROOT/$AGG_DIR"
 						
 						cd "$CJE_ROOT/$AGG_DIR"
 						
-						git submodule foreach 'git fetch; SUBMODULE_BRANCH=$(grep $name: $CJE_ROOT/streams/repositories_$PATCH_OR_BRANCH_LABEL.txt | cut -f2 -d\\ ); SUBMODULE_BRANCH=${SUBMODULE_BRANCH:-$BRANCH}; echo Checking out $SUBMODULE_BRANCH; git checkout $SUBMODULE_BRANCH; git pull'
+						if [ -n "${GIT_SUBMODULE_BRANCHES}" ]; then
+							for submodule in ${GIT_SUBMODULE_BRANCHES//,/ }; do
+								path=$(echo "$submodule" | cut -d: -f1)
+								branch=$(echo "$submodule" | cut -d: -f2)
+								pushd "${path}"
+									git checkout ${branch}
+									git pull
+								popd
+							done
+						fi
 						
 						# Create 'Build input' commit (considering commits potentially submitted to the aggregator BRANCH in the meantime)
 						git checkout $BRANCH
@@ -133,14 +142,14 @@ spec:
 					sshagent (['github-bot-ssh']) {
 						sh '''#!/bin/bash -xe
 							source $CJE_ROOT/buildproperties.shsource
-							function toPushRepo() {
-								from="$1"
-								echo $(sed --expression 's,https://github.com/,git@github.com:,' <<< $from)
+							function tagAndPush {
+								git tag ${BUILD_ID} HEAD
+								pushURL=$(git config remote.origin.url | sed --expression 's,https://github.com/,git@github.com:,')
+								git push "${pushURL}" tag ${BUILD_ID}
 							}
-							export -f toPushRepo
-							git submodule foreach 'if grep "^${name}:" $CJE_ROOT/streams/repositories_$PATCH_OR_BRANCH_LABEL.txt > /dev/null; then git tag $BUILD_ID; PUSH_URL="$(toPushRepo $(git config --get remote.origin.url))"; git push --verbose $PUSH_URL $BUILD_ID; else echo Skipping $name; fi || :'
-							git tag $BUILD_ID
-							git push --verbose origin $BUILD_ID
+							export -f tagAndPush
+							git submodule foreach 'tagAndPush'
+							tagAndPush
 						'''
 					}
 					// Git log creation

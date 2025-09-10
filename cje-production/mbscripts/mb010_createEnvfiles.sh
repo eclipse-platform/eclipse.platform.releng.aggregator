@@ -74,7 +74,6 @@ fn-addToPropFiles BUILD_ENV_FILE_PROP "\"$BUILD_ENV_FILE_PROP\""
 # variables in buildproperties.txt are now defined, add other commonly used variables to prop files
 fn-addToPropFiles BUILD_TYPE "\"${BUILD_TYPE}\""
 fn-addToPropFiles BUILD_TYPE_NAME "\"${BUILD_TYPE_NAME}\""
-fn-addToPropFiles PATCH_OR_BRANCH_LABEL "\"${PATCH_OR_BRANCH_LABEL}\""
 fn-addToPropFiles BUILD_ID "\"$BUILD_TYPE$TIMESTAMP\""
 fn-addToPropFiles BUILD_DIR_SEG "\"$BUILD_TYPE$TIMESTAMP\""
 fn-addToPropFiles EQ_BUILD_DIR_SEG "\"$BUILD_TYPE$TIMESTAMP\""
