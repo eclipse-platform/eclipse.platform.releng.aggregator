@@ -156,9 +156,12 @@ pipeline {
 				replaceInFile('production/testScripts/configuration/streamSpecific.properties', [
 					"for ${PREVIOUS_RELEASE_VERSION}.0 builds" : "for ${NEXT_RELEASE_VERSION}.0 builds",
 				])
-				replaceInFile('JenkinsJobs/JobDSL.json', [
-					/"${PREVIOUS_RELEASE_VERSION}"/ : /"${NEXT_RELEASE_VERSION}"/,
-				])
+				script {
+					utilities.modifyJSON('JenkinsJobs/JobDSL.json') { jobs ->
+						jobs.Branches["${PREVIOUS_RELEASE_VERSION}"] = env.MAINTENANCE_BRANCH
+						jobs.Branches["${NEXT_RELEASE_VERSION}"] = 'master'
+					}
+				}
 				replaceAllInFile('JenkinsJobs/Builds/FOLDER.groovy', [
 					"(?<prefix># Schedule:.*\\R)(?s).*(?<suffix>\\R'''\\))" : "\${prefix}${I_BUILD_SCHEDULE}\${suffix}",
 				])
@@ -228,9 +231,11 @@ pipeline {
 				// Apply the following changes at a preparation branch, starting at the maintenance branch (to create a PR later)
 				sh 'git checkout -b prepareMaintenance ${MAINTENANCE_BRANCH}'
 				
-				replaceInFile('JenkinsJobs/JobDSL.json', [
-					"\"${PREVIOUS_RELEASE_VERSION}\": \"master\"" : "\"${PREVIOUS_RELEASE_VERSION}\": \"${MAINTENANCE_BRANCH}\"",
-				])
+				script {
+					utilities.modifyJSON('JenkinsJobs/JobDSL.json') { jobs ->
+						jobs.Branches["${PREVIOUS_RELEASE_VERSION}"] = env.MAINTENANCE_BRANCH
+					}
+				}
 				replaceInFile('JenkinsJobs/Builds/build.jenkinsfile', [
 					"typeName: 'Integration' , branchLabel: 'master'" : "typeName: 'Integration' , branchLabel: '${MAINTENANCE_BRANCH}'",
 				])

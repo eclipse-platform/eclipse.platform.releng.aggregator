@@ -4,8 +4,9 @@ folder('Builds') {
   description('Eclipse periodic build jobs.')
 }
 
-for (STREAM in config.Streams){
-	def BRANCH = config.Branches[STREAM]
+for (entry in config.Branches.entrySet()){
+	def STREAM = entry.key
+	def BRANCH = entry.value
 
 	pipelineJob('Builds/I-build-' + STREAM){
 		description('Daily Eclipse Integration builds.')

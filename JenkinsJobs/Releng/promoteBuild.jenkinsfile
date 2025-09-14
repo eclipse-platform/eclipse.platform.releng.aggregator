@@ -218,6 +218,9 @@ pipeline {
 							'previousReleaseVersion=.*' : "previousReleaseVersion=${BUILD_MAJOR}.${BUILD_MINOR}",
 							'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${BUILD_MAJOR}.${BUILD_MINOR}",
 						])
+						utilities.modifyJSON('JenkinsJobs/JobDSL.json') { jobs -> // Remove old I-build job for this release
+							jobs.Branches.remove("${BUILD_MAJOR}.${BUILD_MINOR}")
+						}
 						
 						utilities.gitCommitAllExcludingSubmodules("Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts")
 					}
