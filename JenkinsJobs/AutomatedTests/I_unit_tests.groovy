@@ -1,5 +1,4 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JenkinsJobs/JobDSL.json'))
-def STREAMS = config.Streams
 
 def TEST_CONFIGURATIONS = [
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
@@ -10,7 +9,7 @@ def TEST_CONFIGURATIONS = [
 	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
 ]
 
-for (STREAM in STREAMS){
+for (STREAM in config.Branches.keySet()){
 	def MAJOR = STREAM.split('\\.')[0]
 	def MINOR = STREAM.split('\\.')[1]
 	for (TEST_CONFIG in TEST_CONFIGURATIONS){

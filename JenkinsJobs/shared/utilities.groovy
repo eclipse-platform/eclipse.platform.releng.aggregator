@@ -1,3 +1,4 @@
+import groovy.json.JsonOutput
 
 @groovy.transform.Field
 def boolean IS_DRY_RUN = true
@@ -20,6 +21,13 @@ def replaceAllInFile(String filePath, Map<String,String> replacements) {
 		content = newContent
 	}
 	writeFile(file:filePath, text: content)
+}
+
+def modifyJSON(String jsonFilePath, Closure transformation) {
+	def json = readJSON(file: jsonFilePath)
+	transformation.call(json)
+	// This leads to prettier results than using the writeJSON() step, even with the pretty parameter set.
+	writeFile(file: jsonFilePath, text: JsonOutput.prettyPrint(JsonOutput.toJson(json)), encoding :'UTF-8')
 }
 
 def runHereAndForEachGitSubmodule(Closure task) {

@@ -5,8 +5,9 @@ folder('YPBuilds') {
   description('Builds and tests for the beta java builds.')
 }
 
-for (STREAM in config.Streams){
-	def BRANCH = config.Branches[STREAM]
+for (entry in config.Branches.entrySet()){
+	def STREAM = entry.key
+	def BRANCH = entry.value
 
 	pipelineJob('YPBuilds/Y-build-' + STREAM){
 		description('Daily Maintenance Builds.')
