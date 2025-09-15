@@ -18,8 +18,9 @@ for (entry in config.Branches.entrySet()){
 						spec('''TZ=America/Toronto
 # Format: Minute Hour Day Month Day-of-week (1-7)
 # - - - Beta Java Eclipse SDK builds - - - 
-# Schedule: 10 AM every second day
-0 10 * * 2,4,6
+# Schedule: 10 AM every second day (and every day in Java RC phase)
+0 10 * 8-10 2,4,6
+0 10 1-26 11 2,4,6
 ''')
 					}
 				}
