@@ -72,13 +72,26 @@ pipeline {
 					// Compute new build schedule
 					def now = java.time.LocalDate.now()
 					def rcEnd = rc2Date.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
-					def lastCompleteMonth = rcEnd.monthValue - 1
-					// Consider end-of-year overflows
-					def completeMonths = (now.monthValue < lastCompleteMonth) ? "${now.monthValue}-${lastCompleteMonth}" : "${now.monthValue}-12,1-${lastCompleteMonth}"
-					assignEnvVariable('I_BUILD_SCHEDULE', """\
-						0 18 * ${completeMonths} *
-						0 18 1-${rcEnd.dayOfMonth} ${rcEnd.monthValue} *
-					""".stripIndent().trim())
+					assignEnvVariable('I_BUILD_SCHEDULE', createCronPattern(now, rcEnd, 18, '*').trim())
+					
+					env.NEXT_JAVA_RELEASE_DATE = readParameter('NEXT_JAVA_RELEASE_DATE')
+					def yBuildSchedule = null
+					if ("${NEXT_JAVA_RELEASE_DATE}".isEmpty()) {
+						yBuildSchedule = createCronPattern(now, rcEnd, 10, '2,4,6')
+					} else {
+						// Java releases soon after the Eclipse release, therefore schedule Y-builds daily within the 'Java RC phase'
+						def javaReleaseDate = parseDate("${NEXT_JAVA_RELEASE_DATE}")
+						def javaRCStart = javaReleaseDate.minusDays(7)
+						def javaRCEnd = javaReleaseDate.plusDays(2)
+						if (javaRCStart.monthValue != javaRCEnd.monthValue) {
+							// If this is encountered, enhance the logic to handle 'java RC' phases ranging more than one month
+							error "Java release is not in the middle of a month"
+						}
+						yBuildSchedule = createCronPattern(now, javaRCStart, 10, '2,4,6') + """\
+						0 10 ${javaRCStart.dayOfMonth}-${javaRCEnd.dayOfMonth} ${javaRCStart.monthValue} *
+						""".stripIndent()
+					}
+					assignEnvVariable('Y_BUILD_SCHEDULE', yBuildSchedule.trim())
 				}
 			}
 		}
@@ -164,6 +177,9 @@ pipeline {
 				}
 				replaceAllInFile('JenkinsJobs/Builds/FOLDER.groovy', [
 					"(?<prefix># Schedule:.*\\R)(?s).*(?<suffix>\\R'''\\))" : "\${prefix}${I_BUILD_SCHEDULE}\${suffix}",
+				])
+				replaceAllInFile('JenkinsJobs/YBuilds/FOLDER.groovy', [
+					"(?<prefix># Schedule:.*\\R)(?s).*(?<suffix>\\R'''\\))" : "\${prefix}${Y_BUILD_SCHEDULE}\${suffix}",
 				])
 				
 				gitCommitAllExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
@@ -460,6 +476,16 @@ def assignEnvVariable(String name, String value) {
 @NonCPS
 def parseDate(String dateString) {
 	return java.time.LocalDate.parse(dateString.trim()) // expects format 'yyyy-MM-dd'
+}
+
+private String createCronPattern(java.time.LocalDate start, java.time.LocalDate end, int hour, String daysOfWeek = '*') {
+	def lastCompleteMonth = end.monthValue - 1
+	// Consider end-of-year overflows
+	def completeMonths = (start.monthValue < lastCompleteMonth) ? "${start.monthValue}-${lastCompleteMonth}" : "${start.monthValue}-12,1-${lastCompleteMonth}"
+	return """\
+		0 ${hour} * ${completeMonths} ${daysOfWeek}
+		0 ${hour} 1-${end.dayOfMonth} ${end.monthValue} ${daysOfWeek}
+	""".stripIndent()
 }
 
 def replaceInFile(String filePath, Map<String,String> replacements) {

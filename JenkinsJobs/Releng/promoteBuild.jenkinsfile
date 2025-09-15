@@ -239,7 +239,10 @@ pipeline {
 						utilities.replaceAllInFile('cje-production/buildproperties.txt', [
 							'ECLIPSE_RUN_REPO="https://download.eclipse.org/eclipse/updates/.*"' : "ECLIPSE_RUN_REPO=\"${RELEASE_P2_REPOSITORY}\"",
 						])
-						
+						// Disable Y-build schedule only after the previous releases job is not updated (on the master) anymore, because Y-build jobs run beyond the Eclipse release if a new java release is imminent
+						utilities.replaceAllInFile('JenkinsJobs/YBuilds/FOLDER.groovy', [
+							"spec\\('''(?s).+?'''\\)" : "spec('')",
+						])
 						utilities.gitCommitAllExcludingSubmodules("Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes")
 					}
 					// Switch back to master for subsequent parts of this pipeline
