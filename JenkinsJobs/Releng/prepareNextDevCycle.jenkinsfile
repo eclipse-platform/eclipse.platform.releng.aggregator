@@ -1,4 +1,6 @@
 
+def releaseEvents = [ M1: 'Milestone 1', M2: 'Milestone 2', M3: 'Milestone 3', RC1: 'Release Candidate 1', RC2: 'Release Candidate 2', GA: 'Release' ]
+
 pipeline {
 	options {
 		timestamps()
@@ -55,25 +57,28 @@ pipeline {
 					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousIdMatcher.group('date')}-${previousIdMatcher.group('time')}")
 					previousIdMatcher = null // release matcher as it's not serializable
 					
-					//TODO: Read the dates from the calender instead of provide a structured document somewhere?
-					// E.g. next to: https://github.com/eclipse-simrel/.github/blob/main/wiki/SimRel/2025-09.md
-					def m1Date = parseDate(readParameter('M1_DATE'))
-					def m2Date = parseDate(readParameter('M2_DATE'))
-					def m3Date = parseDate(readParameter('M3_DATE'))
-					def rc1Date = parseDate(readParameter('RC1_DATE'))
-					def rc2Date = parseDate(readParameter('RC2_DATE'))
-					def gaDate = parseDate(readParameter('GA_DATE'))
-					if (!(m1Date < m2Date && m2Date < m3Date && m3Date < rc1Date && rc1Date < rc2Date && rc2Date < gaDate)) {
-						error "Dates are not in strictly ascending order: ${M1_DATE}, ${M2_DATE}, ${M3_DATE}, ${RC1_DATE}, ${RC2_DATE}, ${GA_DATE}"
+					env.NEXT_SIMREL_NAME = readParameter('NEXT_SIMREL_NAME')
+					def simRelMatcher = env.NEXT_SIMREL_NAME =~ /(?<year>\d{4})-(?<month>\d{2})/
+					if (!simRelMatcher.matches()) {
+						error "Unexpected format for NEXT_SIMREL_NAME: ${NEXT_SIMREL_NAME}"
 					}
-					assignEnvVariable('NEXT_RELEASE_YEAR', gaDate.year.toString())
-					assignEnvVariable('NEXT_RELEASE_MONTH', String.format("%02d", gaDate.monthValue))
-					assignEnvVariable('NEXT_RELEASE_NAME', "${NEXT_RELEASE_YEAR}-${NEXT_RELEASE_MONTH}")
+					assignEnvVariable('NEXT_RELEASE_YEAR', simRelMatcher.group('year'))
+					assignEnvVariable('NEXT_RELEASE_MONTH', simRelMatcher.group('month'))
+					assignEnvVariable('NEXT_RELEASE_NAME', "${NEXT_SIMREL_NAME}")
+					simRelMatcher = null // release matcher as it's not serializable
+					
+					def simRelDatesRaw = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-simrel/.github/refs/heads/main/wiki/SimRel/${NEXT_SIMREL_NAME}_dates.json", returnStdout: true)
+					def simRelDates = readJSON(text: simRelDatesRaw)
+					def eclipseReleaseDates = releaseEvents.collectEntries{ name, _ ->
+						def date = parseDate(simRelDates[name]).minusDays(name == 'GA' ? 0 : 7) // All Eclipse-TLPs have offset -7 days
+						assignEnvVariable("${name}_DATE", date)
+						return [name, date]
+					}
 					assignEnvVariable('MAINTENANCE_BRANCH', "R${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}_maintenance")
 					
 					// Compute new build schedule
 					def now = java.time.LocalDate.now()
-					def rcEnd = rc2Date.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
+					def rcEnd = eclipseReleaseDates.RC2.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
 					assignEnvVariable('I_BUILD_SCHEDULE', createCronPattern(now, rcEnd, 18, '*').trim())
 					
 					env.NEXT_JAVA_RELEASE_DATE = readParameter('NEXT_JAVA_RELEASE_DATE')
@@ -445,12 +450,10 @@ pipeline {
 								echo "Skipping .eclipsefdn repository of : ${organisation}"
 								continue
 							}
-							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M1",  "${NEXT_RELEASE_VERSION} Milestone 1",         "${M1_DATE}")
-							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M2",  "${NEXT_RELEASE_VERSION} Milestone 2",         "${M2_DATE}")
-							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} M3",  "${NEXT_RELEASE_VERSION} Milestone 3",         "${M3_DATE}")
-							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} RC1", "${NEXT_RELEASE_VERSION} Release Candidate 1", "${RC1_DATE}")
-							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION} RC2", "${NEXT_RELEASE_VERSION} Release Candidate 2", "${RC2_DATE}")
-							githubAPI.createMilestone(organisation, repository, "${NEXT_RELEASE_VERSION}",     "${NEXT_RELEASE_VERSION} Release",             "${GA_DATE}")
+							releaseEvents.each{ name, description ->
+								def title = "${NEXT_RELEASE_VERSION}" + (name != 'GA' ? " ${name}" : '')
+								githubAPI.createMilestone(organisation, repository, title, "${NEXT_RELEASE_VERSION} ${description}", env["${name}_DATE"])
+							}
 						}
 					}
 				}
