@@ -82,12 +82,7 @@ Useful for debugging and to very that the pipeline behaves as intended.
 ''')
 		stringParam('NEXT_RELEASE_VERSION', null, 'Version of the release to prepare, for example: 4.37')
 		stringParam('PREVIOUS_RELEASE_CANDIDATE_ID', null, 'Id of the current release-candiate for the previous release, for example: S-4.36RC2-202505281830')
-		stringParam('M1_DATE', null, 'Milestone 1 end date in the format yyyy-mm-dd, for example: 2025-07-04')
-		stringParam('M2_DATE', null, 'Milestone 2 end date in the format yyyy-mm-dd, for example: 2025-07-25')
-		stringParam('M3_DATE', null, 'Milestone 3 end date in the format yyyy-mm-dd, for example: 2025-08-15')
-		stringParam('RC1_DATE', null, 'Release-Candidate 1 end date in the format yyyy-mm-dd, for example: 2025-08-22')
-		stringParam('RC2_DATE', null, 'Release-Candidate 2 end date in the format yyyy-mm-dd, for example: 2025-08-29')
-		stringParam('GA_DATE', null, 'Final general availability release date in the format yyyy-mm-dd, for example: 2025-09-10')
+		stringParam('NEXT_SIMREL_NAME', null, 'The name of the Simultanious Release that is targeted by the prepared release in the format yyyy-mm, for example: 2026-03')
 		stringParam('NEXT_JAVA_RELEASE_DATE', null, 'Release date of the next Java version, if it is released shortly after the Eclipse release (i.e. shortly after the <em>GA_DATE</em> specified above, <b>usual for odd release versions</b>), else left blank (<b>usual for even releases</b>). Value is in the format yyyy-mm-dd, for example: 2025-09-16')
 	}
 	definition {
