@@ -3,7 +3,7 @@ def STREAMS = config.Streams
 
 def TEST_CONFIGURATIONS = [
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "install('jdk', 'https://download.java.net/java/early_access/jdk25/27/GPL/openjdk-25-ea+27_linux-x64_bin.tar.gz')" ],
+	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "install('jdk', 'https://download.java.net/java/GA/jdk25/bd75d5f9689641da8e1daabeccb5528b/36/GPL/openjdk-25_linux-x64_bin.tar.gz')" ],
 	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home'" ],
 	[os: 'macosx', ws:'cocoa', arch: 'x86_64' , javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home'" ],
 	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
