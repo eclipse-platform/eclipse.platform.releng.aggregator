@@ -131,6 +131,7 @@ spec:
 	  stage('Clone Repositories'){
           steps {
 				dir("${CJE_ROOT}/mbscripts") {
+					withCredentials([gitUsernamePassword(credentialsId: 'github-bot')]) { // Fetching LFS objects from GitHub requires authentication
                   sshagent(['github-bot-ssh']) {
                     sh '''
                         set -eo pipefail
@@ -139,6 +140,7 @@ spec:
                         ./mb100_cloneRepos.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb100_cloneRepos.sh.log
                     '''
                   }
+					}
 				}
 			}
 		}
