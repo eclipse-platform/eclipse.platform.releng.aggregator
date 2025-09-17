@@ -7,10 +7,6 @@ def setDryRun(boolean isDryRun) {
 	IS_DRY_RUN = isDryRun
 }
 
-def replaceInFile(String filePath, Map<String,String> replacements) {
-	replaceAllInFile(filePath, replacements.collectEntries{ k, v -> [java.util.regex.Pattern.quote(k), v] });
-}
-
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
 	def content = readFile(filePath)
 	for (entry in replacements) {

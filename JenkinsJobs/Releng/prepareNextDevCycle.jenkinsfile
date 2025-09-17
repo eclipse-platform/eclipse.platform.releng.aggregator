@@ -137,12 +137,12 @@ pipeline {
 		}
 		stage('Update build scripts') {
 			steps {
-				replaceInFile('cje-production/buildproperties.txt', [
-					"RELEASE_VER=\"${PREVIOUS_RELEASE_VERSION}\"" : "RELEASE_VER=\"${NEXT_RELEASE_VERSION}\"",
-					"STREAM=\"${PREVIOUS_RELEASE_VERSION}.0\"" : "STREAM=\"${NEXT_RELEASE_VERSION}.0\"",
-					"STREAMMajor=\"${PREVIOUS_RELEASE_VERSION_MAJOR}\"" : "STREAMMajor=\"${NEXT_RELEASE_VERSION_MAJOR}\"",
-					"STREAMMinor=\"${PREVIOUS_RELEASE_VERSION_MINOR}\"" : "STREAMMinor=\"${NEXT_RELEASE_VERSION_MINOR}\"",
-					"ECLIPSE_RUN_REPO=\"https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/\"" : "ECLIPSE_RUN_REPO=\"https://download.eclipse.org/eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds/\"",
+				replaceAllInFile('cje-production/buildproperties.txt', [
+					"RELEASE_VER=\".*\"" : "RELEASE_VER=\"${NEXT_RELEASE_VERSION}\"",
+					"STREAM=\".*\"" : "STREAM=\"${NEXT_RELEASE_VERSION}.0\"",
+					"STREAMMajor=\".*\"" : "STREAMMajor=\"${NEXT_RELEASE_VERSION_MAJOR}\"",
+					"STREAMMinor=\".*\"" : "STREAMMinor=\"${NEXT_RELEASE_VERSION_MINOR}\"",
+					"ECLIPSE_RUN_REPO=\".*\"" : "ECLIPSE_RUN_REPO=\"https://download.eclipse.org/eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds/\"",
 				])
 				replaceInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/platform.p2.inf', [
 					"${PREVIOUS_RELEASE_VERSION} Release" : "${NEXT_RELEASE_VERSION} Release",
@@ -463,7 +463,7 @@ def parseDate(String dateString) {
 }
 
 def replaceInFile(String filePath, Map<String,String> replacements) {
-	utilities.replaceInFile(filePath, replacements)
+	utilities.replaceAllInFile(filePath, replacements.collectEntries{ k, v -> [java.util.regex.Pattern.quote(k), v] });
 }
 
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
