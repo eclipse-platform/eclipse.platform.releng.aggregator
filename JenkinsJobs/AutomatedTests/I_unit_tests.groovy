@@ -2,7 +2,6 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 
 def TEST_CONFIGURATIONS = [
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 24, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk24-latest')" ],
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'openjdk-jdk25-latest')" ],
 	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home'" ],
 	[os: 'macosx', ws:'cocoa', arch: 'x86_64' , javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home'" ],
