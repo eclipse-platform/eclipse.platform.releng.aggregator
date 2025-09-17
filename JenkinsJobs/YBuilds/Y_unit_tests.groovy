@@ -2,10 +2,9 @@ def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('Jenk
 
 def TEST_CONFIGURATIONS = [
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "install('jdk', 'https://download.java.net/java/GA/jdk25/bd75d5f9689641da8e1daabeccb5528b/36/GPL/openjdk-25_linux-x64_bin.tar.gz')" ],
-	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home'" ],
-	[os: 'macosx', ws:'cocoa', arch: 'x86_64' , javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home'" ],
-	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
+	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk25-latest')" ],
+	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 25, agentLabel: 'nc1ht-macos11-arm64', javaHome: "installTemurinJDK('25', 'mac', 'x86_64', 'ea')" ],
+	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 25, agentLabel: 'qa6xd-win11'        , javaHome: "installTemurinJDK('25', 'windows', 'x86_64', 'ea')" ],
 ]
 
 for (STREAM in config.Branches.keySet()){
@@ -130,14 +129,24 @@ def pathOf(String path){
 def installTemurinJDK(String version, String os, String arch, String releaseType='ga') {
 	// Translate os/arch names that are different in the Adoptium API
 	if (arch == 'x86_64') {
-		arch == 'x64'
+		arch = 'x64'
 	}
-	return install('jdk', "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse")
+	if (os == 'macosx') {
+		os = 'mac'
+	} else if (os == 'win32') {
+		os = 'windows'
+	}
+	return install('jdk', "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse") + (os == 'mac' ? '/Contents/Home' : '')
 }
 
 def install(String toolType, String url) {
 	dir("${WORKSPACE}/tools/${toolType}") {
-		sh "curl -L ${url} | tar -xzf -"
+		def script = "curl -L ${url} | tar -xzf -"
+		if (isUnix()) {
+			sh script
+		} else { // Windows 10 and later has a tar.exe that can handle zip files (even read from std-in)
+			bat script
+		}
 		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
 	}
 }
