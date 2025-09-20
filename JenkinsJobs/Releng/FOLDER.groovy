@@ -88,7 +88,7 @@ Useful for debugging and to very that the pipeline behaves as intended.
 		stringParam('RC1_DATE', null, 'Release-Candidate 1 end date in the format yyyy-mm-dd, for example: 2025-08-22')
 		stringParam('RC2_DATE', null, 'Release-Candidate 2 end date in the format yyyy-mm-dd, for example: 2025-08-29')
 		stringParam('GA_DATE', null, 'Final general availability release date in the format yyyy-mm-dd, for example: 2025-09-10')
-		stringParam('NEXT_JAVA_RELEASE_DATE', null, 'Release date of the next nww Java version, if it is released shortly after the Eclipse release (i.e. shortly after the <em>GA_DATE</em> specified above, usually for odd release versions), else left blank (usually for even releases). Value is in the format yyyy-mm-dd, for example: 2025-09-16')
+		stringParam('NEXT_JAVA_RELEASE_DATE', null, 'Release date of the next Java version, if it is released shortly after the Eclipse release (i.e. shortly after the <em>GA_DATE</em> specified above, <b>usual for odd release versions</b>), else left blank (<b>usual for even releases</b>). Value is in the format yyyy-mm-dd, for example: 2025-09-16')
 	}
 	definition {
 		cpsScm {

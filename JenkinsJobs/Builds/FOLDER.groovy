@@ -4,9 +4,7 @@ folder('Builds') {
   description('Eclipse periodic build jobs.')
 }
 
-for (entry in config.Branches.entrySet()){
-	def STREAM = entry.key
-	def BRANCH = entry.value
+config.I.streams.each{ STREAM, configuration ->
 
 	pipelineJob('Builds/I-build-' + STREAM){
 		description('Daily Eclipse Integration builds.')
@@ -14,13 +12,12 @@ for (entry in config.Branches.entrySet()){
 			pipelineTriggers {
 				triggers {
 					cron {
-						spec('''TZ=America/Toronto
+						spec(configuration.schedule ? """TZ=America/Toronto
 # Format: Minute Hour Day Month Day-of-week (1-7)
 # - - - Integration Eclipse SDK builds - - - 
 # Schedule: 6 PM every day until end of RC2
-0 18 * 8-10 *
-0 18 1-26 11 *
-''')
+${configuration.schedule}
+""" : '')
 					}
 				}
 			}
@@ -29,7 +26,7 @@ for (entry in config.Branches.entrySet()){
 			cpsScm {
 				lightweight(true)
 				scm {
-					github('eclipse-platform/eclipse.platform.releng.aggregator', BRANCH)
+					github('eclipse-platform/eclipse.platform.releng.aggregator', configuration.branch)
 				}
 				scriptPath('JenkinsJobs/Builds/build.jenkinsfile')
 			}

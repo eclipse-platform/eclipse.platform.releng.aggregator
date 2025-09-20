@@ -218,8 +218,9 @@ pipeline {
 							'previousReleaseVersion=.*' : "previousReleaseVersion=${BUILD_MAJOR}.${BUILD_MINOR}",
 							'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${BUILD_MAJOR}.${BUILD_MINOR}",
 						])
-						utilities.modifyJSON('JenkinsJobs/JobDSL.json') { jobs -> // Remove old I-build job for this release
-							jobs.Branches.remove("${BUILD_MAJOR}.${BUILD_MINOR}")
+						utilities.modifyJSON('JenkinsJobs/JobDSL.json') { builds ->
+							// Remove old I/Y-build jobs for this release
+							builds.values().each{ build -> build.streams.remove("${BUILD_MAJOR}.${BUILD_MINOR}") }
 						}
 						
 						utilities.gitCommitAllExcludingSubmodules("Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts")
@@ -238,10 +239,6 @@ pipeline {
 						"""
 						utilities.replaceAllInFile('cje-production/buildproperties.txt', [
 							'ECLIPSE_RUN_REPO="https://download.eclipse.org/eclipse/updates/.*"' : "ECLIPSE_RUN_REPO=\"${RELEASE_P2_REPOSITORY}\"",
-						])
-						// Disable Y-build schedule only after the previous releases job is not updated (on the master) anymore, because Y-build jobs run beyond the Eclipse release if a new java release is imminent
-						utilities.replaceAllInFile('JenkinsJobs/YBuilds/FOLDER.groovy', [
-							"spec\\('''(?s).+?'''\\)" : "spec('')",
 						])
 						utilities.gitCommitAllExcludingSubmodules("Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes")
 					}

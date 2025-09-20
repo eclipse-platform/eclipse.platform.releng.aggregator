@@ -6,14 +6,10 @@
 
 The (Create Jobs)[https://ci.eclipse.org/releng/job/Create%20Jobs/] job is used to populate the jenkins subfolders with the jobs defined in (JenkinsJobs)[JenkinsJobs] groovy files. There are 2 Process Job DSLs steps, the first looks for FOLDER.groovy files and creates the folders, the second creates the jobs themselves.
 
-Since not every folder needs to be updated every release cycle (for example (JenkinsJobs/YBuilds)[JenkinsJobs/YBuilds]) the currently active folders need to be explicitly listed in the Process Job DSLs step of the build. Likewise, unless you want the YBuilds to be recreated when they are no longer needed, the YBuilds folder will need to be removed from Create Jobs after the release. 
-
 Create Jobs *must be run manually*. Unfortunately JobDSL needs to be run by a specific user, so the build cannot be automatically started by a timer or when it detects jenkins changes without installing an additional plugin like (Authorize Project)[https://plugins.jenkins.io/authorize-project/], which supposedly still works but is abandoned and I (Sam) have not had time to investigate further or find alternatives. This means that while any committer can make changes to the Jenkins Jobs in git, someone with Jenkins rights will have to start the build to implement those changes.
 
-Exceptions: 
-  - (StartSmokeTests)[https://ci.eclipse.org/releng/job/Start-smoke-tests/] predates the rest of the groovy migrations and changing the script to fit JobDSL would have just complicated it with little gain so it was left as is. The source file ((StartSmokeTests.groovy)[JenkinsJobs/SmokeTests/StartSmokeTests.groovy]) is kept with the rest of the smoke test groovy files, but if JobDSL tries to build it it fails so instead of following the normal `JenkinsJobs/FOLDER/*.groovy` format, smoke tests are listed in Create Jobs as `JenkinsJobs/SmokeTests/smoke_*.groovy` specifically.
-
-Currently jobs also need to be deleted manually.
+Obsolete jobs have to be deleted manually.
+They are not deleted automatically as some may be are still in use for a short time (e.g. Y-builds if a java-release is imminent) or to serve as reference in case the new jobs have problems.
 
 **The JenkinsJobs Folder**
 
@@ -52,12 +48,12 @@ The builds themselves and their unit tests are in the (Y Builds)[JenkinsJobs/YBu
 
 ## Setting Up New Builds
 
-When the JDT team is ready they will raise an issue to create new Y and P builds and supply the name of the new branch, usually BETA_JAVA##.
+When the JDT team is ready they will raise an issue to create new Y builds and supply the name of the new branch, usually `BETA_JAVA##`.
 
 **Things to Do:**
-  * Update the Y-build (Y_build.groovy)[JenkinsJobs/YBuilds/Y_build.groovy].
+  * Update the Y-build configuration in the (build.jenkinsfile)[JenkinsJobs/Builds/build.jenkinsfile]
     - Update `branchLabel` and `typeName` to the name of the new java version
+  * Remove the disablement of the current stream in the Y-build configuration in the (JobDSL.json)[JenkinsJobs/JobDSL.json] (should be the only Y-build stream).
   * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
-    - Repos without a BETA_JAVA## branch should be set to master
-  * Add unit tests for the new java version in (JenkinsJobs/YBuilds)[JenkinsJobs/YBuilds]
-  * Add Y builds to (Create Jobs)[https://ci.eclipse.org/releng/job/Create%20Jobs/] in Jenkins if they've been removed
+    - Repos without a `BETA_JAVA##` branch should be set to master
+  * Add unit tests for the new java version in (JenkinsJobs/YBuilds)[JenkinsJobs/YBuilds] and (build.jenkinsfile)[JenkinsJobs/Builds/build.jenkinsfile]

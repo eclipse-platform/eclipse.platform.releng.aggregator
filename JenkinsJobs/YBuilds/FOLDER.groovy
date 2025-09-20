@@ -5,23 +5,21 @@ folder('YPBuilds') {
   description('Builds and tests for the beta java builds.')
 }
 
-for (entry in config.Branches.entrySet()){
-	def STREAM = entry.key
-	def BRANCH = entry.value
+config.Y.streams.each{ STREAM, configuration ->
 
 	pipelineJob('YPBuilds/Y-build-' + STREAM){
 		description('Daily Maintenance Builds.')
+		disabled(configuration.disabled?.toBoolean() ?: false)
 		properties {
 			pipelineTriggers {
 				triggers {
 					cron {
-						spec('''TZ=America/Toronto
+						spec(configuration.schedule ? """TZ=America/Toronto
 # Format: Minute Hour Day Month Day-of-week (1-7)
 # - - - Beta Java Eclipse SDK builds - - - 
 # Schedule: 10 AM every second day (and every day in Java RC phase)
-0 10 * 8-10 2,4,6
-0 10 1-26 11 2,4,6
-''')
+${configuration.schedule}
+""" : '')
 					}
 				}
 			}
@@ -30,7 +28,7 @@ for (entry in config.Branches.entrySet()){
 			cpsScm {
 				lightweight(true)
 				scm {
-					github('eclipse-platform/eclipse.platform.releng.aggregator', BRANCH)
+					github('eclipse-platform/eclipse.platform.releng.aggregator', configuration.branch)
 				}
 				scriptPath('JenkinsJobs/Builds/build.jenkinsfile')
 			}
