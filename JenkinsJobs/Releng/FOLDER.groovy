@@ -2,6 +2,51 @@ folder('Releng') {
 	description('Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.')
 }
 
+pipelineJob('Releng/cleanupBuilds'){
+	displayName('Daily Cleanup of old Builds')
+	description('Remove old builds from the downloads servers.')
+	properties {
+		pipelineTriggers {
+			triggers {
+				cron {
+					spec('''TZ=America/Toronto
+0 4 * * *
+0 16 * * *
+''')
+				}
+			}
+		}
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/cleanupBuilds.jenkinsfile')
+		}
+	}
+}
+
+pipelineJob('Releng/cleanupReleaseArtifacts'){
+	parameters {
+		booleanParam('REMOVE_Y_BUILDS', false, '''Typically only true in even releases.
+		True: Remove Y-build directories and move P-build directory to P-builds-old for safekeeping.
+		False: Remove P-builds-old directory.
+		''' )
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/cleanupReleaseArtifacts.jenkinsfile')
+		}
+	}
+}
+
+
 pipelineJob('Releng/deployToMaven'){
 	displayName('Deploy to Maven')
 	description('''\

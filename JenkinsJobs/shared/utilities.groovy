@@ -71,4 +71,17 @@ private void gitPush(String refSpec, boolean force) {
 	}
 }
 
+def List<String> listSubDirectoriesOnRemote(String remoteDirectory, String dropNamePattern, int major = 0, int minor = 0, int service = 0) {
+	def versionFilter = major == 0 ? '' :"""\
+			| xargs grep -l 'STREAMMinor=\\"${minor}\\"' \
+			| xargs grep -l 'STREAMMajor=\\"${major}\\"' \
+			| xargs grep -l 'STREAMService=\\"${service}\\"'
+	""".trim().stripIndent()
+	def result = sh(script: """$SSH "cd ${remoteDirectory} && \
+		find -maxdepth 1 -type d ${dropNamePattern} -exec find {} -type f -name 'buildproperties.txt' \\\\; \
+		${versionFilter} | xargs dirname | sort -u"
+	""", returnStdout: true).trim()
+	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.startsWith('./') ? d.substring(2) : d }
+}
+
 return this

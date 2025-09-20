@@ -1,0 +1,121 @@
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 30, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	environment {
+		// Download Server locations (seldomly change)
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
+		EP_ECLIPSE_UPDATES = "${EP_ROOT}/eclipse/updates"
+		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+		
+		RELEASE_RETENTION_COUNT = '3'
+	}
+	stages {
+//		stage('Process Input') {
+			//TODO: derive more values from the input. Specify release to clean as release id
+			// -> derive release_build from it
+			// -> compute release_to_remove as three minor versions smaller (consider underflow)
+			// Consider p_build == release_to_remove ? Actually not, see below
+			//TODO: ask for retention policy of Y/P-builds and if old ones can be removed? milestones too?
+			// See https://download.eclipse.org/justj/?file=eclipse/updates
+			
+			//TODO: Assume remove_y_builds false if there is an upcomming java-release
+			// Assume false on odd releases and true on even ones?
+			// Assume p_build = release_to_clean-1 if remove_y_builds=false respectivly on odd releases
+			
+			// CONSIDER: P-builds are handled by JDT now. So actually only Y-builds cleaning enabled yes or no is the questions
+			// and it should also check for older Y-builds from previous release?
+			// Ask JDT when they can be removed. Maybe it's better to do/check this daily?
+			// -> Requires marker if there is a Java-release soon (like for schedule)
+			
+			//TODO: just read from the download-server all available releases and use the last one as release_to_clean
+			// Only two parameters should be the flag if y-builds should be deleted and the number of releases to retain
+			// If Y-builds are deleted, delete all of them before the latest release (like i-builds).
+			
+			//TODO: ask about the retention policy of Y-builds in an issue. Ask if Y-build for Equinox is relevant.
+			// Is it sufficient to just have the latest Y-builds from after the release? Maybe just limit the number of retained Y-builds in general?
+			// Idea: retain only the last X Y-builds and delete the repo automatically when the release after the developed one is released
+//		}
+		stage('Cleanup old release artifacts') {
+			environment {
+				SSH = 'ssh genie.releng@projects-storage.eclipse.org'
+			}
+			steps {
+				script {
+					sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+						def dropIdPattern = /(?<type>[SR])-(?<version>\d+\.\d+(\.\d+)?)(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
+						def iBuildIdPattern = /I(?<date>\d{8})-(?<time>\d{4})/
+						
+						def allDrops = sh(script: '$SSH ls -p ${EP_ECLIPSE_DROPS}', returnStdout: true).trim().split('\\s+')
+							.findAll{ d -> d.endsWith('/')}.collect{ d -> d.substring(0, d.size() - 1)}
+						echo "Found drop directories: ${allDrops}"
+						
+						def allReleases = allDrops.findAll{ d -> d.startsWith('R-')}.sort().reverse() // sort in descending order
+						def latestRelease = allReleases[0]
+						def latestReleaseMatcher = latestRelease =~ dropIdPattern
+						if (!latestReleaseMatcher.matches()) {
+							error "releaseID: ${latestRelease}, does not match the expected pattern."
+						}
+						//TODO: share the list method with the clean-builds job and list the I-builds of all releases and delete them individually
+						env.RELEASE_TO_CLEAN = latestReleaseMatcher.group('version')
+						env.RELEASE_BUILD_DATE = latestReleaseMatcher.group('date').toInteger()
+						latestReleaseMatcher = null
+						
+						env.RELEASES_TO_REMOVE = allReleases.subList(env.RELEASE_RETENTION_COUNT.toInteger(), allReleases.size()).join(',')
+						echo "Releases to remove: ${RELEASES_TO_REMOVE}"
+						env.I_BUILDS_TO_REMOVE = allDrops.findAll{ d -> 
+							def idMatcher = d =~ iBuildIdPattern
+							return idMatcher.matches() && idMatcher.group('date').toInteger() <= env.RELEASE_BUILD_DATE.toInteger()
+						}.join(',')
+						echo "I-builds to remove: ${I_BUILDS_TO_REMOVE}"
+						//TODO: clear Y-builds in a similar way?
+						//TODO: always clean Y-build drops, they are different from the Y-build updates repo!
+						// Is it currently auto-cleaned daily?
+						
+						sh '''#!/bin/bash -xe
+							# Update sites
+							$SSH rm -rf ${EP_ECLIPSE_UPDATES}/${RELEASE_TO_CLEAN}-I-builds/
+							if [[ ${REMOVE_Y_BUILDS} = true ]]; then
+								#notes: only remove ${RELEASE_TO_CLEAN}-Y-builds on even releases (4.18, 4.20, 4.22, etc); skip remove on odd releases (4.19, 4.21, 4.23, etc)
+								$SSH rm -rf ${EP_ECLIPSE_UPDATES}/${RELEASE_TO_CLEAN}-Y-builds/
+							fi
+							
+							# TODO: just do this on the daily clean-up?
+							# Eclipse downloads
+							# Delete releases older than the retention policy
+							for release in ${RELEASES_TO_REMOVE//,/ }; do
+								$SSH rm -rf ${EP_ECLIPSE_DROPS}/${release}
+							done
+							
+							# Delete I/S build downloads older than the latest release
+							$SSH rm -rf ${EP_ECLIPSE_DROPS}/S-${RELEASE_TO_CLEAN}M*
+							$SSH rm -rf ${EP_ECLIPSE_DROPS}/S-${RELEASE_TO_CLEAN}RC*
+							
+							for iBuild in ${I_BUILDS_TO_REMOVE//,/ }; do
+								$SSH rm -rf ${EP_ECLIPSE_DROPS}/${iBuild}
+							done
+							
+							#Equinox downloads
+							# TODO: stop Y-builds for Equinox (at least the publication)?!
+							$SSH rm -rf ${EP_EQUINOX_DROPS}/S-${RELEASE_TO_CLEAN}M*
+							$SSH rm -rf ${EP_EQUINOX_DROPS}/S-${RELEASE_TO_CLEAN}RC*
+							#TODO: assumes Eclipse and equinox are in sync
+							for release in ${RELEASES_TO_REMOVE//,/ }; do
+								$SSH rm -rf ${EP_EQUINOX_DROPS}/${release}
+							done
+							$SSH rm -rf ${EP_EQUINOX_DROPS}/Y*
+						'''
+					}
+				}
+				build job: 'Releng/updateIndex', wait: false
+			}
+		}
+	}
+}
