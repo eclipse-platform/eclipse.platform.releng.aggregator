@@ -8,7 +8,7 @@ def TEST_CONFIGURATIONS = [
 	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
 ]
 
-for (STREAM in config.Branches.keySet()){
+for (STREAM in config.I.streams.keySet()){
 	def MAJOR = STREAM.split('\\.')[0]
 	def MINOR = STREAM.split('\\.')[1]
 	for (TEST_CONFIG in TEST_CONFIGURATIONS){
