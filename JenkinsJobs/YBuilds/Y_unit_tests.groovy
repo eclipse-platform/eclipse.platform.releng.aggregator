@@ -1,17 +1,9 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('buildConfigurations.json'))
 
-def TEST_CONFIGURATIONS = [
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "install('jdk', 'https://download.java.net/java/GA/jdk25/bd75d5f9689641da8e1daabeccb5528b/36/GPL/openjdk-25_linux-x64_bin.tar.gz')" ],
-	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home'" ],
-	[os: 'macosx', ws:'cocoa', arch: 'x86_64' , javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home'" ],
-	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
-]
-
 for (STREAM in config.Y.streams.keySet()){
 	def MAJOR = STREAM.split('\\.')[0]
 	def MINOR = STREAM.split('\\.')[1]
-	for (TEST_CONFIG in TEST_CONFIGURATIONS){
+	for (TEST_CONFIG in config.Y.tests){
 
 		pipelineJob('YBuilds/ep' + MAJOR + MINOR + 'Y-unit-' + TEST_CONFIG.os + '-' + TEST_CONFIG.arch + '-java' + TEST_CONFIG.javaVersion){
 			description('Run Eclipse SDK Tests for the platform implied by this job\'s name')

@@ -64,7 +64,7 @@ do
     fi
     fn-addToPropFiles $key "$value"
   fi
-done < ../buildproperties.txt
+done < ${CJE_ROOT}/buildproperties.txt
 
 source $BUILD_ENV_FILE
 # add BUILD_ENV_FILE* variables to prop files before using fn-write-property in common-functions.shsource

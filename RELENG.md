@@ -53,9 +53,9 @@ The builds themselves and their unit tests are in the (Y Builds)[JenkinsJobs/YBu
 When the JDT team is ready they will raise an issue to create new Y builds and supply the name of the new branch, usually `BETA_JAVA##`.
 
 **Things to Do:**
-  * Update the Y-build configuration in the (build.jenkinsfile)[JenkinsJobs/Builds/build.jenkinsfile]
-    - Update `branchLabel` and `typeName` to the name of the new java version
-  * Remove the disablement of the current stream in the Y-build configuration in the (buildConfigurations.json)[JenkinsJobs/buildConfigurations.json] (should be the only Y-build stream).
+  * Update the Y-build configuration in the (buildConfigurations.json)[JenkinsJobs/buildConfigurations.json]
+    - Update `branchLabel` and `typeName` to the name of the new java version.
+    - Remove the disablement of the current stream in the Y-build configuration (should be the only Y-build stream).
+    - Add unit tests for the new java version and remove old ones.
   * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
     - Repos without a `BETA_JAVA##` branch should be set to master
-  * Add unit tests for the new java version in (JenkinsJobs/YBuilds)[JenkinsJobs/YBuilds] and (build.jenkinsfile)[JenkinsJobs/Builds/build.jenkinsfile]
