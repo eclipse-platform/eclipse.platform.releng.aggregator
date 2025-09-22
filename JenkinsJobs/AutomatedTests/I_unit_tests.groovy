@@ -1,17 +1,9 @@
 def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('buildConfigurations.json'))
 
-def TEST_CONFIGURATIONS = [
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],
-	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 25, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'openjdk-jdk25-latest')" ],
-	[os: 'macosx', ws:'cocoa', arch: 'aarch64', javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11-arm64/Contents/Home'" ],
-	[os: 'macosx', ws:'cocoa', arch: 'x86_64' , javaVersion: 21, agentLabel: 'nc1ht-macos11-arm64', javaHome: "'/Library/Java/JavaVirtualMachines/jdk-21.0.5+11/Contents/Home'" ],
-	[os: 'win32' , ws:'win32', arch: 'x86_64' , javaVersion: 21, agentLabel: 'qa6xd-win11'        , javaHome: "'C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-21.0.5.11-hotspot'" ],
-]
-
 for (STREAM in config.I.streams.keySet()){
 	def MAJOR = STREAM.split('\\.')[0]
 	def MINOR = STREAM.split('\\.')[1]
-	for (TEST_CONFIG in TEST_CONFIGURATIONS){
+	for (TEST_CONFIG in config.I.tests){
 
 		pipelineJob('AutomatedTests/ep' + MAJOR + MINOR + 'I-unit-' + TEST_CONFIG.os + '-' + TEST_CONFIG.arch + '-java' + TEST_CONFIG.javaVersion){
 			description('Run Eclipse SDK Tests for the platform implied by this job\'s name')

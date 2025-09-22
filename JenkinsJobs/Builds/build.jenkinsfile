@@ -1,36 +1,5 @@
-
-def I_TEST_CONFIGURATIONS = [
-  [ os: 'linux' , ws: 'gtk'  , arch: 'x86_64' , javaVersion: 21],
-  [ os: 'linux' , ws: 'gtk'  , arch: 'x86_64' , javaVersion: 25],
-  [ os: 'macosx', ws: 'cocoa', arch: 'aarch64', javaVersion: 21],
-  [ os: 'macosx', ws: 'cocoa', arch: 'x86_64' , javaVersion: 21],
-  [ os: 'win32' , ws: 'win32', arch: 'x86_64' , javaVersion: 21],
-]
-def Y_TEST_CONFIGURATIONS = [
-  [ os: 'linux' , ws: 'gtk'  , arch: 'x86_64' , javaVersion: 21],
-  [ os: 'linux' , ws: 'gtk'  , arch: 'x86_64' , javaVersion: 25],
-  [ os: 'macosx', ws: 'cocoa', arch: 'aarch64', javaVersion: 21],
-  [ os: 'macosx', ws: 'cocoa', arch: 'x86_64' , javaVersion: 21],
-]
-def BUILD = {
-	def matcher = "$JOB_BASE_NAME" =~ '(?<type>[IY])-build-(?<major>\\d).(?<minor>\\d+)'
-	if (matcher) {
-		def buildConfig = [ type: matcher.group('type'), testPrefix: "ep${matcher.group('major')}${matcher.group('minor')}${matcher.group('type')}-unit"]
-		switch(buildConfig.type) {
-			case 'I': return [*:buildConfig,
-				typeName: 'Integration' , branchLabel: 'master',
-				mailingList: 'platform-releng-dev@eclipse.org', testJobFolder:'AutomatedTests', testConfigurations: I_TEST_CONFIGURATIONS]
-			case 'Y': return [*:buildConfig,
-				typeName: 'Beta Java 25', branchLabel: 'java25',
-				mailingList: 'jdt-dev@eclipse.org'            , testJobFolder:'YBuilds'      , testConfigurations: Y_TEST_CONFIGURATIONS]
-		}
-	}
-	error("Unsupported job: $JOB_BASE_NAME" )
-}()
-
-def testConfigurationsExpected = BUILD.testConfigurations.collect{c ->
-		"${BUILD.testPrefix}-${c.os}-${c.arch}-java${c.javaVersion}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
-	}.join(',')
+@groovy.transform.Field
+def BUILD = null
 
 pipeline {
 	options {
@@ -63,43 +32,42 @@ spec:
 		ant 'apache-ant-latest'
 	}
 	environment {
-		BUILD_TYPE = "${BUILD.type}"
-		BUILD_TYPE_NAME = "${BUILD.typeName}"
-		PATCH_OR_BRANCH_LABEL = "${BUILD.branchLabel}"
-
 		MAVEN_OPTS = '-Xmx4G'
 		CJE_ROOT = "${WORKSPACE}/cje-production"
 		logDir = "$CJE_ROOT/buildlogs"
-		TEST_CONFIGURATIONS_EXPECTED = "${testConfigurationsExpected}"
 	}
 	stages {
-		stage('Setup intial configuration'){
+		stage('Set up environment') {
 			steps {
+				script { // Extend build configuration with data from the configuration file
+					def matcher = "$JOB_BASE_NAME" =~ '(?<type>[IY])-build-(?<major>\\d).(?<minor>\\d+)'
+					if (!matcher) {
+						error("Unsupported job: $JOB_BASE_NAME")
+					}
+					assignEnvVariable('BUILD_TYPE', matcher.group('type'))
+					def configurations = readJSON(file: "${WORKSPACE}/JenkinsJobs/buildConfigurations.json")
+					BUILD = configurations["${BUILD_TYPE}"]
+					assignEnvVariable('BUILD_TYPE_NAME', BUILD.typeName)
+					assignEnvVariable('PATCH_OR_BRANCH_LABEL', BUILD.branchLabel)
+					assignEnvVariable('TEST_NAME_PREFIX', "ep${matcher.group('major')}${matcher.group('minor')}${BUILD_TYPE}-unit")
+					assignEnvVariable('TEST_CONFIGURATIONS_EXPECTED', BUILD.tests.collect{ c ->
+						"${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
+					}.join(','))
+				}
 				dir("${CJE_ROOT}") {
-                    sh '''
-                        chmod +x mbscripts/*
-                        mkdir -p $logDir
-                    '''
+					sh '''
+						set -eo pipefail
+						chmod +x mbscripts/*
+						mkdir -p $logDir
+						
+						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
+					'''
 				}
-			}
-		}
-	  stage('Generate environment variables'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                sh '''
-                    set -eo pipefail
-                    ./mb010_createEnvfiles.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
-                '''
-				}
-			}
-		}
-		stage('Export environment variables stage 1'){
-			steps {
 				script {
 					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
-					env.BUILD_IID = buildProps.BUILD_TYPE + buildProps.TIMESTAMP
-					env.STREAM = buildProps.STREAM
-					env.RELEASE_VER = buildProps.RELEASE_VER
+					assignEnvVariable('BUILD_IID', buildProps.BUILD_TYPE + buildProps.TIMESTAMP)
+					assignEnvVariable('STREAM', buildProps.STREAM)
+					assignEnvVariable('RELEASE_VER', buildProps.RELEASE_VER)
 				}
 			}
 		}
@@ -294,11 +262,11 @@ spec:
 				}
 			}
 		}
-		stage('Trigger tests'){
+		stage('Trigger tests') {
 			steps {
 				script {
-					for (c in BUILD.testConfigurations) {
-						build job: "${BUILD.testJobFolder}/${BUILD.testPrefix}-${c.os}-${c.arch}-java${c.javaVersion}", wait: false, parameters: [
+					for (c in BUILD.tests) {
+						build job: "${BUILD.testJobFolder}/${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}", wait: false, parameters: [
 							string(name: 'buildId', value: "${BUILD_IID}")
 						]
 					}
@@ -357,6 +325,12 @@ spec:
 			to: "${BUILD.mailingList}", from:'genie.releng@eclipse.org'
 		}
 	}
+}
+
+@NonCPS
+def assignEnvVariable(String name, String value) {
+	env[name] = value
+	println("${name}=${value}")
 }
 
 def readBuildProperties(String buildPropertiesFile){
