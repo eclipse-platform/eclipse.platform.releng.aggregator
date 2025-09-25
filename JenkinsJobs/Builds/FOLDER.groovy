@@ -54,3 +54,26 @@ pipelineJob('Builds/Build-Docker-images'){
 		}
 	}
 }
+
+pipelineJob('Builds/mark-build'){
+	displayName("Mark build")
+	description("Mark a build as stable or unstable.")
+	parameters {
+		stringParam('buildId', null, "ID of the build to be marked.")
+		choiceParam('markAs', [
+			'STABLE',
+			'UNSTABLE',
+		], 'The kind of marker to apply to (respectively remove from) the specified build.')
+		stringParam('issueURL', null, 'URL of the causing Github issue or PR (<em>only relevant if the build is marked as unstable<em>).')
+	}
+
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Builds/markBuild.jenkinsfile')
+		}
+	}
+}

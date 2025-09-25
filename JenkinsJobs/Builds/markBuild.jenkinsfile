@@ -1,0 +1,63 @@
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 5, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	stages {
+		stage('Mark build'){
+			environment {
+				// Download Server locations (would very seldom change)
+				EP_BUILD_DROP = "/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${buildId}"
+				RELEASE_VER = readBuildProperty('RELEASE_VER')
+			}
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						# Strip spaces from the buildId and eclipseStream
+						buildId=$(echo $buildId|tr -d ' ')
+						issueURL=$(echo $issueURL|tr -d ' ')
+						
+						if [ -z "$buildId" ]; then
+							echo "BuildId is empty! Exiting."
+							exit 1
+						fi
+						if [ "$markAs" == 'UNSTABLE' ] && [ -z "$issueURL" ]; then
+							echo "Required issueURL parameter is empty! Exiting."
+							exit 1
+						fi
+						
+						case ${markAs} in
+							STABLE)
+								#Remove unstable tag
+								ssh genie.releng@projects-storage.eclipse.org rm -f ${EP_BUILD_DROP}/buildUnstable
+							;;
+							UNSTABLE)
+								# Convert URL of GH issue or PR into: 'organization/repository#number'
+								label=$(echo "${issueURL##'https://github.com/'}" | sed 's/\\/issues\\//#/g' | sed 's/\\/pull\\//#/g')
+								#Add unstable tag
+								echo "<p>This build is marked unstable due to <a href='${issueURL}'>${label}</a>.</p>" > buildUnstable
+								scp buildUnstable genie.releng@projects-storage.eclipse.org:${EP_BUILD_DROP}/buildUnstable
+							;;
+						esac
+					'''
+				}
+				build job: 'Releng/updateIndex', wait: false
+				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+					string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-I-builds"),
+					string(name: "${params.markAs == 'STABLE' ? 'add' : 'remove'}", value: "${buildId}")
+				]
+			}
+		}
+	}
+}
+
+def readBuildProperty(String name) {
+	def buildPropertiesURL = "https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.properties"
+	def buildProperties = readProperties(text: sh(script: "curl --fail ${buildPropertiesURL}", returnStdout: true))
+	return buildProperties[name].replace('"','') // Remove surrounding quotes
+}
