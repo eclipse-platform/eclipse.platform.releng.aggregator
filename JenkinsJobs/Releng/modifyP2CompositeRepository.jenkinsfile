@@ -1,3 +1,6 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = 'Add or remove children from an Eclipse-P2 composite repository.'
+
 pipeline {
 	options {
 		disableConcurrentBuilds() // prevent concurrent updates of the same repository
@@ -5,6 +8,16 @@ pipeline {
 		skipDefaultCheckout()
 		timeout(time: 15, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	parameters {
+		string(name: 'repositoryPath', trim: true, description: 'Relative repository path from https://download.eclipse.org/. E.g.: eclipse/updates/4.37-I-builds')
+		string(name: 'add', trim: true, description: 'Comma separated list of children to add. May be empty')
+		string(name: 'remove', trim: true, description: 'Comma separated list of children to remove. May be empty')
+		string(name: 'sizeLimit', trim: true, description: '''\
+			The maximum number of childrem the modified composite should contain.
+			If the total number of children exceeds this limit (after adding new ones), a corresponding number of children is removed from the beginning of the list.
+		''')
+		string(name: 'repositoryName', trim: true, description: 'Optional name attribute of the composite repository to set (if blank the name is not changed)')
 	}
 	agent {
 		label 'basic'

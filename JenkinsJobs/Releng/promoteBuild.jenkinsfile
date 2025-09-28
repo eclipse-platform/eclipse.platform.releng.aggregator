@@ -1,9 +1,28 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = '''\
+This job does the "stage 1" or first part of a promotion.
+It renames the files for Equinox and Eclipse, creates an appropriate repo on 'downloads', sync's everything to 'downloads', but leave everything "invisible" -- unless someone knows the exact URL.
+This allows two things. First, allows artifacts some time to "mirror" when that is needed.
+But also, allows the sites and repositories to be examined for correctness before making them visible to the world.
+The second (deferred) step that makes things visible works, in part, based on some output of this first step.
+'''
+
 pipeline {
 	options {
 		skipDefaultCheckout()
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10'))
+	}
+	parameters {
+		booleanParam(name: 'DRY_RUN', defaultValue: true,
+			description: 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
+		string(name: 'DROP_ID', trim: true, description: '''\
+			The name (or, build id) of the build to promote. Typically would be a value such as 'I20250714-1800'.
+			It must match the name of the build on the build machine.
+		''')
+		string(name: 'CHECKPOINT', trim: true, description: 'M1, M3, RC1, RC2, RC3 etc (blank for final releases).')
+		string(name: 'SIGNOFF_BUG', trim: true, description: 'The issue that was used to "signoff" the checkpoint. If there are no unit test failures, this can be left blank. Otherwise a link is added to test page explaining that "failing unit tests have been investigated".')
 	}
 	agent {
 		label 'basic'
@@ -22,16 +41,13 @@ pipeline {
 			steps {
 				script {
 					echo "DRY_RUN: ${DRY_RUN}"
-					env.DROP_ID = readParameter('DROP_ID')
-					if (!"${DROP_ID}") {
-						error("Parameter 'DROP_ID' is not specified")
-					}
-					env.CHECKPOINT = readParameter('CHECKPOINT')
-					env.SIGNOFF_BUG = readParameter('SIGNOFF_BUG')
+					echo "DROP_ID: ${DROP_ID}"
+					echo "CHECKPOINT: ${CHECKPOINT}"
+					echo "SIGNOFF_BUG: ${SIGNOFF_BUG}"
 					def idMatcher = null
-					if ((idMatcher = env.DROP_ID =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
+					if ((idMatcher = "${DROP_ID}" =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
 						assignEnvVariable('BUILD_LABEL', "${DROP_ID}")
-					} else if ((idMatcher = env.DROP_ID =~ /S-(?<label>\d+\.\d+(\.\d+)?(M|RC)\d+[a-z]?)-(?<date>\d{8})(?<time>\d{4})/).matches()) {
+					} else if ((idMatcher = "${DROP_ID}" =~ /S-(?<label>\d+\.\d+(\.\d+)?(M|RC)\d+[a-z]?)-(?<date>\d{8})(?<time>\d{4})/).matches()) {
 						assignEnvVariable('BUILD_LABEL', idMatcher.group('label'))
 						if ("${CHECKPOINT}") {
 							error "Stable build DROP_ID=${DROP_ID} may only be promoted to release CHECKPOINT, which therefore must be empty: ${CHECKPOINT}"
@@ -51,7 +67,7 @@ pipeline {
 					
 					if ("${CHECKPOINT}" ==~ /M\d+([a-z])?/ || "${CHECKPOINT}" ==~ /RC\d+([a-z])?/) { // milestone or RC promotion
 						assignEnvVariable('DL_TYPE', 'S')
-					} else if (!"${CHECKPOINT}") { // release promotion
+					} else if ("${CHECKPOINT}".isEmpty()) { // release promotion
 						assignEnvVariable('DL_TYPE', 'R')
 					} else {
 						error "CHECKPOINT, ${CHECKPOINT}, did not match any expected pattern."
@@ -65,12 +81,12 @@ pipeline {
 					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${buildTimestamp}")
 					assignEnvVariable('MAINTENANCE_BRANCH', "R${BUILD_MAJOR}_${BUILD_MINOR}_maintenance")
 					
-					if (!env.SIGNOFF_BUG) {
+					if ("${SIGNOFF_BUG}".isEmpty()) {
 						echo '''\
 							[WARNING] SIGNOFF_BUG was not defined. That is valid if no Unit Tests failures but otherwise should be defined.
 							Can be added by hand to buildproperties.php in drop site, if in fact there were errors, and simply forgot to specify.
 						'''.stripIndent()
-					} else if (env.SIGNOFF_BUG ==~ '\\d+') {
+					} else if ("${SIGNOFF_BUG}" ==~ '\\d+') {
 						assignEnvVariable('SIGNOFF_BUG', "https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/${SIGNOFF_BUG}")
 					}
 					
@@ -395,14 +411,6 @@ EOF
 def utilities = null
 @groovy.transform.Field
 def githubAPI = null
-
-@NonCPS
-def readParameter(String name) {
-	//TODO: let jenkins trim the parameters
-	def value = (params[name] ?: '').trim()
-	println("${name}: ${value}")
-	return value
-}
 
 @NonCPS
 def assignEnvVariable(String name, String value) {

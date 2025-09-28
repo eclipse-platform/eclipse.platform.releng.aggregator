@@ -1,3 +1,6 @@
+// Constants read by 
+private static final _JOB_DESCRIPTION = 'Build and publish custom Docker images'
+
 pipeline {
 	options {
 		skipDefaultCheckout()
@@ -5,6 +8,9 @@ pipeline {
 		timeout(time: 2, unit: 'HOURS')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 		disableConcurrentBuilds(abortPrevious: true)
+	}
+	triggers {
+		cron '@weekly'
 	}
 	agent {
 		label 'docker-build'
