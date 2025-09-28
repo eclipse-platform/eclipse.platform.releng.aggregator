@@ -1,9 +1,28 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = '''\
+This job does the "stage 1" or first part of a promotion.
+It renames the files for Equinox and Eclipse, creates an appropriate repo on 'downloads', sync's everything to 'downloads', but leave everything "invisible" -- unless someone knows the exact URL.
+This allows two things. First, allows artifacts some time to "mirror" when that is needed.
+But also, allows the sites and repositories to be examined for correctness before making them visible to the world.
+The second (deferred) step that makes things visible works, in part, based on some output of this first step.
+'''
+
 pipeline {
 	options {
 		skipDefaultCheckout()
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10'))
+	}
+	parameters {
+		booleanParam(name: 'DRY_RUN', defaultValue: true,
+			description: 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
+		string(name: 'DROP_ID', trim: true, description: '''\
+			The name (or, build id) of the build to promote. Typically would be a value such as 'I20250714-1800'.
+			It must match the name of the build on the build machine.
+		''')
+		string(name: 'CHECKPOINT', trim: true, description: 'M1, M3, RC1, RC2, RC3 etc (blank for final releases).')
+		string(name: 'SIGNOFF_BUG', trim: true, description: 'The issue that was used to "signoff" the checkpoint. If there are no unit test failures, this can be left blank. Otherwise a link is added to test page explaining that "failing unit tests have been investigated".')
 	}
 	agent {
 		label 'basic'
@@ -398,8 +417,7 @@ def githubAPI = null
 
 @NonCPS
 def readParameter(String name) {
-	//TODO: let jenkins trim the parameters
-	def value = (params[name] ?: '').trim()
+	def value = params[name] ?: ''
 	println("${name}: ${value}")
 	return value
 }

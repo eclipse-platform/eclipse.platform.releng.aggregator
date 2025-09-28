@@ -1,9 +1,23 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = '''\
+Make a 'release build', which was previously declared by running the 'Promote Build' job, visible.
+The first part of a promotion -- the 'Promote Build' job -- puts the build at its final location, but keeps it hidden.
+Therefore, both jobs have to share a 'workspace', and the output of the first job must remain in place until its time to "make visible".
+'''
+
 pipeline {
 	options {
 		skipDefaultCheckout()
 		timestamps()
 		timeout(time: 45, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10'))
+	}
+	parameters {
+		string(name: 'releaseBuildID', trim: true, description: '''\
+			The id of the 'milestone', 'release-candidate' or 'GA-release' build to make visible.
+			Typically would be a value such as 'S-4.26M1-202209281800' or 'R-4.36-202505281830'.
+			It must match the name of the build on the download server.
+		''')	
 	}
 	agent {
 		label 'basic'
@@ -24,7 +38,7 @@ pipeline {
 					if (!params.releaseBuildID) {
 						error "Required parameter 'releaseBuildID' is not defined."
 					}
-					assignEnvVariable('RELEASE_BUILD_ID', params.releaseBuildID.trim())
+					assignEnvVariable('RELEASE_BUILD_ID', params.releaseBuildID)
 					def idMatcher = env.RELEASE_BUILD_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
 					if (!idMatcher.matches()) {
 						error "releaseID: ${RELEASE_BUILD_ID}, does not match the expected pattern."

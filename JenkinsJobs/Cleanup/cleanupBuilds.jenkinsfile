@@ -1,3 +1,6 @@
+// Constants read by job creation
+private static final _JOB_DISPLAY_NAME = 'Daily Cleanup of old Builds'
+private static final _JOB_DESCRIPTION = 'Remove old builds from the downloads servers.'
 
 def int EQUINOX_RETENTION_COUNT = 3 // Keep the three most recent builds
 def int ECLIPSE_I_BUILD_RETENTION_DAYS = 5 // Minimal number of days for which a drop should be retained
@@ -10,6 +13,12 @@ pipeline {
 		timestamps()
 		timeout(time: 15, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	triggers {
+		cron '''TZ=America/Toronto
+			0 4 * * *
+			0 16 * * *
+		'''
 	}
 	agent {
 		label 'basic'
