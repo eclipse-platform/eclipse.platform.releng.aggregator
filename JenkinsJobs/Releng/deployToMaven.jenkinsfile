@@ -1,9 +1,43 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = '''\
+<p>
+This job uses the <a href="https://github.com/eclipse-cbi/p2repo-aggregator">CBI aggregator</a> to produce a Maven-compatible repository 
+with contents as specified by the <a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/eclipse.platform.releng/deploy-to-maven/SDK4Mvn.aggr">SDK4Mvn.aggr</a> and
+then deploys the artifacts for <code>Eclipse-Platform</code>, <code>JDT</code>, <code>Equinox</code> and <code>PDE</code> from the output:
+</p>
+<ul>
+<li>
+Snapshots are deployed to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
+</li>
+<li>
+Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> through the <a href="https://central.sonatype.org/publish/publish-portal-guide/">Central Portal</a>.
+</li>
+</ul>
+<p>
+'''
+
 pipeline {
 	options {
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10', artifactNumToKeepStr:'2'))
 		checkoutToSubdirectory('git-repo')
+	}
+	parameters {
+		string(name: 'sourceRepository', trim: true, description: '''\
+			The URL of the source P2 repository to be deployed.<br>
+			To deploy a snapshot, the 4.x-I-Builds child repository of the specific build should be specified, e.g. 'https://download.eclipse.org/eclipse/updates/4.37-I-builds/I20250710-1800/'<br>
+			<b>To deploy a <em>Release</em>, the corresponding release repository should be specified</b>, e.g. 'https://download.eclipse.org/eclipse/updates/4.36/R-4.36-202505281830/'<br>
+			If left blank (not recommended), the latest I-build is deployed.
+			<ul>
+			<li>
+			Snapshots are deployed to <a href="https://repo.eclipse.org/content/repositories/eclipse-snapshots/">https://repo.eclipse.org/content/repositories/eclipse-snapshots/</a>.
+			</li>
+			<li>
+			Releases are published to <a href="https://repo1.maven.org/maven2/org/eclipse/">Maven central</a> through the <a href="https://central.sonatype.org/publish/publish-portal-guide/">Central Portal</a>.
+			</li>
+			</ul>
+		''')
 	}
 	agent {
 		label 'basic'
@@ -21,7 +55,6 @@ pipeline {
 		// prevent jline warning about inability to create a system terminal and increase keep-alive timeouts to increase stability in concurrent usage
 		MVND = "mvnd -Dmvnd.daemonStorage=${WORKSPACE}/tools/mvnd -Dorg.jline.terminal.type=dumb -Dmvnd.keepAlive=1000 -Dmvnd.maxLostKeepAlive=600"
 	}
-	// parameters declared in the definition of the invoking job
 	stages {
 		stage('Aggregate Maven repository') {
 			steps {
@@ -161,7 +194,7 @@ pipeline {
 								'''
 								script {
 									if ("${DEPLOYMENT_TYPE}" == 'release') {
-										def repoTag = "${sourceRepository}".trim()
+										def repoTag = "${sourceRepository}"
 										if (repoTag.endsWith('/')) {
 											repoTag = repoTag.substring(0, repoTag.length() - 1)
 										}
@@ -225,7 +258,7 @@ pipeline {
 }
 
 def determineDeploymentType() {
-	if ("${sourceRepository}".trim() =~ /\/(?<version>\d+\.\d+)\/R-\k<version>(\.\d+)?-\d{12}(\/)?$/) {
+	if ("${sourceRepository}" =~ /\/(?<version>\d+\.\d+)\/R-\k<version>(\.\d+)?-\d{12}(\/)?$/) {
 		return 'release'
 	} else {
 		return 'snapshot'

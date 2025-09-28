@@ -1,0 +1,215 @@
+pipeline {
+	options {
+		timestamps()
+		timeout(time: 5, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	agent {
+		label 'basic'
+	}
+	stages {
+		stage('Create Jobs') {
+			environment {
+				JOBS_ROOT_DIRECTORY = 'JenkinsJobs'
+				JENKINS_FILE_EXTENSION = '.jenkinsfile'
+			}
+			steps {
+				dir(JOBS_ROOT_DIRECTORY) {
+					script {
+						def folderDefinitions = [
+							'AutomatedTests': [ displayName: 'Automated Tests', description: 'Folder for Unit Tests'],
+							'Builds': [description: 'Eclipse periodic build jobs.'],
+							'YPBuilds': [displayName: 'Y and P Builds', description: 'Builds and tests for the beta java builds.'],
+							'Cleanup': [description: 'Cleanup Scripts.'],
+							'Releng': [description: 'Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.'],
+							'SmokeTests': [displayName: 'Smoke Tests', description: 'Folder for Smoke Tests'],
+						]
+						def allJenkinsFiles = sh(script: 'ls **/*${JENKINS_FILE_EXTENSION}', returnStdout: true).trim().split('\\s')
+						def pipelineJobDefinitions = [:]
+						for (jenkinsFilePath in allJenkinsFiles) {
+							if (!jenkinsFilePath.endsWith(JENKINS_FILE_EXTENSION)) {
+								error "Not a JenkinsFile path: ${jenkinsFilePath}"
+							}
+							def jobName = jenkinsFilePath.substring(0, jenkinsFilePath.length() - JENKINS_FILE_EXTENSION.length())
+							def pipelineCode = readFile("${jenkinsFilePath}")
+							def jobMetadata = parseJobMetadata(jobName, pipelineCode)
+							pipelineJobDefinitions[jobName] = [scriptPath: "${JOBS_ROOT_DIRECTORY}/${jenkinsFilePath}", branch: 'master', *:jobMetadata]
+						}
+						// Remove the generic 'build' job and define stream specific I/Y-build jobs instead
+						def buildJob = pipelineJobDefinitions.remove('Builds/build')
+						
+						def jobConfigurations = readJSON(file: 'JobDSL.json')
+						jobConfigurations.I.streams.each{ STREAM, config ->
+							pipelineJobDefinitions["Builds/I-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
+								description: 'Daily Eclipse Integration builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
+								TZ=America/Toronto
+								# Format: Minute Hour Day Month Day-of-week (1-7)
+								# - - - Integration Eclipse SDK builds - - - 
+								# Schedule: 6 PM every day until end of RC2
+								'''.stripIndent() + config.schedule).trim() : null]
+						}
+						jobConfigurations.Y.streams.each{ STREAM, config ->
+							pipelineJobDefinitions["YPBuilds/Y-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
+								description: 'Beta Java Eclipse builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
+								TZ=America/Toronto
+								# Format: Minute Hour Day Month Day-of-week (1-7)
+								# - - - Beta Java Eclipse SDK builds - - - 
+								# Schedule: 10 AM every second day (and every day in Java RC phase)
+								'''.stripIndent() + config.schedule).trim() : null]
+						}
+						
+						jobDsl(additionalParameters: [FOLDER_DEFINITIONS: folderDefinitions,  PIPELINE_JOB_DEFINITIONS: pipelineJobDefinitions], sandbox: true, scriptText : '''\
+							FOLDER_DEFINITIONS.each{ folderName, folderDef ->
+								folder(folderName) {
+									if (folderDef.displayName != null) {
+										displayName(folderDef.displayName)
+									}
+									description(folderDef.description)
+								}
+							}
+							PIPELINE_JOB_DEFINITIONS.each{ jobName, jobDef ->
+								pipelineJob(jobName){
+									if (jobDef.displayName != null && !jobDef.displayName.isEmpty()) {
+										displayName(jobDef.displayName)
+									}
+									description(jobDef.description)
+									if (jobDef.disabled?.toBoolean() ?: false) {
+										disabled(true)
+									}
+									if (jobDef.cronTrigger != null && !jobDef.cronTrigger.isEmpty()) {
+										properties {
+											pipelineTriggers {
+												triggers {
+													cron { spec(jobDef.cronTrigger) }
+												}
+											}
+										}
+									}
+									if (jobDef.parameters != null && !jobDef.parameters.isEmpty()) {
+										parameters {
+											for(parameter in jobDef.parameters) {
+												switch(parameter.type) {
+													case 'string':
+														stringParam {
+															name(parameter.name)
+															defaultValue(parameter.defaultValue)
+															description(parameter.description)
+															trim(parameter.trim ?: false)
+														}
+														break;
+													case 'booleanParam':
+														booleanParam(parameter.name, parameter.defaultValue ?: false , parameter.description)
+														break;
+													case 'choice':
+														choiceParam(parameter.name, parameter.choices, parameter.description)
+														break;
+													default:
+														throw new Exception("Unsupported parameter type: ${parameterType}")
+												}
+											}
+										}
+									}
+									definition {
+										cpsScm {
+											lightweight(true)
+											scm {
+												github('eclipse-platform/eclipse.platform.releng.aggregator', jobDef.branch)
+											}
+											scriptPath(jobDef.scriptPath)
+										}
+									}
+								}
+							}
+							'''.stripIndent(), removedJobAction: 'IGNORE', removedViewAction: 'IGNORE', unstableOnDeprecation: true, failOnMissingPlugin: true)
+						jobDsl(targets: '**/*.groovy', sandbox: true, removedJobAction: 'IGNORE', removedViewAction: 'IGNORE', unstableOnDeprecation: true, failOnMissingPlugin: true)
+					}
+				}
+			}
+		}
+	}
+}
+
+// === utility methods to parse static pipeline files ===
+
+@NonCPS
+def parseJobMetadata(String jobName, String pipelineCode) {
+	def ast = new org.codehaus.groovy.ast.builder.AstBuilder().buildFromString(org.codehaus.groovy.control.CompilePhase.CONVERSION, false, pipelineCode)
+	def rootStatements = ast.get(0).getStatements()
+	def pipelineRoot = findMethodCall(rootStatements, 'pipeline')
+	def pipelineElements = getNestedArgumentStatements(pipelineRoot)
+	
+	String displayName = findConstantVariableDeclarationValue(rootStatements, '_JOB_DISPLAY_NAME')
+	if (displayName == null || displayName.isEmpty()) { // Convert file name to 'space'-case
+		displayName = jobName.substring(jobName.lastIndexOf('/') + 1).replaceAll('[A-Z]', { m -> ' ' + m[0]}).capitalize().trim()
+	}
+	String description = findConstantVariableDeclarationValue(rootStatements, '_JOB_DESCRIPTION')
+	
+	def cronTrigger = null
+	def triggersExpression = findMethodCall(pipelineElements, 'triggers')
+	if (triggersExpression != null) {
+		def cronExpression = findMethodCall(getNestedArgumentStatements(triggersExpression), 'cron')
+		if (cronExpression != null) {
+			getFirstArgument(cronExpression)
+			cronTrigger = getConstantExpressionValue(getFirstArgument(cronExpression))
+		}
+	}
+	
+	def parametersExpression = findMethodCall(pipelineElements, 'parameters')
+	def jobParameters = []
+	if (parametersExpression != null) {
+		for(parameterStatement in getNestedArgumentStatements(parametersExpression)) {
+			def parameterExpression = parameterStatement.getExpression()
+			String parameterType = parameterExpression.getMethod().getText()
+			Map<String, String> arguments = parameterExpression.getArguments().getExpressions().get(0).getMapEntryExpressions().collectEntries{e ->
+				[getConstantExpressionValue(e.getKeyExpression()), getConstantExpressionValue(e.getValueExpression())]
+			}
+			if (!(parameterType == 'string' || parameterType == 'booleanParam' || parameterType == 'choice')) {
+				throw new Exception("Unsupported parameter type: ${parameterType}")
+			}
+			arguments.type = parameterType
+			jobParameters.add(arguments)
+		}
+	}
+	
+	return [name: jobName, displayName: displayName, description: description, cronTrigger: cronTrigger, parameters: jobParameters]
+}
+
+@NonCPS
+def getFirstArgument(org.codehaus.groovy.ast.expr.MethodCallExpression methodCall) {
+	return methodCall.getArguments().getExpressions().get(0)
+}
+
+@NonCPS
+def getNestedArgumentStatements(org.codehaus.groovy.ast.expr.MethodCallExpression methodCall) {
+	return getFirstArgument(methodCall).getCode().getStatements()
+}
+
+@NonCPS
+def findMethodCall(Collection<org.codehaus.groovy.ast.stmt.Statement> statements, String methodName) {
+	statements.collect{ s -> s.getExpression() }.find{ expr ->
+		return expr instanceof org.codehaus.groovy.ast.expr.MethodCallExpression && expr.getMethodAsString() == methodName
+	}
+}
+
+@NonCPS
+def findConstantVariableDeclarationValue(Collection<org.codehaus.groovy.ast.stmt.Statement> statements, String methodName) {
+	def variableDeclaration = statements.collect{ s -> s.getExpression() }.find{ expr ->
+		return expr instanceof org.codehaus.groovy.ast.expr.DeclarationExpression && !expr.isMultipleAssignmentDeclaration() &&
+			expr.getVariableExpression().getName() == methodName
+	}
+	return variableDeclaration != null ? getConstantExpressionValue(variableDeclaration.getRightExpression()) : null
+}
+
+@NonCPS
+private Object getConstantExpressionValue(org.codehaus.groovy.ast.expr.Expression expr){
+	if (expr instanceof org.codehaus.groovy.ast.expr.ConstantExpression) {
+		Object value = expr.getValue()
+		if(!(value instanceof String || value instanceof Boolean)) {
+			throw new Exception('Constant literal is not a String or Boolean: ' + value)
+		}
+		return value
+	} else if (expr instanceof org.codehaus.groovy.ast.expr.ListExpression) {
+		return expr.getExpressions().collect{ e -> getConstantExpressionValue(e) }
+	}
+	throw new Exception('Not a constant expression or list of constansts expression: ' + expr)
+}

@@ -1,3 +1,6 @@
+// Constants read by job creation
+private static final _JOB_DISPLAY_NAME = 'Prepare Next Development Cycle'
+private static final _JOB_DESCRIPTION = 'Perform all steps to prepare the next development cycle of Eclipse.'
 
 def releaseEvents = [ M1: 'Milestone 1', M2: 'Milestone 2', M3: 'Milestone 3', RC1: 'Release Candidate 1', RC2: 'Release Candidate 2', GA: 'Release' ]
 
@@ -7,6 +10,21 @@ pipeline {
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 		skipDefaultCheckout()
+	}
+	parameters {
+		booleanParam(name: 'DRY_RUN', defaultValue: true, description: '''\
+			If enabled, the final publication of all changes is skipped respectivly all changes at the download-server happen in a 'try-out' area at https://download.eclipse.org/eclipse/try-outs/.
+			This area is cleaned on each dry-run and should be cleaned after a try-out session is completed.
+			Useful for debugging and to very that the pipeline behaves as intended.
+		''')
+		string(name: 'NEXT_RELEASE_VERSION', trim: true, description: 'Version of the release to prepare, for example: 4.37')
+		string(name: 'PREVIOUS_RELEASE_CANDIDATE_ID', trim: true, description: 'Id of the current release-candiate for the previous release. For example: S-4.36RC2-202505281830')
+		string(name: 'NEXT_SIMREL_NAME', trim: true, description: 'The name of the Simultanious Release that is targeted by the prepared release. Value is in the format yyyy-mm, for example: 2026-03')
+		string(name: 'NEXT_JAVA_RELEASE_DATE', trim: true, description: '''\
+			Release date of the next Java version, if it is released shortly after the Eclipse release
+			(i.e. shortly after the <em>GA_DATE</em> specified above, <b>usual for odd release versions</b>), else left blank (<b>usual for even releases</b>).
+			Value is in the format yyyy-mm-dd, for example: 2025-09-16
+		''')
 	}
 	agent {
 		label 'ubuntu-2404'
@@ -21,8 +39,8 @@ pipeline {
 			steps {
 				script {
 					echo "DRY_RUN: ${DRY_RUN}"
-					env.NEXT_RELEASE_VERSION = readParameter('NEXT_RELEASE_VERSION')
-					def nextVersionMatcher = env.NEXT_RELEASE_VERSION =~ /(?<major>\d+)\.(?<minor>\d+)/
+					echo "NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
+					def nextVersionMatcher = "${NEXT_RELEASE_VERSION}" =~ /(?<major>\d+)\.(?<minor>\d+)/
 					if (!nextVersionMatcher.matches()) {
 						error "Unexpected format for NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
 					}
@@ -30,13 +48,13 @@ pipeline {
 					assignEnvVariable('NEXT_RELEASE_VERSION_MINOR', nextVersionMatcher.group('minor'))
 					nextVersionMatcher = null // release matcher as it's not serializable
 					
-					env.PREVIOUS_RELEASE_CANDIDATE_ID = readParameter('PREVIOUS_RELEASE_CANDIDATE_ID')
+					echo "PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
 					def buildPropertiesTxt = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_CANDIDATE_ID}/buildproperties.txt", returnStdout: true)
 					def buildProperties = readProperties(text: buildPropertiesTxt)
 					assignEnvVariable('IS_JAVA_RELEASE_IMMINENT', !buildProperties.NEXT_JAVA_RELEASE_DATE.replace('"','').isEmpty()) // Remove surrounding quotes
 					
 					def previousIdMatcher = null
-					if ((previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/).matches()) {
+					if ((previousIdMatcher = "${PREVIOUS_RELEASE_CANDIDATE_ID}" =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/).matches()) {
 						def checkpoint = previousIdMatcher.group('checkpoint')
 						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', previousIdMatcher.group('major'))
 						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', previousIdMatcher.group('minor'))
@@ -44,7 +62,7 @@ pipeline {
 						def previousServiceVersion = previousIdMatcher.group('service') ?: '0'
 						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${previousIdMatcher.group('type')}${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}${(checkpoint || previousServiceVersion != '0') ? ('_' + previousServiceVersion) : ''}${checkpoint ? ('_' + checkpoint) : ''}")
 						
-					} else if ((previousIdMatcher = env.PREVIOUS_RELEASE_CANDIDATE_ID =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
+					} else if ((previousIdMatcher = "${PREVIOUS_RELEASE_CANDIDATE_ID}" =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
 						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', buildProperties.STREAMMajor.replace('"','')) // Remove surrounding quotes
 						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', buildProperties.STREAMMinor.replace('"','')) // Remove surrounding quotes
 						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
@@ -57,8 +75,8 @@ pipeline {
 					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousIdMatcher.group('date')}-${previousIdMatcher.group('time')}")
 					previousIdMatcher = null // release matcher as it's not serializable
 					
-					env.NEXT_SIMREL_NAME = readParameter('NEXT_SIMREL_NAME')
-					def simRelMatcher = env.NEXT_SIMREL_NAME =~ /(?<year>\d{4})-(?<month>\d{2})/
+					echo "NEXT_SIMREL_NAME: ${NEXT_SIMREL_NAME}"
+					def simRelMatcher = "${NEXT_SIMREL_NAME}" =~ /(?<year>\d{4})-(?<month>\d{2})/
 					if (!simRelMatcher.matches()) {
 						error "Unexpected format for NEXT_SIMREL_NAME: ${NEXT_SIMREL_NAME}"
 					}
@@ -81,7 +99,7 @@ pipeline {
 					def rcEnd = eclipseReleaseDates.RC2.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
 					assignEnvVariable('I_BUILD_SCHEDULE', createCronPattern(now, rcEnd, 18, '*').trim())
 					
-					env.NEXT_JAVA_RELEASE_DATE = readParameter('NEXT_JAVA_RELEASE_DATE')
+					echo "NEXT_JAVA_RELEASE_DATE: ${NEXT_JAVA_RELEASE_DATE}"
 					def yBuildSchedule = null
 					if ("${NEXT_JAVA_RELEASE_DATE}".isEmpty()) {
 						yBuildSchedule = createCronPattern(now, rcEnd, 10, '2,4,6')
@@ -468,14 +486,6 @@ def utilities = null
 def githubAPI = null
 
 // --- utility methods
-
-@NonCPS
-def readParameter(String name) {
-	//TODO: let jenkins trim the parameters
-	def value = (params[name] ?: '').trim()
-	println("${name}: ${value}")
-	return value
-}
 
 @NonCPS
 def assignEnvVariable(String name, Object value) {

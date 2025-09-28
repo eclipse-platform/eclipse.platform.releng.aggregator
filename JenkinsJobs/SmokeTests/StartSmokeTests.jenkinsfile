@@ -1,9 +1,18 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = 'Runs all smoke tests for the Eclipse SDK.'
 
 pipeline {
 	options {
 		timeout(time: 300, unit: 'MINUTES')
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'10'))
+	}
+	parameters {
+		string(name: 'buildId', trim: true, description: 'Build Id to test (such as I20240611-1800, N20120716-0800).')
+		string(name: 'testsToRun', defaultValue: 'ui', trim: true, description: '''\
+			This can be any ant target from
+			https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml
+		''')
 	}
 	agent none
 	stages {
@@ -86,7 +95,6 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 					if (os =='linux') {
 						def ws = 'gtk'
 						sh '''#!/bin/bash -x
-							buildId=$(echo $buildId|tr -d ' ')
 							cat /etc/*release
 							echo "whoami:  $(whoami)"
 							echo "uname -a: $(uname -a)"

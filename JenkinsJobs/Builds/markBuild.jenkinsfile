@@ -1,9 +1,19 @@
+// Constants read by 
+private static final _JOB_DESCRIPTION = 'Mark a build as stable/unstable or to (not to) be kept indefinitely.'
+
 pipeline {
 	options {
 		skipDefaultCheckout()
 		timestamps()
 		timeout(time: 5, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	parameters {
+		string(name: 'buildId', trim: true, description: 'ID of the build to be marked.')
+		choice(name: 'markAs', choices: [ 'STABLE', 'UNSTABLE', 'RETAINED_INDEFINITELY', 'NOT_RETAINED' ],
+			description: 'The kind of marker to apply to (respectively remove from) the specified build.')
+		string(name: 'issueURL', trim: true,
+			description: 'URL of the causing Github issue or PR (<em>only relevant if the build is marked as unstable<em>).')
 	}
 	agent {
 		label 'basic'
@@ -18,10 +28,6 @@ pipeline {
 			steps {
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
-						# Strip spaces from the buildId and eclipseStream
-						buildId=$(echo $buildId|tr -d ' ')
-						issueURL=$(echo $issueURL|tr -d ' ')
-						
 						if [ -z "$buildId" ]; then
 							echo "BuildId is empty! Exiting."
 							exit 1
