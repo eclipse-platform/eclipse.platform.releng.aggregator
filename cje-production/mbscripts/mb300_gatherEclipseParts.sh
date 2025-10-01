@@ -209,9 +209,7 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -DcjeDir=$CJE_ROOT \
   -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-  -DbuildID=$BUILD_ID \
   -DbuildLabel=$BUILD_ID \
-  -DpostingDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
   -v \
   verifyCompile
@@ -239,16 +237,12 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -DcjeDir=$CJE_ROOT \
   -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
   -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-  -DbuildID=$BUILD_ID \
   -DbuildLabel=$BUILD_ID \
   -DbuildDir=$BUILD_ID \
   -DbuildRepo=$PLATFORM_REPO_DIR \
   -DbuildType=$BUILD_TYPE \
-  -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
-  -DequinoxPostingDirectory=$BUILD_ROOT/$EQUINOX_DROP_DIR \
   -DpublishingContent=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles \
   -DindexFileName=index.php \
-  -DeclipseStream=$STREAM \
   -Dbase.builder=$CJE_ROOT/$BASEBUILDER_DIR \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
   -v \

@@ -1,0 +1,106 @@
+pipeline {
+	options {
+		skipDefaultCheckout()
+		timestamps()
+		timeout(time: 30, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+		disableConcurrentBuilds()
+	}
+	agent {
+		label 'basic'
+	}
+	tools {
+		jdk 'temurin-jdk21-latest'
+	}
+	stages {
+		stage('Checkout SCM') {
+			steps {
+				dir("${WORKSPACE}/git-repo") {
+					checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
+						extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+						[path: 'cje-production/'],
+						[path: 'eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml'],
+					])])
+				}
+			}
+		}
+		stage('Update test results'){
+			environment {
+				// Download Server locations (seldomly change)
+				EP_ECLIPSE_DROPS = '/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4'
+				ECLIPSE = installLatestEclipse()
+			}
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						#trim inputs
+						buildID=$(echo $buildID|tr -d ' ')
+						buildURL=$(echo $buildURL|tr -d ' ')
+						triggeringJob=$(echo $triggeringJob|tr -d ' ')
+						
+						curl -L -o "${WORKSPACE}/buildproperties.shsource" http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
+						source "${WORKSPACE}/buildproperties.shsource"
+						
+						$ECLIPSE -data workspace-toolsinstall \
+							-application org.eclipse.equinox.p2.director \
+							-repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO} \
+							-installIU org.eclipse.releng.build.tools.feature.feature.group
+						
+						buildDirectory="${WORKSPACE}/postingDir/${buildID}"
+						testResultsDir="${buildDirectory}/testresults"
+						mkdir -p "${testResultsDir}"
+						
+						# Fetch previously collected test results and already generated files (that would otherwise be re-generated)
+						rsync -avzh --exclude="*_${triggeringJob}_*" genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/${buildID}/testresults/xml ${buildDirectory}/testresults
+						
+						# ==========================================
+						# Collect results and overview from test-job
+						pushd "${testResultsDir}"
+						
+						curl -L -o "${triggeringJob}.xml" "${buildURL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration"
+						curl -L -o results.zip "${buildURL}/artifact/workarea/${buildID}/eclipse-testing/results/*zip*/results.zip"
+						unzip results.zip
+						# copy them to the expected location (from the subfolder of the zip) (mv can't merge directories) and remove all download artifacts. 
+						cp -r results/* .
+						rm -rf results results.zip
+						popd
+						
+						#triggering ant runner
+						devworkspace=${WORKSPACE}/workspace-updateTestResults
+						
+						$ECLIPSE -debug -data ${WORKSPACE}/workspace-updateTestResults \
+							-application org.eclipse.ant.core.antRunner \
+							-file "${WORKSPACE}/git-repo/cje-production/scripts/publish.xml" \
+							-DbuildDirectory=${buildDirectory} \
+							-Djob=${triggeringJob} \
+							-DbuildType=${BUILD_TYPE} \
+							"-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \
+							"-DmanifestFile=${WORKSPACE}/git-repo/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml"
+						
+						rsync -avzh ${buildDirectory} genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}
+					'''
+				}
+				build job: 'Releng/updateIndex', wait: false
+			}
+		}
+	}
+}
+
+def installLatestEclipse(){
+	def props = null
+	dir("${WORKSPACE}/git-repo") {
+		props = readProperties(file: 'cje-production/buildproperties.txt').collectEntries{n, v ->
+			v = v.trim();
+			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
+		}
+	}
+	def eclipseURL = "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-SDK-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
+	return install('eclipse', eclipseURL) + '/eclipse --launcher.suppressErrors -nosplash -consolelog'
+}
+
+def install(String toolType, String url) {
+	dir("${WORKSPACE}/tools/${toolType}") {
+		sh "curl -L ${url} | tar -xzf -"
+		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).trim()
+	}
+}
