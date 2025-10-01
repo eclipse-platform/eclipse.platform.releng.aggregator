@@ -150,3 +150,17 @@ It must match the name of the build on the download server.
 	}
 }
 
+pipelineJob('Releng/updateIndex'){
+	displayName('Update Download Index')
+	description('Recreates the Eclipse download page index.')
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/updateIndex.jenkinsfile')
+		}
+	}
+}
+
