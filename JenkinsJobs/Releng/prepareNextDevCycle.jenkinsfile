@@ -1,3 +1,6 @@
+// Constants read by job creation
+private static final _JOB_DISPLAY_NAME = 'Prepare Next Development Cycle'
+private static final _JOB_DESCRIPTION = 'Perform all steps to prepare the next development cycle of Eclipse.'
 
 def releaseEvents = [ M1: 'Milestone 1', M2: 'Milestone 2', M3: 'Milestone 3', RC1: 'Release Candidate 1', RC2: 'Release Candidate 2', GA: 'Release' ]
 
@@ -7,6 +10,21 @@ pipeline {
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
 		skipDefaultCheckout()
+	}
+	parameters {
+		booleanParam(name: 'DRY_RUN', defaultValue: true, description: '''\
+			If enabled, the final publication of all changes is skipped respectivly all changes at the download-server happen in a 'try-out' area at https://download.eclipse.org/eclipse/try-outs/.
+			This area is cleaned on each dry-run and should be cleaned after a try-out session is completed.
+			Useful for debugging and to very that the pipeline behaves as intended.
+		''')
+		string(name: 'NEXT_RELEASE_VERSION', description: 'Version of the release to prepare, for example: 4.37')
+		string(name: 'PREVIOUS_RELEASE_CANDIDATE_ID', description: 'Id of the current release-candiate for the previous release. For example: S-4.36RC2-202505281830')
+		string(name: 'NEXT_SIMREL_NAME', description: 'The name of the Simultanious Release that is targeted by the prepared release. Value is in the format yyyy-mm, for example: 2026-03')
+		string(name: 'NEXT_JAVA_RELEASE_DATE', description: '''\
+			Release date of the next Java version, if it is released shortly after the Eclipse release
+			(i.e. shortly after the <em>GA_DATE</em> specified above, <b>usual for odd release versions</b>), else left blank (<b>usual for even releases</b>).
+			Value is in the format yyyy-mm-dd, for example: 2025-09-16
+		''')
 	}
 	agent {
 		label 'ubuntu-2404'
@@ -471,8 +489,7 @@ def githubAPI = null
 
 @NonCPS
 def readParameter(String name) {
-	//TODO: let jenkins trim the parameters
-	def value = (params[name] ?: '').trim()
+	def value = params[name] ?: ''
 	println("${name}: ${value}")
 	return value
 }
