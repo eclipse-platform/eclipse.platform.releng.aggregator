@@ -19,7 +19,6 @@
 
 	<target name="generateIndex"
     depends="initResultsVariables">
-
 		<property
       name="class"
       value="org.eclipse.releng.generators.TestResultsGenerator" />
@@ -62,101 +61,38 @@
       doMissingList="${doMissingListValue}" />
 	</target>
 
-	<target name="initResultsVariables" depends="init">
+	<target name="initResultsVariables">
+		<fail unless="buildDirectory" />
 		<fail unless="job" />
+		<fail unless="buildType" />
+		<fail unless="testsConfigExpected" />
+		<fail unless="manifestFile" />
 
 		<property name="isBuildTested" value="true" />
 
-		<loadresource property="buildType">
-			<string value="${buildID}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^([IMXYNPSRU])(\d{8})-(\d{4})$" replace="\1"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-
 		<property name="dropTokenList" value="%repository%,%sdk%,%tests%,%runtime%,%jdtc%,%swt%" />
 
-		<condition property="indexFileName" value="testResults.php">
-			<contains string="${job}" substring="-unit-" />
-		</condition>
-		<!-- else standard default for download page -->
-		<property name="indexFileName" value="index.php" />
+		<property name="indexFileName" value="" />
 
 		<!-- xml results directory -->
 		<property name="xmlDirectoryName" value="${buildDirectory}/testresults/xml" />
-
-		<condition property="dropTemplateFileName" value="${EBuilderDir}/eclipse/publishingFiles/staticDropFiles/testResults.php">
-			<contains string="${job}" substring="-unit-" />
-		</condition>
-		<!-- else standard default for download index.php page -->
-		<property name="dropTemplateFileName" value="${EBuilderDir}/eclipse/publishingFiles/templateFiles/index.template.php" />
+		
+		<property name="dropTemplateFileName" value="" />
 
 		<property name="testResultsHtmlFileName" value="testResultsTables.html" />
 
 		<property name="hrefTestResultsTargetPath" value="testresults" />
 
 		<property name="hrefCompileLogsTargetPath" value="compilelogs/plugins/" />
-		<property name="compileLogsDirectoryName" value="${buildDirectory}/${hrefCompileLogsTargetPath}" />
-
-		<property name="manifestFile" value="${EBuilderDir}/eclipse/publishingFiles/testManifest.xml" />
+		<property name="compileLogsDirectoryName" value="" />
 
 		<!-- normal unit tests configs -->
-		<property name="testsConfigExpected" value="${env.TEST_CONFIGURATIONS_EXPECTED}" />
-
 		<property name="expectedConfigFilename" value="testConfigs.php" />
 
 		<property name="foundConfigFilename" value="testConfigsFound.php" />
 
 		<!-- we should be able to do this now, and refine list in manifest. -->
 		<property name="doMissingListValue" value="true" />
-
-	</target>
-
-	<target name="init">
-		<fail unless="buildID" />
-		<fail unless="eclipseStream" />
-		<fail unless="postingDirectory" />
-
-		<property name="buildDirectory" value="${postingDirectory}/${buildID}" />
-
-		<condition property="streamOK">
-			<matches pattern="\d+\.\d+\.\d+" string="${eclipseStream}" />
-		</condition>
-		<fail message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}" unless="streamOK" />
-
-		<loadresource property="eclipseStreamMajor">
-			<string value="${eclipseStream}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
-
-		<loadresource property="eclipseStreamMinor">
-			<string value="${eclipseStream}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
-
-		<loadresource property="eclipseStreamService">
-			<string value="${eclipseStream}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\3"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo message="eclipseStreamService: ${eclipseStreamService}"/>
-
-		<property environment="env"/>
 
 	</target>
 

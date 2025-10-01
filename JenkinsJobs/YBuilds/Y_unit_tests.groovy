@@ -108,7 +108,7 @@ pipeline {
         // For smaller test-suites see: https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/be721e33c916b03c342e7b6f334220c6124946f8/production/testScripts/configuration/sdk.tests/testScripts/test.xml#L1893-L1903
         archiveArtifacts '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, *.properties, *.txt'
         junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-        build job: 'Releng/ep-collectResults', wait: false, parameters: [
+        build job: 'Releng/collectTestResults', wait: false, parameters: [
           string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"),
           string(name: 'buildURL', value: "${BUILD_URL}"),
           string(name: 'buildID', value: "${params.buildId}")

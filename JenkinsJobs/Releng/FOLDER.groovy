@@ -2,6 +2,25 @@ folder('Releng') {
 	description('Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.')
 }
 
+pipelineJob('Releng/collectTestResults'){
+	displayName('Collect Test Results')
+	description('Performs some summary analysis and writes unit test results to the download page.')
+	parameters {
+		stringParam('triggeringJob', null, 'Name of the job to collect results from: i.e. \'ep427I-unit-cen64-gtk3-java17\'.')
+		stringParam('buildURL', null, 'Build URL of the triggering job.')
+		stringParam('buildID', null, 'ID of the I-build being tested.')
+	}
+	definition {
+		cpsScm {
+			lightweight(true)
+			scm {
+				github('eclipse-platform/eclipse.platform.releng.aggregator', 'master')
+			}
+			scriptPath('JenkinsJobs/Releng/collectTestResults.jenkinsfile')
+		}
+	}
+}
+
 pipelineJob('Releng/deployToMaven'){
 	displayName('Deploy to Maven')
 	description('''\
