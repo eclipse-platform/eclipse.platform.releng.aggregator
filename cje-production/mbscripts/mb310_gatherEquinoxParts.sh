@@ -84,7 +84,6 @@ ${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
   -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
   -DeqpublishingContent=$ECLIPSE_BUILDER_DIR/equinox/publishingFiles \
   -DindexFileName=index.php \
-  -DeclipseStream=$STREAM \
   -Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \
   -Dbase.builder=$CJE_ROOT/$BASEBUILDER_DIR \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
