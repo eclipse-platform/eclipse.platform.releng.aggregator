@@ -1,12 +1,11 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<!DOCTYPE HTML><html lang="en">
 <HEAD>
 
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<META charset="utf-8">
 
-<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<LINK REL="STYLESHEET" HREF="../book.css" TYPE="text/css">
 <TITLE>
 Undoable operations
 </TITLE>
@@ -16,7 +15,7 @@ Undoable operations
 <BODY>
 <h2>Undoable Operations</h2>
 <p>We've looked at many different ways to contribute commands to the workbench, but we
-haven't focused on the implementation of a command's <tt>execute(ExecutionEvent)</tt> method.
+haven't focused on the implementation of a command's <code>execute(ExecutionEvent)</code> method.
 The mechanics
 of the method depend on the specific command in question, but structuring the code as an
 <b>undoable operation</b> allows the command to participate in the platform undo and redo
@@ -24,7 +23,7 @@ support.</p>
 <p>
 The platform provides an <b>undoable operations framework</b> in the package
 <b><a href="../reference/api/org/eclipse/core/commands/operations/package-summary.html">org.eclipse.core.commands.operations</a></b>.
-By implementing the code inside a <tt>execute(ExecutionEvent)</tt> method to create an
+By implementing the code inside a <code>execute(ExecutionEvent)</code> method to create an
 <a href="../reference/api/org/eclipse/core/commands/operations/IUndoableOperation.html"><b>IUndoableOperation</b></a>,
 the operation can be made available for undo and redo.  Converting an command or action to use operations is straightforward, 
 apart from implementing the undo and redo behavior itself.</p>
@@ -96,8 +95,8 @@ This is largely an application design decision.
 </p>
 <p>
 When a command launches a wizard, then the operation is typically created as part of the wizard's 
-<tt>performFinish()</tt> method or a wizard page's <tt>finish()</tt> method.  Converting the <tt>finish</tt> method
-to use operations is similar to converting an <tt>execute</tt> method.  The method is responsible for creating
+<code>performFinish()</code> method or a wizard page's <code>finish()</code> method.  Converting the <code>finish</code> method
+to use operations is similar to converting an <code>execute</code> method.  The method is responsible for creating
 and executing an operation that does the work previously done inline.
 </p>
 <h3>Operation History</h3>
@@ -161,7 +160,7 @@ operations that have been executed, while views and editors can filter the histo
 Undo contexts can be created by the plug-in that is creating the undoable operations, or accessed through API.  For
 example, the workbench provides access to an undo context that can be used for workbench-wide operations.  However they
 are obtained, undo contexts should be assigned when an operation is created.  The following snippet shows how the
-<tt>execute</tt> method could assign a workbench-wide context to its operations.
+<code>execute</code> method could assign a workbench-wide context to its operations.
 </p>
 <pre>
 public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -225,7 +224,7 @@ IUndoableOperation [] undoHistory = operationHistory.getUndoHistory(IOperationHi
 Whenever an operation is executed, undone, or redone using operation history protocol, clients can
 provide a progress monitor and any additional UI info that may be needed for performing the operation.
 This information is passed to the operation itself.  In our original
-example, the <tt>execute</tt> method constructed an operation with a shell parameter that could be used to open
+example, the <code>execute</code> method constructed an operation with a shell parameter that could be used to open
 the dialog.  Instead of storing the shell in the operation, a better approach is to pass parameters
 to the execute, undo, and redo methods that provide any UI information needed to run the operation.  These
 parameters will be passed on to the operation itself.</p>
