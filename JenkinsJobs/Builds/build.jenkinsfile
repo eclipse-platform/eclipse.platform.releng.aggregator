@@ -36,7 +36,7 @@ pipeline {
 	options {
 		timeout(time: 360, unit: 'MINUTES')
 		timestamps()
-		buildDiscarder(logRotator(numToKeepStr:'25'))
+		buildDiscarder(logRotator(numToKeepStr:'25', artifactNumToKeepStr: '3'))
 	}
   agent {
     kubernetes {
@@ -324,7 +324,7 @@ spec:
 	}
 	post {
 		always {
-			archiveArtifacts 'cje-production/siteDir/**'
+			archiveArtifacts artifacts: 'cje-production/siteDir/**', excludes: 'cje-production/siteDir/eclipse/updates/**'
 		}
 		failure {
 			emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_IID} - BUILD FAILED",
