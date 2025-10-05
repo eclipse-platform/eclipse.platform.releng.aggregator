@@ -3,7 +3,7 @@ pipeline {
 		skipDefaultCheckout()
 		timestamps()
 		timeout(time: 30, unit: 'MINUTES')
-		buildDiscarder(logRotator(numToKeepStr:'5'))
+		buildDiscarder(logRotator(numToKeepStr:'15'))
 		disableConcurrentBuilds()
 	}
 	agent {
@@ -51,7 +51,12 @@ pipeline {
 						mkdir -p "${testResultsDir}"
 						
 						# Fetch previously collected test results and already generated files (that would otherwise be re-generated)
-						rsync -avzh --exclude="*_${triggeringJob}_*" genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/${buildID}/testresults/xml ${buildDirectory}/testresults
+						allTestResultsXMLDirectory="${EP_ECLIPSE_DROPS}/${buildID}/testresults/xml"
+						if ssh genie.releng@projects-storage.eclipse.org "[ -d '${allTestResultsXMLDirectory}' ]"; then
+							rsync -avzh --exclude="*_${triggeringJob}_*" genie.releng@projects-storage.eclipse.org:${allTestResultsXMLDirectory} ${buildDirectory}/testresults
+						else
+							echo 'Test results of other configurations not yet published.'
+						fi
 						
 						# ==========================================
 						# Collect results and overview from test-job
@@ -94,7 +99,7 @@ def installLatestEclipse(){
 			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
 		}
 	}
-	def eclipseURL = "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-SDK-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
+	def eclipseURL = "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-platform-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
 	return install('eclipse', eclipseURL) + '/eclipse --launcher.suppressErrors -nosplash -consolelog'
 }
 
