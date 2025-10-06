@@ -13,7 +13,7 @@ for (STREAM in config.Y.streams.keySet()){
 	def MINOR = STREAM.split('\\.')[1]
 	for (TEST_CONFIG in TEST_CONFIGURATIONS){
 
-		pipelineJob('YPBuilds/ep' + MAJOR + MINOR + 'Y-unit-' + TEST_CONFIG.os + '-' + TEST_CONFIG.arch + '-java' + TEST_CONFIG.javaVersion){
+		pipelineJob('YBuilds/ep' + MAJOR + MINOR + 'Y-unit-' + TEST_CONFIG.os + '-' + TEST_CONFIG.arch + '-java' + TEST_CONFIG.javaVersion){
 			description('Run Eclipse SDK Tests for the platform implied by this job\'s name')
 			parameters { // Define parameters in job configuration to make them available from the very first build onwards
 				stringParam('buildId', null, 'Build Id to test (such as I20240611-1800, N20120716-0800).')
