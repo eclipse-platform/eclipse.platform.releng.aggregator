@@ -44,7 +44,7 @@ The **Y-build** is a full sdk build with the new java version for testing.
 The **P-build** is a patch build that contains modified plugins designed to be installed on top of the current I-build to test the new java version.
 They are now managed by the JDT-project itself in (org.eclipse.jdt.releng)[https://github.com/eclipse-jdt/eclipse.jdt/tree/master/org.eclipse.jdt.releng].
 
-The builds themselves and their unit tests are in the (Y Builds)[JenkinsJobs/YBuilds] folder in git and the (Y and P Builds)[https://ci.eclipse.org/releng/job/YPBuilds/] folder in jenkins.
+The builds themselves and their unit tests are in the (Y Builds)[JenkinsJobs/YBuilds] folder in git and the (Y Builds)[https://ci.eclipse.org/releng/job/YBuilds/] folder in jenkins.
 
 ## Setting Up New Builds
 

@@ -19,7 +19,7 @@ pipeline {
 						def folderDefinitions = [
 							'AutomatedTests': [ displayName: 'Automated Tests', description: 'Folder for Unit Tests'],
 							'Builds': [description: 'Eclipse periodic build jobs.'],
-							'YPBuilds': [displayName: 'Y and P Builds', description: 'Builds and tests for the beta java builds.'],
+							'YBuilds': [displayName: 'Y Builds', description: 'Builds and tests for the beta java builds.'],
 							'Cleanup': [description: 'Cleanup Scripts.'],
 							'Releng': [description: 'Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.'],
 						]
@@ -48,7 +48,7 @@ pipeline {
 								'''.stripIndent() + config.schedule).trim() : null]
 						}
 						jobConfigurations.Y.streams.each{ STREAM, config ->
-							pipelineJobDefinitions["YPBuilds/Y-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
+							pipelineJobDefinitions["YBuilds/Y-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
 								description: 'Beta Java Eclipse builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
 								TZ=America/Toronto
 								# Format: Minute Hour Day Month Day-of-week (1-7)
