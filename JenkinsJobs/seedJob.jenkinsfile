@@ -37,8 +37,8 @@ pipeline {
 						// Remove the generic 'build' job and define stream specific I/Y-build jobs instead
 						def buildJob = pipelineJobDefinitions.remove('Builds/build')
 						
-						def jobConfigurations = readJSON(file: 'JobDSL.json')
-						jobConfigurations.I.streams.each{ STREAM, config ->
+						def buildConfigurations = readJSON(file: 'buildConfigurations.json')
+						buildConfigurations.I.streams.each{ STREAM, config ->
 							pipelineJobDefinitions["Builds/I-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
 								description: 'Daily Eclipse Integration builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
 								TZ=America/Toronto
@@ -47,7 +47,7 @@ pipeline {
 								# Schedule: 6 PM every day until end of RC2
 								'''.stripIndent() + config.schedule).trim() : null]
 						}
-						jobConfigurations.Y.streams.each{ STREAM, config ->
+						buildConfigurations.Y.streams.each{ STREAM, config ->
 							pipelineJobDefinitions["YBuilds/Y-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
 								description: 'Beta Java Eclipse builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
 								TZ=America/Toronto

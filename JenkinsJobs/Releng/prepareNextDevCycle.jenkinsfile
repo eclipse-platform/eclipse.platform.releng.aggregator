@@ -196,7 +196,7 @@ pipeline {
 					"for ${PREVIOUS_RELEASE_VERSION}.0 builds" : "for ${NEXT_RELEASE_VERSION}.0 builds",
 				])
 				script {
-					utilities.modifyJSON('JenkinsJobs/JobDSL.json') { builds ->
+					utilities.modifyJSON('JenkinsJobs/buildConfigurations.json') { builds ->
 						// Create I-build for new stream and move previous I-build to maintenance branch to allow late re-spins
 						builds.I.streams["${NEXT_RELEASE_VERSION}"] = [ branch: 'master', schedule: env.I_BUILD_SCHEDULE ]
 						builds.I.streams["${PREVIOUS_RELEASE_VERSION}"].branch = env.MAINTENANCE_BRANCH
@@ -278,7 +278,7 @@ pipeline {
 				sh 'git checkout -b prepareMaintenance ${MAINTENANCE_BRANCH}'
 				
 				script {
-					utilities.modifyJSON('JenkinsJobs/JobDSL.json') { builds ->
+					utilities.modifyJSON('JenkinsJobs/buildConfigurations.json') { builds ->
 						builds.values().each{ buildType ->
 							def build = buildType.streams["${PREVIOUS_RELEASE_VERSION}"]
 							build.branch = env.MAINTENANCE_BRANCH

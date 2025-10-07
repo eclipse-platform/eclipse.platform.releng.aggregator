@@ -1,4 +1,4 @@
-def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('JobDSL.json'))
+def config = new groovy.json.JsonSlurper().parseText(readFileFromWorkspace('buildConfigurations.json'))
 
 def TEST_CONFIGURATIONS = [
 	[os: 'linux' , ws:'gtk'  , arch: 'x86_64' , javaVersion: 21, agentLabel: 'ubuntu-2404'        , javaHome: "tool(type:'jdk', name:'temurin-jdk21-latest')" ],

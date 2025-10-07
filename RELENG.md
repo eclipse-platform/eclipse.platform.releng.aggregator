@@ -17,7 +17,9 @@ As a general rule, the (JenkinsJobs)[JenkinsJobs] folder should match the layout
 
 Note: JobDSL does also support the creation of Views, so those can be added at some point but someone will either have to manually keep them up to date with the desired jobs or write a script to keep them up-to-date.
 
-Many jobs have the release version in the job name because it is required for results parsing (i.e. the (automated tests)[https://ci.eclipse.org/releng/job/AutomatedTests/]). In order to minimize manual labor the currently active streams are listed in the (JobDSL.json)[JenkinsJobs/JobDSL.json] file. Version dependent jobs then parse this file during creation and make a job for each stream.
+Many jobs have the release version in the job name because it is required for results parsing (i.e. the (automated tests)[https://ci.eclipse.org/releng/job/AutomatedTests/]).
+In order to minimize manual labor the currently active streams are listed in the (buildConfigurations.json)[JenkinsJobs/buildConfigurations.json] file.
+Version dependent jobs then parse this file during creation and make a job for each stream.
 
 **New Jobs**
 
@@ -53,7 +55,7 @@ When the JDT team is ready they will raise an issue to create new Y builds and s
 **Things to Do:**
   * Update the Y-build configuration in the (build.jenkinsfile)[JenkinsJobs/Builds/build.jenkinsfile]
     - Update `branchLabel` and `typeName` to the name of the new java version
-  * Remove the disablement of the current stream in the Y-build configuration in the (JobDSL.json)[JenkinsJobs/JobDSL.json] (should be the only Y-build stream).
+  * Remove the disablement of the current stream in the Y-build configuration in the (buildConfigurations.json)[JenkinsJobs/buildConfigurations.json] (should be the only Y-build stream).
   * Update and rename the java repository files in (cje-production/streams)[cje-production/streams]
     - Repos without a `BETA_JAVA##` branch should be set to master
   * Add unit tests for the new java version in (JenkinsJobs/YBuilds)[JenkinsJobs/YBuilds] and (build.jenkinsfile)[JenkinsJobs/Builds/build.jenkinsfile]
