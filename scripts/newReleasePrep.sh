@@ -25,8 +25,8 @@ TITLE="Preparation work for ${NEXT_STREAM} (${NEXT_TRAIN}) and open master for d
 BODY="This preparation work involves the following tasks. For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggregator#${PREV_ISSUE}.
 
 - [ ] Update JenkinsJobs for ${NEXT_STREAM}:
-- - [ ] Add ${NEXT_STREAM} to JobDSL.json to create new jobs
-- - [ ] Update "Brances" in JobDSL.json to move ${PREV_MAJOR}.${PREV_MINOR}-I builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
+- - [ ] Add ${NEXT_STREAM} to `buildConfigurations.json` to create new jobs
+- - [ ] Update "Brances" in `buildConfigurations.json` to move ${PREV_MAJOR}.${PREV_MINOR}-I builds to R${PREV_MAJOR}_${PREV_MINOR}_maintenance branch
 - - [ ] Update I-build triggers with dates for ${NEXT_STREAM} milestone
 - [ ] Splash Screen for ${NEXT_STREAM} (${NEXT_TRAIN})
 - [ ] Create ${NEXT_STREAM}-I-builds repo
