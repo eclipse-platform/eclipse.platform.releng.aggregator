@@ -73,8 +73,12 @@ spec:
 			}
 		}
 		stage('Clone and tag Build Inputs') {
+			environment {
+				AGGREGATOR_LOCAL_BRANCH = "${scm.branches[0].name}"
+				AGGREGATOR_REPOSITORY_URL = "${scm.userRemoteConfigs[0].url}" // http(s) URL expected
+			}
 			steps {
-				sshagent (['github-bot-ssh']) {
+				dir("${CJE_ROOT}/${AGG_DIR}") {
 					sh '''#!/bin/bash -xe
 						source $CJE_ROOT/buildproperties.shsource
 						
@@ -82,10 +86,8 @@ spec:
 						git config --global user.name 'Eclipse Releng Bot'
 						
 						# Clone this repo and all submodules into the 'AGG_DIR' directory
-						git clone --branch=$BRANCH --recurse-submodules --remote-submodules \
-							git@github.com:eclipse-platform/eclipse.platform.releng.aggregator.git "$CJE_ROOT/$AGG_DIR"
-						
-						cd "$CJE_ROOT/$AGG_DIR"
+						git clone --branch=${AGGREGATOR_LOCAL_BRANCH} --recurse-submodules --remote-submodules \
+							${AGGREGATOR_REPOSITORY_URL} .
 						
 						if [ -n "${GIT_SUBMODULE_BRANCHES}" ]; then
 							for submodule in ${GIT_SUBMODULE_BRANCHES//,/ }; do
@@ -99,16 +101,10 @@ spec:
 						fi
 						
 						# Create 'Build input' commit (considering commits potentially submitted to the aggregator BRANCH in the meantime)
-						git checkout $BRANCH
+						git checkout ${AGGREGATOR_LOCAL_BRANCH}
 						git pull
 						git commit --all --message="Build input for build $BUILD_ID" || echo 'No submodule changes'
-						
-						if [ "${BUILD_TYPE}" == "I" ]; then
-							git push --verbose origin $BRANCH
-						fi
 					'''
-				}
-				dir("${CJE_ROOT}/${AGG_DIR}") {
 					sshagent (['projects-storage.eclipse.org-bot-ssh']) {
 						// Try to find the last tag of the current build type that is available as a promoted build
 						// by checking the most recent 5 tags and seeing if an update site for it exists
@@ -138,14 +134,21 @@ spec:
 							error('Abort scheduled build due to no changes')
 						}
 					}
-					// Git tagging
+					// Create git tags and push changes
 					sshagent (['github-bot-ssh']) {
 						sh '''#!/bin/bash -xe
 							source $CJE_ROOT/buildproperties.shsource
+							
+							function remoteURL {
+								git config remote.origin.url | sed --expression 's,https://github.com/,git@github.com:,'
+							}
+							export -f remoteURL
+							if [ "${BUILD_TYPE}" == "I" ]; then
+								git push --verbose $(remoteURL) ${AGGREGATOR_LOCAL_BRANCH}
+							fi
 							function tagAndPush {
 								git tag ${BUILD_ID} HEAD
-								pushURL=$(git config remote.origin.url | sed --expression 's,https://github.com/,git@github.com:,')
-								git push "${pushURL}" tag ${BUILD_ID}
+								git push --verbose $(remoteURL) tag ${BUILD_ID}
 							}
 							export -f tagAndPush
 							git submodule foreach 'tagAndPush'
