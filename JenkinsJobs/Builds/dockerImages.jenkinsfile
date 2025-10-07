@@ -17,11 +17,15 @@ pipeline {
 	}
 	stages {
 		stage('Get Docker Files') {
+			environment {
+				GIT_BRANCH = "${scm.branches[0].name}"
+				GIT_REPOSITORY = "${scm.userRemoteConfigs[0].url}"
+			}
 			steps {
 				cleanWs()
 				sh '''
-					git clone --depth=1 -b master https://github.com/eclipse-platform/eclipse.platform.releng.aggregator.git
-					git clone --depth=1 -b master https://github.com/eclipse-jdt/eclipse.jdt.core
+					git clone --depth=1 --branch ${GIT_BRANCH} ${GIT_REPOSITORY} eclipse.platform.releng.aggregator
+					git clone --depth=1 --branch ${GIT_BRANCH} https://github.com/eclipse-jdt/eclipse.jdt.core eclipse.jdt.core
 				'''
 			}
 		}
