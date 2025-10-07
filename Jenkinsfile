@@ -36,7 +36,7 @@ pipeline {
 						return !sh(script:'''
 							latestCommitID=$(curl https://download.eclipse.org/eclipse/relengScripts/state)
 							git diff --name-only ${latestCommitID} HEAD \\
-								production/ cje-production/ eclipse.platform.releng.tychoeclipsebuilder/
+								production/testScripts/bootstrap
 							''', returnStdout: true).trim().isEmpty()
 					}
 				}
@@ -52,10 +52,6 @@ pipeline {
 						
 						ssh genie.platform@projects-storage.eclipse.org mkdir -p ${serverStaging}/testScripts
 						scp -r production/testScripts/bootstrap genie.platform@projects-storage.eclipse.org:${serverStaging}/testScripts
-						
-						scp -r cje-production genie.platform@projects-storage.eclipse.org:${serverStaging}
-						
-						scp -r eclipse.platform.releng.tychoeclipsebuilder/entitlement genie.platform@projects-storage.eclipse.org:${serverStaging}
 						
 						# Create state file that contains the current commitID for later diffs in this stage's conditional
 						commitID=$(git rev-parse HEAD)
