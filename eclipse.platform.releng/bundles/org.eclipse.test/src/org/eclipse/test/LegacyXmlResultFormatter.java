@@ -15,7 +15,9 @@ package org.eclipse.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +33,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.tools.ant.taskdefs.optional.junitlauncher.TestResultFormatter;
 import org.apache.tools.ant.util.DOMElementWriter;
 import org.apache.tools.ant.util.DateUtils;
-import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.reporting.ReportEntry;
@@ -333,7 +334,11 @@ public class LegacyXmlResultFormatter extends AbstractJUnitResultFormatter {
 				writer.writeAttribute(ATTR_TYPE, t.getClass().getName());
 
 				if (writeExceptionStackTrace) {
-					writer.writeCharacters(ExceptionUtils.readStackTrace(t));
+					StringWriter stringWriter = new StringWriter();
+					try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
+						t.printStackTrace(printWriter);
+					}
+					writer.writeCharacters(stringWriter.toString());
 				}
 			}
 			writer.writeEndElement();
