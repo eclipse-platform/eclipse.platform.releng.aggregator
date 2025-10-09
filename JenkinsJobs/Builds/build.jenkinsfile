@@ -107,14 +107,14 @@ spec:
 							source $CJE_ROOT/buildproperties.shsource
 							updateSiteRootPath=/home/data/httpd/download.eclipse.org/eclipse/updates/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 							lastTagList=$(git tag --list "${BUILD_TYPE}*" | tail -n5 | tac)
-							for lt in $lastTagList ; do
+							for lt in ${lastTagList}; do
 								if ssh genie.releng@projects-storage.eclipse.org test -d ${updateSiteRootPath}/${lt} ; then
-									echo "$lt" > 'lastTag'
+									echo "$lt" > "${WORKSPACE}/lastTag"
 									exit 0
 								fi
 							done
 							# if no build is promoted yet, then just fallback to the last tag of the current build type
-							git describe --tags --match "${BUILD_TYPE}*" --abbrev=0 > 'lastTag'
+							git describe --tags --match "${BUILD_TYPE}*" --abbrev=0 > "${WORKSPACE}/lastTag"
 						'''
 					}
 					script { // Check for changes and abort if nothing changed since the last build
@@ -124,7 +124,7 @@ spec:
 								No changes have been made since the last successful ${BUILD_TYPE}-Build and therefore this scheduled build was skipped:
 								${BUILD_URL}console
 								""".stripIndent(), mimeType: 'text/plain',
-								to: "${MAILING_LIST}", from: 'genie.releng@eclipse.org'
+								to: "${BUILD.mailingList}", from: 'genie.releng@eclipse.org'
 							currentBuild.result = 'ABORTED'
 							error('Abort scheduled build due to no changes')
 						}
@@ -147,7 +147,7 @@ spec:
 					sh '''#!/bin/bash -xe
 						source $CJE_ROOT/buildproperties.shsource
 						reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M)
-						export lastTag=$(cat lastTag)
+						export lastTag=$(cat "${WORKSPACE}/lastTag")
 						if [[ -n "$lastTag" ]]; then
 							export gitLogFile="$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html"
 							mkdir -p $(dirname "${gitLogFile}")
