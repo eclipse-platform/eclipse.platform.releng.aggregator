@@ -23,7 +23,7 @@ def modifyJSON(String jsonFilePath, Closure transformation) {
 	def json = readJSON(file: jsonFilePath)
 	transformation.call(json)
 	// This leads to prettier results than using the writeJSON() step, even with the pretty parameter set.
-	writeFile(file: jsonFilePath, text: JsonOutput.prettyPrint(JsonOutput.toJson(json)), encoding :'UTF-8')
+	writeFile(file: jsonFilePath, text: JsonOutput.prettyPrint(JsonOutput.toJson(json)).replace('    ','\t'), encoding :'UTF-8')
 }
 
 def runHereAndForEachGitSubmodule(Closure task) {
