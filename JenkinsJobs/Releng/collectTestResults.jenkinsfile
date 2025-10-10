@@ -28,6 +28,7 @@ pipeline {
 						extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
 						[path: 'cje-production/'],
 						[path: 'eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml'],
+						[path: 'JenkinsJobs/shared/utilities.groovy'],
 					])])
 				}
 			}
@@ -98,20 +99,11 @@ pipeline {
 }
 
 def installLatestEclipse(){
-	def props = null
-	dir("${WORKSPACE}/git-repo") {
-		props = readProperties(file: 'cje-production/buildproperties.txt').collectEntries{n, v ->
+	def props = readProperties(file: "${WORKSPACE}/git-repo/cje-production/buildproperties.txt").collectEntries{n, v ->
 			v = v.trim();
 			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
 		}
-	}
+	def utilities = load "${WORKSPACE}/git-repo/JenkinsJobs/shared/utilities.groovy"
 	def eclipseURL = "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-platform-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
-	return install('eclipse', eclipseURL) + '/eclipse --launcher.suppressErrors -nosplash -consolelog'
-}
-
-def install(String toolType, String url) {
-	dir("${WORKSPACE}/tools/${toolType}") {
-		sh "curl -L ${url} | tar -xzf -"
-		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).trim()
-	}
+	return utilities.installDownloadableTool('eclipse', eclipseURL) + '/eclipse --launcher.suppressErrors -nosplash -consolelog'
 }

@@ -1,0 +1,159 @@
+def TEST_AGENT = null
+
+pipeline {
+	options {
+		timeout(time: 600, unit: 'MINUTES')
+		timestamps()
+		buildDiscarder(logRotator(numToKeepStr:'15', artifactNumToKeepStr:'5'))
+		skipDefaultCheckout()
+	}
+	parameters {
+		string(name: 'buildId', trim: true, description: 'Build Id to test. For example: <code>I20251010-0150</code>')
+		string(name: 'testSuite', defaultValue: 'all', trim: true, description: '''This can be any ant target from
+			https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml
+		''')
+		string(name: 'testAgent', trim: true, description: '''The Jenkins build agent this test should run on. If not specified to will be read from the
+			<a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/JenkinsJobs/buildConfigurations.json"><code>buildConfigurations.json</code></a>
+			for the configuration implied by this jobs's name.
+		''')
+	}
+	agent none
+	stages {
+		stage('Fetch test configuration') {
+			when {
+				beforeAgent true
+				equals actual: params.testAgent, expected: ''
+			}
+			agent {
+				label 'basic'
+			}
+			// Read the eventual test-agent's label, if not provided by the caller (usually it's provided)
+			steps {
+				script {
+					def buildConfigurations = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/JenkinsJobs/buildConfigurations.json", returnStdout: true)
+					def testConfiguration = readTestConfiguration(readJSON(text: buildConfigurations))
+					TEST_AGENT = testConfiguration.agent
+					echo "Read agent for OS=${testConfiguration.os} ARCH=${testConfiguration.arch}: ${TEST_AGENT}"
+				}
+			}
+		}
+		stage('Run Tests') {
+			agent {
+				label "${ params.testAgent ?: TEST_AGENT }"
+			}
+			environment {
+				// Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
+				ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
+				ANT_OPTS = "-Djava.io.tmpdir=${pathOf(env.WORKSPACE + '/tmp')}"
+			}
+			steps {
+				// workspace is not always cleaned (a previous clean-up may have failed). Clean before git cloning or custom tools are installed into workspace.
+				cleanWs()
+				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
+					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+					[path: 'JenkinsJobs/buildConfigurations.json'],
+					[path: 'JenkinsJobs/shared/utilities.groovy'],
+				])])
+				script {
+					def buildConfigurations = readJSON(file: 'JenkinsJobs/buildConfigurations.json')
+					def test = readTestConfiguration(buildConfigurations)
+					env.JAVA_HOME = getJDKInstallationPath(test)
+					env.PATH = [pathOf("${JAVA_HOME}/bin"), pathOf("${ANT_HOME}/bin"), env.PATH].join(isUnix() ? ':' : ';')
+					
+					def preambel = ''
+					if (isUnix()) {
+						preambel = '''#!/bin/bash -xe
+							export LANG=en_US.UTF-8
+							echo " whoami: $(whoami)"
+							echo " uname -a: $(uname -a)"
+							
+							# 0002 is often the default for shell users, but it is not when ran from
+							# a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
+							# we create on shared area.
+							oldumask=$(umask)
+							umask 0002
+							echo "umask explicitly set to 0002, old value was $oldumask"
+						'''
+					}
+					boolean needsXVNC = test.os == 'linux'
+					// tmp must already exist, for Java to make use of it, in subsequent steps
+					runScript(needsXVNC, preambel + """
+						mkdir tmp
+						
+						echo JAVA_HOME: §[JAVA_HOME]
+						echo ANT_HOME: §[ANT_HOME]
+						echo PATH: §[PATH]
+						java -XshowSettings -version 1>javaSettings.txt 2>&1
+						
+						curl --fail --output getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
+						ant -f getEBuilder.xml -DbuildId=${params.buildId} -Dosgi.os=${test.os} -Dosgi.ws=${test.ws} -Dosgi.arch=${test.arch} -DtestSuite=${params.testSuite}
+					""")
+				}
+				archiveArtifacts '**/eclipse-testing/results/**, *.properties, *.txt'
+				junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+				build job: 'Releng/collectTestResults', wait: false, parameters: [
+					string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"),
+					string(name: 'buildURL', value: "${BUILD_URL}"),
+					string(name: 'buildID', value: "${params.buildId}")
+				]
+			}
+			post {
+				always {
+					cleanWs()
+				}
+			}
+		}
+	}
+}
+
+@NonCPS
+def readTestConfiguration(Map<String, Object> buildConfigurations) {
+	def matcher = "$JOB_BASE_NAME" =~ /ep(?<major>\d)(?<minor>\d+)(?<type>[A-Z])-unit-(?<os>\w+)-(?<arch>\w+)-java(?<javaVersion>\d+)/
+	if (!matcher.matches()) {
+		throw new Exception("Unsupported test job name: $JOB_BASE_NAME" )
+	}
+	def buildType = matcher.group('type')
+	def os = matcher.group('os')
+	def arch = matcher.group('arch')
+	def javaVersion = matcher.group('javaVersion').toInteger()
+	def test = buildConfigurations[buildType].tests.find{ tc -> tc.os == os && tc.arch == arch && tc.javaVersion == javaVersion }
+	if (test == null) {
+		// Search again without java version to get at least the agent, but assume a temurin-type JDK (it's most generic)
+		test = buildConfigurations[buildType].tests.find{ tc -> tc.os == os && tc.arch == arch }
+		if (test == null) {
+			throw new Exception("Test configuration not found. OS: ${os}, ARCH: ${arch}")
+		}
+		test.javaVersion = javaVersion
+		test.jdk = [type: 'temurin']
+	}
+	return test
+}
+
+def runScript(boolean withXVNC, String scriptText) {
+	if (isUnix()) {
+		scriptText = scriptText.replaceAll(/§\[(\w+?)\]/,'\\${$1}')
+		if (withXVNC) {
+			xvnc(useXauthority: true) {
+				sh(scriptText)
+			}
+		} else {
+			sh(scriptText)
+		}
+	} else {
+		bat (scriptText.replaceAll(/§\[(\w+?)\]/,'%$1%'))
+	}
+}
+
+def getJDKInstallationPath(Map<String, Object> test) {
+	def utilities = load 'JenkinsJobs/shared/utilities.groovy'
+	switch(test.jdk.type) {
+		case 'tool': return tool(type:'jdk', name: test.jdk.name)
+		case 'local': return test.jdk.path
+		case 'install': return utilities.installDownloadableTool('jdk', test.jdk.url)
+		case 'temurin': return utilities.downloadTemurinJDK(test.javaVersion, test.os, test.arch, test.jdk.ea ? 'ea' : 'ga')
+	}
+}
+
+def pathOf(String path) {
+	return path.replace('/', isUnix() ? '/' : '\\')
+}

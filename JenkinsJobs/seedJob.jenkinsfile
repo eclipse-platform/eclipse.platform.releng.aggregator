@@ -36,6 +36,7 @@ pipeline {
 						}
 						// Remove the generic 'build' job and define stream specific I/Y-build jobs instead
 						def buildJob = pipelineJobDefinitions.remove('Builds/build')
+						def integrationTestsJob = pipelineJobDefinitions.remove('AutomatedTests/integrationTests')
 						
 						def buildConfigurations = readJSON(file: 'buildConfigurations.json')
 						buildConfigurations.each{ buildType, buildConfig ->
@@ -46,6 +47,14 @@ pipeline {
 									TZ=America/Toronto
 									# Format: Minute Hour Day Month Day-of-week (1-7)
 									'''.stripIndent() + streamConfig.schedule]
+								
+								// Create tests
+								buildConfig.tests.each{ testConfig ->
+									def jobName = "${buildConfig.testsFolder}/ep${MAJOR}${MINOR}${buildType}-unit-${testConfig.os}-${testConfig.arch}-java${testConfig.javaVersion}"
+									pipelineJobDefinitions[jobName] = [*:integrationTestsJob,
+										displayName: null,
+										description: "Run Eclipse SDK ${buildConfig.typeName} tests for ${testConfig.os.capitalize()} on ${testConfig.arch} with Java ${testConfig.javaVersion}"]
+								}
 							}
 						}
 						
@@ -112,7 +121,6 @@ pipeline {
 								}
 							}
 							'''.stripIndent(), removedJobAction: 'IGNORE', removedViewAction: 'IGNORE', unstableOnDeprecation: true, failOnMissingPlugin: true)
-						jobDsl(targets: '**/*.groovy', sandbox: true, removedJobAction: 'IGNORE', removedViewAction: 'IGNORE', unstableOnDeprecation: true, failOnMissingPlugin: true)
 					}
 				}
 			}
