@@ -266,12 +266,6 @@ def determineDeploymentType() {
 }
 
 def installLatestCbiAggr(){
-	return install('cbiAggr', "https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest/org.eclipse.cbi.p2repo.cli.product-linux.gtk.x86_64.tar.gz") + '/cbiAggr'
-}
-
-def install(String toolType, String url) {
-	dir("${WORKSPACE}/tools/${toolType}") {
-		sh "curl -L ${url} | tar -xzf -"
-		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).trim()
-	}
+	def utilities = load "${WORKSPACE}/git-repo/JenkinsJobs/shared/utilities.groovy"
+	return utilities.installDownloadableTool('cbiAggr', "https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest/org.eclipse.cbi.p2repo.cli.product-linux.gtk.x86_64.tar.gz") + '/cbiAggr'
 }
