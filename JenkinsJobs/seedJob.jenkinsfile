@@ -38,23 +38,15 @@ pipeline {
 						def buildJob = pipelineJobDefinitions.remove('Builds/build')
 						
 						def buildConfigurations = readJSON(file: 'buildConfigurations.json')
-						buildConfigurations.I.streams.each{ STREAM, config ->
-							pipelineJobDefinitions["Builds/I-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
-								description: 'Daily Eclipse Integration builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
-								TZ=America/Toronto
-								# Format: Minute Hour Day Month Day-of-week (1-7)
-								# - - - Integration Eclipse SDK builds - - - 
-								# Schedule: 6 PM every day until end of RC2
-								'''.stripIndent() + config.schedule).trim() : null]
-						}
-						buildConfigurations.Y.streams.each{ STREAM, config ->
-							pipelineJobDefinitions["YBuilds/Y-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: config.branch,
-								description: 'Beta Java Eclipse builds.', disabled: config.disabled, cronTrigger: config.schedule ? ('''\
-								TZ=America/Toronto
-								# Format: Minute Hour Day Month Day-of-week (1-7)
-								# - - - Beta Java Eclipse SDK builds - - - 
-								# Schedule: 10 AM every second day (and every day in Java RC phase)
-								'''.stripIndent() + config.schedule).trim() : null]
+						buildConfigurations.each{ buildType, buildConfig ->
+							buildConfig.streams.each{ STREAM, streamConfig ->
+								def (MAJOR, MINOR) = STREAM.split('\\.')
+								pipelineJobDefinitions["${buildConfig.folder}/${buildType}-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: streamConfig.branch,
+									description: "Eclipse SDK ${buildConfig.typeName} builds", disabled: streamConfig.disabled, cronTrigger: '''\
+									TZ=America/Toronto
+									# Format: Minute Hour Day Month Day-of-week (1-7)
+									'''.stripIndent() + streamConfig.schedule]
+							}
 						}
 						
 						jobDsl(additionalParameters: [FOLDER_DEFINITIONS: folderDefinitions,  PIPELINE_JOB_DEFINITIONS: pipelineJobDefinitions], sandbox: true, scriptText : '''\
