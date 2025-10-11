@@ -122,14 +122,24 @@ def pathOf(String path){
 def installTemurinJDK(String version, String os, String arch, String releaseType='ga') {
 	// Translate os/arch names that are different in the Adoptium API
 	if (arch == 'x86_64') {
-		arch == 'x64'
+		arch = 'x64'
 	}
-	return install('jdk', "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse")
+	if (os == 'macosx') {
+		os = 'mac'
+	} else if (os == 'win32') {
+		os = 'windows'
+	}
+	return install('jdk', "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse") + (os == 'mac' ? '/Contents/Home' : '')
 }
 
 def install(String toolType, String url) {
 	dir("${WORKSPACE}/tools/${toolType}") {
-		sh "curl -L ${url} | tar -xzf -"
+		def script = "curl -L ${url} | tar -xzf -"
+		if (isUnix()) {
+			sh script
+		} else { // Windows 10 and later has a tar.exe that can handle zip files (even read from std-in)
+			bat script
+		}
 		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
 	}
 }
