@@ -10,8 +10,6 @@ pipeline {
 		disableConcurrentBuilds()
 	}
 	parameters {
-		string(name: 'triggeringJob', trim: true, description: 'Name of the job to collect results from: i.e. \'ep427I-unit-cen64-gtk3-java17\'.')
-		string(name: 'buildURL', trim: true, description: 'Build URL of the triggering job.')
 		string(name: 'buildID', trim: true, description: 'ID of the I-build being tested.')
 	}
 	agent {
@@ -55,36 +53,14 @@ pipeline {
 						testResultsDir="${buildDirectory}/testresults"
 						mkdir -p "${testResultsDir}"
 						
-						# ==========================================
-						# Collect results and overview from test-job
-						pushd "${testResultsDir}"
-						
-						curl -L -o "${triggeringJob}.xml" "${buildURL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration"
-						curl -L -o results.zip "${buildURL}/artifact/workarea/${buildID}/eclipse-testing/results/*zip*/results.zip"
-						unzip results.zip
-						# copy them to the expected location (from the subfolder of the zip) and remove all download artifacts.
-						mv results/* .
-						rm -rf results results.zip
-						popd
-						
-						# Fetch previously collected test results and already generated files (that would otherwise be re-generated)
-						allTestResultsDirectory="${EP_ECLIPSE_DROPS}/${buildID}/testresults"
-						if ssh genie.releng@projects-storage.eclipse.org "[ -d '${allTestResultsDirectory}/xml' ]"; then
-							# First delete result files from a previous run of the same configuration (in case that test configuration was run again).
-							ssh genie.releng@projects-storage.eclipse.org rm -rfv ${allTestResultsDirectory}/${triggeringJob}* ${allTestResultsDirectory}/*/*${triggeringJob}*
-							rsync -avzh genie.releng@projects-storage.eclipse.org:${allTestResultsDirectory}/xml ${buildDirectory}/testresults
-						else
-							echo 'Test results of other configurations not yet published.'
-						fi
+						# Fetch previously collected test results of all completed runs
+						rsync -avzh genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/${buildID}/testresults/xml ${testResultsDir}
 						
 						#triggering ant runner
-						devworkspace=${WORKSPACE}/workspace-updateTestResults
-						
 						$ECLIPSE -debug -data ${WORKSPACE}/workspace-updateTestResults \
 							-application org.eclipse.ant.core.antRunner \
 							-file "${WORKSPACE}/git-repo/cje-production/scripts/publish.xml" \
 							-DbuildDirectory=${buildDirectory} \
-							-Djob=${triggeringJob} \
 							-DbuildType=${BUILD_TYPE} \
 							"-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \
 							"-DmanifestFile=${WORKSPACE}/git-repo/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml"
