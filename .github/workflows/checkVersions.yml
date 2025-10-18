@@ -26,6 +26,11 @@ on:
         type: string
         required: false
         default: '.'
+      stream-version-property:
+        description: Maven property name to use for determining the stream version in commit messages
+        type: string
+        required: false
+        default: 'releaseNumberSDK'
 
 permissions: {} # all none
 
@@ -89,11 +94,11 @@ jobs:
         if [[ $(git diff --name-only --cached) != '' ]]; then
           # Relevant files were staged, i.e. some version were changed
           
-          # Read 'releaseNumberSDK' property as stream version
+          # Read property as stream version
           pushd ${{ inputs.working-directory }}
-          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt'
-          streamVersion=$(<releaseNumberSDK-value.txt)
-          rm -f releaseNumberSDK-value.txt
+          mvn help:evaluate -Dexpression=${{ inputs.stream-version-property }} ${{ inputs.extra-maven-args }} --quiet '-Doutput=streamVersion-value.txt'
+          streamVersion=$(<streamVersion-value.txt)
+          rm -f streamVersion-value.txt
           popd
           
           git config --global user.email '${{ inputs.botMail }}'
