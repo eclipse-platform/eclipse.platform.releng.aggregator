@@ -6,7 +6,23 @@ pipeline {
 		timestamps()
 	}
 	agent {
-		label "centos-latest-8gb"
+		kubernetes {
+			inheritFrom 'ubuntu-2404'
+			yaml '''
+			apiVersion: v1
+			kind: Pod
+			spec:
+			  containers:
+			  - name: "jnlp"
+			    resources:
+			      limits:
+			        memory: "8Gi"
+			        cpu: "4000m"
+			      requests:
+			        memory: "4Gi"
+			        cpu: "2000m"
+			'''.stripIndent()
+		}
 	}
 	tools {
 		maven 'apache-maven-latest'
