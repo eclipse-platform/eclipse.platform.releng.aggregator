@@ -7,25 +7,25 @@ pipeline {
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'25', artifactNumToKeepStr: '3'))
 	}
-  agent {
-    kubernetes {
-      inheritFrom 'ubuntu-2404'
-      yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: "jnlp"
-    resources:
-      limits:
-        memory: "8Gi"
-        cpu: "4000m"
-      requests:
-        memory: "6Gi"
-        cpu: "2000m"
-"""
-    }
-  }
+	agent {
+		kubernetes {
+			inheritFrom 'ubuntu-2404'
+			yaml '''
+			apiVersion: v1
+			kind: Pod
+			spec:
+			  containers:
+			  - name: "jnlp"
+			    resources:
+			      limits:
+			        memory: "8Gi"
+			        cpu: "4000m"
+			      requests:
+			        memory: "6Gi"
+			        cpu: "2000m"
+			'''.stripIndent()
+		}
+	}
 	tools {
 		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
