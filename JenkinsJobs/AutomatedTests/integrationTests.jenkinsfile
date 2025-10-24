@@ -10,7 +10,7 @@ pipeline {
 	parameters {
 		string(name: 'buildId', trim: true, description: 'Build Id to test. For example: <code>I20251010-0150</code>')
 		string(name: 'testSuite', defaultValue: 'all', trim: true, description: '''This can be any ant target from
-			https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml
+			the <a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/production/testScripts/configuration/sdk.tests/testScripts/test.xml"><code>test.xml</code></a>
 		''')
 		string(name: 'testAgent', trim: true, description: '''The Jenkins build agent this test should run on. If not specified to will be read from the
 			<a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/master/JenkinsJobs/buildConfigurations.json"><code>buildConfigurations.json</code></a>
@@ -42,6 +42,8 @@ pipeline {
 				label "${ params.testAgent ?: TEST_AGENT }"
 			}
 			environment {
+				// Download Server locations (seldomly change)
+				EP_ECLIPSE_DROPS = '/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4'
 				// Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
 				ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
 				ANT_OPTS = "-Djava.io.tmpdir=${pathOf(env.WORKSPACE + '/tmp')}"
@@ -83,17 +85,27 @@ pipeline {
 						echo JAVA_HOME: §[JAVA_HOME]
 						echo ANT_HOME: §[ANT_HOME]
 						echo PATH: §[PATH]
-						java -XshowSettings -version 1>javaSettings.txt 2>&1
+						java -XshowSettings -version
 						
 						curl --fail --output getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
 						ant -f getEBuilder.xml -DbuildId=${params.buildId} -Dosgi.os=${test.os} -Dosgi.ws=${test.ws} -Dosgi.arch=${test.arch} -DtestSuite=${params.testSuite}
 					""")
 				}
-				archiveArtifacts '**/eclipse-testing/results/**, *.properties, *.txt'
+				// Collect test results
 				junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-				build job: 'Releng/collectTestResults', wait: false, parameters: [
-					string(name: 'triggeringJob', value: "${JOB_BASE_NAME}"),
-					string(name: 'buildURL', value: "${BUILD_URL}"),
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						testResultsDirectory="${EP_ECLIPSE_DROPS}/${buildId}/testresults"
+						ssh genie.releng@projects-storage.eclipse.org mkdir -p ${testResultsDirectory}
+						# First delete result files from a previous run of the same configuration (in case that test configuration was run again), then transfer the new results.
+						ssh genie.releng@projects-storage.eclipse.org rm -rfv ${testResultsDirectory}/${JOB_BASE_NAME}* ${testResultsDirectory}/*/*${JOB_BASE_NAME}*
+						scp -r workarea/${buildId}/eclipse-testing/results/* genie.releng@projects-storage.eclipse.org:${testResultsDirectory}
+						# Download the result summary directly to the storage server
+						ssh genie.releng@projects-storage.eclipse.org \
+							curl --fail --location --output "${testResultsDirectory}/${JOB_BASE_NAME}.xml" "${BUILD_URL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration"
+					'''
+				}
+				build job: 'Releng/updateTestResultIndex', wait: false, parameters: [
 					string(name: 'buildID', value: "${params.buildId}")
 				]
 			}
