@@ -240,10 +240,15 @@ public class EclipseTestRunner {
 		BundleContext context = FrameworkUtil.getBundle(EclipseTestRunner.class).getBundleContext();
 		return Arrays.stream(context.getBundles()).filter(bundle -> {
 			try {
-				return bundle.getEntry("META-INF/services/org.junit.platform.engine.TestEngine") != null;
+				if (bundle.getEntry("META-INF/services/org.junit.platform.engine.TestEngine") != null) {
+					// We need to omit JUnit 6 here see imports in manifest otherwise will get
+					// ServiceConfigurationError: org.junit.platform.engine.TestEngine:
+					// org.junit.vintage.engine.VintageTestEngine not a subtype or similar!
+					return bundle.getVersion().getMajor() < 6;
+				}
 			} catch (Exception e) {
-				return false; // assume absent
 			}
+			return false; // assume absent
 		}).collect(Collectors.toList());
 	}
 
