@@ -1,12 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<!DOCTYPE HTML><html lang="en">
 <HEAD>
 
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
-
-<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<meta charset="utf-8">
 <TITLE>
 Batching resource changes
 </TITLE>
@@ -65,10 +62,10 @@ workspace.run(myRunnable, <b>myProject</b>, <b>IWorkspace.AVOID_UPDATE</b>, null
 </pre>
 <p>The runnable is passed to the workspace, followed by the project that the 
 code is manipulating.  This tells the workspace that all of the changes in the 
-runnable are confined to <tt>myProject</tt>.  Any requests by other threads
-to change <tt>myProject</tt> will be blocked until this runnable completes.  
+runnable are confined to <code>myProject</code>.  Any requests by other threads
+to change <code>myProject</code> will be blocked until this runnable completes.  
 Likewise, this call will block if some other thread is already modifying 
-<tt>myProject</tt>.  By specifying which part of the resource tree will be 
+<code>myProject</code>.  By specifying which part of the resource tree will be 
 modified by the runnable, you are allowing other threads to continue modifying 
 other portions of the workspace.  It is important to be sure that your resource rule 
 matches the work being done inside the runnable.  When a non-null scheduling 
@@ -77,20 +74,20 @@ rule will trigger an exception.
 </p>
 <p>
 There are two special scheduling rules that are important to consider.  First,
-if you use an instance of <tt>IWorkspaceRoot</tt> as the scheduling rule,
+if you use an instance of <code>IWorkspaceRoot</code> as the scheduling rule,
 it means your thread is blocking access to <b>all</b> resources in the tree.
 While a thread holds the root rule, no other thread is allowed to modify the
-workspace.  Conversely, a rule of <tt>null</tt> indicates that the thread
+workspace.  Conversely, a rule of <code>null</code> indicates that the thread
 will block access to <b>no</b> resources in the tree.  While a thread with the
 null rule is free to modify the workspace itself, other threads will not be prevented
-from performing their own modifications.  The <tt>IWorkspaceRoot</tt> and
-<tt>null</tt> scheduling rules occupy opposite ends of the concurrency spectrum.  
-With <tt>IWorkspaceRoot</tt> there is no concurrency
-and only one thread is modifying the workspace at a time.  With a <tt>null</tt> rule,
+from performing their own modifications.  The <code>IWorkspaceRoot</code> and
+<code>null</code> scheduling rules occupy opposite ends of the concurrency spectrum.  
+With <code>IWorkspaceRoot</code> there is no concurrency
+and only one thread is modifying the workspace at a time.  With a <code>null</code> rule,
 there is maximum concurrency as all threads can modify the workspace concurrently.
 </p>
 <p>The third parameter to the <b>run</b> method specifies whether any periodic resource change events should
-be broadcast during the scope of this call.  Using <tt>IWorkspace.AVOID_UPDATE</tt> tells the platform to suppress any
+be broadcast during the scope of this call.  Using <code>IWorkspace.AVOID_UPDATE</code> tells the platform to suppress any
 resource change events while the runnable is running and to broadcast one event at the end of the changes.
 During this call, any other runnables created in the runnable will be considered part of the parent batch
 operation.  Resource changes made in those runnables will appear in the parent's resource change notification.
