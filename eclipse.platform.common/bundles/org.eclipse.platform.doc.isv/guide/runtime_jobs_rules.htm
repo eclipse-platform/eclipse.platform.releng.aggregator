@@ -1,12 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<!DOCTYPE HTML><html lang="en">
 <HEAD>
 
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
-
-<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<meta charset="utf-8">
 <TITLE>Scheduling rules</TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
@@ -68,11 +65,11 @@ on and off again:</p>
 </pre>
 <p>How can that be?  We told the light to turn on and then off, so its final state
 should be off!  The problem is that there was nothing preventing the
-<tt>LightOff</tt> job from running at the same time as the <tt>LightOn</tt>
+<code>LightOff</code> job from running at the same time as the <code>LightOn</code>
 job.  So, even though the &quot;on&quot; job was scheduled first, their
 concurrent execution means that there is no way to predict the exact
-execution order of the two concurrent jobs. If the <tt>LightOff</tt> job ends
-up running before the <tt>LightOn</tt> job, we get this invalid result.
+execution order of the two concurrent jobs. If the <code>LightOff</code> job ends
+up running before the <code>LightOn</code> job, we get this invalid result.
 What we need is a way to prevent the two jobs from running concurrently, and 
 that's where scheduling rules come in.</p>
 <p>
@@ -109,7 +106,7 @@ We can fix this example by creating a simple scheduling rule that acts as a
 </pre>
 <p>
 Now, when the two light switch jobs are scheduled, the job infrastructure will
-call the <tt>isConflicting</tt> method to compare the scheduling rules of the
+call the <code>isConflicting</code> method to compare the scheduling rules of the
 two jobs. It will notice that the two jobs have conflicting scheduling rules, and 
 will make sure that they run in the correct order. It will also make sure they never
 run at the same time. Now, if you run the example program a million times,
@@ -122,7 +119,7 @@ you will always get the same result:</p>
 Rules can also be used independently from jobs as a general locking mechanism.
 The following example acquires a rule within a try/finally block, preventing other
 threads and jobs from running with that rule for the duration between 
-invocations of <tt>beginRule</tt> and <tt>endRule</tt>.</p>
+invocations of <code>beginRule</code> and <code>endRule</code>.</p>
 <pre>   IJobManager manager = Job.getJobManager();
    try {
       manager.beginRule(rule, monitor);
@@ -133,7 +130,7 @@ invocations of <tt>beginRule</tt> and <tt>endRule</tt>.</p>
 </pre>
 <p>You should exercise extreme caution when acquiring and releasing scheduling
 rules using such a coding pattern. If you fail to end a rule for which you
-have called <tt>beginRule</tt>, you will have locked that rule forever.</p>
+have called <code>beginRule</code>, you will have locked that rule forever.</p>
 <H3>Making your own rules</H3>
 <p>
 Although the job API defines the contract of scheduling rules, it does not actually
@@ -143,36 +140,36 @@ jobs have no scheduling rules, and a scheduled job is executed as fast as a
 thread can be created to run it.</p> 
 <p>
 When a job does have a scheduling rule,
-the <tt>isConflicting</tt> method is used to determine if the rule conflicts with
+the <code>isConflicting</code> method is used to determine if the rule conflicts with
 the rules of any jobs that are currently running. Thus, your implementation
-of <tt>isConflicting</tt> can define exactly when it is safe to execute your job.
-In our light switch example, the <tt>isConflicting</tt> implementation simply uses
+of <code>isConflicting</code> can define exactly when it is safe to execute your job.
+In our light switch example, the <code>isConflicting</code> implementation simply uses
 an identity comparison with the provided rule. If another job has the identical rule,
 they will not be run concurrently.  When writing your own scheduling rules, be
-sure to read and follow the API contract for <tt>isConflicting</tt> carefully.</p>
+sure to read and follow the API contract for <code>isConflicting</code> carefully.</p>
 <p>
 If your job has several unrelated constraints, you can compose multiple
 scheduling rules together using a 
 <a href="../reference/api/org/eclipse/core/runtime/jobs/MultiRule.html">MultiRule</a>.
 For example, if your job needs to turn on a light switch, and also write information to
 a network socket, it can have a rule for the light switch and a rule for write access to the socket,
-combined into a single rule using the factory method <tt>MultiRule.combine</tt>.</p>
+combined into a single rule using the factory method <code>MultiRule.combine</code>.</p>
 <H3>Rule hierarchies</H3>
 <p>
-We have discussed the <tt>isConflicting</tt> method on 
+We have discussed the <code>isConflicting</code> method on 
 <a href="../reference/api/org/eclipse/core/runtime/jobs/ISchedulingRule.html">ISchedulingRule</a>,
-but thus far have not mentioned the <tt>contains</tt> method. This method is
+but thus far have not mentioned the <code>contains</code> method. This method is
 used for a fairly specialized application of scheduling rules that many clients will not require.
 Scheduling rules can be logically composed into hierarchies for controlling access to
 naturally hierarchical resources. The simplest example to illustrate this concept is
 a tree-based file system. If an application wants to acquire an exclusive lock
 on a directory, it typically implies that it also wants exclusive access to the files
-and sub-directories within that directory. The <tt>contains</tt> method is
+and sub-directories within that directory. The <code>contains</code> method is
 used to specify the hierarchical relationship among locks. If you do not need
-to create hierarchies of locks, you can implement the <tt>contains</tt> method
-to simply call <tt>isConflicting</tt>.</p>
+to create hierarchies of locks, you can implement the <code>contains</code> method
+to simply call <code>isConflicting</code>.</p>
 <p>
-Here is an example of a hierarchical lock for controlling write access to <tt>java.io.File</tt> handles.
+Here is an example of a hierarchical lock for controlling write access to <code>java.io.File</code> handles.
 </p>
 <pre>   public class FileLock implements ISchedulingRule {
       private String path;
@@ -202,17 +199,17 @@ Here is an example of a hierarchical lock for controlling write access to <tt>ja
       }
    }
 </pre>
-<p>The <tt>contains</tt> method comes into play if a thread tries to acquire
+<p>The <code>contains</code> method comes into play if a thread tries to acquire
 a second rule when it already owns a rule. To avoid the possibility of deadlock,
 any given thread can only own <em>one</em> scheduling rule at any given time.
-If a thread calls <tt>beginRule</tt> when it already owns a rule, either through 
-a previous call to <tt>beginRule</tt> or by executing a job with a scheduling rule, 
-the <tt>contains</tt> method is consulted to see if the two rules are equivalent.
-If the <tt>contains</tt> method for the rule that is already owned returns <tt>true</tt>,
-the <tt>beginRule</tt> invocation will succeed. If the <tt>contains</tt> method returns
-<tt>false</tt> an error will occur.</p>
+If a thread calls <code>beginRule</code> when it already owns a rule, either through 
+a previous call to <code>beginRule</code> or by executing a job with a scheduling rule, 
+the <code>contains</code> method is consulted to see if the two rules are equivalent.
+If the <code>contains</code> method for the rule that is already owned returns <code>true</code>,
+the <code>beginRule</code> invocation will succeed. If the <code>contains</code> method returns
+<code>false</code> an error will occur.</p>
 <p>
-To put this in more concrete terms, say a thread owns our example <tt>FileLock</tt>
+To put this in more concrete terms, say a thread owns our example <code>FileLock</code>
 rule on the directory at &quot;c:\temp&quot;. While it owns this rule, it is only allowed
 to modify files within that directory subtree. If it tries to modify files in other directories that
 are not under &quot;c:\temp&quot;, it should fail. Thus a scheduling rule is a 
