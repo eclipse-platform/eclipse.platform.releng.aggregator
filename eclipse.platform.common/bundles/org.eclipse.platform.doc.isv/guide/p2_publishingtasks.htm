@@ -1,11 +1,20 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta name="copyright"
  content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
-  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <meta charset="utf-8">
+  <link rel="STYLESHEET" href="../book.css" type="text/css">
+  <style>
+    table.custom-border {
+      border: 1px solid black;
+      border-collapse: collapse; /* makes borders look like one line */
+    }
+    table.custom-border th,
+    table.custom-border td {
+      border: 1px solid black;
+    }
+  </style>
   <title>Ant tasks for publishing p2 metadata</title>
 </head>
 <body>
@@ -14,26 +23,26 @@
 in <code>org.eclipse.equinox.p2.publisher</code>.  This bundles is
 part of the Eclipse SDK.</p>
 
-<table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><tt>Default Attributes</tt></b></td></tr>
-	<tr><td><p>The <tt>p2.publish.*</tt> ant tasks outlined below all support the following attributes:</p>
-		<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
-			<tr><td><tt>metadataRepository</tt></td><td>A URL specifying the metadata repository to publish to.</td></tr>
-			<tr><td><tt>artifactRepository</tt></td><td>A URL specifying the artifact repository to publish to.</td></tr>
-			<tr><td><tt>repository</tt></td><td>Sets both metadataRepository and artifactRepository.</td></tr>
-			<tr><td><tt>metadataRepositoryName</tt></td><td>When creating a new metadata repository, sets the name.</td></tr>
-			<tr><td><tt>artifactRepositoryName</tt></td><td>When creating a new artifact repository, sets the name.</td></tr>
-			<tr><td><tt>repositoryName</tt></td><td>Sets both metadataRepositoryName and artifactRepositoryName.</td></tr>
-			<tr><td><tt>append</tt></td><td>Whether to append to the repository.  (Default is "true")</td></tr>
-			<tr><td><tt>compress</tt></td><td>When creating a new repository, whether or not to compress the metadata. (Default is "false")</td></tr>
-			<tr><td><tt>publishArtifacts</tt></td><td>Whether or not to publish the artifacts. (Default is "true")</td></tr>
-			<tr><td><tt>reusePackedFiles</tt></td><td>Whether or not to include discovered Pack200 files in the repository. (Default is "false")</td></tr>
-			<tr><td><tt>&lt;contextRepository&gt;</tt></td>
+<table>
+	<tr><td><b><code>Default Attributes</code></b></td></tr>
+	<tr><td><p>The <code>p2.publish.*</code> ant tasks outlined below all support the following attributes:</p>
+		<table class="custom-border">
+			<tr><td><code>metadataRepository</code></td><td>A URL specifying the metadata repository to publish to.</td></tr>
+			<tr><td><code>artifactRepository</code></td><td>A URL specifying the artifact repository to publish to.</td></tr>
+			<tr><td><code>repository</code></td><td>Sets both metadataRepository and artifactRepository.</td></tr>
+			<tr><td><code>metadataRepositoryName</code></td><td>When creating a new metadata repository, sets the name.</td></tr>
+			<tr><td><code>artifactRepositoryName</code></td><td>When creating a new artifact repository, sets the name.</td></tr>
+			<tr><td><code>repositoryName</code></td><td>Sets both metadataRepositoryName and artifactRepositoryName.</td></tr>
+			<tr><td><code>append</code></td><td>Whether to append to the repository.  (Default is "true")</td></tr>
+			<tr><td><code>compress</code></td><td>When creating a new repository, whether or not to compress the metadata. (Default is "false")</td></tr>
+			<tr><td><code>publishArtifacts</code></td><td>Whether or not to publish the artifacts. (Default is "true")</td></tr>
+			<tr><td><code>reusePackedFiles</code></td><td>Whether or not to include discovered Pack200 files in the repository. (Default is "false")</td></tr>
+			<tr><td><code>&lt;contextRepository&gt;</code></td>
 			<td>Nested elements specifying context repositories, supports the following attributes:
-				<table cellspacing="0" cellpadding="2" border="1" width="100%">
-				<tr><td><tt>location</tt></td><td>A URL specifying the location of the repository.</td></tr>
-				<tr><td><tt>artifact</tt></td><td>"true" or "false": whether or not there is an artifact repository at this location.</td></tr>
-				<tr><td><tt>metadata</tt></td><td>"true" or "false": whether or not there is a metadata repository at this location.</td></tr>
+				<table class="custom-border">
+				<tr><td><code>location</code></td><td>A URL specifying the location of the repository.</td></tr>
+				<tr><td><code>artifact</code></td><td>"true" or "false": whether or not there is an artifact repository at this location.</td></tr>
+				<tr><td><code>metadata</code></td><td>"true" or "false": whether or not there is a metadata repository at this location.</td></tr>
 				</table>
 				<p>If a given context repository contains metadata for one of the features or bundles that are being published, then that metadata
 				will be re-used instead of generating new metadata.</p>
@@ -42,34 +51,34 @@ part of the Eclipse SDK.</p>
 	</td></tr>
 </table>
 <br>
-<table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><tt>p2.publish.featuresAndBundles</tt></b></td></tr>
+<table>
+	<tr><td><b><code>p2.publish.featuresAndBundles</code></b></td></tr>
 	<tr><td><p>This task will publish metadata for pre-existing binary features and plug-ins.</p></td></tr>
 	<tr><td><p>This task supports the following attributes and elements:</p>
-		<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
-			<tr><td><tt>source</tt></td><td>A folder containing plugins and features subfolders to publish.</td></tr>
-			<tr><td><tt>&lt;features&gt;</tt></td><td>A nested fileset element specifying the locations of binary features to publish.</td></tr>
-			<tr><td><tt>&lt;bundles&gt;</tt></td><td>A nested fileset element specifying the locations of binary plug-ins to publish.</td></tr>
+		<table class="custom-border">
+			<tr><td><code>source</code></td><td>A folder containing plugins and features subfolders to publish.</td></tr>
+			<tr><td><code>&lt;features&gt;</code></td><td>A nested fileset element specifying the locations of binary features to publish.</td></tr>
+			<tr><td><code>&lt;bundles&gt;</code></td><td>A nested fileset element specifying the locations of binary plug-ins to publish.</td></tr>
 		</table>
 	</td></tr>
 </table>
 <br>
-<table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><tt>p2.publish.product</tt></b></td></tr>
+<table>
+	<tr><td><b><code>p2.publish.product</code></b></td></tr>
 	<tr><td><p>Publish a .product file. This task assumes everything included in the product already exists in the repository. (That is, all features and bundles have been previously published.)</p>
 	</td></tr>
 	<tr><td><p>This task supports the following attributes:</p>
-	<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
-		<tr><td><tt>flavor</tt></td><td>Set the flavor for the p2 metadata, default is "tooling".  Products should consider using a unique flavor if they have special requirements for bundle start levels.</td></tr>
-		<tr><td><tt>productFile</tt></td><td>The location of the .product file describing the product.</td></tr>
-		<tr><td><tt>executables</tt></td><td>The location of the executables feature.  This is the feature that is used for branding and publishing the executables.</td></tr>
-		<tr><td><tt>&lt;config&gt;</tt></td><td>Nested elements specifying configurations supported by this product. Config elements specify ws, os and arch:
-												<div align="center"><tt>&lt;config ws="gtk" os="linux" arch="x86"/&gt;</tt></div>
-												Use <tt>&lt;config ws="ANY" os="ANY" arch="ANY"/&gt;</tt> if the product can support any platform.
+	<table class="custom-border">
+		<tr><td><code>flavor</code></td><td>Set the flavor for the p2 metadata, default is "tooling".  Products should consider using a unique flavor if they have special requirements for bundle start levels.</td></tr>
+		<tr><td><code>productFile</code></td><td>The location of the .product file describing the product.</td></tr>
+		<tr><td><code>executables</code></td><td>The location of the executables feature.  This is the feature that is used for branding and publishing the executables.</td></tr>
+		<tr><td><code>&lt;config&gt;</code></td><td>Nested elements specifying configurations supported by this product. Config elements specify ws, os and arch:
+												<div style="text-align:center"><code>&lt;config ws="gtk" os="linux" arch="x86"/&gt;</code></div>
+												Use <code>&lt;config ws="ANY" os="ANY" arch="ANY"/&gt;</code> if the product can support any platform.
 		</td></tr>
-		<tr><td><tt>&lt;advice&gt;</tt></td><td>Nested elements specifying specifying additional advice to use when creating the product.  Currently the accepted kinds of advice are "featureVersions" and "pluginVersions".
-		<div align="center"><tt>&lt;advice kind="featureVersions" file="finalFeaturesVersions.properties" /&gt;<br>&lt;advice kind="pluginVersions" file="finalPluginsVersions.properties" /&gt;</tt></div>
-		PDE/Build will generate these version properties files when the builder sets the property <a href="../../org.eclipse.pde.doc.user/tasks/pde_version_qualifiers.htm#final_versions"><tt>generateVersionsLists</tt>"</a>.
+		<tr><td><code>&lt;advice&gt;</code></td><td>Nested elements specifying specifying additional advice to use when creating the product.  Currently the accepted kinds of advice are "featureVersions" and "pluginVersions".
+		<div style="text-align:center"><code>&lt;advice kind="featureVersions" file="finalFeaturesVersions.properties" /&gt;<br>&lt;advice kind="pluginVersions" file="finalPluginsVersions.properties" /&gt;</code></div>
+		PDE/Build will generate these version properties files when the builder sets the property <a href="../../org.eclipse.pde.doc.user/tasks/pde_version_qualifiers.htm#final_versions"><code>generateVersionsLists</code>"</a>.
 		</td></tr>
 	</table>
 	</td></tr>
