@@ -26,6 +26,11 @@ on:
         type: string
         required: false
         default: '.'
+      currentStreamVersionProperty:
+        description: Maven property name to use for determining the stream version in commit messages
+        type: string
+        required: false
+        default: 'releaseNumberSDK'
 
 permissions: {} # all none
 
@@ -89,11 +94,18 @@ jobs:
         if [[ $(git diff --name-only --cached) != '' ]]; then
           # Relevant files were staged, i.e. some version were changed
           
-          # Read 'releaseNumberSDK' property as stream version
+          # Validate property name to prevent injection
+          propertyName="${{ inputs.currentStreamVersionProperty }}"
+          if [[ ! "$propertyName" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+            echo "::error::Invalid property name: $propertyName. Must contain only alphanumeric characters, dots, hyphens, and underscores."
+            exit 1
+          fi
+          
+          # Read property as stream version
           pushd ${{ inputs.working-directory }}
-          mvn help:evaluate -Dexpression=releaseNumberSDK ${{ inputs.extra-maven-args }} --quiet '-Doutput=releaseNumberSDK-value.txt'
-          streamVersion=$(<releaseNumberSDK-value.txt)
-          rm -f releaseNumberSDK-value.txt
+          mvn help:evaluate -Dexpression="$propertyName" ${{ inputs.extra-maven-args }} --quiet '-Doutput=currentStreamVersion-value.txt'
+          streamVersion=$(<currentStreamVersion-value.txt)
+          rm -f currentStreamVersion-value.txt
           popd
           
           git config --global user.email '${{ inputs.botMail }}'
