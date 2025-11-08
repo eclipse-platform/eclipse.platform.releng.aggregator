@@ -222,18 +222,6 @@ pipeline {
 							'BASEBUILD_ID=".*?"' : "BASEBUILD_ID=\"${DL_DROP_ID}\"",
 							'PREVIOUS_RELEASE_ID=".*?"' : "PREVIOUS_RELEASE_ID=\"${DL_DROP_ID}\"",
 						])
-						utilities.replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/equinoxp2tests.properties', [
-							'eclipse-platform-\\d+.\\d+[^-]*?-' : "eclipse-platform-${BUILD_MAJOR}.${BUILD_MINOR}-",
-							'org.eclipse.equinox.p2.tests.last.release.build.repo=.*' : "org.eclipse.equinox.p2.tests.last.release.build.repo=https://download.eclipse.org/equinox/drops/${DL_DROP_ID}/",
-						])
-						utilities.replaceAllInFile('eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/resources/label.properties', [
-							'previousReleaseVersion=.*' : "previousReleaseVersion=${BUILD_MAJOR}.${BUILD_MINOR}",
-						])
-						utilities.replaceAllInFile('production/testScripts/configuration/streamSpecific.properties', [
-							'previousReleaseLocation=.*' : 'previousReleaseLocation=https://\\${DOWNLOAD_HOST}/eclipse/downloads/drops4/' + DL_DROP_ID + '/',
-							'previousReleaseVersion=.*' : "previousReleaseVersion=${BUILD_MAJOR}.${BUILD_MINOR}",
-							'previousReleaseVersionRepo=.*' : "previousReleaseVersionRepo=${BUILD_MAJOR}.${BUILD_MINOR}",
-						])
 						utilities.modifyJSON('JenkinsJobs/buildConfigurations.json') { builds ->
 							// Remove old I/Y-build jobs for this release
 							builds.values().each{ build -> build.streams.remove("${BUILD_MAJOR}.${BUILD_MINOR}") }

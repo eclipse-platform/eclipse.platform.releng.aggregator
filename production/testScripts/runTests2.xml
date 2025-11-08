@@ -5,7 +5,7 @@
 
 	<target
     name="init"
-    depends="initWorkspace, initDownloadHosts, initBuildId, initBuildType, initBasicDirectories, initStreamSpecificVariables, initTargetPlatform, initPlatformSpecificProperties, initCurrentUpdateSite,setJavaMajorVersion"
+    depends="initWorkspace, initDownloadHosts, initBuildType, initBasicDirectories, initStreamSpecificProperties, initTargetPlatform, initPlatformSpecificProperties, initCurrentUpdateSite,setJavaMajorVersion"
     unless="runTest2Initialized">
 
 		<property
@@ -324,6 +324,8 @@
 		<printProperty property="buildIdToUse" />
 		<printProperty property="buildType" />
 		<printProperty property="eclipseStream" />
+		<printProperty property="eclipseStreamMajor" />
+		<printProperty property="eclipseStreamMinor" />
 		<printProperty property="previousReleaseVersion" />
 		<printProperty property="previousReleaseVersionRepo" />
 		<printProperty property="osgi.os" />
@@ -351,17 +353,8 @@
 	</target>
 
 	<target
-    name="initStreamSpecificProperties"
-    depends="initConfigurationDir"
-    unless="streamSpecificPropertiesSet">
-		<property file="${configurationDir}/streamSpecific.properties" />
-		<property
-      name="streamSpecificPropertiesSet"
-      value="true" />
-	</target>
-	<target
     name="initCurrentUpdateSite"
-    depends="initDownloadHosts, initStreamVariables, initBuildId, initBuildType"
+    depends="initDownloadHosts, initStreamSpecificProperties, initBuildType"
     unless="currentUpdateSite">
 		<property
       name="currentUpdateSite"
@@ -375,8 +368,10 @@
 
 	<target
     name="initInstallDir"
-    depends="initBuildId, initStreamSpecificProperties, checkInstallDir"
+    depends="initStreamSpecificProperties, checkInstallDir"
     unless="install">
+		<fail unless="buildId"
+			message="buildId value must be provided by caller (such as 'I20120717-0800'" />
 		<property
       name="testDir"
       value="${WORKSPACE}/workarea/${buildId}" />
@@ -462,10 +457,35 @@
     Not sure which is easier, but current means Hudson job has to be set up with
     two git checkout steps, right version for maps (for 3.8 vs 4.2). -->
 	<target
-    name="initStreamSpecificVariables"
-    unless="initStreamSpecificVariablesComplete"
-    depends="initWorkspace,initBuildType,initConfigurationDir,initStreamVariables,initDownloadHosts">
-		<echo message="DEBUG: executing initStreamSpecificVariables" />
+    name="initStreamSpecificProperties"
+    unless="initStreamSpecificPropertiesComplete"
+    depends="initWorkspace,initBuildType,initDownloadHosts">
+		<echo message="DEBUG: executing initStreamSpecificProperties" />
+
+		<loadproperties srcFile="${WORKSPACE}/eclipse.platform.releng.aggregator/cje-production/buildproperties.txt" prefix="buildProperties">
+			<filterchain>
+				<linecontains matchAny="true">
+					<contains value="STREAM" />
+					<contains value="STREAMMajor" />
+					<contains value="STREAMMinor" />
+					<contains value="PREVIOUS_RELEASE_VER" />
+					<contains value="PREVIOUS_RELEASE_REPO_ID" />
+					<contains value="PREVIOUS_RELEASE_ID" />
+				</linecontains>
+				<replaceregex pattern="&quot;(.*)&quot;$" replace="\1" />
+			</filterchain>
+		</loadproperties>
+		<property name="eclipseStream" value="${buildProperties.STREAM}" />
+		<property name="eclipseStreamMajor" value="${buildProperties.STREAMMajor}" />
+		<property name="eclipseStreamMinor" value="${buildProperties.STREAMMinor}" />
+		<property name="updateSiteSegment" value="${eclipseStreamMajor}.${eclipseStreamMinor}" />
+		<property name="previousReleaseVersion" value="${buildProperties.PREVIOUS_RELEASE_VER}" />
+		<property name="previousReleaseVersionRepo" value="${buildProperties.PREVIOUS_RELEASE_REPO_ID}" />
+
+		<fail unless="eclipseStreamMajor"
+			message="eclipseStreamMajor not defined or computable" />
+		<fail unless="eclipseStreamMinor"
+			message="eclipseStreamMinor not defined or computable" />
 
 		<!-- these conditions used to be in "init". Conceptually seems right to
       be in "stream specific" init (since their value depends on stream) but may
@@ -482,19 +502,23 @@
         arg2="4" />
 		</condition>
 
-		<loadproperties srcFile="${configurationDir}/streamSpecific.properties" />
+		<property name="previousReleaseLocation" value="https://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildProperties.PREVIOUS_RELEASE_ID}" />
+		<property name="isMacAppLayout" value="true" />
 
 		<!-- echo a few typically expected properties, to make sure getting right
       file -->
 
-		<echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
+		<echo message="streamSpecificPropertiesTitle: Properties for ${eclipseStream} builds and tests" />
+		<echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+		<echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+		<echo message="updateSiteSegment: ${updateSiteSegment}"/>
 
 		<echo message="previousReleaseLocation: ${previousReleaseLocation}" />
 		<echo message="previousReleaseVersion: ${previousReleaseVersion}" />
 		<echo message="previousReleaseVersionRepo: ${previousReleaseVersionRepo}" />
 
 		<property
-      name="initStreamSpecificVariablesComplete"
+      name="initStreamSpecificPropertiesComplete"
       value="true" />
 	</target>
 
@@ -535,16 +559,6 @@
 	</target>
 
 
-	<target
-    name="initBuildId"
-    unless="buildId">
-		<!--property file that can contain the buildId, if not otherwise set -->
-		<property file="label.properties" />
-		<fail
-      unless="buildId"
-      message="buildId (e.g I20140731-0800) needs to be provided to run the tests" />
-	</target>
-
 	<target name="initBuildType">
 
 		<fail
@@ -582,74 +596,10 @@
 		<echo message="buildIdTimestamp: ${buildIdTimestamp}"/>
 		<fail unless="buildType" />
 	</target>
-	<!-- main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor
-    and eclipseStreamMinor Uses script, which requires Java 1.6 (or ... else
-    gets complicated to setup) -->
-	<target
-    name="initStreamVariables"
-    depends="initConfigurationDir"
-    unless="streamVariablesInitialized">
-		<property file="${configurationDir}/streamSpecific.properties" />
-		<fail
-      unless="eclipseStream"
-      message="eclipseStream value must be provided by caller, such as '4.3' or '4.4.2." />
-		<condition property="streamOK">
-			<matches
-        pattern="\d\.\d(\.\d)?"
-        string="${eclipseStream}" />
-		</condition>
-		<fail
-      message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
-      unless="streamOK" />
-
-		<loadresource property="eclipseStreamMajor">
-			<string value="${eclipseStream}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
-
-		<loadresource property="eclipseStreamMinor">
-			<string value="${eclipseStream}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
-
-		<loadresource property="updateSiteSegment">
-			<string value="${eclipseStream}"/>
-			<filterchain>
-				<tokenfilter>
-					<replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1\.\2"/>
-				</tokenfilter>
-			</filterchain>
-		</loadresource>
-		<echo message="updateSiteSegment: ${updateSiteSegment}"/>
-
-		<fail
-      unless="eclipseStreamMajor"
-      message="eclipseStreamMajor not defined or computable" />
-		<fail
-      unless="eclipseStreamMinor"
-      message="eclipseStreamMinor not defined or computable" />
-		<fail
-      unless="updateSiteSegment"
-      message="updateSiteSegment not defined or computable" />
-		<property
-      name="streamVariablesInitialized"
-      value="true" />
-
-	</target>
-
+	
 	<target
     name="initBasicDirectories"
-    depends="initWorkspace,initBuildId, initStreamSpecificProperties,initInstallDir, initEclipseHome, initPlatformSpecificProperties, setJavaMajorVersion"
+    depends="initWorkspace, initStreamSpecificProperties,initInstallDir, initEclipseHome, initPlatformSpecificProperties, setJavaMajorVersion"
     unless="basicDirectoriesInitialized">
 
 		<property environment="env" />

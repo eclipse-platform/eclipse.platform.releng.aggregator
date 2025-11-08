@@ -75,8 +75,7 @@
   </target>
 
   <target
-    name="installPreferences"
-    depends="initStreamSpecificProperties">
+    name="installPreferences">
     <property
       name="preferenceDirectory"
       value="${eclipse-home}/configuration/.settings/" />
@@ -469,6 +468,7 @@
   </target>
   <target
     name="initProductionProperties"
+    unless="productionPropertiesInitialized"
     depends="initWorkspace">
     <!--
       during production testing, previous steps persists some properties
@@ -477,20 +477,18 @@
     -->
     <property file="${WORKSPACE}/production.properties" />
 
-  </target>
-  <target
-    name="initBuildId"
-    unless="buildId">
-    <!--property file that can contain the buildId, if not otherwise set -->
-    <property file="label.properties" />
-    <fail
-      unless="buildId"
-      message="buildId (e.g I20140731-0800) needs to be provided to run the tests" />
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
+    <fail unless="eclipseStreamMajor"
+      message="eclipseStreamMajor not defined or computable" />
+    <fail unless="eclipseStreamMinor"
+      message="eclipseStreamMinor not defined or computable" />
+
+    <property name="productionPropertiesInitialized" value="true" />
   </target>
 
   <target
     name="initBuildType"
-    depends="initBuildId"
     unless="buildType">
 
     <fail
@@ -534,103 +532,27 @@
   </target>
   <target
     name="initCurrentUpdateSite"
-    depends="initDownloadHosts, initStreamVariables, initBuildId, initBuildType"
+    depends="initDownloadHosts, initProductionProperties, initBuildType"
     unless="currentUpdateSite">
     <property
       name="currentUpdateSite"
       value="https://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
   </target>
-  <target
-    name="initStreamSpecificProperties"
-    depends="initConfigurationDir"
-    unless="streamSpecificPropertiesSet">
-    <!--
-      Note: configurationDir used to be set by runTest2.xml in 'production'
-      environment only. We may want to set to basedir, if not already set.
-      But, this file, streamSpecific.properties should always be optional.
-      TODO: better document what is in that file.
-    -->
-
-    <property file="${configurationDir}/streamSpecific.properties" />
-    <property
-      name="streamSpecificPropertiesSet"
-      value="true" />
-  </target>
-
-  <!--
-    main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor
-    and eclipseStreamMinor. Uses Javascript, which requires Java 1.6 (or ... else gets complicated to
-    setup)
-  -->
-  <target
-    name="initStreamVariables"
-    depends="initDownloadHosts,initConfigurationDir,initStreamSpecificProperties">
-
-    <property file="${configurationDir}/streamSpecific.properties" />
-    <fail
-      unless="eclipseStream"
-      message="eclipseStream value must be provided by caller, such as '4.3.0'." />
-    <!--
-      Not clear why, but I've seen "eclipseStream" value have a trailing
-      ?blank? that gets picked up when read in as string.
-      Seems it might be a couple of ant issues?
-      Luckily we never use it as a whole string (just major and minor)
-      so we can ignore spaces.
-    -->
-    <condition property="streamOK">
-      <matches
-        pattern="^\s*\d+\.\d+(\.\d+)?\s*$"
-        string="${eclipseStream}" />
-    </condition>
-    <fail
-      message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
-      unless="streamOK" />
-
-    <loadresource property="eclipseStreamMajor">
-      <string value="${eclipseStream}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\1"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}"/>
-
-    <loadresource property="eclipseStreamMinor">
-      <string value="${eclipseStream}"/>
-      <filterchain>
-        <tokenfilter>
-          <replaceregex pattern="^(\d+)\.(\d+)(\.(\d+))" replace="\2"/>
-        </tokenfilter>
-      </filterchain>
-    </loadresource>
-    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}"/>
-    <fail
-      unless="eclipseStreamMajor"
-      message="eclipseStreamMajor not defined or computable" />
-    <fail
-      unless="eclipseStreamMinor"
-      message="eclipseStreamMinor not defined or computable" />
-    <!--
-      <fail
-      unless="eclipseStreamService"
-      message="eclipseStreamService not defined or computable" />
-    -->
-  </target>
 
   <target
     name="initBasicDirectories"
-    depends="initWorkspace,initBuildId, initStreamSpecificProperties,initInstallDir, initEclipseHome"
+    depends="initWorkspace, initInstallDir, initEclipseHome"
     unless="basicDirectoriesInitialized">
+
+    <fail
+      unless="buildId"
+      message="buildId value must be provided by caller (such as 'I20120717-0800'" />
 
     <property environment="env" />
 
     <property
-      name="repoBuildIdToUse"
-      value="${buildId}" />
-    <property
       name="repoZip"
-      value="${executionDir}/eclipse-junit-tests-${repoBuildIdToUse}.zip" />
+      value="${executionDir}/eclipse-junit-tests-${buildId}.zip" />
     <echo message="repoZip: ${repoZip}" />
 
     <property
@@ -687,15 +609,9 @@
     </copy>
   </target>
 
-  <target name="initConfigurationDir">
-    <property
-      name="configurationDir"
-      value="${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration" />
-  </target>
-
   <target
     name="initInstallDir"
-    depends="initBuildId, initStreamSpecificProperties, checkInstallDir"
+    depends="checkInstallDir"
     unless="install">
     <property
       name="testDir"
@@ -732,7 +648,7 @@
   -->
   <target
     name="initEclipseHome"
-    depends="initStreamSpecificProperties, initInstallDir, checkEclipseHome"
+    depends="initInstallDir, checkEclipseHome"
     unless="eclipse-home">
 
     <condition
@@ -784,7 +700,7 @@
 
   <target
     name="init"
-    depends="initWorkspace,initProductionProperties,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initCurrentUpdateSite, initBasicDirectories,initPlatformAndRuntimeArchiveName"
+    depends="initWorkspace,initProductionProperties, initBuildType, initDownloadHosts, initCurrentUpdateSite, initBasicDirectories,initPlatformAndRuntimeArchiveName"
     unless="testingIsInitialized">
 
     <!-- Make sure the values of os, ws, and arch are set. -->
@@ -852,9 +768,6 @@
       name="org.eclipse.equinox.p2.reconciler.tests.platform.archive"
       value="${executionDir}/${platformArchive}" />
     <property
-      name="org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive"
-      value="NotCurrentlyImplementedOrUsed" />
-    <property
       name="org.eclipse.equinox.p2.tests.current.build.repo"
       value="${current.build.repo}" />
     <property
@@ -885,10 +798,6 @@
 
     <echo
       message="org.eclipse.equinox.p2.reconciler.tests.platform.archive=${org.eclipse.equinox.p2.reconciler.tests.platform.archive}${EOL}"
-      file="${executionDir}/equinoxp2tests.properties"
-      append="true" />
-    <echo
-      message="org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive=${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive}${EOL}"
       file="${executionDir}/equinoxp2tests.properties"
       append="true" />
     <echo

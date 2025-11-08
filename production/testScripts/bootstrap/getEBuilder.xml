@@ -74,10 +74,6 @@
 
     <antcall target="fetchEBuilderFromGit" />
 
-    <antcall target="readEclipseStream"/>
-    <property file="${WORKSPACE}/${projectName}/stream.properties"/>
-  	<echo message="eclipseStream: ${eclipseStream}" />
-
     <ant antfile="${WORKSPACE}/${eScriptLocation}/runTests2.xml" />
 
   </target>
@@ -96,24 +92,13 @@
     </exec>
     <exec executable="git"
       dir="${WORKSPACE}/${projectName}" failonerror="true">
-      <arg line="sparse-checkout set --no-cone production/ eclipse-platform-parent/"/>
+      <arg line="sparse-checkout set --no-cone production/ cje-production/buildproperties.txt"/>
     </exec>
     <exec executable="git"
       dir="${WORKSPACE}/${projectName}" failonerror="true">
       <arg line="checkout"/>
     </exec>
 
-  </target>
-  <target name="readEclipseStream"
-    unless="eclipseStream">
-    <xmlproperty
-      file="${WORKSPACE}/${projectName}/eclipse-platform-parent/pom.xml"
-      prefix="eclipse-parent"/>
-    <!-- This target is called with a separate project and writes the stream property to a file, 
-      which is read by the caller to not propagate back all properties read from the pom.xml.-->
-    <echo
-      message="eclipseStream=${eclipse-parent.project.properties.releaseVersion}.0"
-      file="${WORKSPACE}/${projectName}/stream.properties"/>
   </target>
 
 </project>
