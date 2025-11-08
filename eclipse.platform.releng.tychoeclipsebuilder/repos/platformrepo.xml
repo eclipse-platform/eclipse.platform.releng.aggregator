@@ -2,7 +2,6 @@
 
   <target name="all">
     <antcall target="platform" />
-    <antcall target="platformSource" />
   </target>
 
   <target name="platform">
@@ -24,30 +23,6 @@
          </p2.remove.iu>
     <antcall target="assembler">
       <param name="archiveName" value="org.eclipse.platform-${buildId}.zip" />
-    </antcall>
-  </target>
-
-  <target name="platformSource">
-    <property name="featureTemp" value="${eclipse.build.configs}/repos/featureTemp" />
-    <delete dir="${featureTemp}" />
-    <mkdir dir="${featureTemp}" />
-    <p2.mirror source="file://${buildRepo}">
-      <destination kind="metadata" location="file://${featureTemp}" name="Platform Repo" format="file://${buildRepo}" />
-      <destination kind="artifact" location="file://${featureTemp}" name="Platform Repo" format="file://${buildRepo}" />
-      <iu id="org.eclipse.platform.feature.group" version="" />
-      <iu id="org.eclipse.platform.source.feature.group" version="" />
-      <iu id="org.eclipse.equinox.p2.user.ui.feature.group" version="" />
-      <iu id="org.eclipse.equinox.p2.user.ui.source.feature.group" version="" />
-      <iu id="org.eclipse.equinox.executable.feature.group" version="" />
-      <iu id="org.eclipse.platform.ide" version="" />
-      <slicingOptions includeOptional="false" includeNonGreedy="false" />
-    </p2.mirror>
-        <p2.remove.iu>
-             <repository location="file://${featureTemp}" />
-             <iu query="" artifacts="(format=packed)" />
-         </p2.remove.iu>
-    <antcall target="assembler">
-      <param name="archiveName" value="org.eclipse.platform.source-${buildId}.zip" />
     </antcall>
   </target>
 
