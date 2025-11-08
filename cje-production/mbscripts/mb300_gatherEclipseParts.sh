@@ -104,7 +104,7 @@ fi
 
   set -x
   # slice repos
-  ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/buildAll.xml
+  ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/platformrepo.xml
   if [ -d $PLATFORM_REPO_DIR ]; then
     pushd $PLATFORM_REPO_DIR
     java -jar $LAUNCHER_JAR \
