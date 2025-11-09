@@ -2,7 +2,7 @@ def TEST_AGENT = null
 
 pipeline {
 	options {
-		timeout(time: 600, unit: 'MINUTES')
+		timeout(time: 16, unit: 'HOURS') // global timeout (starts at the beginning of this job)
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'15', artifactNumToKeepStr:'5'))
 		skipDefaultCheckout()
@@ -48,7 +48,7 @@ pipeline {
 				ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
 				ANT_OPTS = "-Djava.io.tmpdir=${pathOf(env.WORKSPACE + '/tmp')}"
 			}
-			steps {
+			steps { timeout(time: 8, unit: 'HOURS') { // timeout of test execution (starts after the agent was accessed)
 				// workspace is not always cleaned (a previous clean-up may have failed). Clean before git cloning or custom tools are installed into workspace.
 				cleanWs()
 				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
@@ -92,7 +92,7 @@ pipeline {
 					""")
 				}
 				junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
-			}
+			}}
 			post {
 				always {
 					script {
