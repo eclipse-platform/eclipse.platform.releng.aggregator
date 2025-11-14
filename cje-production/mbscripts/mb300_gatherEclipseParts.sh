@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -xe
 
 #*******************************************************************************
 # Copyright (c) 2019, 2025 IBM Corporation and others.
@@ -33,23 +33,14 @@ JavaCMD=${JAVA_HOME}/bin/java
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
 # gather repo
-REPO_DIR=$PLATFORM_REPO_DIR
-REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
-  
-if [ -d $REPO_DIR ]; then
-  pushd $REPO_DIR
-  cp -r * $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
+  pushd ${SITES_DIR}/eclipse-platform-repository/target
+  cp -r repository/* ${CJE_ROOT}/${UPDATES_DIR}/${BUILD_ID}
+  cp eclipse-platform-repository.eclipse-repository-*.zip ${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}/repository-${BUILD_ID}.zip
   popd
-fi
-
-if [ -f $REPO_ZIP ]; then
-  cp $REPO_ZIP $CJE_ROOT/$DROP_DIR/$BUILD_ID/repository-$BUILD_ID.zip
-fi
-
 
   # gather sdk
-  if [ -d $PLATFORM_PRODUCTS_DIR ]; then
-    pushd $PLATFORM_PRODUCTS_DIR
+  if [ -d ${PRODUCTS_DIR} ]; then
+    pushd ${PRODUCTS_DIR}/eclipse-sdk/target/products
     # sdk
     cp org.eclipse.sdk.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.sdk.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-linux-gtk-ppc64le.tar.gz
@@ -61,6 +52,8 @@ fi
     cp org.eclipse.sdk.ide-macosx.cocoa.aarch64.dmg $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-macosx-cocoa-aarch64.dmg
     cp org.eclipse.sdk.ide-win32.win32.x86_64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-win32-x86_64.zip
     cp org.eclipse.sdk.ide-win32.win32.aarch64.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-SDK-$BUILD_ID-win32-aarch64.zip
+    popd
+    pushd ${PRODUCTS_DIR}/eclipse-platform/target/products
     # platform
     cp org.eclipse.platform.ide-linux.gtk.aarch64.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-aarch64.tar.gz
     cp org.eclipse.platform.ide-linux.gtk.ppc64le.tar.gz $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-platform-$BUILD_ID-linux-gtk-ppc64le.tar.gz
@@ -95,34 +88,17 @@ fi
   fi
 
   # gather test zips
-  TEST_ZIP_DIR=$ECLIPSE_BUILDER_DIR/eclipse-junit-tests/target
+  TEST_ZIP_DIR=${PRODUCTS_DIR}/eclipse-junit-tests/target
   if [ -d $TEST_ZIP_DIR ]; then
     pushd $TEST_ZIP_DIR
     cp eclipse-junit-tests-bundle.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/eclipse-Automated-Tests-$BUILD_ID.zip
     popd
   fi
 
-  set -x
   # slice repos
-  ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/platformrepo.xml
-  if [ -d $PLATFORM_REPO_DIR ]; then
-    pushd $PLATFORM_REPO_DIR
-    java -jar $LAUNCHER_JAR \
-      -application org.eclipse.ant.core.antRunner \
-      -buildfile $ANT_SCRIPT \
-      -data $CJE_ROOT/$TMP_DIR/workspace-buildrepos \
-      -Declipse.build.configs=$ECLIPSE_BUILDER_DIR \
-      -DbuildId=$BUILD_ID \
-      -DbuildLabel=$BUILD_ID \
-      -DbuildRepo=$PLATFORM_REPO_DIR \
-      -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-      -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
-      -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
-      -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-      -v
-    popd
-  fi
-  set +x
+  pushd ${PRODUCTS_DIR}/eclipse-platform/target
+  cp org.eclipse.platform.ide-*.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/org.eclipse.platform-${BUILD_ID}.zip
+  popd
 
 # gather ecj jars
 ECJ_JAR_DIR=$CJE_ROOT/$AGG_DIR/eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch/target
