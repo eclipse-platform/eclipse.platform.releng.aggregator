@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (c) 2012, 2025 IBM Corporation, and others.
+	All rights reserved. This program and the accompanying materials
+	are made available under the terms of the Eclipse Distribution License v1.0
+	which accompanies this distribution, and is available at
+	https://www.eclipse.org/org/documents/edl-v10.php
+
+	Contributors:
+		Igor Fedorenko - initial implementation
+		David Williams - improvements and maintenance
+		Hannes Wellmann - Major rework products and p2-repository build
+-->
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.eclipse</groupId>
+		<artifactId>eclipse-platform-parent</artifactId>
+		<version>4.38.0-SNAPSHOT</version>
+		<relativePath>../eclipse-platform-parent</relativePath>
+	</parent>
+
+	<artifactId>products</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>eclipse-platform</module>
+		<module>eclipse-sdk</module>
+		<module>equinox-starterkit</module>
+		<module>eclipse-junit-tests</module>
+		<module>equinox-sdk</module>
+	</modules>
+
+	<!-- TODO: check PGP signatures. Could we just pgp sign each artifact individually and just reuse the signature in the products/repo? -->
+	<!-- TODO: skipp zipping the p2 repositors -->
+	<!-- TODO: Check for mojo order! Especially with respect to signing -->
+	<!-- TODO: rename this to product-parent-pom.xml and reference it directly from children in order to avoid that this is built and to use automated aggregation.
+		Alternativly don't specify executions here, just define the configuration and call the executions from the child poms at the right phase.
+		Maybe the latter is necessary anyways.
+			-->
+	<!-- TODO: Move site like products into site folder, which also avoids inheriting for them unwanted configuration?-->
+	
+	<properties>
+		<tycho.product.installSources>false</tycho.product.installSources>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-repository-plugin</artifactId>
+					<configuration>
+						<!-- TODO: is this desired/relevant here?!-->
+						<includeAllSources>true</includeAllSources>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-packaging-plugin</artifactId>
+					<configuration>
+						<format>'${buildId}'</format>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-director-plugin</artifactId>
+					<configuration>
+						<products>
+							<product>
+								<id>${tycho.product.id}</id>
+								<!--attachId>${tycho.product.attachId}</attachId--><!-- TODO: this is probably not necessary with only one product per folder. Double check consequences on P2 IU-ids!-->
+								<rootFolder>${tycho.product.rootFolder}</rootFolder>
+								<rootFolders>
+									<macosx>${tycho.product.rootFolder.macosx}</macosx>
+								</rootFolders>
+							</product>
+						</products>
+						<!-- source>repository</source --> <!-- TODO: check this! --> <!-- To leverage PGP signatures added to repo -->
+						<profile>SDKProfile</profile><!-- TODO: make this configurable? See https://tycho.eclipseprojects.io/doc/5.0.0/tycho-p2-director-plugin/materialize-products-mojo.html#profile -->
+						<installSources>${tycho.product.installSources}</installSources>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+	
+	<profiles>
+		<profile>
+			<id>eclipse-sign</id>
+			<properties>
+				<skip.dmg-package-x86_64>true</skip.dmg-package-x86_64>
+				<skip.dmg-package-aarch64>true</skip.dmg-package-aarch64>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- TODO: is this relevant for products?-->
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>tycho-gpg-plugin</artifactId>
+						<configuration>
+							<skipIfJarsigned>false</skipIfJarsigned>
+							<skipIfJarsignedAndAnchored>true</skipIfJarsignedAndAnchored>
+							<pgpKeyBehavior>skip</pgpKeyBehavior>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>sign-p2-artifacts</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.cbi.maven.plugins</groupId>
+						<artifactId>eclipse-winsigner-plugin</artifactId>
+						<version>${cbi-plugins.version}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<baseSearchDir>${project.build.directory}/products/${tycho.product.id}/win32/</baseSearchDir>
+									<fileNames>
+										<fileName>${tycho.product.rootFolder}.exe</fileName>
+										<fileName>${tycho.product.rootFolder}c.exe</fileName>
+									</fileNames>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.cbi.maven.plugins</groupId>
+						<artifactId>eclipse-macsigner-plugin</artifactId>
+						<version>${cbi-plugins.version}</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<baseSearchDir>${project.build.directory}/products/${tycho.product.id}/macosx/</baseSearchDir>
+									<timeoutMillis>300000</timeoutMillis> <!-- 5 min -->
+									<continueOnFail>${macSigner.forceContinue}</continueOnFail>
+									<entitlements>${project.basedir}/../eclipse.entitlement</entitlements>
+									<fileNames>
+										<fileName>${tycho.product.rootFolder.macosx}</fileName>
+									</fileNames>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.eclipse.cbi.maven.plugins</groupId>
+						<artifactId>eclipse-dmg-packager</artifactId>
+						<version>${cbi-plugins.version}</version>
+						<configuration>
+							<timeoutMillis>600000</timeoutMillis> <!-- 10 min -->
+							<continueOnFail>${macSigner.forceContinue}</continueOnFail>
+							<sign>true</sign>
+						</configuration>
+						<executions>
+							<execution>
+								<id>dmg-package-x86_64</id>
+								<goals>
+									<goal>package-dmg</goal>
+								</goals>
+								<phase>integration-test</phase>
+								<configuration>
+									<skip>${skip.dmg-package-x86_64}</skip>
+									<source>${project.build.directory}/products/${tycho.product.id}-macosx.cocoa.x86_64.tar.gz</source>
+								</configuration>
+							</execution>
+							<execution>
+								<id>dmg-package-aarch64</id>
+								<goals>
+									<goal>package-dmg</goal>
+								</goals>
+								<phase>integration-test</phase>
+								<configuration>
+									<skip>${skip.dmg-package-aarch64}</skip>
+									<source>${project.build.directory}/products/${tycho.product.id}.cocoa.aarch64.tar.gz</source>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

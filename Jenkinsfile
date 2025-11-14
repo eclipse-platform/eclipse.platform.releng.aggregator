@@ -107,8 +107,8 @@ pipeline {
 						.*log,*/target/work/data/.metadata/.*log,\
 						*/tests/target/work/data/.metadata/.*log,\
 						apiAnalyzer-workspace/.metadata/.*log,\
-						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*'
-					// To archive the built products, add to above's list: eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products/*
+						sites/eclipse-platform/target/repository/*'
+					// To archive the built products, add to above's list: products/*/target/products/*
 				}
 			}
 		}
