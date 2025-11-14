@@ -215,7 +215,6 @@ pipeline {
 								-DnewPrevious-release.baseline="${RELEASE_P2_REPOSITORY}"
 						'''
 						utilities.replaceAllInFile('cje-production/buildproperties.txt', [
-							'API_PREV_REF_LABEL=".*?"' : "API_PREV_REF_LABEL=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
 							'PREVIOUS_RELEASE_VER=".*?"' : "PREVIOUS_RELEASE_VER=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
 							'PREVIOUS_RELEASE_REPO_ID=".*?"' : "PREVIOUS_RELEASE_REPO_ID=\"${BUILD_MAJOR}.${BUILD_MINOR}\"",
 							'BASEBUILD_ID=".*?"' : "BASEBUILD_ID=\"${DL_DROP_ID}\"",
@@ -371,11 +370,10 @@ EOF
 		BUILD_ID: "${newBuildLabel}",
 		BUILD_TYPE: "${DL_TYPE}",
 		BUILD_TYPE_NAME: "${newTypeName}",
-		BUILD_DIR_SEG: "${newDropID}",
-		EQ_BUILD_DIR_SEG: "${newDropID}",
 	]
 	def buildPropertiesPHP = sh(returnStdout: true, script: "ssh genie.releng@projects-storage.eclipse.org cat ${sourcePath}/buildproperties.php")
 	for (entry in newProperties) {
+		//TODO: update this to modify the buildproperties.json with the new names/labels and updated filenames/size(?)
 		buildPropertiesPHP = buildPropertiesPHP.replaceFirst('\\$' + entry.key + ' = "[^"]+"', '\\$' + entry.key + ' = "' + entry.value + '"')
 	}
 	writeFile(file: 'buildproperties.php', text: buildPropertiesPHP)

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--TODO: set proper metadata/keywords? -->
+	<title>RelEng Logs </title>
+	<meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
+	<link rel="preconnect stylesheet" href="../../page.css" /><!-- Replaced by a refernece to a contained copy on deployment -->
+	<script src="../../page.js"></script><!-- Replaced by a refernece to a contained copy on deployment -->
+</head>
+
+<body>
+	<div data-generate="generateDefaultBreadcrumb(this, eclipseBreadcrumbBase)">
+		<a href="../../..">Downloads</a>
+		<a class="data-ref" href="..">${label}</a>
+		<span>RelEng Logs</span>
+	</div>
+
+	<main>
+		<h2>Release Engineering Logs for <span class="data-ref">${label}</span></h2>
+		<h3 id="properties">Build Properties</h3>
+		<ul>
+			<li><a href="../mavenproperties.properties">Key Maven Properties</a></li>
+			<li><a href="../buildproperties.properties">Other Build Properties</a></li>
+		</ul>
+
+		<h3 id="build">Build logs</h3>
+		<ul id="build-logs" style="list-style-type:square;">
+		</ul>
+
+		<h3 id="comparator">Comparator Logs</h3>
+		<p>For explaination, see <a href="https://wiki.eclipse.org/Platform-releng/Platform_Build_Comparator_Logs">Platform Build Comparator Logs</a> wiki.</p>
+		<ul id="comparator-logs" style="list-style-type:square;">
+		</ul>
+		<p>For an archive of all relevant baseline-versus-current build artifact byte codes download and 'diff' matching files of
+			<a href="comparatorlogs/artifactcomparisons.zip">artifact comparisons</a>.
+		</p>
+	</main>
+
+	<script>
+		loadPageData('../buildproperties.json')
+		const logFiles = fetch('logFiles.json').then(r => r.json())
+
+		contentPostProcessor = (mainElement, build) => {
+			document.title += ` for ${build.label}`
+
+			logFiles.then(files => {
+				populateList('build-logs', files.build, '', true)
+				populateList('comparator-logs', files.comparator, 'comparatorlogs/')
+			})
+		}
+
+		function populateList(listId, files, linkPrefix, beautifyText) {
+			const list = document.getElementById(listId)
+			for (const file of files) {
+				const item = document.createElement('li')
+				let text = file.name
+				if (beautifyText) {
+					if (text.startsWith('s') && text.endsWith('.log')) {
+						const firstDash = text.indexOf('_')
+						text = text.substring(firstDash + 1, text.length - 4).replace('_', ' ')
+					}
+				}
+				item.innerHTML = `<a href="${linkPrefix}${file.name}">${text}</a> (${file.size})`
+				list.appendChild(item)
+			}
+		}
+
+		generate()
+
+	</script>
+</body>
+
+</html>

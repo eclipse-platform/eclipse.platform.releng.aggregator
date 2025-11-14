@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--TODO: set proper title and metadata -->
+	<title>Eclipse Project Downloads</title>
+	<link rel="preconnect stylesheet" href="../page.css" /><!-- Replaced by a refernece to a contained copy on deployment -->
+	<script src="../page.js"></script><!-- Replaced by a refernece to a contained copy on deployment -->
+</head>
+
+<body>
+	<div data-generate="generateDefaultBreadcrumb(this, eclipseBreadcrumbBase)">
+		<span>Downloads</span>
+	</div>
+
+	<main>
+		<h1>The Eclipse Project Downloads</h1>
+		<!--TODO: check all the links and migrate them if necessary-->
+		<p>
+			On this page you can find the latest builds produced by the <a href="https://www.eclipse.org/eclipse/">Eclipse Project</a>.
+			To get started, run the program and go through the user and developer documentation provided in the help system or see the <a href="http://help.eclipse.org/">web-based help system</a>.
+			If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/The_Official_Eclipse_FAQs">check out the Eclipse Project FAQ</a>, or try posting a question to the <a href="https://www.eclipse.org/forums/">forum</a>.
+		</p>
+		<p>
+			See the <a href="https://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
+			The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
+			For reference, see also the <a href="https://wiki.eclipse.org/Eclipse_Project_Update_Sites">p2 repositories provided</a>, meaning of <a href="https://download.eclipse.org/eclipse/downloads/build_types.html">kinds of builds (P,M,I,S, and R)</a>, and the <a href="https://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
+		</p>
+		<h3 id="latest-downloads">Latest Downloads</h3>
+		<table class="builds-table" data-path="latest"></table>
+
+		<h3 id="latest-release">Latest Release</h3>
+		<table class="builds-table" data-path="releases"></table>
+
+		<h3 id="stable-builds">Stable Builds</h3>
+		<table class="builds-table" data-path="stableBuilds"></table>
+
+		<h3 id="integration-builds">Integration Builds</h3>
+		<table class="builds-table" data-path="iBuilds"></table>
+
+		<h3 id="beta-java-builds">Beta Java Builds</h3>
+		<table class="builds-table" data-path="yBuilds"></table>
+
+	</main>
+	<script>
+		loadPageData('data.json')
+
+		const TWELVE_HOURS_AGO = new Date()
+		TWELVE_HOURS_AGO.setTime(TWELVE_HOURS_AGO.getTime() - 12 * 60 * 60 * 1000)
+		const TWENTYFOUR_HOURS_AGO = new Date()
+		TWENTYFOUR_HOURS_AGO.setTime(TWENTYFOUR_HOURS_AGO.getTime() - 24 * 60 * 60 * 1000)
+
+		contentPostProcessor = (mainElement, contentData) => {
+			const dataTables = Array.from(mainElement.getElementsByClassName("builds-table"))
+			for (const table of dataTables) {
+				const dataPath = table.getAttribute('data-path');
+				const tableData = dataPath != 'latest'
+					? getValue(contentData, dataPath)
+					// Filter latest stable-build if none is available (e.g. shortly after a release)
+					: [contentData.releases[0], contentData.stableBuilds[0], contentData.iBuilds[0]].filter(v => v !== undefined)
+
+				if (tableData.length === 0) { // Remove section if empty, e.g. stable-builds shortly after a release
+					table.previousElementSibling.remove() // Remove headline
+					table.remove()
+					continue
+				}
+				table.createTHead().innerHTML = `
+					<tr>
+						<th>Build Name</th>
+						<th>Build Status</th>
+						<th>Build Date (UTC)</th>
+					</tr>
+				`
+				const tBody = table.createTBody()
+				for (const build of tableData) {
+					tBody.insertRow().innerHTML = `
+					<td>
+						<a href="${build.path}">${build.label}</a>
+					</td>
+					<td>
+						<a href="${build.path}">
+							<img src="${getStatusIcon(build)}" title="Build is available" alt="Build is available">
+						</a>
+						<a href="${build.path}/${build.testsPath}" title="${build.testsCompletion} test platforms finished." style="text-decoration: none">
+							<img src="${getTestStatusIcon(build.testsCompletion, build.date)}"/>
+							(${build.testsCompletion} tests completed)
+						</a>
+					</td>
+					<td>${formatBuildDate(build.date)}</td>
+					`
+				}
+			}
+		}
+
+		function getStatusIcon(buildData) {
+			switch (buildData.status) {
+				case 'success':
+					return 'images/build_done.gif'
+				case 'unstable':
+					return 'images/caution.gif'
+				default:
+					throw new Error(`Unknown state: ${buildData.status}`)
+			}
+		}
+
+		const testsCompletionStatusPattern = /^(?<completed>\d+) of (?<expected>\d+)$/
+
+		function getTestStatusIcon(testsCompletion, date) {
+			const buildDate = new Date(date)
+			const matches = testsCompletionStatusPattern.exec(testsCompletion)
+			const expected = parseInt(matches.groups.expected)
+			const completed = parseInt(matches.groups.completed)
+			if (expected == completed) {
+				return 'images/junit.gif'
+			} else {
+				if (completed == 0 && buildDate < TWELVE_HOURS_AGO) {
+					return 'images/caution.gif'
+				} else if (buildDate < TWENTYFOUR_HOURS_AGO) {
+					return 'images/junit.gif' // Assume tests are not running anymore
+				}
+				return 'images/runtests.gif'
+			}
+		}
+
+		generate()
+
+	</script>
+</body>
+
+</html>
