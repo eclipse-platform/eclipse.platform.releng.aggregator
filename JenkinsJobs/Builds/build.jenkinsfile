@@ -36,7 +36,11 @@ pipeline {
 		CJE_ROOT = "${WORKSPACE}/cje-production"
 		AGG_DIR = "${CJE_ROOT}/gitCache/eclipse.platform.releng.aggregator"
 		logDir = "$CJE_ROOT/buildlogs"
-		PLATFORM_REPO_DIR = "${AGG_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository"
+		
+		PRODUCTS_DIR = "${AGG_DIR}/products"
+		SITES_DIR = "${AGG_DIR}/sites"
+		PLATFORM_REPO_DIR = "${SITES_DIR}/eclipse-platform-repository/target/repository"
+		
 		DROP_DIR = "${CJE_ROOT}/siteDir/eclipse/downloads/drops4"
 		EQUINOX_DROP_DIR = "${CJE_ROOT}/siteDir/equinox/drops"
 		// Download server paths
@@ -305,12 +309,13 @@ pipeline {
 									
 									mkdir -p ${DROP_DIR}/${BUILD_ID}/testresults/consolelogs
 									
-									PLATFORM_PROJECT_DIR=${AGG_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target
 									# Gather p2-repository
-									cp ${PLATFORM_PROJECT_DIR}/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip ${DROP_DIR}/${BUILD_ID}/repository-$BUILD_ID.zip
+									pushd ${SITES_DIR}/eclipse-platform-repository/target
+									cp eclipse-platform-repository.eclipse-repository-*.zip ${DROP_DIR}/${BUILD_ID}/repository-${BUILD_ID}.zip
+									popd
 									
 									# Gather sdk product
-									for file in ${PLATFORM_PROJECT_DIR}/products/*; do
+									for file in ${PRODUCTS_DIR}/eclipse-sdk/target/products/*; do
 										if [[ "$file" =~ /org.eclipse.sdk.ide-([^.]+).([^.]+).([^.]+).(.*)$ ]]; then
 											if [[ "${BASH_REMATCH[1]}" == "${BASH_REMATCH[2]}" ]]; then
 												#TODO: Remove this special treatment
@@ -322,7 +327,7 @@ pipeline {
 										fi
 									done
 									# Gather platform product
-									for file in ${PLATFORM_PROJECT_DIR}/products/*; do
+									for file in ${PRODUCTS_DIR}/eclipse-platform/target/products/*; do
 										if [[ "$file" =~ /org.eclipse.platform.ide-([^.]+).([^.]+).([^.]+).(.*)$ ]]; then
 											if [[ "${BASH_REMATCH[1]}" == "${BASH_REMATCH[2]}" ]]; then
 												#TODO: Remove this special treatment
@@ -349,27 +354,14 @@ pipeline {
 									popd
 									
 									# Gather test zips
-									pushd $ECLIPSE_BUILDER_DIR/eclipse-junit-tests/target
+									pushd ${PRODUCTS_DIR}/eclipse-junit-tests/target
 									cp eclipse-junit-tests-bundle.zip ${DROP_DIR}/${BUILD_ID}/eclipse-Automated-Tests-$BUILD_ID.zip
 									popd
 									
-									set -x
 									# Slice repos
-									pushd $PLATFORM_REPO_DIR
-									$BASE_BUILDER_ECLIPSE_EXE \
-										-application org.eclipse.ant.core.antRunner \
-										-buildfile $ECLIPSE_BUILDER_DIR/repos/platformrepo.xml \
-										-data $CJE_ROOT/$TMP_DIR/workspace-buildrepos \
-										-Declipse.build.configs=$ECLIPSE_BUILDER_DIR \
-										-DbuildId=$BUILD_ID \
-										-DbuildLabel=$BUILD_ID \
-										-DbuildRepo=$PLATFORM_REPO_DIR \
-										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
-										-DpostingDirectory=${DROP_DIR} \
-										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-										-v
+									pushd ${PRODUCTS_DIR}/eclipse-platform/target
+									cp org.eclipse.platform.ide-*.zip ${DROP_DIR}/${BUILD_ID}/org.eclipse.platform-${BUILD_ID}.zip
 									popd
-									set +x
 									
 									# Gather ECJ jars
 									pushd ${AGG_DIR}/eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch/target
@@ -511,7 +503,7 @@ pipeline {
 									source $CJE_ROOT/buildproperties.shsource
 									
 									# Gather Equinox Starter Kit
-									for file in $ECLIPSE_BUILDER_DIR/equinox.starterkit.product/target/products/*; do
+									for file in ${PRODUCTS_DIR}/equinox-starterkit/target/products/*; do
 										if [[ "$file" =~ /org.eclipse.rt.osgistarterkit.product-([^.]+).([^.]+).([^.]+).(.*)$ ]]; then
 											cp ${file} ${EQUINOX_DROP_DIR}/${BUILD_ID}/EclipseRT-OSGi-StarterKit-$BUILD_ID-${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]}.${BASH_REMATCH[4]}
 										fi
@@ -524,7 +516,9 @@ pipeline {
 									popd
 									
 									# Gather Equinox SDK
-									cp ${ECLIPSE_BUILDER_DIR}/equinox-sdk/target/equinox-sdk-*-SNAPSHOT.zip ${EQUINOX_DROP_DIR}/${BUILD_ID}/equinox-SDK-$BUILD_ID.zip
+									pushd ${PRODUCTS_DIR}/equinox-sdk/target
+									cp equinox-sdk-*-SNAPSHOT.zip ${EQUINOX_DROP_DIR}/${BUILD_ID}/equinox-SDK-$BUILD_ID.zip
+									popd
 									pushd ${EQUINOX_DROP_DIR}/${BUILD_ID}
 										unzip -o -j equinox-SDK-$BUILD_ID.zip plugins/*.jar -x plugins/*.source_*
 									popd
