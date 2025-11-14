@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (c) 2012, 2025 Eclipse Foundation.
+	All rights reserved. This program and the accompanying materials
+	are made available under the terms of the Eclipse Distribution License v1.0
+	which accompanies this distribution, and is available at
+	https://www.eclipse.org/org/documents/edl-v10.php
+
+	Contributors:
+		Igor Fedorenko - initial implementation
+		David Williams - improvements and maintenance
+-->
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.eclipse</groupId>
+		<artifactId>products</artifactId>
+		<version>4.39.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>org.eclipse.rt.osgistarterkit.product</artifactId>
+	<packaging>eclipse-repository</packaging>
+	
+	<properties>
+		<product.id>org.eclipse.rt.osgistarterkit.product</product.id>
+		<product.rootFolder>rt</product.rootFolder>
+		<product.rootFolder.macosx>Rt.app</product.rootFolder.macosx>
+		
+		<eclipse.signing.skip>false</eclipse.signing.skip>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<configuration>
+					<environments>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>aarch64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-director-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>materialize-products</id>
+						<goals>
+							<goal>materialize-products</goal>
+						</goals>
+						<phase>prepare-package</phase>
+					</execution>
+					<execution>
+						<id>archive-products</id>
+						<goals>
+							<goal>archive-products</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
