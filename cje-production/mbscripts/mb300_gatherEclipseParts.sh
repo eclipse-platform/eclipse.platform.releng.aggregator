@@ -33,19 +33,11 @@ JavaCMD=${JAVA_HOME}/bin/java
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
 # gather repo
-REPO_DIR=$PLATFORM_REPO_DIR
-REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
-  
-if [ -d $REPO_DIR ]; then
-  pushd $REPO_DIR
-  cp -r * $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
+  pushd ${SITES_BUILD_DIR}/eclipse-platform/target
+  #TODO: verify that content is moved correctly at the desired target location
+  mv repository/* ${CJE_ROOT}/${UPDATES_DIR}/${BUILD_ID}
+  mv eclipse-platform-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip ${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}/repository-${BUILD_ID}.zip
   popd
-fi
-
-if [ -f $REPO_ZIP ]; then
-  cp $REPO_ZIP $CJE_ROOT/$DROP_DIR/$BUILD_ID/repository-$BUILD_ID.zip
-fi
-
 
   # gather sdk
   if [ -d $PLATFORM_PRODUCTS_DIR ]; then
@@ -102,27 +94,10 @@ fi
     popd
   fi
 
-  set -x
   # slice repos
-  ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/platformrepo.xml
-  if [ -d $PLATFORM_REPO_DIR ]; then
-    pushd $PLATFORM_REPO_DIR
-    java -jar $LAUNCHER_JAR \
-      -application org.eclipse.ant.core.antRunner \
-      -buildfile $ANT_SCRIPT \
-      -data $CJE_ROOT/$TMP_DIR/workspace-buildrepos \
-      -Declipse.build.configs=$ECLIPSE_BUILDER_DIR \
-      -DbuildId=$BUILD_ID \
-      -DbuildLabel=$BUILD_ID \
-      -DbuildRepo=$PLATFORM_REPO_DIR \
-      -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-      -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
-      -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
-      -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-      -v
-    popd
-  fi
-  set +x
+  pushd ${SITES_BUILD_DIR}/org.eclipse.platform/target
+  cp org.eclipse.platform-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip $CJE_ROOT/$DROP_DIR/$BUILD_ID/org.eclipse.platform-${BUILD_ID}.zip
+  popd
 
 # gather ecj jars
 ECJ_JAR_DIR=$CJE_ROOT/$AGG_DIR/eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch/target

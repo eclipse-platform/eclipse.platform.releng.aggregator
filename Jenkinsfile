@@ -88,12 +88,17 @@ pipeline {
 			}
 		}
 		stage('Build') {
+			environment {
+				KEYRING = credentials('secret-subkeys.asc')
+				KEYRING_PASSPHRASE = credentials('gpg-passphrase')
+			}
 			steps {
 				sh '''
 					mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch -DlocalEcjVersion=99.99 -Dmaven.repo.local=$WORKSPACE/.m2/repository -U
 					mvn clean verify -e -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						-T 1C \
 						-Pbree-libs \
+						-Peclipse-sign \
 						-DskipTests=true \
 						-Dcompare-version-with-baselines.skip=false \
 						-DapiBaselineTargetDirectory=${WORKSPACE} \
@@ -107,8 +112,10 @@ pipeline {
 						.*log,*/target/work/data/.metadata/.*log,\
 						*/tests/target/work/data/.metadata/.*log,\
 						apiAnalyzer-workspace/.metadata/.*log,\
-						eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository/*'
-					// To archive the built products, add to above's list: eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products/*
+						sites/eclipse-platform/target/repository/*,\
+						products/*/target/products/*,\
+						'
+					// To archive the built products, add to above's list: products/*/target/products/*
 				}
 			}
 		}
