@@ -24,8 +24,37 @@ def replaceAllInFile(String filePath, Map<String,String> replacements) {
 def modifyJSON(String jsonFilePath, Closure transformation) {
 	def json = readJSON(file: jsonFilePath)
 	transformation.call(json)
+	writeJSON(jsonFilePath, json)
+}
+
+def writeJSON(String jsonFilePath, def json) {
 	// This leads to prettier results than using the writeJSON() step, even with the pretty parameter set.
 	writeFile(file: jsonFilePath, text: JsonOutput.prettyPrint(JsonOutput.toJson(json)).replace('    ','\t'), encoding :'UTF-8')
+}
+
+// --- website generation ---
+
+def copyStaticWebsiteFiles(String gitRoot, String website) {
+	def pathToReplace;
+	if (website.startsWith('eclipse')) {
+		pathToReplace = '..'
+	} else if (website.startsWith('equinox')) {
+		pathToReplace = '../../eclipse'
+	} else {
+		error("Unknown website: ${website}")
+	}
+	sh """#!/bin/bash -xe
+		cp -r ${gitRoot}/sites/${website}/. .
+		
+		# Copy the share files into this the current stite to make each site self-contained
+		cp ${gitRoot}/sites/eclipse/page.css .
+		cp ${gitRoot}/sites/eclipse/page.js .
+		# Replace references to shared java-script/css files to contained files
+		find . -type f -name "*.html" -exec sed --in-place \
+			--expression='s|${pathToReplace}/page.js">|page.js">|g' \
+			--expression='s|${pathToReplace}/page.css" />|page.css" />|g' \
+			{} +
+	"""
 }
 
 // --- git operations ---

@@ -55,6 +55,9 @@ pipeline {
 					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
 					[path: 'JenkinsJobs/buildConfigurations.json'],
 					[path: 'JenkinsJobs/shared/utilities.groovy'],
+					[path: 'scripts/releng'],
+					[path: 'eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles'],
+					
 				])])
 				script {
 					def buildConfigurations = readJSON(file: 'JenkinsJobs/buildConfigurations.json')
@@ -104,20 +107,34 @@ pipeline {
 									localResultsDirectory="workarea/${buildId}/eclipse-testing/results"
 									ssh genie.releng@projects-storage.eclipse.org mkdir -p ${remoteResultsDirectory}
 									if [ -d "${localResultsDirectory}/xml" ] && [ -z "$(find ${localResultsDirectory}/xml -maxdepth 0 -empty)" ]; then
+										
+										# As long as not all tests run with Java-25 (or later) we cannot use multi-file Source Programs and have to compile manually
+										pushd scripts/releng
+										javac TestResultsGenerator.java
+										javac utilities/JSON.java
+										javac utilities/OS.java
+										javac utilities/XmlProcessorFactoryRelEng.java
+										# Generate new summary file
+										java \
+											-DxmlDirectory="${WORKSPACE}/${localResultsDirectory}/xml" \
+											-DtestsConfigExpected=${JOB_BASE_NAME} \
+											-DtestManifestFile="${WORKSPACE}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml" \
+											TestResultsGenerator
+										popd
+										
 										# First delete result files from a previous run of the same configuration (in case that test configuration was run again), then transfer the new results.
 										ssh genie.releng@projects-storage.eclipse.org rm -rfv ${remoteResultsDirectory}/${JOB_BASE_NAME}* ${remoteResultsDirectory}/*/*${JOB_BASE_NAME}*
 										scp -r ${localResultsDirectory}/* genie.releng@projects-storage.eclipse.org:${remoteResultsDirectory}
+										
 										# Download the result summary directly to the storage server
 										ssh genie.releng@projects-storage.eclipse.org \
-											curl --fail --location --output "${remoteResultsDirectory}/${JOB_BASE_NAME}.xml" "${BUILD_URL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration"
+											curl --fail --location --output "${remoteResultsDirectory}/${JOB_BASE_NAME}.xml" "${BUILD_URL}/testReport/api/json?tree=failCount,passCount,skipCount,duration"
 									fi
 								'''
 							}
 						}
 						if (currentBuild.result == 'SUCCESS' || currentBuild.result == 'UNSTABLE') {
-							build job: 'Releng/updateTestResultIndex', wait: false, parameters: [
-								string(name: 'buildID', value: "${params.buildId}")
-							]
+							build job: 'Releng/updateIndex', wait: false
 						}
 					}
 				}

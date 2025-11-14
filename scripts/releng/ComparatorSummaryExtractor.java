@@ -23,9 +23,10 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import utilities.OS;
 
 /**
  * This class is responsible for extracting the relevent "Debug" messages from
@@ -39,10 +40,8 @@ public class ComparatorSummaryExtractor {
 
 	public static void main(String[] args) throws IOException {
 		ComparatorSummaryExtractor extractor = new ComparatorSummaryExtractor();
-		extractor.buildDirectory = Objects.requireNonNull(System.getProperty("buildDirectory"),
-				"Not set: buildDirectory");
-		extractor.comparatorRepo = Objects.requireNonNull(System.getProperty("comparatorRepo"),
-				"Not set: comparatorRepo");
+		extractor.buildDirectory = OS.readProperty("buildDirectory");
+		extractor.comparatorRepo = OS.readProperty("comparatorRepo");
 		extractor.processBuildfile();
 	}
 

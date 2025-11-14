@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--TODO: set proper metadata/keywords? -->
+	<title>Equinox Build</title>
+	<meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
+	<link rel="preconnect stylesheet" href="../../eclipse/page.css" /><!-- Replaced by a refernece to a contained copy on deployment -->
+	<script src="../../eclipse/page.js"></script><!-- Replaced by a refernece to a contained copy on deployment -->
+</head>
+
+<!-- TODO: Add Equinox favicon?-->
+
+<body>
+	<div data-generate="generateDefaultBreadcrumb(this, equinoxBreadcrumbBase)">
+		<a href="..">Downloads</a>
+		<span class="data-ref">${label}</span>
+	</div>
+
+	<main>
+		<h2>Equinox <span class="data-ref">${kind}</span> Build: <span class="data-ref">${label}</span></h2>
+		<p id="build-state-container"></p>
+
+		<span id="build-timestamp"></span>
+
+		<h3 id="repository">All of Equinox</h3>
+		<p> A complete set of all bundles and launchers produced by the Equinox project. This zip is also a p2 repo. </p>
+		<table class="files-table" data-path="equinoxRepository"></table>
+
+		<h3 id="framework">Framework Only</h3>
+		<table class="files-table" data-path="equinoxFramework"></table>
+
+		<h3 id="addons">Add-on Bundles</h3>
+		<p>
+			Individual <a href="https://eclipse.org/equinox/bundles">bundles</a> that provide standalone OSGi specified services
+			or add-on mechanisms (e.g., the Eclipse extension registry) of interest to OSGi programmers.
+		</p>
+		<table class="files-table" data-path="addonBundles"></table>
+
+		<h3 id="other">Other Required Bundles</h3>
+		<p>
+			A convenient set of bundles that are required by some of the Equinox bundles.
+		</p>
+		<table class="files-table" data-path="otherBundles"></table>
+
+		<h3 id="launchers">Native Launchers</h3>
+		<p>
+			Platform-specific native launchers (e.g., eclipse.exe) for the Equinox framework.
+			See the list of <a href="https://www.eclipse.org/projects/project-plan.php?projectid=eclipse#target_environments">supported OS configurations</a>.
+		</p>
+		<table class="files-table" data-path="launchers"></table>
+
+		<h3 id="starter-kits">OSGi starter kits</h3>
+		<p>
+			A useful collection of Equinox bundles packaged as a ready to run system.
+			This include the framework, p2 and other frequently used service implementations.
+		</p>
+		<table class="files-table" data-path="starterKits"></table>
+
+		<h3 id="other">Other Information</h3>
+		<p><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></p>
+		<p style="text-indent: 3em;" class="data-ref">
+			<a href="checksum/equinox-${label}-SUMSSHA512">SHA512 Checksums for ${label}</a>&nbsp;(<a href="checksum/equinox-${label}-SUMSSHA512.asc">GPG</a>)
+		</p>
+
+	</main>
+	<script>
+		loadPageData('buildproperties.json')
+
+		contentPostProcessor = (mainElement, build) => {
+			document.title = `Equinox - ${build.label}`
+			document.getElementById('build-timestamp').innerHTML = `<b>${formatBuildDate(build.timestamp)} (UTC)</b>`
+
+			// Inject resource files
+			const dataTables = Array.from(mainElement.getElementsByClassName("files-table"))
+			for (const table of dataTables) {
+				const dataPath = table.getAttribute('data-path')
+				const filesData = getValue(build, dataPath)
+				const tBody = table.createTBody()
+				const icon = dataPath == 'equinoxRepository' ? '<img src="repo.gif">&nbsp;' : ''
+				for (const file of filesData) {
+					tBody.insertRow().innerHTML = `
+					<td width="90%">
+						${icon}<a href="${file.name}">${file.name}</a>
+					</td>
+					<td>${file.size}</td>
+					`
+					//TODO: Implement mirror-selection (but https://www.eclipse.org/downloads/download.php?file=equinox/drops/${build.identifier}/${file.name} doesn't work, not even for releases)
+				}
+			}
+		}
+
+		function getPlatformLabel(fileName) {
+			let os = getOSLabel(fileName)
+			let arch = getCPUArchLabel(fileName)
+			return `${os} (${arch})`
+		}
+
+		fetch('buildUnstable').then(res => res.status == 404 ? '' : res.text()).then(msg => {
+			if (msg) {
+				const statusLabel = document.getElementById('build-state-container')
+				statusLabel.innerHTML = '<a href="https://wiki.eclipse.org/Platform-releng/Unstable_build" title="Unstable Build" style="color:red;"><b>Unstable!</b></a>' + msg
+			}
+		})
+
+		generate()
+
+	</script>
+</body>
+
+</html>

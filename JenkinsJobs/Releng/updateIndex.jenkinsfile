@@ -6,26 +6,174 @@ pipeline {
 	options {
 		skipDefaultCheckout()
 		timestamps()
-		buildDiscarder(logRotator(numToKeepStr:'10'))
+		buildDiscarder(logRotator(numToKeepStr:'10', artifactNumToKeepStr: '2'))
 	}
 	agent {
 		label 'basic'
 	}
+	environment {
+		GIT_REPO = "${WORKSPACE}/git-repo"
+		BUILD_SEPARATOR = 'BUILD-SEPARATOR'
+		// Download server paths
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
+		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+	}
 	stages {
-		stage('Update index'){
+		stage('Update index') {
 			steps {
+				dir("${GIT_REPO}") {
+					checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
+						extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+						[path: 'JenkinsJobs/shared/utilities.groovy'],
+						[path: 'sites/eclipse'],
+						[path: 'sites/equinox'],
+					])])
+				}
+				script {
+					def utilities = load "${GIT_REPO}/JenkinsJobs/shared/utilities.groovy"
+					dir('site-eclipse'){
+						utilities.copyStaticWebsiteFiles("${GIT_REPO}", 'eclipse/overview')
+					}
+					dir('site-equinox'){
+						utilities.copyStaticWebsiteFiles("${GIT_REPO}", 'equinox/overview')
+					}
+					def buildDropsData;
+					sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+						buildDropsData = sh(script: """
+							ssh genie.releng@projects-storage.eclipse.org '
+								cd ${EP_ECLIPSE_DROPS}
+								for drop in \$(ls); do
+									if [ -d \${drop} ] && [ ! -f \${drop}/buildHidden ]; then
+										echo "\${drop}"
+										# Count elements in list of expected tests
+										grep "^TEST_CONFIGURATIONS_EXPECTED" \${drop}/buildproperties.properties | awk -F= "{print \\\$2}" | grep -o "ep[0-9A-Za-z]*-unit-" | wc -l
+										# Count number of test-result overview files
+										find \${drop}/testresults -maxdepth 1 -type f -name "ep*-unit-*.json" | wc -l
+										# Count number of old-style test-result overview files (still relevant for not yet archived releases)
+										find \${drop}/testresults -maxdepth 1 -type f -name "ep*-unit-*.xml" | wc -l
+										if [  -f \${drop}/index.html ]; then
+											echo "style-new"
+										else
+											echo "style-old"
+										fi
+										if [  -f \${drop}/buildUnstable ]; then
+											echo "unstable"
+										fi
+										echo "${BUILD_SEPARATOR}"
+									fi
+								done
+								
+								echo "DROP-TYPES-SEPARATOR"
+								
+								cd ${EP_EQUINOX_DROPS}
+								for drop in \$(ls); do
+									if [ -d \${drop} ] && [ ! -f \${drop}/buildHidden ]; then
+										echo "\${drop}"
+										if [  -f \${drop}/buildUnstable ]; then
+											echo "unstable"
+										fi
+										echo "${BUILD_SEPARATOR}"
+									fi
+								done
+							'
+							""".stripIndent(), returnStdout: true)
+					}
+					def dropData = buildDropsData.split('DROP-TYPES-SEPARATOR')
+					def eclipseOverviewData = parseEclipseBuildDrops(dropData[0])
+					utilities.writeJSON('site-eclipse/data.json', eclipseOverviewData)
+					def equinoxOverviewData = parseEquinoxBuildDrops(dropData[1])
+					utilities.writeJSON('site-equinox/data.json', equinoxOverviewData)
+				}
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-					sh '''#!/bin/bash -xe
-						PHP_PAGE="createIndex4x.php"
-						HTML_PAGE="index.html"
-						TEMP_INDEX="tempIndex.html"
-						
-						wget --no-verbose -O ${TEMP_INDEX} https://download.eclipse.org/eclipse/downloads/${PHP_PAGE} 2>&1
-						
-						scp ${TEMP_INDEX} genie.releng@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/eclipse/downloads/${HTML_PAGE}
+					sh '''
+						rsync -avzh site-eclipse/. genie.releng@projects-storage.eclipse.org:${EP_ROOT}/eclipse/downloads/
+						rsync -avzh site-equinox/. genie.releng@projects-storage.eclipse.org:${EP_ROOT}/equinox/
 					'''
 				}
 			}
 		}
 	}
+	post {
+		always {
+			archiveArtifacts artifacts: '**/*', excludes: 'git-repo/**'
+		}
+	}
+}
+
+@NonCPS
+def parseEclipseBuildDrops(String buildDrops) {
+	def overview = [releases: [], stableBuilds: [], iBuilds: [], yBuilds: []]
+	for (dropData in buildDrops.trim().split("${BUILD_SEPARATOR}")) {
+		if (dropData.isEmpty()) {
+			continue;
+		}
+		def dropDataElements = dropData.trim().split('\\s+')
+		def String dropID = dropDataElements[0]
+		def int testsExpected = Integer.parseInt(dropDataElements[1])
+		def int testsFinishedNew = Integer.parseInt(dropDataElements[2])
+		def int testsFinishedOld = Integer.parseInt(dropDataElements[3])
+		def boolean isNewStyleDrop = dropDataElements[4] == 'style-new'
+		def boolean isUnstable = dropDataElements.length > 5 && dropDataElements[5] == 'unstable'
+		def drop = createDropEntry(dropID, 'drops4', isUnstable, overview)
+		drop.testsCompletion = "${ testsFinishedNew + testsFinishedOld } of ${testsExpected}".toString()
+		drop.testsPath = isNewStyleDrop ? 'tests.html' : 'testResults.php'
+	}
+	overview.values().each{ list -> list.sort({d1, d2 -> -d1.label.compareTo(d2.label)})}
+	return overview
+}
+
+@NonCPS
+def parseEquinoxBuildDrops(String buildDrops) {
+	def overview = [releases: [], stableBuilds: [], iBuilds: [], yBuilds: []]
+	for (dropData in buildDrops.trim().split("${BUILD_SEPARATOR}")) {
+		if (dropData.isEmpty()) {
+			continue;
+		}
+		def dropDataElements = dropData.trim().split('\\s+')
+		def String dropID = dropDataElements[0]
+		def boolean isUnstable = dropDataElements.length > 1 && dropDataElements[1] == 'unstable'
+		createDropEntry(dropID, 'drops', isUnstable, overview)
+	}
+	overview.values().each{ list -> list.sort({d1, d2 -> -d1.label.compareTo(d2.label)})}
+	return overview
+}
+
+@NonCPS
+def createDropEntry(String dropID, String containerPath, boolean isUnstable, Map overview) {
+	def drop = [ path: "${containerPath}/${dropID}".toString(), status: isUnstable ? 'unstable' : 'success' ]
+	if (dropID.startsWith('R-')) {
+		drop.label = dropID.substring(2, dropID.lastIndexOf('-'))
+		drop.date = toUTCdateTime(dropID.substring(dropID.lastIndexOf('-') + 1))
+		overview.releases += drop
+	} else if (dropID.startsWith('S-')) {
+		drop.label = dropID.substring(2, dropID.lastIndexOf('-'))
+		drop.date = toUTCdateTime(dropID.substring(dropID.lastIndexOf('-') + 1))
+		overview.stableBuilds += drop
+	} else if (dropID.startsWith('I20')) {
+		drop.label = dropID
+		drop.date = toUTCdateTime(dropID.substring(1).replace('-', ''))
+		overview.iBuilds += drop
+	} else if (dropID.startsWith('Y20')) {
+		drop.label = dropID
+		drop.date = toUTCdateTime(dropID.substring(1).replace('-', ''))
+		overview.yBuilds += drop
+	}
+	return drop
+}
+
+@NonCPS
+def toUTCdateTime(String dateTime) {
+	if (dateTime.length() != 12) {
+		throw new IllegalArgumentException('Not an expected date-time string: ' + dateTime)
+	}
+	def int year = Integer.parseInt(dateTime.substring(0, 4))
+	def int month = Integer.parseInt(dateTime.substring(4, 6))
+	def int day = Integer.parseInt(dateTime.substring(6, 8))
+	def int hour = Integer.parseInt(dateTime.substring(8, 10))
+	def int minute = Integer.parseInt(dateTime.substring(10, 12))
+	return java.time.LocalDateTime.of(year, month, day, hour, minute)
+		.atZone(java.time.ZoneId.of("America/New_York"))
+		.withZoneSameInstant(java.time.ZoneOffset.UTC)
+		.toLocalDateTime().toString() + 'Z';
 }

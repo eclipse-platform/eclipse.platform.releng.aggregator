@@ -34,6 +34,7 @@ pipeline {
 	environment {
 		MAVEN_OPTS = '-Xmx4G'
 		CJE_ROOT = "${WORKSPACE}/cje-production"
+		SCRIPTS = "${WORKSPACE}/scripts"
 		AGG_DIR = "${CJE_ROOT}/gitCache/eclipse.platform.releng.aggregator"
 		logDir = "$CJE_ROOT/buildlogs"
 		
@@ -168,31 +169,38 @@ pipeline {
 					}
 					// Git log creation
 					sh '''#!/bin/bash -xe
-						reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M)
+						reportTimestamp=$(TZ='UTC' date +%Y%m%d-%H%M)
 						export lastTag=$(cat "${WORKSPACE}/lastTag")
 						if [[ -n "$lastTag" ]]; then
-							export gitLogFile="${DROP_DIR}/$BUILD_ID/gitLog.html"
+							export gitLogFile="${DROP_DIR}/$BUILD_ID/gitLog.json"
 							mkdir -p $(dirname "${gitLogFile}")
 							
-							echo -e "<h2>Git log from $lastTag (previous) to $BUILD_ID (current)</h2>" > $gitLogFile
-							echo -e "<h2>The tagging, and this report, were done at about $reportTimestamp</h2>" >> $gitLogFile
+							echo '{' > $gitLogFile
+							echo "\\"label\\": \\"${BUILD_ID}\\"," >> $gitLogFile
+							echo "\\"logFrom\\": \\"${lastTag}\\"," >> $gitLogFile
+							echo "\\"logTo\\": \\"${BUILD_ID}\\"," >> $gitLogFile
+							echo "\\"timestamp\\": \\"${reportTimestamp}\\"," >> $gitLogFile
+							echo "\\"repositories\\": [" >> $gitLogFile >> $gitLogFile
 							
 							function createGitLog() {
 								gitURL=$(git config remote.origin.url | sed --expression 's,git@github.com:,https://github.com/,' | sed 's/\\.git$//')
 								gitName="${gitURL##*/}"
-								gitLog=$(git log $lastTag..$BUILD_ID --date=short --format=format:"<tr><td class=\"datecell\">%cd</td><td class=\"commitcell\"><a href=\"${gitURL}/commit/%H\">%s</a></td><td class=\"authorcell\">%aN</td></tr>")
+								#TODO: handle potential double-quotes in commit message?
+								gitLog=$(git log $lastTag..$BUILD_ID --date=short --format=format:"{ \\"date\\": \\"%cd\\", \\"message\\": \\"%s\\", \\"author\\": \\"%aN\\", \\"url\\": \\"${gitURL}/commit/%H\\"},")
 								if [ -n "$gitLog" ]; then
 									echo "Record changes in ${gitName}"
-									echo "<table><tbody> <tr><th class=\"cell\" colspan=\"3\">Repository: ${gitName}</th></tr>" >> $gitLogFile
-									echo "<tr> <th class=\"datecell\">Date</th> <th class=\"commitcell\">Commit message</th> <th class=\"authorcell\">Author</th> </tr>" >> $gitLogFile
-									echo "${gitLog}" >> $gitLogFile
-									echo "</tbody></table><br><br>" >> $gitLogFile
-									echo '' >> $gitLogFile
+									echo "{" >> $gitLogFile
+									echo "\\"name\\": \\"${gitName}\\"," >> $gitLogFile
+									echo "\\"commits\\": [" >> $gitLogFile
+									echo "${gitLog%,}" >> $gitLogFile
+									echo "]}," >> $gitLogFile
 								fi
 							}
 							export -f createGitLog
 							createGitLog
 							git submodule foreach 'createGitLog'
+							
+							echo "{}]}" >> $gitLogFile # Append empty object to keep JSON valid
 						else
 							echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > $gitLogFile
 						fi
@@ -291,14 +299,18 @@ pipeline {
 						stage('Gather Eclipse parts') {
 							tools {
 								jdk 'temurin-jdk25-latest'
-							}						
+							}
 							environment {
 								KEYRING = credentials('secret-subkeys-releng.asc')
 								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
 							}
 							steps {
+								dir("${DROP_DIR}/${BUILD_ID}") {
+									script {
+										utilities.copyStaticWebsiteFiles("${AGG_DIR}", 'eclipse/build')
+									}
+								}
 								sh '''#!/bin/bash -xe
-									mkdir -p ${DROP_DIR}/${BUILD_ID}
 									cp $CJE_ROOT/buildproperties.* ${DROP_DIR}/${BUILD_ID}
 									source $CJE_ROOT/buildproperties.shsource
 									
@@ -441,20 +453,12 @@ pipeline {
 										bash ${CJE_ROOT}/scripts/produceChecksum.sh eclipse
 									popd
 									
-									cp -r ${ECLIPSE_BUILDER_DIR}/eclipse/publishingFiles/staticDropFiles/. ${DROP_DIR}/${BUILD_ID}
-									
 									java \
-										-DisBuildTested=true \
-										-DbuildType=${BUILD_TYPE} \
-										-DdropTokenList='%repository%,%sdk%,%tests%,%runtime%,%jdtc%,%swt%' \
-										-DdropHtmlFileName=index.php \
-										-DxmlDirectoryName=${DROP_DIR}/${BUILD_ID}/testresults/xml \
-										-DdropDirectoryName=${DROP_DIR}/${BUILD_ID} \
-										-DdropTemplateFileName=${ECLIPSE_BUILDER_DIR}/eclipse/publishingFiles/templateFiles/index.template.php \
-										-DcompileLogsDirectoryName=${DROP_DIR}/${BUILD_ID}/compilelogs/plugins \
-										-DtestManifestFileName=${ECLIPSE_BUILDER_DIR}/eclipse/publishingFiles/testManifest.xml \
-										-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED} \
-										${WORKSPACE}/scripts/releng/TestResultsGenerator.java
+										-DdropDirectory=${DROP_DIR}/${BUILD_ID} \
+										${SCRIPTS}/releng/BuildDropDataGenerator.java mainEclipse
+									java \
+										-DdropDirectory=${DROP_DIR}/${BUILD_ID} \
+										${SCRIPTS}/releng/CompilerSummaryGenerator.java
 								'''
 							}
 						}
@@ -479,14 +483,18 @@ pipeline {
 						stage('Gather Equinox parts') {
 							tools {
 								jdk 'temurin-jdk25-latest'
-							}						
+							}
 							environment {
 								KEYRING = credentials('secret-subkeys-releng.asc')
 								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
 							}
 							steps {
+								dir("${EQUINOX_DROP_DIR}/${BUILD_ID}") {
+									script {
+										utilities.copyStaticWebsiteFiles("${AGG_DIR}", 'equinox/build')
+									}
+								}
 								sh '''#!/bin/bash -xe
-									mkdir -p ${EQUINOX_DROP_DIR}/${BUILD_ID}
 									cp $CJE_ROOT/buildproperties.* ${EQUINOX_DROP_DIR}/${BUILD_ID}
 									source $CJE_ROOT/buildproperties.shsource
 									
@@ -518,20 +526,18 @@ pipeline {
 										cat $f
 									done
 									
-									# Publish Equinox
+									# Build Equinox Launcher archives
 									pushd $CJE_ROOT
 									mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
 									mkdir -p $CJE_ROOT/$TMP_DIR
 									$BASE_BUILDER_ECLIPSE_EXE \
 										-application org.eclipse.ant.core.antRunner \
-										-buildfile $ECLIPSE_BUILDER_DIR/equinox/helper.xml \
+										-buildfile ${ECLIPSE_BUILDER_DIR}/equinox/buildConfigs/equinox-launchers/build.xml \
 										-data $CJE_ROOT/$TMP_DIR/workspace-publishEquinox \
-										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
 										-DbuildDir=$BUILD_ID \
 										-DbuildId=$BUILD_ID \
 										-DbuildRepo=$PLATFORM_REPO_DIR \
 										-DequinoxPostingDirectory=${EQUINOX_DROP_DIR} \
-										-DeqpublishingContent=$ECLIPSE_BUILDER_DIR/equinox/publishingFiles \
 										-Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \
 										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
 										-v \
@@ -542,19 +548,9 @@ pipeline {
 										bash ${CJE_ROOT}/scripts/produceChecksum.sh equinox
 									popd
 									
-									cp -r ${ECLIPSE_BUILDER_DIR}/equinox/publishingFiles/staticDropFiles/. ${EQUINOX_DROP_DIR}/${BUILD_ID}
-									
 									java \
-										-DisBuildTested=false \
-										-DbuildType=${BUILD_TYPE} \
-										-DdropTokenList='%equinox%,%framework%,%extrabundles%,%other%,%launchers%,%osgistarterkits%' \
-										-DdropHtmlFileName=index.php \
-										-DxmlDirectoryName=${DROP_DIR}/$BUILD_ID/testresults/xml \
-										-DdropDirectoryName=${EQUINOX_DROP_DIR}/${BUILD_ID} \
-										-DdropTemplateFileName=${ECLIPSE_BUILDER_DIR}/equinox/publishingFiles/templateFiles/index.template.php \
-										-DcompileLogsDirectoryName=${EQUINOX_DROP_DIR}/${BUILD_ID}/compilelogs/plugins \
-										-DtestManifestFileName=${ECLIPSE_BUILDER_DIR}/equinox/publishingFiles/testManifest.xml \
-										${WORKSPACE}/scripts/releng/TestResultsGenerator.java
+										-DdropDirectory=${EQUINOX_DROP_DIR}/${BUILD_ID} \
+										${SCRIPTS}/releng/BuildDropDataGenerator.java mainEquinox
 								'''
 							}
 						}
@@ -599,6 +595,9 @@ pipeline {
 			}
 		}
 		stage('Archive build logs') {
+			tools {
+				jdk 'temurin-jdk25-latest'
+			}
 			steps {
 				script {
 					// See https://github.com/jenkinsci/pipeline-stage-view-plugin/tree/master/rest-api#get-jobjob-namewfapiruns
@@ -607,7 +606,7 @@ pipeline {
 					for (jobStage in description['stages']) {
 						if (jobStage.status != 'IN_PROGRESS') {
 							def prefix = 's' + String.format('%03d', stageIndex++) // prefix with index to establish stable order
-							def logFileName = "${logDir}/" + prefix + '_' + jobStage.name.replace(' ', '_').replace('Declarative:_', '') + '.log'
+							def logFileName = "${DROP_DIR}/${BUILD_ID}/buildlogs/" + prefix + '_' + jobStage.name.replace(' ', '_').replace('Declarative:_', '') + '.log'
 							sh """
 								curl --fail --silent --output '${logFileName}' ${BUILD_URL}/pipeline-overview/log?nodeId=${jobStage.id}
 								# Test (efficiently) if the file starts with the no-logs message and if yes, ensure it doesn't contain more other lines
@@ -620,8 +619,10 @@ pipeline {
 				}
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
-						dropPath=${EP_ECLIPSE_DROPS}/${BUILD_ID}
-						scp -r $logDir/* genie.releng@projects-storage.eclipse.org:${dropPath}/buildlogs/
+						java \
+							-DdropDirectory=${DROP_DIR}/${BUILD_ID} \
+							${SCRIPTS}/releng/BuildDropDataGenerator.java buildLogs
+						rsync -avzh ${DROP_DIR}/${BUILD_ID}/buildlogs/ genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/${BUILD_ID}/buildlogs/
 					'''
 				}
 			}

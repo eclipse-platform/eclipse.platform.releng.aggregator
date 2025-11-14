@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--TODO: set proper title and metadata -->
+	<title>Equinox Downloads</title>
+	<link rel="preconnect stylesheet" href="../../eclipse/page.css" /><!-- Replaced by a refernece to a contained copy on deployment -->
+	<script src="../../eclipse/page.js"></script><!-- Replaced by a refernece to a contained copy on deployment -->
+</head>
+<!-- TODO: Add Equinox favicon?-->
+
+<body>
+	<div data-generate="generateDefaultBreadcrumb(this, equinoxBreadcrumbBase)">
+		<span>Downloads</span>
+	</div>
+
+	<main>
+		<h1>Equinox Downloads</h1>
+		<p>
+			Older releases are available in the <a href="http://archive.eclipse.org/equinox/">Equinox archived builds site</a>.
+		</p>
+		<h3 id="latest-downloads">Latest Builds</h3>
+		<table class="builds-table" data-path="latest"></table>
+
+		<h3 id="latest-release">Latest Release</h3>
+		<table class="builds-table" data-path="releases"></table>
+
+		<h3 id="stable-builds">Stable Builds</h3>
+		<table class="builds-table" data-path="stableBuilds"></table>
+
+		<h3 id="integration-builds">Integration Builds</h3>
+		<table class="builds-table" data-path="iBuilds"></table>
+
+	</main>
+	<script>
+		loadPageData('data.json')
+
+		contentPostProcessor = (mainElement, contentData) => {
+			const dataTables = Array.from(mainElement.getElementsByClassName("builds-table"))
+			for (const table of dataTables) {
+				const dataPath = table.getAttribute('data-path');
+				const tableData = dataPath != 'latest'
+					? getValue(contentData, dataPath)
+					// Filter latest stable-build if none is available (e.g. shortly after a release)
+					: [contentData.releases[0], contentData.stableBuilds[0], contentData.iBuilds[0]].filter(v => v !== undefined)
+
+				if (tableData.length === 0) { // Remove section if empty, e.g. stable-builds shortly after a release
+					table.previousElementSibling.remove() // Remove headline
+					table.remove()
+					continue
+				}
+				table.createTHead().innerHTML = `
+					<tr>
+						<th>Build Name</th>
+						<th>Build Date (UTC)</th>
+					</tr>
+				`
+				const tBody = table.createTBody()
+				for (const build of tableData) {
+					tBody.insertRow().innerHTML = `
+					<td>
+						<a href="${build.path}">${build.label}</a>
+					</td>
+					<td>${formatBuildDate(build.date)}</td>
+					`
+				}
+			}
+		}
+
+		generate()
+
+	</script>
+</body>
+
+</html>

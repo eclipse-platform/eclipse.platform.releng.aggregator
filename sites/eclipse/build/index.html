@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--TODO: set proper metadata/keywords? -->
+	<title>Eclipse Project Downloads</title>
+	<meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
+	<link rel="preconnect stylesheet" href="../page.css" /><!-- Replaced by a refernece to a contained copy on deployment -->
+	<script src="../page.js"></script><!-- Replaced by a refernece to a contained copy on deployment -->
+</head>
+
+<body>
+	<div data-generate="generateDefaultBreadcrumb(this, eclipseBreadcrumbBase)">
+		<a href="..">Downloads</a>
+		<span class="data-ref">${label}</span>
+	</div>
+
+	<main>
+
+		<h2>Eclipse <span class="data-ref">${release}</span> <span class="data-ref">${kind}</span> Build: <span class="data-ref">${label}</span></h2>
+		<p id="build-state-container"></p>
+		<p>
+			This page provides access to the various deliverables of Eclipse Platform build along with its logs and tests.
+		</p>
+		<p>
+			<a class="data-ref" href="https://eclipse.dev/eclipse/news/${releaseShort}">New and Noteworthy</a>
+			<br />
+			<a class="data-ref" href="https://eclipse.dev/eclipse/markdown/?f=news/${releaseShort}/acknowledgements.md">Acknowledgments</a>
+			<br />
+			<a class="data-ref" href="https://eclipse.dev/eclipse/development/readme.html?file=readme_eclipse_${releaseShort}.html">Eclipse Project ${releaseShort} Readme</a>
+			<br />
+			<a class="data-ref" href="https://eclipse.dev/eclipse/development/plans.html?file=plans/eclipse_project_plan_${releaseShort}.xml">Eclipse Project Plan</a>
+			<br />
+		</p>
+
+		<h3>Logs and Test Links</h3>
+		<ul>
+			<li>View the <a href="tests.html">logs for the current build</a>.</li>
+			<li>View the <a href="tests.html">integration and unit test results for the current build.</a>.</li>
+		</ul>
+
+		<h3 id="tests">Summary of Unit Test Results</h3>
+		<p>
+			<span id="test-completion-state">No</span> integration and unit test configurations are complete.
+		</p>
+		<table id="tests-overview-table">
+			<thead>
+				<tr>
+					<th style="text-align:center; width:25%">Tested Platform</th>
+					<th style="text-align:center">Failed</th>
+					<th style="text-align:center">Passed</th>
+					<th style="text-align:center">Total</th>
+					<th style="text-align:center">Runtime</th>
+				</tr>
+			</thead>
+		</table>
+
+		<h3>Related Links</h3>
+		<ul>
+			<li><a class="data-ref" href="https://eclipse.dev/eclipse/development/plans/eclipse_project_plan_${releaseShort}.xml#target_environments">Target Platforms and Environments</a></li>
+			<li><a href="gitLog.html">Git log</a></li>
+			<li><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download</a></li>
+		</ul>
+		<p class="data-ref">
+			<a href="checksum/eclipse-${label}-SUMSSHA512">SHA512 Checksums for ${label}</a>&nbsp;(<a href="checksum/eclipse-${label}-SUMSSHA512.asc">GPG</a>)
+		</p>
+
+		<h3 id="repository">Eclipse p2 Repository
+			<a href="details.html#Repository"><i class="fa fa-xs fa-info-circle"></i></a>
+		</h3>
+		<p>
+			To update your Eclipse installation to this development stream, you can use the software repository at
+		</p>
+		<ul>
+			<li><a class="data-ref" href="https://download.eclipse.org/eclipse/updates/${releaseShort}/">https://download.eclipse.org/eclipse/updates/${releaseShort}</a></li>
+		</ul>
+		<p>
+			To update your build to use this specific build, you can use the software repository at
+		</p>
+		<ul>
+			<li><a class="data-ref" href="https://download.eclipse.org/eclipse/updates/${releaseShort}/${identifier}/">https://download.eclipse.org/eclipse/updates/${releaseShort}/${identifier}</a></li>
+		</ul>
+		<table class="files-table" data-path="p2Repository"></table>
+
+		<h3 id="eclipse-sdk">Eclipse SDK
+			<a href="details.html#EclipseSDK"><i class="fa fa-xs fa-info-circle"></i></a>
+		</h3>
+		<table class="files-table" data-path="sdkProducts"></table>
+
+		<h3 id="testing-framework">Tests and Testing Framework
+			<a href="details.html#JUnitPlugin"><i class="fa fa-xs fa-info-circle"></i></a>
+		</h3>
+		<table class="files-table" data-path="eclipseTests"></table>
+
+		<h3 id="platform-runtime">Platform Runtime Binary
+			<a href="details.html#PlatformRuntime"><i class="fa fa-xs fa-info-circle"></i></a>
+		</h3>
+		<table class="files-table" data-path="platformProducts"></table>
+
+		<h3 id="ecj">JDT Core Batch Compiler
+			<a href="details.html#JDTCORE"><i class="fa fa-xs fa-info-circle"></i></a>
+		</h3>
+		<table class="files-table" data-path="jdtCompiler"></table>
+
+		<h3 id="swt">SWT Binary and Source
+			<a href="details.html#SWT"><i class="fa fa-xs fa-info-circle"></i></a>
+		</h3>
+		<table class="files-table" data-path="swtBinaries"></table>
+
+	</main>
+	<script>
+		loadPageData('buildproperties.json')
+
+		contentPostProcessor = (mainElement, build) => {
+			document.title = `${build.label} - ${document.title}`
+
+			// Inject test results
+			const jobNamePrefix = getJenkinsTestJobNamePrefix(build)
+			const testJobsFolderURL = getJenkinsTestJobsFolderURL(build)
+
+			const testResultsOverview = fetchAllJSON(build.expectedTests.map(c => `testresults/${jobNamePrefix}-${c}.json`))
+			const testResultsTable = document.getElementById("tests-overview-table")
+			const tBody = testResultsTable.createTBody()
+			testResultsOverview.then(testResults => {
+				let completedTests = 0
+				for (let r = 0; r < testResults.length; r++) {
+					const row = tBody.insertRow()
+					const result = testResults[r]
+					const testName = build.expectedTests[r]
+					//TODO: compute nicer, non-breaking label (like for file Platforms?) and align elements horizontally
+					const label = `<a href="tests.html">${testName}</a>`
+					if (result.duration) { // Test configuration completed
+						completedTests++
+						row.innerHTML = `
+							<td>${label}</td>
+							<td style="text-align:end">${result.failCount}</td>
+							<td style="text-align:end">${result.passCount}</td>
+							<td style="text-align:end">${result.passCount + result.failCount}</td>
+							<td style="text-align:end">${formatRuntime(result.duration)}</td>
+						`
+					} else {
+						const jobName = `${jobNamePrefix}-${testName}`
+						row.innerHTML = `
+							<td>${label}</td>
+							<td colspan="4"> Test job is running at <a href="${testJobsFolderURL}/job/${jobName}/">${jobName}</a></td>
+						`
+					}
+				}
+				// Inject test completion state
+				document.getElementById('test-completion-state').innerHTML = `${completedTests} of ${testResults.length}`
+			})
+
+			// Inject resource files
+			const dataTables = Array.from(mainElement.getElementsByClassName("files-table"))
+			for (const table of dataTables) {
+				const dataPath = table.getAttribute('data-path')
+				const filesData = getValue(build, dataPath)
+				table.createTHead().innerHTML = `
+					<tr>
+						<th>Platform</th>
+						<th style="width:50%">Download</th>
+						<th>Size</th>
+					</tr>
+				`
+				const tBody = table.createTBody()
+				for (const file of filesData) {
+					tBody.insertRow().innerHTML = `
+					<td>${file.icon ? `<img src="${file.icon}">` : ''} ${file.platform ? file.platform : getPlatformLabel(file.name)}</td>
+					<td>
+						<a href="${file.name}">${file.name}</a>
+					</td>
+					<td>${file.size}</td>
+					`
+					//TODO: Implement mirror-selection (but https://www.eclipse.org/downloads/download.php?file=eclipse/downloads/drops4/${build.identifier}/${file.name} doesn't work, not even for releases)
+				}
+			}
+		}
+
+		function getPlatformLabel(fileName) {
+			let os = getOSLabel(fileName)
+			let arch = getCPUArchLabel(fileName)
+			return `${os} (${arch})`
+		}
+
+		fetch('buildUnstable').then(res => res.status == 404 ? '' : res.text()).then(msg => {
+			if (msg) {
+				const statusLabel = document.getElementById('build-state-container')
+				statusLabel.innerHTML = '<a href="https://wiki.eclipse.org/Platform-releng/Unstable_build" title="Unstable Build" style="color:red;"><b>Unstable!</b></a>' + msg
+			}
+		})
+
+		generate()
+
+	</script>
+</body>
+
+</html>

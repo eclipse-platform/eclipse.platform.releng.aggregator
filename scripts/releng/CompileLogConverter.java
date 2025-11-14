@@ -14,7 +14,6 @@
  *     Hannes Wellmann - Convert to plain Java scripts
  *******************************************************************************/
 
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +38,8 @@ import log.converter.LogDocumentNode.ProblemSummaryNode;
 import log.converter.ProblemNode;
 import log.converter.ProblemNode.SeverityType;
 import log.converter.ProblemsNode;
+import utilities.OS;
+import utilities.XmlProcessorFactoryRelEng;
 
 public class CompileLogConverter {
 
@@ -53,12 +54,9 @@ public class CompileLogConverter {
 	}
 
 	public static void main(String[] args) throws IOException, ParserConfigurationException {
-		String input = System.getProperty("input");
-		if (input == null) {
-			throw new IllegalArgumentException("An input file or directorty is required"); //$NON-NLS-1$
-		}
+		Path source = Path.of(OS.readProperty("input"));
 		CompileLogConverter converter = new CompileLogConverter();
-		converter.parse2(Path.of(input));
+		converter.parse2(source);
 	}
 
 	private Path extractNameFrom(Path file) {
@@ -69,7 +67,7 @@ public class CompileLogConverter {
 
 	private void parse2(Path sourceDir) throws ParserConfigurationException, IOException {
 		DOMHtmlConverter converter = new DOMHtmlConverter();
-		final DocumentBuilderFactory factory = createDocumentBuilderFactoryIgnoringDOCTYPE();
+		final DocumentBuilderFactory factory = XmlProcessorFactoryRelEng.createDocumentBuilderFactoryIgnoringDOCTYPE();
 		factory.setValidating(true);
 		factory.setIgnoringElementContentWhitespace(true);
 		final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -207,17 +205,4 @@ public class CompileLogConverter {
 		System.err.println(e.getMessage());
 	}
 
-	// --- utility methods ---
-
-	private static synchronized DocumentBuilderFactory createDocumentBuilderFactoryIgnoringDOCTYPE() {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		try {
-			// completely disable external entities declarations:
-			factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
-			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
-		} catch (ParserConfigurationException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-		return factory;
-	}
 }
