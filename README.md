@@ -65,20 +65,17 @@ Integration builds
 
 The integrations (nightly) build jobs are hosted on Jenkins instance https://ci.eclipse.org/releng/job/Builds/.
 
-The job with the highest release number is the one that builds nightly SDK build, like https://ci.eclipse.org/releng/job/Builds/job/I-build-4.36/ job for 4.36 SDK.
+The job with the highest release number is the one that builds nightly SDK build, like https://ci.eclipse.org/releng/job/Builds/job/I-build-4.39/ job for 4.39 SDK.
 
 - The build artifacts and test results are accessible at https://download.eclipse.org/eclipse/downloads/
 - If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/job/AutomatedTests/
-- If the build is successful but SDK is broken and shouldn't be used, the build can be marked as unstable via https://ci.eclipse.org/releng/job/Builds/job/markUnstable/
-- Weekly maven snapshots are [built on Jenkins](https://ci.eclipse.org/releng/view/Publish%20to%20Maven/) and available at https://repo.eclipse.org/content/repositories/eclipse-snapshots/
+- If the build is successful but relevant functionality is severely broken and the build shouldn't be used, the build can be marked as unstable via the [Mark Build](https://ci.eclipse.org/releng/job/Builds/job/markBuild/) job.
+- Daily Maven snapshots are provided by the [Deploy To Maven](https://ci.eclipse.org/releng/job/Releng/job/deployToMaven) job
+and are available from https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 
 Milestone and release tasks
 -----------------
 See [Releng-Tasks 2.0](RELEASE.md) (includes links to schedule, calendar etc)
-
-Performance Tests
------------------
-See [Performance README.md](production/README.md)
 
 How to contribute
 -----------------

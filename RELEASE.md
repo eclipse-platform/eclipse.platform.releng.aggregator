@@ -41,12 +41,12 @@
          - For Milestones/RC promotions, this should automatically run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job to make the promoted build immediatly visible on the download page.
        * Contribute to SimRel
          - If you have not already set up SimRel you can do so using Auto Launch [here](https://www.eclipse.org/setups/installer/?url=https://git.eclipse.org/c/oomph/org.eclipse.oomph.git/plain/setups/interim/SimultaneousReleaseTrainConfiguration.setup&show=true)
-         - Clone [org.eclipse.simrel.build](https://git.eclipse.org/c/simrel/org.eclipse.simrel.build.git) (Should have been done by the installer during set up, but make sure you have latest).
+         - Clone [simrel.build](https://github.com/eclipse-simrel/simrel.build.git) (Should have been done by the installer during set up, but make sure you have latest).
            1. Open simrel.aggr in Eclipse
            2. Change to the properties view
-           3. Select Contribution:Eclipse > Mapped Repository
-           4. Update the Location property to the "Specific repository for building against" in the mailtemplate.txt from promotion.
-           5. Commit Simrel updates to Gerrit
+           3. Select `Contribution:Eclipse` > `Mapped Repository`
+           4. Update the Location property to the "Specific repository for building against" in the `mailtemplate.txt` from promotion.
+           5. Commit Simrel updates to GitHub
               - Message should use year-month format, i.e "Simrel updates for Eclipse and Equinox for 2022-06 M1"
      * **After RC1**
        * Comment on EMF, ECF and Orbit issues to ask for final release builds.
@@ -66,14 +66,14 @@ Tasks that need to be completed before Friday
     - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) (see [Readme file for 4.26](https://github.com/eclipse-platform/www.eclipse.org-eclipse/issues/24) as an example).
     - Add Readme files and update generatation scripts.
   * **Acknowledgements**
-    - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) and link it to the main release issue in eclipse.platform.releng.aggregator.
-    - Create a new acknowledgements file for the current release and add it to [www.eclipse.org-eclipse/development](https://github.com/eclipse-platform/www.eclipse.org-eclipse/tree/master/development).
-    - The previous acknowledgement files are there for reference.
+    - The RelEng pipeline automatically runs the [Generate Acknowledgements](https://github.com/eclipse-platform/www.eclipse.org-eclipse/actions/workflows/generateAcknowledgements.yml) GitHub workflow
+      which creates a pull request in the [www.eclipse.org-eclipse repository](https://github.com/eclipse-platform/www.eclipse.org-eclipse/pulls)
+    - This pull request should be reviewed to ensure all bot accounts are excluded and that conflicting author names are properly resolved.
   * **Migration Guide**
-    - Create a tracking issue in [eclipse.platform.common](https://github.com/eclipse-platform/eclipse.platform.common) and link it to the main release issue in eclipse.platform.releng.aggregator.
-    - Every release a new porting guide and folder need to be added to [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting](https://github.com/eclipse-platform/eclipse.platform.common/tree/master/bundles/org.eclipse.jdt.doc.isv/porting), named with the version being migrated *to*.
+    - Create a tracking issue in [eclipse.platform.releng.aggregator](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues) and link it to the main release issue.
+    - Every release a new porting guide and folder need to be added to [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting), named with the version being migrated *to*.
       - i.e `eclipse_4_27_porting_guide.html` is for migrating from 4.26 tp 4.27.
-    - Update topics_Porting.xml in [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv](https://github.com/eclipse-platform/eclipse.platform.common/tree/master/bundles/org.eclipse.jdt.doc.isv) and [eclipse.platform.common/bundles/org.eclipse.platform.doc.isv](https://github.com/eclipse-platform/eclipse.platform.common/tree/master/bundles/org.eclipse.platform.doc.isv)
+    - Update `topics_Porting.xml` in [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv) and [eclipse.platform.common/bundles/org.eclipse.platform.doc.isv](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv)
     - Update the name of the proting html document in [eclipse.platform/platform/org.eclipse.platform/intro/migrateExtensionContent.xml](https://github.com/eclipse-platform/eclipse.platform/blob/master/platform/org.eclipse.platform/intro/migrateExtensionContent.xml) 
   * **SWT Javadoc bash**
     Currently handled by @niraj-modi 
@@ -130,7 +130,7 @@ The release is scheduled for 10AM EST. Typically the jobs are scheduled beforeha
   - Issue for the 2023 releases is [https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2336](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/2336)
   
 #### **Update Jenkins for the next Release:**
-  - Run the [Create Jobs](https://ci.eclipse.org/releng/job/Create%20Jobs/) job in Jenkins.  
+  - Run the [Create Jobs](https://ci.eclipse.org/releng/job/CreateJobs/) job in Jenkins.
     But until the preparation work has completed, the new I-builds should not be triggered in order to avoid undesired interference. To ensure this, either
     - Run the `Create Jobs` job only after all preparation work is reviewed and submitted and the first I-build can run.
     - Disable the new `I-build` job until it's ready to run it the first time.
