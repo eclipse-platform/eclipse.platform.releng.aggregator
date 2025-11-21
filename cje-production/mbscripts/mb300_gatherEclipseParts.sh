@@ -23,7 +23,6 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
-mkdir -p $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/testresults/consolelogs
 
@@ -33,15 +32,8 @@ JavaCMD=${JAVA_HOME}/bin/java
 cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
 # gather repo
-REPO_DIR=$PLATFORM_REPO_DIR
 REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
   
-if [ -d $REPO_DIR ]; then
-  pushd $REPO_DIR
-  cp -r * $CJE_ROOT/$UPDATES_DIR/$BUILD_ID
-  popd
-fi
-
 if [ -f $REPO_ZIP ]; then
   cp $REPO_ZIP $CJE_ROOT/$DROP_DIR/$BUILD_ID/repository-$BUILD_ID.zip
 fi
@@ -142,36 +134,6 @@ if [ -d $CJE_ROOT/$AGG_DIR ]; then
   popd
 fi
 
-# gather artifactcomparisons
-if [ -d $CJE_ROOT/$AGG_DIR ]; then
-  pushd $CJE_ROOT/$AGG_DIR
-  comparatorlogsDir=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/comparatorlogs
-  mkdir -p $comparatorlogsDir
-  find . -regex .*target/artifactcomparison -type d -exec zip -r $comparatorlogsDir/artifactcomparisons.zip '{}' \;
-  popd
-fi
-
-# verify comparatorlogs
-#
-# Note: copy mb220_buildSdkPatch.sh.log as mb060_run-maven-build_output.txt for now to avoid changing eclipse_compare.xml
-# To-do: modify eclipse_compare.xml to use mb220_buildSdkPatch.sh.log after CJE migration
-cp $CJE_ROOT/buildlogs/mb220_buildSdkPatch.sh.log $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/mb060_run-maven-build_output.txt
-#
-pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
-ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/buildScripts/eclipse_compare.xml
-$JavaCMD -jar $LAUNCHER_JAR \
-  -application org.eclipse.ant.core.antRunner \
-  -buildfile $ANT_SCRIPT \
-  -data $CJE_ROOT/$TMP_DIR/workspace-comparatorLogs \
-  -DEBuilderDir=$ECLIPSE_BUILDER_DIR \
-  -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
-  -DbuildId=$BUILD_ID \
-  -DbuildLabel=$BUILD_ID \
-  -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-  -v \
-  compare
-popd
-
 # gather compilelogs
 if [ -d $CJE_ROOT/$AGG_DIR ]; then
   pushd $CJE_ROOT/$AGG_DIR
@@ -248,27 +210,3 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -v \
   publish
 popd
-
-comparatorLogMinimumSize=350
-comparatorLog=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
-
-logSize=0
-if [[ -e ${comparatorLog} ]]
-then
-  logSize=$(stat -c '%s' ${comparatorLog} )
-  echo -e "DEBUG: comparatorLog found at\n\t${comparatorLog}\n\tWith size of $logSize bytes"
-else
-  echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLog}"
-fi
-
-if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
-then
-  echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
-
-  fn-write-property COMPARATOR_ERRORS "true"
-  fn-write-property COMPARATOR_ERRORS_SUBJECT "\"- Comparator Errors Found\""
-else
-  echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
-  fn-write-property COMPARATOR_ERRORS_SUBJECT "\"\""
-fi
-

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #*******************************************************************************
-# Copyright (c) 2020 IBM Corporation and others.
+# Copyright (c) 2020, 2025 IBM Corporation and others.
 #
 # This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,7 @@ wait
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-buildToTest=$CJE_ROOT/$UPDATES_DIR/$BUILD_ID
+buildToTest=$PLATFORM_REPO_DIR
 output_dir=$CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
 tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
 report_app_dir=$CJE_ROOT/$TMP_DIR/reportApplication
