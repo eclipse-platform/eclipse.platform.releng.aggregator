@@ -25,6 +25,7 @@ source $1
 epUpdateDir=/home/data/httpd/download.eclipse.org/eclipse/updates
 dropsPath=${epUpdateDir}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 
-pushd $CJE_ROOT/$UPDATES_DIR
-scp -r ${BUILD_ID} genie.releng@projects-storage.eclipse.org:${dropsPath}/.
+pushd $PLATFORM_REPO_DIR
+ssh genie.releng@projects-storage.eclipse.org mkdir -p ${dropsPath}/${BUILD_ID}
+scp -r * genie.releng@projects-storage.eclipse.org:${dropsPath}/${BUILD_ID}/.
 popd

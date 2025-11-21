@@ -228,115 +228,177 @@ pipeline {
 				}
 			}
 		}
-	  stage('Gather Eclipse Parts'){
-	      environment {
-                KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
-          }
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                          sh '''
-                            set -eo pipefail
-                            bash -x ./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
-                          '''
-				}
-			}
-		}
-	  stage('Gather Equinox Parts'){
-	  environment {
-                KEYRING = credentials('secret-subkeys-releng.asc')
-                KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
-          }
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                          sh '''
-                            set -eo pipefail
-                            ./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb310_gatherEquinoxParts.sh.log
-                          '''
-				}
-			}
-		}
-	  stage('Generate Repo reports'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                      sh '''
-                        set -eo pipefail
-                        ./mb500_createRepoReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb500_createRepoReports.sh.log
-                      '''
-				}
-			}
-		}
-	  stage('Generate API tools reports'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                      sh '''
-                        set -eo pipefail
-                        ./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb510_createApiToolsReports.sh.log
-                      '''
-				}
-			}
-		}
-		stage('Export environment variables stage 2'){
+		stage('Check for comparator errors') {
 			steps {
+				sh '''#!/bin/bash -xe
+					source $CJE_ROOT/scripts/common-functions.shsource
+					source $CJE_ROOT/buildproperties.shsource
+					
+					# Gather maven properties
+					cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
+					
+					# Gather artifactcomparisons
+					pushd $CJE_ROOT/$AGG_DIR
+					comparatorlogsDir=${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}/buildlogs/comparatorlogs
+					mkdir -p $comparatorlogsDir
+					find . -regex .*target/artifactcomparison -type d -exec zip -r $comparatorlogsDir/artifactcomparisons.zip '{}' \\;
+					popd
+					
+					# Verify comparatorlogs
+					#
+					# Note: copy mb220_buildSdkPatch.sh.log as mb060_run-maven-build_output.txt for now to avoid changing eclipse_compare.xml
+					# ToDo: Modify org.eclipse.releng.build.tools.comparator.Extractor to be configurable:
+					# https://github.com/eclipse-platform/eclipse.platform.releng.buildtools/blob/c5f7ecf1951d44311e24ce7bd6b505189aabb4da/bundles/org.eclipse.releng.build.tools.comparator/src/org/eclipse/releng/build/tools/comparator/Extractor.java#L27
+					cp ${logDir}/mb220_buildSdkPatch.sh.log $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/mb060_run-maven-build_output.txt
+					
+					pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
+					java -jar $LAUNCHER_JAR \
+						-application org.eclipse.ant.core.antRunner \
+						-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/eclipse_compare.xml \
+						-data $CJE_ROOT/$TMP_DIR/workspace-comparatorLogs \
+						-DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
+						-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+						-v \
+						compare
+					popd
+					
+					comparatorLogMinimumSize=350
+					comparatorLog=${comparatorlogsDir}/buildtimeComparatorUnanticipated.log.txt
+					logSize=$(stat --format='%s' ${comparatorLog})
+					if [[ ${logSize} -gt ${comparatorLogMinimumSize} ]]; then
+						echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
+						fn-write-property COMPARATOR_ERRORS "true"
+						fn-write-property COMPARATOR_ERRORS_SUBJECT "\\"- Comparator Errors Found\\""
+					else
+						echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
+						fn-write-property COMPARATOR_ERRORS_SUBJECT "\\"\\""
+					fi
+				'''
 				script {
 					def buildProps = readBuildProperties("${CJE_ROOT}/buildproperties.properties")
 					env.COMPARATOR_ERRORS_SUBJECT = buildProps.COMPARATOR_ERRORS_SUBJECT
 				}
 			}
 		}
-	  stage('Archive artifacts'){
-          steps {
-                sh '''
-                    source $CJE_ROOT/buildproperties.shsource
-                    cp -r $logDir/* $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs
-                    rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
-                    cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
-                    cp $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
-                '''
-            }
-		}
-	  stage('Promote Eclipse platform'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-                      sh '''
-                        ./mb600_promoteEclipse.sh $CJE_ROOT/buildproperties.shsource
-                      '''
-                  }
-                build job: 'Releng/updateIndex', wait: false
-				}
-			}
-		}
-	  stage('Promote Equinox'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-                      sh '''
-                        ./mb610_promoteEquinox.sh $CJE_ROOT/buildproperties.shsource
-                      '''
-                  }
-				}
-			}
-		}
-	  stage('Promote Update Site'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-                      sh '''
-                        ./mb620_promoteUpdateSite.sh $CJE_ROOT/buildproperties.shsource
-                      '''
-                  }
-					script {
-						if ("${COMPARATOR_ERRORS_SUBJECT}" != '' && "$BUILD_TYPE" == "I") {
-							echo 'Skip adding unstable build to composite repository.'
-							return
+		stage('Promote results') {
+			parallel {
+				stage('Eclipse') {
+					stages {
+						stage('Gather Eclipse parts') {
+							environment {
+								KEYRING = credentials('secret-subkeys-releng.asc')
+								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
+							}
+							steps {
+								dir("${CJE_ROOT}/mbscripts") {
+									sh '''#!/bin/bash -xe
+										set -o pipefail
+										source $CJE_ROOT/buildproperties.shsource
+										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
+										./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
+									'''
+								}
+							}
 						}
-						build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
-							string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds"),
-							string(name: 'add', value: "${BUILD_IID}"),
-							string(name: 'sizeLimit', value: '3')
-						]
+						stage('Generate Repo reports') {
+							steps {
+								dir("${CJE_ROOT}/mbscripts") {
+									sh '''#!/bin/bash -xe
+										set -eo pipefail
+										./mb500_createRepoReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb500_createRepoReports.sh.log
+									'''
+								}
+							}
+						}
+						stage('Generate API tools reports') {
+							steps {
+								dir("${CJE_ROOT}/mbscripts") {
+									sh '''#!/bin/bash -xe
+										set -eo pipefail
+										source $CJE_ROOT/buildproperties.shsource
+										./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb510_createApiToolsReports.sh.log
+										rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
+									'''
+								}
+							}
+						}
+						stage('Promote Eclipse platform') {
+							steps {
+								dir("${CJE_ROOT}/mbscripts") {
+									sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+										sh '''#!/bin/bash -xe
+											./mb600_promoteEclipse.sh $CJE_ROOT/buildproperties.shsource
+										'''
+									}
+									build job: 'Releng/updateIndex', wait: false
+								}
+							}
+						}
 					}
+				}
+				stage('Equinox') {
+					stages {
+						stage('Gather Equinox parts') {
+							environment {
+								KEYRING = credentials('secret-subkeys-releng.asc')
+								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
+							}
+							steps {
+								dir("${CJE_ROOT}/mbscripts") {
+									sh '''#!/bin/bash -xe
+										set -o pipefail
+										source $CJE_ROOT/buildproperties.shsource
+										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
+										./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb310_gatherEquinoxParts.sh.log
+									'''
+								}
+							}
+						}
+						stage('Promote Equinox') {
+							steps {
+								dir("${CJE_ROOT}/mbscripts") {
+									sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+										sh '''#!/bin/bash -xe
+											./mb610_promoteEquinox.sh $CJE_ROOT/buildproperties.shsource
+										'''
+									}
+								}
+							}
+						}
+					}
+				}
+				stage('Update Site') {
+					steps {
+						dir("${CJE_ROOT}/mbscripts") {
+							sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+								sh '''#!/bin/bash -xe
+									./mb620_promoteUpdateSite.sh $CJE_ROOT/buildproperties.shsource
+								'''
+							}
+						}
+						script {
+							if ("${COMPARATOR_ERRORS_SUBJECT}" != '' && "${BUILD_TYPE}" == 'I') {
+								echo 'Skip adding unstable build to composite repository.'
+								return
+							}
+							build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+								string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds"),
+								string(name: 'add', value: "${BUILD_IID}"),
+								string(name: 'sizeLimit', value: '3')
+							]
+						}
+					}
+				}
+			}
+		}
+		stage('Archive build logs') {
+			steps {
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''#!/bin/bash -xe
+						source $CJE_ROOT/buildproperties.shsource
+						dropPath=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}
+						scp -r $logDir/* genie.releng@projects-storage.eclipse.org:${dropPath}/buildlogs/
+					'''
 				}
 			}
 		}
@@ -412,7 +474,7 @@ def assignEnvVariable(String name, String value) {
 	println("${name}=${value}")
 }
 
-def readBuildProperties(String buildPropertiesFile){
+def readBuildProperties(String buildPropertiesFile) {
 	return readProperties(file: buildPropertiesFile, charset: 'UTF-8').collectEntries{n, v ->
 			v = v.trim();
 			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
