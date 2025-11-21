@@ -6,23 +6,48 @@ on:
   workflow_call
   
 permissions:
-  contents: read
+  issues: read
 
 jobs:
   verify-freeze-period:
     runs-on: ubuntu-latest
     steps:
-      - name: Checking whether Eclipse project is currently in stabilization/code-freeze period ...
-        run: |
-          today=$(TZ=UTC date "+%Y-%m-%d")
-          tomorrow=$(TZ=UTC date -d "+1 days" "+%Y-%m-%d")
-          calId="prfk26fdmpru1mptlb06p0jh4s@group.calendar.google.com"
-          calURL="https://clients6.google.com/calendar/v3/calendars/group.calendar.google.com/events?calendarId=${calId}&singleEvents=true&timeZone=UTC&maxResults=250&sanitizeHtml=true&timeMin=${today}T00:00:00Z&timeMax=${tomorrow}T00:00:00Z&key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs"
-          echo "Querying calendar https://calendar.google.com/calendar/u/0/embed?src=${calId}"
-          curl "${calURL}" | grep -i -P '(stabilization|signoff|(?<!M\d) promotion)'
-          if [[ $? == 0 ]]; then
-            echo "::error::Today is a freeze day"
-            exit 1 #Exiting with non-0 makes this workflow fail
-          fi
-          echo "No code freeze today"
-        shell: bash {0} # do not fail-fast
+    - name: Checking for code-freeze period
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      with:
+        script: |
+          // See 
+          // - https://octokit.github.io/rest.js/v21/#issues-list-milestones
+          // - https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#list-milestones
+          // About pagination, see https://github.com/octokit/octokit.js#pagination
+          const responseIterator = github.paginate.iterator(github.rest.issues.listMilestones, {
+            ...context.repo,
+            state: 'open', sort: 'due_on', direction: 'desc',
+            per_page: 6, // the six milestones of the current release are usually sufficient
+          })
+          const now = new Date()
+          for await (const response of responseIterator) { // iterate through each response
+            for (const milestone of response.data) {
+              console.log('Checking milestone ' + milestone.title)
+              const dueDate = new Date(milestone.due_on)
+              if (milestone.title.includes('RC') && isInFreezePeriodOf(dueDate, now)) {
+                core.setFailed('Active freeze period for ' + milestone.description)
+                return;
+              } else if (dueDate < now) {
+                // As milestones are sorted by descending due-dates and this one's is in the past, following ones won't match either.
+                return;
+              }
+            }
+          }
+          
+          function isInFreezePeriodOf(referenceDate, nowDate) {
+            // A freeze period starts at the beginning of the third day before the milestone/RC
+            // Two days for stabilization and one for sign-off before the promotion happens at the date.
+            const freezePeriodStartOffset = 3
+            const endDate = new Date(referenceDate)
+            endDate.setUTCHours(24, 0, 0) // start of next day
+            const startDate = new Date(referenceDate)
+            startDate.setDate(startDate.getDate() - freezePeriodStartOffset); // handles month and year under-flow
+            startDate.setUTCHours(0, 0, 0) // start of the day
+            return startDate <= nowDate  && nowDate < endDate
+          }
