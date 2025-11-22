@@ -1,10 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML>
 <html lang="en">
 <head>
 <meta name="copyright" content="Copyright (c) GK Software AG and others 2014, 2015. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="Content-Style-Type" content="text/css">
-<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<meta charset="utf-8">
+<link rel="stylesheet" href="../book.css" type="text/css">
 <title>Using null type annotations</title>
 </head>
 <body>
@@ -359,7 +358,8 @@ the semantics.
 <p>
 For two constructs the JLS introduces a syntactic change:
 </p>
-<table border="1" cellspacing="0" cellpadding="5" summary="Syntax Changes">
+<table class="border">
+	<caption>Syntax Changes</caption>
 <tr><th>Declaration Annotations (Java 7 or below)</th><th>Type Annotation (Java 8)</th></tr>
 <tr><td><code>@NonNull String[]</code></td><td><code>String @NonNull[]</code></td></tr>
 <tr><td><code>@NonNull java.lang.String</code></td><td><code>java.lang.@NonNull String</code></td></tr>
@@ -457,7 +457,8 @@ the annotation <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/e
 	(see also the enum <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/DefaultLocation.html"
 	><code>DefaultLocation</code></a>).</li>
 <li>As a consequence, the notation for canceling a default from an outer scope has been changed, too:
-<table border="1" cellspacing="0" cellpadding="5" summary="Cancelling a default">
+<table class="border">
+	<caption>Cancelling a default</caption>
 <tr><th>Declaration Annotations (Java 7 or below)</th><th>Type Annotation (Java 8)</th></tr>
 <tr><td><code>@NonNullByDefault(false)</code></td><td><code>@NonNullByDefault({})</code></td></tr>
 </table>
@@ -497,7 +498,7 @@ if null type annotations are enabled for analysis:
 
 <h3>General Null Type Mismatch</h3>
 <dl>
-<dt><font color="SaddleBrown">Null type mismatch (type annotations): required 'X' but this expression has type 'Y'</font></dt>
+<dt style=" color:SaddleBrown">Null type mismatch (type annotations): required 'X' but this expression has type 'Y'</dt>
 <dd>In an assignment context null type annotations don't match.
 	Note that the mismatch may relate to any detail of the type (type argument, array element), not necessarily to the main type.</dd>
 </dl>
@@ -507,40 +508,40 @@ All mismatches detected based on type annotations are prefixed with "<code>Null 
 	
 <h3>Various Expressions</h3>
 <dl>
-<dt><font color="SaddleBrown">Potential null pointer access: array element may be null</font></dt>
+<dt style=" color:SaddleBrown">Potential null pointer access: array element may be null</dt>
 <dd>An array element is dereferenced, where the array type declares its elements as <code>@Nullable</code>.</dd>
-<dt><font color="SaddleBrown">Potential null pointer access: this expression has a '@Nullable' type</font></dt>
+<dt style=" color:SaddleBrown">Potential null pointer access: this expression has a '@Nullable' type</dt>
 <dd>Any expression at the left hand side of a dot has a type that is declared to be nullable.</dd>
-<dt><font color="SaddleBrown">Redundant null check: comparing '@NonNull X' against null</font></dt>
+<dt style=" color:SaddleBrown">Redundant null check: comparing '@NonNull X' against null</dt>
 <dd>An arbitrary expression known to have a @NonNull type is unnecessarily being compared against null.</dd>
 </dl>
 
 <h3>Unchecked Conversions</h3>
 <dl>
-<dt><font color="SaddleBrown">Null type safety (type annotations): The expression of type 'X' needs unchecked conversion to conform to '@NonNull X'</font></dt>
+<dt style=" color:SaddleBrown">Null type safety (type annotations): The expression of type 'X' needs unchecked conversion to conform to '@NonNull X'</dt>
 <dd>A value of an un-annotated type is being assigned to a variable of an annotated type.
 	Note that the mismatch may relate to any detail of the type (type argument, array element), not necessarily to the main type.</dd>
-<dt><font color="SaddleBrown">Null type safety: Unchecked cast from X to '@N Y'</font></dt>
+<dt style=" color:SaddleBrown">Null type safety: Unchecked cast from X to '@N Y'</dt>
 <dd>A value is casted to a null-annotated type, where the nullness is not checked at runtime by the cast.</dd>
 </dl>
 
 <h3>Problems Specific to Generics</h3>
 <dl>
-<dt><font color="SaddleBrown">Null constraint mismatch: The type 'X' is not a valid substitute for the type parameter 'T'</font></dt>
+<dt style=" color:SaddleBrown">Null constraint mismatch: The type 'X' is not a valid substitute for the type parameter 'T'</dt>
 <dd>Here the type parameter <code>&lt;T&gt;</code> has a constraint in one of the forms mentioned <a href="#typeParameters">above</a>.
 	The actual type argument <code>X</code>, however, doesn't conform to this constraint.</dd>
-<dt><font color="SaddleBrown">This nullness annotation conflicts with a '@N' annotation which is effective on the same type parameter</font></dt>
+<dt style=" color:SaddleBrown">This nullness annotation conflicts with a '@N' annotation which is effective on the same type parameter</dt>
 <dd>A null annotation on a bound of a type parameter conflicts with another null annotation on another bound or on the type parameter itself.</dd>
-<dt><font color="SaddleBrown">Contradictory null annotations: method was inferred as 'T foo(X)', but only one of '@NonNull' and '@Nullable' can be effective at any location</font></dt>
+<dt style=" color:SaddleBrown">Contradictory null annotations: method was inferred as 'T foo(X)', but only one of '@NonNull' and '@Nullable' can be effective at any location</dt>
 <dd>Type inference for a generic method invocation has produced a signature in which contradictory null annotations clash on the same element.<dd>
-<dt><font color="SaddleBrown">Null type mismatch (type annotations): 'null' is not compatible to the free type variable 'T'</font></dt>
-<dt><font color="SaddleBrown">Null type mismatch (type annotations): required 'T' but this expression has type '@Nullable T', where 'T' is a free type variable</font></dt>
-<dt><font color="SaddleBrown">Null type safety: required '@NonNull' but this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
-<dt><font color="SaddleBrown">The field 'f' may not have been initialized, whereas its type 'T' is a free type variable that may represent a '@NonNull' type</font></dt>
-<dt><font color="SaddleBrown">Potential null pointer access: this expression has type 'T', a free type variable that may represent a '@Nullable' type</font></dt>
+<dt style=" color:SaddleBrown">Null type mismatch (type annotations): 'null' is not compatible to the free type variable 'T'</dt>
+<dt style=" color:SaddleBrown">Null type mismatch (type annotations): required 'T' but this expression has type '@Nullable T', where 'T' is a free type variable</dt>
+<dt style=" color:SaddleBrown">Null type safety: required '@NonNull' but this expression has type 'T', a free type variable that may represent a '@Nullable' type</dt>
+<dt style=" color:SaddleBrown">The field 'f' may not have been initialized, whereas its type 'T' is a free type variable that may represent a '@NonNull' type</dt>
+<dt style=" color:SaddleBrown">Potential null pointer access: this expression has type 'T', a free type variable that may represent a '@Nullable' type</dt>
 <dd>These problems are specifically detected by <a href="#pessimistic_analysis">pessimistic analysis for free type variables</a>.</dd>
-<dt><font color="SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on the receiver type 'Map&lt;Y,@NonNull X&gt;'. Type 'Map' doesn't seem to be designed with null type annotations in mind</font></dt>
-<dt><font color="SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on substitution 'V=@NonNull X'. Declaring type 'Map&lt;K,V&gt;' doesn't seem to be designed with null type annotations in mind</font></dt>
+<dt style=" color:SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on the receiver type 'Map&lt;Y,@NonNull X&gt;'. Type 'Map' doesn't seem to be designed with null type annotations in mind</dt>
+<dt style=" color:SaddleBrown">Unsafe interpretation of method return type as '@NonNull X' based on substitution 'V=@NonNull X'. Declaring type 'Map&lt;K,V&gt;' doesn't seem to be designed with null type annotations in mind</dt>
 <dd>This signals a particular dilemma regarding <a href="#substitution">substitution of type variables from a legacy library</a>.
 </dl>
 
