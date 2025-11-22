@@ -24,7 +24,7 @@ source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
 # gather Equinox Starter Kit
-REPO_DIR=$ECLIPSE_BUILDER_DIR/equinox.starterkit.product/target/products
+REPO_DIR=$PRODUCTS_DIR/equinox-starterkit/target/products
   
 if [ -d $REPO_DIR ]; then
   pushd $REPO_DIR
@@ -39,10 +39,11 @@ if [ -d $REPO_DIR ]; then
   NOTARIZE_LOG_DIR=$CJE_ROOT/notarizeEqLog
   mkdir -p $NOTARIZE_LOG_DIR
   (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg > $NOTARIZE_LOG_DIR/equinoxX64.log 2>&1)&
+  (/bin/bash $CJE_ROOT/scripts/notarizeMacApp.sh "$CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID" EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-aarch64.dmg > $NOTARIZE_LOG_DIR/equinoxAARCH64.log 2>&1)&
 fi
 
 # gather Equinox SDK
-REPO_DIR=$ECLIPSE_BUILDER_DIR/equinox-sdk/target
+REPO_DIR=$PRODUCTS_DIR/equinox-sdk/target
   
 if [ -d $REPO_DIR ]; then
   pushd $REPO_DIR
