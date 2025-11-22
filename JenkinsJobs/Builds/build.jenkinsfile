@@ -36,6 +36,13 @@ pipeline {
 		CJE_ROOT = "${WORKSPACE}/cje-production"
 		AGG_DIR = 'gitCache/eclipse.platform.releng.aggregator'
 		logDir = "$CJE_ROOT/buildlogs"
+		DROP_DIR = 'siteDir/eclipse/downloads/drops4'
+		EQUINOX_DROP_DIR = 'siteDir/equinox/drops'
+		// Download server paths
+		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		EP_ECLIPSE_UPDATES = "${EP_ROOT}/eclipse/updates"
+		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
+		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
 	}
 	stages {
 		stage('Set up environment') {
@@ -105,7 +112,7 @@ pipeline {
 						// by checking the most recent 5 tags and seeing if an update site for it exists
 						sh '''#!/bin/bash -xe
 							source $CJE_ROOT/buildproperties.shsource
-							updateSiteRootPath=/home/data/httpd/download.eclipse.org/eclipse/updates/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
+							updateSiteRootPath=${EP_ECLIPSE_UPDATES}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 							lastTagList=$(git tag --list "${BUILD_TYPE}*" | tail -n5 | tac)
 							for lt in ${lastTagList}; do
 								if ssh genie.releng@projects-storage.eclipse.org test -d ${updateSiteRootPath}/${lt} ; then
@@ -152,7 +159,6 @@ pipeline {
 					}
 					// Git log creation
 					sh '''#!/bin/bash -xe
-						source $CJE_ROOT/buildproperties.shsource
 						reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M)
 						export lastTag=$(cat "${WORKSPACE}/lastTag")
 						if [[ -n "$lastTag" ]]; then
@@ -261,7 +267,6 @@ pipeline {
 					logSize=$(stat --format='%s' ${comparatorLog})
 					if [[ ${logSize} -gt ${comparatorLogMinimumSize} ]]; then
 						echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
-						fn-write-property COMPARATOR_ERRORS "true"
 						fn-write-property COMPARATOR_ERRORS_SUBJECT "\\"- Comparator Errors Found\\""
 					else
 						echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
@@ -283,7 +288,6 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										source $CJE_ROOT/buildproperties.shsource
 										mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
 										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
 										./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1
@@ -304,7 +308,6 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										source $CJE_ROOT/buildproperties.shsource
 										./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1
 										rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
 									'''
@@ -313,14 +316,16 @@ pipeline {
 						}
 						stage('Promote Eclipse platform') {
 							steps {
-								dir("${CJE_ROOT}/mbscripts") {
-									sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-										sh '''#!/bin/bash -xe
-											./mb600_promoteEclipse.sh $CJE_ROOT/buildproperties.shsource
-										'''
-									}
-									build job: 'Releng/updateIndex', wait: false
+								sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+									sh '''#!/bin/bash -xe
+										dropDir=${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}
+										if [ -n "${COMPARATOR_ERRORS_SUBJECT}" ]; then
+											echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>" > ${dropDir}/buildUnstable
+										fi
+										scp -r ${dropDir} genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/.
+									'''
 								}
+								build job: 'Releng/updateIndex', wait: false
 							}
 						}
 					}
@@ -335,7 +340,6 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										source $CJE_ROOT/buildproperties.shsource
 										mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 										./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1
@@ -345,25 +349,28 @@ pipeline {
 						}
 						stage('Promote Equinox') {
 							steps {
-								dir("${CJE_ROOT}/mbscripts") {
-									sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-										sh '''#!/bin/bash -xe
-											./mb610_promoteEquinox.sh $CJE_ROOT/buildproperties.shsource
-										'''
-									}
+								sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+									sh '''#!/bin/bash -xe
+										dropDir=${CJE_ROOT}/${EQUINOX_DROP_DIR}/${BUILD_ID}
+										if [ -n "${COMPARATOR_ERRORS_SUBJECT}" ]; then
+											echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>" > ${dropDir}/buildUnstable
+										fi
+										scp -r ${dropDir} genie.releng@projects-storage.eclipse.org:${EP_EQUINOX_DROPS}/.
+									'''
 								}
 							}
 						}
 					}
 				}
-				stage('Update Site') {
+				stage('Promote Update Site') {
 					steps {
-						dir("${CJE_ROOT}/mbscripts") {
-							sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-								sh '''#!/bin/bash -xe
-									./mb620_promoteUpdateSite.sh $CJE_ROOT/buildproperties.shsource
-								'''
-							}
+						sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+							sh '''#!/bin/bash -xe
+								source $CJE_ROOT/buildproperties.shsource
+								repoPath=${EP_ECLIPSE_UPDATES}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds/${BUILD_ID}
+								ssh genie.releng@projects-storage.eclipse.org mkdir -p ${repoPath}
+								scp -r ${PLATFORM_REPO_DIR}/. genie.releng@projects-storage.eclipse.org:${repoPath}/.
+							'''
 						}
 						script {
 							if ("${COMPARATOR_ERRORS_SUBJECT}" != '' && "${BUILD_TYPE}" == 'I') {
@@ -402,7 +409,7 @@ pipeline {
 				}
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
-						dropPath=/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}
+						dropPath=${EP_ECLIPSE_DROPS}/${BUILD_ID}
 						scp -r $logDir/* genie.releng@projects-storage.eclipse.org:${dropPath}/buildlogs/
 					'''
 				}
