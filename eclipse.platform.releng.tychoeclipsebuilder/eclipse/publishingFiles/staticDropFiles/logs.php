@@ -11,9 +11,9 @@ include ('logPhpUtils.php');
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="author" content="Eclipse Foundation, Inc." />
 <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
-<link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/visual.css" media="screen" />
-<link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/layout.css" media="screen" />
-<link rel="stylesheet" type="text/css" href="../../../eclipse.org-common/stylesheets/print.css" media="print" />
+<link rel="stylesheet" type="text/css" href="https://download.eclipse.org/eclipse/eclipse.org-common/stylesheets/visual.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="https://download.eclipse.org/eclipse/eclipse.org-common/stylesheets/layout.css" media="screen" />
+<link rel="stylesheet" type="text/css" href="https://download.eclipse.org/eclipse/eclipse.org-common/stylesheets/print.css" media="print" />
 
 <title>Test Logs for <?= $BUILD_ID ?></title>
 <style>
