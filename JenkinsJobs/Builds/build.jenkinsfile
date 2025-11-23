@@ -56,12 +56,11 @@ pipeline {
 					}.join(','))
 				}
 				dir("${CJE_ROOT}") {
-					sh '''
-						set -eo pipefail
+					sh '''#!/bin/bash -xe
 						chmod +x mbscripts/*
 						mkdir -p $logDir
 						
-						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1 | tee $logDir/mb010_createEnvfiles.sh.log
+						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1
 					'''
 				}
 				script {
@@ -194,9 +193,8 @@ pipeline {
           steps {
 				dir("${CJE_ROOT}/mbscripts") {
 		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-		                sh '''
-		                    set -eo pipefail
-		                    ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb020_createBaseBuilder.sh.log
+		                sh '''#!/bin/bash -xe
+		                    ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1
 		                '''
 		        }
 				}
@@ -206,9 +204,8 @@ pipeline {
           steps {
 				dir("${CJE_ROOT}/mbscripts") {
                   sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-                    sh '''
-                        set -eo pipefail
-                        ./mb030_downloadBuildToCompare.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb030_downloadBuildToCompare.sh.log
+                    sh '''#!/bin/bash -xe
+                        ./mb030_downloadBuildToCompare.sh $CJE_ROOT/buildproperties.shsource 2>&1
                     '''
                   }
 				}
@@ -249,6 +246,7 @@ pipeline {
 					# Note: copy mb220_buildSdkPatch.sh.log as mb060_run-maven-build_output.txt for now to avoid changing eclipse_compare.xml
 					# ToDo: Modify org.eclipse.releng.build.tools.comparator.Extractor to be configurable:
 					# https://github.com/eclipse-platform/eclipse.platform.releng.buildtools/blob/c5f7ecf1951d44311e24ce7bd6b505189aabb4da/bundles/org.eclipse.releng.build.tools.comparator/src/org/eclipse/releng/build/tools/comparator/Extractor.java#L27
+					#TODO: Generally try to avoid the need to capture the build log in a file/for teeing
 					cp ${logDir}/mb220_buildSdkPatch.sh.log $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/mb060_run-maven-build_output.txt
 					
 					pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
@@ -292,11 +290,10 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										set -o pipefail
 										source $CJE_ROOT/buildproperties.shsource
 										mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
 										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
-										./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb300_gatherEclipseParts.sh.log
+										./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1
 									'''
 								}
 							}
@@ -305,8 +302,7 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										set -eo pipefail
-										./mb500_createRepoReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb500_createRepoReports.sh.log
+										./mb500_createRepoReports.sh $CJE_ROOT/buildproperties.shsource 2>&1
 									'''
 								}
 							}
@@ -315,9 +311,8 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										set -eo pipefail
 										source $CJE_ROOT/buildproperties.shsource
-										./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb510_createApiToolsReports.sh.log
+										./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1
 										rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
 									'''
 								}
@@ -347,11 +342,10 @@ pipeline {
 							steps {
 								dir("${CJE_ROOT}/mbscripts") {
 									sh '''#!/bin/bash -xe
-										set -o pipefail
 										source $CJE_ROOT/buildproperties.shsource
 										mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
-										./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb310_gatherEquinoxParts.sh.log
+										./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1
 									'''
 								}
 							}
@@ -395,6 +389,24 @@ pipeline {
 		}
 		stage('Archive build logs') {
 			steps {
+				script {
+					// See https://github.com/jenkinsci/pipeline-stage-view-plugin/tree/master/rest-api#get-jobjob-namewfapiruns
+					def description = readJSON(text: sh(script: "curl --fail ${BUILD_URL}/wfapi/describe", returnStdout: true))
+					int stageIndex = 0
+					for (jobStage in description['stages']) {
+						if (jobStage.status != 'IN_PROGRESS') {
+							def prefix = 's' + String.format('%03d', stageIndex++) // prefix with index to establish stable order
+							def logFileName = "${logDir}/" + prefix + '_' + jobStage.name.replace(' ', '_').replace('Declarative:_', '') + '.log'
+							sh """
+								curl --fail --silent --output '${logFileName}' ${BUILD_URL}/pipeline-overview/log?nodeId=${jobStage.id}
+								# Test (efficiently) if the file starts with the no-logs message and if yes, ensure it doesn't contain more other lines
+								if [ "\$(head --lines 1 '${logFileName}' | xargs)" == 'No logs found' ] && [ "\$(wc --lines < '${logFileName}')" -le 1 ]; then
+									rm -f "${logFileName}"
+								fi
+							"""
+						}
+					}
+				}
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''#!/bin/bash -xe
 						source $CJE_ROOT/buildproperties.shsource
