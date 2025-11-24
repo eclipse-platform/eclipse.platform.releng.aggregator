@@ -22,14 +22,9 @@ fi
 source $CJE_ROOT/scripts/common-functions.shsource
 source $1
 
-mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
-mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/testresults/consolelogs
 
 JavaCMD=${JAVA_HOME}/bin/java
-
-# gather maven properties
-cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties  $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
 
 # gather repo
 REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
@@ -109,7 +104,6 @@ fi
       -DbuildRepo=$PLATFORM_REPO_DIR \
       -DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
       -DpostingDirectory=$CJE_ROOT/$DROP_DIR \
-      -DequinoxPostingDirectory=$CJE_ROOT/$EQUINOX_DROP_DIR \
       -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
       -v
     popd
