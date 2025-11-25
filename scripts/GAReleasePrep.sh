@@ -27,7 +27,6 @@ BODY="Umbrella bug to track release activities for ${STREAM}
 For previous bug please refer to eclipse-platform/eclipse.platform.releng.aggregator#${PREV_ISSUE}.
 
 
-- [ ] New & Noteworthy
 - [ ] Readme file for ${STREAM}
 - [ ] ${STREAM} Acknowledgements
 - [ ] Migration Guide
