@@ -24,8 +24,6 @@ source $1
 
 mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID/testresults/consolelogs
 
-JavaCMD=${JAVA_HOME}/bin/java
-
 # gather repo
 REPO_ZIP=$PLATFORM_TARGET_DIR/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip
   
@@ -94,7 +92,7 @@ fi
   ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/repos/platformrepo.xml
   if [ -d $PLATFORM_REPO_DIR ]; then
     pushd $PLATFORM_REPO_DIR
-    java -jar $LAUNCHER_JAR \
+    $BASE_BUILDER_ECLIPSE_EXE \
       -application org.eclipse.ant.core.antRunner \
       -buildfile $ANT_SCRIPT \
       -data $CJE_ROOT/$TMP_DIR/workspace-buildrepos \
@@ -158,7 +156,7 @@ fi
 # verify compilelog
 pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/helper.xml
-$JavaCMD -jar $LAUNCHER_JAR \
+$BASE_BUILDER_ECLIPSE_EXE \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-verifyCompile \
@@ -185,7 +183,7 @@ fi
 # publish Eclipse
 pushd $CJE_ROOT
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/eclipse/helper.xml
-$JavaCMD -jar $LAUNCHER_JAR \
+$BASE_BUILDER_ECLIPSE_EXE \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-publish \
@@ -199,7 +197,6 @@ $JavaCMD -jar $LAUNCHER_JAR \
   -DbuildType=$BUILD_TYPE \
   -DpublishingContent=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles \
   -DindexFileName=index.php \
-  -Dbase.builder=$CJE_ROOT/$BASEBUILDER_DIR \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
   -v \
   publish

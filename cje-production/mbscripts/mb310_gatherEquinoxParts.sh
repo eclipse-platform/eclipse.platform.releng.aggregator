@@ -69,7 +69,7 @@ fi
 pushd $CJE_ROOT
 mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
 ANT_SCRIPT=$ECLIPSE_BUILDER_DIR/equinox/helper.xml
-${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
+$BASE_BUILDER_ECLIPSE_EXE \
   -application org.eclipse.ant.core.antRunner \
   -buildfile $ANT_SCRIPT \
   -data $CJE_ROOT/$TMP_DIR/workspace-publishEquinox \
@@ -84,7 +84,6 @@ ${JAVA_HOME}/bin/java -jar $LAUNCHER_JAR \
   -DeqpublishingContent=$ECLIPSE_BUILDER_DIR/equinox/publishingFiles \
   -DindexFileName=index.php \
   -Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \
-  -Dbase.builder=$CJE_ROOT/$BASEBUILDER_DIR \
   -Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
   -v \
   publish

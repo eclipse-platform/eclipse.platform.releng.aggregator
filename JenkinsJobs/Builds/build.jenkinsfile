@@ -61,6 +61,8 @@ pipeline {
 					assignEnvVariable('TEST_CONFIGURATIONS_EXPECTED', BUILD.tests.collect{ c ->
 						"${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
 					}.join(','))
+					
+					utilities = load 'JenkinsJobs/shared/utilities.groovy'
 				}
 				dir("${CJE_ROOT}") {
 					sh '''#!/bin/bash -xe
@@ -73,6 +75,7 @@ pipeline {
 				exportPropertiesAsEnvironmentVariables("${CJE_ROOT}/buildproperties.properties", [
 					'BUILD_ID',
 					'STREAM', 'RELEASE_VER',
+					'PREVIOUS_RELEASE_ID', 'PREVIOUS_RELEASE_VER',
 				])
 			}
 		}
@@ -191,14 +194,21 @@ pipeline {
 				}
 			}
 		}
-	  stage('Create Base builder'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-		      sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-		                sh '''#!/bin/bash -xe
-		                    ./mb020_createBaseBuilder.sh $CJE_ROOT/buildproperties.shsource 2>&1
-		                '''
-		        }
+		stage('Create base builder'){
+			steps {
+				script{
+					def eclipsePlatformLatestRelease = "https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
+					def exe = utilities.installDownloadableTool('eclipse', eclipsePlatformLatestRelease) + '/eclipse'
+					assignEnvVariable('BASE_BUILDER_ECLIPSE_EXE', "${exe} -nosplash --launcher.suppressErrors")
+					sh '''
+						source $CJE_ROOT/buildproperties.shsource
+						$BASE_BUILDER_ECLIPSE_EXE \
+							-debug -consolelog -data $CJE_ROOT/$TMP_DIR/workspace-toolsinstall \
+							-application org.eclipse.equinox.p2.director \
+							-repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO},https://download.eclipse.org/cbi/updates/p2-analyzers/products/nightly/latest \
+							-installIU org.eclipse.pde.api.tools,org.eclipse.releng.build.tools.feature.feature.group,org.eclipse.cbi.p2repo.analyzers \
+							-profile SDKProfile
+					'''
 				}
 			}
 		}
@@ -252,7 +262,7 @@ pipeline {
 					cp ${logDir}/mb220_buildSdkPatch.sh.log $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/mb060_run-maven-build_output.txt
 					
 					pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
-					java -jar $LAUNCHER_JAR \
+					$BASE_BUILDER_ECLIPSE_EXE \
 						-application org.eclipse.ant.core.antRunner \
 						-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/eclipse_compare.xml \
 						-data $CJE_ROOT/$TMP_DIR/workspace-comparatorLogs \
@@ -297,21 +307,39 @@ pipeline {
 						}
 						stage('Generate Repo reports') {
 							steps {
-								dir("${CJE_ROOT}/mbscripts") {
-									sh '''#!/bin/bash -xe
-										./mb500_createRepoReports.sh $CJE_ROOT/buildproperties.shsource 2>&1
-									'''
-								}
+								sh '''#!/bin/bash -xe
+									source $CJE_ROOT/buildproperties.shsource
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.cbi.p2repo.analyzers.repoReport \
+										-data $CJE_ROOT/$TMP_DIR/workspace-report -vmargs -Xmx1g \
+										-DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$BASEBUILD_ID \
+										-DreportRepoDir=${PLATFORM_REPO_DIR} \
+										-DreportOutputDir=${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}/buildlogs
+								'''
 							}
 						}
 						stage('Generate API tools reports') {
 							steps {
-								dir("${CJE_ROOT}/mbscripts") {
-									sh '''#!/bin/bash -xe
-										./mb510_createApiToolsReports.sh $CJE_ROOT/buildproperties.shsource 2>&1
-										rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
-									'''
-								}
+								sh '''#!/bin/bash -xe
+									source $CJE_ROOT/buildproperties.shsource
+									pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.ant.core.antRunner \
+										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml \
+										-data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
+										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
+										-DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
+										-DbuildId=$BUILD_ID \
+										-DbuildLabel=$BUILD_ID \
+										-DbuildWorkingArea=$CJE_ROOT/$AGG_DIR \
+										-DpreviousBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
+										-DpreviousBaselineName=Eclipse-SDK-$PREVIOUS_RELEASE_VER \
+										-DpreviousBaselineFilename=eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
+										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+										apiToolsReports
+									popd
+									rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
+								'''
 							}
 						}
 						stage('Promote Eclipse platform') {
@@ -480,6 +508,9 @@ pipeline {
 		}
 	}
 }
+
+@groovy.transform.Field
+def utilities = null
 
 @NonCPS
 def assignEnvVariable(String name, String value) {
