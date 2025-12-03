@@ -11,6 +11,7 @@
  *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Convert to plain Java scripts
  *******************************************************************************/
 
 import java.io.File;
@@ -32,9 +33,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**
- * @version 1.0
- */
 public class ErrorTracker {
 
 	private final Set<String> testLogsSet = Collections.checkedSortedSet(new TreeSet<>(), String.class);
@@ -83,11 +81,9 @@ public class ErrorTracker {
 
 	// Answer an array of PlatformStatus objects for a given type.
 
-	@SuppressWarnings("restriction")
 	public void loadFile(final String fileName) {
 		try {
-			DocumentBuilder parser = org.eclipse.core.internal.runtime.XmlProcessorFactory
-					.createDocumentBuilderWithErrorOnDOCTYPE();
+			DocumentBuilder parser = TestResultsGenerator.createDocumentBuilderWithErrorOnDOCTYPE();
 			final Document document = parser.parse(fileName);
 			final NodeList elements = document.getElementsByTagName("platform");
 			final int elementCount = elements.getLength();

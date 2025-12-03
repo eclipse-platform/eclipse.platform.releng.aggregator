@@ -11,6 +11,7 @@
  *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Convert to plain Java scripts
  *******************************************************************************/
 
 import java.io.BufferedReader;
@@ -31,17 +32,16 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.eclipse.releng.generators.TestResultsGenerator.ResultsTable.Cell;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -51,10 +51,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * @version 1.0
  * @author Dean Roberts (circa 2000!) and David Williams (circa 2016)
  */
-public class TestResultsGenerator extends Task {
+public class TestResultsGenerator {
 
 	public class ResultsTable implements Iterable<String> {
 
@@ -123,12 +122,10 @@ public class TestResultsGenerator extends Task {
 	private List<String> expectedConfigs = null;
 	private static final String EOL = System.lineSeparator();
 	private static boolean DEBUG = false;
-	private static String FOUND_TEST_CONFIGS_FILENAME_DEFAULT = "testConfigsFound.php";
 
-	private static String EXPECTED_TEST_CONFIGS_FILENAME_DEFAULT = "testConfigs.php";
 	private final String expected_config_type = "expected";
-	private String expectedConfigFilename = EXPECTED_TEST_CONFIGS_FILENAME_DEFAULT;
-	private String foundConfigFilename = FOUND_TEST_CONFIGS_FILENAME_DEFAULT;
+	private final String expectedConfigFilename = "testConfigs.php";
+	private final String foundConfigFilename = "testConfigsFound.php";
 
 	private ErrorTracker anErrorTracker;
 
@@ -154,16 +151,16 @@ public class TestResultsGenerator extends Task {
 	// Name of the HTML fragment file that any testResults.php file will
 	// "include".
 	// setting to common default.
-	private String testResultsHtmlFileName = "testResultsTables.html";
+	private final String testResultsHtmlFileName = "testResultsTables.html";
 
 	// Name of the generated drop index php file;
 	private String dropHtmlFileName;
 
 	// Arbitrary path used in the index.php page to href the
 	// generated .html files.
-	private String hrefTestResultsTargetPath;
+	private final String hrefTestResultsTargetPath = "testresults";
 	// Arbitrary path used in the index.php page to reference the compileLogs
-	private String hrefCompileLogsTargetPath;
+	private final String hrefCompileLogsTargetPath = "compilelogs/plugins/";
 	// Location of compile logs base directory
 	private String compileLogsDirectoryName;
 	// Location and name of test manifest file
@@ -172,9 +169,9 @@ public class TestResultsGenerator extends Task {
 	// private static int testsConstantLength = testsConstant.length();
 	// temporary way to force "missing" list not to be printed (until complete
 	// solution found)
-	private boolean doMissingList = true;
+	private final boolean doMissingList = true;
 
-	private Set<String> final missingManifestFiles = Collections.checkedSortedSet(new TreeSet<>(), String.class);
+	private final Set<String> missingManifestFiles = Collections.checkedSortedSet(new TreeSet<>(), String.class);
 
 	class ExpectedConfigFiler implements FilenameFilter {
 
@@ -218,7 +215,7 @@ public class TestResultsGenerator extends Task {
 	// "ep4" + getTestedBuildType() + "-unit-win32_win32.win32.x86_8.0.xml",
 	// "ep4" + getTestedBuildType() + "-unit-cen64-gtk3_linux.gtk.x86_64_8.0.xml" };
 	private String testsConfigExpected;
-	private String compilerSummaryFilename = "compilerSummary.html";
+	private final String compilerSummaryFilename = "compilerSummary.html";
 	/*
 	 * Default for "regenerate" is FALSE, but during development, is handy to set to
 	 * TRUE. If TRUE, the "index.php" file and "compilerSummary.html" files are
@@ -227,7 +224,7 @@ public class TestResultsGenerator extends Task {
 	 * 'isTested" is set) since the purpose is usually to include an additional
 	 * tested platform.
 	 */
-	private boolean regenerate = false;
+	private final boolean regenerate = false;
 
 	private int countCompileErrors(final String aString) {
 		return extractNumber(aString, "error");
@@ -263,9 +260,7 @@ public class TestResultsGenerator extends Task {
 			} else {
 
 				try {
-					@SuppressWarnings("restriction")
-					DocumentBuilder parser = org.eclipse.core.internal.runtime.XmlProcessorFactory
-					.createDocumentBuilderWithErrorOnDOCTYPE();
+					DocumentBuilder parser = createDocumentBuilderWithErrorOnDOCTYPE();
 					final Document document = parser.parse(fileName);
 					final NodeList elements = document.getElementsByTagName(elementName);
 
@@ -310,7 +305,26 @@ public class TestResultsGenerator extends Task {
 		return extractNumber(aString, "Access restriction:");
 	}
 
-	@Override
+	public static void main(String[] args) {
+		TestResultsGenerator generator = new TestResultsGenerator();
+		generator.isBuildTested = Boolean.parseBoolean(System.getProperty("isBuildTested", "false"));
+
+		generator.buildType = Objects.requireNonNull(System.getProperty("buildType"), "Not set: buildType");
+		generator.compileLogsDirectoryName = System.getProperty("compileLogsDirectoryName");
+		generator.dropDirectoryName = Objects.requireNonNull(System.getProperty("dropDirectoryName"),
+				"Not set: dropDirectoryName");
+		generator.dropHtmlFileName = System.getProperty("dropHtmlFileName");
+		generator.dropTemplateFileName = System.getProperty("dropTemplateFileName");
+		generator.dropTokenList = System.getProperty("dropTokenList");
+		generator.testManifestFileName = Objects.requireNonNull(System.getProperty("testManifestFileName"),
+				"Not set: testManifestFileName");
+
+		generator.xmlDirectoryName = System.getProperty("xmlDirectoryName");
+		generator.testsConfigExpected = System.getProperty("testsConfigExpected");
+
+		generator.execute();
+	}
+
 	public void execute() {
 
 		log(EOL + "INFO: Processing test and build results for ");
@@ -323,7 +337,7 @@ public class TestResultsGenerator extends Task {
 		try {
 			parseCompileLogs();
 		} catch (IOException e) {
-			throw new BuildException("Error while parsing Compiler Results File ", e);
+			throw new IllegalStateException("Error while parsing Compiler Results File ", e);
 		}
 
 		if (isBuildTested) {
@@ -332,7 +346,7 @@ public class TestResultsGenerator extends Task {
 				parseJUnitTestsXml();
 
 			} catch (IOException e) {
-				throw new BuildException("Error while parsing JUnit Tests Results Files", e);
+				throw new IllegalStateException("Error while parsing JUnit Tests Results Files", e);
 			}
 
 		} else {
@@ -452,10 +466,7 @@ public class TestResultsGenerator extends Task {
 		Document aDocument = null;
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			final InputSource inputSource = new InputSource(reader);
-			@SuppressWarnings("restriction")
-			final DocumentBuilder builder = org.eclipse.core.internal.runtime.XmlProcessorFactory
-			.createDocumentBuilderIgnoringDOCTYPE();
-			builder.setEntityResolver((publicId, systemId) -> new InputSource(new ByteArrayInputStream(new byte[0])));
+			final DocumentBuilder builder = createDocumentBuilderIgnoringDOCTYPE();
 
 			aDocument = builder.parse(inputSource);
 		} catch (final ParserConfigurationException | IOException | SAXException e) {
@@ -660,7 +671,7 @@ public class TestResultsGenerator extends Task {
 
 		if (buildType.equals("Y")) {
 			htmlString.append(
-					"<p>The unit tests are run on the <a href=\"https://ci.eclipse.org/releng/job/YPBuilds/\">releng ci instance</a>.</p>");
+					"<p>The unit tests are run on the <a href=\"https://ci.eclipse.org/releng/job/YBuilds/\">releng ci instance</a>.</p>");
 		} else {
 			htmlString.append(
 					"<p>The unit tests are run on the <a href=\"https://ci.eclipse.org/releng/job/AutomatedTests/\">releng ci instance</a>.</p>");
@@ -938,84 +949,6 @@ public class TestResultsGenerator extends Task {
 
 	}
 
-	public void setBuildType(final String buildType) {
-		this.buildType = buildType;
-	}
-
-	/**
-	 * Sets the compileLogsDirectoryName.
-	 *
-	 * @param compileLogsDirectoryName The compileLogsDirectoryName to set
-	 */
-	public void setCompileLogsDirectoryName(final String compileLogsDirectoryName) {
-		this.compileLogsDirectoryName = compileLogsDirectoryName;
-	}
-
-	public void setDropDirectoryName(final String aString) {
-		dropDirectoryName = aString;
-	}
-
-	/**
-	 * Sets the dropHtmlFileName.
-	 *
-	 * @param dropHtmlFileName The dropHtmlFileName to set
-	 */
-	public void setDropHtmlFileName(final String dropHtmlFileName) {
-		this.dropHtmlFileName = dropHtmlFileName;
-	}
-
-	/**
-	 * Sets the dropTemplateFileName.
-	 *
-	 * @param dropTemplateFileName The dropTemplateFileName to set
-	 */
-	public void setDropTemplateFileName(final String dropTemplateFileName) {
-		this.dropTemplateFileName = dropTemplateFileName;
-	}
-
-	public void setDropTokenList(final String dropTokenList) {
-		this.dropTokenList = dropTokenList;
-	}
-
-	/**
-	 * Sets the hrefCompileLogsTargetPath.
-	 *
-	 * @param hrefCompileLogsTargetPath The hrefCompileLogsTargetPath to set
-	 */
-	public void setHrefCompileLogsTargetPath(final String hrefCompileLogsTargetPath) {
-		this.hrefCompileLogsTargetPath = hrefCompileLogsTargetPath;
-	}
-
-	/**
-	 * Sets the hrefTestResultsTargetPath.
-	 *
-	 * @param hrefTestResultsTargetPath The hrefTestResultsTargetPath to set
-	 */
-	public void setHrefTestResultsTargetPath(final String htmlTargetPath) {
-		hrefTestResultsTargetPath = htmlTargetPath;
-	}
-
-	public void setIsBuildTested(final boolean isBuildTested) {
-		this.isBuildTested = isBuildTested;
-	}
-
-	/**
-	 * Sets the testManifestFileName.
-	 *
-	 * @param testManifestFileName The testManifestFileName to set
-	 */
-	public void setTestManifestFileName(final String testManifestFileName) {
-		this.testManifestFileName = testManifestFileName;
-	}
-
-	public void setTestResultsHtmlFileName(final String aString) {
-		testResultsHtmlFileName = aString;
-	}
-
-	public void setXmlDirectoryName(final String aString) {
-		xmlDirectoryName = aString;
-	}
-
 	private String verifyAllTestsRan(final String directory, List<String> foundConfigs) {
 		StringBuilder replaceString = new StringBuilder();
 		List<String> missingFiles = new ArrayList<>();
@@ -1117,11 +1050,6 @@ public class TestResultsGenerator extends Task {
 
 	}
 
-	public void setTestsConfigExpected(String testsConfigExpected) {
-		this.testsConfigExpected = testsConfigExpected;
-		// log("DEBUG: testsConfigExpected: " + testsConfigExpected);
-	}
-
 	private List<String> getTestsConfig() throws IOException {
 		if (expectedConfigs == null) {
 			expectedConfigs = new ArrayList<>();
@@ -1132,7 +1060,7 @@ public class TestResultsGenerator extends Task {
 					expectedConfigs.add(tokenizer.nextToken());
 				}
 			} else {
-				throw new BuildException("test configurations were not found. One or more must be set.");
+				throw new IllegalStateException("test configurations were not found. One or more must be set.");
 			}
 			if (DEBUG) {
 				// log("DEBUG: testsConfig array ");
@@ -1146,10 +1074,6 @@ public class TestResultsGenerator extends Task {
 			writePhpConfigFile(expected_config_type, expectedConfigs, expectedConfigFilename);
 		}
 		return expectedConfigs;
-	}
-
-	public void setDoMissingList(boolean doMissingList) {
-		this.doMissingList = doMissingList;
 	}
 
 	/*
@@ -1214,9 +1138,9 @@ public class TestResultsGenerator extends Task {
 		results.append(EOL).append("<tr><td class=\"namecell\">").append(displayName).append("</td>");
 
 		for (String config : getTestsConfig()) {
-			Cell cell = resultsTable.getCell(corename, config);
+			TestResultsGenerator.ResultsTable.Cell cell = resultsTable.getCell(corename, config);
 			if (cell == null && foundConfigs.contains(config)) {
-				cell = new Cell(-1, null);
+				cell = new TestResultsGenerator.ResultsTable.Cell(-1, null);
 			}
 			results.append(printCell(cell));
 		}
@@ -1224,7 +1148,7 @@ public class TestResultsGenerator extends Task {
 		return results.toString();
 	}
 
-	private String printCell(Cell cell) {
+	private String printCell(TestResultsGenerator.ResultsTable.Cell cell) {
 		String result = null;
 		String displayName = null;
 		if (cell == null) {
@@ -1274,16 +1198,46 @@ public class TestResultsGenerator extends Task {
 				+ hrefTestResultsTargetPath + "/xml/" + rawfilename + XML_EXTENSION + "\">&nbsp;(XML)</a></td>";
 	}
 
-	public void setRegenerate(boolean regenerate) {
-		this.regenerate = regenerate;
+	// --- utility methods ---
+
+	private static void log(String msg) {
+		System.out.println(msg);
 	}
 
-	public void setExpectedConfigFilename(String expectedConfigFilename) {
-		this.expectedConfigFilename = expectedConfigFilename;
+	private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE = createDocumentBuilderFactoryIgnoringDOCTYPE();
+	private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY_ERROR_ON_DOCTYPE = createDocumentBuilderFactoryWithErrorOnDOCTYPE();
+
+	private static synchronized DocumentBuilderFactory createDocumentBuilderFactoryIgnoringDOCTYPE() {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		try {
+			// completely disable external entities declarations:
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+		return factory;
 	}
 
-	public void setFoundConfigFilename(String foundConfigFilename) {
-		this.foundConfigFilename = foundConfigFilename;
+	private static synchronized DocumentBuilderFactory createDocumentBuilderFactoryWithErrorOnDOCTYPE() {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		// completely disable DOCTYPE declaration:
+		try {
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true); //$NON-NLS-1$
+		} catch (ParserConfigurationException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+		return factory;
+	}
+
+	static synchronized DocumentBuilder createDocumentBuilderIgnoringDOCTYPE() throws ParserConfigurationException {
+		DocumentBuilder builder = DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE.newDocumentBuilder();
+		builder.setEntityResolver((__, ___) -> new InputSource(new ByteArrayInputStream(new byte[0])));
+		return builder;
+	}
+
+	static synchronized DocumentBuilder createDocumentBuilderWithErrorOnDOCTYPE() throws ParserConfigurationException {
+		return DOCUMENT_BUILDER_FACTORY_ERROR_ON_DOCTYPE.newDocumentBuilder();
 	}
 
 }

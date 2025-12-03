@@ -16,7 +16,7 @@ pipeline {
 		label 'basic'
 	}
 	tools {
-		jdk 'temurin-jdk21-latest'
+		jdk 'temurin-jdk25-latest'
 	}
 	stages {
 		stage('Checkout SCM') {
@@ -24,9 +24,8 @@ pipeline {
 				dir("${WORKSPACE}/git-repo") {
 					checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
 						extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
-						[path: 'cje-production/'],
+						[path: 'scripts/releng/'],
 						[path: 'eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml'],
-						[path: 'JenkinsJobs/shared/utilities.groovy'],
 					])])
 				}
 			}
@@ -35,7 +34,6 @@ pipeline {
 			environment {
 				// Download Server locations (seldomly change)
 				EP_ECLIPSE_DROPS = '/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4'
-				ECLIPSE = installLatestEclipse()
 			}
 			steps {
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -44,11 +42,6 @@ pipeline {
 						curl -L -o "${WORKSPACE}/buildproperties.shsource" http://download.eclipse.org/eclipse/downloads/drops4/${buildID}/buildproperties.shsource
 						source "${WORKSPACE}/buildproperties.shsource"
 						
-						$ECLIPSE -data workspace-toolsinstall \
-							-application org.eclipse.equinox.p2.director \
-							-repository ${ECLIPSE_RUN_REPO},${BUILDTOOLS_REPO} \
-							-installIU org.eclipse.releng.build.tools.feature.feature.group
-						
 						buildDirectory="${WORKSPACE}/postingDir/${buildID}"
 						testResultsDir="${buildDirectory}/testresults"
 						mkdir -p "${testResultsDir}"
@@ -56,14 +49,14 @@ pipeline {
 						# Fetch previously collected test results of all completed runs
 						rsync -avzh genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/${buildID}/testresults/xml ${testResultsDir}
 						
-						#triggering ant runner
-						$ECLIPSE -debug -data ${WORKSPACE}/workspace-updateTestResults \
-							-application org.eclipse.ant.core.antRunner \
-							-file "${WORKSPACE}/git-repo/cje-production/scripts/publish.xml" \
-							-DbuildDirectory=${buildDirectory} \
+						java \
+							-DisBuildTested=true \
 							-DbuildType=${BUILD_TYPE} \
-							"-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED}" \
-							"-DmanifestFile=${WORKSPACE}/git-repo/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml"
+							-DdropDirectoryName=${buildDirectory} \
+							-DxmlDirectoryName=${buildDirectory}/testresults/xml \
+							-DtestManifestFileName=${WORKSPACE}/git-repo/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/testManifest.xml \
+							-DtestsConfigExpected=${TEST_CONFIGURATIONS_EXPECTED} \
+							${WORKSPACE}/git-repo/scripts/releng/TestResultsGenerator.java
 						
 						rsync -avzh ${buildDirectory} genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}
 					'''
@@ -72,14 +65,4 @@ pipeline {
 			}
 		}
 	}
-}
-
-def installLatestEclipse(){
-	def props = readProperties(file: "${WORKSPACE}/git-repo/cje-production/buildproperties.txt").collectEntries{n, v ->
-			v = v.trim();
-			return [n, (v.startsWith('"') && v.endsWith('"') ? v.substring(1, v.length() - 1) : v)]
-		}
-	def utilities = load "${WORKSPACE}/git-repo/JenkinsJobs/shared/utilities.groovy"
-	def eclipseURL = "https://download.eclipse.org/eclipse/downloads/drops4/${props.PREVIOUS_RELEASE_ID}/eclipse-platform-${props.PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
-	return utilities.installDownloadableTool('eclipse', eclipseURL) + '/eclipse --launcher.suppressErrors -nosplash -consolelog'
 }

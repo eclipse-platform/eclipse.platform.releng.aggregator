@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #*******************************************************************************
 # Copyright (c) 2017, 2025 IBM Corporation and others.
 #
@@ -12,9 +12,17 @@
 # Contributors:
 #     David Williams - initial API and implementation
 #*******************************************************************************
-#
+
+if [ $# -ne 1 ]; then
+  echo USAGE: $0 client
+  exit 1
+fi
+client=$1
+
 echo "[DEBUG] Producing checksums starting"
 echo "[DEBUG] current directory: ${PWD}"
+
+mkdir checksum
 
 allCheckSumsSHA512=checksum/${client}-${BUILD_ID}-SUMSSHA512
 fileExtensionsToHash='zip dmg gz tar.xz jar'

@@ -6,9 +6,6 @@
   <target
     name="init"
     unless="helperInitialized">
-    <fail
-      unless="postingDirectory"
-      message="Eclipse drop directory must be provided (yes, even for Equinox drop site creation)." />
 
     <fail
       unless="equinoxPostingDirectory"
@@ -22,19 +19,8 @@
       unless="EBuilderDir"
       message="Root of Eclipse Builder (or Tycho Eclipse Builder) must be provided." />
 
-    <property environment="env" />
+    <property name="TMP" value="${java.io.tmpdir}"/>
 
-    <!-- we typically expect TMP_DIR to be set in environnment. But, if not, /tmp might work. -->
-    <condition
-      property="TMP"
-      value="${env.TMP_DIR}"
-      else="/tmp">
-      <isset property="env.TMP_DIR" />
-    </condition>
-        <!-- make dir, in case we are first to use it, unlikely as that is -->
-    <mkdir dir="$TMP" />
-    <echo message="DEBUG: echo properties at start of equinox publish" />
-    <echoproperties />
     <property
       name="helperInitialized"
       value="true" />
@@ -44,121 +30,13 @@
     name="publish"
     depends="init">
     <echo message="[DEBUG] Equinox helper.xml publish starting" />
-        <!-- there are three "buildproperties.* files, each with same variables defined/used
-             during the build, such as BUILD_ID, etc. One for PHP, one for Ant, and one for BASH scripts.
-             The one for PHP is most likely to be useful on download site.
-        -->
-    <copy todir="${equinoxPostingDirectory}/${buildId}">
-      <fileset
-        dir="${postingDirectory}"
-        includes="buildproperties.*" />
-    </copy>
-
         <!--
           These two steps were "blindly" copied from previosly eclipsebuilder, buildAll.xml file.
           They were the only two things done for equininox before "publish" was called, so we call
           them as the first step of "publish".
         -->
-
-        <!-- <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox/build.xml" /> -->
     <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox-launchers/build.xml" />
-
-    <!-- copy orbit files to equinox download directory (I'm not sure this is necessary any longer?) -->
-    <copy
-      todir="${equinoxPostingDirectory}/${buildDir}"
-      overwrite="true">
-      <fileset
-        dir="${buildRepo}/plugins"
-        includes="org.apache.felix.gogo.*,javax.servlet_*,javax.servlet.jsp_*,org.apache.commons.logging_*,javax.el_*"
-        excludes="*.source_*, *.jar.pack.gz" />
-    </copy>
-
     <antcall target="updateTestManifests" />
-
-    <property
-      name="generatorClass"
-      value="org.eclipse.releng.generators.TestResultsGenerator" />
-
-    <available
-      classname="${generatorClass}"
-      property="class"
-      value="${generatorClass}" />
-
-    <!-- generate md5s and sha1s for bundles -->
-    <mkdir dir="${equinoxPostingDirectory}/${buildDir}/checksum" />
-    <exec
-      executable="/bin/bash"
-      dir="${equinoxPostingDirectory}/${buildDir}">
-      <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
-      <env key="client" value="equinox"/>
-    </exec>
-
-
-    <!--post clickThroughs. Removed 03/26/2013. There are no clickthroughs for current equinox.
-        if ever added back, will have to be re-worked.
-        <copy todir="${equinoxPostingDirectory}/${buildDir}">
-            <fileset
-                dir="${buildDirectory}/maps/org.eclipse.releng"
-                includes="clickThroughs/" />
-        </copy>
-        -->
-
-    <!--copy compile logs to this posting directory. Not sure needed. Is this where API reports come from? -->
-    <copy
-      todir="${equinoxPostingDirectory}/${buildDir}"
-      overwrite="true">
-      <fileset
-        dir="${postingDirectory}"
-        includes="compilelogs/**/plugins/org.eclipse.osgi*/**,compilelogs/**/plugins/org.eclipse.equinox*/**"
-        excludes="compilelogs/**/plugins/org.eclipse.osgi.test*/**" />
-    </copy>
-
-
-        <!--post directory.txt.  Removed 03/26/2013. I don't think ever displayed on Equinox page.
-        and current directory.txt has limited usefulness.
-        <copy
-            file="${buildDirectory}/directory.txt"
-            todir="${equinoxPostingDirectory}/${buildDir}" />
-        -->
-    <copy todir="${equinoxPostingDirectory}/${buildDir}">
-      <fileset dir="${eqpublishingContent}/staticDropFiles" />
-    </copy>
-
-    <!-- regenerate the index page with links to test results.
-         Removed 3/26/20113. There are no test results, at this point on initial promote,
-         and for at least past year and a half we have never "reran" this to pick up
-         test results. I do not see any test results links on DL page .... though,
-         probably could be in icons.
-         Turns out we still need to run the "indexer" to update DL page, even though
-         there are no test results. That's how it fills in the symbols in drop token list.
-    -->
-    <property
-      name="class"
-      value="org.eclipse.releng.generators.TestResultsGenerator" />
-    <taskdef
-      name="indexResults"
-      classname="${class}" />
-
-        <!-- equinox uses same test results -->
-
-        <!-- provisioning removed per bug 368488
-          dropTokenList="%equinox%,%framework%,%extrabundles%,%other%,%provisioning%,%launchers%,%osgistarterkits%"
-          -->
-    <indexResults
-      isBuildTested="false"
-      buildType="${buildType}"
-      dropTokenList="%equinox%,%framework%,%extrabundles%,%other%,%launchers%,%osgistarterkits%"
-      dropHtmlFileName="index.php"
-      xmlDirectoryName="${postingDirectory}/testresults/xml"
-      dropDirectoryName="${equinoxPostingDirectory}/${buildDir}"
-      dropTemplateFileName="${eqpublishingContent}/templateFiles/index.template.php"
-      testResultsHtmlFileName="testResultsTable.html"
-      hrefTestResultsTargetPath="testresults"
-      hrefCompileLogsTargetPath="compilelogs/plugins/"
-      compileLogsDirectoryName="${equinoxPostingDirectory}/${buildDir}/compilelogs/plugins"
-      testManifestFileName="${eqpublishingContent}/testManifest.xml" />
-
-    <echo message="[DEBUG] Equinox helper.xml publish ending normally" />
   </target>
 
 
