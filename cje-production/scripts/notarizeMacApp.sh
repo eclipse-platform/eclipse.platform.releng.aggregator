@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #*******************************************************************************
 # Copyright (c) 2021 IBM Corporation and others.
 #
@@ -13,11 +13,7 @@
 #     Sravan Kumar Lakkimsetti - initial API and implementation
 #*******************************************************************************
 
-set -x
-BUILD_DIR="$1"; shift
 DMG="$1"; shift
-
-pushd "$BUILD_DIR" || exit 5
 
 PRIMARY_BUNDLE_ID="${DMG//-macosx-cocoa-x86_64.dmg/}"
 
@@ -70,5 +66,3 @@ done
 rm "${DMG}"
 
 curl -sSJO "https://cbi.eclipse.org/macos/xcrun/${UUID}/download"
-popd || exit 5
-set +x

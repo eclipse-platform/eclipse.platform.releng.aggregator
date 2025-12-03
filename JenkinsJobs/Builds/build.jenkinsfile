@@ -34,10 +34,11 @@ pipeline {
 	environment {
 		MAVEN_OPTS = '-Xmx4G'
 		CJE_ROOT = "${WORKSPACE}/cje-production"
-		AGG_DIR = 'gitCache/eclipse.platform.releng.aggregator'
+		AGG_DIR = "${CJE_ROOT}/gitCache/eclipse.platform.releng.aggregator"
 		logDir = "$CJE_ROOT/buildlogs"
-		DROP_DIR = 'siteDir/eclipse/downloads/drops4'
-		EQUINOX_DROP_DIR = 'siteDir/equinox/drops'
+		PLATFORM_REPO_DIR = "${AGG_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository"
+		DROP_DIR = "${CJE_ROOT}/siteDir/eclipse/downloads/drops4"
+		EQUINOX_DROP_DIR = "${CJE_ROOT}/siteDir/equinox/drops"
 		// Download server paths
 		EP_ROOT = '/home/data/httpd/download.eclipse.org'
 		EP_ECLIPSE_UPDATES = "${EP_ROOT}/eclipse/updates"
@@ -67,6 +68,7 @@ pipeline {
 				dir("${CJE_ROOT}") {
 					sh '''#!/bin/bash -xe
 						chmod +x mbscripts/*
+						chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
 						mkdir -p $logDir
 						
 						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1
@@ -85,7 +87,7 @@ pipeline {
 				AGGREGATOR_REPOSITORY_URL = "${scm.userRemoteConfigs[0].url}" // http(s) URL expected
 			}
 			steps {
-				dir("${CJE_ROOT}/${AGG_DIR}") {
+				dir("${AGG_DIR}") {
 					sh '''#!/bin/bash -xe
 						git config --global user.email 'releng-bot@eclipse.org'
 						git config --global user.name 'Eclipse Releng Bot'
@@ -165,7 +167,7 @@ pipeline {
 						reportTimestamp=$(TZ="America/New_York" date +%Y%m%d-%H%M)
 						export lastTag=$(cat "${WORKSPACE}/lastTag")
 						if [[ -n "$lastTag" ]]; then
-							export gitLogFile="$CJE_ROOT/$DROP_DIR/$BUILD_ID/gitLog.html"
+							export gitLogFile="${DROP_DIR}/$BUILD_ID/gitLog.html"
 							mkdir -p $(dirname "${gitLogFile}")
 							
 							echo -e "<h2>Git log from $lastTag (previous) to $BUILD_ID (current)</h2>" > $gitLogFile
@@ -244,11 +246,11 @@ pipeline {
 					source $CJE_ROOT/buildproperties.shsource
 					
 					# Gather maven properties
-					cp $CJE_ROOT/$AGG_DIR/eclipse-platform-parent/target/mavenproperties.properties $CJE_ROOT/$DROP_DIR/$BUILD_ID/mavenproperties.properties
+					cp ${AGG_DIR}/eclipse-platform-parent/target/mavenproperties.properties ${DROP_DIR}/$BUILD_ID/mavenproperties.properties
 					
 					# Gather artifactcomparisons
-					pushd $CJE_ROOT/$AGG_DIR
-					comparatorlogsDir=${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}/buildlogs/comparatorlogs
+					pushd ${AGG_DIR}
+					comparatorlogsDir=${DROP_DIR}/${BUILD_ID}/buildlogs/comparatorlogs
 					mkdir -p $comparatorlogsDir
 					find . -regex .*target/artifactcomparison -type d -exec zip -r $comparatorlogsDir/artifactcomparisons.zip '{}' \\;
 					popd
@@ -259,14 +261,14 @@ pipeline {
 					# ToDo: Modify org.eclipse.releng.build.tools.comparator.Extractor to be configurable:
 					# https://github.com/eclipse-platform/eclipse.platform.releng.buildtools/blob/c5f7ecf1951d44311e24ce7bd6b505189aabb4da/bundles/org.eclipse.releng.build.tools.comparator/src/org/eclipse/releng/build/tools/comparator/Extractor.java#L27
 					#TODO: Generally try to avoid the need to capture the build log in a file/for teeing
-					cp ${logDir}/mb220_buildSdkPatch.sh.log $CJE_ROOT/$DROP_DIR/$BUILD_ID/buildlogs/mb060_run-maven-build_output.txt
+					cp ${logDir}/mb220_buildSdkPatch.sh.log ${DROP_DIR}/$BUILD_ID/buildlogs/mb060_run-maven-build_output.txt
 					
-					pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
+					pushd ${DROP_DIR}/$BUILD_ID
 					$BASE_BUILDER_ECLIPSE_EXE \
 						-application org.eclipse.ant.core.antRunner \
 						-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/eclipse_compare.xml \
 						-data $CJE_ROOT/$TMP_DIR/workspace-comparatorLogs \
-						-DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
+						-DbuildDirectory=${DROP_DIR}/$BUILD_ID \
 						-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
 						-v \
 						compare
@@ -296,13 +298,160 @@ pipeline {
 								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
 							}
 							steps {
-								dir("${CJE_ROOT}/mbscripts") {
-									sh '''#!/bin/bash -xe
-										mkdir -p $CJE_ROOT/$DROP_DIR/$BUILD_ID
-										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$DROP_DIR/$BUILD_ID
-										./mb300_gatherEclipseParts.sh $CJE_ROOT/buildproperties.shsource 2>&1
-									'''
-								}
+								sh '''#!/bin/bash -xe
+									mkdir -p ${DROP_DIR}/${BUILD_ID}
+									cp $CJE_ROOT/buildproperties.* ${DROP_DIR}/${BUILD_ID}
+									source $CJE_ROOT/buildproperties.shsource
+									
+									mkdir -p ${DROP_DIR}/${BUILD_ID}/testresults/consolelogs
+									
+									PLATFORM_PROJECT_DIR=${AGG_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target
+									# Gather p2-repository
+									cp ${PLATFORM_PROJECT_DIR}/eclipse.platform.repository-${STREAMMajor}.${STREAMMinor}.${STREAMService}-SNAPSHOT.zip ${DROP_DIR}/${BUILD_ID}/repository-$BUILD_ID.zip
+									
+									# Gather sdk product
+									for file in ${PLATFORM_PROJECT_DIR}/products/*; do
+										if [[ "$file" =~ /org.eclipse.sdk.ide-([^.]+).([^.]+).([^.]+).(.*)$ ]]; then
+											if [[ "${BASH_REMATCH[1]}" == "${BASH_REMATCH[2]}" ]]; then
+												#TODO: Remove this special treatment
+												osWsArch=${BASH_REMATCH[1]}-${BASH_REMATCH[3]}
+											else
+												osWsArch=${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]}
+											fi
+											cp ${file} ${DROP_DIR}/${BUILD_ID}/eclipse-SDK-$BUILD_ID-${osWsArch}.${BASH_REMATCH[4]}
+										fi
+									done
+									# Gather platform product
+									for file in ${PLATFORM_PROJECT_DIR}/products/*; do
+										if [[ "$file" =~ /org.eclipse.platform.ide-([^.]+).([^.]+).([^.]+).(.*)$ ]]; then
+											if [[ "${BASH_REMATCH[1]}" == "${BASH_REMATCH[2]}" ]]; then
+												#TODO: Remove this special treatment
+												osWsArch=${BASH_REMATCH[1]}-${BASH_REMATCH[3]}
+											else
+												osWsArch=${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]}
+											fi
+											cp ${file} ${DROP_DIR}/${BUILD_ID}/eclipse-platform-$BUILD_ID-${osWsArch}.${BASH_REMATCH[4]}
+										fi
+									done
+									
+									notarizeLogDir=$CJE_ROOT/notarizeLog
+									mkdir -p $notarizeLogDir
+									pushd ${DROP_DIR}/${BUILD_ID}
+									for macProduct in *.dmg; do
+										(/bin/bash ${CJE_ROOT}/scripts/notarizeMacApp.sh ${macProduct} > $notarizeLogDir/${macProduct}.log 2>&1)&
+										sleep 18s
+									done
+									popd
+									
+									# Gather swt zips
+									pushd ${AGG_DIR}/eclipse.platform.swt/binaries
+									cp */target/*.zip ${DROP_DIR}/${BUILD_ID}
+									popd
+									
+									# Gather test zips
+									pushd $ECLIPSE_BUILDER_DIR/eclipse-junit-tests/target
+									cp eclipse-junit-tests-bundle.zip ${DROP_DIR}/${BUILD_ID}/eclipse-Automated-Tests-$BUILD_ID.zip
+									popd
+									
+									set -x
+									# Slice repos
+									pushd $PLATFORM_REPO_DIR
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.ant.core.antRunner \
+										-buildfile $ECLIPSE_BUILDER_DIR/repos/platformrepo.xml \
+										-data $CJE_ROOT/$TMP_DIR/workspace-buildrepos \
+										-Declipse.build.configs=$ECLIPSE_BUILDER_DIR \
+										-DbuildId=$BUILD_ID \
+										-DbuildLabel=$BUILD_ID \
+										-DbuildRepo=$PLATFORM_REPO_DIR \
+										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
+										-DpostingDirectory=${DROP_DIR} \
+										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+										-v
+									popd
+									set +x
+									
+									# Gather ECJ jars
+									pushd ${AGG_DIR}/eclipse.jdt.core/org.eclipse.jdt.core.compiler.batch/target
+									cp org.eclipse.jdt.core.compiler.batch-*-SNAPSHOT.jar ${DROP_DIR}/${BUILD_ID}/ecj-$BUILD_ID.jar
+									cp org.eclipse.jdt.core.compiler.batch-*-SNAPSHOT-sources.jar ${DROP_DIR}/${BUILD_ID}/ecjsrc-$BUILD_ID.jar
+									popd
+									
+									# Gather buildnotes
+									pushd ${AGG_DIR}
+									buildnotesDir=${DROP_DIR}/${BUILD_ID}/buildnotes
+									mkdir -p $buildnotesDir
+									find . -name buildnotes_*.html -exec rsync '{}' $buildnotesDir \\;
+									popd
+									
+									# Gather compilelogs
+									pushd ${AGG_DIR}
+									compilelogsDir=${DROP_DIR}/${BUILD_ID}/compilelogs/plugins
+									for log in $(find ${AGG_DIR} -name "compilelogs" -type d ); do
+										targetDir=$( dirname $log )
+										if [ ! -r $targetDir/MANIFEST.MF ]; then
+											echo "** Failed to process $log in $targetDir. Likely compile error. Will backup to source MANIFEST.MF in directory containing target."
+											targetDir=$( dirname $targetDir )
+											if [ ! -r $targetDir/META-INF/MANIFEST.MF ]; then
+												echo "**Failed to process $log in $targetDir."
+											else
+												bundleId=$( grep Bundle-SymbolicName $targetDir/META-INF/MANIFEST.MF | cut -f2 -d" " | cut -f1 -d\\; | tr -d '\\f\\r\\n\\t' )
+												bundleVersion=$( grep Bundle-Version $targetDir/META-INF/MANIFEST.MF | cut -f2 -d" " | tr -d '\\f\\r\\n\\t' )
+												mkdir -p $compilelogsDir/${bundleId}_${bundleVersion}
+												rsync -vr $log/ $compilelogsDir/${bundleId}_${bundleVersion}/
+											fi
+										else
+											bundleId=$( grep Bundle-SymbolicName $targetDir/MANIFEST.MF | cut -f2 -d" " | cut -f1 -d\\; | tr -d '\\f\\r\\n\\t' )
+											bundleVersion=$( grep Bundle-Version $targetDir/MANIFEST.MF | cut -f2 -d" " | tr -d '\\f\\r\\n\\t' )
+											mkdir -p $compilelogsDir/${bundleId}_${bundleVersion}
+											rsync -vr $log/ $compilelogsDir/${bundleId}_${bundleVersion}/
+										fi
+									done
+									popd
+									
+									# Verify compilelog
+									pushd ${DROP_DIR}/${BUILD_ID}
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.ant.core.antRunner \
+										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/helper.xml \
+										-data $CJE_ROOT/$TMP_DIR/workspace-verifyCompile \
+										-DcjeDir=$CJE_ROOT \
+										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
+										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
+										-DbuildLabel=$BUILD_ID \
+										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+										-v \
+										verifyCompile
+									popd
+									
+									# Wait for notarization before checksums and pages got generated.
+									wait
+									for f in $notarizeLogDir/*.log; do
+										echo $f
+										cat $f
+									done
+									
+									# Publish Eclipse
+									pushd $CJE_ROOT
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.ant.core.antRunner \
+										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/helper.xml \
+										-data $CJE_ROOT/$TMP_DIR/workspace-publish \
+										-DAGGR_DIR=${AGG_DIR} \
+										-DcjeDir=$CJE_ROOT \
+										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
+										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
+										-DbuildLabel=$BUILD_ID \
+										-DbuildDir=$BUILD_ID \
+										-DbuildRepo=$PLATFORM_REPO_DIR \
+										-DbuildType=$BUILD_TYPE \
+										-DpublishingContent=$ECLIPSE_BUILDER_DIR/eclipse/publishingFiles \
+										-DindexFileName=index.php \
+										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+										-v \
+										publish
+									popd
+								'''
 							}
 						}
 						stage('Generate Repo reports') {
@@ -314,7 +463,7 @@ pipeline {
 										-data $CJE_ROOT/$TMP_DIR/workspace-report -vmargs -Xmx1g \
 										-DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$BASEBUILD_ID \
 										-DreportRepoDir=${PLATFORM_REPO_DIR} \
-										-DreportOutputDir=${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}/buildlogs
+										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
 								'''
 							}
 						}
@@ -322,23 +471,23 @@ pipeline {
 							steps {
 								sh '''#!/bin/bash -xe
 									source $CJE_ROOT/buildproperties.shsource
-									pushd $CJE_ROOT/$DROP_DIR/$BUILD_ID
+									pushd ${DROP_DIR}/${BUILD_ID}
 									$BASE_BUILDER_ECLIPSE_EXE \
 										-application org.eclipse.ant.core.antRunner \
 										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml \
 										-data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
 										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
-										-DbuildDirectory=$CJE_ROOT/$DROP_DIR/$BUILD_ID \
+										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
 										-DbuildId=$BUILD_ID \
 										-DbuildLabel=$BUILD_ID \
-										-DbuildWorkingArea=$CJE_ROOT/$AGG_DIR \
+										-DbuildWorkingArea=${AGG_DIR} \
 										-DpreviousBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
 										-DpreviousBaselineName=Eclipse-SDK-$PREVIOUS_RELEASE_VER \
 										-DpreviousBaselineFilename=eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
 										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
 										apiToolsReports
 									popd
-									rm -rf $CJE_ROOT/$DROP_DIR/$BUILD_ID/apitoolingreference
+									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
 								'''
 							}
 						}
@@ -346,7 +495,7 @@ pipeline {
 							steps {
 								sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 									sh '''#!/bin/bash -xe
-										dropDir=${CJE_ROOT}/${DROP_DIR}/${BUILD_ID}
+										dropDir=${DROP_DIR}/${BUILD_ID}
 										if [ -n "${COMPARATOR_ERRORS_SUBJECT}" ]; then
 											echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>" > ${dropDir}/buildUnstable
 										fi
@@ -366,20 +515,67 @@ pipeline {
 								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
 							}
 							steps {
-								dir("${CJE_ROOT}/mbscripts") {
-									sh '''#!/bin/bash -xe
-										mkdir -p $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
-										cp $CJE_ROOT/buildproperties.* $CJE_ROOT/$EQUINOX_DROP_DIR/$BUILD_ID
-										./mb310_gatherEquinoxParts.sh $CJE_ROOT/buildproperties.shsource 2>&1
-									'''
-								}
+								sh '''#!/bin/bash -xe
+									mkdir -p ${EQUINOX_DROP_DIR}/${BUILD_ID}
+									cp $CJE_ROOT/buildproperties.* ${EQUINOX_DROP_DIR}/${BUILD_ID}
+									source $CJE_ROOT/buildproperties.shsource
+									
+									# Gather Equinox Starter Kit
+									for file in $ECLIPSE_BUILDER_DIR/equinox.starterkit.product/target/products/*; do
+										if [[ "$file" =~ /org.eclipse.rt.osgistarterkit.product-([^.]+).([^.]+).([^.]+).(.*)$ ]]; then
+											cp ${file} ${EQUINOX_DROP_DIR}/${BUILD_ID}/EclipseRT-OSGi-StarterKit-$BUILD_ID-${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]}.${BASH_REMATCH[4]}
+										fi
+									done
+									
+									notarizeLogDir=$CJE_ROOT/notarizeEqLog
+									mkdir -p $notarizeLogDir
+									pushd ${EQUINOX_DROP_DIR}/${BUILD_ID}
+									(/bin/bash ${CJE_ROOT}/scripts/notarizeMacApp.sh EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg > $notarizeLogDir/equinoxX64.log 2>&1)&
+									popd
+									
+									# Gather Equinox SDK
+									cp ${ECLIPSE_BUILDER_DIR}/equinox-sdk/target/equinox-sdk-*-SNAPSHOT.zip ${EQUINOX_DROP_DIR}/${BUILD_ID}/equinox-SDK-$BUILD_ID.zip
+									pushd ${EQUINOX_DROP_DIR}/${BUILD_ID}
+										unzip -o -j equinox-SDK-$BUILD_ID.zip plugins/*.jar -x plugins/*.source_*
+									popd
+									
+									# Wait for notarization to complete
+									wait
+									for f in $notarizeLogDir/*.log; do
+										echo $f
+										cat $f
+									done
+									
+									# Publish Equinox
+									pushd $CJE_ROOT
+									mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.ant.core.antRunner \
+										-buildfile $ECLIPSE_BUILDER_DIR/equinox/helper.xml \
+										-data $CJE_ROOT/$TMP_DIR/workspace-publishEquinox \
+										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
+										-DbuildDir=$BUILD_ID \
+										-DbuildDirectory=${EQUINOX_DROP_DIR} \
+										-DbuildId=$BUILD_ID \
+										-DbuildRepo=$PLATFORM_REPO_DIR \
+										-DbuildType=$BUILD_TYPE \
+										-DpostingDirectory=${DROP_DIR}/$BUILD_ID \
+										-DequinoxPostingDirectory=${EQUINOX_DROP_DIR} \
+										-DeqpublishingContent=$ECLIPSE_BUILDER_DIR/equinox/publishingFiles \
+										-DindexFileName=index.php \
+										-Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \
+										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+										-v \
+										publish
+									popd
+								'''
 							}
 						}
 						stage('Promote Equinox') {
 							steps {
 								sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 									sh '''#!/bin/bash -xe
-										dropDir=${CJE_ROOT}/${EQUINOX_DROP_DIR}/${BUILD_ID}
+										dropDir=${EQUINOX_DROP_DIR}/${BUILD_ID}
 										if [ -n "${COMPARATOR_ERRORS_SUBJECT}" ]; then
 											echo "<p>This build has been marked unstable due to <a href='https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt'>unanticipated comparator errors</a></p>" > ${dropDir}/buildUnstable
 										fi
