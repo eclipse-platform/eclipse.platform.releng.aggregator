@@ -11,6 +11,7 @@
  *
  *  Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Hannes Wellmann - Convert to plain Java scripts
  *******************************************************************************/
 
 import java.io.BufferedReader;
@@ -22,6 +23,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,9 +35,16 @@ import java.util.regex.Pattern;
  */
 public class ComparatorSummaryExtractor {
 
-	public static final String BUILD_DIRECTORY_PROPERTY = "builddirectory";
-	public static final String COMPARATOR_REPO_PROPERTY = "comparatorRepo";
 	private static final String EOL = System.lineSeparator();
+
+	public static void main(String[] args) throws IOException {
+		ComparatorSummaryExtractor extractor = new ComparatorSummaryExtractor();
+		extractor.buildDirectory = Objects.requireNonNull(System.getProperty("buildDirectory"),
+				"Not set: buildDirectory");
+		extractor.comparatorRepo = Objects.requireNonNull(System.getProperty("comparatorRepo"),
+				"Not set: comparatorRepo");
+		extractor.processBuildfile();
+	}
 
 	private record LogEntry(String name, List<String> reasons, List<String> info) {
 
@@ -85,52 +94,44 @@ public class ComparatorSummaryExtractor {
 		return result;
 	}
 
-	public String getBuildDirectory() {
-		// if not set explicitly, see if its a system property
-		if (buildDirectory == null) {
-			buildDirectory = System.getProperty(BUILD_DIRECTORY_PROPERTY);
-		}
-		return buildDirectory;
-	}
-
 	private String getInputFilename() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + "mb060_run-maven-build_output.txt";
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + "mb220_buildSdkPatch.sh.log";
 	}
 
 	private String getOutputFilenameDoc() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
 				+ "buildtimeComparatorDocBundle.log.txt";
 	}
 
 	private String getOutputFilenameFull() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
 				+ "buildtimeComparatorFull.log.txt";
 	}
 
 	private String getOutputFilenameOther() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
 				+ "buildtimeComparatorUnanticipated.log.txt";
 	}
 
 	private String getOutputFilenameSign() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
 				+ "buildtimeComparatorSignatureOnly.log.txt";
 	}
 
 	private String getOutputFilenameSignWithInnerJar() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
 				+ "buildtimeComparatorSignatureOnlyWithInnerJar.log.txt";
 	}
 
 	private String getOutputFilenameJDTCore() {
-		return getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
+		return buildDirectory + "/" + BUILD_LOGS_DIRECTORY + "/" + COMPARATOR_LOGS_DIRECTORY + "/"
 				+ "buildtimeComparatorJDTCore.log.txt";
 	}
 
 	public void processBuildfile() throws IOException {
 
 		// Make sure directory exists
-		File outputDir = new File(getBuildDirectory() + "/" + BUILD_LOGS_DIRECTORY, COMPARATOR_LOGS_DIRECTORY);
+		File outputDir = new File(buildDirectory + "/" + BUILD_LOGS_DIRECTORY, COMPARATOR_LOGS_DIRECTORY);
 		if (!outputDir.exists()) {
 			outputDir.mkdirs();
 		}
@@ -219,11 +220,9 @@ public class ComparatorSummaryExtractor {
 
 	private void writeHeader(final BufferedWriter output) throws IOException {
 		output.write("Comparator differences from current build" + EOL);
-		output.write("\t" + getBuildDirectory() + EOL);
-		if (comparatorRepo != null) {
-			output.write("compared to reference repo at " + EOL);
-			output.write("\t" + getComparatorRepo() + EOL + EOL);
-		}
+		output.write("\t" + buildDirectory + EOL);
+		output.write("compared to reference repo at " + EOL);
+		output.write("\t" + comparatorRepo + EOL + EOL);
 	}
 
 	private boolean jdtCore(final LogEntry newEntry) {
@@ -285,10 +284,6 @@ public class ComparatorSummaryExtractor {
 		return result;
 	}
 
-	public void setBuildDirectory(final String buildDirectory) {
-		this.buildDirectory = buildDirectory;
-	}
-
 	private void writeEntry(int thistypeCount, final Writer output, final LogEntry newEntry) throws IOException {
 
 		output.write(thistypeCount + ".  " + newEntry.name() + EOL);
@@ -301,13 +296,5 @@ public class ComparatorSummaryExtractor {
 			output.write(info + EOL);
 		}
 		output.write(EOL);
-	}
-
-	public String getComparatorRepo() {
-		return comparatorRepo;
-	}
-
-	public void setComparatorRepo(String comparatorRepo) {
-		this.comparatorRepo = comparatorRepo;
 	}
 }
