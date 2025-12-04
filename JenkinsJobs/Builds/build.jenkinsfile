@@ -424,6 +424,33 @@ pipeline {
 										verifyCompile
 									popd
 									
+									# Generate repository reports
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.cbi.p2repo.analyzers.repoReport \
+										-data $CJE_ROOT/$TMP_DIR/workspace-report -vmargs -Xmx1g \
+										-DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$BASEBUILD_ID \
+										-DreportRepoDir=${PLATFORM_REPO_DIR} \
+										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
+									
+									# Generate API-tools reports
+									pushd ${DROP_DIR}/${BUILD_ID}
+									$BASE_BUILDER_ECLIPSE_EXE \
+										-application org.eclipse.ant.core.antRunner \
+										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml \
+										-data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
+										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
+										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
+										-DbuildId=$BUILD_ID \
+										-DbuildLabel=$BUILD_ID \
+										-DbuildWorkingArea=${AGG_DIR} \
+										-DpreviousBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
+										-DpreviousBaselineName=Eclipse-SDK-$PREVIOUS_RELEASE_VER \
+										-DpreviousBaselineFilename=eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
+										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+										apiToolsReports
+									popd
+									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
+									
 									# Wait for notarization before checksums and pages got generated.
 									wait
 									for f in $notarizeLogDir/*.log; do
@@ -454,44 +481,7 @@ pipeline {
 								'''
 							}
 						}
-						stage('Generate Repo reports') {
-							steps {
-								sh '''#!/bin/bash -xe
-									source $CJE_ROOT/buildproperties.shsource
-									$BASE_BUILDER_ECLIPSE_EXE \
-										-application org.eclipse.cbi.p2repo.analyzers.repoReport \
-										-data $CJE_ROOT/$TMP_DIR/workspace-report -vmargs -Xmx1g \
-										-DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$BASEBUILD_ID \
-										-DreportRepoDir=${PLATFORM_REPO_DIR} \
-										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
-								'''
-							}
-						}
-						stage('Generate API tools reports') {
-							steps {
-								sh '''#!/bin/bash -xe
-									source $CJE_ROOT/buildproperties.shsource
-									pushd ${DROP_DIR}/${BUILD_ID}
-									$BASE_BUILDER_ECLIPSE_EXE \
-										-application org.eclipse.ant.core.antRunner \
-										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml \
-										-data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
-										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
-										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
-										-DbuildId=$BUILD_ID \
-										-DbuildLabel=$BUILD_ID \
-										-DbuildWorkingArea=${AGG_DIR} \
-										-DpreviousBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
-										-DpreviousBaselineName=Eclipse-SDK-$PREVIOUS_RELEASE_VER \
-										-DpreviousBaselineFilename=eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
-										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-										apiToolsReports
-									popd
-									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
-								'''
-							}
-						}
-						stage('Promote Eclipse platform') {
+						stage('Promote Eclipse') {
 							steps {
 								sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 									sh '''#!/bin/bash -xe
