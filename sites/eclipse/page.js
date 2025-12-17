@@ -111,12 +111,35 @@ function formatBuildDate(date) {
 const runtimeFormat = new Intl.DurationFormat("en", { style: "short" })
 
 function formatRuntime(runtime) {
-    const duration = Temporal.Duration.from({ seconds: Math.trunc(runtime) });
-    return runtimeFormat.format(duration.round({
-        largestUnit: "hours",
-        smallestUnit: duration.seconds >= 3600 ? "minutes" : "seconds"
-    }));
-
+    // Check if Temporal API is available (not supported in all browsers yet)
+    if (typeof Temporal !== 'undefined' && Temporal.Duration) {
+        try {
+            const duration = Temporal.Duration.from({ seconds: Math.trunc(runtime) });
+            return runtimeFormat.format(duration.round({
+                largestUnit: "hours",
+                smallestUnit: duration.seconds >= 3600 ? "minutes" : "seconds"
+            }));
+        } catch (e) {
+            // Fall through to fallback implementation
+        }
+    }
+    
+    // Fallback implementation for browsers without Temporal support
+    const totalSeconds = Math.trunc(runtime);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) {
+        // For durations >= 1 hour, show hours and minutes
+        return `${hours} hr, ${minutes} min`;
+    } else if (minutes > 0) {
+        // For durations < 1 hour but >= 1 minute, show minutes and seconds
+        return `${minutes} min, ${seconds} sec`;
+    } else {
+        // For durations < 1 minute, show only seconds
+        return `${seconds} sec`;
+    }
 }
 
 function fetchAllJSON(urls) {
