@@ -108,23 +108,23 @@ function formatBuildDate(date) {
     return BUILD_DATE_FORMAT.format(new Date(date))
 }
 
-const runtimeFormat = new Intl.DurationFormat("en", { style: "short" })
-
 function formatRuntime(runtime) {
-    // Check if Temporal API is available (not supported in all browsers yet)
-    if (typeof Temporal !== 'undefined' && Temporal.Duration) {
+    // Check if both Temporal and Intl.DurationFormat APIs are available (not supported in all browsers yet)
+    if (typeof Temporal !== 'undefined' && Temporal.Duration && typeof Intl.DurationFormat !== 'undefined') {
         try {
-            const duration = Temporal.Duration.from({ seconds: Math.trunc(runtime) });
+            const totalSeconds = Math.trunc(runtime);
+            const duration = Temporal.Duration.from({ seconds: totalSeconds });
+            const runtimeFormat = new Intl.DurationFormat("en", { style: "short" });
             return runtimeFormat.format(duration.round({
                 largestUnit: "hours",
-                smallestUnit: duration.seconds >= 3600 ? "minutes" : "seconds"
+                smallestUnit: totalSeconds >= 3600 ? "minutes" : "seconds"
             }));
         } catch (e) {
             // Fall through to fallback implementation
         }
     }
     
-    // Fallback implementation for browsers without Temporal support
+    // Fallback implementation for browsers without Temporal/DurationFormat support
     const totalSeconds = Math.trunc(runtime);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
