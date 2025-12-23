@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,13 +124,22 @@ public final class Screenshots {
     }
 
     private static File getJunitReportOutput() {
-        String[] args = Platform.getCommandLineArgs();
-        for (int i = 0; i < args.length - 1; i++) {
-            if ("-junitReportOutput".equals(args[i])) { // see library.xml and org.eclipse.test.EclipseTestRunner
-                return new File(args[i + 1]).getAbsoluteFile();
-            }
-        }
-        return null;
+		boolean platformAvailable = false;
+		try {
+			Class.forName("org.eclipse.core.runtime.Platform", false, Screenshots.class.getClassLoader());
+			platformAvailable = true;
+		} catch (ClassNotFoundException e) {
+			platformAvailable = false;
+		}
+		if (platformAvailable) {
+			String[] args = Platform.getCommandLineArgs();
+			for (int i = 0; i < args.length - 1; i++) {
+				if ("-junitReportOutput".equals(args[i])) { // see library.xml and org.eclipse.test.EclipseTestRunner
+					return new File(args[i + 1]).getAbsoluteFile();
+				}
+			}
+		}
+		return null;
     }
 
     /**
