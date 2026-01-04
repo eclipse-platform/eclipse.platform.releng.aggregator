@@ -43,6 +43,7 @@
 		<p>
 			<span id="test-completion-state">No</span> integration and unit test configurations are complete.
 		</p>
+		<p id="signOff-issue-container"></p>
 		<table id="tests-overview-table">
 			<thead>
 				<tr>
@@ -149,6 +150,13 @@
 				// Inject test completion state
 				document.getElementById('test-completion-state').innerHTML = `${completedTests} of ${testResults.length}`
 			})
+
+			if (build.signOffIssue) {
+				const signOffLabel = build.signOffIssue.replace('https://github.com/', '').replace('/issues/', '#')
+				const signOffSection = document.getElementById('signOff-issue-container')
+				signOffSection.innerHTML = `Any unit test failures below have been investigated and found to be test-related and to not affect the quality of the build.<br>
+				For details, see <a href="${build.signOffIssue}">${signOffLabel}</a>.`
+			}
 
 			// Inject resource files
 			const dataTables = Array.from(mainElement.getElementsByClassName("files-table"))
