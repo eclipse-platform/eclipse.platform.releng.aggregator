@@ -110,18 +110,20 @@
 	<script>
 		loadPageData('buildproperties.json', data => {
 			data.buildTypeName = getBuildTypeName(data)
-			data.updatesP2RepositoryComposite = `https://download.eclipse.org/eclipse/updates/${data.releaseShort}`
-			const buildID = data.identifier
-			const buildType = buildID.charAt(0)
-			if (buildType == 'I' || buildType == 'Y') {
-				data.updatesP2RepositoryComposite += `-${buildType}-builds`
-			}
-			if (buildType == 'S') {
-				data.updatesP2RepositoryComposite += '-I-builds'
-				const timestamp = buildID.substring(buildID.lastIndexOf('-') + 1, buildID.length)
-				data.updatesP2Repository = `${data.updatesP2RepositoryComposite}/I${timestamp.substring(0, 8)}-${timestamp.substring(8, 12)}`
-			} else {
-				data.updatesP2Repository = `${data.updatesP2RepositoryComposite}/${buildID}`
+			if (data.releaseShort) {
+				data.updatesP2RepositoryComposite = `https://download.eclipse.org/eclipse/updates/${data.releaseShort}`
+				const buildID = data.identifier
+				const buildType = buildID.charAt(0)
+				if (buildType == 'I' || buildType == 'Y') {
+					data.updatesP2RepositoryComposite += `-${buildType}-builds`
+				}
+				if (buildType == 'S') {
+					data.updatesP2RepositoryComposite += '-I-builds'
+					const timestamp = buildID.substring(buildID.lastIndexOf('-') + 1, buildID.length)
+					data.updatesP2Repository = `${data.updatesP2RepositoryComposite}/I${timestamp.substring(0, 8)}-${timestamp.substring(8, 12)}`
+				} else {
+					data.updatesP2Repository = `${data.updatesP2RepositoryComposite}/${buildID}`
+				}
 			}
 			return data
 		})

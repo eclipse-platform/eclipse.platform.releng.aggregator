@@ -104,6 +104,46 @@ function getCPUArchLabel(name) {
     }
 }
 
+function getPreliminaryPageData() {
+    const identifier = getIdentifierFromSiteLocation()
+    if (identifier) {
+        let data = { identifier: identifier }
+        if (identifier.startsWith('I') || identifier.startsWith('Y')) {
+            data.label = identifier
+        } else if (identifier.startsWith('S-') || identifier.startsWith('R-')) {
+            data.label = identifier.substring(2, identifier.indexOf('-', 2))
+            const versionEndIndex = Math.max(data.label.indexOf('M'), data.label.indexOf('RC'))
+            const version = versionEndIndex < 0 ? data.label : data.label.substring(0, versionEndIndex)
+            data.release = version.split('.').length === 2 ? (version + '.0') : version
+            data.releaseShort = data.release.substring(0, data.release.lastIndexOf('.'))
+        } else {
+            throw new Error(`Unexpected identifier: ${identifier}`)
+        }
+        if (!identifier.startsWith('Y')) { // Y-build's adapt their 'kind' to the targeted java version, which is therefore not constant
+            data.kind = 'Integration'
+        }
+        if (_dataGenerator) {
+            data = _dataGenerator(data)
+        }
+        Object.keys(data).forEach(k => data[k] == undefined && delete data[k]);
+        return data
+    }
+    return null
+}
+
+function getIdentifierFromSiteLocation() {
+    if (window.location.hostname === 'download.eclipse.org') {
+        const pathname = window.location.pathname
+        for (const prefix of ['/eclipse/downloads/drops4/', '/equinox/drops/']) {
+            if (pathname.startsWith(prefix)) {
+                const idEndingSlash = pathname.indexOf('/', prefix.length)
+                return pathname.substring(prefix.length, idEndingSlash > -1 ? idEndingSlash : pathname.length)
+            }
+        }
+    }
+    return null
+}
+
 const BUILD_DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'UTC',
     year: 'numeric',
@@ -173,8 +213,10 @@ function fetchAllJSON(urls) {
 }
 
 let _pageData = null
+let _dataGenerator = null
 
 function loadPageData(dataPath, dataGenerator = null) {
+    _dataGenerator = dataGenerator
     _pageData = fetch(dataPath).then(res => res.json())
     if (dataGenerator) {
         _pageData = _pageData.then(dataGenerator)
@@ -200,12 +242,20 @@ function generate() {
         }
 
         const generatedBody = generateBody();
+        // To reduce flickering, early resolve variables that can be derived from the build-drop's folder name
+        const preliminaryData = _pageData ? getPreliminaryPageData() : null
+        if (preliminaryData) {
+            resolveDataReferences(generatedBody, preliminaryData, true)
+        }
         document.body.replaceChildren(generatedBody);
 
         generateTOCItems(document.body) // assume no headers (for the TOC) are generated dynamically
 
         if (_pageData) {
             _pageData.then(data => {
+                if (preliminaryData) {
+                    verifyDataConsistency(preliminaryData, data)
+                }
                 const mainElement = document.body.querySelector('main')
                 const contentMain = mainElement.querySelector('main') // This is the main element of the calling html file
                 resolveDataReferences(document, data)
@@ -234,25 +284,45 @@ function generateTOCItems(mainElement) {
 
 const dataReferencePattern = /\${(?<path>[\w\-\.]+)}/g
 
-function resolveDataReferences(contextElement, contextData) {
+function resolveDataReferences(contextElement, contextData, lenient = false) {
     const dataElements = Array.from(contextElement.getElementsByClassName('data-ref'))
     for (const element of dataElements) {
-        element.classList.remove('data-ref') // Prevent multiple processing in subsequent passes with different context (therefore a copy is created from the list)
-        element.outerHTML = element.outerHTML.replaceAll(dataReferencePattern, (_match, pathGroup, _offset, _string) => {
-            return getValue(contextData, pathGroup)
+        const resolved = element.outerHTML.replaceAll(dataReferencePattern, (match, pathGroup, _offset, _string) => {
+            return getValue(contextData, pathGroup, lenient ? match : undefined)
         })
+        element.outerHTML = resolved
+        dataReferencePattern.lastIndex = 0 // reset lastIndex as RegExp.prototype.test() is stateful. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/test
+        if (!lenient || !dataReferencePattern.test(resolved)) {
+            // Prevent multiple processing in subsequent passes with different context (if no variables are contained anymore)
+            element.classList.remove('data-ref')
+        }
     }
 }
 
-function getValue(data, path) {
+function getValue(data, path, lenienceDefaultValue = undefined) {
     let value = data
     for (const key of path.split('.')) {
         if (!value.hasOwnProperty(key)) {
+            if (lenienceDefaultValue) {
+                return lenienceDefaultValue // just skip absent variables
+            }
             throw new Error(`Key '${key}' not found in ${JSON.stringify(value)}`)
         }
         value = value[key]
     }
     return value;
+}
+
+function verifyDataConsistency(preliminaryData, data) {
+    for (const key in preliminaryData) {
+        if (data[key] !== preliminaryData[key]) {
+            const msg = `Prelininary value of key '${key}' differes from loaded data.
+	                             preliminary - ${preliminaryData[key]},
+	                             loaded data - ${data[key]}`
+            logException(msg, msg)
+            throw new Error(msg)
+        }
+    }
 }
 
 function logException(message, loggedObject) {
