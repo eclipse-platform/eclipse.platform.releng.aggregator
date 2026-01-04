@@ -120,7 +120,7 @@ if (typeof Intl.DurationFormat !== 'undefined') {
 
 function formatRuntime(runtime) {
     const totalSeconds = Math.trunc(runtime);
-    
+
     // Try to use Temporal API if both Temporal and DurationFormat are available (not supported in all browsers yet)
     if (typeof Temporal !== 'undefined' && Temporal.Duration && runtimeFormat) {
         try {
@@ -133,12 +133,12 @@ function formatRuntime(runtime) {
             // Fall through to fallback implementation
         }
     }
-    
+
     // Fallback implementation for browsers without Temporal/DurationFormat support
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    
+
     if (hours > 0) {
         // For durations >= 1 hour, show hours and minutes
         return `${hours} hr, ${minutes} min`;
@@ -163,8 +163,11 @@ function fetchAllJSON(urls) {
 
 let pageData = null
 
-function loadPageData(dataPath) {
+function loadPageData(dataPath, dataGenerator = null) {
     pageData = fetch(dataPath).then(res => res.json())
+    if (dataGenerator) {
+        pageData = pageData.then(dataGenerator)
+    }
 }
 
 let contentPostProcessor = (_mainElement, _contentData) => {}

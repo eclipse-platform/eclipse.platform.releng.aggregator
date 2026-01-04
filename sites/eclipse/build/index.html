@@ -71,16 +71,14 @@
 		</h3>
 		<p>
 			To update your Eclipse installation to this development stream, you can use the software repository at
+			<br>
+			<code><a class="data-ref" href="${updatesP2RepositoryComposite}">${updatesP2RepositoryComposite}</a></code>
 		</p>
-		<ul>
-			<li><a class="data-ref" href="https://download.eclipse.org/eclipse/updates/${releaseShort}/">https://download.eclipse.org/eclipse/updates/${releaseShort}</a></li>
-		</ul>
 		<p>
 			To update your build to use this specific build, you can use the software repository at
+			<br>
+			<code><a class="data-ref" href="${updatesP2Repository}">${updatesP2Repository}</a></code>
 		</p>
-		<ul>
-			<li><a class="data-ref" href="https://download.eclipse.org/eclipse/updates/${releaseShort}/${identifier}/">https://download.eclipse.org/eclipse/updates/${releaseShort}/${identifier}</a></li>
-		</ul>
 		<table class="files-table" data-path="p2Repository"></table>
 
 		<h3 id="eclipse-sdk">Eclipse SDK
@@ -110,7 +108,22 @@
 
 	</main>
 	<script>
-		loadPageData('buildproperties.json')
+		loadPageData('buildproperties.json', data => {
+			data.updatesP2RepositoryComposite = `https://download.eclipse.org/eclipse/updates/${data.releaseShort}`
+			const buildID = data.identifier
+			const buildType = buildID.charAt(0)
+			if (buildType == 'I' || buildType == 'Y') {
+				data.updatesP2RepositoryComposite += `-${buildType}-builds`
+			}
+			if (buildType == 'S') {
+				data.updatesP2RepositoryComposite += `-I-builds`
+				const timestamp = buildID.substring(buildID.lastIndexOf('-') + 1, buildID.length)
+				data.updatesP2Repository = `${data.updatesP2RepositoryComposite}/I${timestamp.substring(0, 8)}-${timestamp.substring(8, 12)}`
+			} else {
+				data.updatesP2Repository = `${data.updatesP2RepositoryComposite}/${buildID}`
+			}
+			return data
+		})
 
 		contentPostProcessor = (mainElement, build) => {
 			document.title = `${build.label} - ${document.title}`
