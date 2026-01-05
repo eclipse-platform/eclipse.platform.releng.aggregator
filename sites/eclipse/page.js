@@ -55,6 +55,17 @@ function getBuildType(buildData) {
     return buildData.identifier.startsWith('Y') ? 'Y' : 'I'
 }
 
+function getBuildTypeName(buildData) {
+    const identifier = buildData.identifier
+    if (identifier.startsWith('R-')) {
+        return 'Release'
+    } else if (identifier.startsWith('S-')) {
+        return identifier.includes('RC') ? 'Release Candidate' : 'Stable'
+    } else {
+        return buildData.kind
+    }
+}
+
 function getWS(os) {
     if (os == 'win32') {
         return 'win32'

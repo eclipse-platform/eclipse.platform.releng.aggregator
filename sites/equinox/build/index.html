@@ -18,7 +18,7 @@
 	</div>
 
 	<main>
-		<h2>Equinox <span class="data-ref">${kind}</span> Build: <span class="data-ref">${label}</span></h2>
+		<h2>Equinox <span class="data-ref">${buildTypeName}</span> Build: <span class="data-ref">${label}</span></h2>
 		<p id="build-state-container"></p>
 
 		<span id="build-timestamp"></span>
@@ -65,7 +65,10 @@
 
 	</main>
 	<script>
-		loadPageData('buildproperties.json')
+		loadPageData('buildproperties.json', data => {
+			data.buildTypeName = getBuildTypeName(data)
+			return data
+		})
 
 		contentPostProcessor = (mainElement, build) => {
 			document.title = `Equinox - ${build.label}`
