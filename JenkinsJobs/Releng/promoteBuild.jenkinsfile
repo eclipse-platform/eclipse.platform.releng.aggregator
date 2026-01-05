@@ -352,18 +352,10 @@ EOF
 	utilities.modifyJSON('buildproperties.json') { buildProperties ->
 		buildProperties.identifier = newDropID
 		buildProperties.label = newBuildLabel
-	if ("${DL_TYPE}" == 'R') {
-		buildProperties.kind = 'Release'
-	} else if (newBuildLabel.contains('RC')) {
-		buildProperties.kind = 'Release Candidate'
-	} else if ("${DL_TYPE}" == 'S') {
-		buildProperties.kind = 'Stable'
-	} else {
-		error "Unexpected DL_TYPE value, ${DL_TYPE}"
-	}
-		buildProperties.values().each{ value ->
+		// Update filenames in lists
+		for (value in buildProperties.values()) {
 			if (value instanceof List) {
-				value.each{ fileData ->
+				for (fileData in value) {
 					if('name' in fileData) {
 						fileData.name = fileData.name.replace(oldBuildLabel, newBuildLabel)
 					}
