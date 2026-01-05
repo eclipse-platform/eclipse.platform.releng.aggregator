@@ -93,15 +93,15 @@ function getCPUArchLabel(name) {
     }
 }
 
-const BUILD_DATE_FORMAT = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    weekday: "short",
+const BUILD_DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    weekday: 'short',
     hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
+    hour: '2-digit',
+    minute: '2-digit',
 })
 
 function formatBuildDate(date) {
@@ -112,7 +112,7 @@ function formatBuildDate(date) {
 let runtimeFormat = null;
 if (typeof Intl.DurationFormat !== 'undefined') {
     try {
-        runtimeFormat = new Intl.DurationFormat("en", { style: "short" });
+        runtimeFormat = new Intl.DurationFormat('en', { style: 'short' });
     } catch (e) {
         // Intl.DurationFormat not available
     }
@@ -126,8 +126,8 @@ function formatRuntime(runtime) {
         try {
             const duration = Temporal.Duration.from({ seconds: totalSeconds });
             return runtimeFormat.format(duration.round({
-                largestUnit: "hours",
-                smallestUnit: totalSeconds >= 3600 ? "minutes" : "seconds"
+                largestUnit: 'hours',
+                smallestUnit: totalSeconds >= 3600 ? 'minutes' : 'seconds'
             }));
         } catch (e) {
             // Fall through to fallback implementation
@@ -161,12 +161,12 @@ function fetchAllJSON(urls) {
     return Promise.all(promises)
 }
 
-let pageData = null
+let _pageData = null
 
 function loadPageData(dataPath, dataGenerator = null) {
-    pageData = fetch(dataPath).then(res => res.json())
+    _pageData = fetch(dataPath).then(res => res.json())
     if (dataGenerator) {
-        pageData = pageData.then(dataGenerator)
+        _pageData = _pageData.then(dataGenerator)
     }
 }
 
@@ -189,12 +189,12 @@ function generate() {
         }
 
         const generatedBody = generateBody();
-        document.body.replaceChildren(...generatedBody);
+        document.body.replaceChildren(generatedBody);
 
         generateTOCItems(document.body) // assume no headers (for the TOC) are generated dynamically
 
-        if (pageData) {
-            pageData.then(data => {
+        if (_pageData) {
+            _pageData.then(data => {
                 const mainElement = document.body.querySelector('main')
                 const contentMain = mainElement.querySelector('main') // This is the main element of the calling html file
                 resolveDataReferences(document, data)
@@ -221,12 +221,12 @@ function generateTOCItems(mainElement) {
     }
 }
 
-const dataReferencePattern = /\${(?<path>[\w-\.]+)}/g
+const dataReferencePattern = /\${(?<path>[\w\-\.]+)}/g
 
 function resolveDataReferences(contextElement, contextData) {
-    const dataElements = Array.from(contextElement.getElementsByClassName("data-ref"))
+    const dataElements = Array.from(contextElement.getElementsByClassName('data-ref'))
     for (const element of dataElements) {
-        element.classList.remove("data-ref") // Prevent multiple processing in subsequent passes with different context (therefore a copy is created from the list)
+        element.classList.remove('data-ref') // Prevent multiple processing in subsequent passes with different context (therefore a copy is created from the list)
         element.outerHTML = element.outerHTML.replaceAll(dataReferencePattern, (_match, pathGroup, _offset, _string) => {
             return getValue(contextData, pathGroup)
         })
@@ -245,14 +245,14 @@ function getValue(data, path) {
 }
 
 function logException(message, loggedObject) {
-    document.body.prepend(...toElements(`<span>Failed to generate content: <span><b style="color: FireBrick">${message}</b><br/>`));
+    document.body.prepend(toElement(`<p>Failed to generate content: <b style="color: FireBrick">${message}</b></p>`));
     console.log(loggedObject);
 }
 
 function generateBody() {
     const hasHeadersForTOC = document.querySelector('h1[id], h2[id], h3[id], h4[id]') !== null;
     const col = hasHeadersForTOC ? 'col-md-18' : ' col-md-24';
-    return toElements(`
+    return toElement(`
 <div>
 	${generateHeader()}
 	<main id="content">
@@ -345,7 +345,7 @@ function generateMainContent() {
     if (main != null) {
         return main.outerHTML
     }
-    return "<main>The body specifies no content.</main>";
+    return '<main>The body specifies no content.</main>';
 }
 
 function generateHeader() {
@@ -444,7 +444,7 @@ function toElements(text) {
 function toElement(text) {
     const elements = toElements(text)
     if (elements.length != 1) {
-        throw new Error("Not exactly one element: " + elements.length)
+        throw new Error(`Not exactly one element: ${elements.length}`)
     }
     return elements[0]
 }
