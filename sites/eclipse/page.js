@@ -557,3 +557,126 @@ function prependChildren(element, id, ...children) {
     element.prepend(...children);
     return element;
 }
+
+// Collapsibles/accordion tables
+
+let _eventListenersAdded = false
+
+function activateCollapsiblesTable(table) {
+    for (const row of table.querySelectorAll('.collapsible-table-main-row')) {
+        row.onclick = () => openDetailsRow(row, true)
+    }
+    for (const row of table.querySelectorAll('.collapsible-table-details-row')) {
+        for (const cell of row.cells) {
+            cell.innerHTML = `
+<div class="collapsible-table-animation-wrapper">
+	<div style="overflow: hidden;">
+		<div class="collapsible-table-details-content">
+			${cell.innerHTML}
+		</div>
+	</div>
+</div>
+`
+        }
+    }
+    for (loaderElement of table.querySelectorAll('.data-loader')) {
+        loaderElement.innerHTML = `
+<div style="display:flex; align-items:center; gap: 12px; color: #666;">
+	<div class="data-loader-spinner"></div>
+	<span>Fetching compile logs...</span>
+</div>
+`
+    }
+
+    if (!_eventListenersAdded) {
+        window.addEventListener('load', checkAnchor)
+        window.addEventListener('hashchange', checkAnchor)
+        _eventListenersAdded = true
+    }
+
+    function openDetailsRow(mainRow, toggle, scrollTarget = null) {
+        const detailsRow = mainRow.nextElementSibling
+        const wrapper = detailsRow.querySelector('.collapsible-table-animation-wrapper')
+        if (wrapper && (toggle || !wrapper.classList.contains('open'))) {
+            wrapper.classList.toggle('open')
+            if (!detailsRow.classList.contains('is-loaded')) {
+                fetchAndApplyData(detailsRow, scrollTarget)
+            }
+        }
+    }
+
+    async function fetchAndApplyData(detailsRow, scrollTarget) {
+        try {
+            const AsyncFunction = async function() {}.constructor;
+            const dataCache = new Map()
+            for (loader of detailsRow.querySelectorAll('.data-loader')) {
+                const supplier = loader.getAttribute('data-supplier')
+                const processor = loader.getAttribute('data-processor')
+                let data = dataCache.get(supplier)
+                if (!data) {
+                    data = await new AsyncFunction('return ' + supplier)()
+                    dataCache.set(supplier, data)
+                }
+                const content = new Function('arg', 'return ' + processor)(data)
+                loader.innerHTML = content
+            }
+            detailsRow.classList.add('is-loaded')
+            if (scrollTarget) {
+                scrollTarget.scrollIntoView({ behavior: 'smooth' })
+            }
+        } catch (exception) {
+            detailsRow.querySelector('.collapsible-table-details-content').innerHTML = `<p style="color:red"><b>Failed to load data. Please check your connection.</b></p>`
+            logException(exception.message, exception)
+        }
+    }
+
+    function checkAnchor() {
+        const hash = window.location.hash
+        if (!hash) {
+            return
+        }
+        const id = hash.substring(1) // Remove '#' to get the ID
+        const element = document.getElementById(id)
+        if (element) {
+            const mainRow = element.closest('.collapsible-table-details-row').previousElementSibling
+            openDetailsRow(mainRow, false, element)
+            element.scrollIntoView({ behavior: 'smooth' })
+        }
+    }
+}
+
+// Copy link button
+
+function appendCopyLinkButton(code) {
+    return `
+<div style="display: flex;align-items: center;">
+	${code}
+	<button class="copy-icon" onclick="copyLink(this)" title="Copy link to clipboard">&#128279;</button>
+</div>
+`
+}
+
+function copyLink(button) {
+    const sectionId = button.previousElementSibling.id
+    const link = window.location.href.split('#')[0] + '#' + sectionId
+    navigator.clipboard.writeText(link).then(() => {
+        const originalText = button.innerText
+        button.innerHTML = '&#10004;'
+        setTimeout(() => { button.innerText = originalText }, 1000) // Restore symbol shortly later
+    })
+}
+
+// Code editor box
+
+function createCodeEditorBlock(line, content) {
+    return `
+<div class="code-editor-box">
+	<div class="code-editor-line">${line}</div>
+	<div class="code-editor-content">${content}</div>
+</div>
+`
+}
+
+function applyCodeMarker(severity, rawCode) {
+    return `<span class="code-marker" style="text-decoration-color: var(--marker-${severity})">${rawCode}</span>`
+}

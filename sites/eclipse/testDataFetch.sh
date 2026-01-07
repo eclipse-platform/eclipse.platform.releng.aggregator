@@ -19,6 +19,8 @@ if [ "$#" -ne 1 ]; then
 fi
 buildID=$1
 
+# This script Requires jq: https://jqlang.org/download/
+
 # Work from the directory containing the eclipse and equinox website
 cd $(dirname "$0")/..
 
@@ -27,22 +29,37 @@ find equinox -type f -name "*.json" -delete
 
 # Eclipse website
 buildDrop="https://download.eclipse.org/eclipse/downloads/drops4/${buildID}"
+rm -rf eclipse/build/compilelogs
+mkdir -p eclipse/build/compilelogs
+
 curl --fail -o eclipse/overview/data.json https://download.eclipse.org/eclipse/downloads/data.json
 curl --fail -o eclipse/build/buildproperties.json "${buildDrop}/buildproperties.json"
-curl --fail -o eclipse/build/compilerSummary.json "${buildDrop}/compilerSummary.json"
+curl --fail -o eclipse/build/compilelogs/logs.json "${buildDrop}/compilelogs/logs.json"
 curl --fail -o eclipse/build/gitLog.json "${buildDrop}/gitLog.json"
 curl --fail -o eclipse/build/buildlogs/logs.json "${buildDrop}/buildlogs/logs.json"
 
-# Download test results
-# Requires jq: https://jqlang.org/download/
-mkdir -p eclipse/build/testresults
+# Fetch test results
+rm -rf eclipse/build/testresults/*.json
 releaseShort=$(jq -r '.releaseShort' eclipse/build/buildproperties.json)
 testConfigurations=$(jq -r '.expectedTests[]' eclipse/build/buildproperties.json)
 for testConfig in ${testConfigurations//[[:space:]]/ }; do
 	filename="ep${releaseShort//./}I-unit-${testConfig}"
-	curl --fail -o eclipse/build/testresults/${filename}-summary.json "${buildDrop}/testresults/${filename}-summary.json"
-	curl --fail -o eclipse/build/testresults/${filename}.json "${buildDrop}/testresults/${filename}.json"
+	(curl --fail -o eclipse/build/testresults/${filename}-summary.json "${buildDrop}/testresults/${filename}-summary.json" || echo "Tests not yet completed: ${testConfig}")&
+	(curl --fail -o eclipse/build/testresults/${filename}.json "${buildDrop}/testresults/${filename}.json" || echo "Tests not yet completed: ${testConfig}")&
 done
+
+# Fetch compile logs
+compileLogs=$(jq -r 'keys[]' eclipse/build/compilelogs/logs.json)
+for log in ${compileLogs//[[:space:]]/ }; do
+	if [ "${log}" == 'note' ]; then
+		continue
+	fi
+	logPath="compilelogs/${log}"
+	mkdir -p $(dirname eclipse/build/${logPath})
+	(curl --fail -o eclipse/build/${logPath} "${buildDrop}/${logPath}")&
+done
+
+wait
 
 # Equinox website
 curl --fail -o equinox/overview/data.json https://download.eclipse.org/equinox/data.json

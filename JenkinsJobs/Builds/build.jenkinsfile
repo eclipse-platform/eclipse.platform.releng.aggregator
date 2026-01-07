@@ -388,33 +388,14 @@ pipeline {
 									
 									# Gather compilelogs
 									pushd ${AGG_DIR}
-									compilelogsDir=${DROP_DIR}/${BUILD_ID}/compilelogs/plugins
-									for log in $(find ${AGG_DIR} -name "compilelogs" -type d ); do
+									compilelogsDir=${DROP_DIR}/${BUILD_ID}/compilelogs
+									mkdir -p ${compilelogsDir}
+									for log in $(find . -name "compilelogs" -type d ); do
 										targetDir=$( dirname $log )
-										if [ ! -r $targetDir/MANIFEST.MF ]; then
-											echo "** Failed to process $log in $targetDir. Likely compile error. Will backup to source MANIFEST.MF in directory containing target."
-											targetDir=$( dirname $targetDir )
-											if [ ! -r $targetDir/META-INF/MANIFEST.MF ]; then
-												echo "**Failed to process $log in $targetDir."
-											else
-												bundleId=$( grep Bundle-SymbolicName $targetDir/META-INF/MANIFEST.MF | cut -f2 -d" " | cut -f1 -d\\; | tr -d '\\f\\r\\n\\t' )
-												bundleVersion=$( grep Bundle-Version $targetDir/META-INF/MANIFEST.MF | cut -f2 -d" " | tr -d '\\f\\r\\n\\t' )
-												mkdir -p $compilelogsDir/${bundleId}_${bundleVersion}
-												rsync -vr $log/ $compilelogsDir/${bundleId}_${bundleVersion}/
-											fi
-										else
-											bundleId=$( grep Bundle-SymbolicName $targetDir/MANIFEST.MF | cut -f2 -d" " | cut -f1 -d\\; | tr -d '\\f\\r\\n\\t' )
-											bundleVersion=$( grep Bundle-Version $targetDir/MANIFEST.MF | cut -f2 -d" " | tr -d '\\f\\r\\n\\t' )
-											mkdir -p $compilelogsDir/${bundleId}_${bundleVersion}
-											rsync -vr $log/ $compilelogsDir/${bundleId}_${bundleVersion}/
-										fi
+										fullName=$(awk -F '[:;[:space:]]+' '/^Bundle-SymbolicName/ {name=$2} /^Bundle-Version/ {version=$2} END {print name "_" version}' $targetDir/MANIFEST.MF)
+										cp -r "${log}" "${compilelogsDir}/${fullName}/"
 									done
 									popd
-									
-									# Verify compilelog
-									java \
-										-Dinput=${DROP_DIR}/${BUILD_ID}/compilelogs/plugins \
-										${WORKSPACE}/scripts/releng/CompileLogConverter.java
 									
 									# Generate repository reports
 									$BASE_BUILDER_ECLIPSE_EXE \

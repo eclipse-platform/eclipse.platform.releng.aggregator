@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
@@ -82,8 +81,7 @@ public class TestResultsGenerator {
 				errorCount = -2;
 			} else {
 				try {
-					DocumentBuilder builder = XmlProcessorFactoryRelEng.createDocumentBuilderWithErrorOnDOCTYPE();
-					Document document = builder.parse(fileName.toFile());
+					Document document = XmlProcessorFactoryRelEng.parseDocumentWithErrorOnDOCTYPE(fileName);
 					final NodeList elements = document.getElementsByTagName(elementName);
 
 					final int elementCount = elements.getLength();
@@ -196,8 +194,7 @@ public class TestResultsGenerator {
 
 		Set<String> testLogsSet = new TreeSet<>();
 
-		DocumentBuilder parser = XmlProcessorFactoryRelEng.createDocumentBuilderWithErrorOnDOCTYPE();
-		Document document = parser.parse(testManifestFile.toFile());
+		Document document = XmlProcessorFactoryRelEng.parseDocumentWithErrorOnDOCTYPE(testManifestFile);
 
 		// store a list of the test logs expected after testing
 		NodeList testLogList = document.getElementsByTagName("logFile");
