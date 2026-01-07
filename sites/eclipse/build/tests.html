@@ -54,39 +54,27 @@
 			<tbody id="test-results-summary"></tbody>
 		</table>
 
-		<h3 id="compiler-problems">Plugins containing compile errors or warnings</h3>
+		<h3 id="compiler-issues">Plugins containing compile warnings or infos</h3>
 		<p>
-			The table below shows the plugins in which errors or warnings were encountered.
-			Click on the jar file link to view its detailed report.
+			The table below shows the plugins in which warnings were encountered.
+			Click on the jar file's row to view its detailed report.
 		</p>
-		<table>
+		<table class="styled-table">
 			<thead>
 				<tr>
 					<th>Compile Logs (Jar Files)</th>
-					<th style="text-align: center">Errors</th>
-					<th style="text-align: center">Warnings</th>
+					<th style="text-align: center">General Warnings</th>
+					<th style="text-align: center">Access Warnings</th>
+					<th style="text-align: center">Infos</th>
 				</tr>
 			</thead>
-			<tbody id="compiler-warnings-summary"></tbody>
-		</table>
-
-		<h3>Plugins containing access errors or warnings</h3>
-		<table>
-			<thead>
-				<tr>
-					<th>Compile Logs (Jar Files)</th>
-					<th style="text-align: center">Forbidden Access</th>
-					<th style="text-align: center">Discouraged Access</th>
-					<th style="text-align: center">Info Warnings</th>
-				</tr>
-			</thead>
-			<tbody id="compiler-access-summary"></tbody>
+			<tbody id="compiler-issues-body"></tbody>
 		</table>
 	</main>
 
 	<script>
 		loadPageData('buildproperties.json')
-		const compilerSummary = fetch('compilerSummary.json').then(r => r.json())
+		const compilerSummary = fetch('compilelogs/logs.json').then(r => r.json())
 
 		contentPostProcessor = (mainElement, build) => {
 			document.title += ` for ${build.label}`
@@ -142,29 +130,126 @@
 		}
 
 		function injectCompilerSummaryTable(compilerSummary) {
-			const generalIssues = document.getElementById('compiler-warnings-summary')
-			const accessIssues = document.getElementById('compiler-access-summary')
-			for (const pluginName in compilerSummary) {
-				const issues = compilerSummary[pluginName]
-				const basicLink = `compilelogs/plugins/${issues.path}`
-				if (issues.errors || issues.warnings) {
-					const row = generalIssues.insertRow()
-					addLinkCell(row, basicLink, null, pluginName)
-					addLinkCell(row, basicLink, 'ERRORS', issues.errors)
-					addLinkCell(row, basicLink, 'OTHER_WARNINGS', issues.warnings)
-				}
-				if (issues.forbidden || issues.discouraged || issues.infos) {
-					const row = accessIssues.insertRow()
-					addLinkCell(row, basicLink, null, pluginName)
-					addLinkCell(row, basicLink, 'FORBIDDEN_WARNINGS', issues.forbidden)
-					addLinkCell(row, basicLink, 'DISCOURAGED_WARNINGS', issues.discouraged)
-					addLinkCell(row, basicLink, 'INFO_WARNINGS', issues.infos)
-				}
+			const compilerIssues = document.getElementById('compiler-issues-body')
+			for (const logFile in compilerSummary) {
+				const issues = compilerSummary[logFile]
+				const shortName = computePluginLabel(logFile)
+				// Summary row
+				const row = compilerIssues.insertRow()
+				row.classList.add('collapsible-table-main-row')
+				insertLeanCell(row, false).innerHTML = shortName
+				addLinkCell(row, `${shortName}--warnings`, issues.warnings)
+				addLinkCell(row, `${shortName}--access_warnings`, issues.access)
+				addLinkCell(row, `${shortName}--infos`, issues.infos)
+				// Details row (collapsed by default)
+				const detailsRow = compilerIssues.insertRow()
+				detailsRow.classList.add('collapsible-table-details-row')
+
+				const content = ''
+					+ (issues.warnings > 0 ? getDetailsContent(logFile, shortName, 'warnings') : '')
+					+ (issues.access > 0 ? getDetailsContent(logFile, shortName, 'access_warnings') : '')
+					+ (issues.infos > 0 ? getDetailsContent(logFile, shortName, 'infos') : '')
+
+				detailsRow.innerHTML = `<td colspan="${row.cells.length}">${content}</td>
+					`
+			}
+			activateCollapsiblesTable(compilerIssues)
+
+			function addLinkCell(row, fragment, value) {
+				insertLeanCell(row, true).innerHTML = value ? `<a href="#${fragment}">${value}</a>` : '0'
 			}
 
-			function addLinkCell(row, basicLink, fragment, value) {
-				const link = basicLink + (fragment ? ('#' + fragment) : '')
-				insertLeanCell(row, Boolean(fragment)).innerHTML = `<a href="${link}">${value ? value : 0}</a>`
+			function getDetailsContent(logFile, shortName, issueType) {
+				return appendCopyLinkButton(`<h4 id="${shortName}--${issueType}"><b>${issueType.toUpperCase().replace('_', ' ')} in org.eclipse.${shortName}</b></h4>`) + `
+				<div class="data-loader" data-supplier="parseCompileLogXML('${logFile}')" data-processor="generateCompileLog(arg,'${logFile}','${issueType}')"></div>
+				`
+			}
+		}
+
+		async function parseCompileLogXML(logFile) {
+			const url = `compilelogs/${logFile}`
+			const text = await (await fetch(url)).text()
+			return new DOMParser().parseFromString(text, 'text/xml');
+		}
+
+		function generateCompileLog(compileLogXML, logFile, issueType) {
+			let content = ''
+			for (const fileProblems of compileLogXML.getElementsByTagName('problems')) {
+				const source = fileProblems.parentNode
+				const sourceFileName = computeRelativeFilePath(source, logFile)
+				const warnings = parseInt(fileProblems.getAttribute('warnings'))
+				const infos = parseInt(fileProblems.getAttribute('infos'))
+				let counter = 0
+				let elements = ''
+				let severity;
+				for (problem of fileProblems.getElementsByTagName('problem')) {
+					severity = problem.getAttribute('severity')
+					const problemID = problem.getAttribute('id')
+					const line = parseInt(problem.getAttribute('line'))
+					const message = problem.querySelector('message').getAttribute('value')
+					const contextValue = problem.querySelector('source_context').getAttribute('value')
+					const sourceStart = parseInt(problem.querySelector('source_context').getAttribute('sourceStart'))
+					const sourceEnd = parseInt(problem.querySelector('source_context').getAttribute('sourceEnd')) + 1
+					const sourceCodeBefore = contextValue.substring(0, sourceStart)
+					const sourceCode = contextValue.substring(sourceStart, sourceEnd);
+					const sourceCodeAfter = contextValue.substring(sourceEnd, contextValue.length);
+					if (isMatchingIssue(issueType, severity, problemID)) {
+						elements += `
+						<tr class="no-zebra-striping">
+							<td style="padding-top:6px; padding-bottom:8px; padding-left:4px; padding-right:4px;">
+								<b>${++counter}.</b> <i>${message}</i>
+								${createCodeEditorBlock(line, `${sourceCodeBefore}${applyCodeMarker(severity.toLowerCase(), sourceCode)}${sourceCodeAfter}`)}
+							</td>
+						</tr>
+						`
+					}
+				}
+				if (counter > 0) {
+					content += `
+						<h5><b><code>${sourceFileName}</code>: ${counter}&nbsp;${severity.toLowerCase()}${counter > 1 ? 's' : ''}</b></h5>
+						<table><tbody>
+							${elements}
+						</tbody></table>
+					`
+				}
+			}
+			return content
+		}
+
+		function computePluginLabel(logFile) {
+			const pluginName = logFile.endsWith('/@dot.xml')
+				? logFile.substring(0, logFile.indexOf('_'))
+				: logFile.substring(0, logFile.indexOf('_')) + logFile.substring(logFile.indexOf('/'), logFile.length).replace(/\.jar\.xml$/, '')
+			const shortName = pluginName.replace(/^org\.eclipse\./, '')
+			return shortName
+		}
+
+		function computeRelativeFilePath(source, logFile) {
+			const filePath = source.getAttribute('path')
+			const outputRoot = source.getAttribute('output').replace(/\/target\/classes$/, '')
+			if (filePath.startsWith(outputRoot)) {
+				return filePath.substring(outputRoot.length + 1, filePath.length)
+			}
+			// Some projects need special handling: SWT fragments and nested jars
+			let pluginName = logFile.substring(0, logFile.indexOf('_')) // also handles nested jars
+			if (pluginName.startsWith('org.eclipse.swt.cocoa.') || pluginName.startsWith('org.eclipse.swt.gtk.') || pluginName.startsWith('org.eclipse.swt.win32.')) {
+				pluginName = 'org.eclipse.swt'
+			}
+			let pluginNameIndex = filePath.lastIndexOf(pluginName)
+			if (pluginNameIndex < 0) {
+				throw new Error(`Plugin name <${pluginName}>not found in path: ${filePath}`)
+			}
+			return filePath.substring(pluginNameIndex + pluginName.length + 1, filePath.length)
+		}
+
+		const apiWarningIDs = new Set(['ForbiddenReference', 'DiscouragedReference'])
+
+		function isMatchingIssue(expectedType, severity, problemId) {
+			switch (expectedType) {
+				case "warnings": return severity == 'WARNING' && !apiWarningIDs.has(problemId)
+				case "access_warnings": return severity == 'WARNING' && apiWarningIDs.has(problemId)
+				case "infos": return severity == 'INFO'
+				default: throw new Error(`Unexpected type: ${expectedType}`)
 			}
 		}
 
