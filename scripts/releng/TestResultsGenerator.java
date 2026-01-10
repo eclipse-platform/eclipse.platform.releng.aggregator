@@ -15,6 +15,8 @@
  *     Hannes Wellmann - split TestResultsGenerator and CompilerSummaryGenerator
  *******************************************************************************/
 
+import static utilities.XmlProcessorFactoryRelEng.elements;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +35,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -69,14 +70,14 @@ public class TestResultsGenerator {
 	 * if the file is missing or something is wrong with the file (such as is
 	 * incomplete).
 	 */
-	private int countErrors(Path fileName) throws ParserConfigurationException, SAXException, IOException {
+	private void collectErrors(Path fileName, JSON.Object test)
+			throws ParserConfigurationException, SAXException, IOException {
 		int errorCount = -99;
 		// File should exists, since we are "driving" this based on file list
 		// ... but, just in case.
 		if (!Files.exists(fileName)) {
 			errorCount = -1;
 		} else {
-
 			if (Files.size(fileName) == 0) {
 				errorCount = -2;
 			} else {
@@ -93,16 +94,16 @@ public class TestResultsGenerator {
 						// need to
 						// loop through each to count all errors and failures.
 						errorCount = 0;
-						for (int i = 0; i < elementCount; i++) {
-							final Element element = (Element) elements.item(i);
-							final NamedNodeMap attributes = element.getAttributes();
-							Node aNode = attributes.getNamedItem("errors");
-							if (aNode != null) {
-								errorCount = errorCount + Integer.parseInt(aNode.getNodeValue());
-							}
-							aNode = attributes.getNamedItem("failures");
-							errorCount = errorCount + Integer.parseInt(aNode.getNodeValue());
+						JSON.Array suites = JSON.Array.create();
+						for (Element element : elements(elements)) {
+							String errorsValue = element.getAttribute("errors");
+							String failuresValue = element.getAttribute("failures");
+							errorCount += errorsValue.isEmpty() ? 0 : Integer.parseInt(errorsValue);
+							errorCount += failuresValue.isEmpty() ? 0 : Integer.parseInt(failuresValue);
+							String testSuiteFQN = element.getAttribute("package") + "." + element.getAttribute("name");
+							suites.add(JSON.String.create(testSuiteFQN));
 						}
+						test.add("suites", suites);
 					}
 				} catch (final IOException e) {
 					println("ERROR: IOException: " + fileName);
@@ -118,7 +119,7 @@ public class TestResultsGenerator {
 				}
 			}
 		}
-		return errorCount;
+		test.add("errors", JSON.Integer.create(errorCount));
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -160,14 +161,12 @@ public class TestResultsGenerator {
 		for (Path junitResultsFile : allFiles) {
 			checkIfMissingFromTestManifestFile(junitResultsFile);
 			String filename = junitResultsFile.getFileName().toString();
-			int errorCount = countErrors(junitResultsFile);
-			String displayName = computeDisplayName(computeCoreName(filename));
-			String configuration = computeConfig(filename);
-
 			JSON.Object test = JSON.Object.create();
-			test.add("errors", JSON.Integer.create(errorCount));
+			collectErrors(junitResultsFile, test);
+			String testPluginName = computeCoreName(filename);
+			String configuration = computeConfig(filename);
 			JSON.Object summary = summaries.computeIfAbsent(configuration, c -> JSON.Object.create());
-			summary.add(displayName, test);
+			summary.add(testPluginName, test);
 		}
 
 		println("DEBUG: End: Parsing XML JUnit results files");
@@ -240,15 +239,6 @@ public class TestResultsGenerator {
 		int firstUnderscorepos = fname.indexOf('_');
 		// should not occur, but if it does, we will take whole name
 		return firstUnderscorepos == -1 ? fname : fname.substring(0, firstUnderscorepos);
-	}
-
-	private static final String ECLIPSE_PREFIX = "org.eclipse.";
-
-	private static String computeDisplayName(String name) {
-		if (name.startsWith(ECLIPSE_PREFIX)) {
-			return name.substring(ECLIPSE_PREFIX.length());
-		}
-		throw new IllegalArgumentException();
 	}
 
 	private static String computeConfig(String fname) {

@@ -22,7 +22,7 @@
 		<ul class="data-ref">
 			<li><a href="buildlogs/reporeports/index.html"><b>Repository Reports </b></a></li>
 			<li><a href="buildlogs/logs.html"><b>Build and Release Engineering Logs</b></a></li>
-			<li><a href="testresults/"><b>Test Console Logs</b></a></li> <!-- TODO: Once testresults/logs.html is implementd change this link to it -->
+			<li><a href="testresults/logs.html"><b>Test Console Logs</b></a></li>
 			<li><a href="apitools/analysis/html/index.html"><b>API Tools Version Verification Report</b></a>
 				This tool verifies the versions of the plugins against Eclipse ${previousReleaseAPILabel}
 				(Exclusions listed in <a href="https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob//eclipse.platform.releng.tychoeclipsebuilder/eclipse/apiexclude/exclude_list_external.txt">apiexclude/exclude_list_external.txt</a>).
@@ -39,7 +39,7 @@
 		</p>
 		<p>
 			A negative number or "DNF" means the test "Did Not Finish" for unknown reasons and hence no results page is available.
-			In that case, more information can sometimes be found in the <a href="testresults">console logs</a>. <!-- TODO: Once testresults/logs.html is implementd change this link to testresults/logs.html#console -->
+			In that case, more information can sometimes be found in the <a href="testresults/logs.html#console">console logs</a>.
 		</p>
 		<table>
 			<thead>
@@ -96,9 +96,7 @@
 		}
 
 		function injectTestResultsSummaryTable(build) {
-			const jobNamePrefix = getJenkinsTestJobNamePrefix(build)
-
-			const testResultsSummaries = fetchAllJSON(build.expectedTests.map(c => `testresults/${jobNamePrefix}-${c}-summary.json`))
+			const testResultsSummaries = fetchAllTestSummaryFiles(build, 'testresults/')
 			const testResultsTable = document.getElementById('test-results-summary')
 			const testsHeadlineCell = document.getElementById('tests-header')
 			const testConfigsHeadline = document.getElementById('test-configurations-headline')
@@ -106,17 +104,12 @@
 			testsHeadlineCell.colSpan = expectedTestConfigsCount
 			const expectedTestsLongNames = []
 			for (const testConfig of build.expectedTests) {
-				const [os, arch, javaPart] = testConfig.split('-')
-				if (!javaPart.startsWith('java')) {
-					throw new Error('Unexpected java version: ' + testConfig)
-				}
-				const javaVersion = javaPart.substring(4)
+				const [os, ws, arch, javaVersion] = parseTestConfiguration(testConfig)
 				const headerCell = document.createElement('th');
-				headerCell.innerHTML = `${getOSLabel(testConfig)}<br/>${getCPUArchLabel(testConfig)}<br/>Java ${javaVersion}`
+				headerCell.innerHTML = `${getOSLabel(os)}<br/>${getCPUArchLabel(arch)}<br/>Java ${javaVersion}`
 				headerCell.style = 'text-align:center'
 				testConfigsHeadline.appendChild(headerCell)
-				const ws = getWS(os)
-				expectedTestsLongNames.push(`${jobNamePrefix}-${testConfig}_${os}.${ws}.${arch}_${javaVersion}`)
+				expectedTestsLongNames.push(getLongTestConfigurationName(testConfig, build))
 			}
 			testResultsSummaries.then(testSummaries => {
 				const allTestNames = new Set();
@@ -128,13 +121,13 @@
 				sortedTestNames.sort()
 				for (const testName of sortedTestNames) {
 					const testRow = testResultsTable.insertRow()
-					insertLeanCell(testRow).innerHTML = testName
+					insertLeanCell(testRow).innerHTML = testName.replace(/^org\.eclipse\./, '')
 					for (let t = 0; t < expectedTestConfigsCount; t++) {
 						const testResult = testSummaries[t][testName]
 
 						let cellHTML = '';
 						if (testResult) {
-							const filename = `org.eclipse.${testName}_${expectedTestsLongNames[t]}`
+							const filename = `${testName}_${expectedTestsLongNames[t]}`
 							const color = testResult.errors == 0 ? 'inherit' : 'red'
 							cellHTML = `
 							<a style="color:${color}" title="Detailed Unit Test Results Table" href="testresults/html/${filename}.html">(${testResult.errors})</a>

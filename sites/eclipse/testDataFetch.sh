@@ -31,7 +31,7 @@ curl --fail -o eclipse/overview/data.json https://download.eclipse.org/eclipse/d
 curl --fail -o eclipse/build/buildproperties.json "${buildDrop}/buildproperties.json"
 curl --fail -o eclipse/build/compilerSummary.json "${buildDrop}/compilerSummary.json"
 curl --fail -o eclipse/build/gitLog.json "${buildDrop}/gitLog.json"
-curl --fail -o eclipse/build/buildlogs/logFiles.json "${buildDrop}/buildlogs/logFiles.json"
+curl --fail -o eclipse/build/buildlogs/logs.json "${buildDrop}/buildlogs/logs.json"
 
 # Download test results
 # Requires jq: https://jqlang.org/download/
