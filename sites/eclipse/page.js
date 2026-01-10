@@ -39,17 +39,6 @@ const equinoxBreadcrumbBase = toElements(`
 	<a href="https://eclipse.dev/equinox/">Equinox</a>
 `);
 
-function getJenkinsTestJobsFolderURL(build) {
-    const buildType = getBuildType(build)
-    const testJobFolderName = buildType == 'I' ? 'AutomatedTests' : 'YBuilds'
-    return `https://ci.eclipse.org/releng/job/${testJobFolderName}`
-}
-
-function getJenkinsTestJobNamePrefix(build) {
-    const buildType = getBuildType(build)
-    return `ep${build.releaseShort.replace('.', '')}${buildType}-unit`
-}
-
 function getBuildType(buildData) {
     //This might be called for stable/release builds too
     return buildData.identifier.startsWith('Y') ? 'Y' : 'I'
@@ -102,6 +91,38 @@ function getCPUArchLabel(name) {
     } else {
         throw new Error('Cannot determine CPU-Arch from name: ' + name)
     }
+}
+
+function getJenkinsTestJobsFolderURL(build) {
+    const buildType = getBuildType(build)
+    const testJobFolderName = buildType == 'I' ? 'AutomatedTests' : 'YBuilds'
+    return `https://ci.eclipse.org/releng/job/${testJobFolderName}`
+}
+
+function getJenkinsTestJobNamePrefix(build) {
+    const buildType = getBuildType(build)
+    return `ep${build.releaseShort.replace('.', '')}${buildType}-unit`
+}
+
+function parseTestConfiguration(testConfig) {
+    const [os, arch, javaPart] = testConfig.split('-')
+    if (!javaPart.startsWith('java')) {
+        throw new Error('Unexpected java version: ' + testConfig)
+    }
+    const javaVersion = javaPart.substring(4)
+    const ws = getWS(os)
+    return [os, ws, arch, javaVersion]
+}
+
+function getLongTestConfigurationName(testConfig, buildConfig) {
+    const jobNamePrefix = getJenkinsTestJobNamePrefix(buildConfig)
+    const [os, ws, arch, javaVersion] = parseTestConfiguration(testConfig)
+    return `${jobNamePrefix}-${testConfig}_${os}.${ws}.${arch}_${javaVersion}`
+}
+
+function fetchAllTestSummaryFiles(build, testresultsPath) {
+    const jobNamePrefix = getJenkinsTestJobNamePrefix(build)
+    return fetchAllJSON(build.expectedTests.map(c => `${testresultsPath}${jobNamePrefix}-${c}-summary.json`))
 }
 
 function getPreliminaryPageData() {

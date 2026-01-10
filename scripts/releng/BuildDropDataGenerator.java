@@ -151,7 +151,7 @@ void buildLogsPageData() throws IOException {
 	JSON.Array comparatorLogs = colleFilesInDirectory(comparatorLogsDirectory, _ -> true, files);
 	logFiles.add("comparator", comparatorLogs);
 
-	Path file = DIRECTORY.resolve("buildlogs/logFiles.json");
+	Path file = DIRECTORY.resolve("buildlogs/logs.json");
 	IO.println("Write RelEng logs data to: " + file);
 	JSON.write(logFiles, file);
 }

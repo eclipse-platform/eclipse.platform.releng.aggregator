@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<!--TODO: set proper metadata/keywords? -->
+	<title>Test Logs</title>
+	<meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
+	<link rel="preconnect stylesheet" href="../../page.css" /><!-- Replaced by a refernece to a contained copy on deployment -->
+	<script src="../../page.js"></script><!-- Replaced by a refernece to a contained copy on deployment -->
+</head>
+
+<body>
+	<div data-generate="generateDefaultBreadcrumb(this, eclipseBreadcrumbBase)">
+		<a href="../../..">Downloads</a>
+		<a class="data-ref" href="..">${label}</a>
+		<span>Test Logs</span>
+	</div>
+
+	<main>
+		<h2>Test Console Logs for <span class="data-ref">${label}</span></h2>
+		<h3 id="console">Console Logs</h3>
+		<p>These logs contain the console output captured while running the JUnit automated tests.</p>
+		<ul id="test-console-files" style="list-style-type:square;">
+		</ul>
+		<div id="test-logs-container"></div>
+
+	</main>
+
+	<script>
+		loadPageData('../buildproperties.json')
+
+		contentPostProcessor = (mainElement, build) => {
+			document.title += ` for ${build.label}`
+			const testResultsSummaries = fetchAllTestSummaryFiles(build, '')
+			testResultsSummaries.then(testSummaries => {
+				const consoleLogFilesList = document.getElementById('test-console-files')
+				const testLogFilesContainer = document.getElementById('test-logs-container')
+				const expectedTestConfigsCount = build.expectedTests.length
+				for (let t = 0; t < expectedTestConfigsCount; t++) {
+					const testConfig = build.expectedTests[t]
+					const testsSummary = testSummaries[t]
+					const tests = Object.keys(testsSummary)
+					if (tests.length == 0) {
+						continue; // Test configuration not yet completed
+					}
+					const testConfigLong = getLongTestConfigurationName(testConfig, build)
+					const testConsoleLogFile = `${testConfigLong}_consolelog.txt`
+					const item = document.createElement('li')
+					item.innerHTML = `<a href="consolelogs/${testConsoleLogFile}">${testConsoleLogFile}</a>`
+					consoleLogFilesList.appendChild(item)
+
+					let testLogsList = `
+						<h4>Individual test logs from ${testConfigLong}</h4>
+						<ul style="list-style-type:square;">
+					`
+					let directorLogsList = `
+						<h4>P2 director logs while installing tests on ${testConfigLong}</h4>
+						<ul style="list-style-type:square;">
+					`
+					for (const testName of tests) {
+						const test = testsSummary[testName]
+						const suites = test.suites // One test-plugin may execute multiple suites
+						if (suites) {
+							for (const testSuiteFQN of suites) {
+								testLogsList += `
+									<li><a href="${testConfigLong}/${testSuiteFQN}.log">${testSuiteFQN}.log</a></li>
+									<li><a href="${testConfigLong}/${testSuiteFQN}.log">${testSuiteFQN}.txt</a></li>
+								`
+								directorLogsList += `
+									<li><a href="${testConfigLong}/directorLogs/director-${testName}.log">directorLogs_director-${testName}.log</a></li>
+								`
+							}
+						}
+					}
+					testLogsList += '</ul>'
+					directorLogsList += '</ul>'
+					testLogFilesContainer.append(...toElements(testLogsList + directorLogsList))
+				}
+			})
+		}
+
+		generate()
+
+	</script>
+</body>
+
+</html>

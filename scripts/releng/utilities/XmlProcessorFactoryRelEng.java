@@ -14,11 +14,14 @@
 package utilities;
 
 import java.io.ByteArrayInputStream;
+import java.util.stream.IntStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
@@ -100,6 +103,11 @@ public class XmlProcessorFactoryRelEng {
 		DocumentBuilder builder = DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE.newDocumentBuilder();
 		builder.setEntityResolver((__, ___) -> new InputSource(new ByteArrayInputStream(new byte[0])));
 		return builder;
+	}
+
+	public static Iterable<Element> elements(NodeList list) {
+		return () -> IntStream.range(0, list.getLength()).mapToObj(list::item).filter(Element.class::isInstance)
+				.map(Element.class::cast).iterator();
 	}
 
 }
