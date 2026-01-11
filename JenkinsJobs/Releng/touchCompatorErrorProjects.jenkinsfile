@@ -1,0 +1,101 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = '''
+For a a build with <em>comparator-errors</em>, touches all affected projects to enforce an update of their qualifier and creates PRs with thes corresponding changes.
+'''
+
+pipeline {
+	options {
+		timestamps()
+		timeout(time: 30, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'10', artifactNumToKeepStr:'2'))
+	}
+	parameters {
+		string(name: 'buildId', trim: true, description: '''
+			The identifier of the build with comparator-errors whoose affected Plugins should be touched.<br>
+			For example: <code>I20260111-0430</code>
+		''')
+		string(name: 'message', defaultValue: 'Enforce qualifier update', description: '''
+			The message appended to all touched qualifier-update files
+		''')
+	}
+	agent {
+		label 'basic'
+	}
+	stages {
+		stage('Checkout Submodules') {
+			steps {
+				sh '''#!/bin/bash -xe
+					git submodule update --init --recursive --remote --depth 1
+					git config --global user.email 'releng-bot@eclipse.org'
+					git config --global user.name 'Eclipse Releng Bot'
+				'''
+			}
+		}
+		stage('Touch projects with errors') {
+			steps {
+				script {
+					
+					def comparatorLog = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt", returnStdout: true)
+					def errorEntries = comparatorLog.split(/(?m)^\d+\. +/).toList()
+					errorEntries = errorEntries.subList(1, errorEntries.size()) // Drop header
+					for(entry in errorEntries) {
+						def path = entry.readLines()[0].trim()
+						if(path.endsWith('/pom.xml') || path.endsWith('/.tycho-consumer-pom.xml')) {
+							path = path.substring(0, path.lastIndexOf('/'))
+						} else {
+							error("Unexpected path end: ${path}")
+						}
+						if (!fileExists("${path}/META-INF/MANIFEST.MF")) {
+							error("Computed path is not a Plugin root: ${path}")
+						}
+						def forceQualifierUpdateFile = "${path}/forceQualifierUpdate.txt"
+						sh """
+							echo 'Touching: ${path}'
+							if [ ! -f ${forceQualifierUpdateFile} ]; then
+								echo '# To force a version qualifier update add the bug here' >> ${forceQualifierUpdateFile}
+							fi
+							# Ensure file terminates with a newline
+							lastChar=\$(tail -c1 ${forceQualifierUpdateFile} | od -An -tx1)
+							if [ ! "\${lastChar}" = "0a" ] && [ ! "\${lastChar}" = "0d" ]; then
+								echo '' >> ${forceQualifierUpdateFile}
+							fi
+							echo '${message}' >> ${forceQualifierUpdateFile}
+						"""
+					}
+				}
+			}
+		}
+		stage('Create PRs') {
+			steps {
+				script {
+					def utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities.setDryRun(false)
+					def githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+					githubAPI.setDryRun(true)
+
+					utilities.runHereAndForEachGitSubmodule{ submodulePath ->
+						def boolean isUnchanged = sh(script: 'git status --short --ignore-submodules', returnStdout: true).trim().isEmpty()
+						if (isUnchanged) {
+							echo "Skipping repository without changes: ${submodulePath}"
+							return
+						}
+						def branch = 'enforce-qualifier-update'
+						def msg = 'Enforce qualifier update for project(s) with comparator errors'
+						sh """
+							echo 'Committing changes in ${submodulePath}'
+							git checkout -B '${branch}' HEAD
+							git commit --all --message '${msg}'
+						"""
+						
+						utilities.gitPushBranch(branch, branch)
+						def repoName = githubAPI.getCurrentRepositoriesGithubName()
+						def prURL = githubAPI.createPullRequest(repoName, msg, """\
+							Enforce qualifier update for project(s) with comparator error in build ${buildId}.
+							""".stripIndent(), branch)
+						echo "Created ${prURL}"
+					}
+				}
+			}
+		}
+	}
+}

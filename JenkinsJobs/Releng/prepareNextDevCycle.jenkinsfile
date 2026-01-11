@@ -399,14 +399,7 @@ pipeline {
 							echo "Skipping submodule without changes: ${submodulePath}"
 							return
 						}
-						def submoduleURL = sh(script: "git config remote.origin.url", returnStdout: true).trim()
-						// Extract repository path from e.g.: https://github.com/eclipse-platform/eclipse.platform.git
-						def expectedPrefix = 'https://github.com/'
-						def expectedSuffix = '.git'
-						if (!submoduleURL.startsWith(expectedPrefix) || !submoduleURL.endsWith(expectedSuffix)) {
-							error "Unexpected of submodule URL: ${submoduleURL}"
-						}
-						def repoName = submoduleURL.substring(expectedPrefix.length(), submoduleURL.length() - expectedSuffix.length())
+						def repoName = githubAPI.getCurrentRepositoriesGithubName()
 						githubAPI.createPullRequest(repoName, prHeadline, """\
 							Prepare development of Eclipse ${NEXT_RELEASE_VERSION}.
 							This complements:
