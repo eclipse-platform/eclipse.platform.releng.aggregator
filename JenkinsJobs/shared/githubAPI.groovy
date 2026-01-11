@@ -1,9 +1,9 @@
 
 @groovy.transform.Field
-def boolean IS_DRY_RUN = true
+def boolean _GH_API_IS_DRY_RUN = true
 
 def setDryRun(boolean isDryRun) {
-	IS_DRY_RUN = isDryRun
+	_GH_API_IS_DRY_RUN = isDryRun
 }
 
 /** Returns a list of all repositories in the specified organization.*/
@@ -72,7 +72,7 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		def params = writeJSON(json: queryParameters, returnText: true)
 		query += "-d '" + params + "'"
 	}
-	if (IS_DRY_RUN && !method.isEmpty()) {
+	if (_GH_API_IS_DRY_RUN && !method.isEmpty()) {
 		echo "Query (not send): ${query}"
 		return null
 	}
@@ -90,6 +90,17 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 
 private boolean isFailed(Map response, int successCode) {
 	return response?.errors || (response?.status && response.status?.toInteger() != successCode)
+}
+
+def getCurrentRepositoriesGithubName() {
+	def submoduleURL = sh(script: "git config remote.origin.url", returnStdout: true).trim()
+	// Extract repository path from e.g.: https://github.com/eclipse-platform/eclipse.platform.git
+	def expectedPrefix = 'https://github.com/'
+	def expectedSuffix = '.git'
+	if (!submoduleURL.startsWith(expectedPrefix) || !submoduleURL.endsWith(expectedSuffix)) {
+		error "Unexpected of submodule URL: ${submoduleURL}"
+	}
+	return submoduleURL.substring(expectedPrefix.length(), submoduleURL.length() - expectedSuffix.length())
 }
 
 return this
