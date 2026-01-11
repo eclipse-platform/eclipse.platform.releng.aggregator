@@ -315,7 +315,8 @@ function getValue(data, path, lenienceDefaultValue = undefined) {
 
 function verifyDataConsistency(preliminaryData, data) {
     for (const key in preliminaryData) {
-        if (data[key] !== preliminaryData[key]) {
+        const dataValue = data[key]
+        if (dataValue !== undefined && dataValue !== preliminaryData[key]) {
             const msg = `Prelininary value of key '${key}' differes from loaded data.
 	                             preliminary - ${preliminaryData[key]},
 	                             loaded data - ${data[key]}`
