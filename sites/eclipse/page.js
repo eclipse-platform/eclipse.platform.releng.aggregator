@@ -558,6 +558,13 @@ function prependChildren(element, id, ...children) {
     return element;
 }
 
+function escapeHTML(rawString) {
+    return rawString
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+}
+
 // Collapsibles/accordion tables
 
 let _eventListenersAdded = false
