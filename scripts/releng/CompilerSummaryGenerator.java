@@ -33,7 +33,7 @@ import utilities.XmlProcessorFactoryRelEng;
 /** @author Dean Roberts (circa 2000!) and David Williams (circa 2016) */
 
 final String XML_EXTENSION = ".xml";
-final String COMPILER_SUMMARY_FILENAME = "compilerSummary.json";
+final String COMPILER_SUMMARY_FILENAME = "logs.json";
 
 Path compileLogsDirectory; // Location of compile logs base directory
 
