@@ -19,7 +19,8 @@
 
 	<main>
 		<h2>Equinox <span class="data-ref">${buildTypeName}</span> Build: <span class="data-ref">${label}</span></h2>
-		<p id="build-state-container"></p>
+
+		<div id="build-state-container"></div>
 
 		<span id="build-timestamp"></span>
 
@@ -70,6 +71,8 @@
 			return data
 		})
 
+		injectUnstableBuildCause('build-state-container')
+
 		contentPostProcessor = (mainElement, build) => {
 			document.title = `Equinox - ${build.label}`
 			document.getElementById('build-timestamp').innerHTML = `<b>${formatBuildDate(build.timestamp)} (UTC)</b>`
@@ -80,11 +83,10 @@
 				const dataPath = table.getAttribute('data-path')
 				const filesData = getValue(build, dataPath)
 				const tBody = table.createTBody()
-				const icon = dataPath == 'equinoxRepository' ? '<img src="repo.gif">&nbsp;' : ''
 				for (const file of filesData) {
 					tBody.insertRow().innerHTML = `
 					<td width="90%">
-						${icon}<a href="${file.name}">${file.name}</a>
+						<a href="${file.name}">${file.name}</a>
 					</td>
 					<td>${file.size}</td>
 					`
@@ -98,13 +100,6 @@
 			let arch = getCPUArchLabel(fileName)
 			return `${os} (${arch})`
 		}
-
-		fetch('buildUnstable').then(res => res.status == 404 ? '' : res.text()).then(msg => {
-			if (msg) {
-				const statusLabel = document.getElementById('build-state-container')
-				statusLabel.innerHTML = '<a href="https://wiki.eclipse.org/Platform-releng/Unstable_build" title="Unstable Build" style="color:red;"><b>Unstable!</b></a>' + msg
-			}
-		})
 
 		generate()
 

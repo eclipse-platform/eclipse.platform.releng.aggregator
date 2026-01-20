@@ -18,48 +18,46 @@
 	<main>
 
 		<h2>Eclipse <span class="data-ref">${release}</span> <span class="data-ref">${buildTypeName}</span> Build: <span class="data-ref">${label}</span></h2>
-		<p id="build-state-container"></p>
+
+		<div id="build-state-container"></div>
+
 		<p>
 			This page provides access to the various deliverables of Eclipse Platform build along with its logs and tests.
 		</p>
-		<p>
-			<a class="data-ref" href="https://eclipse.dev/eclipse/news/${releaseShort}">New and Noteworthy</a>
-			<br />
-			<a class="data-ref" href="https://eclipse.dev/eclipse/markdown/?f=news/${releaseShort}/acknowledgements.md">Acknowledgments</a>
-			<br />
-			<a class="data-ref" href="https://eclipse.dev/eclipse/development/readme.html?file=readme_eclipse_${releaseShort}.html">Eclipse Project ${releaseShort} Readme</a>
-			<br />
-			<a class="data-ref" href="https://eclipse.dev/eclipse/development/plans.html?file=plans/eclipse_project_plan_${releaseShort}.xml">Eclipse Project Plan</a>
-			<br />
-		</p>
-
-		<h3>Logs and Test Links</h3>
 		<ul>
-			<li>View the <a href="reports.html#logs">logs for the current build</a>.</li>
-			<li>View the <a href="reports.html#tests">integration and unit test results for the current build.</a>.</li>
+			<li><a class="data-ref" href="https://eclipse.dev/eclipse/news/${releaseShort}">New and Noteworthy</a></li>
+			<li><a class="data-ref" href="https://eclipse.dev/eclipse/markdown/?f=news/${releaseShort}/acknowledgements.md">Acknowledgments</a></li>
+			<li><a class="data-ref" href="https://eclipse.dev/eclipse/development/readme.html?file=readme_eclipse_${releaseShort}.html">Eclipse Project ${releaseShort} Readme</a></li>
+			<li><a class="data-ref" href="https://eclipse.dev/eclipse/development/plans.html?file=plans/eclipse_project_plan_${releaseShort}.xml">Eclipse Project Plan</a></li>
+			<li><a class="data-ref" href="https://eclipse.dev/eclipse/development/plans/eclipse_project_plan_${releaseShort}.xml#target_environments">Target Platforms and Environments</a></li>
 		</ul>
 
-		<h3 id="tests">Summary of Unit Test Results</h3>
+		<h3 id="reports">Reports</h3>
 		<p>
-			<span id="test-completion-state">No</span> integration and unit test configurations are complete.
+			The <a href="reports.html">Reports page</a> provides detailed build and tests logs and analyses of various aspects of this build.
 		</p>
+
+		<h4 id="tests">Test Results Summary</h4>
 		<p id="signOff-issue-container"></p>
 		<table id="tests-overview-table">
 			<thead>
 				<tr>
-					<th style="text-align:center; width:25%">Tested Platform</th>
-					<th style="text-align:center">Failed</th>
-					<th style="text-align:center">Passed</th>
-					<th style="text-align:center">Total</th>
-					<th style="text-align:center">Runtime</th>
+					<th style="text-align:center; width:30%">Tested Platform</th>
+					<th style="text-align:end">Failed</th>
+					<th style="text-align:end">Passed</th>
+					<th style="text-align:end">Total</th>
+					<th style="text-align:end">Runtime</th>
 				</tr>
 			</thead>
 		</table>
 
-		<h3>Related Links</h3>
+		<h4 id="git-log">Git Log</h4>
 		<ul>
-			<li><a class="data-ref" href="https://eclipse.dev/eclipse/development/plans/eclipse_project_plan_${releaseShort}.xml#target_environments">Target Platforms and Environments</a></li>
 			<li><a href="gitLog.html">Git log</a></li>
+		</ul>
+
+		<h4 id="signatures">Checksums&nbsp;(SHA 512) and GPG&nbsp;Signatures</h4>
+		<ul>
 			<li><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download</a></li>
 		</ul>
 		<p class="data-ref">
@@ -128,6 +126,8 @@
 			return data
 		})
 
+		injectUnstableBuildCause('build-state-container')
+
 		contentPostProcessor = (mainElement, build) => {
 			document.title = `${build.label} - ${document.title}`
 
@@ -139,15 +139,13 @@
 			const testResultsTable = document.getElementById('tests-overview-table')
 			const tBody = testResultsTable.createTBody()
 			testResultsOverview.then(testResults => {
-				let completedTests = 0
 				for (let r = 0; r < testResults.length; r++) {
 					const row = tBody.insertRow()
 					const result = testResults[r]
 					const testName = build.expectedTests[r]
-					//TODO: compute nicer, non-breaking label (like for file Platforms?) and align elements horizontally
-					const label = `<a href="reports.html#tests">${testName}</a>`
+					const [os, ws, arch, javaVersion] = parseTestConfiguration(testName)
+					const label = `<a href="reports.html#tests">${getOSLabel(os)} (${getCPUArchLabel(arch)}) Java&nbsp;${javaVersion}</a>`
 					if (result.duration) { // Test configuration completed
-						completedTests++
 						row.innerHTML = `
 							<td>${label}</td>
 							<td style="text-align:end">${result.failCount}</td>
@@ -163,8 +161,6 @@
 						`
 					}
 				}
-				// Inject test completion state
-				document.getElementById('test-completion-state').innerHTML = `${completedTests} of ${testResults.length}`
 			})
 
 			if (build.signOffIssue) {
@@ -189,7 +185,7 @@
 				const tBody = table.createTBody()
 				for (const file of filesData) {
 					tBody.insertRow().innerHTML = `
-					<td>${file.icon ? `<img src="${file.icon}">` : ''} ${file.platform ? file.platform : getPlatformLabel(file.name)}</td>
+					<td>${file.platform ? file.platform : getPlatformLabel(file.name)}</td>
 					<td>
 						<a href="${file.name}">${file.name}</a>
 					</td>
@@ -205,13 +201,6 @@
 			let arch = getCPUArchLabel(fileName)
 			return `${os} (${arch})`
 		}
-
-		fetch('buildUnstable').then(res => res.status == 404 ? '' : res.text()).then(msg => {
-			if (msg) {
-				const statusLabel = document.getElementById('build-state-container')
-				statusLabel.innerHTML = '<a href="https://wiki.eclipse.org/Platform-releng/Unstable_build" title="Unstable Build" style="color:red;"><b>Unstable!</b></a>' + msg
-			}
-		})
 
 		generate()
 

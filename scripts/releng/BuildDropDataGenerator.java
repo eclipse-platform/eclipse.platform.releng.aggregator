@@ -78,7 +78,7 @@ void mainEclipsePageData() throws IOException {
 
 	// files
 	buildProperties.add("p2Repository", JSON.Array.create(//
-			createFileEntry("repository-" + buildId + ".zip", files, "All", "repo.gif")));
+			createFileEntry("repository-" + buildId + ".zip", files, "All")));
 
 	buildProperties.add("sdkProducts",
 			collectFileEntries(files, filename -> filename.startsWith("eclipse-SDK-") && !OS.isMacTarGZ(filename)));
@@ -89,7 +89,7 @@ void mainEclipsePageData() throws IOException {
 	JSON.Array platformProducts = collectFileEntries(files,
 			filename -> filename.startsWith("eclipse-platform-") && !OS.isMacTarGZ(filename));
 	platformProducts.add(createFileEntry( // Add separate entry for eclipse-platform product p2-repository
-			"org.eclipse.platform-" + buildId + ".zip", files, "Platform Runtime Repo", "repo.gif"));
+			"org.eclipse.platform-" + buildId + ".zip", files, "Platform Runtime Repo"));
 	buildProperties.add("platformProducts", platformProducts);
 
 	buildProperties.add("jdtCompiler", JSON.Array.create( //
@@ -200,21 +200,11 @@ final Comparator<String> BY_OS_ARCH_FILE_NAME = Comparator.comparing((String fil
 	return 100;
 })).thenComparing(Comparator.naturalOrder());
 
-JSON.Object createFileEntry(String filename, Map<Path, Long> buildFiles, String platform, String icon) {
-	return createFileEntry(Path.of(filename), buildFiles, platform, icon);
-}
-
 JSON.Object createFileEntry(String filename, Map<Path, Long> buildFiles, String platform) {
-	return createFileEntry(Path.of(filename), buildFiles, platform, null);
-}
-
-JSON.Object createFileEntry(Path filename, Map<Path, Long> buildFiles, String platform, String icon) {
-	JSON.Object file = createFileDescription(filename, buildFiles.get(filename));
+	Path filePath = Path.of(filename);
+	JSON.Object file = createFileDescription(filePath, buildFiles.get(filePath));
 	if (platform != null) {
 		file.add("platform", JSON.String.create(platform));
-	}
-	if (icon != null) {
-		file.add("icon", JSON.String.create(icon));
 	}
 	return file;
 }

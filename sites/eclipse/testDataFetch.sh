@@ -26,6 +26,7 @@ cd $(dirname "$0")/..
 
 find eclipse -type f -name "*.json" -delete
 find equinox -type f -name "*.json" -delete
+rm -rf ./*/build/buildUnstable
 
 # Eclipse website
 buildDrop="https://download.eclipse.org/eclipse/downloads/drops4/${buildID}"
@@ -34,6 +35,7 @@ mkdir -p eclipse/build/compilelogs
 
 curl --fail -o eclipse/overview/data.json https://download.eclipse.org/eclipse/downloads/data.json
 curl --fail -o eclipse/build/buildproperties.json "${buildDrop}/buildproperties.json"
+curl --fail -o eclipse/build/buildUnstable "${buildDrop}/buildUnstable" || echo 'No buildUnstable file -> Build was stable'
 curl --fail -o eclipse/build/compilelogs/logs.json "${buildDrop}/compilelogs/logs.json"
 curl --fail -o eclipse/build/gitLog.json "${buildDrop}/gitLog.json"
 curl --fail -o eclipse/build/buildlogs/logs.json "${buildDrop}/buildlogs/logs.json"
@@ -62,5 +64,7 @@ done
 wait
 
 # Equinox website
+buildDrop="https://download.eclipse.org/equinox/drops/${buildID}"
 curl --fail -o equinox/overview/data.json https://download.eclipse.org/equinox/data.json
-curl --fail -o equinox/build/buildproperties.json "https://download.eclipse.org/equinox/drops/${buildID}/buildproperties.json"
+curl --fail -o equinox/build/buildproperties.json "${buildDrop}/buildproperties.json"
+curl --fail -o equinox/build/buildUnstable "${buildDrop}/buildUnstable" || echo 'No buildUnstable file -> Build was stable'
