@@ -78,16 +78,18 @@ function getOSLabel(name) {
         throw new Error('Cannot determine OS from name: ' + name)
     }
 }
-//TODO: make entire labels non-breaking
+
 function getCPUArchLabel(name) {
+    // Use non-breaking space and hypen in label
+    const bit64 = '64&#8209;bit'
     if (name.includes('x86_64')) {
-        return 'x86 64-bit'
+        return `x86&nbsp;${bit64}`
     } else if (name.includes('aarch64')) {
-        return 'ARM 64-bit'
+        return `ARM&nbsp;${bit64}`
     } else if (name.includes('ppc64le')) {
-        return 'PowerPC 64-bit'
+        return `PowerPC&nbsp;${bit64}`
     } else if (name.includes('riscv64')) {
-        return 'RISC-V 64-bit'
+        return `RISC&#8209;V&nbsp;${bit64}`
     } else {
         throw new Error('Cannot determine CPU-Arch from name: ' + name)
     }
@@ -180,47 +182,32 @@ function formatBuildDate(date) {
     return BUILD_DATE_FORMAT.format(new Date(date))
 }
 
-// Cache the runtime formatter if the API is available
-let runtimeFormat = null;
-if (typeof Intl.DurationFormat !== 'undefined') {
-    try {
-        runtimeFormat = new Intl.DurationFormat('en', { style: 'short' });
-    } catch (e) {
-        // Intl.DurationFormat not available
+function formatRuntime(runtime) {
+    const totalSeconds = Math.trunc(runtime);
+    // Not all browsers support the Intl.DurationFormat and Temporal.Duration API... so do it 'manually'
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0')
+    if (hours > 0) {
+        // For durations >= 1 hour, show hours and minutes
+        return `${hours} hr, ${minutes}&nbsp;min`;
+    } else if (minutes > 0) {
+        // For durations < 1 hour but >= 1 minute, show minutes and seconds
+        return `${minutes}&nbsp;min, ${seconds}&nbsp;sec`;
+    } else {
+        // For durations < 1 minute, show only seconds
+        return `${seconds}&nbsp;sec`;
     }
 }
 
-function formatRuntime(runtime) {
-    const totalSeconds = Math.trunc(runtime);
-
-    // Try to use Temporal API if both Temporal and DurationFormat are available (not supported in all browsers yet)
-    if (typeof Temporal !== 'undefined' && Temporal.Duration && runtimeFormat) {
-        try {
-            const duration = Temporal.Duration.from({ seconds: totalSeconds });
-            return runtimeFormat.format(duration.round({
-                largestUnit: 'hours',
-                smallestUnit: totalSeconds >= 3600 ? 'minutes' : 'seconds'
-            }));
-        } catch (e) {
-            // Fall through to fallback implementation
+function injectUnstableBuildCause(buildStateContainerId) {
+    fetch('buildUnstable').then(res => res.status == 404 ? '' : res.text()).then(msg => {
+        if (msg) {
+            const statusContainer = document.getElementById(buildStateContainerId)
+            statusContainer.classList.add('error-message-box')
+            statusContainer.innerHTML = `<strong>UNSTABLE</strong><br>${msg}`
         }
-    }
-
-    // Fallback implementation for browsers without Temporal/DurationFormat support
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-        // For durations >= 1 hour, show hours and minutes
-        return `${hours} hr, ${minutes} min`;
-    } else if (minutes > 0) {
-        // For durations < 1 hour but >= 1 minute, show minutes and seconds
-        return `${minutes} min, ${seconds} sec`;
-    } else {
-        // For durations < 1 minute, show only seconds
-        return `${seconds} sec`;
-    }
+    })
 }
 
 function fetchAllJSON(urls) {
@@ -288,17 +275,37 @@ function generate() {
     }
 }
 
+const tocLevelIndentation = '0px'
+
 function generateTOCItems(mainElement) {
     const headersOfTOC = mainElement.querySelectorAll('h1[id], h2[id], h3[id], h4[id]');
     if (headersOfTOC.length === 0) {
         document.getElementById('toc-container').remove()
     } else {
-        //TODO: Consider to use the more advanced style from the large aside at https://eclipse.dev/eclipse/news/news.html
         const tocList = document.getElementById('table-of-contents')
+        tocList.style.marginLeft = tocLevelIndentation
+
+        let lastLevel = -1;
+        const lists = [tocList];
         for (const header of headersOfTOC) {
             const item = document.createElement('li')
+            item.classList.add('toc-item')
             item.innerHTML = `<a href="#${header.id}">${header.textContent}</a>`
-            tocList.appendChild(item)
+
+            const level = parseInt(header.tagName.substring(1));
+            if (lastLevel < 0) {
+                lastLevel = level
+            }
+            if (level > lastLevel) {
+                const newList = document.createElement('ul');
+                newList.style.marginLeft = tocLevelIndentation
+                lists[lists.length - 1].appendChild(newList);
+                lists.push(newList);
+            } else if (level < lastLevel) {
+                lists.pop();
+            }
+            lists[lists.length - 1].appendChild(item);
+            lastLevel = level;
         }
     }
 }
@@ -348,7 +355,7 @@ function verifyDataConsistency(preliminaryData, data) {
 }
 
 function logException(message, loggedObject) {
-    document.body.prepend(toElement(`<p>Failed to generate content: <b style="color: FireBrick">${message}</b></p>`));
+    document.body.prepend(toElement(`<p>Failed to generate content: <strong style="color: firebrick">${message}</strong></p>`));
     console.log(loggedObject);
 }
 
@@ -377,9 +384,9 @@ function generateBody() {
 					<aside>
 						<ul class="ul-left-nav">
 							<div class="sideitem">
-								<h2>Table of Contents</h2>
+								<strong>Table of Contents</strong>
 								<div id="toc-target">
-									<ul id="table-of-contents" style="list-style-type:square;">
+									<ul id="table-of-contents">
 									</ul>
 								</div>
 							</div>
@@ -429,14 +436,9 @@ function generateBody() {
 					</ul>
 				</div>
 			</div>
-			<div class="col-sm-24">
-				<div class="row">
-					<div id="copyright" class="col-md-16">
-						<p id="copyright-text">Copyright © Eclipse Foundation AISBL. All Rights Reserved.</p>
-					</div>
-				</div>
+			<div style="padding-left: 0;">
+				<p id="copyright-text">Copyright &copy; Eclipse Foundation AISBL. All Rights Reserved.</p>
 			</div>
-			<a href="#" class="scrollup" onclick="scrollToTop()">Back to the top</a>
 		</div>
 	</footer>
 </div>
@@ -632,7 +634,7 @@ function activateCollapsiblesTable(table) {
                 scrollTarget.scrollIntoView({ behavior: 'smooth' })
             }
         } catch (exception) {
-            detailsRow.querySelector('.collapsible-table-details-content').innerHTML = `<p style="color:red"><b>Failed to load data. Please check your connection.</b></p>`
+            detailsRow.querySelector('.collapsible-table-details-content').innerHTML = `<p style="color:red"><strong>Failed to load data. Please check your connection.</strong></p>`
             logException(exception.message, exception)
         }
     }
