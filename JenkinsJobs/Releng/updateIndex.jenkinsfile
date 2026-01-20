@@ -52,10 +52,15 @@ pipeline {
 										find \${drop}/testresults -maxdepth 1 -type f -name "ep*-unit-*.json" ! -name "ep*-unit-*-summary.json" | wc -l
 										# Count number of old-style test-result overview files (still relevant for not yet archived releases)
 										find \${drop}/testresults -maxdepth 1 -type f -name "ep*-unit-*.xml" | wc -l
-										if [  -f \${drop}/index.html ]; then
-											echo "style-new"
+										#TODO: Remove this after the next three release when there are no old old-style tests on the overview page anymore
+										if [ -f \${drop}/reports.html ]; then
+											echo 'reports.html#tests'
+										elif [ -f \${drop}/tests.html ]; then
+											echo 'tests.html'
+										elif [ -f \${drop}/testResults.php ]; then
+											echo 'testResults.php'
 										else
-											echo "style-old"
+											echo 'unknown'
 										fi
 										if [  -f \${drop}/buildUnstable ]; then
 											echo "unstable"
@@ -113,11 +118,10 @@ def parseEclipseBuildDrops(String buildDrops) {
 		def int testsExpected = Integer.parseInt(dropDataElements[1])
 		def int testsFinishedNew = Integer.parseInt(dropDataElements[2])
 		def int testsFinishedOld = Integer.parseInt(dropDataElements[3])
-		def boolean isNewStyleDrop = dropDataElements[4] == 'style-new'
 		def boolean isUnstable = dropDataElements.length > 5 && dropDataElements[5] == 'unstable'
 		def drop = createDropEntry(dropID, 'drops4', isUnstable, overview)
 		drop.testsCompletion = "${ testsFinishedNew + testsFinishedOld } of ${testsExpected}".toString()
-		drop.testsPath = isNewStyleDrop ? 'tests.html' : 'testResults.php'
+		drop.testsPath = dropDataElements[4]
 	}
 	overview.values().each{ list -> list.sort({d1, d2 -> -d1.label.compareTo(d2.label)})}
 	return overview
