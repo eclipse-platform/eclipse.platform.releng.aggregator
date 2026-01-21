@@ -40,13 +40,9 @@ pipeline {
 					errorEntries = errorEntries.subList(1, errorEntries.size()) // Drop header
 					for(entry in errorEntries) {
 						def path = entry.readLines()[0].trim()
-						if(path.endsWith('/pom.xml') || path.endsWith('/.tycho-consumer-pom.xml')) {
-							path = path.substring(0, path.lastIndexOf('/'))
-						} else {
-							error("Unexpected path end: ${path}")
-						}
-						if (!fileExists("${path}/META-INF/MANIFEST.MF")) {
-							error("Computed path is not a Plugin root: ${path}")
+						path = path.substring(0, path.lastIndexOf('/'))
+						if (!(fileExists("${path}/META-INF/MANIFEST.MF") || fileExists("${path}/feature.xml"))) {
+							error("Computed path is not a Plugin or Feature root: ${path}")
 						}
 						def forceQualifierUpdateFile = "${path}/forceQualifierUpdate.txt"
 						sh """
@@ -90,7 +86,7 @@ pipeline {
 						utilities.gitPushBranch(branch, branch)
 						def repoName = githubAPI.getCurrentRepositoriesGithubName()
 						def prURL = githubAPI.createPullRequest(repoName, msg, """\
-							Enforce qualifier update for project(s) with comparator error in build ${buildId}.
+							Enforce qualifier update for project(s) with comparator error in build `${buildId}`.
 							""".stripIndent(), branch)
 						echo "Created ${prURL}"
 					}
