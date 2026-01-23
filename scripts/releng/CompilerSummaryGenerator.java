@@ -51,32 +51,31 @@ void parseCompileLog(Path file, Map<String, JSON.Object> compilerLog)
 		throws IOException, SAXException, ParserConfigurationException {
 	Document aDocument = XmlProcessorFactoryRelEng.parseDocumentIgnoringDOCTYPE(file);
 	int warnings = 0;
-	int accessWarnings = 0;
 	int infos = 0;
+	int tasks = 0;
 	// Get summary of problems
 	NodeList problemList = aDocument.getElementsByTagName("problem");
 	for (Element problem : elements(problemList)) {
 		String severity = problem.getAttribute("severity");
 		switch (severity) {
-		case "WARNING" -> {
-			// this is a warning need to check the id
-			String value = problem.getAttribute("id");
-			switch (value) {
-			case "ForbiddenReference", "DiscouragedReference" -> accessWarnings++;
-			default -> warnings++;
-			}
-		}
+		case "WARNING" -> warnings++;
 		case "INFO" -> infos++; // this is an info warning
 		}
 	}
-	if (warnings == 0 && accessWarnings == 0 && infos == 0) {
+	NodeList tasksList = aDocument.getElementsByTagName("tasks");
+	for (Element element : elements(tasksList)) {
+		String count = element.getAttribute("tasks");
+		tasks += Integer.parseInt(count);
+	}
+
+	if (warnings == 0 && infos == 0 && tasks == 0) {
 		return;
 	}
 	String path = compileLogsDirectory.relativize(file).toString().replace(File.separatorChar, '/');
 	JSON.Object issues = JSON.Object.create();
 	addIfNonZero(issues, "warnings", warnings);
-	addIfNonZero(issues, "access", accessWarnings);
 	addIfNonZero(issues, "infos", infos);
+	addIfNonZero(issues, "tasks", tasks);
 	if (compilerLog.putIfAbsent(path, issues) != null) {
 		throw new IllegalStateException("Plugin already set: " + path + "\n" + compilerLog.get(path));
 	}
