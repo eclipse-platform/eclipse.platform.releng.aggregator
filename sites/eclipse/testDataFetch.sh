@@ -37,7 +37,6 @@ curl --fail -o eclipse/overview/data.json https://download.eclipse.org/eclipse/d
 curl --fail -o eclipse/build/buildproperties.json "${buildDrop}/buildproperties.json"
 curl --fail -o eclipse/build/buildUnstable "${buildDrop}/buildUnstable" || echo 'No buildUnstable file -> Build was stable'
 curl --fail -o eclipse/build/compilelogs/logs.json "${buildDrop}/compilelogs/logs.json"
-curl --fail -o eclipse/build/gitLog.json "${buildDrop}/gitLog.json"
 curl --fail -o eclipse/build/buildlogs/logs.json "${buildDrop}/buildlogs/logs.json"
 
 # Fetch test results

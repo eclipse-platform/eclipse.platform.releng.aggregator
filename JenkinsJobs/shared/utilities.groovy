@@ -31,6 +31,16 @@ def matchBuildIdentifier(String dropID, Closure iBuildHandler, Closure sBuildHan
 	])
 }
 
+@NonCPS
+def String stableBuildGitTag(Map<String, String> id) {
+	def service = id.service ?: '0'
+	return "${id.type}${id.major}_${id.minor}${(id.checkpoint || service != '0') ? ('_' + service) : ''}${id.checkpoint ? ('_' + id.checkpoint) : ''}"
+}
+
+def stableBuildGitTag(CharSequence dropID) {
+	return stableBuildGitTag(matchBuildIdentifier(dropID, null, { }))
+}
+
 // --- local file modifications ---
 
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
@@ -94,6 +104,27 @@ def forEachGitSubmodule(Closure task) {
 		dir("${submodulePath}") {
 			task.call(submodulePath)
 		}
+	}
+}
+
+def listChangedGitRepositoryURLs(String fromTag, String toTag) {
+	// Diff the relative path's of each sub-module from within the aggregator (not from within each submodule)
+	// to avoid the need to clone each submodule in full depth (just to test if something changed, not necessarily what changed)
+	def gitReposChanged = sh(script: """
+		echoURLOfChangedRepository() {
+			if ! git diff ${fromTag}..${toTag} --quiet \$1; then
+				pushd "\$1" > /dev/null
+				git config remote.origin.url
+				popd > /dev/null
+			fi
+		}
+		echoURLOfChangedRepository
+		for submodulePath in \$(git submodule foreach --quiet 'echo \$sm_path'); do
+			echoURLOfChangedRepository \$submodulePath
+		done
+	""", returnStdout: true).split('\\s+')
+	return gitReposChanged.collect{ url ->
+		return url.endsWith('.git') ? url.substring(0, url.length() - 4) : url
 	}
 }
 

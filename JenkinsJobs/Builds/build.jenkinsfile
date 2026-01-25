@@ -134,9 +134,11 @@ pipeline {
 							git describe --tags --match "${BUILD_TYPE}*" --abbrev=0 > "${WORKSPACE}/lastTag"
 						'''
 					}
-					script { // Check for changes and abort if nothing changed since the last build
+					script {
+						assignEnvVariable('GIT_BASELINE_TAG', readFile("${WORKSPACE}/lastTag").trim())
+						// Check for changes and abort if nothing changed since the last build
 						def boolean isScheduledBuild = !currentBuild.getBuildCauses('hudson.triggers.TimerTrigger$TimerTriggerCause').isEmpty()
-						if (isScheduledBuild && sh(script: 'git diff $(cat "${WORKSPACE}/lastTag")..HEAD --name-only', returnStdout: true).trim().isEmpty()) {
+						if (isScheduledBuild && sh(script: 'git diff ${GIT_BASELINE_TAG}..HEAD --name-only', returnStdout: true).trim().isEmpty()) {
 							emailext subject: "${RELEASE_VER} ${BUILD_TYPE}-Build: ${BUILD_ID} - Build skipped", body: """\
 								No changes have been made since the last successful ${BUILD_TYPE}-Build and therefore this scheduled build was skipped:
 								${BUILD_URL}console
@@ -168,43 +170,10 @@ pipeline {
 						'''
 					}
 					// Git log creation
-					sh '''#!/bin/bash -xe
-						reportTimestamp=$(TZ='UTC' date +%Y%m%d-%H%M)
-						export lastTag=$(cat "${WORKSPACE}/lastTag")
-						if [[ -n "$lastTag" ]]; then
-							export gitLogFile="${DROP_DIR}/$BUILD_ID/gitLog.json"
-							mkdir -p $(dirname "${gitLogFile}")
-							
-							echo '{' > $gitLogFile
-							echo "\\"label\\": \\"${BUILD_ID}\\"," >> $gitLogFile
-							echo "\\"logFrom\\": \\"${lastTag}\\"," >> $gitLogFile
-							echo "\\"logTo\\": \\"${BUILD_ID}\\"," >> $gitLogFile
-							echo "\\"timestamp\\": \\"${reportTimestamp}\\"," >> $gitLogFile
-							echo "\\"repositories\\": [" >> $gitLogFile >> $gitLogFile
-							
-							function createGitLog() {
-								gitURL=$(git config remote.origin.url | sed --expression 's,git@github.com:,https://github.com/,' | sed 's/\\.git$//')
-								gitName="${gitURL##*/}"
-								#TODO: handle potential double-quotes in commit message?
-								gitLog=$(git log $lastTag..$BUILD_ID --date=short --format=format:"{ \\"date\\": \\"%cd\\", \\"message\\": \\"%s\\", \\"author\\": \\"%aN\\", \\"url\\": \\"${gitURL}/commit/%H\\"},")
-								if [ -n "$gitLog" ]; then
-									echo "Record changes in ${gitName}"
-									echo "{" >> $gitLogFile
-									echo "\\"name\\": \\"${gitName}\\"," >> $gitLogFile
-									echo "\\"commits\\": [" >> $gitLogFile
-									echo "${gitLog%,}" >> $gitLogFile
-									echo "]}," >> $gitLogFile
-								fi
-							}
-							export -f createGitLog
-							createGitLog
-							git submodule foreach 'createGitLog'
-							
-							echo "{}]}" >> $gitLogFile # Append empty object to keep JSON valid
-						else
-							echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > $gitLogFile
-						fi
-					'''
+					script {
+						def gitReposChanged = utilities.listChangedGitRepositoryURLs("${GIT_BASELINE_TAG}", "${BUILD_ID}")
+						assignEnvVariable('GIT_REPOS_CHANGED', gitReposChanged.join(','))
+					}
 				}
 			}
 		}
@@ -261,6 +230,7 @@ pipeline {
 					source $CJE_ROOT/buildproperties.shsource
 					
 					# Gather maven properties
+					mkdir -p ${DROP_DIR}/$BUILD_ID
 					cp ${AGG_DIR}/eclipse-platform-parent/target/mavenproperties.properties ${DROP_DIR}/$BUILD_ID/mavenproperties.properties
 					comparatorRepo=$(grep '^comparator.repo=' ${DROP_DIR}/${BUILD_ID}/mavenproperties.properties | cut -d'=' -f2-)
 					
@@ -439,6 +409,8 @@ pipeline {
 									
 									java \
 										-DdropDirectory=${DROP_DIR}/${BUILD_ID} \
+										-DgitBaselineTag=${GIT_BASELINE_TAG} \
+										-DgitReposChanged=${GIT_REPOS_CHANGED} \
 										${SCRIPTS}/releng/BuildDropDataGenerator.java mainEclipse
 									java \
 										-DdropDirectory=${DROP_DIR}/${BUILD_ID} \

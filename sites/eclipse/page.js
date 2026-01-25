@@ -275,10 +275,11 @@ function generate() {
     }
 }
 
+const tocLevelPrefix = 'toc-level-'
 const tocLevelIndentation = '0px'
 
 function generateTOCItems(mainElement) {
-    const headersOfTOC = mainElement.querySelectorAll('h1[id], h2[id], h3[id], h4[id]');
+    const headersOfTOC = mainElement.querySelectorAll('h1[id], h2[id], h3[id], h4[id], details > summary[id]');
     if (headersOfTOC.length === 0) {
         document.getElementById('toc-container').remove()
     } else {
@@ -292,7 +293,9 @@ function generateTOCItems(mainElement) {
             item.classList.add('toc-item')
             item.innerHTML = `<a href="#${header.id}">${header.textContent}</a>`
 
-            const level = parseInt(header.tagName.substring(1));
+            const level = parseInt(header.tagName.toLowerCase().startsWith('h')
+                ? header.tagName.substring(1)
+                : Array.from(header.classList).find(c => c.startsWith(tocLevelPrefix)).substring(tocLevelPrefix.length));
             if (lastLevel < 0) {
                 lastLevel = level
             }
