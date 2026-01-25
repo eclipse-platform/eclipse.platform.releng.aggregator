@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -50,34 +51,38 @@ public class OS {
 		}));
 	}
 
-	public static Map<Path, Long> listFileTree(Path root, Optional<Path> filesListFile, Path directory, int depth)
-			throws IOException {
-		if (filesListFile.isPresent()) {
-			return Files.lines(filesListFile.get()).map(line -> line.startsWith("./") ? line.substring(2) : line)
-					.map(line -> {
-						String[] elements = line.split(" ");
-						if (elements.length != 2) {
-							System.out.println(
-									"Line does not contain exactly two space-separated elements. Ignoring:" + line);
-							return null;
-						}
-						return Map.entry(Path.of(elements[0]), Long.parseLong(elements[1]));
-					}).filter(Objects::nonNull).filter(e -> {
-						Path path = e.getKey();
-						return (directory == null || path.startsWith(directory)) && path.getNameCount() <= depth;
-					}).collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
-		} else {
-			int searchDepth = depth - (directory != null ? directory.getNameCount() : 0);
-			Path start = directory != null ? root.resolve(directory) : root;
-			try (var filePaths = Files.walk(start, searchDepth).filter(Files::isRegularFile)) {
-				return filePaths.collect(Collectors.toMap(f -> root.relativize(f), f -> {
-					try {
-						return Files.size(f);
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					}
-				}));
+	public record FileInfo(long size, String hashSHA512) {
+	}
+
+	public static Map<Path, FileInfo> listFileTree(Path root, int searchDepth) throws IOException {
+		try (var filePaths = Files.walk(root, searchDepth).filter(Files::isRegularFile)) {
+			return filePaths.collect(Collectors.toMap(f -> root.relativize(f), f -> {
+				try {
+					String computeFileHash = computeFileHash(f, SHA512_DIGEST.get());
+					return new FileInfo(Files.size(f), computeFileHash);
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			}));
+		}
+	}
+
+	private static final ThreadLocal<MessageDigest> SHA512_DIGEST = ThreadLocal.withInitial(() -> {
+		try {
+			return MessageDigest.getInstance("SHA-512");
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(e);
+		}
+	});
+
+	public static String computeFileHash(Path file, MessageDigest digest) throws IOException {
+		byte[] filesBytes = new byte[8192];
+		try (var stream = Files.newInputStream(file)) {
+			for (int read; (read = stream.read(filesBytes)) >= 0;) {
+				digest.update(filesBytes, 0, read);
 			}
+			byte[] digestBytes = digest.digest();
+			return HexFormat.of().formatHex(digestBytes);
 		}
 	}
 

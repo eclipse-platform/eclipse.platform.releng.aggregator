@@ -51,6 +51,7 @@
 			</thead>
 		</table>
 
+		<br>
 		<details>
 			<summary id="git-log" class="toc-level-4">Git Log</summary>
 			<div style="padding: 5px;">
@@ -62,13 +63,67 @@
 			</div>
 		</details>
 
-		<h4 id="signatures">Checksums&nbsp;(SHA 512) and GPG&nbsp;Signatures</h4>
-		<ul>
-			<li><a href="https://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download</a></li>
-		</ul>
-		<p class="data-ref">
-			<a href="checksum/eclipse-${label}-SUMSSHA512">SHA512 Checksums for ${label}</a>&nbsp;(<a href="checksum/eclipse-${label}-SUMSSHA512.asc">GPG</a>)
-		</p>
+		<br>
+		<details>
+			<summary id="signatures" class="toc-level-4">Checksums&nbsp;(SHA 512) and GPG&nbsp;Signatures</summary>
+			<div style="padding: 5px;">
+				<p>
+					The <em>SHA512</em> checksum of each artifact is provided individually in the tables below.
+					To verify the <em>integrity</em> of a downloaded artifact its checksum, computed by any suitable program (the details below provide examples), can be compared with the listed one.
+					<br>
+					The following instructions describe how to also verify a downloaded artifact's <em>authenticity</em>.
+				</p>
+				<h4>Obtain checksums and signature files</h4>
+				<p class="data-ref">
+					To verify the <em>authenticity</em> and <em>integrity</em> of any artifact provided on this page,
+					download the <a href="eclipse-${label}-checksums">SHA512&nbsp;Checksums file</a> and its <a href="eclipse-${label}-checksums.asc">GPG&nbsp;signature</a>,
+					to the same directory as the files to check.
+					On the CLI both can be downloaded using, for example, the commands:
+					<code class="data-ref append-copy-button" style="display: block;">
+curl -O https://download.eclipse.org/eclipse/downloads/drops4/${identifier}/eclipse-${label}-checksums<br>
+curl -O https://download.eclipse.org/eclipse/downloads/drops4/${identifier}/eclipse-${label}-checksums.asc
+					</code>
+				</p>
+				<h4>Verify checksums authenticity</h4>
+				<p>
+					The authenticity of the checksums file can be verified by executing the command:
+				</p>
+				<code class="data-ref append-copy-button">gpg --verify eclipse-${label}-checksums.asc</code>
+				<p>On successful verification the output is similar to:</p>
+				<pre class="data-ref">
+gpg: assuming signed data in 'eclipse-${label}-checksums'
+gpg: Signature made Tue Jan 27 00:32:27 2026
+gpg:                using RSA key 9E3044071B758EBCB7E45673700E4F39BC05364B
+<b>gpg: Good signature from "Eclipse Platform Project &lt;platform-releng-dev@eclipse.org&gt;"</b> [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 3C91 FED3 922D 5229 6888  BAE9 B6D3 AB9B CC64 1282
+     Subkey fingerprint: 9E30 4407 1B75 8EBC B7E4  5673 700E 4F39 BC05 364B
+</pre>
+				<p>If Eclipse artifacts are verified for the first time, the displayed output will probably indicate that the public key is missing:</p>
+				<pre>
+gpg: Can't check signature: public key not found
+</pre>
+				<p>
+					In this case the the public key has to be received first, for example by executing:
+					<code class="append-copy-button">gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 9E3044071B758EBCB7E45673700E4F39BC05364B</code class="append-copy-button">
+				</p>
+				<h4>Verify artifact integrity</h4>
+				To verify that an artifact, downloaded from this page and located in the same directory as the signature file,
+				matches the checksum recorded in the authentic checksums file, run:
+				<ul>
+					<li>On Linux (or Windows in a POSIX environment)<br>
+						<code class="data-ref append-copy-button">sha512sum --check --ignore-missing eclipse-${label}-checksums</code>
+					The output should be similar to<br>
+					<code class="data-ref">eclipse-SDK-${label}-linux-gtk-x86_64.tar.gz: OK</code>
+					</li>
+					<li>On Windows:<br>
+						<code class="append-copy-button">certutil -hashFile &lt;file-to-verify&gt; SHA512</code>
+						and compare the displayed checksum with the one recorded in the signed checksums file for the corresponding artifact.
+					</li>
+					</ul>
+			</div>
+		</details>
 
 		<h3 id="repository">Eclipse p2 Repository
 			<a href="details.html#Repository"><i class="fa fa-xs fa-info-circle"></i></a>
@@ -196,9 +251,10 @@
 				const filesData = getValue(build, dataPath)
 				table.createTHead().innerHTML = `
 					<tr>
-						<th>Platform</th>
+						<th style="width:22%">Platform</th>
 						<th style="width:50%">Download</th>
-						<th>Size</th>
+						<th style="width:10%">Size</th>
+						<th style="width:13%">Check&shy;sum</th>
 					</tr>
 				`
 				const tBody = table.createTBody()
@@ -209,11 +265,15 @@
 						<a href="${file.name}">${file.name}</a>
 					</td>
 					<td>${file.size}</td>
+					<td>${appendCopyContentButton(`<code class="single-line-truncate file-hash-value" title="SHA512 hash of file: ${file.sha512}">${file.sha512}</code>`, 'SHA512 checksum')}</td>
 					`
 					//TODO: Implement mirror-selection (but https://www.eclipse.org/downloads/download.php?file=eclipse/downloads/drops4/${build.identifier}/${file.name} doesn't work, not even for releases)
 				}
 			}
 		}
+
+		const signaturesSection = document.getElementById('signatures').parentElement
+		appendCopyContentButtons(signaturesSection, 'append-copy-button', 'command')
 
 		function getPlatformLabel(fileName) {
 			let os = getOSLabel(fileName)
