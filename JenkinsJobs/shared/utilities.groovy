@@ -66,6 +66,30 @@ def writeJSON(String jsonFilePath, def json) {
 	writeFile(file: jsonFilePath, text: JsonOutput.prettyPrint(JsonOutput.toJson(json)).replace('    ','\t'), encoding :'UTF-8')
 }
 
+def prepareGPGSigning(String client = '') {
+	def gpgHome = "${WORKSPACE}/tools/gpg/${client}"
+	withCredentials([ file(credentialsId: 'secret-subkeys-releng.asc', variable: 'KEYRING') ]) {
+		sh """#!/bin/bash -xe
+			# Import gpg keys into a clean gpg-homedir
+			rm -rf "${gpgHome}"
+			mkdir -p "${gpgHome}"
+			gpg --homedir "${gpgHome}" --batch --import "\${KEYRING}"
+		"""
+	}
+	return gpgHome
+}
+
+def pgpSignFile(String filePath, String client = '') {
+	def gpgHome = prepareGPGSigning(client)
+	withCredentials([ string(credentialsId: 'secret-subkeys-releng.asc-passphrase', variable: 'KEYRING_PASSPHRASE') ]) {
+		sh """
+			gpg --homedir "${gpgHome}" --batch \
+				--detach-sign --armor --pinentry-mode loopback --passphrase-fd 0 \
+				--output ${filePath}.asc ${filePath} <<< "\${KEYRING_PASSPHRASE}"
+		"""
+	}
+}
+
 // --- website generation ---
 
 def copyStaticWebsiteFiles(String gitRoot, String website) {

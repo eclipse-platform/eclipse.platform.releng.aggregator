@@ -273,10 +273,6 @@ pipeline {
 							tools {
 								jdk 'temurin-jdk25-latest'
 							}
-							environment {
-								KEYRING = credentials('secret-subkeys-releng.asc')
-								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
-							}
 							steps {
 								dir("${DROP_DIR}/${BUILD_ID}") {
 									script {
@@ -394,7 +390,7 @@ pipeline {
 									popd
 									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
 									
-									# Wait for notarization before checksums and pages got generated.
+									# Wait for notarization to complete before checksums are generated.
 									wait
 									for f in $notarizeLogDir/*.log; do
 										echo $f
@@ -402,10 +398,6 @@ pipeline {
 									done
 									
 									# Publish Eclipse
-									
-									pushd ${DROP_DIR}/${BUILD_ID}
-										bash ${CJE_ROOT}/scripts/produceChecksum.sh eclipse
-									popd
 									
 									java \
 										-DdropDirectory=${DROP_DIR}/${BUILD_ID} \
@@ -416,6 +408,9 @@ pipeline {
 										-DdropDirectory=${DROP_DIR}/${BUILD_ID} \
 										${SCRIPTS}/releng/CompilerSummaryGenerator.java
 								'''
+								script {
+									utilities.pgpSignFile("${DROP_DIR}/${BUILD_ID}/eclipse-${BUILD_ID}-checksums", 'eclipse')
+								}
 							}
 						}
 						stage('Promote Eclipse') {
@@ -439,10 +434,6 @@ pipeline {
 						stage('Gather Equinox parts') {
 							tools {
 								jdk 'temurin-jdk25-latest'
-							}
-							environment {
-								KEYRING = credentials('secret-subkeys-releng.asc')
-								KEYRING_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
 							}
 							steps {
 								dir("${EQUINOX_DROP_DIR}/${BUILD_ID}") {
@@ -475,7 +466,7 @@ pipeline {
 										unzip -o -j equinox-SDK-$BUILD_ID.zip plugins/*.jar -x plugins/*.source_*
 									popd
 									
-									# Wait for notarization to complete
+									# Wait for notarization to complete before checksums are generated.
 									wait
 									for f in $notarizeLogDir/*.log; do
 										echo $f
@@ -498,14 +489,13 @@ pipeline {
 										-v
 									popd
 									
-									pushd ${EQUINOX_DROP_DIR}/${BUILD_ID}
-										bash ${CJE_ROOT}/scripts/produceChecksum.sh equinox
-									popd
-									
 									java \
 										-DdropDirectory=${EQUINOX_DROP_DIR}/${BUILD_ID} \
 										${SCRIPTS}/releng/BuildDropDataGenerator.java mainEquinox
 								'''
+								script {
+									utilities.pgpSignFile("${EQUINOX_DROP_DIR}/${BUILD_ID}/equinox-${BUILD_ID}-checksums", 'equinox')
+								}
 							}
 						}
 						stage('Promote Equinox') {

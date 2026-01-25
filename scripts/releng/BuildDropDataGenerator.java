@@ -16,10 +16,11 @@
 import java.util.Map.Entry;
 
 import utilities.JSON;
+import utilities.JSON.Object;
 import utilities.OS;
+import utilities.OS.FileInfo;
 
 Path DIRECTORY;
-Optional<Path> FILES_LIST_FILE;
 
 /**
  * Considered JVM properties are:
@@ -30,23 +31,14 @@ Optional<Path> FILES_LIST_FILE;
  * <li>{@code gitReposChanged} (required for {@code mainEclipse}) -- The comma
  * separated list of URLs of Git repositories that changed since the
  * baseline.</li>
- * <li>{@code filesList} (optional) -- path to a file listing all files and
- * their size in the directory.<br>
- * Can be generated using the UNIX command
- * {@code find . -exec stat --format "%n %s" {} \; }</li>
  * </ul>
  * The generated data files (mainly JSON) are written at locations within the
  * specified directory where the website pages expect them.
  */
 void main(String[] args) throws IOException {
 	DIRECTORY = Path.of(OS.readProperty("dropDirectory")).toRealPath();
-	FILES_LIST_FILE = Optional.ofNullable(System.getProperty("filesList")).map(Path::of);
 	IO.println("INFO: Generating drop data file for");
 	IO.println("\t" + DIRECTORY);
-	FILES_LIST_FILE.ifPresent(list -> {
-		IO.println("INFO: Reading files from:");
-		IO.println("\t" + list);
-	});
 
 	switch (args[0]) {
 	case "mainEclipse" -> mainEclipsePageData();
@@ -57,12 +49,15 @@ void main(String[] args) throws IOException {
 }
 
 final Pattern COMMA = Pattern.compile(",");
+final String FILENAME = "name";
+final String FILE_SIZE = "size";
+final String FILE_HASH_TYPE = "sha512";
 
 void mainEclipsePageData() throws IOException {
 	String gitBaselineTag = OS.readProperty("gitBaselineTag").trim();
 	List<String> gitReposChanged = List.of(OS.readProperty("gitReposChanged").trim().split(","));
 
-	Map<Path, Long> files = OS.listFileTree(DIRECTORY, FILES_LIST_FILE, null, 1);
+	Map<Path, FileInfo> files = OS.listFileTree(DIRECTORY, 1);
 	Map<String, String> properties = OS.loadProperties(DIRECTORY.resolve("buildproperties.properties"));
 	String buildId = properties.get("BUILD_ID");
 	ZonedDateTime buildDate = buildTimestamp(buildId);
@@ -116,13 +111,15 @@ void mainEclipsePageData() throws IOException {
 
 	buildProperties.add("swtBinaries", collectFileEntries(files, filename -> filename.startsWith("swt-")));
 
+	writeChecksumsSummaryFile(buildProperties, buildId, "eclipse");
+
 	Path file = DIRECTORY.resolve("buildproperties.json");
 	IO.println("Write Eclipse drop main data to: " + file);
 	JSON.write(buildProperties, file);
 }
 
 void mainEquinoxPageData() throws IOException {
-	Map<Path, Long> files = OS.listFileTree(DIRECTORY, FILES_LIST_FILE, null, 1);
+	Map<Path, FileInfo> files = OS.listFileTree(DIRECTORY, 1);
 	Map<String, String> properties = OS.loadProperties(DIRECTORY.resolve("buildproperties.properties"));
 	String buildId = properties.get("BUILD_ID");
 	ZonedDateTime buildDate = buildTimestamp(buildId);
@@ -153,20 +150,21 @@ void mainEquinoxPageData() throws IOException {
 	buildProperties.add("starterKits", collectFileEntries(files,
 			filename -> filename.startsWith("EclipseRT-OSGi-StarterKit-") && !OS.isMacTarGZ(filename)));
 
+	writeChecksumsSummaryFile(buildProperties, buildId, "equinox");
+
 	Path file = DIRECTORY.resolve("buildproperties.json");
 	IO.println("Write Equinox drop main data to: " + file);
 	JSON.write(buildProperties, file);
 }
 
 void buildLogsPageData() throws IOException {
-	Path buildLogsDirectory = Path.of("buildlogs");
-	Path comparatorLogsDirectory = Path.of("buildlogs/comparatorlogs");
-	Map<Path, Long> files = OS.listFileTree(DIRECTORY, FILES_LIST_FILE, buildLogsDirectory, 3);
+	Path comparatorLogsDirectory = Path.of("comparatorlogs");
+	Map<Path, FileInfo> files = OS.listFileTree(DIRECTORY.resolve("buildlogs"), 2);
 
 	JSON.Object logFiles = JSON.Object.create();
-	JSON.Array buildLogs = colleFilesInDirectory(buildLogsDirectory, filename -> filename.startsWith("s"), files);
+	JSON.Array buildLogs = collectFileEntries(files, filename -> filename.startsWith("s"));
 	logFiles.add("build", buildLogs);
-	JSON.Array comparatorLogs = colleFilesInDirectory(comparatorLogsDirectory, _ -> true, files);
+	JSON.Array comparatorLogs = collectFilesInDirectory(files, comparatorLogsDirectory, _ -> true);
 	logFiles.add("comparator", comparatorLogs);
 
 	Path file = DIRECTORY.resolve("buildlogs/logs.json");
@@ -185,12 +183,12 @@ String previousReleaseAPILabel(Map<String, String> buildProps) {
 	return major + "." + (minor - 1);
 }
 
-JSON.Array collectFileEntries(Map<Path, Long> buildFiles, Predicate<String> filenameFilter) {
-	return colleFilesInDirectory(null, filenameFilter, buildFiles);
+JSON.Array collectFileEntries(Map<Path, FileInfo> buildFiles, Predicate<String> filenameFilter) {
+	return collectFilesInDirectory(buildFiles, null, filenameFilter);
 }
 
-JSON.Array colleFilesInDirectory(Path inDirectory, Predicate<String> filenameFilter, Map<Path, Long> buildFiles) {
-	Function<Entry<Path, Long>, String> getFilename = f -> f.getKey().getFileName().toString();
+JSON.Array collectFilesInDirectory(Map<Path, FileInfo> buildFiles, Path inDirectory, Predicate<String> filenameFilter) {
+	Function<Entry<Path, FileInfo>, String> getFilename = f -> f.getKey().getFileName().toString();
 	int expectedNameCount = inDirectory != null ? inDirectory.getNameCount() + 1 : 1;
 	return buildFiles.entrySet().stream().filter(f -> {
 		Path file = f.getKey();
@@ -218,7 +216,7 @@ final Comparator<String> BY_OS_ARCH_FILE_NAME = Comparator.comparing((String fil
 	return 100;
 })).thenComparing(Comparator.naturalOrder());
 
-JSON.Object createFileEntry(String filename, Map<Path, Long> buildFiles, String platform) {
+JSON.Object createFileEntry(String filename, Map<Path, FileInfo> buildFiles, String platform) {
 	Path filePath = Path.of(filename);
 	JSON.Object file = createFileDescription(filePath, buildFiles.get(filePath));
 	if (platform != null) {
@@ -227,10 +225,28 @@ JSON.Object createFileEntry(String filename, Map<Path, Long> buildFiles, String 
 	return file;
 }
 
-JSON.Object createFileDescription(Path file, Long fileSize) {
+void writeChecksumsSummaryFile(JSON.Object buildProperties, String buildId, String client) throws IOException {
+	Path checksumSummary = DIRECTORY.resolve(client + "-" + buildId + "-checksums");
+	List<String> lines = buildProperties.members().values().stream() //
+			.filter(JSON.Array.class::isInstance).map(JSON.Array.class::cast) //
+			.map(JSON.Array::elements).flatMap(List::stream) //
+			.filter(JSON.Object.class::isInstance).map(JSON.Object.class::cast) //
+			.map(Object::members).filter(o -> o.containsKey(FILENAME) && o.containsKey(FILE_HASH_TYPE))
+			.sorted(Comparator.comparing((Map<String, JSON.Value> o) -> getStringValue(o, FILENAME)))
+			.map(o -> getStringValue(o, FILE_HASH_TYPE) + " *" + getStringValue(o, FILENAME)).toList();
+	IO.println("Write checksum summary file to: " + checksumSummary);
+	Files.write(checksumSummary, lines);
+}
+
+String getStringValue(Map<String, JSON.Value> o, String key) {
+	return ((JSON.String) o.get(key)).characters();
+}
+
+JSON.Object createFileDescription(Path file, FileInfo fileInfo) {
 	JSON.Object fileEntry = JSON.Object.create();
-	fileEntry.add("name", JSON.String.create(file.toString().replace(File.separatorChar, '/')));
-	fileEntry.add("size", JSON.String.create(OS.fileSizeAsString(fileSize)));
+	fileEntry.add(FILENAME, JSON.String.create(file.toString().replace(File.separatorChar, '/')));
+	fileEntry.add(FILE_SIZE, JSON.String.create(OS.fileSizeAsString(fileInfo.size())));
+	fileEntry.add(FILE_HASH_TYPE, JSON.String.create(fileInfo.hashSHA512()));
 	return fileEntry;
 }
 

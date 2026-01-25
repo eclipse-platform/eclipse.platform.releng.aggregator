@@ -660,10 +660,18 @@ function activateCollapsiblesTable(table) {
 // Copy link button
 
 function appendCopyLinkButton(code) {
+    return appendCopyButton(code, 'copyLink', 'link', '<i class="fa-solid fa-link"></i>')
+}
+
+function appendCopyContentButton(code, contentDescription) {
+    return appendCopyButton(code, 'copyTextContent', contentDescription, '<i class="fa-regular fa-copy"></i>')
+}
+
+function appendCopyButton(code, clickHandler, contentDescription, icon) {
     return `
-<div style="display: flex;align-items: center;">
+<div style="display: flex;align-items: center;flex-wrap: wrap;">
 	${code}
-	<button class="copy-icon" onclick="copyLink(this)" title="Copy link to clipboard">&#128279;</button>
+	<button class="copy-icon" onclick="${clickHandler}(this)" title="Copy ${contentDescription} to clipboard">${icon}</button>
 </div>
 `
 }
@@ -671,11 +679,27 @@ function appendCopyLinkButton(code) {
 function copyLink(button) {
     const sectionId = button.previousElementSibling.id
     const link = window.location.href.split('#')[0] + '#' + sectionId
-    navigator.clipboard.writeText(link).then(() => {
-        const originalText = button.innerText
-        button.innerHTML = '&#10004;'
-        setTimeout(() => { button.innerText = originalText }, 1000) // Restore symbol shortly later
+    copyToClipboard(link, button)
+}
+
+function copyTextContent(button) {
+    const content = button.previousElementSibling.textContent.trim()
+    copyToClipboard(content, button)
+}
+
+function copyToClipboard(content, button) {
+    navigator.clipboard.writeText(content).then(() => {
+        const originalHTML = button.innerHTML
+        button.innerHTML = '<i class="fa-solid fa-copy"></i>'
+        setTimeout(() => { button.innerHTML = originalHTML }, 1000) // Restore symbol shortly later
     })
+}
+
+function appendCopyContentButtons(contextElement, boxClass, contentDescription) {
+    const codeElements = Array.from(contextElement.getElementsByClassName(boxClass))
+    for (const element of codeElements) {
+        element.outerHTML = appendCopyContentButton(element.outerHTML, contentDescription)
+    }
 }
 
 // Code editor box
