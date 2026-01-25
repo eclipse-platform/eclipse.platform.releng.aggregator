@@ -51,10 +51,16 @@
 			</thead>
 		</table>
 
-		<h4 id="git-log">Git Log</h4>
-		<ul>
-			<li><a href="gitLog.html">Git log</a></li>
-		</ul>
+		<details>
+			<summary id="git-log" class="toc-level-4">Git Log</summary>
+			<div style="padding: 5px;">
+				<p>
+					The following Git repositories changed since <b class="data-ref">${gitBaselineTag}</b> until this build (<b class="data-ref">${gitTag}</b>):
+				<ul id="git-log-repo-list">
+				</ul>
+				</p>
+			</div>
+		</details>
 
 		<h4 id="signatures">Checksums&nbsp;(SHA 512) and GPG&nbsp;Signatures</h4>
 		<ul>
@@ -168,6 +174,19 @@
 				const signOffSection = document.getElementById('signOff-issue-container')
 				signOffSection.innerHTML = `Any unit test failures below have been investigated and found to be test-related and to not affect the quality of the build.<br>
 				For details, see <a href="${build.signOffIssue}">${signOffLabel}</a>.`
+			}
+
+			// Inject git log
+			const gitLogRepoList = document.getElementById('git-log-repo-list')
+			for (let repoURL of build.gitReposChanged) {
+				if (repoURL.endsWith('.git')) {
+					repoURL = repoURL.substring(0, repoURL.length - 4)
+				}
+
+				const repoName = repoURL.substring(repoURL.indexOf('github.com') + 10 + 1, repoURL.length)
+				const repoItem = document.createElement('li')
+				repoItem.innerHTML = `<b><a href="${repoURL}/compare/${build.gitBaselineTag}...${build.gitTag}">${repoName}</a></b>`
+				gitLogRepoList.appendChild(repoItem)
 			}
 
 			// Inject resource files

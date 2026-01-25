@@ -143,14 +143,29 @@ pipeline {
 					
 					echo 'Promote Eclipse'
 					dir("${WORKSPACE}/eclipse") {
-						renameBuildDrop('eclipse/downloads/drops4', "${DROP_ID}", "${BUILD_LABEL}", "${DL_DROP_ID}", "${DL_LABEL}")
+						renameBuildDrop('eclipse/downloads/drops4', "${DROP_ID}", "${BUILD_LABEL}", "${DL_DROP_ID}", "${DL_LABEL}") { buildProperties ->
+							script {
+								def baselineBuilds = utilities.listBuildDropDirectoriesOnRemote("${EP_ROOT}/eclipse/downloads/drops4", "${DL_TYPE}*") // sorted in ascending order
+								if (baselineBuilds.isEmpty() && "${DL_TYPE}" == 'S') { // For M1 usually no previous stable build exists
+									baselineBuilds = utilities.listBuildDropDirectoriesOnRemote("${EP_ROOT}/eclipse/downloads/drops4", 'R*')
+								}
+								buildProperties.gitTag = utilities.stableBuildGitTag("${DL_DROP_ID}")
+								buildProperties.gitBaselineTag = utilities.stableBuildGitTag("${baselineBuilds.last()}")
+								echo "gitTag: ${buildProperties.gitTag}, gitBaselineTag: ${buildProperties.gitBaselineTag}"
+								dir("${WORKSPACE}/repository") {
+									def changedRepositories = utilities.listChangedGitRepositoryURLs(buildProperties.gitBaselineTag, buildProperties.gitTag)
+									echo "Changed repositories: ${changedRepositories}"
+									buildProperties.gitReposChanged = changedRepositories
+								}
+							}
+						}
 					}
 				}
 			}
 		}
 		stage('Tag Build') {
 			environment {
-				TAG = "${DL_TYPE}${BUILD_MAJOR}_${BUILD_MINOR}${(CHECKPOINT || BUILD_SERVICE != '0') ? ('_' + BUILD_SERVICE) : ''}${CHECKPOINT ? ('_' + CHECKPOINT) : ''}"
+				TAG = "${utilities.stableBuildGitTag(DL_DROP_ID)}"
 			}
 			steps {
 				dir("${WORKSPACE}/repository") {
@@ -312,7 +327,7 @@ pipeline {
 	}
 }
 
-def renameBuildDrop(String baseDropPath, String oldDropID, String oldBuildLabel, String newDropID, String newBuildLabel) {
+def renameBuildDrop(String baseDropPath, String oldDropID, String oldBuildLabel, String newDropID, String newBuildLabel, Closure extraModification = null) {
 	def sourcePath="${EP_ROOT}/${baseDropPath}/${oldDropID}"
 	def targetPath="${EP_ROOT}/${env.DRY_RUN_PREFIX ?: ''}${baseDropPath}/${newDropID}"
 	
@@ -353,6 +368,9 @@ EOF
 	utilities.modifyJSON('buildproperties.json') { buildProperties ->
 		buildProperties.identifier = newDropID
 		buildProperties.label = newBuildLabel
+		if (extraModification) {
+			extraModification.call(buildProperties)
+		}
 		// Update filenames in lists
 		for (value in buildProperties.values()) {
 			if (value instanceof List) {

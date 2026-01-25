@@ -25,6 +25,11 @@ Optional<Path> FILES_LIST_FILE;
  * Considered JVM properties are:
  * <ul>
  * <li>{@code directory} (required) -- path to the drop directory root.</li>
+ * <li>{@code gitBaselineTag} (required for {@code mainEclipse}) -- the Git
+ * baseline tag.</li>
+ * <li>{@code gitReposChanged} (required for {@code mainEclipse}) -- The comma
+ * separated list of URLs of Git repositories that changed since the
+ * baseline.</li>
  * <li>{@code filesList} (optional) -- path to a file listing all files and
  * their size in the directory.<br>
  * Can be generated using the UNIX command
@@ -54,6 +59,9 @@ void main(String[] args) throws IOException {
 final Pattern COMMA = Pattern.compile(",");
 
 void mainEclipsePageData() throws IOException {
+	String gitBaselineTag = OS.readProperty("gitBaselineTag").trim();
+	List<String> gitReposChanged = List.of(OS.readProperty("gitReposChanged").trim().split(","));
+
 	Map<Path, Long> files = OS.listFileTree(DIRECTORY, FILES_LIST_FILE, null, 1);
 	Map<String, String> properties = OS.loadProperties(DIRECTORY.resolve("buildproperties.properties"));
 	String buildId = properties.get("BUILD_ID");
@@ -68,6 +76,16 @@ void mainEclipsePageData() throws IOException {
 	buildProperties.add("releaseShort", JSON.String.create(properties.get("RELEASE_VER")));
 	buildProperties.add("previousReleaseAPILabel", JSON.String.create(previousReleaseAPILabel(properties)));
 	buildProperties.add("timestamp", JSON.String.create(buildDate.toString()));
+
+	// git log
+	buildProperties.add("gitTag", JSON.String.create(buildId));
+	buildProperties.add("gitBaselineTag", JSON.String.create(gitBaselineTag));
+	if (!gitBaselineTag.isEmpty()) {
+		buildProperties.add("gitReposChanged",
+				gitReposChanged.stream().map(JSON.String::create).collect(JSON.Array.toJSONArray()));
+	} else {
+		IO.println("Git log not generated because a reasonable previous tag could not be found.");
+	}
 
 	// tests
 	JSON.Array testConfigurations = COMMA.splitAsStream(properties.get("TEST_CONFIGURATIONS_EXPECTED")).map(c -> {
