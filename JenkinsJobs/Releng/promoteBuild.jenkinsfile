@@ -9,14 +9,17 @@ The second (deferred) step that makes things visible works, in part, based on so
 
 pipeline {
 	options {
-		skipDefaultCheckout()
+		checkoutToSubdirectory('repository')
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10'))
 	}
 	parameters {
-		booleanParam(name: 'DRY_RUN', defaultValue: true,
-			description: 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
+		booleanParam(name: 'DRY_RUN', defaultValue: true, description: '''\
+			If enabled, the final publication of all changes is skipped respectivly all changes at the download-server happen in a 'try-out' area at https://download.eclipse.org/eclipse/try-outs/.
+			This area is cleaned on each dry-run and should be cleaned after a try-out session is completed.
+			Useful for debugging and to very that the pipeline behaves as intended.
+		''')
 		string(name: 'DROP_ID', trim: true, description: '''\
 			The name (or, build id) of the build to promote. Typically would be a value such as 'I20250714-1800'.
 			It must match the name of the build on the build machine.
@@ -47,23 +50,28 @@ pipeline {
 			steps {
 				script {
 					echo "DRY_RUN: ${DRY_RUN}"
+					// Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+					dir('repository') {
+						utilities = load "JenkinsJobs/shared/utilities.groovy"
+						utilities.setDryRun(params.DRY_RUN)
+						githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+						githubAPI.setDryRun(params.DRY_RUN)
+					}
 					echo "DROP_ID: ${DROP_ID}"
 					echo "CHECKPOINT: ${CHECKPOINT}"
 					echo "SIGNOFF_ISSUE: ${SIGNOFF_ISSUE}"
-					def idMatcher = null
-					if ((idMatcher = "${DROP_ID}" =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
+					def build = utilities.matchBuildIdentifier("${DROP_ID}", { iBuild ->
 						assignEnvVariable('BUILD_LABEL', "${DROP_ID}")
-					} else if ((idMatcher = "${DROP_ID}" =~ /S-(?<label>\d+\.\d+(\.\d+)?(M|RC)\d+[a-z]?)-(?<date>\d{8})(?<time>\d{4})/).matches()) {
-						assignEnvVariable('BUILD_LABEL', idMatcher.group('label'))
+					}, { sBuild ->
+						if (sBuild.type == 'R') {
+							error "Releases cannot be promoted further: ${DROP_ID}"
+						}
+						assignEnvVariable('BUILD_LABEL', sBuild.label)
 						if ("${CHECKPOINT}") {
 							error "Stable build DROP_ID=${DROP_ID} may only be promoted to release CHECKPOINT, which therefore must be empty: ${CHECKPOINT}"
 						}
-					} else {
-						error "DROP_ID, ${DROP_ID}, did not match any expected pattern."
-					}
-					def buildTimestamp = idMatcher.group('date') + idMatcher.group('time')
-					assignEnvVariable('REPO_ID', "I${idMatcher.group('date')}-${idMatcher.group('time')}")
-					idMatcher = null // release matcher as it's not serializable
+					})
+					assignEnvVariable('REPO_ID', "I${build.date}-${build.time}")
 					
 					def buildPropertiesTxt = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${DROP_ID}/buildproperties.txt", returnStdout: true)
 					def buildProperties = readProperties(text: buildPropertiesTxt)
@@ -84,7 +92,7 @@ pipeline {
 						: "${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_SERVICE}${CHECKPOINT}"
 					)
 					// This is DL_DROP_ID for Eclipse and Equinox
-					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${buildTimestamp}")
+					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${build.date}${build.time}")
 					assignEnvVariable('MAINTENANCE_BRANCH', "R${BUILD_MAJOR}_${BUILD_MINOR}_maintenance")
 					
 					if ("${SIGNOFF_ISSUE}".isEmpty()) {
@@ -101,16 +109,9 @@ pipeline {
 				}
 			}
 		}
-		stage('Checkout SCM') {
+		stage('Checkout Submodules') {
 			steps {
 				dir("${WORKSPACE}/repository") {
-					checkout scm
-					script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
-						utilities = load "JenkinsJobs/shared/utilities.groovy"
-						utilities.setDryRun(params.DRY_RUN)
-						githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
-						githubAPI.setDryRun(params.DRY_RUN)
-					}
 					sh '''#!/bin/bash -xe
 						git branch --force master HEAD
 						if [[ "${DL_TYPE}" == 'R' ]]; then

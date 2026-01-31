@@ -7,6 +7,30 @@ def setDryRun(boolean isDryRun) {
 	IS_DRY_RUN = isDryRun
 }
 
+def Map<String, String> matchPattern(String stringName, String string, List<String> patterns, List<Closure> handlers = null) {
+	for (int i = 0; i < patterns.size(); i++) {
+		def matcher = (string =~ patterns[i])
+		if (matcher.matches()) {
+			def groups = matcher.pattern().namedGroups().keySet().collectEntries{ name -> [name, matcher.group(name)]}
+			if (handlers != null) {
+				handlers[i].call(groups)
+			}
+			return groups
+		}
+	}
+	throw new Exception("${stringName}, ${string}, did not match expected pattern(s).")
+}
+
+def matchBuildIdentifier(String dropID, Closure iBuildHandler, Closure sBuildHandler) {
+	return matchPattern('dropID', dropID, [
+		/(?<type>[I])(?<date>\d{8})-(?<time>\d{4})/,
+		/(?<type>[SR])-(?<label>(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?)-(?<date>\d{8})(?<time>\d{4})/,
+	], [
+		{ iBuild -> Objects.requireNonNull(iBuildHandler, "No handler for I-build id match: ${dropID}").call(iBuild)},
+		{ sBuild -> Objects.requireNonNull(sBuildHandler, "No handler for S-build id match: ${dropID}").call(sBuild)},
+	])
+}
+
 // --- local file modifications ---
 
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
