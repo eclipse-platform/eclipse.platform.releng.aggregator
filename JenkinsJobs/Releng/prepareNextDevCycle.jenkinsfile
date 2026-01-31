@@ -9,14 +9,10 @@ pipeline {
 		timestamps()
 		timeout(time: 120, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'5'))
-		skipDefaultCheckout()
 	}
 	parameters {
-		booleanParam(name: 'DRY_RUN', defaultValue: true, description: '''\
-			If enabled, the final publication of all changes is skipped respectivly all changes at the download-server happen in a 'try-out' area at https://download.eclipse.org/eclipse/try-outs/.
-			This area is cleaned on each dry-run and should be cleaned after a try-out session is completed.
-			Useful for debugging and to very that the pipeline behaves as intended.
-		''')
+		booleanParam(name: 'DRY_RUN', defaultValue: true,
+			description: 'If enabled, the final publication of all changes is skipped. Useful for debugging and to very that the pipeline behaves as intended.')
 		string(name: 'NEXT_RELEASE_VERSION', trim: true, description: 'Version of the release to prepare, for example: 4.37')
 		string(name: 'PREVIOUS_RELEASE_CANDIDATE_ID', trim: true, description: 'Id of the current release-candiate for the previous release. For example: S-4.36RC2-202505281830')
 		string(name: 'NEXT_SIMREL_NAME', trim: true, description: 'The name of the Simultanious Release that is targeted by the prepared release. Value is in the format yyyy-mm, for example: 2026-03')
@@ -39,51 +35,40 @@ pipeline {
 			steps {
 				script {
 					echo "DRY_RUN: ${DRY_RUN}"
+					// Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities.setDryRun(params.DRY_RUN)
+					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+					githubAPI.setDryRun(params.DRY_RUN)
+					
 					echo "NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
-					def nextVersionMatcher = "${NEXT_RELEASE_VERSION}" =~ /(?<major>\d+)\.(?<minor>\d+)/
-					if (!nextVersionMatcher.matches()) {
-						error "Unexpected format for NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
-					}
-					assignEnvVariable('NEXT_RELEASE_VERSION_MAJOR', nextVersionMatcher.group('major'))
-					assignEnvVariable('NEXT_RELEASE_VERSION_MINOR', nextVersionMatcher.group('minor'))
-					nextVersionMatcher = null // release matcher as it's not serializable
+					def nextVersion = utilities.matchPattern('NEXT_RELEASE_VERSION', "${NEXT_RELEASE_VERSION}", [ /(?<major>\d+)\.(?<minor>\d+)/ ])
+					assignEnvVariable('NEXT_RELEASE_VERSION_MAJOR', nextVersion.major)
+					assignEnvVariable('NEXT_RELEASE_VERSION_MINOR', nextVersion.minor)
 					
 					echo "PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
 					def buildPropertiesTxt = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_CANDIDATE_ID}/buildproperties.txt", returnStdout: true)
 					def buildProperties = readProperties(text: buildPropertiesTxt)
 					assignEnvVariable('IS_JAVA_RELEASE_IMMINENT', !buildProperties.NEXT_JAVA_RELEASE_DATE.replace('"','').isEmpty()) // Remove surrounding quotes
 					
-					def previousIdMatcher = null
-					if ((previousIdMatcher = "${PREVIOUS_RELEASE_CANDIDATE_ID}" =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/).matches()) {
-						def checkpoint = previousIdMatcher.group('checkpoint')
-						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', previousIdMatcher.group('major'))
-						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', previousIdMatcher.group('minor'))
-						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}${checkpoint}")
-						def previousServiceVersion = previousIdMatcher.group('service') ?: '0'
-						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${previousIdMatcher.group('type')}${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}${(checkpoint || previousServiceVersion != '0') ? ('_' + previousServiceVersion) : ''}${checkpoint ? ('_' + checkpoint) : ''}")
-						
-					} else if ((previousIdMatcher = "${PREVIOUS_RELEASE_CANDIDATE_ID}" =~ /I(?<date>\d{8})-(?<time>\d{4})/).matches()) {
-						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MAJOR', buildProperties.STREAMMajor.replace('"','')) // Remove surrounding quotes
-						assignEnvVariable('PREVIOUS_RELEASE_VERSION_MINOR', buildProperties.STREAMMinor.replace('"','')) // Remove surrounding quotes
+					def previousRC = utilities.matchBuildIdentifier("${PREVIOUS_RELEASE_CANDIDATE_ID}", { iBuild ->
+						iBuild.major = buildProperties.STREAMMajor.replace('"','') // Remove surrounding quotes
+						iBuild.minor = buildProperties.STREAMMinor.replace('"','') // Remove surrounding quotes
 						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
 						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
-						
-					} else {
-						error "Unexpected format for PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
-					}
-					assignEnvVariable('PREVIOUS_RELEASE_VERSION', "${PREVIOUS_RELEASE_VERSION_MAJOR}.${PREVIOUS_RELEASE_VERSION_MINOR}")
-					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousIdMatcher.group('date')}-${previousIdMatcher.group('time')}")
-					previousIdMatcher = null // release matcher as it's not serializable
+					}, { sBuild ->
+						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${sBuild.major}.${sBuild.minor}${sBuild.checkpoint}")
+						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', utilities.stableBuildGitTag(sBuild))
+					})
+					assignEnvVariable('PREVIOUS_RELEASE_VERSION', "${previousRC.major}.${previousRC.minor}")
+					assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_I_BUILD', "I${previousRC.date}-${previousRC.time}")
+					assignEnvVariable('MAINTENANCE_BRANCH', "R${previousRC.major}_${previousRC.minor}_maintenance")
 					
 					echo "NEXT_SIMREL_NAME: ${NEXT_SIMREL_NAME}"
-					def simRelMatcher = "${NEXT_SIMREL_NAME}" =~ /(?<year>\d{4})-(?<month>\d{2})/
-					if (!simRelMatcher.matches()) {
-						error "Unexpected format for NEXT_SIMREL_NAME: ${NEXT_SIMREL_NAME}"
-					}
-					assignEnvVariable('NEXT_RELEASE_YEAR', simRelMatcher.group('year'))
-					assignEnvVariable('NEXT_RELEASE_MONTH', simRelMatcher.group('month'))
+					def simRel = utilities.matchPattern('NEXT_SIMREL_NAME', "${NEXT_SIMREL_NAME}", [ /(?<year>\d{4})-(?<month>\d{2})/ ])
+					assignEnvVariable('NEXT_RELEASE_YEAR', simRel.year)
+					assignEnvVariable('NEXT_RELEASE_MONTH', simRel.month)
 					assignEnvVariable('NEXT_RELEASE_NAME', "${NEXT_SIMREL_NAME}")
-					simRelMatcher = null // release matcher as it's not serializable
 					
 					def simRelDatesRaw = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-simrel/.github/refs/heads/main/wiki/SimRel/${NEXT_SIMREL_NAME}_dates.json", returnStdout: true)
 					def simRelDates = readJSON(text: simRelDatesRaw)
@@ -92,7 +77,6 @@ pipeline {
 						assignEnvVariable("${name}_DATE", date)
 						return [name, date]
 					}
-					assignEnvVariable('MAINTENANCE_BRANCH', "R${PREVIOUS_RELEASE_VERSION_MAJOR}_${PREVIOUS_RELEASE_VERSION_MINOR}_maintenance")
 					
 					// Compute new build schedule
 					def now = java.time.LocalDate.now()
@@ -120,15 +104,8 @@ pipeline {
 				}
 			}
 		}
-		stage('Checkout SCM') {
+		stage('Checkout Submodules') {
 			steps {
-				checkout scm
-				script { // Always load the script from the very same state this pipeline is loaded (to ensure consistency)
-					utilities = load "JenkinsJobs/shared/utilities.groovy"
-					utilities.setDryRun(params.DRY_RUN)
-					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
-					githubAPI.setDryRun(params.DRY_RUN)
-				}
 				sh '''#!/bin/bash -xe
 					git submodule update --init --recursive --remote
 					git config --global user.email 'releng-bot@eclipse.org'
