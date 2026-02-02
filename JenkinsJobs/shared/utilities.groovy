@@ -79,8 +79,10 @@ def prepareGPGSigning(String client = '') {
 	return gpgHome
 }
 
-def pgpSignFile(String filePath, String client = '') {
-	def gpgHome = prepareGPGSigning(client)
+def pgpSignFile(String filePath, String client = '', String gpgHome = null) {
+	if (!gpgHome) {
+		gpgHome = prepareGPGSigning(client)
+	}
 	withCredentials([ string(credentialsId: 'secret-subkeys-releng.asc-passphrase', variable: 'KEYRING_PASSPHRASE') ]) {
 		sh """
 			gpg --homedir "${gpgHome}" --batch \
