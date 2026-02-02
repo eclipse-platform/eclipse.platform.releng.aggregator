@@ -322,7 +322,7 @@ pipeline {
 	}
 	post {
 		always {
-			archiveArtifacts artifacts: '**/*', excludes: 'repository/**'
+			archiveArtifacts artifacts: '**/*', excludes: 'repository/**,tools/**'
 		}
 	}
 }
@@ -358,9 +358,6 @@ def renameBuildDrop(String baseDropPath, String oldDropID, String oldBuildLabel,
 			done
 #DO NOT INDENT EOF!
 EOF
-		
-		#Update checksums to new filenames
-		ssh genie.releng@projects-storage.eclipse.org sed --in-place --expression 's/${oldBuildLabel}/${newBuildLabel}/g' ${targetPath}/*-checksums
 	"""
 	
 	// Update buildproperties.json to new names
@@ -386,6 +383,25 @@ EOF
 		}
 	}
 	
+	// Update filenames in checksum file and re-sign its updated content
+	def gpgHome = utilities.prepareGPGSigning()
+	def client = baseDropPath.substring(0, baseDropPath.indexOf('/'))
+	def checksumsFile = "${client}-${newBuildLabel}-checksums"
+	sh """#!/bin/bash -xe
+		scp genie.releng@projects-storage.eclipse.org:${targetPath}/${checksumsFile}* .
+		
+		# Verify authenticity of the checksums file's previous content
+		if ! gpg --homedir "${gpgHome}" --verify '${checksumsFile}.asc'; then
+			echo 'ERROR: Invalid signature of checksum file. Abort!'
+			exit 1
+		fi
+		# Update recorded filenames
+		sed --in-place --expression 's/${oldBuildLabel}/${newBuildLabel}/g' ${checksumsFile}
+		rm ${checksumsFile}.asc
+	"""
+	utilities.pgpSignFile(checksumsFile, '', gpgHome)
+	
+	// Transfer modified files back to storage server
 	sh """#!/bin/bash -xe
 		# Copy locally modified files to the download server
 		scp -r . genie.releng@projects-storage.eclipse.org:${targetPath}/
