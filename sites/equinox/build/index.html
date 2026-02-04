@@ -79,6 +79,7 @@
 			document.getElementById('build-timestamp').innerHTML = `<b>${formatBuildDate(build.timestamp)} (UTC)</b>`
 
 			// Inject resource files
+			const mirrorPrefix = getArtifactMirrorPrefix()
 			const dataTables = Array.from(mainElement.getElementsByClassName('files-table'))
 			for (const table of dataTables) {
 				const dataPath = table.getAttribute('data-path')
@@ -87,12 +88,11 @@
 				for (const file of filesData) {
 					tBody.insertRow().innerHTML = `
 					<td width="75%">
-						<a href="${file.name}">${file.name}</a>
+						<a href="${mirrorPrefix}${file.name}">${file.name}</a>
 					</td>
 					<td width="10%">${file.size}</td>
 					<td width="15%">${appendCopyContentButton(`<code class="single-line-truncate file-hash-value" title="SHA512 hash of file: ${file.sha512}">${file.sha512}</code>`, 'SHA512 checksum')}</td>
 					`
-					//TODO: Implement mirror-selection (but https://www.eclipse.org/downloads/download.php?file=equinox/drops/${build.identifier}/${file.name} doesn't work, not even for releases)
 				}
 			}
 		}

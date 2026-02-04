@@ -210,6 +210,17 @@ function injectUnstableBuildCause(buildStateContainerId) {
     })
 }
 
+function getArtifactMirrorPrefix() {
+    const id = getIdentifierFromSiteLocation()
+    // No mirroring for I/Y-build artifacts or when not on the eclipse storage server
+    if (id && !(id.startsWith('I') || id.startsWith('Y'))) {
+        const pathname = window.location.pathname
+        const pagePath = pathname.endsWith('/') ? pathname : pathname + '/'
+        return `https://www.eclipse.org/downloads/download.php?file=${pagePath}`
+    }
+    return ''
+}
+
 function fetchAllJSON(urls) {
     const promises = urls.map(url => fetch(url).then(res => {
         if (res.status == 404) {
