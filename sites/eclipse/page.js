@@ -269,6 +269,7 @@ function generate() {
         document.body.replaceChildren(generatedBody);
 
         generateTOCItems(document.body) // assume no headers (for the TOC) are generated dynamically
+        completePopupDialogs(document.body)
 
         if (_pageData) {
             _pageData.then(data => {
@@ -321,6 +322,29 @@ function generateTOCItems(mainElement) {
             lists[lists.length - 1].appendChild(item);
             lastLevel = level;
         }
+    }
+}
+
+const headlinePattern = /^H\d$/
+
+function completePopupDialogs(mainElement) {
+    const popUps = mainElement.querySelectorAll('main dialog.details-popup')
+    for (const popUpDialog of popUps) {
+        popUpDialog.classList.add('col-md-14') // Defines width dynamically
+        popUpDialog.setAttribute('closedby', 'any')
+        const header = popUpDialog.previousElementSibling
+        if (headlinePattern.test(header.nodeName.toUpperCase())) {
+            const openBtn = document.createElement('button');
+            openBtn.classList.add('details-icon')
+            openBtn.innerHTML = '&#x2139;'
+            openBtn.onclick = () => popUpDialog.showModal()
+            header.appendChild(openBtn)
+        }
+        const closeBtn = document.createElement('button');
+        closeBtn.classList.add('close-btn')
+        closeBtn.innerHTML = `&times;`
+        closeBtn.onclick = () => popUpDialog.close()
+        popUpDialog.prepend(closeBtn)
     }
 }
 
@@ -387,7 +411,7 @@ function generateBody() {
 						<div class="row">
 							${generateBreadcrumb()}
 						</div>
-						<div class=" main-col-content">
+						<div class="main-col-content">
 							<div id="midcolumn">
 							${generateMainContent()}
 							</div>
@@ -417,11 +441,11 @@ function generateBody() {
 					<div class="menu-heading">Eclipse Foundation</div>
 					<ul class="nav">
 						<ul class="nav">
-							<li><a href="http://www.eclipse.org/org/">About</a></li>
+							<li><a href="https://www.eclipse.org/org/">About</a></li>
 							<li><a href="https://projects.eclipse.org/">Projects</a></li>
-							<li><a href="http://www.eclipse.org/collaborations/">Collaborations</a></li>
-							<li><a href="http://www.eclipse.org/membership/">Membership</a></li>
-							<li><a href="http://www.eclipse.org/sponsor/">Sponsor</a></li>
+							<li><a href="https://www.eclipse.org/collaborations/">Collaborations</a></li>
+							<li><a href="https://www.eclipse.org/membership/">Membership</a></li>
+							<li><a href="https://www.eclipse.org/sponsor/">Sponsor</a></li>
 						</ul>
 					</ul>
 				</div>
@@ -429,12 +453,12 @@ function generateBody() {
 					<div class="menu-heading">Legal</div>
 					<ul class="nav">
 						<ul class="nav">
-							<li><a href="http://www.eclipse.org/legal/privacy.php">Privacy Policy</a></li>
-							<li><a href="http://www.eclipse.org/legal/termsofuse.php">Terms of Use</a></li>
-							<li><a href="http://www.eclipse.org/legal/compliance/">Compliance</a></li>
-							<li><a href="http://www.eclipse.org/org/documents/Community_Code_of_Conduct.php">Code of
+							<li><a href="https://www.eclipse.org/legal/privacy.php">Privacy Policy</a></li>
+							<li><a href="https://www.eclipse.org/legal/termsofuse.php">Terms of Use</a></li>
+							<li><a href="https://www.eclipse.org/legal/compliance/">Compliance</a></li>
+							<li><a href="https://www.eclipse.org/org/documents/Community_Code_of_Conduct.php">Code of
 									Conduct</a></li>
-							<li><a href="http://www.eclipse.org/legal/">Legal Resources</a></li>
+							<li><a href="https://www.eclipse.org/legal/">Legal Resources</a></li>
 						</ul>
 					</ul>
 				</div>
@@ -442,10 +466,10 @@ function generateBody() {
 					<div class="menu-heading">More</div>
 					<ul class="nav">
 						<ul class="nav">
-							<li><a href="http://www.eclipse.org/security/">Report a Vulnerability</a></li>
+							<li><a href="https://www.eclipse.org/security/">Report a Vulnerability</a></li>
 							<li><a href="https://www.eclipsestatus.io/">Service Status</a></li>
-							<li><a href="http://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
-							<li><a href="http://www.eclipse.org//projects/support/">Support</a></li>
+							<li><a href="https://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
+							<li><a href="https://www.eclipse.org//projects/support/">Support</a></li>
 						</ul>
 					</ul>
 				</div>
@@ -701,7 +725,7 @@ function copyTextContent(button) {
 function copyToClipboard(content, button) {
     navigator.clipboard.writeText(content).then(() => {
         const originalHTML = button.innerHTML
-        button.innerHTML = '<i class="fa-solid fa-copy"></i>'
+        button.innerHTML = '<i class="fa-solid fa-clipboard-check"></i>'
         setTimeout(() => { button.innerHTML = originalHTML }, 1000) // Restore symbol shortly later
     })
 }
