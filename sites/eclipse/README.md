@@ -32,5 +32,5 @@ Unzip the archives to a location of your choise and launch the RelEng Java progr
 ## Launching a web-server
 
 Launch `jwebserver` from this or the parent folder (requires a JDK-18 or later on `PATH`)
-and open the localhost URL displayed on the console (by default `http://127.0.0.1:8000/`).
+and open the localhost URL displayed on the console (by default `http://localhost:8000/`).
 Run `jwebserver --help` for help and further options.
