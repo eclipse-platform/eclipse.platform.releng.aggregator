@@ -62,6 +62,7 @@ pipeline {
 					echo "SIGNOFF_ISSUE: ${SIGNOFF_ISSUE}"
 					def build = utilities.matchBuildIdentifier("${DROP_ID}", { iBuild ->
 						assignEnvVariable('BUILD_LABEL', "${DROP_ID}")
+						assignEnvVariable('DROP_GIT_TAG', "${DROP_ID}")
 					}, { sBuild ->
 						if (sBuild.type == 'R') {
 							error "Releases cannot be promoted further: ${DROP_ID}"
@@ -70,6 +71,7 @@ pipeline {
 						if ("${CHECKPOINT}") {
 							error "Stable build DROP_ID=${DROP_ID} may only be promoted to release CHECKPOINT, which therefore must be empty: ${CHECKPOINT}"
 						}
+						assignEnvVariable('DROP_GIT_TAG', utilities.stableBuildGitTag("${DROP_ID}"))
 					})
 					assignEnvVariable('REPO_ID', "I${build.date}-${build.time}")
 					
@@ -94,6 +96,8 @@ pipeline {
 					// This is DL_DROP_ID for Eclipse and Equinox
 					assignEnvVariable('DL_DROP_ID', "${DL_TYPE}-${DL_LABEL}-${build.date}${build.time}")
 					assignEnvVariable('MAINTENANCE_BRANCH', "R${BUILD_MAJOR}_${BUILD_MINOR}_maintenance")
+					
+					assignEnvVariable('GIT_TAG', utilities.stableBuildGitTag("${DL_DROP_ID}"))
 					
 					if ("${SIGNOFF_ISSUE}".isEmpty()) {
 						echo '[WARNING] SIGNOFF_ISSUE was not defined. That is valid if no Unit Tests failures but otherwise should be defined.'
@@ -149,11 +153,12 @@ pipeline {
 								if (baselineBuilds.isEmpty() && "${DL_TYPE}" == 'S') { // For M1 usually no previous stable build exists
 									baselineBuilds = utilities.listBuildDropDirectoriesOnRemote("${EP_ROOT}/eclipse/downloads/drops4", 'R*')
 								}
-								buildProperties.gitTag = utilities.stableBuildGitTag("${DL_DROP_ID}")
+								baselineBuilds.remove(env.DL_DROP_ID) // ignore the just promoted drop when determining the latest
+								buildProperties.gitTag = env.GIT_TAG
 								buildProperties.gitBaselineTag = utilities.stableBuildGitTag("${baselineBuilds.last()}")
 								echo "gitTag: ${buildProperties.gitTag}, gitBaselineTag: ${buildProperties.gitBaselineTag}"
 								dir("${WORKSPACE}/repository") {
-									def changedRepositories = utilities.listChangedGitRepositoryURLs(buildProperties.gitBaselineTag, buildProperties.gitTag)
+									def changedRepositories = utilities.listChangedGitRepositoryURLs(buildProperties.gitBaselineTag, "${DROP_GIT_TAG}") // git tag of promoted build not yet created
 									echo "Changed repositories: ${changedRepositories}"
 									buildProperties.gitReposChanged = changedRepositories
 								}
@@ -164,16 +169,13 @@ pipeline {
 			}
 		}
 		stage('Tag Build') {
-			environment {
-				TAG = "${utilities.stableBuildGitTag(DL_DROP_ID)}"
-			}
 			steps {
 				dir("${WORKSPACE}/repository") {
 					script {
 						utilities.runHereAndForEachGitSubmodule{
 							// Enforce the (re-)creation of the tag in case of a very late respin
-							sh 'git tag --force --annotate --message="${SIGNOFF_ISSUE}" ${TAG} HEAD'
-							utilities.gitPushTag("${TAG}", /*force*/ true)
+							sh 'git tag --force --annotate --message="${SIGNOFF_ISSUE}" ${GIT_TAG} HEAD'
+							utilities.gitPushTag("${GIT_TAG}", /*force*/ true)
 						}
 					}
 				}
