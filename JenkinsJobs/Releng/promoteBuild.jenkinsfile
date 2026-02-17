@@ -39,6 +39,7 @@ pipeline {
 	environment {
 		// Download Server locations (would very seldom change)
 		EP_ROOT = '/home/data/httpd/download.eclipse.org'
+		ARCHIVE_ROOT = '/home/data/httpd/archive.eclipse.org'
 		DRY_RUN_PREFIX = "${params.DRY_RUN ? 'eclipse/try-outs/' : ''}"
 	}
 	tools {
@@ -203,6 +204,11 @@ pipeline {
 								-Dp2.repository.mirrorsURL=${MIRRORS_URL}
 							
 							scp output/artifacts.* genie.releng@projects-storage.eclipse.org:${EP_ROOT}/${targetRepo}
+							
+							if [[ "${DRY_RUN}" == 'false' ]]; then
+								echo 'Create archive of updates repository'
+								ssh genie.releng@projects-storage.eclipse.org cp -r "${EP_ROOT}/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}" "${ARCHIVE_ROOT}/eclipse/updates/"
+							fi
 						'''
 					}
 				}
@@ -410,7 +416,7 @@ EOF
 		
 		if [[ '${DL_TYPE}' == 'R' ]] && [[ '${DRY_RUN}' == 'false' ]]; then
 			echo 'Creating archive'
-			ssh genie.releng@projects-storage.eclipse.org cp -r '${targetPath}' /home/data/httpd/archive.eclipse.org/${baseDropPath}/
+			ssh genie.releng@projects-storage.eclipse.org cp -r '${targetPath}' ${ARCHIVE_ROOT}/${baseDropPath}
 		fi
 	"""
 }

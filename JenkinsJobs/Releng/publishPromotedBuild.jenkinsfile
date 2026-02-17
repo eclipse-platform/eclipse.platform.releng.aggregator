@@ -100,6 +100,15 @@ pipeline {
 					string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}"),
 					string(name: 'add', value: "${RELEASE_BUILD_ID}")
 				]
+				// Update composite repository files in archive
+				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+					sh '''
+						ssh genie.releng@projects-storage.eclipse.org rsync -vh \
+							${DOWNLOAD_ROOT}/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/ \
+							${ARCHIVE_ROOT}/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/
+					'''
+				}
+				
 				// Update generic composite repositories for latest release (clearing all previous children)
 				// Note: The stream number is not in the 'name', because once a 'name' is defined in Eclipse's UI, it does not change.
 				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [

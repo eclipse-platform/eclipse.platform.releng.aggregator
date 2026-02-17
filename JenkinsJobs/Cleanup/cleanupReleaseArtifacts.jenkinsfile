@@ -2,6 +2,7 @@
 private static final _JOB_DESCRIPTION = 'Cleanup major artifacts from previous releases at the beginning of a new release.'
 
 def int RELEASE_RETENTION_COUNT = 3
+def int UPDATES_RETENTION_COUNT = 10
 
 pipeline {
 	options {
@@ -44,15 +45,14 @@ pipeline {
 						def allReleases = allDrops.findAll{ d -> d.startsWith('R-')}.sort().reverse() // sort in descending order
 						
 						def releaseVersions = allReleases.collectEntries{ release ->
-							def matcher = release =~ /R-(?<version>(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?)-(?<date>\d{8})\d{4}/
-							if (!matcher.matches()) {
-								error "releaseID: ${release}, does not match the expected pattern."
-							}
-							return [ (release): [ 'version': matcher.group('version'),
-								'major': matcher.group('major').toInteger(),
-								'minor': matcher.group('minor').toInteger(),
-								'service': matcher.group('service')?.toInteger() ?: 0,
-								'date': matcher.group('date').toInteger()]]
+							def version = utilities.matchBuildIdentifier(release,
+								{ iBuild -> error "I-builds are not supprted: ${release}" },
+								{ rBuild -> return rBuild })
+							return [ (release): [ 'version': version.label,
+								'major': version.major.toInteger(),
+								'minor': version.minor.toInteger(),
+								'service': version.service?.toInteger() ?: 0,
+								'date': version.date.toInteger()]]
 						}
 						echo "Derived release data: ${releaseVersions}"
 						def latestMinorRelease = allReleases.find{ r -> releaseVersions[r].service == 0}
@@ -62,7 +62,7 @@ pipeline {
 						echo "Eclipse drops to be removed: ${removedEclipseDrops}"
 						utilities.removeDropsOnRemote("${EP_ECLIPSE_DROPS}", removedEclipseDrops)
 						
-						releaseVersions.each{ release, version ->  // Remove I-builds of release
+						releaseVersions.each{ release, version -> // Remove I-builds of release
 							def iBuildsOfRelease = utilities.listBuildDropDirectoriesOnRemote("${EP_ECLIPSE_DROPS}", "I*",
 								version.major, version.minor, version.service)
 							echo "I-build drops to remove for release ${release}: ${iBuildsOfRelease}"
@@ -81,6 +81,16 @@ pipeline {
 							}
 							//TODO: maybe only keep the last 10 or so children, if this is the latest release? Regardless of a new Java-release is close or not
 						}
+						def allUpdateRepositories = utilities.listDirectoryContentOnRemote("${EP_ECLIPSE_UPDATES}")
+							.findAll{ d -> d ==~ /\d+\.\d+(\.\d+)?/ }
+							.collect{ v -> java.lang.Runtime.Version.parse(v.endsWith(".0") ? v.substring(0, v.length() - 2) : v) }
+							.sort().collect{ v -> v.toString() } // sort in ascending order
+						echo "Eclipse updates before clean-up: ${allUpdateRepositories}"
+						if (allUpdateRepositories.size() > UPDATES_RETENTION_COUNT) {
+							removedUpdateSites += allUpdateRepositories.subList(0, allUpdateRepositories.size() - UPDATES_RETENTION_COUNT)
+						}
+						
+						echo "Eclipse update sites to be removed: ${removedUpdateSites}"
 						utilities.removeDropsOnRemote("${EP_ECLIPSE_UPDATES}", removedUpdateSites)
 						
 						// --- Equinox downloads ---

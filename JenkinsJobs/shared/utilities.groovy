@@ -200,6 +200,11 @@ def List<String> listBuildDropDirectoriesOnRemote(String remoteDirectory, String
 	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.startsWith('./') ? d.substring(2) : d }
 }
 
+def List<String> listDirectoryContentOnRemote(String remoteDirectory) {
+	def result = sh(script: "ssh genie.releng@projects-storage.eclipse.org 'ls ${remoteDirectory}'", returnStdout: true).trim()
+	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.endsWith('/') ? d.substring(0, d.length() - 1) : d }
+}
+
 private void removeDropsOnRemote(String remoteDirectory, List<String> drops) {
 	def paths = drops.collect{ r -> "${remoteDirectory}/${r}"}.join(' ')
 	// The main portion of the script is executed on the storage server
@@ -210,11 +215,11 @@ private void removeDropsOnRemote(String remoteDirectory, List<String> drops) {
 		for dropDir in ${paths}; do
 			if [ ! -d \\"\\\${dropDir}\\" ]; then
 				echo \\"Skip not existing directory: \\\${dropDir}\\"
-			elif [ ! -f \\"\\\${dropDir}/buildKeep\\" ]; then
+			elif [ -f \\"\\\${dropDir}/buildKeep\\" ]; then
+				echo \\"Keep drop marked to be kept: \\\${dropDir}\\"
+			else
 				echo \\"Remove directory \\\${dropDir}\\"
 				${ IS_DRY_RUN ? 'echo __' : ''}rm -rf \\"\\\${dropDir}\\"
-			else
-				echo \\"Keep drop marked to be kept: \\\${dropDir}\\"
 			fi
 		done "
 	"""
