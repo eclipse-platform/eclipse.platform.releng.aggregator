@@ -120,11 +120,11 @@
 						<a href="${build.path}">${build.label}</a>
 					</td>
 					<td>
-						<a href="${build.path}">
-							<img src="${getStatusIcon(build)}" title="Build is available" alt="Build is available">
+						<a href="${build.path}" style="text-decoration:none">
+							 ${getStatusIcon(build)}
 						</a>
-						<a href="${build.path}/${build.testsPath}" title="${build.testsCompletion} test platforms finished." style="text-decoration: none">
-							<img src="${getTestStatusIcon(build.testsCompletion, build.date)}"/>
+						<a href="${build.path}/${build.testsPath}" title="${build.testsCompletion} test platforms finished.">
+							${getTestStatusIcon(build.testsCompletion, build.date)}
 							(${build.testsCompletion} tests completed)
 						</a>
 					</td>
@@ -134,12 +134,14 @@
 			}
 		}
 
+		const errorMarkerStyle = 'font-weight:800; font-size:1.2em; line-height:1em; font-family:sans-serif; color:indianred; margin: 0 0.25em 0 0.25em;'
+
 		function getStatusIcon(buildData) {
 			switch (buildData.status) {
 				case 'success':
-					return 'images/build_done.gif'
+					return '<img src="images/build_done.svg" title="Build is available" alt="Build available"/>'
 				case 'unstable':
-					return 'images/caution.gif'
+					return `<span title="Build is unstable" style="${errorMarkerStyle}">!</span>`
 				default:
 					throw new Error(`Unknown state: ${buildData.status}`)
 			}
@@ -153,14 +155,14 @@
 			const expected = parseInt(matches.groups.expected)
 			const completed = parseInt(matches.groups.completed)
 			if (expected == completed) {
-				return 'images/junit.gif'
+				return '<img src="images/junit.svg"/>'
 			} else {
 				if (completed == 0 && buildDate < TWELVE_HOURS_AGO) {
-					return 'images/caution.gif'
+					return `<span style="${errorMarkerStyle}">!</span>`
 				} else if (buildDate < TWENTYFOUR_HOURS_AGO) {
-					return 'images/junit.gif' // Assume tests are not running anymore
+					return '<img src="images/junit.svg"/>' // Assume tests are not running anymore
 				}
-				return 'images/runtests.gif'
+				return '<img src="images/runtests.svg"/>'
 			}
 		}
 
