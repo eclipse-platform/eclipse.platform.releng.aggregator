@@ -552,7 +552,7 @@ pipeline {
 							def prefix = 's' + String.format('%03d', stageIndex++) // prefix with index to establish stable order
 							def logFileName = "${DROP_DIR}/${BUILD_ID}/buildlogs/" + prefix + '_' + jobStage.name.replace(' ', '_').replace('Declarative:_', '') + '.log'
 							sh """
-								curl --fail --silent --output '${logFileName}' ${BUILD_URL}/pipeline-overview/log?nodeId=${jobStage.id}
+								curl --fail --silent --output '${logFileName}' ${BUILD_URL}/stages/log?nodeId=${jobStage.id}
 								# Test (efficiently) if the file starts with the no-logs message and if yes, ensure it doesn't contain more other lines
 								if [ "\$(head --lines 1 '${logFileName}' | xargs)" == 'No logs found' ] && [ "\$(wc --lines < '${logFileName}')" -le 1 ]; then
 									rm -f "${logFileName}"
