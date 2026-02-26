@@ -364,10 +364,24 @@ pipeline {
 					def prBranch = "prepare-R${NEXT_RELEASE_VERSION}"
 					def aggregatorPreparationPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator', prHeadline, """\
 						Prepare development of Eclipse ${NEXT_RELEASE_VERSION}.
-						This includes:
+						This includes(inter alia):
 						- Updating the version of the Maven parent, all references to it and the Eclipse products to `${NEXT_RELEASE_VERSION}`
 						- Updating the release version to `${NEXT_RELEASE_VERSION}` across build scripts
 						- Updating the previous release version to the current Release-Candidate: `${PREVIOUS_RELEASE_CANDIDATE_ID}`
+						
+						Further tasks:
+						- [ ] Review and submit all PRs created in the submodules to prepare them for the new release cycle.
+						  All of these PRs are linked to this one.
+						- [ ] Review and submit the creation of the N&N pages for the new stream in the [eclipse website](https://github.com/eclipse-platform/www.eclipse.org-eclipse/pulls) repository.
+						- [ ] Submit this PR.
+						  Before the preparation PRs in all submodules have been submitted the build of this change cannot complete
+						  (this can still submit it before).
+						- [ ] Update build calendar for platform ${NEXT_STREAM} release.
+						
+						After this and all submodule PRs are submitted: 
+						- [ ] Run the [`Create Jobs`](https://ci.eclipse.org/releng/job/CreateJobs/) seed job to generate the Jenkins jobs for the new stream
+						- [ ] Start the new [`I-build-${NEXT_RELEASE_VERSION}`](https://ci.eclipse.org/releng/job/Builds/job/I-build-${NEXT_RELEASE_VERSION}/) job for the first I-build of the new stream
+						
 						""".stripIndent(), prBranch)
 					
 					utilities.forEachGitSubmodule{ submodulePath ->
