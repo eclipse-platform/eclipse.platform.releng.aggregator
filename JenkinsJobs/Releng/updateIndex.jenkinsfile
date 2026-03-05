@@ -89,11 +89,18 @@ pipeline {
 					utilities.writeJSON('site-eclipse/data.json', eclipseOverviewData)
 					def equinoxOverviewData = parseEquinoxBuildDrops(dropData[1])
 					utilities.writeJSON('site-equinox/data.json', equinoxOverviewData)
+					
+					// Redirection pages towards the eclipse downloads overview page
+					writeFile(file: 'downloads-index.html', text: utilities.redirectionPage('downloads', 'Eclipse Downloads'))
+					writeFile(file: 'drops4-index.html', text: utilities.redirectionPage('..', 'Eclipse Downloads'))
 				}
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh '''
-						rsync -rvzh site-eclipse/. genie.releng@projects-storage.eclipse.org:${EP_ROOT}/eclipse/downloads/
-						rsync -rvzh site-equinox/. genie.releng@projects-storage.eclipse.org:${EP_ROOT}/equinox/
+						rsync -rvzh --checksum site-eclipse/. genie.releng@projects-storage.eclipse.org:${EP_ROOT}/eclipse/downloads/
+						rsync -rvzh --checksum site-equinox/. genie.releng@projects-storage.eclipse.org:${EP_ROOT}/equinox/
+						
+						rsync -rvzh --checksum downloads-index.html genie.releng@projects-storage.eclipse.org:${EP_ROOT}/eclipse/index.html
+						rsync -rvzh --checksum drops4-index.html genie.releng@projects-storage.eclipse.org:${EP_ROOT}/eclipse/downloads/drops4/index.html
 					'''
 				}
 			}

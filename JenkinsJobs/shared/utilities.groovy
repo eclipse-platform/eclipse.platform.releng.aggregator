@@ -123,6 +123,20 @@ def copyStaticWebsiteFiles(String gitRoot, String website) {
 	"""
 }
 
+def redirectionPage(String redirectionTarget, String title, String targetName = null) {
+	return """
+	<!DOCTYPE html>
+	<head>
+		<title>${title}</title>
+		<meta http-equiv="refresh" content="0;url=${redirectionTarget}">
+	</head>
+	<body>
+		Redirection to <a href="${redirectionTarget}">${targetName ?: title}</a>.
+	</body>
+	</html>
+	""".stripIndent()
+}
+
 // --- git operations ---
 
 def runHereAndForEachGitSubmodule(Closure task) {
