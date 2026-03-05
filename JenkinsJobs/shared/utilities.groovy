@@ -26,8 +26,8 @@ def matchBuildIdentifier(String dropID, Closure iBuildHandler, Closure sBuildHan
 		/(?<type>[I])(?<date>\d{8})-(?<time>\d{4})/,
 		/(?<type>[SR])-(?<label>(?<major>\d+)\.(?<minor>\d+)(\.(?<service>\d+))?(?<checkpoint>(M|RC)\d+[a-z]?)?)-(?<date>\d{8})(?<time>\d{4})/,
 	], [
-		{ iBuild -> Objects.requireNonNull(iBuildHandler, "No handler for I-build id match: ${dropID}").call(iBuild)},
-		{ sBuild -> Objects.requireNonNull(sBuildHandler, "No handler for S-build id match: ${dropID}").call(sBuild)},
+		{ iBuild -> Objects.requireNonNull(iBuildHandler, "I-build ID not supported: ${dropID}").call(iBuild)},
+		{ sBuild -> Objects.requireNonNull(sBuildHandler, "S/R-build ID not supported: ${dropID}").call(sBuild)},
 	])
 }
 
@@ -39,6 +39,12 @@ def String stableBuildGitTag(Map<String, String> id) {
 
 def stableBuildGitTag(CharSequence dropID) {
 	return stableBuildGitTag(matchBuildIdentifier(dropID, null, { }))
+}
+
+@NonCPS
+def assignEnvVariable(String name, Object value) {
+	env[name] = value?.toString()?.trim()
+	println("${name}=${value}")
 }
 
 // --- local file modifications ---

@@ -7,7 +7,7 @@ Therefore, both jobs have to share a 'workspace', and the output of the first jo
 
 pipeline {
 	options {
-		skipDefaultCheckout()
+		checkoutToSubdirectory('git-repo')
 		timestamps()
 		timeout(time: 45, unit: 'MINUTES')
 		buildDiscarder(logRotator(numToKeepStr:'10'))
@@ -35,20 +35,20 @@ pipeline {
 		stage('Process Input') {
 			steps {
 				script {
+					// Always load the script from the very same state this pipeline is loaded (to ensure consistency)
+					utilities = load 'git-repo/JenkinsJobs/shared/utilities.groovy'
+					
 					if (!params.releaseBuildID) {
 						error "Required parameter 'releaseBuildID' is not defined."
 					}
 					assignEnvVariable('RELEASE_BUILD_ID', params.releaseBuildID)
-					def idMatcher = env.RELEASE_BUILD_ID =~ /(?<type>[SR])-(?<major>\d+)\.(?<minor>\d+)(\.\d+)?(?<checkpoint>(M|RC)\d+[a-z]?)?-(?<date>\d{8})(?<time>\d{4})/
-					if (!idMatcher.matches()) {
-						error "releaseID: ${RELEASE_BUILD_ID}, does not match the expected pattern."
-					}
-					assignEnvVariable('RELEASE_TYPE', idMatcher.group('type'))
-					assignEnvVariable('RELEASE_VERSION_MAJOR', idMatcher.group('major'))
-					assignEnvVariable('RELEASE_VERSION_MINOR', idMatcher.group('minor'))
-					assignEnvVariable('CHECKPOINT', idMatcher.group('checkpoint') ?: 'GA')
-					def buildId = "I${idMatcher.group('date')}-${idMatcher.group('time')}"
-					idMatcher = null // release matcher as it's not serializable
+					def build = utilities.matchBuildIdentifier("${RELEASE_BUILD_ID}", null, {})
+					
+					assignEnvVariable('RELEASE_TYPE', build.type)
+					assignEnvVariable('RELEASE_VERSION_MAJOR', build.major)
+					assignEnvVariable('RELEASE_VERSION_MINOR', build.minor)
+					assignEnvVariable('CHECKPOINT', build.checkpoint ?: 'GA')
+					def buildId = "I${build.date}-${build.time}"
 					
 					if (env.RELEASE_TYPE == 'R') {
 						assignEnvVariable('REPOSITORY_PATH', "${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/${RELEASE_BUILD_ID}")
@@ -175,8 +175,10 @@ pipeline {
 	}
 }
 
+@groovy.transform.Field
+def utilities = null
+
 @NonCPS
 def assignEnvVariable(String name, String value) {
-	env."${name}" = value
-	println("${name}=${value}")
+	utilities.assignEnvVariable(name, value)
 }

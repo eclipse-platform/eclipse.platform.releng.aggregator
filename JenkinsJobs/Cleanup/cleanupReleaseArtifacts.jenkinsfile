@@ -45,9 +45,7 @@ pipeline {
 						def allReleases = allDrops.findAll{ d -> d.startsWith('R-')}.sort().reverse() // sort in descending order
 						
 						def releaseVersions = allReleases.collectEntries{ release ->
-							def version = utilities.matchBuildIdentifier(release,
-								{ iBuild -> error "I-builds are not supprted: ${release}" },
-								{ rBuild -> return rBuild })
+							def version = utilities.matchBuildIdentifier(release, null, {})
 							return [ (release): [ 'version': version.label,
 								'major': version.major.toInteger(),
 								'minor': version.minor.toInteger(),
