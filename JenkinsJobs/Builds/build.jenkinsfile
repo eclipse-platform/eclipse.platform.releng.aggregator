@@ -53,22 +53,20 @@ pipeline {
 	stages {
 		stage('Set up environment') {
 			steps {
-				script { // Extend build configuration with data from the configuration file
-					def matcher = "$JOB_BASE_NAME" =~ '(?<type>[IY])-build-(?<major>\\d).(?<minor>\\d+)'
-					if (!matcher) {
-						error("Unsupported job: $JOB_BASE_NAME")
-					}
-					assignEnvVariable('BUILD_TYPE', matcher.group('type'))
+				script {
+					utilities = load 'JenkinsJobs/shared/utilities.groovy'
+					
+					def job = utilities.matchPattern('Job name', "${JOB_BASE_NAME}", [ /(?<type>[IY])-build-(?<major>\d).(?<minor>\d+)/ ])
+					// Load build properties and configuration from the properties and configuration file
+					assignEnvVariable('BUILD_TYPE', job.type)
 					def configurations = readJSON(file: "${WORKSPACE}/JenkinsJobs/buildConfigurations.json")
 					BUILD = configurations["${BUILD_TYPE}"]
 					assignEnvVariable('BUILD_TYPE_NAME', BUILD.typeName)
 					assignEnvVariable('GIT_SUBMODULE_BRANCHES', BUILD.branches ? BUILD.branches.collect{ name, branch -> "${name}:${branch}" }.join(',') : '')
-					assignEnvVariable('TEST_NAME_PREFIX', "ep${matcher.group('major')}${matcher.group('minor')}${BUILD_TYPE}-unit")
+					assignEnvVariable('TEST_NAME_PREFIX', "ep${job.major}${job.minor}${BUILD_TYPE}-unit")
 					assignEnvVariable('TEST_CONFIGURATIONS_EXPECTED', BUILD.tests.collect{ c ->
 						"${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
 					}.join(','))
-					
-					utilities = load 'JenkinsJobs/shared/utilities.groovy'
 				}
 				dir("${CJE_ROOT}") {
 					sh '''#!/bin/bash -xe
@@ -642,8 +640,7 @@ def utilities = null
 
 @NonCPS
 def assignEnvVariable(String name, String value) {
-	env[name] = value
-	println("${name}=${value}")
+	utilities.assignEnvVariable(name, value)
 }
 
 def exportPropertiesAsEnvironmentVariables(String propertiesFile, Collection<String> exportedVariables){
