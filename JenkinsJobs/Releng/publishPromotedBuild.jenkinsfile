@@ -119,19 +119,7 @@ pipeline {
 				]
 				
 				// Update html redirect to latest release updates repository
-				writeFile(file: 'index.html', text: """\
-					<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-					<html>
-						<head>
-							<title>Eclipse</title>
-							<meta http-equiv="Cache-control" content="no-cache, no-store, must-revalidate">
-							<meta http-equiv="REFRESH" content="0;url=https://download.eclipse.org/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/" />
-						</head>
-						<body>
-							This page will redirect to the <a href="https://download.eclipse.org/eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}/">Eclipse latest release</a> repository.
-						</body>
-					</html>
-				""".stripIndent())
+				writeFile(file: 'index.html', text: utilities.redirectionPage("${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}", 'Eclipse Updates', 'latest Eclipse release repository'))
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 					sh 'scp index.html genie.releng@projects-storage.eclipse.org:${DOWNLOAD_ROOT}/eclipse/updates/'
 				}
