@@ -71,7 +71,7 @@ The job with the highest release number is the one that builds nightly SDK build
 - If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/job/AutomatedTests/
 - If the build is successful but relevant functionality is severely broken and the build shouldn't be used, the build can be marked as unstable via the [Mark Build](https://ci.eclipse.org/releng/job/Builds/job/markBuild/) job.
 - Daily Maven snapshots are provided by the [Deploy To Maven](https://ci.eclipse.org/releng/job/Releng/job/deployToMaven) job
-and are available from https://repo.eclipse.org/content/repositories/eclipse-snapshots/
+and are available from https://repo.eclipse.org/content/repositories/eclipse-maven2-snapshots/
 
 Milestone and release tasks
 -----------------
