@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2025, 2025 Ed Merks and others.
+ *  Copyright (c) 2025, 2026 Ed Merks and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  *
  *  Contributors:
  *     Ed Merks - initial API and implementation
- *     Hannes Wellmann - Apply Eclipse News scripts to reworked Build drop websites
+ *     Hannes Wellmann - Adapt Eclipse News scripts to reworked Build drop websites
  *******************************************************************************/
 
 const meta = toElements(`
@@ -453,10 +453,10 @@ function generateBody() {
 					<div class="menu-heading">Legal</div>
 					<ul class="nav">
 						<ul class="nav">
-							<li><a href="https://www.eclipse.org/legal/privacy.php">Privacy Policy</a></li>
-							<li><a href="https://www.eclipse.org/legal/termsofuse.php">Terms of Use</a></li>
+							<li><a href="https://www.eclipse.org/legal/privacy/">Privacy Policy</a></li>
+							<li><a href="https://www.eclipse.org/legal/terms-of-use/">Terms of Use</a></li>
 							<li><a href="https://www.eclipse.org/legal/compliance/">Compliance</a></li>
-							<li><a href="https://www.eclipse.org/org/documents/Community_Code_of_Conduct.php">Code of
+							<li><a href="https://www.eclipse.org/org/documents/community-code-of-conduct/">Code of
 									Conduct</a></li>
 							<li><a href="https://www.eclipse.org/legal/">Legal Resources</a></li>
 						</ul>
@@ -468,7 +468,7 @@ function generateBody() {
 						<ul class="nav">
 							<li><a href="https://www.eclipse.org/security/">Report a Vulnerability</a></li>
 							<li><a href="https://www.eclipsestatus.io/">Service Status</a></li>
-							<li><a href="https://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
+							<li><a href="https://www.eclipse.org/org/foundation/contact/">Contact</a></li>
 							<li><a href="https://www.eclipse.org//projects/support/">Support</a></li>
 						</ul>
 					</ul>
