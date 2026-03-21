@@ -30,7 +30,7 @@ Eclipse downloads:
 https://download.eclipse.org/eclipse/downloads/drops4/${IBUILD}
 
 Build logs and/or test results (eventually):
-https://download.eclipse.org/eclipse/downloads/drops4/${IBUILD}/testResults.php
+https://download.eclipse.org/eclipse/downloads/drops4/${IBUILD}/reports.html
 
 Software site repository:
 https://download.eclipse.org/eclipse/updates/${STREAM}-I-builds

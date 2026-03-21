@@ -427,7 +427,7 @@
         <td align="left">
             <a href="../../../">Downloads</a> / 
             <a href="../../">Build</a> / 
-            <a href="../../testResults.php">Test Results</a> | 
+            <a href="../../reports.html#tests">Test Results</a> | 
             <a href="../xml/{$filename}"><xsl:value-of select="$filename"/></a>
         </td>
         <td align="right">Designed for use with <a href='http://junit.org/'>JUnit</a> and <a href='https://ant.apache.org/'>Ant</a>.</td>

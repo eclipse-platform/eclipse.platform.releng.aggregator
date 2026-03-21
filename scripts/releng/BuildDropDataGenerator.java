@@ -1,6 +1,6 @@
 
 /*******************************************************************************
- *  Copyright (c) 2025, 2025 Hannes Wellmann and others.
+ *  Copyright (c) 2025, 2026 Hannes Wellmann and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -129,6 +129,7 @@ void mainEquinoxPageData() throws IOException {
 	buildProperties.add("identifier", JSON.String.create(buildId));
 	buildProperties.add("label", JSON.String.create(buildId));
 	buildProperties.add("kind", JSON.String.create(properties.get("BUILD_TYPE_NAME")));
+	buildProperties.add("releaseShort", JSON.String.create(properties.get("RELEASE_VER")));
 	buildProperties.add("timestamp", JSON.String.create(buildDate.toString()));
 
 	// files
