@@ -97,6 +97,9 @@
       .Properties {
         text-align:right;
       }
+      code {
+        white-space: pre-wrap;
+      }
       </style>
       <script type="text/javascript" language="JavaScript">
         var TestCases = new Array();
@@ -572,7 +575,7 @@
     <xsl:choose>
         <xsl:when test="not(@message)">N/A</xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="@message"/>
+		<pre><code><xsl:value-of select="@message"/></code></pre>
         </xsl:otherwise>
     </xsl:choose>
     <!-- display the stacktrace -->
