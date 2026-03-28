@@ -124,11 +124,12 @@ def copyStaticWebsiteFiles(String gitRoot, String website) {
 }
 
 def redirectionPage(String redirectionTarget, String title, String targetName = null) {
-	return """
+	return """\
 	<!DOCTYPE html>
+	<html lang="en">
 	<head>
 		<title>${title}</title>
-		<meta http-equiv="refresh" content="0;url=${redirectionTarget}">
+		<meta http-equiv="refresh" content="0; url=${redirectionTarget}">
 	</head>
 	<body>
 		Redirection to <a href="${redirectionTarget}">${targetName ?: title}</a>.
