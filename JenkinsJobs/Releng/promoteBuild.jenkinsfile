@@ -151,10 +151,10 @@ pipeline {
 						renameBuildDrop('eclipse/downloads/drops4', "${DROP_ID}", "${BUILD_LABEL}", "${DL_DROP_ID}", "${DL_LABEL}") { buildProperties ->
 							script {
 								def baselineBuilds = utilities.listBuildDropDirectoriesOnRemote("${EP_ROOT}/eclipse/downloads/drops4", "${DL_TYPE}*") // sorted in ascending order
+								baselineBuilds.remove(env.DL_DROP_ID) // ignore the just promoted drop when determining the latest
 								if (baselineBuilds.isEmpty() && "${DL_TYPE}" == 'S') { // For M1 usually no previous stable build exists
 									baselineBuilds = utilities.listBuildDropDirectoriesOnRemote("${EP_ROOT}/eclipse/downloads/drops4", 'R*')
 								}
-								baselineBuilds.remove(env.DL_DROP_ID) // ignore the just promoted drop when determining the latest
 								buildProperties.gitTag = env.GIT_TAG
 								buildProperties.gitBaselineTag = utilities.stableBuildGitTag("${baselineBuilds.last()}")
 								echo "gitTag: ${buildProperties.gitTag}, gitBaselineTag: ${buildProperties.gitBaselineTag}"
