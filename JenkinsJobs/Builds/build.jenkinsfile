@@ -186,21 +186,10 @@ pipeline {
 						$BASE_BUILDER_ECLIPSE_EXE \
 							-debug -consolelog -data $CJE_ROOT/$TMP_DIR/workspace-toolsinstall \
 							-application org.eclipse.equinox.p2.director \
-							-repository ${ECLIPSE_RUN_REPO},https://download.eclipse.org/cbi/updates/p2-analyzers/products/nightly/latest \
-							-installIU org.eclipse.pde.api.tools,org.eclipse.cbi.p2repo.analyzers \
+							-repository ${ECLIPSE_RUN_REPO},https://download.eclipse.org/cbi/updates/p2-analyzers/tools/nightly/latest \
+							-installIU org.eclipse.pde.api.tools,org.eclipse.cbi.p2repo.analyzers.feature.feature.group \
 							-profile SDKProfile
 					'''
-				}
-			}
-		}
-	  stage('Download reference repo for repo reports'){
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                  sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-                    sh '''#!/bin/bash -xe
-                        ./mb030_downloadBuildToCompare.sh $CJE_ROOT/buildproperties.shsource 2>&1
-                    '''
-                  }
 				}
 			}
 		}
@@ -365,7 +354,7 @@ pipeline {
 									$BASE_BUILDER_ECLIPSE_EXE \
 										-application org.eclipse.cbi.p2repo.analyzers.repoReport \
 										-data $CJE_ROOT/$TMP_DIR/workspace-report -vmargs -Xmx1g \
-										-DreferenceRepo=$CJE_ROOT/$TMP_DIR/$BUILD_TO_COMPARE_SITE/$PREVIOUS_RELEASE_VER/$BASEBUILD_ID \
+										-DreferenceRepo=https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_REPO_ID}/${BASEBUILD_ID} \
 										-DreportRepoDir=${PLATFORM_REPO_DIR} \
 										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
 									
