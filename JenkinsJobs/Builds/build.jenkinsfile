@@ -72,7 +72,6 @@ pipeline {
 					sh '''#!/bin/bash -xe
 						chmod +x mbscripts/*
 						chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
-						mkdir -p $logDir
 						
 						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1
 					'''
@@ -183,6 +182,7 @@ pipeline {
 					assignEnvVariable('BASE_BUILDER_ECLIPSE_EXE', "${exe} -nosplash --launcher.suppressErrors")
 					sh '''
 						source $CJE_ROOT/buildproperties.shsource
+						mkdir -p $CJE_ROOT/$TMP_DIR
 						$BASE_BUILDER_ECLIPSE_EXE \
 							-debug -consolelog -data $CJE_ROOT/$TMP_DIR/workspace-toolsinstall \
 							-application org.eclipse.equinox.p2.director \
@@ -193,17 +193,36 @@ pipeline {
 				}
 			}
 		}
-	  stage('Aggregator maven build'){
-	      environment {
-                KEYRING = credentials('secret-subkeys-releng.asc')
-                MAVEN_GPG_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
-          }
-          steps {
-				dir("${CJE_ROOT}/mbscripts") {
-                    sh '''
-                        set -eo pipefail
-                        ./mb220_buildSdkPatch.sh $CJE_ROOT/buildproperties.shsource 2>&1 | tee $logDir/mb220_buildSdkPatch.sh.log
-                    '''
+		stage('Aggregator maven build') {
+			environment {
+				KEYRING = credentials('secret-subkeys-releng.asc')
+				MAVEN_GPG_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
+				LOCAL_REPO = 'localMavenRepo'
+			}
+			steps {
+				dir("${AGG_DIR}") {
+					sh '''#!/bin/bash -xe
+						source $CJE_ROOT/buildproperties.shsource
+						
+						mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
+							-Dmaven.repo.local=${LOCAL_REPO} -DlocalEcjVersion=99.99 \
+							-DcompilerBaselineMode=disable -DcompilerBaselineReplace=none
+						
+						set -o pipefail
+						mkdir -p ${logDir}
+						
+						mvn clean verify -DskipTests=true -Pbree-libs -Peclipse-sign \
+							-Dtycho.debug.artifactcomparator -Dtycho.localArtifacts=ignore \
+							-Dcbi.jarsigner.continueOnFail=true \
+							-Dtycho.pgp.signer=bc -Dtycho.pgp.signer.bc.secretKeys="${KEYRING}" \
+							-Djgit.dirtyWorkingTree=error \
+							-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
+							-Dmaven.repo.local=${LOCAL_REPO} -Dcbi-ecj-version=99.99 \
+							-DbuildType=${BUILD_TYPE} -DbuildId=${BUILD_ID} -DbuildTimestamp=${TIMESTAMP} \
+							-e -T 1C \
+							2>&1 | tee ${logDir}/mb220_buildSdkPatch.sh.log
+							# Capture the build log for the subsequent scan for comparator errors
+					'''
 				}
 			}
 		}
@@ -463,7 +482,6 @@ pipeline {
 									# Build Equinox Launcher archives
 									pushd $CJE_ROOT
 									mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
-									mkdir -p $CJE_ROOT/$TMP_DIR
 									$BASE_BUILDER_ECLIPSE_EXE \
 										-application org.eclipse.ant.core.antRunner \
 										-buildfile ${ECLIPSE_BUILDER_DIR}/equinox/buildConfigs/equinox-launchers/build.xml \
