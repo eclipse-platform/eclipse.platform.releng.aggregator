@@ -480,18 +480,23 @@ pipeline {
 									done
 									
 									# Build Equinox Launcher archives
-									pushd $CJE_ROOT
-									mkdir -p $ECLIPSE_BUILDER_DIR/equinox/$TMP_DIR
-									$BASE_BUILDER_ECLIPSE_EXE \
-										-application org.eclipse.ant.core.antRunner \
-										-buildfile ${ECLIPSE_BUILDER_DIR}/equinox/buildConfigs/equinox-launchers/build.xml \
-										-data $CJE_ROOT/$TMP_DIR/workspace-publishEquinox \
-										-DbuildId=$BUILD_ID \
-										-DbuildRepo=$PLATFORM_REPO_DIR \
-										-DequinoxPostingDirectory=${EQUINOX_DROP_DIR} \
-										-Dequinox.build.configs=$ECLIPSE_BUILDER_DIR/equinox/buildConfigs \
-										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-										-v
+									pushd ${PRODUCTS_DIR}/equinox-launcher/target
+									for launcher in products/equinox-launcher/*/*/*; do
+										if [[ "${launcher}" =~ /equinox-launcher/([^/]+)/([^/]+)/([^/]+)$ ]]; then
+											os="${BASH_REMATCH[1]}"
+											if [[ ${os} == 'macosx' ]]; then installDir='Eclipse.app/Contents/Eclipse'; else installDir='eclipse'; fi
+											mkdir -p "${launcher}/${installDir}/binary/"
+											cp repository/binary/org.eclipse.equinox.executable_root.${BASH_REMATCH[2]}.${os}.${BASH_REMATCH[3]}_* "${launcher}/${installDir}/binary/"
+											archivePath="${EQUINOX_DROP_DIR}/${BUILD_ID}/launchers-${os}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}.${BUILD_ID}"
+											pushd "${launcher}/${installDir}"
+												if [[ ${os} == 'win32' ]]; then
+													zip -r "${archivePath}.zip" binary/ features/ plugins/
+												else
+													tar -czf "${archivePath}.tar.gz" binary/ features/ plugins/
+												fi
+											popd
+										fi
+									done
 									popd
 									
 									java \
