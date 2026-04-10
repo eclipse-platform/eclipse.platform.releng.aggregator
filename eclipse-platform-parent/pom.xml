@@ -69,13 +69,6 @@
 
     <eclipse-sdk-repo>https://download.eclipse.org/eclipse/updates/${releaseVersion}-I-builds/</eclipse-sdk-repo>
 
-    <!--  
-      The tycho-eclipserun-plugin will create its instance of Eclipse from this
-      'eclipiserun-repo' repository, such as for computing .api-descriptions and
-      generating API Tools reports.
-    -->
-    <eclipserun-repo>${eclipse-sdk-repo}</eclipserun-repo>
-    
     <comparator.repo>${eclipse-sdk-repo}</comparator.repo>
 
     <!-- only used when Tycho snapshot repo is enabled in <pluginRepositories> further down -->
@@ -494,6 +487,91 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-gpg-plugin</artifactId>
           <version>${tycho.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-eclipse-plugin</artifactId>
+          <version>${tycho.version}</version>
+          <configuration>
+            <work>${eclipserun.workArea}</work>
+            <repositories>
+              <repository>
+                <id>eclipse</id>
+                <layout>p2</layout>
+                <url>${eclipse-sdk-repo}</url>
+              </repository>
+            </repositories>
+          </configuration>
+          <executions>
+            <execution>
+              <id>generate-repo-report</id>
+              <goals>
+                <goal>eclipse-run</goal>
+              </goals>
+              <phase>none</phase><!-- Ensure explict invocation is required. -->
+              <configuration>
+                <applicationArgs>
+                  <arg>-application</arg>
+                  <arg>org.eclipse.cbi.p2repo.analyzers.repoReport</arg>
+                </applicationArgs>
+                <jvmArgs>
+                  <arg>-DreferenceRepo=${previous-release.baseline}</arg>
+                  <arg>-DreportRepoDir=${reportRepoDir}</arg>
+                  <arg>-DreportOutputDir=${reportOutputDir}</arg>
+                </jvmArgs>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.cbi.p2repo.analyzers.feature</artifactId>
+                    <type>eclipse-feature</type>
+                  </dependency>
+                </dependencies>
+                <repositories combine.children="append">
+                  <repository>
+                    <id>cbi.p2repo.analyzer</id>
+                    <layout>p2</layout>
+                    <url>https://download.eclipse.org/cbi/updates/p2-analyzers/tools/nightly/latest</url>
+                  </repository>
+                </repositories>
+              </configuration>
+            </execution>
+            <execution>
+              <id>generate-api-report</id>
+              <goals>
+                <goal>eclipse-run</goal>
+              </goals>
+              <phase>none</phase><!-- Ensure explict invocation is required. -->
+              <configuration>
+                <applicationArgs>
+                  <arg>-application</arg>
+                  <arg>org.eclipse.ant.core.antRunner</arg>
+                  <arg>-buildfile</arg>
+                  <arg>${gitRepoRoot}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/api-tools-builder.xml</arg>
+                  <arg>apiToolsReports</arg>
+                </applicationArgs>
+                <jvmArgs>
+                  <arg>-DEBuilderDir=${gitRepoRoot}/eclipse.platform.releng.tychoeclipsebuilder</arg>
+                  <arg>-DbuildDirectory=${buildDirectory}</arg>
+                  <arg>-DbuildId=${buildId}</arg>
+                  <arg>-DbuildLabel=${buildId}</arg>
+                  <arg>-DbuildWorkingArea=${gitRepoRoot}</arg>
+                  <arg>-DpreviousBaseURL=https://download.eclipse.org/eclipse/downloads/drops4/${previousReleaseId}/eclipse-SDK-${previousReleaseVer}-win32-x86_64.zip</arg>
+                  <arg>-DpreviousBaselineName=Eclipse-SDK-${previousReleaseVer}</arg>
+                  <arg>-DpreviousBaselineFilename=eclipse-SDK-${previousReleaseVer}-win32-x86_64.zip</arg>
+                  <arg>-Djava.io.tmpdir=${env.CJE_ROOT}/${env.TMP_DIR}</arg>
+                </jvmArgs>
+                <dependencies>
+                  <dependency>
+                    <artifactId>org.eclipse.pde.api.tools</artifactId>
+                    <type>eclipse-plugin</type>
+                  </dependency>
+                  <dependency>
+                    <artifactId>org.eclipse.platform</artifactId>
+                    <type>eclipse-feature</type>
+                  </dependency>
+                </dependencies>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
