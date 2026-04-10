@@ -42,8 +42,9 @@ def stableBuildGitTag(CharSequence dropID) {
 }
 
 @NonCPS
-def assignEnvVariable(String name, Object value) {
-	env[name] = value?.toString()?.trim()
+def assignEnvVariable(String name, String value) {
+	value = value?.trim()
+	env[name] = value
 	println("${name}=${value}")
 }
 
@@ -208,14 +209,19 @@ private void gitPush(String refSpec, boolean force) {
 
 // --- remote file system operations ---
 
+def Map<String, String> loadBuildDropProperties(String buildId) {
+	def properties = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/buildproperties.properties", returnStdout: true)
+	return readProperties(text: properties)
+}
+
 def List<String> listBuildDropDirectoriesOnRemote(String remoteDirectory, String dropNamePattern = "*", int major = 0, int minor = 0, int service = 0) {
 	def versionFilter = major == 0 ? '' :"""\
-		| xargs grep -l 'STREAMMinor=\\"${minor}\\"' \
-		| xargs grep -l 'STREAMMajor=\\"${major}\\"' \
-		| xargs grep -l 'STREAMService=\\"${service}\\"' \
+		| xargs grep -l 'STREAMMinor *= *\\"\\?${minor}\\"\\?\$' \
+		| xargs grep -l 'STREAMMajor *= *\\"\\?${major}\\"\\?\$' \
+		| xargs grep -l 'STREAMService *= *\\"\\?${service}\\"\\?\$' \
 	""".trim()
 	def result = sh(script: """ssh genie.releng@projects-storage.eclipse.org "cd ${remoteDirectory} && \
-		find -maxdepth 2 -type f -path './${dropNamePattern}/buildproperties.txt' \
+		find -maxdepth 2 -type f -path './${dropNamePattern}/buildproperties.properties' \
 		${versionFilter} | xargs dirname | sort -u"
 	""", returnStdout: true).trim()
 	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.startsWith('./') ? d.substring(2) : d }

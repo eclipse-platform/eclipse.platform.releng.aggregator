@@ -64,12 +64,15 @@ void mainEclipsePageData() throws IOException {
 
 	JSON.Object buildProperties = JSON.Object.create();
 	// basic data
+	int major = Integer.parseInt(properties.get("STREAMMajor"));
+	int minor = Integer.parseInt(properties.get("STREAMMinor"));
+	int service = Integer.parseInt(properties.get("STREAMService"));
 	buildProperties.add("identifier", JSON.String.create(buildId));
 	buildProperties.add("label", JSON.String.create(buildId));
 	buildProperties.add("kind", JSON.String.create(properties.get("BUILD_TYPE_NAME")));
-	buildProperties.add("release", JSON.String.create(properties.get("STREAM")));
+	buildProperties.add("release", JSON.String.create(major + "." + minor + "." + service));
 	buildProperties.add("releaseShort", JSON.String.create(properties.get("RELEASE_VER")));
-	buildProperties.add("previousReleaseAPILabel", JSON.String.create(previousReleaseAPILabel(properties)));
+	buildProperties.add("previousReleaseAPILabel", JSON.String.create(previousReleaseAPILabel(major, minor)));
 	buildProperties.add("timestamp", JSON.String.create(buildDate.toString()));
 
 	// git log
@@ -175,9 +178,7 @@ void buildLogsPageData() throws IOException {
 
 // --- data conversion/collection ---
 
-String previousReleaseAPILabel(Map<String, String> buildProps) {
-	int major = Integer.parseInt(buildProps.get("STREAMMajor"));
-	int minor = Integer.parseInt(buildProps.get("STREAMMinor"));
+String previousReleaseAPILabel(int major, int minor) {
 	if (minor == 0) {
 		throw new IllegalStateException("New major version not yet handled");
 	}

@@ -47,13 +47,12 @@ pipeline {
 					assignEnvVariable('NEXT_RELEASE_VERSION_MINOR', nextVersion.minor)
 					
 					echo "PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
-					def buildPropertiesTxt = sh(script: "curl --fail https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_CANDIDATE_ID}/buildproperties.txt", returnStdout: true)
-					def buildProperties = readProperties(text: buildPropertiesTxt)
-					assignEnvVariable('IS_JAVA_RELEASE_IMMINENT', !buildProperties.NEXT_JAVA_RELEASE_DATE.replace('"','').isEmpty()) // Remove surrounding quotes
+					def buildProperties = utilities.loadBuildDropProperties("${PREVIOUS_RELEASE_CANDIDATE_ID}")
+					assignEnvVariable('IS_JAVA_RELEASE_IMMINENT', !buildProperties.NEXT_JAVA_RELEASE_DATE.trim().isEmpty()) // Remove surrounding quotes
 					
 					def previousRC = utilities.matchBuildIdentifier("${PREVIOUS_RELEASE_CANDIDATE_ID}", { iBuild ->
-						iBuild.major = buildProperties.STREAMMajor.replace('"','') // Remove surrounding quotes
-						iBuild.minor = buildProperties.STREAMMinor.replace('"','') // Remove surrounding quotes
+						iBuild.major = buildProperties.STREAMMajor
+						iBuild.minor = buildProperties.STREAMMinor
 						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
 						assignEnvVariable('PREVIOUS_RELEASE_CANDIDATE_GIT_TAG', "${PREVIOUS_RELEASE_CANDIDATE_ID}")
 					}, { sBuild ->
@@ -153,11 +152,9 @@ pipeline {
 		stage('Update build scripts') {
 			steps {
 				replaceAllInFile('cje-production/buildproperties.txt', [
-					"RELEASE_VER=\".*\"" : "RELEASE_VER=\"${NEXT_RELEASE_VERSION}\"",
-					"STREAM=\".*\"" : "STREAM=\"${NEXT_RELEASE_VERSION}.0\"",
-					"STREAMMajor=\".*\"" : "STREAMMajor=\"${NEXT_RELEASE_VERSION_MAJOR}\"",
-					"STREAMMinor=\".*\"" : "STREAMMinor=\"${NEXT_RELEASE_VERSION_MINOR}\"",
-					"NEXT_JAVA_RELEASE_DATE=\".*\"" : "NEXT_JAVA_RELEASE_DATE=\"${NEXT_JAVA_RELEASE_DATE}\"",
+					'STREAMMajor=.*' : "STREAMMajor=${NEXT_RELEASE_VERSION_MAJOR}",
+					'STREAMMinor=.*' : "STREAMMinor=${NEXT_RELEASE_VERSION_MINOR}",
+					'NEXT_JAVA_RELEASE_DATE=.*' : "NEXT_JAVA_RELEASE_DATE=${NEXT_JAVA_RELEASE_DATE}",
 				])
 				replaceInFile('products/eclipse-platform/platform.p2.inf', [
 					"${PREVIOUS_RELEASE_VERSION} Release" : "${NEXT_RELEASE_VERSION} Release",
@@ -196,10 +193,10 @@ pipeline {
 						"-DnewPrevious-release.baseline=https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/"
 				'''
 				replaceAllInFile('cje-production/buildproperties.txt', [
-					'PREVIOUS_RELEASE_VER=".*"' : "PREVIOUS_RELEASE_VER=\"${PREVIOUS_RELEASE_CANDIDATE_TAG}\"",
-					'PREVIOUS_RELEASE_REPO_ID=".*"' : "PREVIOUS_RELEASE_REPO_ID=\"${PREVIOUS_RELEASE_VERSION}-I-builds\"",
-					'BASEBUILD_ID=".*"' : "BASEBUILD_ID=\"${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}\"",
-					'PREVIOUS_RELEASE_ID=".*"' : "PREVIOUS_RELEASE_ID=\"${PREVIOUS_RELEASE_CANDIDATE_ID}\"",
+					'PREVIOUS_RELEASE_VER=.*' : "PREVIOUS_RELEASE_VER=${PREVIOUS_RELEASE_CANDIDATE_TAG}",
+					'PREVIOUS_RELEASE_REPO_ID=.*' : "PREVIOUS_RELEASE_REPO_ID=${PREVIOUS_RELEASE_VERSION}-I-builds",
+					'BASEBUILD_ID=.*' : "BASEBUILD_ID=${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}",
+					'PREVIOUS_RELEASE_ID=.*' : "PREVIOUS_RELEASE_ID=${PREVIOUS_RELEASE_CANDIDATE_ID}",
 				])
 				
 				gitCommitAllExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
@@ -430,7 +427,7 @@ def githubAPI = null
 
 @NonCPS
 def assignEnvVariable(String name, Object value) {
-	utilities.assignEnvVariable(name, value)
+	utilities.assignEnvVariable(name, value?.toString())
 }
 
 @NonCPS

@@ -1,5 +1,7 @@
 @groovy.transform.Field
 def BUILD = null
+@groovy.transform.Field
+def BUILD_PROPERTIES = [:]
 
 pipeline {
 	options {
@@ -59,29 +61,22 @@ pipeline {
 					
 					def job = utilities.matchPattern('Job name', "${JOB_BASE_NAME}", [ /(?<type>[IY])-build-(?<major>\d).(?<minor>\d+)/ ])
 					// Load build properties and configuration from the properties and configuration file
-					assignEnvVariable('BUILD_TYPE', job.type)
-					def configurations = readJSON(file: "${WORKSPACE}/JenkinsJobs/buildConfigurations.json")
-					BUILD = configurations["${BUILD_TYPE}"]
-					assignEnvVariable('BUILD_TYPE_NAME', BUILD.typeName)
+					BUILD = readJSON(file: 'JenkinsJobs/buildConfigurations.json')[job.type]
+					
+					def int jobStart = currentBuild.startTimeInMillis.intdiv(1000)
+					BUILD_PROPERTIES.TIMESTAMP = sh(script: "TZ='America/New_York' date +%Y%m%d-%H%M --date='@${jobStart}'", returnStdout: true)
+					BUILD_PROPERTIES.BUILD_TYPE = job.type
+					BUILD_PROPERTIES.BUILD_TYPE_NAME = BUILD.typeName
+					BUILD_PROPERTIES.BUILD_ID = "${BUILD_PROPERTIES.BUILD_TYPE}${BUILD_PROPERTIES.TIMESTAMP}"
+					BUILD_PROPERTIES += readProperties(file: "${CJE_ROOT}/buildproperties.txt", interpolate: true)
+					BUILD_PROPERTIES.TEST_CONFIGURATIONS_EXPECTED = BUILD.tests.collect{ c ->
+						"${testJobName(c)}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
+					}.join(',')
+					
+					// Export build properties
+					BUILD_PROPERTIES.each{ key, value -> assignEnvVariable(key, value) }
 					assignEnvVariable('GIT_SUBMODULE_BRANCHES', BUILD.branches ? BUILD.branches.collect{ name, branch -> "${name}:${branch}" }.join(',') : '')
-					assignEnvVariable('TEST_NAME_PREFIX', "ep${job.major}${job.minor}${BUILD_TYPE}-unit")
-					assignEnvVariable('TEST_CONFIGURATIONS_EXPECTED', BUILD.tests.collect{ c ->
-						"${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}_${c.os}.${c.ws}.${c.arch}_${c.javaVersion}"
-					}.join(','))
 				}
-				dir("${CJE_ROOT}") {
-					sh '''#!/bin/bash -xe
-						chmod +x mbscripts/*
-						chmod +x $CJE_ROOT/scripts/notarizeMacApp.sh
-						
-						./mbscripts/mb010_createEnvfiles.sh ${CJE_ROOT}/buildproperties.shsource 2>&1
-					'''
-				}
-				exportPropertiesAsEnvironmentVariables("${CJE_ROOT}/buildproperties.properties", [
-					'BUILD_ID',
-					'STREAM', 'RELEASE_VER',
-					'PREVIOUS_RELEASE_ID', 'PREVIOUS_RELEASE_VER',
-				])
 			}
 		}
 		stage('Clone and tag Build Inputs') {
@@ -119,7 +114,6 @@ pipeline {
 						// Try to find the last tag of the current build type that is available as a promoted build
 						// by checking the most recent 5 tags and seeing if an update site for it exists
 						sh '''#!/bin/bash -xe
-							source $CJE_ROOT/buildproperties.shsource
 							updateSiteRootPath=${EP_ECLIPSE_UPDATES}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds
 							lastTagList=$(git tag --list "${BUILD_TYPE}*" | tail -n5 | tac)
 							for lt in ${lastTagList}; do
@@ -149,8 +143,6 @@ pipeline {
 					// Create git tags and push changes
 					sshagent (['github-bot-ssh']) {
 						sh '''#!/bin/bash -xe
-							source $CJE_ROOT/buildproperties.shsource
-							
 							function remoteURL {
 								git config remote.origin.url | sed --expression 's,https://github.com/,git@github.com:,'
 							}
@@ -183,7 +175,6 @@ pipeline {
 			steps {
 				dir("${AGG_DIR}") {
 					sh '''#!/bin/bash -xe
-						source $CJE_ROOT/buildproperties.shsource
 						mkdir -p ${TEMP_DIR}
 						
 						mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
@@ -204,6 +195,13 @@ pipeline {
 							2>&1 | tee ${logDir}/mb220_buildSdkPatch.sh.log
 							# Capture the build log for the subsequent scan for comparator errors
 					'''
+					script {
+						def mavenProperties = readProperties(file: 'eclipse-platform-parent/target/mavenproperties.properties')
+						mavenProperties.each{ key, value -> assignEnvVariable(key, value) }
+						BUILD_PROPERTIES += mavenProperties
+						// Store now complete build-properties
+						writeFile(file: "${CJE_ROOT}/buildproperties.properties", text: BUILD_PROPERTIES.collect{ key, value -> "${key}=${value}"}.join('\n'))
+					}
 				}
 			}
 		}
@@ -213,13 +211,8 @@ pipeline {
 			}
 			steps {
 				sh '''#!/bin/bash -xe
-					source $CJE_ROOT/scripts/common-functions.shsource
-					source $CJE_ROOT/buildproperties.shsource
-					
 					# Gather maven properties
 					mkdir -p ${DROP_DIR}/$BUILD_ID
-					cp ${AGG_DIR}/eclipse-platform-parent/target/mavenproperties.properties ${DROP_DIR}/$BUILD_ID/mavenproperties.properties
-					comparatorRepo=$(grep '^comparator.repo=' ${DROP_DIR}/${BUILD_ID}/mavenproperties.properties | cut -d'=' -f2-)
 					
 					# Gather artifactcomparisons
 					pushd ${AGG_DIR}
@@ -232,9 +225,10 @@ pipeline {
 					#TODO: Generally try to avoid the need to capture the build log in a file/for teeing
 					cp ${logDir}/mb220_buildSdkPatch.sh.log ${DROP_DIR}/$BUILD_ID/buildlogs/
 					
+					#TODO: when outputting comparator error logs, add the baseline repository in the metadata (even on non-failure?) so that it doesn't have to be set here explicitly
 					java \
 						-DbuildDirectory=${DROP_DIR}/$BUILD_ID \
-						-DcomparatorRepo=${comparatorRepo} \
+						-DcomparatorRepo=${COMPARATOR_BASELINE} \
 						${WORKSPACE}/scripts/releng/ComparatorSummaryExtractor.java
 					
 					comparatorLogMinimumSize=350
@@ -242,13 +236,15 @@ pipeline {
 					logSize=$(stat --format='%s' ${comparatorLog})
 					if [[ ${logSize} -gt ${comparatorLogMinimumSize} ]]; then
 						echo -e "DEBUG: found logsize greater an minimum. preparing message using ${link}"
-						fn-write-property COMPARATOR_ERRORS_SUBJECT "\\"- Comparator Errors Found\\""
+						echo "- Comparator Errors Found" > comparatorErrorsSubject
 					else
 						echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
-						fn-write-property COMPARATOR_ERRORS_SUBJECT "\\"\\""
+						touch comparatorErrorsSubject
 					fi
 				'''
-				exportPropertiesAsEnvironmentVariables("${CJE_ROOT}/buildproperties.properties", [ 'COMPARATOR_ERRORS_SUBJECT' ])
+				script { // Export subject to signal comparator errors, if any
+					assignEnvVariable('COMPARATOR_ERRORS_SUBJECT', readFile("${WORKSPACE}/comparatorErrorsSubject").trim())
+				}
 			}
 		}
 		stage('Promote results') {
@@ -267,7 +263,6 @@ pipeline {
 								}
 								sh '''#!/bin/bash -xe
 									cp $CJE_ROOT/buildproperties.* ${DROP_DIR}/${BUILD_ID}
-									source $CJE_ROOT/buildproperties.shsource
 									
 									mkdir -p ${DROP_DIR}/${BUILD_ID}/testresults/consolelogs
 									
@@ -303,6 +298,7 @@ pipeline {
 									
 									notarizeLogDir=$CJE_ROOT/notarizeLog
 									mkdir -p $notarizeLogDir
+									chmod +x ${CJE_ROOT}/scripts/notarizeMacApp.sh
 									pushd ${DROP_DIR}/${BUILD_ID}
 									for macProduct in *.dmg; do
 										(/bin/bash ${CJE_ROOT}/scripts/notarizeMacApp.sh ${macProduct} > $notarizeLogDir/${macProduct}.log 2>&1)&
@@ -419,7 +415,6 @@ pipeline {
 								}
 								sh '''#!/bin/bash -xe
 									cp $CJE_ROOT/buildproperties.* ${EQUINOX_DROP_DIR}/${BUILD_ID}
-									source $CJE_ROOT/buildproperties.shsource
 									
 									# Gather Equinox Starter Kit
 									for file in ${PRODUCTS_DIR}/equinox-starterkit/target/products/*; do
@@ -430,6 +425,7 @@ pipeline {
 									
 									notarizeLogDir=$CJE_ROOT/notarizeEqLog
 									mkdir -p $notarizeLogDir
+									chmod +x ${CJE_ROOT}/scripts/notarizeMacApp.sh
 									pushd ${EQUINOX_DROP_DIR}/${BUILD_ID}
 									(/bin/bash ${CJE_ROOT}/scripts/notarizeMacApp.sh EclipseRT-OSGi-StarterKit-$BUILD_ID-macosx-cocoa-x86_64.dmg > $notarizeLogDir/equinoxX64.log 2>&1)&
 									popd
@@ -497,7 +493,6 @@ pipeline {
 					steps {
 						sshagent(['projects-storage.eclipse.org-bot-ssh']) {
 							sh '''#!/bin/bash -xe
-								source $CJE_ROOT/buildproperties.shsource
 								repoPath=${EP_ECLIPSE_UPDATES}/${STREAMMajor}.${STREAMMinor}-${BUILD_TYPE}-builds/${BUILD_ID}
 								ssh genie.releng@projects-storage.eclipse.org mkdir -p ${repoPath}
 								scp -r ${PLATFORM_REPO_DIR}/. genie.releng@projects-storage.eclipse.org:${repoPath}/.
@@ -555,7 +550,7 @@ pipeline {
 			steps {
 				script {
 					for (c in BUILD.tests) {
-						build job: "${BUILD.testsFolder}/${TEST_NAME_PREFIX}-${c.os}-${c.arch}-java${c.javaVersion}", wait: false, parameters: [
+						build job: "${BUILD.testsFolder}/${testJobName(c)}", wait: false, parameters: [
 							string(name: 'buildId', value: "${BUILD_ID}"),
 							string(name: 'testAgent', value: "${c.agent}"),
 						]
@@ -625,10 +620,7 @@ def assignEnvVariable(String name, String value) {
 	utilities.assignEnvVariable(name, value)
 }
 
-def exportPropertiesAsEnvironmentVariables(String propertiesFile, Collection<String> exportedVariables){
-	def properties = readProperties(file: propertiesFile, charset: 'UTF-8')
-	for (envVar in exportedVariables) {
-		def value = properties[envVar].trim()
-		assignEnvVariable(envVar, value.startsWith('"') && value.endsWith('"') ? value.substring(1, value.length() - 1) : value)
-	}
+@NonCPS
+def testJobName(Map<String, String> c) {
+	return "ep${BUILD_PROPERTIES.STREAMMajor}${BUILD_PROPERTIES.STREAMMinor}${BUILD_PROPERTIES.BUILD_TYPE}-unit-${c.os}-${c.arch}-java${c.javaVersion}"
 }
