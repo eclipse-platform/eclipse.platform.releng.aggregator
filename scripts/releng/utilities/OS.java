@@ -42,13 +42,8 @@ public class OS {
 		try (var stream = Files.newInputStream(file)) {
 			properties.load(stream);
 		}
-		return properties.entrySet().stream().collect(Collectors.toUnmodifiableMap(e -> (String) e.getKey(), e -> {
-			String value = e.getValue().toString().trim();
-			if (value.startsWith("\"") && value.endsWith("\"")) {
-				return value.substring(1, value.length() - 1);
-			}
-			return value;
-		}));
+		return properties.entrySet().stream()
+				.collect(Collectors.toUnmodifiableMap(e -> (String) e.getKey(), e -> e.getValue().toString().trim()));
 	}
 
 	public record FileInfo(long size, String hashSHA512) {

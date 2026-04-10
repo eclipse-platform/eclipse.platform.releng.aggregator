@@ -40,9 +40,9 @@ pipeline {
 						
 						def buildConfigurations = readJSON(file: 'buildConfigurations.json')
 						buildConfigurations.each{ buildType, buildConfig ->
-							buildConfig.streams.each{ STREAM, streamConfig ->
-								def (MAJOR, MINOR) = STREAM.split('\\.')
-								pipelineJobDefinitions["${buildConfig.folder}/${buildType}-build-${STREAM}"] = [scriptPath: buildJob.scriptPath, branch: streamConfig.branch,
+							buildConfig.streams.each{ streamName, streamConfig ->
+								def (MAJOR, MINOR) = streamName.split('\\.')
+								pipelineJobDefinitions["${buildConfig.folder}/${buildType}-build-${streamName}"] = [scriptPath: buildJob.scriptPath, branch: streamConfig.branch,
 									description: "Eclipse SDK ${buildConfig.typeName} builds", disabled: streamConfig.disabled, cronTrigger: '''\
 									TZ=America/Toronto
 									# Format: Minute Hour Day Month Day-of-week (1-7)

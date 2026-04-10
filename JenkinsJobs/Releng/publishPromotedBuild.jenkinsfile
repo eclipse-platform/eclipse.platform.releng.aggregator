@@ -57,14 +57,8 @@ pipeline {
 					} else {
 						error "RELEASE_TYPE, ${RELEASE_TYPE}, did not match any expected pattern."
 					}
-					
-					def eclipseParentPOM = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/tags/${buildId}/eclipse-platform-parent/pom.xml", returnStdout: true)
-					def yearMatcher = eclipseParentPOM =~ /<releaseYear>(?<year>\d+)<\/releaseYear>/
-					def monthMatcher = eclipseParentPOM =~ /<releaseMonth>(?<month>\d+)<\/releaseMonth>/
-					if (!yearMatcher.find() || !monthMatcher.find()) {
-						error "Eclipse Parent POM does not contain releaseYear or releaseMonth"
-					}
-					assignEnvVariable('TRAIN_NAME', yearMatcher.group('year') + '-' + monthMatcher.group('month'))
+					def buildProperties = utilities.loadBuildDropProperties(buildId)
+					assignEnvVariable('TRAIN_NAME', "${buildProperties.RELEASE_YEAR}-${buildProperties.RELEASE_MONTH}")
 					if (!env.TRAIN_NAME) {
 						error "TRAIN_NAME is empty."
 					}
