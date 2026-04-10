@@ -29,7 +29,6 @@ pipeline {
 	tools {
 		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
-		ant 'apache-ant-latest'
 	}
 	environment {
 		MAVEN_OPTS = '-Xmx4G'
@@ -174,25 +173,6 @@ pipeline {
 				}
 			}
 		}
-		stage('Create base builder'){
-			steps {
-				script{
-					def eclipsePlatformLatestRelease = "https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-platform-${PREVIOUS_RELEASE_VER}-linux-gtk-x86_64.tar.gz"
-					def exe = utilities.installDownloadableTool('eclipse', eclipsePlatformLatestRelease) + '/eclipse'
-					assignEnvVariable('BASE_BUILDER_ECLIPSE_EXE', "${exe} -nosplash --launcher.suppressErrors")
-					sh '''
-						source $CJE_ROOT/buildproperties.shsource
-						mkdir -p $CJE_ROOT/$TMP_DIR
-						$BASE_BUILDER_ECLIPSE_EXE \
-							-debug -consolelog -data $CJE_ROOT/$TMP_DIR/workspace-toolsinstall \
-							-application org.eclipse.equinox.p2.director \
-							-repository ${ECLIPSE_RUN_REPO},https://download.eclipse.org/cbi/updates/p2-analyzers/tools/nightly/latest \
-							-installIU org.eclipse.pde.api.tools,org.eclipse.cbi.p2repo.analyzers.feature.feature.group \
-							-profile SDKProfile
-					'''
-				}
-			}
-		}
 		stage('Aggregator maven build') {
 			environment {
 				KEYRING = credentials('secret-subkeys-releng.asc')
@@ -203,6 +183,7 @@ pipeline {
 				dir("${AGG_DIR}") {
 					sh '''#!/bin/bash -xe
 						source $CJE_ROOT/buildproperties.shsource
+						mkdir -p ${CJE_ROOT}/${TMP_DIR}
 						
 						mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
 							-Dmaven.repo.local=${LOCAL_REPO} -DlocalEcjVersion=99.99 \
@@ -370,30 +351,20 @@ pipeline {
 									popd
 									
 									# Generate repository reports
-									$BASE_BUILDER_ECLIPSE_EXE \
-										-application org.eclipse.cbi.p2repo.analyzers.repoReport \
-										-data $CJE_ROOT/$TMP_DIR/workspace-report -vmargs -Xmx1g \
-										-DreferenceRepo=https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_REPO_ID}/${BASEBUILD_ID} \
+									mvn tycho-eclipse:eclipse-run@generate-repo-report -f eclipse-platform-parent \
+										-Declipserun.workArea=${CJE_ROOT}/${TMP_DIR}/repo-report \
 										-DreportRepoDir=${PLATFORM_REPO_DIR} \
 										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
 									
 									# Generate API-tools reports
-									pushd ${DROP_DIR}/${BUILD_ID}
-									$BASE_BUILDER_ECLIPSE_EXE \
-										-application org.eclipse.ant.core.antRunner \
-										-buildfile $ECLIPSE_BUILDER_DIR/eclipse/buildScripts/api-tools-builder.xml \
-										-data $CJE_ROOT/$TMP_DIR/workspace-apitoolingsLogs \
-										-DEBuilderDir=$ECLIPSE_BUILDER_DIR \
+									mvn tycho-eclipse:eclipse-run@generate-api-report -f eclipse-platform-parent \
+										-Declipserun.workArea=${CJE_ROOT}/${TMP_DIR}/apitoolings-logs \
+										-DgitRepoRoot=${AGG_DIR} \
 										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
 										-DbuildId=$BUILD_ID \
-										-DbuildLabel=$BUILD_ID \
-										-DbuildWorkingArea=${AGG_DIR} \
-										-DpreviousBaseURL=https://$DOWNLOAD_HOST/eclipse/downloads/drops4/$PREVIOUS_RELEASE_ID/eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
-										-DpreviousBaselineName=Eclipse-SDK-$PREVIOUS_RELEASE_VER \
-										-DpreviousBaselineFilename=eclipse-SDK-$PREVIOUS_RELEASE_VER-win32-x86_64.zip \
-										-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-										apiToolsReports
-									popd
+										-DpreviousReleaseVer=${PREVIOUS_RELEASE_VER} \
+										-DpreviousReleaseId=${PREVIOUS_RELEASE_ID} \
+									
 									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
 									
 									# Wait for notarization to complete before checksums are generated.

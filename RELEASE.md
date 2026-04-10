@@ -148,7 +148,6 @@ Previously they were created in ther own job:
   This is still a work in progress so if there are any issues or a repo gets missed you can fall back to the old process below:   
   Once that's done it's easiest to just grep for the previous release version or stream number to find the remaining instances that need to be updated, then commit the changes in a new branch for each repo.   
   - **Update comparator repo and eclipse run repo**
-    - Update the ECLIPSE_RUN_REPO in the [cje-production](cje-production) buildproperties.txt files
   - **Set Previous Version to RC2** 
     - RC2 becomes the new baseline for the week before the GA release.
     - Update previous-release.baseline in [eclipse-platform-parent/pom.xml](eclipse-platform-parent/pom.xml)
