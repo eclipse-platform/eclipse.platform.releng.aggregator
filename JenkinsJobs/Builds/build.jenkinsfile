@@ -31,16 +31,15 @@ pipeline {
 		maven 'apache-maven-latest'
 	}
 	environment {
-		MAVEN_OPTS = '-Xmx4G'
 		CJE_ROOT = "${WORKSPACE}/cje-production"
 		SCRIPTS = "${WORKSPACE}/scripts"
 		AGG_DIR = "${CJE_ROOT}/gitCache/eclipse.platform.releng.aggregator"
+		TEMP_DIR = "${CJE_ROOT}/tmp"
 		logDir = "$CJE_ROOT/buildlogs"
 		
 		PRODUCTS_DIR = "${AGG_DIR}/products"
 		SITES_DIR = "${AGG_DIR}/sites"
 		PLATFORM_REPO_DIR = "${SITES_DIR}/eclipse-platform-repository/target/repository"
-		
 		DROP_DIR = "${CJE_ROOT}/siteDir/eclipse/downloads/drops4"
 		EQUINOX_DROP_DIR = "${CJE_ROOT}/siteDir/equinox/drops"
 		// Download server paths
@@ -48,6 +47,9 @@ pipeline {
 		EP_ECLIPSE_UPDATES = "${EP_ROOT}/eclipse/updates"
 		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
 		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+		// Tool configurations
+		MAVEN_OPTS = "-Xmx4G -Dmaven.repo.local=${TEMP_DIR}/maven-repo"
+		JDK_JAVA_OPTIONS = "-Djava.io.tmpdir=${TEMP_DIR}"
 	}
 	stages {
 		stage('Set up environment') {
@@ -177,16 +179,15 @@ pipeline {
 			environment {
 				KEYRING = credentials('secret-subkeys-releng.asc')
 				MAVEN_GPG_PASSPHRASE = credentials('secret-subkeys-releng.asc-passphrase')
-				LOCAL_REPO = 'localMavenRepo'
 			}
 			steps {
 				dir("${AGG_DIR}") {
 					sh '''#!/bin/bash -xe
 						source $CJE_ROOT/buildproperties.shsource
-						mkdir -p ${CJE_ROOT}/${TMP_DIR}
+						mkdir -p ${TEMP_DIR}
 						
 						mvn clean install -pl :eclipse-sdk-prereqs,:org.eclipse.jdt.core.compiler.batch \
-							-Dmaven.repo.local=${LOCAL_REPO} -DlocalEcjVersion=99.99 \
+							-DlocalEcjVersion=99.99 \
 							-DcompilerBaselineMode=disable -DcompilerBaselineReplace=none
 						
 						set -o pipefail
@@ -197,8 +198,7 @@ pipeline {
 							-Dcbi.jarsigner.continueOnFail=true \
 							-Dtycho.pgp.signer=bc -Dtycho.pgp.signer.bc.secretKeys="${KEYRING}" \
 							-Djgit.dirtyWorkingTree=error \
-							-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
-							-Dmaven.repo.local=${LOCAL_REPO} -Dcbi-ecj-version=99.99 \
+							-Dcbi-ecj-version=99.99 \
 							-DbuildType=${BUILD_TYPE} -DbuildId=${BUILD_ID} -DbuildTimestamp=${TIMESTAMP} \
 							-e -T 1C \
 							2>&1 | tee ${logDir}/mb220_buildSdkPatch.sh.log
@@ -235,7 +235,6 @@ pipeline {
 					java \
 						-DbuildDirectory=${DROP_DIR}/$BUILD_ID \
 						-DcomparatorRepo=${comparatorRepo} \
-						-Djava.io.tmpdir=$CJE_ROOT/$TMP_DIR \
 						${WORKSPACE}/scripts/releng/ComparatorSummaryExtractor.java
 					
 					comparatorLogMinimumSize=350
@@ -352,13 +351,13 @@ pipeline {
 									
 									# Generate repository reports
 									mvn tycho-eclipse:eclipse-run@generate-repo-report -f eclipse-platform-parent \
-										-Declipserun.workArea=${CJE_ROOT}/${TMP_DIR}/repo-report \
+										-Declipserun.workArea=${TEMP_DIR}/repo-report \
 										-DreportRepoDir=${PLATFORM_REPO_DIR} \
 										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
 									
 									# Generate API-tools reports
 									mvn tycho-eclipse:eclipse-run@generate-api-report -f eclipse-platform-parent \
-										-Declipserun.workArea=${CJE_ROOT}/${TMP_DIR}/apitoolings-logs \
+										-Declipserun.workArea=${TEMP_DIR}/apitoolings-logs \
 										-DgitRepoRoot=${AGG_DIR} \
 										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
 										-DbuildId=$BUILD_ID \
