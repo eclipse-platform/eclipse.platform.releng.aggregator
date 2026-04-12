@@ -13,6 +13,8 @@
  *     Hannes Wellmann - initial API and implementation
  *******************************************************************************/
 
+import static java.util.function.Predicate.not;
+
 import java.util.Map.Entry;
 
 import utilities.JSON;
@@ -139,15 +141,16 @@ void mainEquinoxPageData() throws IOException {
 	buildProperties.add("equinoxRepository",
 			collectFileEntries(files, filename -> filename.startsWith("equinox-SDK-")));
 
-	buildProperties.add("equinoxFramework",
-			collectFileEntries(files, filename -> filename.startsWith("org.eclipse.osgi_")));
+	Predicate<String> isOSGiBundle = filename -> filename.startsWith("org.eclipse.osgi_");
+	buildProperties.add("equinoxFramework", collectFileEntries(files, isOSGiBundle));
 
 	Predicate<String> isAddonBundle = filename -> (filename.startsWith("org.eclipse.equinox.")
 			|| filename.startsWith("org.eclipse.osgi.")) && !filename.startsWith("org.eclipse.equinox.p2.");
 	Predicate<String> isJar = filename -> filename.endsWith(".jar");
 
 	buildProperties.add("addonBundles", collectFileEntries(files, isAddonBundle.and(isJar)));
-	buildProperties.add("otherBundles", collectFileEntries(files, isAddonBundle.negate().and(isJar)));
+	buildProperties.add("otherBundles",
+			collectFileEntries(files, not(isAddonBundle).and(not(isOSGiBundle)).and(isJar)));
 
 	buildProperties.add("launchers", collectFileEntries(files, filename -> filename.startsWith("launchers-")));
 
