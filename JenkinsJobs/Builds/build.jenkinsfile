@@ -340,13 +340,30 @@ pipeline {
 										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
 									
 									# Generate API-tools reports
+									
+									mkdir -p ${DROP_DIR}/${BUILD_ID}/apitools
+									# Collect .api_filters files
+									for filter in $(find ${AGG_DIR} -type f -path '*/.settings/.api_filters'); do
+										IFS='/' read -ra PATH_SEGMENTS <<< "${filter}"
+										pluginName="${PATH_SEGMENTS[-3]}"
+										target=${DROP_DIR}/${BUILD_ID}/apifilters/${pluginName}
+										mkdir -p ${target}
+										cp ${filter} ${target}
+									done
+									pushd ${DROP_DIR}/${BUILD_ID}
+										zip -r apitools/apifilters-${BUILD_ID}.zip apifilters/*
+									popd
+									
+									baseline=${DROP_DIR}/${BUILD_ID}/apitoolingreference/Eclipse-SDK-${PREVIOUS_RELEASE_VER}/eclipse-SDK-${PREVIOUS_RELEASE_VER}-win32-x86_64.zip
+									mkdir -p $(dirname ${baseline})
+									curl -o ${baseline} https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-SDK-${PREVIOUS_RELEASE_VER}-win32-x86_64.zip
 									mvn tycho-eclipse:eclipse-run@generate-api-report -f eclipse-platform-parent \
 										-Declipserun.workArea=${TEMP_DIR}/apitoolings-logs \
 										-DgitRepoRoot=${AGG_DIR} \
-										-DbuildDirectory=${DROP_DIR}/${BUILD_ID} \
-										-DbuildId=$BUILD_ID \
-										-DpreviousReleaseVer=${PREVIOUS_RELEASE_VER} \
-										-DpreviousReleaseId=${PREVIOUS_RELEASE_ID} \
+										-Dbaseline=${baseline} \
+										-Dcurrent_location=${DROP_DIR}/${BUILD_ID}/eclipse-SDK-${BUILD_ID}-win32-win32-x86_64.zip \
+										-Dreport=${DROP_DIR}/${BUILD_ID}/apitools \
+										-Dfilter_store=${DROP_DIR}/${BUILD_ID}/apifilters \
 									
 									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
 									
