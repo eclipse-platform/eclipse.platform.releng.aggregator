@@ -347,27 +347,22 @@ pipeline {
 									for filter in $(find ${AGG_DIR} -type f -path '*/.settings/.api_filters'); do
 										IFS='/' read -ra PATH_SEGMENTS <<< "${filter}"
 										pluginName="${PATH_SEGMENTS[-3]}"
-										target=${DROP_DIR}/${BUILD_ID}/apifilters/${pluginName}
+										target=${TEMP_DIR}/apifilters/${pluginName}
 										mkdir -p ${target}
 										cp ${filter} ${target}
 									done
-									pushd ${DROP_DIR}/${BUILD_ID}
-										zip -r apitools/apifilters-${BUILD_ID}.zip apifilters/*
-									popd
 									
-									baseline=${DROP_DIR}/${BUILD_ID}/apitoolingreference/Eclipse-SDK-${PREVIOUS_RELEASE_VER}/eclipse-SDK-${PREVIOUS_RELEASE_VER}-win32-x86_64.zip
+									baseline=${TEMP_DIR}/apitoolingreference/repository-${PREVIOUS_RELEASE_VER}.zip
 									mkdir -p $(dirname ${baseline})
-									curl -o ${baseline} https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-SDK-${PREVIOUS_RELEASE_VER}-win32-x86_64.zip
+									curl -o ${baseline} https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/repository-${PREVIOUS_RELEASE_VER}.zip
 									mvn tycho-eclipse:eclipse-run@generate-api-report -f eclipse-platform-parent \
 										-Declipse-sdk-repo=file://${PLATFORM_REPO_DIR} \
 										-Declipserun.workArea=${TEMP_DIR}/apitoolings-logs \
 										-DgitRepoRoot=${AGG_DIR} \
 										-Dbaseline=${baseline} \
-										-Dcurrent_location=${DROP_DIR}/${BUILD_ID}/eclipse-SDK-${BUILD_ID}-win32-win32-x86_64.zip \
+										-Dcurrent_location=${PLATFORM_REPO_DIR} \
 										-Dreport=${DROP_DIR}/${BUILD_ID}/apitools \
-										-Dfilter_store=${DROP_DIR}/${BUILD_ID}/apifilters \
-									
-									rm -rf ${DROP_DIR}/${BUILD_ID}/apitoolingreference
+										-Dfilter_store=${TEMP_DIR}/apifilters \
 									
 									# Wait for notarization to complete before checksums are generated.
 									wait
