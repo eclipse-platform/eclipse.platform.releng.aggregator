@@ -335,6 +335,7 @@ pipeline {
 									
 									# Generate repository reports
 									mvn tycho-eclipse:eclipse-run@generate-repo-report -f eclipse-platform-parent \
+										-Declipse-sdk-repo=file://${PLATFORM_REPO_DIR} \
 										-Declipserun.workArea=${TEMP_DIR}/repo-report \
 										-DreportRepoDir=${PLATFORM_REPO_DIR} \
 										-DreportOutputDir=${DROP_DIR}/${BUILD_ID}/buildlogs
@@ -358,6 +359,7 @@ pipeline {
 									mkdir -p $(dirname ${baseline})
 									curl -o ${baseline} https://download.eclipse.org/eclipse/downloads/drops4/${PREVIOUS_RELEASE_ID}/eclipse-SDK-${PREVIOUS_RELEASE_VER}-win32-x86_64.zip
 									mvn tycho-eclipse:eclipse-run@generate-api-report -f eclipse-platform-parent \
+										-Declipse-sdk-repo=file://${PLATFORM_REPO_DIR} \
 										-Declipserun.workArea=${TEMP_DIR}/apitoolings-logs \
 										-DgitRepoRoot=${AGG_DIR} \
 										-Dbaseline=${baseline} \
