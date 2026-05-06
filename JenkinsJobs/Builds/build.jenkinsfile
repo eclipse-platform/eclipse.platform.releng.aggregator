@@ -519,17 +519,20 @@ pipeline {
 			tools {
 				jdk 'temurin-jdk25-latest'
 			}
+			environment {
+				JENKINS_API_TOKEN = credentials('jenkins-api') // username:password
+			}
 			steps {
 				script {
 					// See https://github.com/jenkinsci/pipeline-stage-view-plugin/tree/master/rest-api#get-jobjob-namewfapiruns
-					def description = readJSON(text: sh(script: "curl --fail ${BUILD_URL}/wfapi/describe", returnStdout: true))
+					def description = readJSON(text: sh(script: 'curl --fail ${BUILD_URL}/wfapi/describe --user "${JENKINS_API_TOKEN}"', returnStdout: true))
 					int stageIndex = 0
 					for (jobStage in description['stages']) {
 						if (jobStage.status != 'IN_PROGRESS') {
 							def prefix = 's' + String.format('%03d', stageIndex++) // prefix with index to establish stable order
 							def logFileName = "${DROP_DIR}/${BUILD_ID}/buildlogs/" + prefix + '_' + jobStage.name.replace(' ', '_').replace('Declarative:_', '') + '.log'
 							sh """
-								curl --fail --silent --output '${logFileName}' ${BUILD_URL}/stages/log?nodeId=${jobStage.id}
+								curl --fail --silent --output '${logFileName}' --user "\${JENKINS_API_TOKEN}" ${BUILD_URL}/stages/log?nodeId=${jobStage.id}
 								# Test (efficiently) if the file starts with the no-logs message and if yes, ensure it doesn't contain more other lines
 								if [ "\$(head --lines 1 '${logFileName}' | xargs)" == 'No logs found' ] && [ "\$(wc --lines < '${logFileName}')" -le 1 ]; then
 									rm -f "${logFileName}"
