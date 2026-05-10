@@ -121,24 +121,16 @@ def pgpSignFile(String filePath, String client = '', String gpgHome = null) {
 // --- website generation ---
 
 def copyStaticWebsiteFiles(String gitRoot, String website) {
-	def pathToReplace;
-	if (website.startsWith('eclipse')) {
-		pathToReplace = '..'
-	} else if (website.startsWith('equinox')) {
-		pathToReplace = '../../eclipse'
-	} else {
-		error("Unknown website: ${website}")
-	}
 	sh """#!/bin/bash -xe
-		cp -r ${gitRoot}/sites/${website}/. .
+		cp -r ${gitRoot}/sites/websites/${website}/. .
 		
 		# Copy the share files into this the current stite to make each site self-contained
-		cp ${gitRoot}/sites/eclipse/page.css .
-		cp ${gitRoot}/sites/eclipse/page.js .
+		cp ${gitRoot}/sites/websites/page.css .
+		cp ${gitRoot}/sites/websites/page.js .
 		# Replace references to shared java-script/css files to contained files
 		find . -type f -name "*.html" -exec sed --in-place \
-			--expression='s|${pathToReplace}/page.js">|page.js">|g' \
-			--expression='s|${pathToReplace}/page.css" />|page.css" />|g' \
+			--expression='s|../../page.js">|page.js">|g' \
+			--expression='s|../../page.css" />|page.css" />|g' \
 			{} +
 	"""
 }

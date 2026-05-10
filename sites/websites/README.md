@@ -1,4 +1,4 @@
-# Eclipse Build websites
+# Eclipse and Equinox Build websites
 
 The websites for all Eclipse and Equinox builds and their overview pages are based on plain HTML pages, that read their individual information from data files (in JSON format) and apply them via _JavaScript_.
 All data files of each website are contained within the root folder of each site and all sites are generally self-contained.
@@ -29,8 +29,8 @@ and from the archived build artifacts download all files as ZIP-archive in the f
 to get a full Eclipse respectivly Equinox drop locally.
 Unzip the archives to a location of your choise and launch the RelEng Java programs with the corresponding System-properties pointing to these drop folders accordingly.
 
-## Launching a web-server
+## Launching a local web-server
 
-Launch `jwebserver` from this or the parent folder (requires a JDK-18 or later on `PATH`)
+Launch `jwebserver` from this folder (requires a JDK-18 or later on `PATH`)
 and open the localhost URL displayed on the console (by default `http://localhost:8000/`).
 Run `jwebserver --help` for help and further options.
