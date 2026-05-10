@@ -22,7 +22,7 @@ buildID=$1
 # This script Requires jq: https://jqlang.org/download/
 
 # Work from the directory containing the eclipse and equinox website
-cd $(dirname "$0")/..
+cd $(dirname "$0")
 
 find eclipse -type f -name "*.json" -delete
 find equinox -type f -name "*.json" -delete
