@@ -59,9 +59,12 @@ pipeline {
 				script {
 					utilities = load 'JenkinsJobs/shared/utilities.groovy'
 					
-					def job = utilities.matchPattern('Job name', "${JOB_BASE_NAME}", [ /(?<type>[IY])-build-(?<major>\d).(?<minor>\d+)/ ])
+					def job = utilities.matchPattern('Job name', "${JOB_BASE_NAME}", [ /(?<type>[A-Z])-build-(?<major>\d).(?<minor>\d+)/ ])
 					// Load build properties and configuration from the properties and configuration file
 					BUILD = readJSON(file: 'JenkinsJobs/buildConfigurations.json')[job.type]
+					if (BUILD == null) {
+						error "Unsupported build type: ${job.type}"
+					}
 					
 					def int jobStart = currentBuild.startTimeInMillis.intdiv(1000)
 					BUILD_PROPERTIES.TIMESTAMP = sh(script: "TZ='America/New_York' date +%Y%m%d-%H%M --date='@${jobStart}'", returnStdout: true).trim()
