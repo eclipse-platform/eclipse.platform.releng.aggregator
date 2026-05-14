@@ -255,7 +255,7 @@ JSON.Object createFileDescription(Path file, FileInfo fileInfo) {
 	return fileEntry;
 }
 
-final Pattern INTEGRATION_BUILD_ID = Pattern.compile("(I|Y)(?<date>\\d{8})-(?<time>\\d{4})");
+final Pattern INTEGRATION_BUILD_ID = Pattern.compile("[A-Z](?<date>\\d{8})-(?<time>\\d{4})");
 final ZoneId BUILD_TIMEZONE = ZoneId.of("America/New_York");
 final DateTimeFormatter BASIC_LOCAL_TIME = DateTimeFormatter.ofPattern("HHmm");
 
