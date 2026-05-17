@@ -28,6 +28,7 @@ pipeline {
 		EP_ROOT = '/home/data/httpd/download.eclipse.org'
 		EP_ECLIPSE_DROPS = "${EP_ROOT}/eclipse/downloads/drops4"
 		EP_EQUINOX_DROPS = "${EP_ROOT}/equinox/drops"
+		EP_ECLIPSE_UPDATES = "${EP_ROOT}/eclipse/updates"
 		
 		SSH = 'ssh genie.releng@projects-storage.eclipse.org'
 	}
@@ -59,17 +60,14 @@ pipeline {
 						}
 					}
 				}
-				stage('Eclipse I-builds') {
+				stage('Eclipse') {
 					steps {
 						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							// I-builds
 							removeOldBuildDropsOfCurrentStream("${EP_ECLIPSE_DROPS}", 'I', ECLIPSE_I_BUILD_RETENTION_DAYS, ECLIPSE_I_BUILD_RETENTION_COUNT)
-						}
-					}
-				}
-				stage('Eclipse Y-builds') {
-					steps {
-						sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+							// Y-builds
 							removeSurplusBuildDrops("${EP_ECLIPSE_DROPS}", 'Y', ECLIPSE_Y_BUILD_RETENTION_COUNT)
+							removeSurplusDirectories("${EP_ECLIPSE_UPDATES}/${devVersionMajor}.${devVersionMinor}-Y-builds", 'Y*', ECLIPSE_Y_BUILD_RETENTION_COUNT)
 						}
 					}
 				}
@@ -94,10 +92,19 @@ def int devVersionService = null
 
 def removeSurplusBuildDrops(String remoteDirectory, String buildType, int retentionCount) {
 	def drops = utilities.listBuildDropDirectoriesOnRemote(remoteDirectory, "${buildType}*") // sorted in ascending order
-	if (retentionCount < drops.size()) {
-		utilities.removeDropsOnRemote(remoteDirectory, drops.subList(0, drops.size() - retentionCount))
+	removeSurplusLeadingDirectories(drops, remoteDirectory, "${buildType}*", retentionCount)
+}
+
+def removeSurplusDirectories(String remoteDirectory, String dirNamePattern, int retentionCount) {
+	def directories = utilities.listDirectoriesOnRemote(remoteDirectory, dirNamePattern) // sorted in ascending order
+	removeSurplusLeadingDirectories(directories, remoteDirectory, dirNamePattern, retentionCount)
+}
+
+def removeSurplusLeadingDirectories(List<String> directories, String remoteDirectory, String dirNamePattern, int retentionCount) {
+	if (directories.size() > retentionCount) {
+		utilities.removeDropsOnRemote(remoteDirectory, directories.subList(0, directories.size() - retentionCount))
 	} else {
-		echo "Nothing to clean in ${remoteDirectory} with pattern '${buildType}*'. Found only ${drops}, not exceeding the threshold of ${retentionCount}."
+		echo "Nothing to clean in ${remoteDirectory} with pattern '${dirNamePattern}'. Found only ${directories}, not exceeding the threshold of ${retentionCount}."
 	}
 }
 
@@ -106,7 +113,7 @@ def removeOldBuildDropsOfCurrentStream(String remoteDirectory, String buildType,
 	// But keep at least the minimal retention count of builds regardless of their age and all of those younger than the minimal retention time.
 	def retentionThresholdDate = java.time.LocalDate.now().minusDays(retentionDays)
 	def allBuilds = utilities.listBuildDropDirectoriesOnRemote(remoteDirectory, "${buildType}*",
-		devVersionMajor, devVersionMinor, devVersionService).sort() // sort ascending to start with Mondays
+		devVersionMajor, devVersionMinor, devVersionService) // sorted in ascending order -> starts with Mondays
 	echo "Number of ${buildType}-builds before cleaning: ${allBuilds.size()}"
 	def oldBuilds = allBuilds.findAll{ b -> parseDate(b) < retentionThresholdDate} // sorted ascendingly to start with Mondays
 	// Keep the specified count of latest builds

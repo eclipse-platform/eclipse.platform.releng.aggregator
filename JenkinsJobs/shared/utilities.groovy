@@ -223,13 +223,21 @@ def List<String> listBuildDropDirectoriesOnRemote(String remoteDirectory, String
 	def result = sh(script: """ssh genie.releng@projects-storage.eclipse.org "cd ${remoteDirectory} && \
 		find -maxdepth 2 -type f -path './${dropNamePattern}/buildproperties.properties' \
 		${versionFilter} | xargs dirname | sort -u"
-	""", returnStdout: true).trim()
-	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.startsWith('./') ? d.substring(2) : d }
+	""", returnStdout: true)
+	return parsePathList(result)
 }
 
-def List<String> listDirectoryContentOnRemote(String remoteDirectory) {
-	def result = sh(script: "ssh genie.releng@projects-storage.eclipse.org 'ls ${remoteDirectory}'", returnStdout: true).trim()
-	return result.isEmpty() ? [] : result.split('\\s+').collect{ d -> d.endsWith('/') ? d.substring(0, d.length() - 1) : d }
+def List<String> listDirectoriesOnRemote(String remoteDirectory, String dirNamePattern = "*") {
+	def result = sh(script: "ssh genie.releng@projects-storage.eclipse.org 'cd ${remoteDirectory} && ls -d ${dirNamePattern}'", returnStdout: true)
+	return parsePathList(result)
+}
+
+@NonCPS
+def List<String> parsePathList(String list) {
+	list = list.trim()
+	return list.isEmpty() ? [] : list.split('\\s+').collect{ d ->
+		d.substring(d.startsWith('./') ? 2 : 0, d.length() - (d.endsWith('/') ? 1 : 0))
+	}.sort()
 }
 
 private void removeDropsOnRemote(String remoteDirectory, List<String> drops) {
