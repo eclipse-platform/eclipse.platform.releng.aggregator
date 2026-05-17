@@ -21,9 +21,11 @@ pipeline {
 	stages {
 		stage('Mark build'){
 			environment {
-				// Download Server locations (would very seldom change)
-				EP_BUILD_DROP = "/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${buildId}"
 				RELEASE_VER = readBuildProperty('RELEASE_VER')
+				// Download Server locations (would very seldom change)
+				EP_ROOT = '/home/data/httpd/download.eclipse.org'
+				EP_BUILD_DROP = "${EP_ROOT}/eclipse/downloads/drops4/${buildId}"
+				EP_BUILD_UPDATES = "${EP_ROOT}/eclipse/updates/${RELEASE_VER}-${params.buildId.charAt(0)}-builds/${buildId}"
 			}
 			steps {
 				sshagent(['projects-storage.eclipse.org-bot-ssh']) {
@@ -52,10 +54,12 @@ pipeline {
 							RETAINED_INDEFINITELY)
 								#Add keep tag
 								ssh genie.releng@projects-storage.eclipse.org touch ${EP_BUILD_DROP}/buildKeep
+								ssh genie.releng@projects-storage.eclipse.org touch ${EP_BUILD_UPDATES}/buildKeep
 							;;
 							NOT_RETAINED)
 								#Remove keep tag
 								ssh genie.releng@projects-storage.eclipse.org rm -f ${EP_BUILD_DROP}/buildKeep
+								ssh genie.releng@projects-storage.eclipse.org rm -f ${EP_BUILD_UPDATES}/buildKeep
 							;;
 						esac
 					'''
