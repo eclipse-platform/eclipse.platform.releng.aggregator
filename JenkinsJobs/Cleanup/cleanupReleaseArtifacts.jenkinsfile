@@ -77,9 +77,8 @@ pipeline {
 								// Keep Y-build p2-repositories for the latest release
 								removedUpdateSites.add("${versions.version}-Y-builds")
 							}
-							//TODO: maybe only keep the last 10 or so children, if this is the latest release? Regardless of a new Java-release is close or not
 						}
-						def allUpdateRepositories = utilities.listDirectoryContentOnRemote("${EP_ECLIPSE_UPDATES}")
+						def allUpdateRepositories = utilities.listDirectoriesOnRemote("${EP_ECLIPSE_UPDATES}")
 							.findAll{ d -> d ==~ /\d+\.\d+(\.\d+)?/ }
 							.collect{ v -> java.lang.Runtime.Version.parse(v.endsWith(".0") ? v.substring(0, v.length() - 2) : v) }
 							.sort().collect{ v -> v.toString() } // sort in ascending order
