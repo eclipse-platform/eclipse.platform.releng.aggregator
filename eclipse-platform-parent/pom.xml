@@ -131,6 +131,7 @@
     <!-- system specific JVM args; if needed provided by system properties to the build command -->
     <surefire.systemProperties></surefire.systemProperties>
     <surefire.timeout>1200</surefire.timeout>
+    <surefire.screenshot_directory>${project.build.directory}/screenshots</surefire.screenshot_directory>
     <java.version>17</java.version>
     <printApiMessages>false</printApiMessages>
     <failOnJavadocErrors>false</failOnJavadocErrors>
@@ -343,6 +344,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>${surefire.version}</version>
+          <configuration>
+            <systemPropertyVariables>
+                <eclipse.test.screenshot_directory>${surefire.screenshot_directory}</eclipse.test.screenshot_directory>
+            </systemPropertyVariables>
+          </configuration>
         </plugin>
          <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -434,6 +440,9 @@
             <enableAssertions>true</enableAssertions>
             <argLine>${surefire.testArgLine} ${surefire.platformSystemProperties} ${surefire.systemProperties} ${surefire.moduleProperties}</argLine>
             <quiet>true</quiet>
+            <systemProperties>
+                <eclipse.test.screenshot_directory>${surefire.screenshot_directory}</eclipse.test.screenshot_directory>
+            </systemProperties>
           </configuration>
         </plugin>
         <plugin>
