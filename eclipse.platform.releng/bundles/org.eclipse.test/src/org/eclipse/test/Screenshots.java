@@ -103,27 +103,34 @@ public final class Screenshots {
         return filename;
     }
 
-    /**
-     * @return unspecified
-     * @noreference This method is not intended to be referenced by clients.
-     */
-    public static File getResultsDirectory() {
-        File resultsDir = getJunitReportOutput(); // ends up in testresults/linux.gtk.x86_6.0/<class>.<test>.png
+	/**
+	 * @return unspecified
+	 * @noreference This method is not intended to be referenced by clients.
+	 */
+	public static File getResultsDirectory() {
+		File resultsDir = discoverResultsDirectory();
+		resultsDir.mkdirs();
+		return resultsDir;
+	}
 
-        if (resultsDir == null) {
-            File eclipseDir = new File("").getAbsoluteFile();
-            if (isRunByGerritHudsonJob()) {
-                resultsDir = new File(eclipseDir, "/../").getAbsoluteFile(); // ends up in the workspace root
-            } else {
-                resultsDir = new File(System.getProperty("java.io.tmpdir"));
-            }
-        }
+	private static File discoverResultsDirectory() {
+		File resultsDir = getJunitReportOutput(); // ends up in testresults/linux.gtk.x86_6.0/<class>.<test>.png
+		if (resultsDir != null) {
+			return resultsDir;
+		}
+		// Set from "surefire.screenshot_directory" Maven property by
+		// eclipse-platform-parent/pom.xml
+		String propertyPath = System.getProperty("eclipse.test.screenshot_directory");
+		if (propertyPath != null) {
+			return new File(propertyPath);
+		}
 
-        resultsDir.mkdirs();
-        return resultsDir;
-    }
+		return new File(System.getProperty("java.io.tmpdir"));
+	}
 
-    private static File getJunitReportOutput() {
+	private static File getJunitReportOutput() {
+		// Current implementation only interfaces with Ant test launcher.
+		// Maven tests do not use "-junitReportOutput" argument.
 		boolean platformAvailable = false;
 		try {
 			Class.forName("org.eclipse.core.runtime.Platform", false, Screenshots.class.getClassLoader());
@@ -140,14 +147,6 @@ public final class Screenshots {
 			}
 		}
 		return null;
-    }
-
-    /**
-     * @return unspecified
-     * @noreference This method is not intended to be referenced by clients.
-     */
-    public static boolean isRunByGerritHudsonJob() {
-        return System.getProperty("user.dir").matches(".*/(?:eclipse|rt\\.equinox)\\.[^/]+-Gerrit/.*");
-    }
+	}
 
 }
