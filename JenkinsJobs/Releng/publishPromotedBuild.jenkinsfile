@@ -124,10 +124,8 @@ pipeline {
 		}
 		stage('Send announcement mail') {
 			steps {
-				emailext subject: "Eclipse and Equinox ${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR} (${TRAIN_NAME}) ${CHECKPOINT} is available",
-					body: ("""\
-					Hello everyone,
-					
+				script {
+					utilities.sendEmail("Eclipse and Equinox ${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR} (${TRAIN_NAME}) ${CHECKPOINT} is available", """\
 					We are pleased to announce that Eclipse and Equinox ${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR} ${CHECKPOINT} (for ${TRAIN_NAME}) is available for download and updates.
 					
 						Eclipse downloads:
@@ -146,12 +144,8 @@ pipeline {
 						https://download.eclipse.org/equinox/drops/${RELEASE_BUILD_ID}/
 					
 					Thank you to everyone who made this checkpoint possible.
-					
-					Best regards,
-					
-					The Eclipse contributors
-					""").stripIndent(), mimeType: 'text/plain', from:'genie.releng@eclipse.org',
-					to: "platform-releng-dev@eclipse.org eclipse-dev@eclipse.org platform-dev@eclipse.org equinox-dev@eclipse.org jdt-dev@eclipse.org pde-dev@eclipse.org"
+					""")
+				}
 			}
 		}
 	}

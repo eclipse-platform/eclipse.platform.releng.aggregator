@@ -48,6 +48,11 @@ def assignEnvVariable(String name, String value) {
 	println("${name}=${value}")
 }
 
+@NonCPS
+def parseDate(String dateString) {
+	return java.time.LocalDate.parse(dateString.trim()) // expects format 'yyyy-MM-dd'
+}
+
 // --- local file modifications ---
 
 def replaceAllInFile(String filePath, Map<String,String> replacements) {
@@ -285,6 +290,43 @@ def installDownloadableTool(String toolType, String url) {
 		}
 		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
 	}
+}
+
+// --- RelEng  ---
+
+@NonCPS
+def releaseEvents() {
+	return [ 
+		M1: 'Milestone 1',
+		M2: 'Milestone 2',
+		M3: 'Milestone 3',
+		RC1: 'Release Candidate 1',
+		RC2: 'Release Candidate 2',
+		GA: 'Release',
+	]
+}
+
+def readReleaseDates(String simRelName) {
+	def simRelDatesRaw = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-simrel/.github/refs/heads/main/wiki/SimRel/${simRelName}_dates.json", returnStdout: true)
+	def simRelDates = readJSON(text: simRelDatesRaw)
+	return releaseEvents().collectEntries{ name, _ ->
+		def date = parseDate(simRelDates[name]).minusDays(name == 'GA' ? 0 : 7) // All Eclipse-TLPs have offset -7 days
+		return [name, date]
+	}
+}
+
+def sendEmail(String subject, String message) {
+	emailext(subject: subject, body: ("""\
+		Hello everyone,
+		
+		""".stripIndent() + message.stripIndent() + """\
+		
+		
+		Best regards,
+		
+		The Eclipse contributors
+		""".stripIndent()), mimeType: 'text/plain', from:'genie.releng@eclipse.org',
+		to: "platform-releng-dev@eclipse.org eclipse-dev@eclipse.org platform-dev@eclipse.org equinox-dev@eclipse.org jdt-dev@eclipse.org pde-dev@eclipse.org")
 }
 
 return this

@@ -1,0 +1,150 @@
+// Constants read by job creation
+private static final _JOB_DESCRIPTION = 'Send miscellaneous announcements for different phases in the development and release process.'
+
+pipeline {
+	options {
+		timestamps()
+		timeout(time: 5, unit: 'MINUTES')
+		buildDiscarder(logRotator(numToKeepStr:'5'))
+	}
+	parameters {
+		choice(name: 'type', description: 'The type of announcements to make', choices: [
+			'MASTER_OPEN',
+			'REMINDER_RC',
+			'SIGNOFF_RC',
+			])
+		string(name: 'rcNumber', trim: true, description: '''
+				The release candidate number, e.g. <code>1</code>, <code>2</code>, <code>2a</code>, ...
+				(<em>only used for <code>REMINDER_RC</code> and <code>SIGNOFF_RC</code><em>).
+			''')
+		string(name: 'buildId', trim: true, description: 'ID of the build to sign-off (<em>only used for <code>SIGNOFF_RC</code><em>).')
+		string(name: 'deadline', trim: true, description: '''
+				Optional, deviating deadline for non default sign-offs in the format <code>yyyy-mm-dd</code>, for example: 2026-05-31.<br>
+				Left blank for the default sign-offs at RC1 and RC2.<br>
+				(<em>only used by <code>SIGNOFF_RC</code><em>)
+			''')
+	}
+	agent {
+		label 'basic'
+	}
+	tools {
+		jdk 'temurin-jdk21-latest'
+		maven 'apache-maven-latest'
+	}
+	stages {
+		stage('Send Mail') {
+			steps {
+				script {
+					def utilities = load 'JenkinsJobs/shared/utilities.groovy'
+					def githubAPI = load 'JenkinsJobs/shared/githubAPI.groovy'
+					githubAPI.setDryRun(false)
+					
+					def buildProperties = readProperties(file: 'cje-production/buildproperties.txt')
+					int versionMajor = buildProperties.STREAMMajor.toInteger()
+					int versionMinor = buildProperties.STREAMMinor.toInteger()
+					def releaseVersion = "${versionMajor}.${versionMinor}"
+					
+					sh 'cd eclipse-platform-parent && mvn resources:copy-resources@saveproperties'
+					def mavenProperties = readProperties(file: 'eclipse-platform-parent/target/mavenproperties.properties')
+					def simRel = "${mavenProperties.RELEASE_YEAR}-${mavenProperties.RELEASE_MONTH}"
+					def eclipseReleaseDates = utilities.readReleaseDates("${simRel}")
+					
+					switch (params.type) {
+					case 'MASTER_OPEN':
+						utilities.sendEmail("Master branch is open for ${releaseVersion} development", """\
+							We are pleased to announce that the master branch is open for ${releaseVersion} development.
+							
+							Please make sure to update each Pull-Request to the tip of the master branch before considering it for submission!
+							""")
+						break
+					case 'REMINDER_RC':
+						def rcDate = eclipseReleaseDates["RC${rcNumber}"]
+						if (rcDate == null) {
+							error "RC Reminder can only be sent for default candidates, but not for ${rcNumber}"
+						}
+						def dateFormat = dateFormat('EEEE, dd MMMM yyyy')
+						utilities.sendEmail("Eclipse and Equinox ${releaseVersion} (${simRel}) RC${rcNumber} Reminder", """\
+							We are scheduled to promote and contribute ${releaseVersion} RC${rcNumber} to SimRel on ${rcDate.format(dateFormat)}.
+							
+							The schedule for Release Candidate ${rcNumber}:
+							
+							- ${rcDate.minusDays(2).format(dateFormat)} 23:00 (UTC)
+							  API/feature freeze and RC${rcNumber} build
+							
+							- ${rcDate.format(dateFormat)}
+							  Submit RC${rcNumber} to SimRel
+							
+							Please note the following excerpt from the freeze plan:
+							All fixes submitted must have a project lead vote on the bug report, and the fix must be reviewed by an additional committer (any committer other than the one who made the fix).
+							A positive review from a project lead means implicit approval and no vote is needed on the bug report.
+							Ongoing changes to documentation, tests or examples do not require approval.
+							""")
+						break
+					case 'SIGNOFF_RC':
+						def signOffDeadline = params.deadline ? utilities.parseDate(params.deadline) : eclipseReleaseDates["RC${rcNumber}"]
+						def date = dateFormat('EEEE, dd MMMM yyyy').format(signOffDeadline)
+						def signOffIssueTitle = "Declare ${releaseVersion} RC${rcNumber}"
+						def signOffCandidateDetails = """
+							Eclipse downloads:
+							https://download.eclipse.org/eclipse/downloads/drops4/${buildId}
+							
+							Build logs and/or test results (eventually):
+							https://download.eclipse.org/eclipse/downloads/drops4/${buildId}/reports.html
+							
+							Software site repository:
+							https://download.eclipse.org/eclipse/updates/${releaseVersion}-I-builds
+							
+							Specific (simple) site repository:
+							https://download.eclipse.org/eclipse/updates/${releaseVersion}-I-builds/${buildId}
+							
+							Equinox downloads:
+							https://download.eclipse.org/equinox/drops/${buildId}
+							"""
+						def issueURL = githubAPI.createIssue('eclipse-platform/eclipse.platform.releng.aggregator', signOffIssueTitle, """\
+							A "Go" is needed from all the components below to declare this milestone.
+							
+							Current candidate
+							${signOffCandidateDetails}
+							---
+							Deadlines:
+							- ${date}, around 09:00 (UTC)
+							Deadline for sign-off (or, by then, comment in this issue when you expect to sign-off).
+							- ${date}, around 12:00 (UTC)
+							Promote approved build to S-${releaseVersion}${releaseVersion}-* and contribute to simultaneous release repository.
+							
+							Remember to investigate and document here any failing JUnit tests.
+							
+							---
+							- [ ] Platform:
+							  - [ ] Resources
+							  - [ ] UI
+							  - [ ] Debug
+							  - [ ] Ant
+							  - [ ] SWT
+							  - [ ] Releng
+							- [ ] JDT:
+							  - [ ] Core
+							  - [ ] Debug
+							  - [ ] UI
+							- [ ] PDE
+							- [ ] Equinox
+							""".stripIndent())
+						utilities.sendEmail(signOffIssueTitle, """\
+							Please sign off and declare ${releaseVersion} RC${rcNumber} on
+							${issueURL}
+							
+							${signOffCandidateDetails}
+							""")	
+						break
+					default:
+						error "Unsupported mail type: ${params.type}"
+					}
+				}
+			}
+		}
+	}
+}
+
+def dateFormat(String pattern) {
+	return java.time.format.DateTimeFormatter.ofPattern(pattern).localizedBy(Locale.ENGLISH)
+}
