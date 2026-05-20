@@ -51,6 +51,19 @@ def createPullRequest(String orgaSlashRepo, String title, String body, String he
 	return response?.html_url
 }
 
+/**
+ * Create an issue in the specified repo.
+ */
+def createIssue(String orgaRepo, String title, String body) {
+	echo "In ${orgaRepo} create Issue: '${title}'"
+	def params = [title: title, body: body]
+	def response = queryGithubAPI('-X POST',"repos/${orgaRepo}/issues", params)
+	if (isFailed(response, 201)) {
+		error "Response contains errors:\n${response}"
+	}
+	return response?.html_url
+}
+
 def triggerWorkflow(String orgaSlashRepo, String workflowId, Map<String, String> inputs, String referenceBranch = 'master') {
 	echo "In ${orgaSlashRepo} trigger workflow '${workflowId}' on branch ${referenceBranch} with inputs ${inputs}"
 	def params = ['ref': referenceBranch, 'inputs': inputs]
