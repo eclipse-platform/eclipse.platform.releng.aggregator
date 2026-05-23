@@ -384,24 +384,18 @@ pipeline {
 			}
 		}
 		stage('Create Github milestones') {
+			environment {
+				GITHUB_BOT_TOKEN = credentials('github-bot-token')
+			}
 			steps {
 				script {
-					def organisations = [ 'eclipse-platform', 'eclipse-jdt', 'eclipse-pde', 'eclipse-equinox' ]
-					for (organisation in organisations) {
+					for (organisation in githubAPI.listEclipseOrganizations()) {
 						def repositories = githubAPI.listReposOfOrganization(organisation)
 						echo "${organisation} repositories: ${repositories.name}"
-						for (repositoryData in repositories) {
-							def repository = repositoryData.name
-							if (repositoryData.archived) {
-								echo "Skipping archived repository: ${repository}"
-								continue
-							} else if ('.eclipsefdn'.equals(repository)) {
-								echo "Skipping .eclipsefdn repository of : ${organisation}"
-								continue
-							}
+						for (repository in repositories) {
 							utilities.releaseEvents().each{ name, description ->
 								def title = "${NEXT_RELEASE_VERSION}" + (name != 'GA' ? " ${name}" : '')
-								githubAPI.createMilestone(organisation, repository, title, "${NEXT_RELEASE_VERSION} ${description}", env["${name}_DATE"])
+								githubAPI.createMilestone("${organisation}/${repository.name}", title, "${NEXT_RELEASE_VERSION} ${description}", env["${name}_DATE"])
 							}
 						}
 					}

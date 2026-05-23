@@ -6,32 +6,80 @@ def setDryRun(boolean isDryRun) {
 	_GH_API_IS_DRY_RUN = isDryRun
 }
 
+def listEclipseOrganizations() {
+	return [ 'eclipse-platform', 'eclipse-equinox', 'eclipse-jdt', 'eclipse-pde' ]
+}
+
 /** Returns a list of all repositories in the specified organization.*/
 def listReposOfOrganization(String orga) {
 	def response = queryGithubAPI('', "orgs/${orga}/repos", null)
 	if (!(response instanceof List) && isFailed(response, 201)) {
 		error "Response contains errors:\n${response}"
 	}
-	return response
+	return response.findAll{ repository ->
+		if (repository.archived) {
+			echo "Skipping archived repository: ${repository.name}"
+			return false
+		} else if ('.eclipsefdn'.equals(repository.name)) {
+			echo "Skipping .eclipsefdn repository of : ${orga}"
+			return false
+		}
+		return true
+	}
 }
 
 /**
  * Create a new milestone.
  * @param dueDay the milestone's due-date, format: YYYY-MM-DD
  */
-def createMilestone(String orga, String repo, String title, String description, String dueDay) {
-	echo "In ${orga}/${repo} create milestone: ${title} due on ${dueDay}"
+def createMilestone(String orgaRepo, String title, String description, String dueDay) {
+	echo "In ${orgaRepo}, create milestone: ${title} due on ${dueDay}"
 	def params = [title: title, description: description, due_on: "${dueDay}T23:59:59Z"]
-	def response = queryGithubAPI('-X POST', "repos/${orga}/${repo}/milestones", params)
+	def response = queryGithubAPI('-X POST', "repos/${orgaRepo}/milestones", params)
 	if (isFailed(response, 201)) {
 		if (response.errors && response.errors[0]?.code == 'already_exists') {
-			echo 'Milestone already exists and is not modified'
-			// TODO: update milestone in this case: https://docs.github.com/en/rest/issues/milestones?apiVersion=2022-11-28#update-a-milestone
-			// Usefull if e.g. the dates are wrongly read from the calendar
+			echo "Milestone '${title}' already exists and is updated"
+			updateMilestone(orgaRepo, title, params)
 		} else {
 			error "Response contains errors:\n${response}"
 		}
 	}
+}
+
+def closeMilestone(String orgaRepo, String title) {
+	updateMilestone(orgaRepo, title, [state: 'closed'])
+}
+
+def updateMilestone(String orgaRepo, String title, Map<String, Object> updatedParameters) {
+	def milestoneNumber = findMilestoneNumber(orgaRepo, title)
+	echo "In ${orgaRepo}, update milestone: ${title}"
+	def response = queryGithubAPI('-X PATCH', "repos/${orgaRepo}/milestones/${milestoneNumber}", updatedParameters)
+	if (isFailed(response, 200)) {
+		error "Response contains errors:\n${response}"
+	}
+}
+
+def findMilestoneNumber(String orgaRepo, String title) {
+	// Iterate over all (open and closed) milestones, sorted by decending due-date.
+	// See https://docs.github.com/en/rest/issues/milestones?apiVersion=2026-03-10#list-milestones
+	// Consider even closed milestones to make the pipelines more robust in case some milestones are closed manually
+	def perPage = 10 // Should usually be sufficient
+	def maxPage = 100
+	for (int page in 1..maxPage) {
+		def response = queryGithubAPI('', "repos/${orgaRepo}/milestones?state=all&sort=due_on&direction=desc&per_page=${perPage}&page=${page}")
+		if (!(response instanceof List) && isFailed(response, 200)) {
+			error "Response contains errors:\n${response}"
+		}
+		for (milestone in response) {
+			if(milestone.title == title) {
+				return milestone.number
+			}
+		}
+		if (response.size() < perPage) {
+			break; // last page reached
+		}
+	}
+	error "Milestone '${title}' not found among the most recent ${perPage * maxPage} milestones"
 }
 
 /**
@@ -55,7 +103,7 @@ def createPullRequest(String orgaSlashRepo, String title, String body, String he
  * Create an issue in the specified repo.
  */
 def createIssue(String orgaRepo, String title, String body) {
-	echo "In ${orgaRepo} create Issue: '${title}'"
+	echo "In ${orgaRepo}, create Issue: '${title}'"
 	def params = [title: title, body: body]
 	def response = queryGithubAPI('-X POST',"repos/${orgaRepo}/issues", params)
 	if (isFailed(response, 201)) {
@@ -73,13 +121,13 @@ def triggerWorkflow(String orgaSlashRepo, String workflowId, Map<String, String>
 	}
 }
 
-def queryGithubAPI(String method, String endpoint, Map<String, Object> queryParameters, boolean allowEmptyReponse = false) {
+def queryGithubAPI(String method, String endpoint, Map<String, Object> queryParameters = null, boolean allowEmptyReponse = false) {
 	def query = """\
 		curl -L ${method} \
 			-H "Accept: application/vnd.github+json" \
 			-H "Authorization: Bearer \${GITHUB_BOT_TOKEN}" \
 			-H "X-GitHub-Api-Version: 2026-03-10" \
-			https://api.github.com/${endpoint} \
+			'https://api.github.com/${endpoint}' \
 		""".replace('\t','').trim()
 	if (queryParameters != null) {
 		def params = writeJSON(json: queryParameters, returnText: true)
@@ -89,9 +137,10 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		echo "Query (not send): ${query}"
 		return null
 	}
-	def response = withCredentials([string(credentialsId: 'github-bot-token', variable: 'GITHUB_BOT_TOKEN')]) {
-		return sh(script: query, returnStdout: true)
-	}
+	// Re-use Github API token, if already set up in the caller
+	def Closure executeQuery = { sh(script: query, returnStdout: true) }
+	def response = env.GITHUB_BOT_TOKEN ? executeQuery.call()
+		: withCredentials([string(credentialsId: 'github-bot-token', variable: 'GITHUB_BOT_TOKEN')], executeQuery)
 	if (response == null || response.isEmpty()) {
 		if (allowEmptyReponse) {
 			return null
