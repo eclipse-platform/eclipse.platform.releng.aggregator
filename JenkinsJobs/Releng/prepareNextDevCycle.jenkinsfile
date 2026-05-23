@@ -263,14 +263,14 @@ pipeline {
 				// Run simple clean build to verify that at least all parent versions are updated correctly
 				sh 'mvn clean'
 				// search for leftover occurrences of the previous release version
-				sh '''#!/bin/bash -e
+				sh '''#!/bin/bash -xe
 					matchingFiles=$(grep --recursive --files-with-matches \
 						--include pom.xml \
 						--include MANIFEST.MF \
 						--include feature.xml \
 						--include \\*.product \
 						--include \\*.sh \
-						--fixed-strings "${PREVIOUS_RELEASE_VERSION}")
+						--perl-regexp "${PREVIOUS_RELEASE_VERSION//./\\\\.}(?!\\d)")
 					# The eclipse-platform-parent/pom.xml contains the previous version in the baseline repository variable
 					if [[ -z "${matchingFiles}" ]] || [[ "${matchingFiles}" == 'eclipse-platform-parent/pom.xml' ]]; then
 						echo "No unexpected references to previous version ${PREVIOUS_RELEASE_VERSION} found."
