@@ -17,11 +17,11 @@ def listReposOfOrganization(String orga) {
 
 /**
  * Create a new milestone.
- * @param msDueDay the milestone's due-date, format: YYYY-MM-DD
+ * @param dueDay the milestone's due-date, format: YYYY-MM-DD
  */
-def createMilestone(String orga, String repo, String msTitle, String msDescription, String msDueDay) {
-	echo "In ${orga}/${repo} create milestone: ${msTitle} due on ${msDueDay}"
-	def params = [title: msTitle, description: msDescription, due_on: "${msDueDay}T23:59:59Z"]
+def createMilestone(String orga, String repo, String title, String description, String dueDay) {
+	echo "In ${orga}/${repo} create milestone: ${title} due on ${dueDay}"
+	def params = [title: title, description: description, due_on: "${dueDay}T23:59:59Z"]
 	def response = queryGithubAPI('-X POST', "repos/${orga}/${repo}/milestones", params)
 	if (isFailed(response, 201)) {
 		if (response.errors && response.errors[0]?.code == 'already_exists') {
@@ -37,9 +37,9 @@ def createMilestone(String orga, String repo, String msTitle, String msDescripti
 /**
  * Create a PR in the specified repo, from a branch that is expected to reside in the same repository.
  */
-def createPullRequest(String orgaSlashRepo, String prTitle, String prBody, String headBranch, String baseBranch = 'master', boolean skipExistingPR = false) {
-	echo "In ${orgaSlashRepo} create PR: '${prTitle}' on branch ${headBranch}"
-	def params = [title: prTitle, body: prBody, head: headBranch, base: baseBranch]
+def createPullRequest(String orgaSlashRepo, String title, String body, String headBranch, String baseBranch = 'master', boolean skipExistingPR = false) {
+	echo "In ${orgaSlashRepo} create PR: '${title}' on branch ${headBranch}"
+	def params = [title: title, body: body, head: headBranch, base: baseBranch]
 	def response = queryGithubAPI('-X POST',"repos/${orgaSlashRepo}/pulls", params)
 	if (isFailed(response, 201)) {
 		if (skipExistingPR && response.errors[0]?.message?.contains('pull request already exists')) {
@@ -55,7 +55,7 @@ def triggerWorkflow(String orgaSlashRepo, String workflowId, Map<String, String>
 	echo "In ${orgaSlashRepo} trigger workflow '${workflowId}' on branch ${referenceBranch} with inputs ${inputs}"
 	def params = ['ref': referenceBranch, 'inputs': inputs]
 	def response = queryGithubAPI('-X POST',"repos/${orgaSlashRepo}/actions/workflows/${workflowId}/dispatches", params, true)
-	if (isFailed(response, 204)) {
+	if (isFailed(response, 200)) {
 		error "Response contains errors:\n${response}"
 	}
 }
@@ -65,12 +65,12 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		curl -L ${method} \
 			-H "Accept: application/vnd.github+json" \
 			-H "Authorization: Bearer \${GITHUB_BOT_TOKEN}" \
-			-H "X-GitHub-Api-Version: 2022-11-28" \
+			-H "X-GitHub-Api-Version: 2026-03-10" \
 			https://api.github.com/${endpoint} \
-		""".stripIndent()
+		""".replace('\t','').trim()
 	if (queryParameters != null) {
 		def params = writeJSON(json: queryParameters, returnText: true)
-		query += "-d '" + params + "'"
+		query += " -d '" + params + "'"
 	}
 	if (_GH_API_IS_DRY_RUN && !method.isEmpty()) {
 		echo "Query (not send): ${query}"
