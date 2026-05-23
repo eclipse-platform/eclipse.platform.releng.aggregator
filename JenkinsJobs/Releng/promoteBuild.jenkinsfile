@@ -300,6 +300,27 @@ pipeline {
 				]
 			}
 		}
+		stage('Close Github Milestones') {
+			when{
+				expression { // On primary milestone/RC or release promotion (not on RC2a or similar)
+					return "${CHECKPOINT}" ==~ /M\d+/ || "${CHECKPOINT}" ==~ /RC\d+/ || "${CHECKPOINT}".isEmpty();
+				}
+			}
+			environment {
+				GITHUB_BOT_TOKEN = credentials('github-bot-token')
+			}
+			steps {
+				script {
+					for (organisation in githubAPI.listEclipseOrganizations()) {
+						def repositories = githubAPI.listReposOfOrganization(organisation)
+						echo "${organisation} repositories: ${repositories.name}"
+						for (repository in repositories) {
+							githubAPI.closeMilestone("${organisation}/${repository.name}", "${BUILD_MAJOR}.${BUILD_MINOR} ${CHECKPOINT}".trim())
+						}
+					}
+				}
+			}
+		}
 		stage('Update acknowledgements') {
 			when {
 				not { expression { params.DRY_RUN } }
