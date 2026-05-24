@@ -1,10 +1,24 @@
+/*******************************************************************************
+ * Copyright (c) 2025, 2026 Hannes Wellmann and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     Hannes Wellmann - initial API and implementation
+ *******************************************************************************/
+
 import groovy.json.JsonOutput
 
 @groovy.transform.Field
-def boolean IS_DRY_RUN = true
+def boolean _UTILS_IS_DRY_RUN = true
 
 def setDryRun(boolean isDryRun) {
-	IS_DRY_RUN = isDryRun
+	_UTILS_IS_DRY_RUN = isDryRun
 }
 
 def Map<String, String> matchPattern(String stringName, String string, List<String> patterns, List<Closure> handlers = null) {
@@ -152,7 +166,7 @@ def runHereAndForEachGitSubmodule(Closure task) {
 }
 
 def forEachGitSubmodule(Closure task) {
-	def submodulePaths = sh(script: "git submodule --quiet foreach 'echo \$sm_path'", returnStdout: true).trim().split('\\s')
+	def submodulePaths = sh(script: "git submodule --quiet foreach 'echo \$sm_path'", returnStdout: true).trim().split('\\s+')
 	for (submodulePath in submodulePaths) {
 		dir("${submodulePath}") {
 			task.call(submodulePath)
@@ -201,7 +215,7 @@ def gitPushTag(String tagName, boolean force = false) {
 }
 
 private void gitPush(String refSpec, boolean force) {
-	def dryRunOption = IS_DRY_RUN ? '--dry-run' : ''
+	def dryRunOption = _UTILS_IS_DRY_RUN ? '--dry-run' : ''
 	def forceOption = force ? '--force' : ''
 	sshagent(['github-bot-ssh']) {
 		sh """#!/bin/bash -xe
@@ -259,7 +273,7 @@ private void removeDropsOnRemote(String remoteDirectory, List<String> drops) {
 				echo \\"Keep drop marked to be kept: \\\${dropDir}\\"
 			else
 				echo \\"Remove directory \\\${dropDir}\\"
-				${ IS_DRY_RUN ? 'echo __' : ''}rm -rf \\"\\\${dropDir}\\"
+				${ _UTILS_IS_DRY_RUN ? 'echo __' : ''}rm -rf \\"\\\${dropDir}\\"
 			fi
 		done "
 	"""
@@ -282,13 +296,18 @@ def downloadTemurinJDK(int version, String os, String arch, String releaseType='
 
 def installDownloadableTool(String toolType, String url) {
 	dir("${WORKSPACE}/tools/${toolType}") {
+		deleteDir()
 		def scriptText = "curl --fail --location ${url} | ${ isUnix() ? 'tar' : 'C:\\Windows\\System32\\tar.exe'} -xzf -"
 		if (isUnix()) {
 			sh scriptText
 		} else { // Windows 10 and later has a tar.exe that can handle zip files (even read from std-in)
 			bat scriptText
 		}
-		return "${pwd()}/" + sh(script: 'ls', returnStdout: true).strip()
+		def subDirs = sh(script: 'ls', returnStdout: true).strip().split('\\s+')
+		if (subDirs.length != 1) {
+			error "Not exactly one subfolder in ${pwd()}: ${subDirs}"
+		}
+		return "${pwd()}/${subDirs[0]}"
 	}
 }
 
