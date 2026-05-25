@@ -56,9 +56,8 @@ Tasks to be completed after RC2
 ### Release Preparation
 Tasks that need to be completed before Friday
 
-  * Create an issue to track the current release tasks (see [Release 4.24](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/273)).
-    - Tag @SarikaSinha (Readme), @ktatavarthi (JDT and Platform Migration Guides).
-    - A script to create this issue exists [here](scripts/GAReleasePrep.sh) for those who have the hub cli tool installed.
+The job sending the request to sign-off of RC2, also creates the issue to track the final release steps in this repository.
+
   * **Readme**
     Currently handled by @SarikaSinha
     - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) (see [Readme file for 4.26](https://github.com/eclipse-platform/www.eclipse.org-eclipse/issues/24) as an example).
