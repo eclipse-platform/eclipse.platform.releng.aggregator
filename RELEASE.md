@@ -118,14 +118,6 @@ The release is scheduled for 10:00 UTC.
   - After RC2 is promoted/published run the [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job
     - Review the Pull-Requests created by it in this `eclipse.platform.releng.aggregator` repository and all its submodules and complete the listed tasks.
 
-#### **Update the Build Calendar:**
-  - Create an [issue](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/289) and update the [build calendar](https://calendar.google.com/calendar/u/0?cid=cHJmazI2ZmRtcHJ1MW1wdGxiMDZwMGpoNHNAZ3JvdXAuY2FsZW5kYXIuZ29vZ2xlLmNvbQ) for the next GA release based on the [Simultaneous Release schedule](https://wiki.eclipse.org/Simultaneous_Release).
-  - Each stream has its own [page](https://github.com/eclipse-simrel/.github/blob/main/wiki/SimRel/2026-06.md) with a more detailed schedule.
-  - List of people who can edit the calendar
-    - Alexander Kurtakov(@akurtakov)
-    - Gireesh Punathil
-    - Rahul Mohanan
-
 #### **Update Splash Screen:**
   - Future spash screens are kept in a subfolder of [eclipse.platform/platform/org.eclipse.platform](https://github.com/eclipse-platform/eclipse.platform/tree/master/platform/org.eclipse.platform/futureSplashScreens).
   - NOTE: Splash screens are created 4 at a time, for 4 consequtive quarterly releases, so they need to be requested once a year before the 20XX-06 release (the cycle is 2022-06 -> 2023-03, etc). Create an issue in the [Eclipse Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) similar to [Bug 575781](https://bugs.eclipse.org/bugs/show_bug.cgi?id=575781). It is customary to do this by the previous -09 (September) release so that there's plenty of time for discussion before the -06 (June) release is opened. 
