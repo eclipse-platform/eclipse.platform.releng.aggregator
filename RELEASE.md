@@ -58,11 +58,10 @@ Tasks that need to be completed before Friday
 
 The job sending the request to sign-off of RC2, also creates the issue to track the final release steps in this repository.
 
-  * **Readme**
-    Currently handled by @SarikaSinha
+  * #### Readme
     - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) (see [Readme file for 4.26](https://github.com/eclipse-platform/www.eclipse.org-eclipse/issues/24) as an example).
     - Add Readme files and update generatation scripts.
-  * **Migration Guide**
+  * #### Migration Guide
     - Create a tracking issue in [eclipse.platform.releng.aggregator](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues) and link it to the main release issue.
     - Every release a new porting guide and folder need to be added to [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting), named with the version being migrated *to*.
       - i.e `eclipse_4_27_porting_guide.html` is for migrating from 4.26 tp 4.27.
@@ -82,7 +81,7 @@ Sometimes there is a critical issue that requires a fix, if it's decided that on
 The actual steps to release
 
 **Friday**
-  * #### **Promote to GA**
+  * #### Promote to GA
     - After **SimRel** declares RC2 (usually on Friday before the final release) run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a, ...) to be the final release.
       - `DROP_ID`: Final release candidate's ID, e.g.: `S-4.36RC2-202505281830`
       - `CHECKPOINT`: blank for final releases
@@ -92,29 +91,30 @@ The actual steps to release
     - It will again update the Acknowledgements and creates a PR if there are any last changes.
       Review and submit it at https://github.com/eclipse-platform/www.eclipse.org-eclipse/pulls
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
-  - #### **Contribute to SimRel**
-    - If SimRel is not updated before the I-builds are cleaned up (specifically the build for RC2/GA) it will break. 
 
 **Tuesday/Monday**
-  - #### **Complete Publication to Maven Central**
+  - #### Complete Publication to Maven Central
     - The final release to Maven-Central should happen latest by Tuesday before the release since there is up to a 24 hour delay for the Maven mirrors.
     - The artifacts have been deployed into a Maven-Central _staging_ repository by the `Promote Build` job when the RC was promoted to GA release.
     - Login to https://central.sonatype.com/ and `Publish` the three staging repositories for `Platform`, `JDT` and `PDE` by closing them.
       - Make sure the name of the deployment you are about to release matches the tag and timestamp of the final release repository.
         E.g for a P2 repo with id `R-4.36-202505281830` the deployments should be named `PLATFORM_R-4.36-202505281830`, `PDE_R-4.36-202505281830` or `JDT_R-4.36-202505281830` respectivly.
       - If you do not have an account on `central.sonatype.com` for performing the rest of the release request one by creating an [EF Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) issue to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
-  - #### **Contribute to SimRel**
+  - #### Contribute to SimRel
     - The final release repo has to be contributed to SimRel before the currently active I-build repo is deleted (is done automatically after the release is published)
+  - #### Update build versions to GA
+    - Upon promotion of the final GA build, PRs for the the master and corresponding maintenance branch were created to update the build to the GA versions.
+    - Submit these PRs now.
 
 **Wednesday**
 The release is scheduled for 15:00 UTC.
 
-  - #### **Make the Release Visible**
+  - #### Make the Release Visible
     - Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
       - `releaseBuildID`: the full id of the release build to publish, e.g. `R-4.36-202505281830`
   - The (still existing) I-Build jobs of that release can now be deleted (together with the associdated test jobs), because we are now sure a RC respins won't happen anymore.
 
-### **Preparation for the next Release**
+### Preparation for the next Release
   - After RC2 is promoted/published run the [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job
     - Review the Pull-Requests created by it in this `eclipse.platform.releng.aggregator` repository and all its submodules and complete the listed tasks.
 

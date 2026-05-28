@@ -32,7 +32,7 @@ pipeline {
 		maven 'apache-maven-latest'
 	}
 	stages {
-		stage('Send Mail') {
+		stage('Make Announcement') {
 			steps {
 				script {
 					def utilities = load 'JenkinsJobs/shared/utilities.groovy'
@@ -48,6 +48,7 @@ pipeline {
 					def mavenProperties = readProperties(file: 'eclipse-platform-parent/target/mavenproperties.properties')
 					def simRel = "${mavenProperties.RELEASE_YEAR}-${mavenProperties.RELEASE_MONTH}"
 					def eclipseReleaseDates = utilities.readReleaseDates("${simRel}")
+					def dateFormat = java.time.format.DateTimeFormatter.ofPattern('EEEE, dd MMMM yyyy').localizedBy(Locale.ENGLISH)
 					
 					switch (params.type) {
 					case 'MASTER_OPEN':
@@ -62,7 +63,43 @@ pipeline {
 						if (rcDate == null) {
 							error "RC Reminder can only be sent for default candidates, but not for RC${rcNumber}"
 						}
-						def dateFormat = dateFormat('EEEE, dd MMMM yyyy')
+						def releaseIssue = null
+						if (rcNumber == '2') {
+							def headCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+							def releaseDocURL = "https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/${headCommit}/RELEASE.md"
+							releaseIssue = githubAPI.createIssue('eclipse-platform/eclipse.platform.releng.aggregator', "Release ${releaseVersion}", """\
+								Umbrella issue to track the final activities for the `${releaseVersion}` release.
+								
+								### RC2 week
+								before the RC2 build at end of ${eclipseReleaseDates.RC2.minusDays(2).format(dateFormat)}:
+								  - [ ] [Create Readme files](${releaseDocURL}#Readme)
+								  - [ ] [Create Migration Guide](${releaseDocURL}#migration-guide)
+								  - [ ] Ensure the build is cleared of comparator errors in doc bundles
+								    - Check this before the final RC2 build and again before promoting the final GA release
+								
+								After RC2 promotion:
+								  - [ ] [Prepare subsequent development cycle](${releaseDocURL}#preparation-for-the-next-release)
+								    - [ ] Perform a _Dry-Run_ with the final parameters (ideally shortly) before and verify correctness
+								
+								### Five days before release
+								at ${eclipseReleaseDates.GA.minusDays(5).format(dateFormat)}
+								  - [ ] [Promote latest RC2(a,b,...) to GA release](${releaseDocURL}#promote-to-ga)
+								  (it is only staged and will be hidden until it's published at release)
+								
+								### One day before release
+								at ${eclipseReleaseDates.GA.minusDays(1).format(dateFormat)}
+								  - [ ] [Publish ${releaseVersion} to Maven central](${releaseDocURL}#complete-publication-to-maven-central)
+								  - [ ] [Contribute ${releaseVersion} to SimRel](${releaseDocURL}#contribute-to-simrel)
+								  - [ ] Submit the pending PRs in this repository to update build scripts to ${releaseVersion} GA on master and the ${releaseVersion}-maintenance branch
+								
+								### Release day
+								at ${eclipseReleaseDates.GA.format(dateFormat)} 15:00 UTC
+								  - [ ] [Publish the staged ${releaseVersion} release build](${releaseDocURL}#make-the-release-visible)
+								
+								### Clean-up after release
+								  - [ ] Delete the old [`I-build-${releaseVersion}`](https://ci.eclipse.org/releng/job/Builds/) job and its associated [Test jobs](https://ci.eclipse.org/releng/job/AutomatedTests/).
+								""".stripIndent())
+						}
 						utilities.sendEmail("Eclipse and Equinox ${releaseVersion} (${simRel}) RC${rcNumber} Reminder", """\
 							We are scheduled to promote and contribute ${releaseVersion} RC${rcNumber} to SimRel on ${rcDate.format(dateFormat)}.
 							
@@ -78,14 +115,21 @@ pipeline {
 							All fixes submitted must have a project lead vote on the bug report, and the fix must be reviewed by an additional committer (any committer other than the one who made the fix).
 							A positive review from a project lead means implicit approval and no vote is needed on the bug report.
 							Ongoing changes to documentation, tests or examples do not require approval.
-							""")
+							""" + (releaseIssue != null ? """
+							
+							Also note:
+							The master branch of each repository will stay closed after RC2 until the preparation of the subsequent development cycle is completed and the reopening was annocuned.
+							
+							The final steps towards the ${releaseVersion} release are tracked in
+							${releaseIssue}
+							""":''))
 						break
 					case 'SIGNOFF_RC':
 						def signOffDeadline = params.deadline ? utilities.parseDate(params.deadline) : eclipseReleaseDates["RC${rcNumber}"]
 						if (signOffDeadline == null) {
 							error "No default deadline for RC${rcNumber}"
 						}
-						def date = dateFormat('EEEE, dd MMMM yyyy').format(signOffDeadline)
+						def date = dateFormat.format(signOffDeadline)
 						def signOffIssueTitle = "Declare ${releaseVersion} RC${rcNumber}"
 						def signOffCandidateDetails = """
 							Current candidate
@@ -113,16 +157,14 @@ pipeline {
 							- ${date}, around 09:00 (UTC)
 							Deadline for sign-off (or, by then, comment in this issue when you expect to sign-off).
 							- ${date}, around 12:00 (UTC)
-							Promote approved build to S-${releaseVersion}${releaseVersion}-* and contribute to simultaneous release repository.
+							Promote approved build to S-${releaseVersion}-* and contribute to simultaneous release repository.
 							
 							Remember to investigate and document here any failing JUnit tests.
 							
 							---
 							- [ ] Platform:
-							  - [ ] Resources
+							  - [ ] Platform
 							  - [ ] UI
-							  - [ ] Debug
-							  - [ ] Ant
 							  - [ ] SWT
 							  - [ ] Releng
 							- [ ] JDT:
@@ -132,38 +174,12 @@ pipeline {
 							- [ ] PDE
 							- [ ] Equinox
 							""".stripIndent())
-						def releaseIssue = null
-						if (rcNumber == '2') {
-							releaseIssue = githubAPI.createIssue('eclipse-platform/eclipse.platform.releng.aggregator', "Release ${releaseVersion}", """\
-								Umbrella issue to track release activities for ${releaseVersion}
-								
-								- [ ] Readme file for ${releaseVersion}
-								- [ ] Migration Guide
-								- [ ] Ensure the build is cleared of comparator errors in doc bundles before RC2 build
-								- [ ] Preparation of the subsequent development cycle
-								  - After RC2 was promoted, run the [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) Jenkins job and complete the tasks listed in the PR created by it in this repository.
-								  - [ ] Run it with final parameters as `dry-run` (ideally shortly) before and verify correctnes.
-								
-								- [ ] Publish ${releaseVersion} to Maven central
-								  - The final publication should be done one or two days before the release to ensure everything is mirrored at the time of release.
-								- [ ] Contribute ${releaseVersion} to SimRel
-								  - Should be done one day before the release to ensure the SimRel aggregation does not contain the RC I-build repo, which is deleted on release day.
-								- [ ] Submit the pending PRs to update build scripts to ${releaseVersion} GA on master and the ${releaseVersion}-maintenance
-								  - Should be done one day before the release
-								
-								- [ ] Delete the old [`I-build-${releaseVersion}`](https://ci.eclipse.org/releng/job/Builds/) job and its associated [Test jobs](https://ci.eclipse.org/releng/job/AutomatedTests/).
-								""".stripIndent())
-						}
 						utilities.sendEmail(signOffIssueTitle, """\
 							Please sign off and declare ${releaseVersion} RC${rcNumber} on
 							${signOffIssue}
 							
 							${signOffCandidateDetails}
-							""" + (releaseIssue != null ? """
-							
-							The final steps towards the ${releaseVersion} release are tracked in
-							${releaseIssue}
-							""":''))	
+							""")	
 						break
 					default:
 						error "Unsupported mail type: ${params.type}"
@@ -172,8 +188,4 @@ pipeline {
 			}
 		}
 	}
-}
-
-def dateFormat(String pattern) {
-	return java.time.format.DateTimeFormatter.ofPattern(pattern).localizedBy(Locale.ENGLISH)
 }
