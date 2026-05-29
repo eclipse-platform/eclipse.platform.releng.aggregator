@@ -131,6 +131,7 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 		""".replace('\t','').trim()
 	if (queryParameters != null) {
 		def params = writeJSON(json: queryParameters, returnText: true)
+		params = params.replace("'", "'\\''") // Escape single quotes by '\''
 		query += " -d '" + params + "'"
 	}
 	if (_GH_API_IS_DRY_RUN && !method.isEmpty()) {
