@@ -241,6 +241,12 @@ pipeline {
 						}
 						
 						utilities.gitCommitAllExcludingSubmodules("Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts")
+						
+						// Disable early setup redirection
+						utilities.replaceAllInFile('oomph/Platform.setup', [
+							'(?<=id="early\\.redirection")(?<separator>\\s+)' : '${separator}disabled="true"${separator}',
+						])
+						utilities.gitCommitAllExcludingSubmodules("Disable early redirection for ${BUILD_MAJOR}.${BUILD_MINOR} in platform setup")
 					}
 					script { // Update the maintenance branch
 						sh 'git checkout -b updateMaintenance "origin/${MAINTENANCE_BRANCH}"'
