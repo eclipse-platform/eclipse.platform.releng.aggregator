@@ -209,6 +209,30 @@ pipeline {
 				}
 			}
 		}
+		stage('Early setup redirection') {
+			steps {
+				dir('oomph') {
+					script {
+						def previousRC = utilities.loadBuildDropProperties("${PREVIOUS_RELEASE_CANDIDATE_ID}")
+						replaceInFile('Platform.setup', [
+							"early.redirection.${PREVIOUS_RELEASE_VERSION}" : "early.redirection.${NEXT_RELEASE_VERSION}",
+							" ${PREVIOUS_RELEASE_VERSION}" : " ${NEXT_RELEASE_VERSION}",
+							" ${previousRC.PREVIOUS_RELEASE_VER}" : " ${PREVIOUS_RELEASE_VERSION}",
+						])
+						replaceAllInFile('Platform.setup', [
+							'id="early.redirection"\\s+disabled="true"' : 'id="early.redirection"',
+							*:redirectionTaskReplacementEntry('early.redirection.ibuild',
+								"https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds",
+								"https://download.eclipse.org/eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds"),
+							*:redirectionTaskReplacementEntry('early.redirection.baseline',
+								"https://download.eclipse.org/eclipse/updates/${previousRC.PREVIOUS_RELEASE_REPO_ID}/${previousRC.PREVIOUS_RELEASE_ID}",
+								"https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}"),
+						])
+						sh "git commit --message 'Enable and update early redirection for ${NEXT_RELEASE_VERSION} in platform setup' ."
+					}
+				}
+			}
+		}
 		stage('Apply individual updates') {
 			environment {
 				UPDATE_SCRIPT = 'prepareNextDevCycle.sh'
@@ -444,3 +468,9 @@ def replaceAllInFile(String filePath, Map<String,String> replacements) {
 def gitCommitAllExcludingSubmodules(String commitMessage) {
 	utilities.gitCommitAllExcludingSubmodules(commitMessage)
 }
+
+def redirectionTaskReplacementEntry(String taskId, String newSourceURL, String newTargetURL) {
+	def regex = """(?s)(?<sourcePrefix>id="${java.util.regex.Pattern.quote(taskId)}".+?sourceURL=")[^"]+(?<targetPrefix>"\\s+?targetURL=")[^"]+"""
+	return [ (regex) : "\${sourcePrefix}${newSourceURL}\${targetPrefix}${newTargetURL}"]
+}
+
