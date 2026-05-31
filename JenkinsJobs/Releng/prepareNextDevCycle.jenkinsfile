@@ -27,7 +27,9 @@ pipeline {
 		jdk 'temurin-jdk21-latest'
 		maven 'apache-maven-latest'
 	}
-	//Parameters are defined in the job definition
+	environment {
+		MAVEN_ARGS = '--update-snapshots --batch-mode --no-transfer-progress'
+	}
 	stages {
 		stage('Process Input') {
 			steps {
@@ -117,7 +119,7 @@ pipeline {
 				'''
 			}
 		}
-		stage('Update Maven Version') {
+		stage('Update Build versions') {
 			steps {
 				sh '''
 					mvn org.eclipse.tycho:tycho-versions-plugin:set-version \
@@ -136,14 +138,6 @@ pipeline {
 					"eclipse/updates/${PREVIOUS_RELEASE_VERSION}" : "eclipse/updates/${NEXT_RELEASE_VERSION}",
 					/releases\/20\d\d-\d\d" name="20\d\d-\d\d"/ : /releases\/${NEXT_RELEASE_NAME}" name="${NEXT_RELEASE_NAME}"/,
 				])
-				sh '''
-					git commit --all --message "Prepare Release ${NEXT_RELEASE_VERSION}"
-					git submodule foreach 'git commit --all --message "Update release version for ${NEXT_RELEASE_VERSION}" & echo done'
-				'''
-			}
-		}
-		stage('Update build scripts') {
-			steps {
 				replaceAllInFile('cje-production/buildproperties.txt', [
 					'STREAMMajor=.*' : "STREAMMajor=${NEXT_RELEASE_VERSION_MAJOR}",
 					'STREAMMinor=.*' : "STREAMMinor=${NEXT_RELEASE_VERSION_MINOR}",
@@ -163,19 +157,21 @@ pipeline {
 						// Create I-build for new stream and move previous I-build to maintenance branch to allow late re-spins
 						builds.I.streams["${NEXT_RELEASE_VERSION}"] = [ branch: 'master', schedule: env.I_BUILD_SCHEDULE ]
 						builds.I.streams["${PREVIOUS_RELEASE_VERSION}"].branch = env.MAINTENANCE_BRANCH
-						builds.I.streams["${PREVIOUS_RELEASE_VERSION}"].schedule = '' // schedule should already be inactive, but clear it to be sure
+						// The schedule is already inactive and is therefore unchanged. Only Y-builds run for longer, if a Java release is imminent.
+						// In all cases the schedule is cleared on the maintenance branch and the previous stream will be deleted from master upon release.
 						
 						//Create Y-build for new stream
 						builds.Y.streams["${NEXT_RELEASE_VERSION}"] = [ branch: 'master', disabled: env.IS_JAVA_RELEASE_IMMINENT, schedule: env.Y_BUILD_SCHEDULE ]
 						// If a new Java version is released shortly after the previous release, that Java release will happen in the next days from the point when this is executed.
 						// In that case Y-builds for the old stream continue on maintenance branch (with pre-defined schedule) to provide P-builds upon Java release.
 						// Then the Y-build for the new stream is initially disabled and enabled manually later, when the beta branch for the subsequent Java release is set up.
-						// If no Java release is scheduled soon, the old Y-build stream will just be dormat (like the old I-build), but don't reset its schedule to not overwrite it in the other case.
 						builds.Y.streams["${PREVIOUS_RELEASE_VERSION}"].branch = env.MAINTENANCE_BRANCH
 					}
 				}
-				
-				gitCommitAllExcludingSubmodules("Update versions to ${NEXT_RELEASE_VERSION} in build scripts")
+				gitCommitAllExcludingSubmodules("Prepare ${NEXT_RELEASE_VERSION} development") // Submodules might have received changes in the meantime
+				sh '''
+					git submodule foreach 'git commit --all --message "Prepare ${NEXT_RELEASE_VERSION} development" & echo done'
+				'''
 			}
 		}
 		stage('Move previous version to current RC') {
