@@ -107,7 +107,7 @@ The actual steps to release
     - Submit these PRs now.
 
 **Wednesday**
-The release is scheduled for 15:00 UTC.
+The release is scheduled for 10:00 UTC.
 
   - #### Make the Release Visible
     - Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
