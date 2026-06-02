@@ -110,7 +110,7 @@ public class StatisticsSession {
         }
 
         if (steps.contains(Integer.valueOf(InternalPerformanceMeter.AVERAGE))) {
-            // an already aggregated set of data points from the DB
+            // an already aggregated set of data points
             stats = computeStatsFromAggregates(dimension);
         } else if (steps.contains(Integer.valueOf(InternalPerformanceMeter.AFTER))) {
             // raw values from measurement
@@ -148,7 +148,6 @@ public class StatisticsSession {
                     aggregateCount++;
                     break;
                 case InternalPerformanceMeter.STDEV:
-                    // see DB.internalStore
                     stdevSum += Double.longBitsToDouble(magnitude);
                     break;
                 case InternalPerformanceMeter.SIZE:
