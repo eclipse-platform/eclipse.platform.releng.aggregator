@@ -39,14 +39,16 @@ pipeline {
 					def githubAPI = load 'JenkinsJobs/shared/githubAPI.groovy'
 					githubAPI.setDryRun(false)
 					
-					def buildProperties = readProperties(file: 'cje-production/buildproperties.txt')
-					int versionMajor = buildProperties.STREAMMajor.toInteger()
-					int versionMinor = buildProperties.STREAMMinor.toInteger()
-					def releaseVersion = "${versionMajor}.${versionMinor}"
-					
-					sh 'cd eclipse-platform-parent && mvn resources:copy-resources@saveproperties'
-					def mavenProperties = readProperties(file: 'eclipse-platform-parent/target/mavenproperties.properties')
-					def simRel = "${mavenProperties.RELEASE_YEAR}-${mavenProperties.RELEASE_MONTH}"
+					def buildProperties = [:]
+					if (params.buildId) { // Read build properties from given build
+						buildProperties += utilities.loadBuildDropProperties("${buildId}")
+					} else {
+						buildProperties += readProperties(file: 'cje-production/buildproperties.txt')
+						sh 'cd eclipse-platform-parent && mvn resources:copy-resources@saveproperties'
+						buildProperties += readProperties(file: 'eclipse-platform-parent/target/mavenproperties.properties')
+					}
+					def releaseVersion = "${buildProperties.STREAMMajor}.${buildProperties.STREAMMinor}"
+					def simRel = "${buildProperties.RELEASE_YEAR}-${buildProperties.RELEASE_MONTH}"
 					def eclipseReleaseDates = utilities.readReleaseDates("${simRel}")
 					def dateFormat = java.time.format.DateTimeFormatter.ofPattern('EEEE, dd MMMM yyyy').localizedBy(Locale.ENGLISH)
 					
