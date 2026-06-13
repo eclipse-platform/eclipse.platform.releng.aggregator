@@ -76,23 +76,32 @@ def findMilestoneNumber(String orgaRepo, String title) {
 	// Iterate over all (open and closed) milestones, sorted by decending due-date.
 	// See https://docs.github.com/en/rest/issues/milestones?apiVersion=2026-03-10#list-milestones
 	// Consider even closed milestones to make the pipelines more robust in case some milestones are closed manually
-	def perPage = 10 // Should usually be sufficient
-	def maxPage = 100
+	def milestone = findElement("repos/${orgaRepo}/milestones?state=all&sort=due_on&direction=desc", {ms -> ms.title == title})
+	if (milestone == null) {
+		error "Milestone '${title}' not found among the most recent ~1000 milestones"
+	}
+	return milestone
+}
+
+private Object findElement(String query, Closure predicate) {
+	// See https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api?apiVersion=2026-03-10
+	def perPage = 30 // Should usually be sufficient
+	def maxPage = 33
 	for (int page in 1..maxPage) {
-		def response = queryGithubAPI('', "repos/${orgaRepo}/milestones?state=all&sort=due_on&direction=desc&per_page=${perPage}&page=${page}")
+		def response = queryGithubAPI('', "${query}&per_page=${perPage}&page=${page}")
 		if (!(response instanceof List) && isFailed(response, 200)) {
 			error "Response contains errors:\n${response}"
 		}
-		for (milestone in response) {
-			if(milestone.title == title) {
-				return milestone.number
+		for (element in response) {
+			if (predicate.call(element)) {
+				return element
 			}
 		}
 		if (response.size() < perPage) {
 			break; // last page reached
 		}
 	}
-	error "Milestone '${title}' not found among the most recent ${perPage * maxPage} milestones"
+	return null
 }
 
 /**
@@ -123,6 +132,13 @@ def createIssue(String orgaRepo, String title, String body) {
 		error "Response contains errors:\n${response}"
 	}
 	return response?.html_url
+}
+
+def findIssue(String orgaRepo, String title) {
+	// Iterate over all issues, sorted by decending date of last update.
+	// See https://docs.github.com/en/rest/issues/issues?apiVersion=2026-03-10#list-repository-issues
+	def issue = findElement("repos/${orgaRepo}/issues?state=all&sort=updated&direction=desc", {i -> i.title == title})
+	return issue?.html_url // Do not fail if issue was not found
 }
 
 def triggerWorkflow(String orgaSlashRepo, String workflowId, Map<String, String> inputs, String referenceBranch = 'master') {
