@@ -74,23 +74,27 @@ Sometimes there is a critical issue that requires a fix, if it's decided that on
   2. Start a new I-build for that release.
     The still existing I-build jobs are now running on the maintenance branch and will include the backported fix.
   3. Promote the newly built I-build as `RC2a` or `RC2b`, ... and use it for the final release promotion
-  - In case the a fix is necessary after the final release promotion, but before its publication, additionally run the final release promotion with the new RC2x.
-    Also make sure to discard the previously promoted artifacts, by deleting the previous release download and update sites and to **DROP** the artifacts previously staged for Maven Central.
+  - In case the a fix is necessary after the final release promotion happened (but of course before its publication), additionally run the final release promotion with the new RC2x.
+    Also make sure to discard the previously promoted artifacts, by deleting the previously promoted release Eclipse and Equinox download sites and the release update site, in both, the `download` and `archive` area.
+    Additionally **DROP** the artifacts previously staged for Maven Central and replace the final contribution to SimRel.
 
 ### Release
 The actual steps to release
 
-**Friday**
-  * #### Promote to GA
-    - After **SimRel** declares RC2 (usually on Friday before the final release) run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a, ...) to be the final release.
+**Wednesday, one week before release**
+  - #### Promote to GA
+    - At the very end of the **SimRel RC2 contribution period** (usually at Wednesday end of business day),
+      Run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a, ...) to be the final release.
       - `DROP_ID`: Final release candidate's ID, e.g.: `S-4.36RC2-202505281830`
       - `CHECKPOINT`: blank for final releases
     - It creates the download and update sites of the final release at their final location, but does not publish them and keeps them hidden from the public.
     - It also creates pull requests to update the build configuration on the master and corresponding maintenance branch to the promoted release.
-      - Only submit them **AFTER** the release was finally published.
+      - Submit them **IMMEDIATLY BEFORE** the release is finally published.
     - It will again update the Acknowledgements and creates a PR if there are any last changes.
       Review and submit it at https://github.com/eclipse-platform/www.eclipse.org-eclipse/pulls
     - You can subscribe to [cross-project-issues](https://accounts.eclipse.org/mailing-list/cross-project-issues-dev) to get the notifications on Simrel releases.
+  - #### Contribute to SimRel
+    - The final release repo has to be contributed to SimRel before the currently active I-build repo is deleted (is done automatically after the release is published)
 
 **Tuesday/Monday**
   - #### Complete Publication to Maven Central
@@ -100,15 +104,14 @@ The actual steps to release
       - Make sure the name of the deployment you are about to release matches the tag and timestamp of the final release repository.
         E.g for a P2 repo with id `R-4.36-202505281830` the deployments should be named `PLATFORM_R-4.36-202505281830`, `PDE_R-4.36-202505281830` or `JDT_R-4.36-202505281830` respectivly.
       - If you do not have an account on `central.sonatype.com` for performing the rest of the release request one by creating an [EF Help Desk](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues) issue to get permissions for platform, JDT and PDE projects and tag an existing release engineer to give approval.
-  - #### Contribute to SimRel
-    - The final release repo has to be contributed to SimRel before the currently active I-build repo is deleted (is done automatically after the release is published)
+
+**Wednesday**
+
+The release is scheduled for 10:00 UTC.
+
   - #### Update build versions to GA
     - Upon promotion of the final GA build, PRs for the the master and corresponding maintenance branch were created to update the build to the GA versions.
     - Submit these PRs now.
-
-**Wednesday**
-The release is scheduled for 10:00 UTC.
-
   - #### Make the Release Visible
     - Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
       - `releaseBuildID`: the full id of the release build to publish, e.g. `R-4.36-202505281830`

@@ -274,20 +274,28 @@ pipeline {
 						utilities.gitPushBranch('master', "update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}", /*force*/ true)
 						utilities.gitPushBranch('updateMaintenance', "update-${MAINTENANCE_BRANCH}", /*force*/ true)
 						
+						def releaseIssue = githubAPI.findIssue('eclipse-platform/eclipse.platform.releng.aggregator', "Release ${BUILD_MAJOR}.${BUILD_MINOR}")
+						
 						def masterPR = githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
 							"Update previous release version to ${BUILD_MAJOR}.${BUILD_MINOR} GA across build scripts", """\
-							Update the the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release version.
+							Update the `master` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release versions.
 							
-							**This should not be submitted before ${BUILD_MAJOR}.${BUILD_MINOR} is finally released.**
+							**This should be submitted immediately before the ${BUILD_MAJOR}.${BUILD_MINOR} release is finally published.**
+							
+							Part of
+							- ${releaseIssue}
 							""".stripIndent(),"update-build-to-R${BUILD_MAJOR}.${BUILD_MINOR}", 'master', /*skipExistingPR*/ true)
 						
 						githubAPI.createPullRequest('eclipse-platform/eclipse.platform.releng.aggregator',
 							"Update ${MAINTENANCE_BRANCH} branch with release version for ${BUILD_MAJOR}_${BUILD_MINOR}+ changes", """\
-							Update the the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release version.
+							Update the `${MAINTENANCE_BRANCH}` branch with final ${BUILD_MAJOR}.${BUILD_MINOR} release versions.
 							This complements:
 							- ${masterPR}
 							
-							**This should not be submitted before ${BUILD_MAJOR}.${BUILD_MINOR} is finally released.**
+							**This should be submitted immediately before the ${BUILD_MAJOR}.${BUILD_MINOR} release is finally published.**
+							
+							Part of
+							- ${releaseIssue}
 							""".stripIndent(),"update-${MAINTENANCE_BRANCH}", "${MAINTENANCE_BRANCH}", /*skipExistingPR*/ true)
 					}
 				}
