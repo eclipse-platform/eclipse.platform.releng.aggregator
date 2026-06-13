@@ -75,12 +75,12 @@ pipeline {
 					// Compute new build schedule
 					def now = java.time.LocalDate.now()
 					def rcEnd = eclipseReleaseDates.RC2.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
-					assignEnvVariable('I_BUILD_SCHEDULE', createCronPattern(now, rcEnd, 18, '*').trim())
+					assignEnvVariable('I_BUILD_SCHEDULE', createCronPattern(now, rcEnd, 23, '*').trim())
 					
 					echo "NEXT_JAVA_RELEASE_DATE: ${NEXT_JAVA_RELEASE_DATE}"
 					def yBuildSchedule = null
 					if ("${NEXT_JAVA_RELEASE_DATE}".isEmpty()) {
-						yBuildSchedule = createCronPattern(now, rcEnd, 10, '2,4,6')
+						yBuildSchedule = createCronPattern(now, rcEnd, 15, '2,4,6')
 					} else {
 						// Java releases soon after the Eclipse release, therefore schedule Y-builds daily within the 'Java RC phase'
 						def javaReleaseDate = utilities.parseDate("${NEXT_JAVA_RELEASE_DATE}")
@@ -90,7 +90,7 @@ pipeline {
 							// If this is encountered, enhance the logic to handle 'java RC' phases ranging more than one month
 							error "Java release is not in the middle of a month"
 						}
-						yBuildSchedule = createCronPattern(now, javaRCStart, 10, '2,4,6') + """\
+						yBuildSchedule = createCronPattern(now, javaRCStart, 15, '2,4,6') + """\
 						0 10 ${javaRCStart.dayOfMonth}-${javaRCEnd.dayOfMonth} ${javaRCStart.monthValue} *
 						""".stripIndent()
 					}
@@ -452,7 +452,7 @@ private String createCronPattern(java.time.LocalDate start, java.time.LocalDate 
 	// Consider end-of-year overflows
 	def completeMonths = (start.monthValue < lastCompleteMonth) ? "${start.monthValue}-${lastCompleteMonth}" : "${start.monthValue}-12,1-${lastCompleteMonth}"
 	return """\
-		TZ=America/Toronto
+		TZ=UTC
 		# Format: Minute Hour Day Month Day-of-week (1-7)
 		0 ${hour} * ${completeMonths} ${daysOfWeek}
 		0 ${hour} 1-${end.dayOfMonth} ${end.monthValue} ${daysOfWeek}

@@ -62,7 +62,7 @@ void mainEclipsePageData() throws IOException {
 	Map<Path, FileInfo> files = OS.listFileTree(DIRECTORY, 1);
 	Map<String, String> properties = OS.loadProperties(DIRECTORY.resolve("buildproperties.properties"));
 	String buildId = properties.get("BUILD_ID");
-	ZonedDateTime buildDate = buildTimestamp(buildId);
+	ZonedDateTime buildDateUTC = buildTimestampUTC(buildId);
 
 	JSON.Object buildProperties = JSON.Object.create();
 	// basic data
@@ -75,7 +75,7 @@ void mainEclipsePageData() throws IOException {
 	buildProperties.add("release", JSON.String.create(major + "." + minor + "." + service));
 	buildProperties.add("releaseShort", JSON.String.create(properties.get("RELEASE_VER")));
 	buildProperties.add("previousReleaseAPILabel", JSON.String.create(previousReleaseAPILabel(major, minor)));
-	buildProperties.add("timestamp", JSON.String.create(buildDate.toString()));
+	buildProperties.add("timestamp", JSON.String.create(buildDateUTC.toString()));
 
 	// git log
 	buildProperties.add("gitTag", JSON.String.create(buildId));
@@ -127,7 +127,7 @@ void mainEquinoxPageData() throws IOException {
 	Map<Path, FileInfo> files = OS.listFileTree(DIRECTORY, 1);
 	Map<String, String> properties = OS.loadProperties(DIRECTORY.resolve("buildproperties.properties"));
 	String buildId = properties.get("BUILD_ID");
-	ZonedDateTime buildDate = buildTimestamp(buildId);
+	ZonedDateTime buildDateUTC = buildTimestampUTC(buildId);
 
 	JSON.Object buildProperties = JSON.Object.create();
 	// basic data
@@ -135,7 +135,7 @@ void mainEquinoxPageData() throws IOException {
 	buildProperties.add("label", JSON.String.create(buildId));
 	buildProperties.add("kind", JSON.String.create(properties.get("BUILD_TYPE_NAME")));
 	buildProperties.add("releaseShort", JSON.String.create(properties.get("RELEASE_VER")));
-	buildProperties.add("timestamp", JSON.String.create(buildDate.toString()));
+	buildProperties.add("timestamp", JSON.String.create(buildDateUTC.toString()));
 
 	// files
 	buildProperties.add("equinoxRepository",
@@ -256,10 +256,10 @@ JSON.Object createFileDescription(Path file, FileInfo fileInfo) {
 }
 
 final Pattern INTEGRATION_BUILD_ID = Pattern.compile("[A-Z](?<date>\\d{8})-(?<time>\\d{4})");
-final ZoneId BUILD_TIMEZONE = ZoneId.of("America/New_York");
+final ZoneId BUILD_TIMEZONE = ZoneOffset.UTC;
 final DateTimeFormatter BASIC_LOCAL_TIME = DateTimeFormatter.ofPattern("HHmm");
 
-ZonedDateTime buildTimestamp(String buildId) {
+ZonedDateTime buildTimestampUTC(String buildId) {
 	Matcher buildIDMatcher = INTEGRATION_BUILD_ID.matcher(buildId);
 	if (!buildIDMatcher.matches()) {
 		throw new IllegalArgumentException("Unexpected BUILD_ID: " + buildId);
