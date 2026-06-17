@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,11 +45,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 /**
- * A TestRunner for JUnit that supports Ant JUnitResultFormatters and running
- * tests inside Eclipse. Example call: EclipseTestRunner -classname
- * junit.samples.SimpleTest
- * formatter=org.apache.tools.ant.taskdefs.optional.junit
- * .XMLJUnitResultFormatter
+ * A TestRunner for JUnit that supports running tests inside Eclipse. Example
+ * call: EclipseTestRunner -classname junit.samples.SimpleTest -resultPath
+ * result.xml
  */
 public class EclipseTestRunner {
 
@@ -73,15 +71,13 @@ public class EclipseTestRunner {
 	 * <pre>
 	 * -className=&lt;testSuiteName&gt;
 	 * -testPluginName&lt;containingpluginName&gt;
-	 * -formatter=&lt;classname&gt;(,&lt;path&gt;)
+	 * -resultPath&lt;path&gt;
 	 * </pre>
 	 *
-	 * Where &lt;classname&gt; is the formatter classname, currently ignored as only
-	 * LegacyXmlResultFormatter is used. The path is either the path to the result
-	 * file and should include the file extension (xml) if a single test is being
-	 * run or should be the path to the result directory where result files should
-	 * be created if multiple tests are being run. If no path is given, the standard
-	 * output is used.
+	 * The result path is either the path to the result file and should include the
+	 * file extension (xml) if a single test is being run or should be the path to
+	 * the result directory where result files should be created if multiple tests
+	 * are being run. If no path is given, the standard output is used.
 	 */
 	public static void main(String[] args) throws IOException {
 		System.exit(run(args));
@@ -133,10 +129,11 @@ public class EclipseTestRunner {
 					junitReportOutput = args[i + 1];
 				}
 				i++;
-			} else if (args[i].startsWith("formatter=")) {
-				String formatterString = args[i].substring(10);
-				int seperatorIndex = formatterString.indexOf(',');
-				resultPathString = seperatorIndex == -1 ? null : formatterString.substring(seperatorIndex + 1);
+			} else if (args[i].toLowerCase().equals("-resultpath")) {
+				if (i < args.length - 1) {
+					resultPathString = args[i + 1];
+				}
+				i++;
 			} else if (args[i].startsWith("propsfile=")) {
 				try (FileInputStream in = new FileInputStream(args[i].substring(10))) {
 					props.load(in);
