@@ -94,7 +94,7 @@ pipeline {
 					""")
 					def testResults = junit(keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml')
 					writeFile(file: "workarea/${buildId}/eclipse-testing/results/${JOB_BASE_NAME}.json",
-						text: """{"passCount":${testResults.passCount},"failCount":${testResults.failCount},"skipCount":${testResults.skipCount},"duration":${getTestDuration()}}""")
+						text: """{"passCount":${testResults.passCount},"failCount":${testResults.failCount},"skipCount":${testResults.skipCount},"duration":${testResults.duration}}""")
 				}
 			}}
 			post {
@@ -193,12 +193,4 @@ def getJDKInstallationPath(Map<String, Object> test) {
 
 def pathOf(String path) {
 	return path.replace('/', isUnix() ? '/' : '\\')
-}
-
-def getTestDuration() {
-	// Workaround for https://github.com/jenkinsci/junit-plugin/issues/1235
-	withCredentials([usernameColonPassword(credentialsId: 'jenkins-api', variable: 'JENKINS_API_TOKEN')]) {
-		def summary = sh(script: 'curl --fail --user "${JENKINS_API_TOKEN}" "${BUILD_URL}/testReport/api/json?tree=duration"', returnStdout: true)
-		return readJSON(text: summary).duration
-	}
 }
