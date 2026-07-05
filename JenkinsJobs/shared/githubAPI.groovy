@@ -80,7 +80,7 @@ def findMilestoneNumber(String orgaRepo, String title) {
 	if (milestone == null) {
 		error "Milestone '${title}' not found among the most recent ~1000 milestones"
 	}
-	return milestone
+	return milestone.number
 }
 
 private Object findElement(String query, Closure predicate) {
