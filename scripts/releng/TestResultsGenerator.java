@@ -1,6 +1,5 @@
-
 /*******************************************************************************
- *  Copyright (c) 2000, 2025 IBM Corporation and others.
+ *  Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -163,7 +162,7 @@ public class TestResultsGenerator {
 			collectErrors(junitResultsFile, test);
 			String testPluginName = computeCoreName(filename);
 			String configuration = computeConfig(filename);
-			JSON.Object summary = summaries.computeIfAbsent(configuration, c -> JSON.Object.create());
+			JSON.Object summary = summaries.computeIfAbsent(configuration, _ -> JSON.Object.create());
 			summary.add(testPluginName, test);
 		}
 
