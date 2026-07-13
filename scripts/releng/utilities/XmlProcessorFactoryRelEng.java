@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  Copyright (c) 2023, 2025 Joerg Kubitz and others.
+ *  Copyright (c) 2023, 2026 Joerg Kubitz and others.
  *
  *  This program and the accompanying materials
  *  are made available under the terms of the Eclipse Public License 2.0
@@ -77,7 +77,7 @@ public class XmlProcessorFactoryRelEng {
 	public static synchronized Document parseDocumentIgnoringDOCTYPE(Path file)
 			throws ParserConfigurationException, IOException, SAXException {
 		DocumentBuilder builder = DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE.newDocumentBuilder();
-		builder.setEntityResolver((__, ___) -> new InputSource(new ByteArrayInputStream(new byte[0])));
+		builder.setEntityResolver((_, _) -> new InputSource(new ByteArrayInputStream(new byte[0])));
 		return builder.parse((file.toFile()));
 	}
 
