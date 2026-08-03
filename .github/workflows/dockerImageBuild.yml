@@ -1,0 +1,106 @@
+# This workflow builds the custom Docker images used by the Eclipse top level projects.
+# Based on https://docs.github.com/en/actions/tutorials/publish-packages/publish-docker-images#publishing-images-to-github-packages
+
+name: Docker Image Build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '45 23 * * 6'
+  push:
+    branches: [ master ]
+    paths:
+      - 'cje-production/dockerfiles/**'
+  pull_request:
+    paths:
+      - 'cje-production/dockerfiles/**'
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-docker-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    if: github.event_name != 'schedule' || github.repository_owner == 'eclipse-platform' # Skip execution on schedule in forks
+    strategy:
+      fail-fast: false
+      matrix:
+        image: 
+          - { id: 'platformreleng-debian-swtnativebuild',     tag: '12',      path: 'cje-production/dockerfiles/debian/swtnativebuild'  }
+          - { id: 'platformreleng-debian-swtgtk3nativebuild', tag: '11',      path: 'cje-production/dockerfiles/debian/swtgtk3nativebuild' }
+          - { id: 'platformreleng-centos-gtk4-mutter',        tag: '9' ,      path: 'cje-production/dockerfiles/centos-gtk4-mutter/9-gtk4'   }
+          - { id: 'platformreleng-opensuse-gtk3-metacity',    tag: '16',      path: 'cje-production/dockerfiles/opensuse-gtk3-metacity/16-gtk3'   }
+          - { id: 'platformreleng-ubuntu-gtk3-metacity',      tag: 'jikespg', path: 'org.eclipse.jdt.core/docker/jikespg',                      repository: 'eclipse-jdt/eclipse.jdt.core' }
+    env:
+      IMAGE_NAME: '${{ github.repository_owner }}/${{ matrix.image.id }}'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ matrix.image.repository && matrix.image.repository || '' }}
+          sparse-checkout: '${{ matrix.image.path }}'
+      - name: Extract docker metadata
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ matrix.image.tag }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        if: ${{ ! github.event.pull_request }}
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker image (and push, if enabled)
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: '${{ matrix.image.path }}'
+          push: ${{ ! github.event.pull_request }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Generate artifact attestation
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        if: ${{ ! github.event.pull_request }}
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+      - name: Delete old image versions
+        if: ${{ ! github.event.pull_request }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUTOFF_DAYS: '32'
+          IS_ORGANIZATION: ${{ github.event.repository.owner.type == 'Organization' }}
+        run: |
+          set -exuo pipefail
+          cutoffDate="$(date -u -d "${CUTOFF_DAYS} days ago" +%s)"
+          if [[ "$IS_ORGANIZATION" = 'true' ]]; then
+            packagesEndpoint='/orgs/${{ github.repository_owner }}/packages/container/${{ matrix.image.id}}/versions'
+          else
+            packagesEndpoint='/users/${{ github.repository_owner }}/packages/container/${{ matrix.image.id}}/versions'
+          fi
+          versionsList=$(gh api --paginate \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            "${packagesEndpoint}" \
+            --jq '.[] | "\(.id) \(.created_at)"')
+          
+          while read -r version_id created_at; do
+            [[ -z "${version_id:-}" ]] && continue
+
+            createdDate="$(date -u -d "${created_at}" +%s)"
+            if (( createdDate < cutoffDate )); then
+              echo "Deleting ${{ matrix.image.id }}:${version_id} (${created_at})"
+              gh api --method DELETE \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2026-03-10" \
+                "${packagesEndpoint}/${version_id}"
+            fi
+          done <<< "${versionsList}"
