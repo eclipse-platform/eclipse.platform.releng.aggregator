@@ -36,7 +36,7 @@ RUN dnf -y update && dnf -y install \
     && dnf clean all
 
 ENV HOME=/home/vnc
-ENV DISPLAY :0
+ENV DISPLAY=:0
 
 RUN useradd -u 10001 -d ${HOME} testuser
 

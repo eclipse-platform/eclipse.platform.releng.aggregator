@@ -19,7 +19,7 @@ RUN apt-get update -qq && apt-get install -qq -y \
       webkit2gtk-driver
 
 ENV HOME=/home/swtbuild
-ENV DISPLAY :0
+ENV DISPLAY=:0
 RUN useradd -u 10001 -d ${HOME} testuser
 
 RUN mkdir -p /var/lib/dbus && dbus-uuidgen > /var/lib/dbus/machine-id \
