@@ -37,7 +37,9 @@ git submodule update
 mvn clean verify  -DskipTests=true
 
 # find the results in
-# eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/products
+# products/eclipse-sdk/target/products      (SDK archives per platform)
+# products/eclipse-platform/target/products (Platform archives per platform)
+# sites/eclipse-platform-repository/target/repository (p2 update site)
 ```
 
 Build with custom compiler
