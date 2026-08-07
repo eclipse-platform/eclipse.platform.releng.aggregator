@@ -609,7 +609,7 @@ function escapeHTML(rawString) {
 
 let _eventListenersAdded = false
 
-function activateCollapsiblesTable(table) {
+function activateCollapsiblesTable(table, dataTypeLabel) {
     for (const row of table.querySelectorAll('.collapsible-table-main-row')) {
         row.onclick = () => openDetailsRow(row, true)
     }
@@ -626,14 +626,7 @@ function activateCollapsiblesTable(table) {
 `
         }
     }
-    for (loaderElement of table.querySelectorAll('.data-loader')) {
-        loaderElement.innerHTML = `
-<div style="display:flex; align-items:center; gap: 12px; color: #666;">
-	<div class="data-loader-spinner"></div>
-	<span>Fetching compile logs...</span>
-</div>
-`
-    }
+    insertWaitSpinner(table, dataTypeLabel)
 
     if (!_eventListenersAdded) {
         window.addEventListener('load', checkAnchor)
@@ -648,32 +641,9 @@ function activateCollapsiblesTable(table) {
             wrapper.classList.toggle('open')
             if (!detailsRow.classList.contains('is-loaded')) {
                 fetchAndApplyData(detailsRow, scrollTarget)
+                detailsRow.classList.add('is-loaded')
             }
-        }
-    }
 
-    async function fetchAndApplyData(detailsRow, scrollTarget) {
-        try {
-            const AsyncFunction = async function() {}.constructor;
-            const dataCache = new Map()
-            for (loader of detailsRow.querySelectorAll('.data-loader')) {
-                const supplier = loader.getAttribute('data-supplier')
-                const processor = loader.getAttribute('data-processor')
-                let data = dataCache.get(supplier)
-                if (!data) {
-                    data = await new AsyncFunction('return ' + supplier)()
-                    dataCache.set(supplier, data)
-                }
-                const content = new Function('arg', 'return ' + processor)(data)
-                loader.innerHTML = content
-            }
-            detailsRow.classList.add('is-loaded')
-            if (scrollTarget) {
-                scrollTarget.scrollIntoView({ behavior: 'smooth' })
-            }
-        } catch (exception) {
-            detailsRow.querySelector('.collapsible-table-details-content').innerHTML = `<p style="color:red"><strong>Failed to load data. Please check your connection.</strong></p>`
-            logException(exception.message, exception)
         }
     }
 
@@ -692,19 +662,61 @@ function activateCollapsiblesTable(table) {
     }
 }
 
+function insertWaitSpinner(container, dataTypeLabel, contentJustification = 'flex-start') {
+    for (loaderElement of container.querySelectorAll('.data-loader')) {
+        loaderElement.innerHTML = `
+<div style="display:flex; align-items:center; justify-content:${contentJustification}; gap: 12px; color: #666;">
+	<div class="data-loader-spinner"></div>
+	<span>Loading ${dataTypeLabel} ...</span>
+</div>
+`
+    }
+}
+
+function activateDataLoadingDetails(details, dataTypeLabel) {
+    insertWaitSpinner(details, dataTypeLabel, 'center')
+    details.addEventListener('toggle', () => fetchAndApplyData(details, null, dataTypeLabel), { once: true });
+}
+
+async function fetchAndApplyData(dataContainer, scrollTarget = null, dataTypeLabel = 'data') {
+    try {
+        const AsyncFunction = async function() {}.constructor;
+        const dataCache = new Map()
+        for (const loader of dataContainer.querySelectorAll('.data-loader')) {
+            const supplier = loader.getAttribute('data-supplier')
+            const processor = loader.getAttribute('data-processor')
+            let data = dataCache.get(supplier)
+            if (!data) {
+                data = await new AsyncFunction('return ' + supplier)()
+                dataCache.set(supplier, data)
+            }
+            const content = new Function('arg', 'return ' + processor)(data)
+            if (content) {
+                loader.innerHTML = content
+            }
+        }
+        if (scrollTarget) {
+            scrollTarget.scrollIntoView({ behavior: 'smooth' })
+        }
+    } catch (exception) {
+        dataContainer.innerHTML = `<p style="color:red"><strong>Failed to load ${dataTypeLabel}. Please check your connection.</strong></p>`
+        logException(exception.message, exception)
+    }
+}
+
 // Copy link button
 
 function appendCopyLinkButton(code) {
     return appendCopyButton(code, 'copyLink', 'link', '<i class="fa-solid fa-link"></i>')
 }
 
-function appendCopyContentButton(code, contentDescription) {
-    return appendCopyButton(code, 'copyTextContent', contentDescription, '<i class="fa-regular fa-copy"></i>')
+function appendCopyContentButton(code, contentDescription, flexWrap = undefined) {
+    return appendCopyButton(code, 'copyTextContent', contentDescription, '<i class="fa-regular fa-copy"></i>', flexWrap)
 }
 
-function appendCopyButton(code, clickHandler, contentDescription, icon) {
+function appendCopyButton(code, clickHandler, contentDescription, icon, flexWrap = 'wrap') {
     return `
-<div style="display: flex;align-items: center;flex-wrap: wrap;">
+<div style="display: flex;align-items: center;flex-wrap: ${flexWrap};">
 	${code}
 	<button class="copy-icon" onclick="${clickHandler}(this)" title="Copy ${contentDescription} to clipboard">${icon}</button>
 </div>
@@ -750,4 +762,49 @@ function createCodeEditorBlock(line, content) {
 
 function applyCodeMarker(severity, rawCode) {
     return `<span class="code-marker" style="text-decoration-color: var(--marker-${severity})">${rawCode}</span>`
+}
+
+// --- Miscellaneous utilities ---
+
+function loadScripts(scriptSources) {
+    // Scripts must be loaded sequentially since they may rely on each other
+    let result = Promise.resolve()
+    for (const script of scriptSources) {
+        result = result.then(() => {
+            return load(document.scripts, l => l.src == script, () => {
+                const newScript = document.createElement('script')
+                newScript.src = script
+                return newScript
+            })
+        })
+    }
+    return result
+}
+
+function loadStyleSheets(styleSources) {
+    // Style sheets can be loaded concurrently
+    return Promise.all(styleSources.map(style => {
+        return load(document.styleSheets, l => l.href == style, () => {
+            const newStyleSheet = document.createElement('link')
+            newStyleSheet.rel = 'stylesheet'
+            newStyleSheet.href = style
+            return newStyleSheet
+        })
+    }))
+}
+
+function load(sources, test, factory) {
+    const element = [...sources].find(test)
+    if (element) {
+        return Promise.resolve(element)
+    }
+    return new Promise((resolve, reject) => {
+        const newElement = factory()
+        newElement.onload = resolve
+        newElement.onerror = (err) => {
+            reject(`Failed to load link '${styleSource}': ` + err);
+            console.log(err);
+        }
+        document.head.appendChild(newElement);
+    });
 }

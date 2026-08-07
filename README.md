@@ -81,6 +81,8 @@ The job with the highest release number is the one that builds nightly SDK build
 - Daily Maven snapshots are provided by the [Deploy To Maven](https://ci.eclipse.org/releng/job/Releng/job/deployToMaven) job
 and are available at https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 
+The [Eclipse RelEng and build calendar](https://download.eclipse.org/eclipse/downloads/#releng-calendar) provides an overview of all scheduled builds and release related events.
+
 Milestone and release tasks
 -----------------
 See [Releng-Tasks 2.1](RELEASE.md) (includes links to schedule, calendar etc)
