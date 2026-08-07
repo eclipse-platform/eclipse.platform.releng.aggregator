@@ -40,6 +40,8 @@ pipeline {
 					utilities.setDryRun(params.DRY_RUN)
 					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
 					githubAPI.setDryRun(params.DRY_RUN)
+					calendarAPI = load "JenkinsJobs/shared/calendarAPI.groovy"
+					calendarAPI.setDryRun(params.DRY_RUN)
 					
 					echo "NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
 					def nextVersion = utilities.matchPattern('NEXT_RELEASE_VERSION', "${NEXT_RELEASE_VERSION}", [ /(?<major>\d+)\.(?<minor>\d+)/ ])
@@ -380,7 +382,6 @@ pipeline {
 						- [ ] Review and submit the new N&N pages created for the [eclipse website](https://github.com/eclipse-platform/www.eclipse.org-eclipse/pulls) repository.
 						- [ ] Submit this PR.
 						  Before the preparation PRs in all submodules have been submitted the build of this change cannot complete (this can still submit it before).
-						- [ ] Update build calendar for platform ${NEXT_RELEASE_VERSION} release cycle.
 						
 						After this and all submodule PRs are submitted:
 						- [ ] Run the [`Create Jobs`](https://ci.eclipse.org/releng/job/CreateJobs/) seed job to create the Jenkins jobs of the new stream
@@ -432,6 +433,35 @@ pipeline {
 				}
 			}
 		}
+		stage('Create build calendar') {
+			environment {
+				GCLOULD_KEY_FILE = credentials('gclould-service-account-key') // Secret file
+			}
+			steps {
+				script {
+					calendarAPI.initialize(utilities)
+					def rc2 = utilities.parseDate("${RC2_DATE}")
+					def ga  = utilities.parseDate("${GA_DATE}")
+					def eclipsePrefix = "Eclipse ${NEXT_RELEASE_VERSION}" //TODO: Or keep Eclipse Platform
+					// I-build events
+					def iBuildStart = java.time.LocalDate.now().plusDays(1).atTime(18, 0).atZone(java.time.ZoneId.of('America/Toronto'))
+					def iBuildUntil = rc2.minusDays(1) // exclusive
+					calendarAPI.createEvent("Eclipse ${NEXT_RELEASE_VERSION} I-build", iBuildStart, iBuildStart.plusHours(1),
+						[ calendarAPI.createRecurrenceRRule('DAILY', iBuildUntil) ])
+					// Release events
+					utilities.releaseEvents().each{ name, description ->
+						def date = utilities.parseDate(env["${name}_DATE"])
+						if (name.startsWith('RC')) {
+							calendarAPI.createEvent("${eclipsePrefix} ${name} Stabilization", date.minusDays(3), date.minusDays(1))
+							calendarAPI.createEvent("${eclipsePrefix} ${name} Sign-off", date.minusDays(1))
+						}
+						def title = eclipsePrefix + (name != 'GA' ? " ${name} Promotion" : " (${NEXT_SIMREL_NAME}) GA")
+						calendarAPI.createEvent(title, date, date)
+					}
+					calendarAPI.createEvent("${eclipsePrefix} Quiet period", rc2.plusDays(1), ga)
+				}
+			}
+		}
 	}
 }
 
@@ -439,6 +469,8 @@ pipeline {
 def utilities = null
 @groovy.transform.Field
 def githubAPI = null
+@groovy.transform.Field
+def calendarAPI = null
 
 // --- utility methods
 
