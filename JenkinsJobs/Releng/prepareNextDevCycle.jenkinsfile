@@ -73,28 +73,16 @@ pipeline {
 					eclipseReleaseDates.each{ name, date -> assignEnvVariable("${name}_DATE", date) }
 					
 					// Compute new build schedule
-					def now = java.time.LocalDate.now()
-					def rcEnd = eclipseReleaseDates.RC2.minusDays(2) // Wednesday before RC2 is the last planned I-build and the cron-triggers should stop after
-					assignEnvVariable('I_BUILD_SCHEDULE', createCronPattern(now, rcEnd, 23, '*').trim())
 					
 					echo "NEXT_JAVA_RELEASE_DATE: ${NEXT_JAVA_RELEASE_DATE}"
-					def yBuildSchedule = null
-					if ("${NEXT_JAVA_RELEASE_DATE}".isEmpty()) {
-						yBuildSchedule = createCronPattern(now, rcEnd, 15, '2,4,6')
-					} else {
-						// Java releases soon after the Eclipse release, therefore schedule Y-builds daily within the 'Java RC phase'
-						def javaReleaseDate = utilities.parseDate("${NEXT_JAVA_RELEASE_DATE}")
-						def javaRCStart = javaReleaseDate.minusDays(7)
-						def javaRCEnd = javaReleaseDate.plusDays(2)
-						if (javaRCStart.monthValue != javaRCEnd.monthValue) {
-							// If this is encountered, enhance the logic to handle 'java RC' phases ranging more than one month
-							error "Java release is not in the middle of a month"
-						}
-						yBuildSchedule = createCronPattern(now, javaRCStart, 15, '2,4,6') + """\
-						0 10 ${javaRCStart.dayOfMonth}-${javaRCEnd.dayOfMonth} ${javaRCStart.monthValue} *
-						""".stripIndent()
+					def relengDates = eclipseReleaseDates.collect{ name, date -> "${name}:${date}" }.join(',')
+					for (buildType in [ 'I', 'Y' ]) {
+						def schedule = sh(returnStdout: true, script: """java \
+								-DrelengDates='${relengDates}' -DjavaReleaseDate=${NEXT_JAVA_RELEASE_DATE} \
+								scripts/releng/releaseSchedule.java --generate${buildType}BuildSchedule
+						""")
+						assignEnvVariable("${buildType}_BUILD_SCHEDULE", schedule.trim())
 					}
-					assignEnvVariable('Y_BUILD_SCHEDULE', yBuildSchedule.trim())
 				}
 			}
 		}
@@ -167,6 +155,16 @@ pipeline {
 						// Then the Y-build for the new stream is initially disabled and enabled manually later, when the beta branch for the subsequent Java release is set up.
 						builds.Y.streams["${PREVIOUS_RELEASE_VERSION}"].branch = env.MAINTENANCE_BRANCH
 					}
+					def relengDates = utilities.releaseEvents().keySet().collect{ name -> name + ':' + env["${name}_DATE"] }.join(',')
+					sh """
+						java \
+							-DrelengDates='${relengDates}' \
+							-DreleaseVersion=${NEXT_RELEASE_VERSION} \
+							-DpreviousReleaseVersion=${PREVIOUS_RELEASE_VERSION} \
+							-DsimRelName=${NEXT_SIMREL_NAME} \
+							-Dfile=sites/releng-calendar.ics \
+							scripts/releng/releaseSchedule.java --updateCalendar
+					"""
 				}
 				gitCommitAllExcludingSubmodules("Prepare ${NEXT_RELEASE_VERSION} development") // Submodules might have received changes in the meantime
 				sh '''
@@ -380,12 +378,11 @@ pipeline {
 						- [ ] Review and submit the new N&N pages created for the [eclipse website](https://github.com/eclipse-platform/www.eclipse.org-eclipse/pulls) repository.
 						- [ ] Submit this PR.
 						  Before the preparation PRs in all submodules have been submitted the build of this change cannot complete (this can still submit it before).
-						- [ ] Update build calendar for platform ${NEXT_RELEASE_VERSION} release cycle.
 						
 						After this and all submodule PRs are submitted:
 						- [ ] Run the [`Create Jobs`](https://ci.eclipse.org/releng/job/CreateJobs/) seed job to create the Jenkins jobs of the new stream
 						- [ ] Start the new [`I-build-${NEXT_RELEASE_VERSION}`](https://ci.eclipse.org/releng/job/Builds/job/I-build-${NEXT_RELEASE_VERSION}/) job for the first I-build of the new stream
-						  - In case the new I-build job is not sufficiently stable, disable it temporarily until it's ready for the usual schedule
+						  - In case the new I-build job is not sufficiently stable, disable it temporarily until it's ready for the regular schedule
 						- [ ] As soon as the new I-build is stable, [`Send the Announcement`](https://ci.eclipse.org/releng/job/Releng/job/sendAnnouncement/) that the master is open again.
 						""".stripIndent(), prBranch)
 					
@@ -445,18 +442,6 @@ def githubAPI = null
 @NonCPS
 def assignEnvVariable(String name, Object value) {
 	utilities.assignEnvVariable(name, value?.toString())
-}
-
-private String createCronPattern(java.time.LocalDate start, java.time.LocalDate end, int hour, String daysOfWeek = '*') {
-	def lastCompleteMonth = end.monthValue - 1
-	// Consider end-of-year overflows
-	def completeMonths = (start.monthValue < lastCompleteMonth) ? "${start.monthValue}-${lastCompleteMonth}" : "${start.monthValue}-12,1-${lastCompleteMonth}"
-	return """\
-		TZ=UTC
-		# Format: Minute Hour Day Month Day-of-week (1-7)
-		0 ${hour} * ${completeMonths} ${daysOfWeek}
-		0 ${hour} 1-${end.dayOfMonth} ${end.monthValue} ${daysOfWeek}
-	""".stripIndent()
 }
 
 def replaceInFile(String filePath, Map<String,String> replacements) {

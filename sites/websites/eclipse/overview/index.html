@@ -28,8 +28,26 @@
 		<p>
 			See the <a href="https://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
 			The <a href="https://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="https://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
-			For reference, see also the <a href="https://calendar.google.com/calendar/embed?src=prfk26fdmpru1mptlb06p0jh4s%40group.calendar.google.com">Eclipse Build and RelEng calendar</a>.
 		</p>
+
+		<details id="releng-calendar-details">
+			<summary id="releng-calendar" class="toc-level-3">Build and RelEng calendar</summary>
+			<div style="padding: 10px;">
+				<div id="releng-calendar-container" class="data-loader" data-supplier="fetchCalendarEvents()" data-processor="generateCalendar(arg)"></div>
+				<dialog class="details-popup">
+					<div id="calendar-event-details"></div>
+				</dialog>
+				<p></p>
+				<p>
+					The <em>Eclipse Build and RelEng calendar</em> lists all scheduled builds and important release events for the past and upcoming release of the Eclipse top level project.
+				</p>
+				<p>
+					To subscribe, add its iCal address to your calendar:<br>
+					<code id="releng-calendar-address" class="code-editor-content"></code>
+				</p>
+			</div>
+		</details>
+
 		<h3 id="latest-downloads">Latest Downloads</h3>
 		<table class="builds-table" data-path="latest"></table>
 
@@ -144,6 +162,8 @@
 					`
 				}
 			}
+			const calendarDetails = document.getElementById('releng-calendar-details')
+			activateDataLoadingDetails(calendarDetails, 'calendar')
 		}
 
 		const errorMarkerStyle = 'font-weight:800; font-size:1.2em; line-height:1em; font-family:sans-serif; color:indianred; margin: 0 0.25em 0 0.25em;'
@@ -178,7 +198,136 @@
 			}
 		}
 
+		// RelEng calendar
+		const RELENG_CALENDAR_URL = 'https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/sites/releng-calendar.ics'
+		const RELENG_CALENDAR_THEME = 'forma'
+		const RELENG_CALENDAR_PALETTE = 'blue'
+		const FULLCALENDAR_VERSION = '7.0'
+		const ICAL_SCRIPT = 'https://unpkg.com/ical.js/dist/ical.es5.min.cjs'
+		// See https://fullcalendar.io/docs/color-palettes and https://themes.fullcalendar.io/
+		const CALENDAR_STYLESHEETS = [
+			`https://cdn.jsdelivr.net/npm/fullcalendar@${FULLCALENDAR_VERSION}/skeleton.css`,
+			`https://cdn.jsdelivr.net/npm/fullcalendar@${FULLCALENDAR_VERSION}/themes/${RELENG_CALENDAR_THEME}/theme.css`,
+			`https://cdn.jsdelivr.net/npm/fullcalendar@${FULLCALENDAR_VERSION}/themes/${RELENG_CALENDAR_THEME}/palettes/${RELENG_CALENDAR_PALETTE}.css`,
+		]
+		const CALENDAR_SCRIPTS = [
+			`https://cdn.jsdelivr.net/npm/fullcalendar@${FULLCALENDAR_VERSION}/all/global.js`,
+			`https://cdn.jsdelivr.net/npm/fullcalendar@${FULLCALENDAR_VERSION}/themes/${RELENG_CALENDAR_THEME}/global.js`
+		]
+
+		const CALENDAR_TIME_FORMAT = { // technial format
+			hour: '2-digit', minute: '2-digit',
+			hour12: false, meridiem: false,
+		}
+
+		async function fetchCalendarEvents() {
+			const calendarAddress = document.getElementById('releng-calendar-address')
+			calendarAddress.innerHTML = RELENG_CALENDAR_URL
+			calendarAddress.outerHTML = appendCopyContentButton(calendarAddress.outerHTML, 'iCal calendar address', 'nowrap')
+
+			const iCalScript = loadScripts([ICAL_SCRIPT])
+			const iCalSource = fetch(RELENG_CALENDAR_URL).then(response => response.text()).then(iCalText => iCalScript.then(() => ICAL.parse(iCalText)))
+
+			const calendarStyleSheets = loadStyleSheets(CALENDAR_STYLESHEETS)
+			const calendarScripts = loadScripts(CALENDAR_SCRIPTS)
+
+			const jcalData = await iCalSource
+			const vcalendar = new ICAL.Component(jcalData);
+			const vevents = vcalendar.getAllSubcomponents('vevent');
+			const events = [];
+
+			for (const vevent of vevents) {
+				const event = new ICAL.Event(vevent);
+				const appendEvent = ev => {
+					events.push({
+						// Remove common 'Eclipse' prefix for compactness
+						title: event.summary?.replace(/^Eclipse /g, '') || '(no title)',
+						start: ev.startDate.toJSDate(),
+						end: ev.endDate?.toJSDate(),
+						allDay: ev.startDate.isDate && (!ev.endDate || ev.endDate.isDate),
+						description: event.description,
+					})
+				}
+				// See https://fullcalendar.io/docs/event-parsing and https://fullcalendar.io/docs/event-object
+				if (event.isRecurring()) {
+					const recurObject = event.component.getFirstProperty('rrule').getFirstValue();
+					if (!(recurObject?.count || recurObject?.until)) {
+						throw new Error(`Recurring event has no known end: ${event}`)
+					}
+					// Expand recurring event: https://fullcalendar.io/docs/recurring-events
+					let next;
+					for (const iterator = event.iterator(); (next = iterator.next());) {
+						const occurrence = event.getOccurrenceDetails(next)
+						appendEvent(occurrence)
+					}
+				} else if (event.startDate) {
+					appendEvent(event)
+				}
+			}
+
+			await calendarStyleSheets
+			await calendarScripts
+
+			return events;
+		}
+
+		function generateCalendar(calendarEvents) {
+			const calendarContainer = document.getElementById('releng-calendar-container')
+			const calendar = new FullCalendar.Calendar(calendarContainer, {
+				events: calendarEvents,
+				editable: false,
+				// Use default auto-sizing: https://fullcalendar.io/docs/sizing
+				themeSystem: RELENG_CALENDAR_THEME,
+				initialView: 'dayGridMonth',
+				headerToolbar: { // https://fullcalendar.io/docs/headerToolbar
+					left: 'prev,next today',
+					center: 'title',
+					right: 'dayGridMonth,timeGridWeek,listMonth'
+				},
+				navLinks: true,
+				eventClick: showEventDetails,
+				firstDay: 1, // Start week on Monday
+				views: {
+					dayGridMonth: {
+						displayEventTime: false // Hide times to save horizontal space
+					}
+				},
+				eventTimeFormat: CALENDAR_TIME_FORMAT,
+				slotHeaderFormat: CALENDAR_TIME_FORMAT,
+			});
+			calendar.render();
+		}
+
+		function showEventDetails(info) {
+			const event = info.event
+			// See https://fullcalendar.io/docs/formatRange and related pages
+			const eventFormat = {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+				weekday: 'long',
+				isEndExclusive: event.allDay, // name is incorrectly documented
+			}
+			if (!event.allDay) { // Omit time segment for all-day events
+				Object.assign(eventFormat, CALENDAR_TIME_FORMAT);
+			}
+			const eventDetails = document.getElementById('calendar-event-details')
+			eventDetails.innerHTML = `
+				<h3>${info.event.title}</h3>
+				<p>
+					<b>${FullCalendar.formatRange(event.start, event.end, eventFormat)}</b>
+				</p>
+				<p>
+					${event.extendedProps.description?.replace('\n', '<br>') || ''}
+				</p>
+			`
+			eventDetails.parentElement.showModal()
+		}
+
 		generate()
+
+	</script>
+	<script type="module">
 
 	</script>
 </body>
