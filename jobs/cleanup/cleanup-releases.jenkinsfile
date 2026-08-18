@@ -1,4 +1,5 @@
 // Constants read by job creation
+private static final _JOB_DISPLAY_NAME = 'Cleanup release artifacts'
 private static final _JOB_DESCRIPTION = 'Cleanup major artifacts from previous releases at the beginning of a new release.'
 
 def int RELEASE_RETENTION_COUNT = 3
@@ -28,10 +29,10 @@ pipeline {
 			steps {
 				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
 					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
-					[path: 'JenkinsJobs/shared/utilities.groovy'],
+					[path: 'jobs/shared/utilities.groovy'],
 				])])
 				script {
-					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities = load 'jobs/shared/utilities.groovy'
 					utilities.setDryRun(false)
 				}
 			}
@@ -97,7 +98,7 @@ pipeline {
 						utilities.removeDropsOnRemote("${EP_EQUINOX_DROPS}", removedEquinoxDrops)
 					}
 				}
-				build job: 'Releng/updateIndex', wait: false
+				build job: 'releng/update-index', wait: false
 			}
 		}
 	}

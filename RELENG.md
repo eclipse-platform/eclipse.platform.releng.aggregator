@@ -4,35 +4,35 @@
 
 ### Create Jobs
 
-The [Create Jobs](https://ci.eclipse.org/releng/job/CreateJobs/) job is used to populate the Jenkins subfolders with the jobs defined in [JenkinsJobs](JenkinsJobs).
-It is defined in [`JenkinsJobs/seedJob.jenkinsfile`](JenkinsJobs/seedJob.jenkinsfile).
+The [Create jobs](https://ci.eclipse.org/releng/job/create-jobs) job is used to populate the Jenkins subfolders with the jobs defined in the [jobs](jobs) directory.
+It is defined in [`jobs/seed.jenkinsfile`](jobs/seed.jenkinsfile).
 
-Create Jobs *must be run manually*.
+`Create jobs` *must be run manually*.
 Unfortunately JobDSL needs to be run by a specific user, so the build cannot be automatically started by a timer or when it detects jenkins changes without installing an additional Plug-in (like [Authorize Project](https://plugins.jenkins.io/authorize-project/)) which supposedly still works but is abandoned.
 This means that while any committer can make changes to the Jenkins Jobs in git, someone with Jenkins permissions will have to start the build to implement those changes.
 
 Obsolete jobs have to be deleted manually.
 They are not deleted automatically as some may be are still in use for a short time (e.g. Y-builds if a java-release is imminent) or to serve as reference in case the new jobs have problems.
 
-### The JenkinsJobs Folder
+### The Jenkins jobs Folder
 
-As a general rule, the [JenkinsJobs](./JenkinsJobs) folder should match the layout of Jenkins itself.
+As a general rule, the [jobs](jobs) folder should match the layout of Jenkins itself.
 Every subfolder contains a `.jenkinsfile` file for each individual job.
-The folders containing the individual job definitions are replicated in the Jenkins instance. 
-Labels and descriptions of the folders implied by that structure can be specified in the [Seed Job](JenkinsJobs/seedJob.jenkinsfile):
-https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/9a0ef15799eb3420d748a54d8719ca08c3c7b5af/JenkinsJobs/seedJob.jenkinsfile#L19-L26
+The folders containing the individual job definitions are replicated in the Jenkins instance.
+Labels and descriptions of the folders implied by that structure can be specified in the [Create jobs](jobs/seed.jenkinsfile) seed job:
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/9a0ef15799eb3420d748a54d8719ca08c3c7b5af/jobs/seedJob.jenkinsfile#L19-L26
 
-Multiple build and test jobs have the release version in the job name because it is required for result parsing, e.g. the [automated tests](https://ci.eclipse.org/releng/job/AutomatedTests/).
-In order to minimize constant adjustments of the job definitions the active streams are configured through the [buildConfigurations.json](JenkinsJobs/buildConfigurations.json) file.
+Multiple build and test jobs have the release version in the job name because it is required for result parsing, e.g. the [automated tests](https://ci.eclipse.org/releng/job/automated-tests).
+In order to minimize constant adjustments of the job definitions the active streams are configured through the [buildConfigurations.json](jobs/buildConfigurations.json) file.
 This file is used to create the versioned build and test jobs and is also read by these jobs during their execution for detailed configuration.
 
 ### New Jobs
 
 Adding a job to Jenkins should be as easy as adding a new `.jenkinsfile` file to git, but here are some general points to consider.
 
-- Use **only CamelCase in filenames**, no spaces or dashes (it breaks JobDSL).
+- Use **only lowercase in filenames and separate words by dashes**, for consistency do not use spaces, underscores or CamelCasing.
 - The job Names/IDs (used in the job URL) are the same as the names of the `.jenkinsfile` files, without `.jenkinsfile` extension.
-- The display names are derived from that filenames by inserting spaces before each uppercase letter.
+- By default the display names are derived from that filenames by replacing the dashes with spaces and capitalizing the first word.
   - The generated display name can be overwritten by a static `_JOB_DISPLAY_NAME` field.
 - Similarly the job's description can be defined using a static `_JOB_DESCRIPTION` field.
   
@@ -68,15 +68,15 @@ The **Y-build** is a full Eclipse-SDK build with the support of the new Java ver
 The **P-build** is a patch build that contains modified plugins designed to be installed on top of the current I-build to use the new java version support as early as possible.
 They are now managed by the JDT-project itself in [org.eclipse.jdt.releng](https://github.com/eclipse-jdt/eclipse.jdt/tree/master/org.eclipse.jdt.releng).
 
-The Y-build themselves and their unit tests are, just like the regular I-builds, defined in the [build.jenkinsfile](./JenkinsJobs/Builds/build.jenkinsfile) respectively the [integrationTests.jenkinsfile](./JenkinsJobs/AutomatedTests/integrationTests.jenkinsfile) in git
-and used for the [Y Builds](https://ci.eclipse.org/releng/job/YBuilds/) folder in Jenkins.
+The Y-build themselves and their unit tests are, just like the regular I-builds, defined in the [build.jenkinsfile](jobs/builds/build.jenkinsfile) respectively the [integration-tests.jenkinsfile](jobs/automated-tests/integration-tests.jenkinsfile) in git
+and used for the [Y Builds](https://ci.eclipse.org/releng/job/y-builds) folder in Jenkins.
 
 ## Setting Up New Builds
 
 When the JDT team is ready they will raise an issue to create new Y builds and supply the name of the new branch, usually `BETA_JAVA##`.
 
 **Things to Do:**
-  * Update the Y-build configuration in the (buildConfigurations.json)[JenkinsJobs/buildConfigurations.json]
+  * Update the Y-build configuration in the (buildConfigurations.json)[jobs/buildConfigurations.json]
     - Update `typeName` to the name of the new java version.
     - Remove the disablement of the current stream in the Y-build configuration (should be the only Y-build stream).
     - Update `branches` to point to the new BETA branch.

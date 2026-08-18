@@ -10,19 +10,19 @@ pipeline {
 	stages {
 		stage('Create Jobs') {
 			environment {
-				JOBS_ROOT_DIRECTORY = 'JenkinsJobs'
+				JOBS_ROOT_DIRECTORY = 'jobs'
 				JENKINS_FILE_EXTENSION = '.jenkinsfile'
 			}
 			steps {
 				dir(JOBS_ROOT_DIRECTORY) {
 					script {
 						def folderDefinitions = [
-							'AutomatedTests': [ displayName: 'Automated Tests', description: 'Folder for Unit Tests'],
-							'Builds': [description: 'Eclipse periodic build jobs.'],
-							'YBuilds': [displayName: 'Y Builds', description: 'Builds and tests for the beta java builds.'],
-							'VBuilds': [displayName: 'V Builds', description: 'Builds and tests for the Java Value Objects development builds.'],
-							'Cleanup': [description: 'Cleanup Scripts.'],
-							'Releng': [description: 'Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.'],
+							'automated-tests': [ displayName: 'Automated Tests', description: 'Folder for Unit Tests'],
+							'builds': [displayName: 'Builds', description: 'Eclipse periodic build jobs.'],
+							'y-builds': [displayName: 'Y Builds', description: 'Builds and tests for the beta java builds.'],
+							'v-builds': [displayName: 'V Builds', description: 'Builds and tests for the Java Value Objects development builds.'],
+							'cleanup': [displayName: 'Cleanup', description: 'Cleanup Scripts.'],
+							'releng': [displayName: 'Releng', description: 'Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.'],
 						]
 						def allJenkinsFiles = sh(script: 'ls **/*${JENKINS_FILE_EXTENSION}', returnStdout: true).trim().split('\\s+')
 						def pipelineJobDefinitions = [:]
@@ -36,8 +36,8 @@ pipeline {
 							pipelineJobDefinitions[jobName] = [scriptPath: "${JOBS_ROOT_DIRECTORY}/${jenkinsFilePath}", branch: 'master', *:jobMetadata]
 						}
 						// Remove the generic 'build' job and define stream specific I/Y-build jobs instead
-						def buildJob = pipelineJobDefinitions.remove('Builds/build')
-						def integrationTestsJob = pipelineJobDefinitions.remove('AutomatedTests/integrationTests')
+						def buildJob = pipelineJobDefinitions.remove('builds/build')
+						def integrationTestsJob = pipelineJobDefinitions.remove('automated-tests/integration-tests')
 						
 						def buildConfigurations = readJSON(file: 'buildConfigurations.json')
 						buildConfigurations.each{ buildType, buildConfig ->
@@ -134,7 +134,7 @@ def parseJobMetadata(String jobName, String pipelineCode) {
 	
 	String displayName = findConstantVariableDeclarationValue(rootStatements, '_JOB_DISPLAY_NAME')
 	if (displayName == null || displayName.isEmpty()) { // Convert file name to 'space'-case
-		displayName = jobName.substring(jobName.lastIndexOf('/') + 1).replaceAll('[A-Z]', { m -> ' ' + m[0]}).capitalize().trim()
+		displayName = jobName.substring(jobName.lastIndexOf('/') + 1).replace('-', ' ').replaceAll('[A-Z]', { m -> ' ' + m[0]}).capitalize().trim()
 	}
 	String description = findConstantVariableDeclarationValue(rootStatements, '_JOB_DESCRIPTION')
 	

@@ -97,7 +97,7 @@ function getCPUArchLabel(name) {
 
 function getJenkinsTestJobsFolderURL(build) {
     const buildType = getBuildType(build)
-    const testJobFolderName = buildType == 'I' ? 'AutomatedTests' : 'YBuilds'
+    const testJobFolderName = buildType == 'I' ? 'automated-tests' : `${buildType}-builds`
     return `https://ci.eclipse.org/releng/job/${testJobFolderName}`
 }
 

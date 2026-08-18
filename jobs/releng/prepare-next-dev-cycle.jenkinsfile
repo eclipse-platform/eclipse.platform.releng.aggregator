@@ -1,5 +1,5 @@
 // Constants read by job creation
-private static final _JOB_DISPLAY_NAME = 'Prepare Next Development Cycle'
+private static final _JOB_DISPLAY_NAME = 'Prepare next development cycle'
 private static final _JOB_DESCRIPTION = 'Perform all steps to prepare the next development cycle of Eclipse.'
 
 pipeline {
@@ -36,9 +36,9 @@ pipeline {
 				script {
 					echo "DRY_RUN: ${DRY_RUN}"
 					// Always load the script from the very same state this pipeline is loaded (to ensure consistency)
-					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities = load 'jobs/shared/utilities.groovy'
 					utilities.setDryRun(params.DRY_RUN)
-					githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+					githubAPI = load 'jobs/shared/github-api.groovy'
 					githubAPI.setDryRun(params.DRY_RUN)
 					
 					echo "NEXT_RELEASE_VERSION: ${NEXT_RELEASE_VERSION}"
@@ -141,7 +141,7 @@ pipeline {
 					"version=${PREVIOUS_RELEASE_VERSION}.0" : "version=${NEXT_RELEASE_VERSION}.0",
 				])
 				script {
-					utilities.modifyJSON('JenkinsJobs/buildConfigurations.json') { builds ->
+					utilities.modifyJSON('jobs/buildConfigurations.json') { builds ->
 						// Create I-build for new stream and move previous I-build to maintenance branch to allow late re-spins
 						builds.I.streams["${NEXT_RELEASE_VERSION}"] = [ branch: 'master', schedule: env.I_BUILD_SCHEDULE ]
 						builds.I.streams["${PREVIOUS_RELEASE_VERSION}"].branch = env.MAINTENANCE_BRANCH
@@ -247,7 +247,7 @@ pipeline {
 				sh 'git checkout -b prepareMaintenance ${MAINTENANCE_BRANCH}'
 				
 				script {
-					utilities.modifyJSON('JenkinsJobs/buildConfigurations.json') { builds ->
+					utilities.modifyJSON('jobs/buildConfigurations.json') { builds ->
 						builds.values().each{ buildType ->
 							def build = buildType.streams["${PREVIOUS_RELEASE_VERSION}"]
 							build.branch = env.MAINTENANCE_BRANCH
@@ -309,24 +309,24 @@ pipeline {
 				not { expression { params.DRY_RUN } }
 			}
 			steps {
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+				build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}-I-builds"),
 					string(name: 'repositoryName', value: "Eclipse ${NEXT_RELEASE_VERSION} integration builds"),
 					string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-I-builds/${PREVIOUS_RELEASE_CANDIDATE_I_BUILD}/")
 					// Size-limit is not relevant, the repository is initially empty.
 				]
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+				build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}-Y-builds"),
 					string(name: 'repositoryName', value: "Eclipse ${NEXT_RELEASE_VERSION} Beta Java builds"),
 					string(name: 'add', value: "https://download.eclipse.org/eclipse/updates/${PREVIOUS_RELEASE_VERSION}-Y-builds/"),
 				]
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+				build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/${NEXT_RELEASE_VERSION}"),
 					string(name: 'repositoryName', value: "Eclipse ${NEXT_RELEASE_VERSION} release")
 				]
 				// Update generic composite repositories for I/Y-builds (clearing all previous children)
 				// Note: The stream number is not in the 'name', because once a 'name' is defined in Eclipse's UI, it does not change.
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+				build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/I-builds"),
 					string(name: 'repositoryName', value: "Eclipse latest integration builds"),
 					string(name: 'sizeLimit', value: '1'), // Clear all previous children
@@ -380,10 +380,10 @@ pipeline {
 						  Before the preparation PRs in all submodules have been submitted the build of this change cannot complete (this can still submit it before).
 						
 						After this and all submodule PRs are submitted:
-						- [ ] Run the [`Create Jobs`](https://ci.eclipse.org/releng/job/CreateJobs/) seed job to create the Jenkins jobs of the new stream
-						- [ ] Start the new [`I-build-${NEXT_RELEASE_VERSION}`](https://ci.eclipse.org/releng/job/Builds/job/I-build-${NEXT_RELEASE_VERSION}/) job for the first I-build of the new stream
+						- [ ] Run the [`Create Jobs`](https://ci.eclipse.org/releng/job/create-jobs) seed job to create the Jenkins jobs of the new stream
+						- [ ] Start the new [`I-build-${NEXT_RELEASE_VERSION}`](https://ci.eclipse.org/releng/job/builds/job/I-build-${NEXT_RELEASE_VERSION}) job for the first I-build of the new stream
 						  - In case the new I-build job is not sufficiently stable, disable it temporarily until it's ready for the regular schedule
-						- [ ] As soon as the new I-build is stable, [`Send the Announcement`](https://ci.eclipse.org/releng/job/Releng/job/sendAnnouncement/) that the master is open again.
+						- [ ] As soon as the new I-build is stable, [`Send the Announcement`](https://ci.eclipse.org/releng/job/releng/job/send-announcement) that the master is open again.
 						""".stripIndent(), prBranch)
 					
 					utilities.forEachGitSubmodule{ submodulePath ->

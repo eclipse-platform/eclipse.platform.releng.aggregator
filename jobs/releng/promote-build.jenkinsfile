@@ -53,9 +53,9 @@ pipeline {
 					echo "DRY_RUN: ${DRY_RUN}"
 					// Always load the script from the very same state this pipeline is loaded (to ensure consistency)
 					dir('repository') {
-						utilities = load "JenkinsJobs/shared/utilities.groovy"
+						utilities = load 'jobs/shared/utilities.groovy'
 						utilities.setDryRun(params.DRY_RUN)
-						githubAPI = load "JenkinsJobs/shared/githubAPI.groovy"
+						githubAPI = load 'jobs/shared/github-api.groovy'
 						githubAPI.setDryRun(params.DRY_RUN)
 					}
 					echo "DROP_ID: ${DROP_ID}"
@@ -235,7 +235,7 @@ pipeline {
 							'BASEBUILD_ID=.*' : "BASEBUILD_ID=${DL_DROP_ID}",
 							'PREVIOUS_RELEASE_ID=.*' : "PREVIOUS_RELEASE_ID=${DL_DROP_ID}",
 						])
-						utilities.modifyJSON('JenkinsJobs/buildConfigurations.json') { builds ->
+						utilities.modifyJSON('jobs/buildConfigurations.json') { builds ->
 							// Remove old I/Y-build jobs for this release
 							builds.values().each{ build -> build.streams.remove("${BUILD_MAJOR}.${BUILD_MINOR}") }
 						}
@@ -309,7 +309,7 @@ pipeline {
 				}
 			}
 			steps {
-				build job: 'Releng/deployToMaven', wait: true, propagate: true, parameters: [
+				build job: 'releng/deploy-maven', wait: true, propagate: true, parameters: [
 					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${BUILD_MAJOR}.${BUILD_MINOR}/${DL_DROP_ID}/")
 				]
 			}
@@ -353,7 +353,7 @@ pipeline {
 				}
 			}
 			steps {
-				build job: 'Releng/publishPromotedBuild', wait: true, propagate: true, parameters: [
+				build job: 'releng/publish-build', wait: true, propagate: true, parameters: [
 					string(name: 'releaseBuildID', value: "${DL_DROP_ID}")
 				]
 			}

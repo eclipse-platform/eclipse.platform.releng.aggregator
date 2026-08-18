@@ -64,10 +64,10 @@ pipeline {
 						esac
 					'''
 				}
-				build job: 'Releng/updateIndex', wait: false
+				build job: 'releng/update-index', wait: false
 				script {
 					if (params.markAs == 'STABLE' || params.markAs == 'UNSTABLE') {
-						build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+						build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 							string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-I-builds"),
 							string(name: "${params.markAs == 'STABLE' ? 'add' : 'remove'}", value: "${buildId}")
 						]
