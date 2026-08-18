@@ -1,5 +1,5 @@
 // Constants read by job creation
-private static final _JOB_DISPLAY_NAME = 'Daily Cleanup of old Builds'
+private static final _JOB_DISPLAY_NAME = 'Daily cleanup of old builds'
 private static final _JOB_DESCRIPTION = 'Remove old builds from the downloads servers.'
 
 def int EQUINOX_RETENTION_COUNT = 3 // Keep the three most recent builds
@@ -37,11 +37,11 @@ pipeline {
 			steps {
 				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
 					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
-					[path: 'JenkinsJobs/shared/utilities.groovy'],
+					[path: 'jobs/shared/utilities.groovy'],
 					[path: 'cje-production/buildproperties.txt'],
 				])])
 				script {
-					utilities = load "JenkinsJobs/shared/utilities.groovy"
+					utilities = load 'jobs/shared/utilities.groovy'
 					utilities.setDryRun(false)
 					def buildProperties = readProperties(file: 'cje-production/buildproperties.txt')
 					devVersionMajor = buildProperties.STREAMMajor.toInteger()
@@ -73,7 +73,7 @@ pipeline {
 			}
 			post {
 				success {
-					build job: 'Releng/updateIndex', wait: false
+					build job: 'releng/update-index', wait: false
 				}
 			}
 		}

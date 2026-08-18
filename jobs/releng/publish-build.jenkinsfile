@@ -1,4 +1,5 @@
 // Constants read by job creation
+private static final _JOB_DISPLAY_NAME = 'Publish promoted build'
 private static final _JOB_DESCRIPTION = '''\
 Make a 'release build', which was previously declared by running the 'Promote Build' job, visible.
 The first part of a promotion -- the 'Promote Build' job -- puts the build at its final location, but keeps it hidden.
@@ -36,7 +37,7 @@ pipeline {
 			steps {
 				script {
 					// Always load the script from the very same state this pipeline is loaded (to ensure consistency)
-					utilities = load 'git-repo/JenkinsJobs/shared/utilities.groovy'
+					utilities = load 'git-repo/jobs/shared/utilities.groovy'
 					
 					if (!params.releaseBuildID) {
 						error "Required parameter 'releaseBuildID' is not defined."
@@ -82,7 +83,7 @@ pipeline {
 						done
 					'''
 				}
-				build job: 'Releng/updateIndex', wait: false
+				build job: 'releng/update-index', wait: false
 			}
 		}
 		stage('Make Release Repository visible') {
@@ -90,7 +91,7 @@ pipeline {
 				environment name: 'RELEASE_TYPE', value: 'R'
 			}
 			steps {
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+				build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VERSION_MAJOR}.${RELEASE_VERSION_MINOR}"),
 					string(name: 'add', value: "${RELEASE_BUILD_ID}")
 				]
@@ -105,7 +106,7 @@ pipeline {
 				
 				// Update generic composite repositories for latest release (clearing all previous children)
 				// Note: The stream number is not in the 'name', because once a 'name' is defined in Eclipse's UI, it does not change.
-				build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+				build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 					string(name: 'repositoryPath', value: "eclipse/updates/latest"),
 					string(name: 'repositoryName', value: "Eclipse latest release"),
 					string(name: 'sizeLimit', value: '1'), // Clear all previous children
@@ -119,7 +120,7 @@ pipeline {
 				}
 				
 				// Trigger clean-up of release artifacts
-				build job: 'Cleanup/cleanupReleaseArtifacts', wait: false
+				build job: 'cleanup/cleanup-releases', wait: false
 			}
 		}
 		stage('Send announcement mail') {

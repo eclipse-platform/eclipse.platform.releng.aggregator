@@ -7,7 +7,7 @@
 ### Friday before release week:
  * Create or update prerequisite issues for tracking ECF, EMF and Orbit
 - Send reminder email for upcoming RC week
-  - Run the [`Send Announcement`](https://ci.eclipse.org/releng/job/Releng/job/sendAnnouncement/) job
+  - Run the [`Send announcement`](https://ci.eclipse.org/releng/job/releng/job/send-announcement) job
     - `type`: `REMINDER_RC`
     - `rcNumber`: number of current RC, `1` or `2`
 ### Milestone/RC Week
@@ -23,17 +23,17 @@
      * Because of time zones, PST/EST might want to do Thursday's tasks EOD Wednesday after the release candidate has built. 
    - **Thursday**:
      - Send request to sign-off the current release candidate build
-       - Run the [`Send Announcement`](https://ci.eclipse.org/releng/job/Releng/job/sendAnnouncement/) job
+       - Run the [`Send announcement`](https://ci.eclipse.org/releng/job/releng/job/send-announcement) job
          - `type`: `SIGNOFF_RC`
          - `rcNumber`: number of current RC, e.g. `1`, `2`, `2a`, ...
          - `buildId`: ID of the current release candidate I-build, e.g. `I20260527-1800`
    - **Friday**:
      * **Promote** the release candidate (if go).
-       - Run the [`Promote Build`](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job
+       - Run the [`Promote build`](https://ci.eclipse.org/releng/job/releng/job/promote-build) job
          - `DROP_ID`: ID of the build to promote, e.g.: `I20250817-1800`
          - `CHECKPOINT`: M1 etc. (blank for final releases)
          - `SIGNOFF_ISSUE`: Only relevant for RCs, the issue on which sign-off by component leads was requested (numeric part only)
-       - For Milestone/RC promotions, this automatically runs the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job to make the promoted build immediatly visible on the download page.
+       - For Milestone/RC promotions, this automatically runs the [Publish promoted build](https://ci.eclipse.org/releng/job/releng/job/publish-build) job to make the promoted build immediatly visible on the download page.
          - For release promotions that run has to be started manually at the time of the release
        - It also triggers the [Generate Acknowledgements](https://github.com/eclipse-platform/www.eclipse.org-eclipse/actions/workflows/generateAcknowledgements.yml) workflow.
          - Review and submit the PR created by it and pay special attention about name conflicts mentioned in the PR message and make sure they are resolved:
@@ -84,7 +84,7 @@ The actual steps to release
 **Wednesday, one week before release**
   - #### Promote to GA
     - At the very end of the **SimRel RC2 contribution period** (usually at Wednesday end of business day),
-      Run the [Promote Build](https://ci.eclipse.org/releng/job/Releng/job/promoteBuild/) job to promote RC2 (or RC2a, ...) to be the final release.
+      Run the [Promote build](https://ci.eclipse.org/releng/job/releng/job/promote-build) job to promote RC2 (or RC2a, ...) to be the final release.
       - `DROP_ID`: Final release candidate's ID, e.g.: `S-4.36RC2-202505281830`
       - `CHECKPOINT`: blank for final releases
     - It creates the download and update sites of the final release at their final location, but does not publish them and keeps them hidden from the public.
@@ -99,7 +99,7 @@ The actual steps to release
 **Tuesday/Monday**
   - #### Complete Publication to Maven Central
     - The final release to Maven-Central should happen latest by Tuesday before the release since there is up to a 24 hour delay for the Maven mirrors.
-    - The artifacts have been deployed into a Maven-Central _staging_ repository by the `Promote Build` job when the RC was promoted to GA release.
+    - The artifacts have been deployed into a Maven-Central _staging_ repository by the `Promote build` job when the RC was promoted to GA release.
     - Login to https://central.sonatype.com/ and `Publish` the three staging repositories for `Platform`, `JDT` and `PDE` by closing them.
       - Make sure the name of the deployment you are about to release matches the tag and timestamp of the final release repository.
         E.g for a P2 repo with id `R-4.36-202505281830` the deployments should be named `PLATFORM_R-4.36-202505281830`, `PDE_R-4.36-202505281830` or `JDT_R-4.36-202505281830` respectivly.
@@ -113,12 +113,12 @@ The release is scheduled for 10:00 UTC.
     - Upon promotion of the final GA build, PRs for the the master and corresponding maintenance branch were created to update the build to the GA versions.
     - Submit these PRs now.
   - #### Make the Release Visible
-    - Run the [Publish Promoted Build](https://ci.eclipse.org/releng/job/Releng/job/publishPromotedBuild/) job in Releng jenkins to make the promoted build visible on the download page.
+    - Run the [Publish promoted build](https://ci.eclipse.org/releng/job/releng/job/publish-build) job in Releng jenkins to make the promoted build visible on the download page.
       - `releaseBuildID`: the full id of the release build to publish, e.g. `R-4.36-202505281830`
   - The (still existing) I-Build jobs of that release can now be deleted (together with the associdated test jobs), because we are now sure a RC respins won't happen anymore.
 
 ### Preparation for the next Release
-  - After RC2 is promoted/published run the [`Prepare Next Development Cycle`](https://ci.eclipse.org/releng/job/Releng/job/prepareNextDevCycle/) job
+  - After RC2 is promoted/published run the [`Prepare next development cycle`](https://ci.eclipse.org/releng/job/releng/job/prepare-next-dev-cycle) job
     - Review the Pull-Requests created by it in this `eclipse.platform.releng.aggregator` repository and all its submodules and complete the listed tasks.
 
 #### **Update Splash Screen:**

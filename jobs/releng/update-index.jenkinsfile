@@ -1,5 +1,5 @@
 // Constants read by job creation
-private static final _JOB_DISPLAY_NAME = 'Update Download Index'
+private static final _JOB_DISPLAY_NAME = 'Update download index'
 private static final _JOB_DESCRIPTION = 'Recreates the Eclipse download page index.'
 
 pipeline {
@@ -25,12 +25,12 @@ pipeline {
 				dir("${GIT_REPO}") {
 					checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
 						extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
-						[path: 'JenkinsJobs/shared/utilities.groovy'],
+						[path: 'jobs/shared/utilities.groovy'],
 						[path: 'sites/websites'],
 					])])
 				}
 				script {
-					def utilities = load "${GIT_REPO}/JenkinsJobs/shared/utilities.groovy"
+					def utilities = load "${GIT_REPO}/jobs/shared/utilities.groovy"
 					dir('site-eclipse'){
 						utilities.copyStaticWebsiteFiles("${GIT_REPO}", 'eclipse/overview')
 					}

@@ -57,11 +57,11 @@ pipeline {
 		stage('Set up environment') {
 			steps {
 				script {
-					utilities = load 'JenkinsJobs/shared/utilities.groovy'
+					utilities = load 'jobs/shared/utilities.groovy'
 					
 					def job = utilities.matchPattern('Job name', "${JOB_BASE_NAME}", [ /(?<type>[A-Z])-build-(?<major>\d).(?<minor>\d+)/ ])
 					// Load build properties and configuration from the properties and configuration file
-					BUILD = readJSON(file: 'JenkinsJobs/buildConfigurations.json')[job.type]
+					BUILD = readJSON(file: 'jobs/buildConfigurations.json')[job.type]
 					if (BUILD == null) {
 						error "Unsupported build type: ${job.type}"
 					}
@@ -395,7 +395,7 @@ pipeline {
 										scp -r ${dropDir} genie.releng@projects-storage.eclipse.org:${EP_ECLIPSE_DROPS}/.
 									'''
 								}
-								build job: 'Releng/updateIndex', wait: false
+								build job: 'releng/update-index', wait: false
 							}
 						}
 					}
@@ -502,7 +502,7 @@ pipeline {
 								echo 'Skip adding unstable build to composite repository.'
 								return
 							}
-							build job: 'Releng/modifyP2CompositeRepository', wait: true, propagate: true, parameters: [
+							build job: 'releng/modify-p2-composite', wait: true, propagate: true, parameters: [
 								string(name: 'repositoryPath', value: "eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds"),
 								string(name: 'add', value: "${BUILD_ID}"),
 								string(name: 'sizeLimit', value: '3')
@@ -555,7 +555,7 @@ pipeline {
 						]
 					}
 				}
-				build job: 'AutomatedTests/smokeTests', wait: false, parameters: [
+				build job: 'automated-tests/smoke-tests', wait: false, parameters: [
 					string(name: 'buildId', value: "${BUILD_ID}")
 				]
 			}
@@ -570,7 +570,7 @@ pipeline {
 				}
 			}
 			steps {
-				build job: 'Releng/deployToMaven', wait: false, parameters: [
+				build job: 'releng/deploy-maven', wait: false, parameters: [
 					string(name: 'sourceRepository', value: "https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds/${BUILD_ID}")
 				]
 			}
@@ -596,7 +596,7 @@ pipeline {
 			""" + (env.COMPARATOR_ERRORS_SUBJECT == '' ? '' : """
 			Check unanticipated comparator messages:
 			https://download.eclipse.org/eclipse/downloads/drops4/${BUILD_ID}/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt
-			(If appropriate, affected projects can be touched using: ${JENKINS_URL}job/Releng/job/touchCompatorErrorProjects)
+			(If appropriate, affected projects can be touched using: ${JENKINS_URL}job/releng/job/touch-projects)
 			""") + """
 			Software site repository:
 			https://download.eclipse.org/eclipse/updates/${RELEASE_VER}-${BUILD_TYPE}-builds
