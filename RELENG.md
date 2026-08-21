@@ -20,7 +20,7 @@ As a general rule, the [jobs](jobs) folder should match the layout of Jenkins it
 Every subfolder contains a `.jenkinsfile` file for each individual job.
 The folders containing the individual job definitions are replicated in the Jenkins instance.
 Labels and descriptions of the folders implied by that structure can be specified in the [Create jobs](jobs/seed.jenkinsfile) seed job:
-https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/9a0ef15799eb3420d748a54d8719ca08c3c7b5af/jobs/seedJob.jenkinsfile#L19-L26
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/df6078e32be3d8e268fe9cc60c8a49332fb6c616/jobs/seed.jenkinsfile#L19-L26
 
 Multiple build and test jobs have the release version in the job name because it is required for result parsing, e.g. the [automated tests](https://ci.eclipse.org/releng/job/automated-tests).
 In order to minimize constant adjustments of the job definitions the active streams are configured through the [buildConfigurations.json](jobs/buildConfigurations.json) file.
