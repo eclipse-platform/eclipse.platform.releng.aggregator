@@ -115,6 +115,7 @@ pipeline {
 						done
 					'''
 				}
+				findText(textFinders: [textFinder(regexp: 'WARNING', alsoCheckConsoleOutput: true, changeCondition: 'MATCH_FOUND', buildResult: 'UNSTABLE')])
 			}
 		}
 		stage('Deploy artifacts') {
@@ -126,7 +127,7 @@ pipeline {
 					}
 				}
 				stages {
-					stage('Deploy project to Maven'){
+					stage('Deploy project to Maven') {
 						environment {
 							SETTINGS = "/home/jenkins/.m2/settings-deploy-ossrh-${PROJECT == 'platform' ? 'releng': PROJECT}.xml"
 							SONATYPE_BEARER_TOKEN = credentials("central-sonatype-bearer-token-${PROJECT}")
@@ -136,7 +137,7 @@ pipeline {
 							MAVEN_GPG_PASSPHRASE = credentials("secret-subkeys-${PROJECT == 'platform' ? 'releng': PROJECT}.asc-passphrase")
 						}
 						steps {
-							dir("deploy-${PROJECT}"){
+							dir("deploy-${PROJECT}") {
 								sh '''#!/bin/sh -xe
 									# Copy configuration pom into clean directory to stop maven from finding the .mvn folder of this git-repository
 									cp "${WORKSPACE}/git-repo/eclipse-platform-parent/pom.xml" eclipse-parent-pom.xml
@@ -250,8 +251,8 @@ pipeline {
 				repo/**, coordinates-*.txt, artifacts-*.txt, \
 				deploymentId-*.txt, */*-artifacts.zip'
 		}
-		failure {
-			emailext subject: "Publication of Maven artifacts failed",
+		unsuccessful {
+			emailext subject: "Publication of Maven artifacts unsuccessful",
 				body: "Please go to ${BUILD_URL}console and check the build failure.", mimeType: 'text/plain',
 				to: 'platform-releng-dev@eclipse.org', from:'genie.releng@eclipse.org'
 		}
@@ -266,7 +267,7 @@ def determineDeploymentType() {
 	}
 }
 
-def installLatestCbiAggr(){
+def installLatestCbiAggr() {
 	def utilities = load "${WORKSPACE}/git-repo/jobs/shared/utilities.groovy"
 	return utilities.installDownloadableTool('cbiAggr', "https://download.eclipse.org/cbi/updates/p2-aggregator/products/nightly/latest/org.eclipse.cbi.p2repo.cli.product-linux.gtk.x86_64.tar.gz") + '/cbiAggr'
 }
