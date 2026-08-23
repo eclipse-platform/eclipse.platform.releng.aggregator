@@ -78,3 +78,7 @@ It creates a git-commit with the required changes applied.
 ## publishVersionCheckResults.yml
 
 Publishes the results of the `checkVersions` workflow by adding a comment to the affected PR that lists files to change and additionally pushes the created git-commit to the PR's branch.
+
+## inactiveCommitters.yml
+
+Lists the activity of all committers in the Github organization in the specified list of Eclipse projects and summaries inactive commiters.

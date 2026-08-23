@@ -1,0 +1,99 @@
+# This workflow lists the activity of all committers in the Github organization in the specified list of Eclipse projects
+# and summaries inactive committers.
+
+name: List inactive committers
+
+on:
+  workflow_dispatch:
+    inputs:
+      activity-period:
+        description: 'Period in which committers should be active'
+        type: string
+        default: '2 years'
+        required: false
+      projects:
+        description: 'The JSON list of projects to check'
+        type: string
+        default: '["eclipse.platform", "eclipse.equinox", "eclipse.jdt", "eclipse.pde"]'
+        required: false
+  workflow_call:
+    inputs:
+      activity-period:
+        description: 'Period in which committers should be active'
+        type: string
+        default: '2 years'
+        required: false
+      projects:
+        description: 'The JSON list of projects to check'
+        type: string
+        default: '["eclipse.platform", "eclipse.equinox", "eclipse.jdt", "eclipse.pde"]'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  list-inactive-committers:
+    strategy:
+      matrix:
+        projectId: ${{ fromJSON(inputs.projects) }}
+      fail-fast: false
+      max-parallel: 1
+    name: List inactive ${{ matrix.projectId }} committers
+    runs-on: ubuntu-slim
+    steps:
+      - name: Check committer activity
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eo pipefail
+          
+          projectInfo=$(curl --fail --silent --show-error \
+            "https://projects.eclipse.org/api/projects/${{ matrix.projectId }}")
+          githubOrg=$(echo "${projectInfo}" | jq --raw-output '.[0] | .github.org')
+          
+          readarray -t committers < <(echo "${projectInfo}" \
+            | jq --compact-output '.[] | .committers[] | { name: .full_name, profile: .url }')
+          
+          cutoffDate=$(date -d '-${{ inputs.activity-period }}' --utc +'%Y-%m-%d')
+          echo "List activity of ${#committers[@]} committer(s) in ${githubOrg} organization since ${cutoffDate}."
+          
+          inactiveCommitters=()
+          for committer in "${committers[@]}"; do
+            name=$(echo "$committer"    | jq --raw-output '.name')
+            profile=$(echo "$committer" | jq --raw-output '.profile')
+            if [[ "$profile" == 'null' ]]; then
+              echo "::warning title=Missing Profile handle::No EF profile handle for $name"
+              continue
+            fi
+            githubHandle=$(curl --fail --silent --show-error "${profile}" \
+              | jq --raw-output '.github_handle')
+            if [[ "${githubHandle}" == 'null' ]]; then
+              echo "::warning title=Missing Github handle::No Github handle for $name"
+              inactiveCommitters+=("- \`${name}\` -- no Github handle!")
+              continue
+            fi
+            
+            echo "Activity of $name (@${githubHandle}):"
+            interactions=0
+            for kind in author committer; do
+                # Search for commits authored or committed by this user in the org since cutoff
+                count=$(gh api -H "X-GitHub-Api-Version: 2026-03-10" \
+                  "/search/commits?q=org:${githubOrg}+${kind}:${githubHandle}+${kind}-date:>${cutoffDate}&per_page=1" \
+                  --jq '.total_count')
+                interactions=$(( interactions + count ))
+                echo "  ${kind}: ${count}"
+            done
+            if (( $interactions == 0 )); then
+              inactiveCommitters+=("- \`${name}\` -- @${githubHandle}")
+            fi
+            # Respect GitHub search API secondary rate limit: 30 requests per minute
+            sleep 5
+
+          done
+          
+          echo '--------------------'
+          echo 'Inactive committers:'
+          for committer in "${inactiveCommitters[@]}"; do
+            echo "${committer}"
+          done
