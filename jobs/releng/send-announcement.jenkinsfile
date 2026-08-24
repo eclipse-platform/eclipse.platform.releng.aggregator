@@ -66,7 +66,7 @@ pipeline {
 							error "RC Reminder can only be sent for default candidates, but not for RC${rcNumber}"
 						}
 						def releaseIssue = null
-						if (rcNumber == '2') {
+						if (params.rcNumber == '2') {
 							def headCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
 							def releaseDocURL = "https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/${headCommit}/RELEASE.md"
 							releaseIssue = githubAPI.createIssue('eclipse-platform/eclipse.platform.releng.aggregator', "Release ${releaseVersion}", """\
@@ -108,7 +108,7 @@ pipeline {
 							The schedule for Release Candidate ${rcNumber}:
 							
 							- ${rcDate.minusDays(2).format(dateFormat)} 23:00 (UTC)
-							  API/feature freeze and RC${rcNumber} build
+							  ${params.rcNumber == '1' ? 'API/feature freeze and ' : ''}RC${rcNumber} build
 							
 							- ${rcDate.format(dateFormat)}
 							  Submit RC${rcNumber} to SimRel

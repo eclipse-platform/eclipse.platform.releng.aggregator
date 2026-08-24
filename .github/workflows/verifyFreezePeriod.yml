@@ -30,7 +30,7 @@ jobs:
             for (const milestone of response.data) {
               console.log('Checking milestone ' + milestone.title)
               const dueDate = new Date(milestone.due_on)
-              if (milestone.title.includes('RC') && isInFreezePeriodOf(dueDate, now)) {
+              if (milestone.title.includes('RC') && isInFreezePeriodOf(dueDate, now, freezePeriodLength(milestone.title))) {
                 core.setFailed('Active freeze period for ' + milestone.description)
                 return;
               } else if (dueDate < now) {
@@ -40,10 +40,14 @@ jobs:
             }
           }
           
-          function isInFreezePeriodOf(referenceDate, nowDate) {
-            // A freeze period starts at the beginning of the third day before the milestone/RC
+          function freezePeriodLength(rcTitle){
+            // For RC1 the freeze period starts at the beginning of the third day before the milestone/RC
             // Two days for stabilization and one for sign-off before the promotion happens at the date.
-            const freezePeriodStartOffset = 3
+            // For RC2 the freeze period starts immediatly after RC1.
+            return rcTitle.includes('RC2') ? 6 : 3
+          }
+          
+          function isInFreezePeriodOf(referenceDate, nowDate, freezePeriodStartOffset) {
             const endDate = new Date(referenceDate)
             endDate.setUTCHours(24, 0, 0) // start of next day
             const startDate = new Date(referenceDate)
