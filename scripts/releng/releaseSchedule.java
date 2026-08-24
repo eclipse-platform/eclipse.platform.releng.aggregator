@@ -113,7 +113,8 @@ void generateCalendar() throws IOException {
 			String eclipseVersion = "Eclipse " + releaseVersion + " ";
 			if (title.startsWith("RC")) {
 				String prefix = eclipseVersion + title;
-				events.accept(singleEvent(prefix + " Stabilization", date.minusDays(3), date.minusDays(1),
+				int freezeOffSet = "RC2".equals(title) ? 6 : 3;
+				events.accept(singleEvent(prefix + " Stabilization", date.minusDays(freezeOffSet), date.minusDays(1),
 						"Stabilization and quiet period before " + prefix
 						+ ". Code changes are only permitted to fix new and severe bugs."));
 				events.accept(singleDayEvent(prefix + " Sign-off", date.minusDays(1),
