@@ -189,22 +189,20 @@ pipeline {
 				gitCommitAllExcludingSubmodules("Move previous version to ${PREVIOUS_RELEASE_CANDIDATE_TAG} in build scripts")
 			}
 		}
-		stage('Update doc bundles') {
+		stage('Individual preparation') {
+			environment {
+				PREPARATION_SCRIPT = 'prepareNextDevCycle.sh'
+			}
 			steps {
-				dir('eclipse.platform.common/bundles') {
-					sh '''
-						# Update links to N&N entries
-						for whatsNewFile in */whatsNew/*_whatsnew.html; do
-							sed --expression "s|Eclipse ${PREVIOUS_RELEASE_VERSION}|Eclipse ${NEXT_RELEASE_VERSION}|" -i "${whatsNewFile}"
-							sed --expression "s|news/${PREVIOUS_RELEASE_VERSION}/|news/${NEXT_RELEASE_VERSION}/|" -i "${whatsNewFile}"
-						done
-						# Clear content of all forceQualifierUpdate files in this directory
-						for file in */forceQualifierUpdate.txt; do
-							> "$file"
-						done
-						git commit --message "Update doc bundles for ${NEXT_RELEASE_VERSION} development" .
-					'''
-				}
+				sh '''#!/bin/bash -xe
+					scripts=$(find $(pwd) -maxdepth 3 -name "${PREPARATION_SCRIPT}")
+					for script in ${scripts}; do
+						# Preparation scripts expect the working directory to be their container
+						cd $(dirname ${script})
+						chmod +x ${PREPARATION_SCRIPT}
+						"./${PREPARATION_SCRIPT}"
+					done
+				'''
 			}
 		}
 		stage('Early setup redirection') {
@@ -229,16 +227,6 @@ pipeline {
 						sh "git commit --message 'Enable and update early redirection for ${NEXT_RELEASE_VERSION} in platform setup' ."
 					}
 				}
-			}
-		}
-		stage('Apply individual updates') {
-			environment {
-				UPDATE_SCRIPT = 'prepareNextDevCycle.sh'
-			}
-			steps {
-				sh '''
-					git submodule foreach 'if [ -f ${UPDATE_SCRIPT} ]; then chmod +x ./${UPDATE_SCRIPT} && ./${UPDATE_SCRIPT}; fi'
-				'''
 			}
 		}
 		stage('Prepare maintenance branch') {

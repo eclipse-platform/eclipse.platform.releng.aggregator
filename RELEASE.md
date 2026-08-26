@@ -10,6 +10,8 @@
   - Run the [`Send announcement`](https://ci.eclipse.org/releng/job/releng/job/send-announcement) job
     - `type`: `REMINDER_RC`
     - `rcNumber`: number of current RC, `1` or `2`
+  The job sending the reminder for the RC2 week, also creates the issue to track the final release steps in this repository.
+
 ### Milestone/RC Week
    - **M 1/2/3 Release**
      * All milestone releases are 'lightweight', meaning there is no announcement or signoff.
@@ -52,21 +54,6 @@
 
 ## GA Releases 
 Tasks to be completed after RC2
-
-### Release Preparation
-Tasks that need to be completed before Friday
-
-The job sending the request to sign-off of RC2, also creates the issue to track the final release steps in this repository.
-
-  * #### Readme
-    - Create a tracking issue in [www.eclipse.org-eclipse](https://github.com/eclipse-platform/www.eclipse.org-eclipse) (see [Readme file for 4.26](https://github.com/eclipse-platform/www.eclipse.org-eclipse/issues/24) as an example).
-    - Add Readme files and update generatation scripts.
-  * #### Migration Guide
-    - Create a tracking issue in [eclipse.platform.releng.aggregator](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues) and link it to the main release issue.
-    - Every release a new porting guide and folder need to be added to [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/porting), named with the version being migrated *to*.
-      - i.e `eclipse_4_27_porting_guide.html` is for migrating from 4.26 tp 4.27.
-    - Update `topics_Porting.xml` in [eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv) and [eclipse.platform.common/bundles/org.eclipse.platform.doc.isv](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/tree/master/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv)
-    - Update the name of the proting html document in [eclipse.platform/platform/org.eclipse.platform/intro/migrateExtensionContent.xml](https://github.com/eclipse-platform/eclipse.platform/blob/master/platform/org.eclipse.platform/intro/migrateExtensionContent.xml) 
 
 ### RC2 Respin
 Sometimes there is a critical issue that requires a fix, if it's decided that one is needed then an `RC2a` (followed by `RC2b`, `RC2c`, etc. if necessary) is built from the maintenance branch and promoted using the RC2 process.
