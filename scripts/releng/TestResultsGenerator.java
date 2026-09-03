@@ -47,10 +47,6 @@ import utilities.XmlProcessorFactoryRelEng;
  */
 public class TestResultsGenerator {
 
-	//
-	// NOTE: KEEP THIS AT Java-21 until all tests are executed with Java-25!
-	//
-
 	private static final String XML_EXTENSION = ".xml";
 	private static final String elementName = "testsuite";
 	private List<String> expectedTestConfigs;
@@ -104,11 +100,11 @@ public class TestResultsGenerator {
 						test.add("suites", suites);
 					}
 				} catch (final IOException e) {
-					println("ERROR: IOException: " + fileName);
+					IO.println("ERROR: IOException: " + fileName);
 					e.printStackTrace();
 					errorCount = -4;
 				} catch (final SAXException e) {
-					println("ERROR: SAXException: " + fileName);
+					IO.println("ERROR: SAXException: " + fileName);
 					e.printStackTrace();
 					errorCount = -5;
 				} catch (final ParserConfigurationException e) {
@@ -126,16 +122,16 @@ public class TestResultsGenerator {
 		generator.xmlDirectory = Path.of(OS.readProperty("xmlDirectory")).toRealPath();
 		generator.expectedTestConfigs = List.of(OS.readProperty("testsConfigExpected").split(","));
 
-		println("INFO: Processing test results in");
-		println("\t" + generator.xmlDirectory);
-		println("INFO: For configurations");
-		generator.expectedTestConfigs.forEach(c -> println("\t- " + c));
+		IO.println("INFO: Processing test results in");
+		IO.println("\t" + generator.xmlDirectory);
+		IO.println("INFO: For configurations");
+		generator.expectedTestConfigs.forEach(c -> IO.println("\t- " + c));
 
 		generator.parseJUnitTestsXml();
 	}
 
 	private void parseJUnitTestsXml() throws Exception {
-		println("DEBUG: Begin: Parsing XML JUnit results files");
+		IO.println("DEBUG: Begin: Parsing XML JUnit results files");
 		List<String> foundConfigs = new ArrayList<>();
 		List<Path> allFiles = new ArrayList<>();
 		for (String expectedConfig : expectedTestConfigs) {
@@ -149,7 +145,7 @@ public class TestResultsGenerator {
 			if (sizeBefore < allFiles.size()) {
 				foundConfigs.add(expectedConfig);
 			} else {
-				println("WARNING: No tests found for configuration: " + expectedConfig);
+				IO.println("WARNING: No tests found for configuration: " + expectedConfig);
 			}
 		}
 		expectedTestLogs = loadExpectedTests(foundConfigs);
@@ -167,23 +163,23 @@ public class TestResultsGenerator {
 			summary.add(testPluginName, test);
 		}
 
-		println("DEBUG: End: Parsing XML JUnit results files");
+		IO.println("DEBUG: End: Parsing XML JUnit results files");
 		// above is all "compute data". Now it is time to "display" it.
 		if (foundConfigs.size() > 0) {
-			println("DEBUG: Begin: Generating test results index");
+			IO.println("DEBUG: Begin: Generating test results index");
 			for (Entry<String, JSON.Object> entry : summaries.entrySet()) {
 				String configName = entry.getKey();
 				JSON.Object summary = entry.getValue();
 				String shortConfig = computeShortConfigurationName(configName);
 				Path file = xmlDirectory.resolveSibling(shortConfig + "-summary.json");
-				println("DEBUG: Write Eclipse drop main data to: " + file);
+				IO.println("DEBUG: Write Eclipse drop main data to: " + file);
 				JSON.write(summary, file);
 			}
 			verifyAllTestsRan(xmlDirectory);
 			listMissingManifestFiles();
-			println("DEBUG: End: Generating test results index tables");
+			IO.println("DEBUG: End: Generating test results index tables");
 		} else {
-			println("WARNING: Test results not found in " + xmlDirectory);
+			IO.println("WARNING: Test results not found in " + xmlDirectory);
 		}
 		// TODO: It seems that the DNF/-1 was (just) set if a test result was not
 		// available for one config, but not for another one (i.e. a missing cell).
@@ -277,9 +273,9 @@ public class TestResultsGenerator {
 			}
 		}
 		if (missingFiles.size() > 0) {
-			println("WARNING: Results of test(s) listed in testManifest.xml are missing: " + missingFiles.size());
+			IO.println("WARNING: Results of test(s) listed in testManifest.xml are missing: " + missingFiles.size());
 			for (String testLogName : missingFiles) {
-				println("WARNING:\t- " + testLogName);
+				IO.println("WARNING:\t- " + testLogName);
 			}
 		}
 	}
@@ -288,14 +284,14 @@ public class TestResultsGenerator {
 		if (missingManifestFiles.size() > 0) {
 			// TODO: Make this visible on the download page somehow?
 			Path filename = xmlDirectory.resolve("addToTestManifest.xml");
-			println("WARNING: Found test(s) missing in testManifest.xml: " + missingManifestFiles.size());
-			println("WARNING:\tFor details see: " + filename);
+			IO.println("WARNING: Found test(s) missing in testManifest.xml: " + missingManifestFiles.size());
+			IO.println("WARNING:\tFor details see: " + filename);
 			StringBuilder xmlFragment = new StringBuilder("""
 					<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 					<topLevel>
 					""");
 			for (String testLogName : missingManifestFiles) {
-				println("WARNING:\t- " + testLogName);
+				IO.println("WARNING:\t- " + testLogName);
 				xmlFragment.append("<logFile\n");
 				xmlFragment.append("  name=\"").append(testLogName).append("\"\n");
 				xmlFragment.append("  type=\"test\" />\n");
@@ -303,10 +299,6 @@ public class TestResultsGenerator {
 			xmlFragment.append("</topLevel>");
 			Files.writeString(filename, xmlFragment);
 		}
-	}
-
-	private static void println(String msg) {
-		System.out.println(msg);
 	}
 
 }

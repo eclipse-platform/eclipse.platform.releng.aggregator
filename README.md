@@ -63,7 +63,7 @@ mvn clean verify -DskipTests=true -Dcbi-ecj-version=99.99
 Build requirements
 ------------------
 
-The build commands require the installation and setup of Java 21 or higher and Maven version 3.9.12 or higher.
+The build commands require the installation and setup of Java 25 or higher and Maven version 3.9.12 or higher.
 See also the complete instructions on the [Platform Build wiki](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/wiki/Platform-Build). 
 Note, it is highly recommended to use toolchains.xml and `-Pbree-libs` as described in [Using BREE Libs](https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/wiki/Platform-Build#using-bree-libs).
 

@@ -109,18 +109,12 @@ pipeline {
 									ssh genie.releng@projects-storage.eclipse.org mkdir -p ${remoteResultsDirectory}
 									if [ -d "${localResultsDirectory}/xml" ] && [ -z "$(find ${localResultsDirectory}/xml -maxdepth 0 -empty)" ]; then
 										
-										# As long as not all tests run with Java-25 (or later) we cannot use multi-file Source Programs and have to compile manually
-										pushd scripts/releng
-										javac TestResultsGenerator.java
-										javac utilities/JSON.java
-										javac utilities/OS.java
-										javac utilities/XmlProcessorFactoryRelEng.java
 										# Generate new summary file
 										java \
 											-DxmlDirectory="${WORKSPACE}/${localResultsDirectory}/xml" \
 											-DtestsConfigExpected=${JOB_BASE_NAME} \
 											-DtestManifestFile="${WORKSPACE}/scripts/testing/publishingFiles/testManifest.xml" \
-											TestResultsGenerator
+											TestResultsGenerator.java
 										popd
 										
 										# First delete result files from a previous run of the same configuration (in case that test configuration was run again), then transfer the new results.
