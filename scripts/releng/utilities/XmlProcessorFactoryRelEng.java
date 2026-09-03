@@ -77,7 +77,7 @@ public class XmlProcessorFactoryRelEng {
 	public static synchronized Document parseDocumentIgnoringDOCTYPE(Path file)
 			throws ParserConfigurationException, IOException, SAXException {
 		DocumentBuilder builder = DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE.newDocumentBuilder();
-		builder.setEntityResolver((__, ___) -> new InputSource(new ByteArrayInputStream(new byte[0])));
+		builder.setEntityResolver((_, _) -> new InputSource(new ByteArrayInputStream(new byte[0])));
 		return builder.parse((file.toFile()));
 	}
 
