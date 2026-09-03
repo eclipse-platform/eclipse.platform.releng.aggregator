@@ -23,14 +23,18 @@ jobs:
           const responseIterator = github.paginate.iterator(github.rest.issues.listMilestones, {
             ...context.repo,
             state: 'open', sort: 'due_on', direction: 'desc',
-            per_page: 6, // the six milestones of the current release are usually sufficient
+            per_page: 24, // Commonly there are six milestones per release cycle.
+              // But some projects have additional milestones and at some times the milestones of the previous release are not yet closed.
+            
           })
           const now = new Date()
           for await (const response of responseIterator) { // iterate through each response
             for (const milestone of response.data) {
               console.log('Checking milestone ' + milestone.title)
               const dueDate = new Date(milestone.due_on)
-              if (milestone.title.includes('RC') && isInFreezePeriodOf(dueDate, now, freezePeriodLength(milestone.title))) {
+              const rcPattern = /^\d+\.\d+ RC(?<number>\d+)$/i
+              const rcMatch = rcPattern.exec(milestone.title)
+              if (rcMatch && isInFreezePeriodOf(dueDate, now, freezePeriodLength(rcMatch.groups.number))) {
                 core.setFailed('Active freeze period for ' + milestone.description)
                 return;
               } else if (dueDate < now) {
@@ -40,11 +44,11 @@ jobs:
             }
           }
           
-          function freezePeriodLength(rcTitle){
+          function freezePeriodLength(rcNumber){
             // For RC1 the freeze period starts at the beginning of the third day before the milestone/RC
             // Two days for stabilization and one for sign-off before the promotion happens at the date.
             // For RC2 the freeze period starts immediatly after RC1.
-            return rcTitle.includes('RC2') ? 6 : 3
+            return parseInt(rcNumber) == 2 ? 6 : 3
           }
           
           function isInFreezePeriodOf(referenceDate, nowDate, freezePeriodStartOffset) {
