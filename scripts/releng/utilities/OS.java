@@ -8,10 +8,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDate;
 import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,10 @@ public class OS {
 
 	public static String readProperty(String name) {
 		return Objects.requireNonNull(System.getProperty(name), "Not set: " + name);
+	}
+
+	public static Optional<LocalDate> readOptionalDateProperty(String name) {
+		return Optional.ofNullable(System.getProperty(name)).filter(s -> !s.isEmpty()).map(LocalDate::parse);
 	}
 
 	public static boolean isWindowsArtifact(String name) {
