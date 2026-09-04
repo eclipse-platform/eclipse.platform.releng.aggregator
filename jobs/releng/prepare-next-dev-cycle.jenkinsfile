@@ -48,7 +48,6 @@ pipeline {
 					
 					echo "PREVIOUS_RELEASE_CANDIDATE_ID: ${PREVIOUS_RELEASE_CANDIDATE_ID}"
 					def buildProperties = utilities.loadBuildDropProperties("${PREVIOUS_RELEASE_CANDIDATE_ID}")
-					assignEnvVariable('IS_JAVA_RELEASE_IMMINENT', !buildProperties.NEXT_JAVA_RELEASE_DATE.trim().isEmpty()) // Remove surrounding quotes
 					
 					def previousRC = utilities.matchBuildIdentifier("${PREVIOUS_RELEASE_CANDIDATE_ID}", { iBuild ->
 						iBuild.major = buildProperties.STREAMMajor
@@ -75,10 +74,13 @@ pipeline {
 					// Compute new build schedule
 					
 					echo "NEXT_JAVA_RELEASE_DATE: ${NEXT_JAVA_RELEASE_DATE}"
+					assignEnvVariable('PREVIOUS_JAVA_RELEASE_DATE', buildProperties.NEXT_JAVA_RELEASE_DATE) // actually more 'previous NEXT_JAVA_RELEASE_DATE'
 					def relengDates = eclipseReleaseDates.collect{ name, date -> "${name}:${date}" }.join(',')
 					for (buildType in [ 'I', 'Y' ]) {
 						def schedule = sh(returnStdout: true, script: """java \
-								-DrelengDates='${relengDates}' -DjavaReleaseDate=${NEXT_JAVA_RELEASE_DATE} \
+								-DrelengDates='${relengDates}' \
+								-DjavaReleaseDate=${NEXT_JAVA_RELEASE_DATE} \
+								-DpreviousJavaReleaseDate=${PREVIOUS_JAVA_RELEASE_DATE} \
 								scripts/releng/releaseSchedule.java --generate${buildType}BuildSchedule
 						""")
 						assignEnvVariable("${buildType}_BUILD_SCHEDULE", schedule.trim())
@@ -149,7 +151,7 @@ pipeline {
 						// In all cases the schedule is cleared on the maintenance branch and the previous stream will be deleted from master upon release.
 						
 						//Create Y-build for new stream
-						builds.Y.streams["${NEXT_RELEASE_VERSION}"] = [ branch: 'master', disabled: env.IS_JAVA_RELEASE_IMMINENT, schedule: env.Y_BUILD_SCHEDULE ]
+						builds.Y.streams["${NEXT_RELEASE_VERSION}"] = [ branch: 'master', disabled: !env.PREVIOUS_JAVA_RELEASE_DATE.isEmpty(), schedule: env.Y_BUILD_SCHEDULE ]
 						// If a new Java version is released shortly after the previous release, that Java release will happen in the next days from the point when this is executed.
 						// In that case Y-builds for the old stream continue on maintenance branch (with pre-defined schedule) to provide P-builds upon Java release.
 						// Then the Y-build for the new stream is initially disabled and enabled manually later, when the beta branch for the subsequent Java release is set up.
@@ -161,6 +163,7 @@ pipeline {
 							-DrelengDates='${relengDates}' \
 							-DreleaseVersion=${NEXT_RELEASE_VERSION} \
 							-DpreviousReleaseVersion=${PREVIOUS_RELEASE_VERSION} \
+							-DpreviousJavaReleaseDate=${PREVIOUS_JAVA_RELEASE_DATE} \
 							-DsimRelName=${NEXT_SIMREL_NAME} \
 							-Dfile=sites/releng-calendar.ics \
 							scripts/releng/releaseSchedule.java --updateCalendar

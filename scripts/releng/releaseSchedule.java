@@ -34,9 +34,10 @@ String previousReleaseVersion;
 ///
 void main(String[] args) throws IOException {
 	relengDates = Arrays.stream(OS.readProperty("relengDates").split(",")).map(e -> e.split(":", 2))
-			.collect(Collectors.toMap(a -> a[0], a -> LocalDate.parse(a[1])));
-	javaReleaseDate = Optional.ofNullable(System.getProperty("javaReleaseDate")).filter(s -> !s.isEmpty())
-			.map(LocalDate::parse);
+			.collect(Collectors.toMap(a -> a[0], a -> LocalDate.parse(a[1]), (d1, d2) -> {
+				throw new IllegalStateException("Same name for dates " + d1 + " and " + d2);
+			}, LinkedHashMap::new)); // maintain order of declaration
+	javaReleaseDate = OS.readOptionalDateProperty("javaReleaseDate");
 
 	switch (args[0]) {
 	case "--updateCalendar" -> generateCalendar();
@@ -46,28 +47,30 @@ void main(String[] args) throws IOException {
 	}
 }
 
-final ZonedDateTime NOW = ZonedDateTime.now().withZoneSameInstant(ZoneOffset.UTC);
+final OffsetDateTime NOW = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
 
 List<DailyRecurrence> iBuildRecurrences() {
 	OffsetTime iBuildTime = OffsetTime.of(LocalTime.of(23, 0), ZoneOffset.UTC);
-	ZonedDateTime iBuildStart = NOW.plusDays(1).with(iBuildTime);
+	OffsetDateTime iBuildStart = NOW.plusDays(1).with(iBuildTime);
 	return List.of(new DailyRecurrence(iBuildStart, rcPhaseEnd(), List.of()));
 }
 
 List<DailyRecurrence> yBuildRecurrences() {
 	OffsetTime yBuildTime = OffsetTime.of(LocalTime.of(15, 0), ZoneOffset.UTC);
 	List<DayOfWeek> yBuildDays = List.of(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY, DayOfWeek.SATURDAY);
-	ZonedDateTime yBuildStart = NOW.with(TemporalAdjusters.next(yBuildDays.getFirst())).with(yBuildTime);
+
+	OffsetDateTime yBuildStart = OS.readOptionalDateProperty("previousJavaReleaseDate").map(date -> date.plusDays(4))
+			.orElse(NOW.toLocalDate().with(TemporalAdjusters.next(yBuildDays.getFirst()))) //
+			.atTime(yBuildTime);
 	if (javaReleaseDate.isPresent()) {
 		// When a java release is imminent, prolong Y-builds and add a separate RC phase
 		// around the Java release with increased Y-build frequency.
 		LocalDate javaRelease = javaReleaseDate.get();
 		LocalDate javaRCStart = javaRelease.minusDays(7);
 		LocalDate javaRCEnd = javaRelease.plusDays(2);
-		ZonedDateTime javaRCBuildStart = javaRCStart.atTime(yBuildTime).atZoneSameInstant(ZoneOffset.UTC);
 		return List.of( //
 				new DailyRecurrence(yBuildStart, javaRCStart.minusDays(1 /* Prevent overlap */), yBuildDays),
-				new DailyRecurrence(javaRCBuildStart, javaRCEnd, List.of()));
+				new DailyRecurrence(javaRCStart.atTime(yBuildTime), javaRCEnd, List.of()));
 	} else {
 		return List.of(new DailyRecurrence(yBuildStart, rcPhaseEnd(), yBuildDays));
 	}
@@ -175,10 +178,10 @@ List<List<String>> recurringEvent(String title, List<DailyRecurrence> recurrence
 
 List<String> recurringEvent(String title, Temporal start, Temporal end, String rule, String description) {
 	return List.of(EVENT_START, // https://www.rfc-editor.org/info/rfc5545/#section-3.8.2
+			"SUMMARY:" + title, //
 			dateTime("DTSTART", start), //
 			dateTime("DTEND", end), //
 			optional("RRULE:", rule), //
-			"SUMMARY:" + title, //
 			optional("DESCRIPTION:", escape(description)), //
 			"UID:" + UUID.randomUUID(), //
 			"STATUS:CONFIRMED", // https://www.rfc-editor.org/info/rfc5545/#section-3.8.1.11
@@ -202,7 +205,7 @@ List<String> recurringEvent(String title, Temporal start, Temporal end, String r
 
 record DailyRecurrence(
 		/// Start of this recurrence.
-		ZonedDateTime start,
+		OffsetDateTime start,
 		/// End day of this recurrence (inclusive if matched by a weekday).
 		LocalDate end,
 		/// The days of a week this recurrence happens, if empty on each day.
