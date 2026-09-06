@@ -1,20 +1,6 @@
 name: Publish Test Results
 on:
   workflow_call:
-    inputs:
-      gist-url:
-        description: passing an url to the gist where results should be published as a badge
-        required: false
-        default: ''
-        type: string
-      gist-file:
-        description: passing the name of the gist file to update, defaults to badge.svg
-        required: false
-        default: 'badge.svg'
-        type: string
-    secrets:
-      gist-token:
-        required: false
 
 permissions: {}
 
@@ -35,56 +21,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
-           mkdir -p artifacts && cd artifacts
-
-           artifacts_url=${{ github.event.workflow_run.artifacts_url }}
-
-           gh api "$artifacts_url" -q '.artifacts[] | [.name, .archive_download_url] | @tsv' | while read artifact
-           do
-             IFS=$'\t' read name url <<< "$artifact"
-             gh api $url > "$name.zip"
-             unzip -d "$name" "$name.zip"
-           done
+          mkdir -p artifacts && cd artifacts
+          gh run download ${{ github.event.workflow_run.id }} --repo ${{ github.repository }} \
+            --name 'event-file' --pattern 'test-results-*'
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@d0a4676d0e0b938bc201470d88276b7c74c712b3 # v2.24.0
         id: test-results
         with:
           commit: ${{ github.event.workflow_run.head_sha }}
-          event_file: artifacts/Event File/event.json
+          event_file: artifacts/event-file/event.json
           event_name: ${{ github.event.workflow_run.event }}
           files: "artifacts/**/*.xml"
-      - name: Set badge color
-        if: github.ref == 'refs/heads/master' && inputs.gist-url != ''
-        shell: bash
-        run: |
-          case ${{ fromJSON( steps.test-results.outputs.json ).conclusion }} in
-            success)
-              echo "BADGE_COLOR=31c653" >> $GITHUB_ENV
-              ;;
-            failure)
-              echo "BADGE_COLOR=800000" >> $GITHUB_ENV
-              ;;
-            neutral)
-              echo "BADGE_COLOR=696969" >> $GITHUB_ENV
-              ;;
-          esac
-
-      - name: Create badge
-        if: github.ref == 'refs/heads/master' && inputs.gist-url != ''
-        uses: emibcn/badge-action@f9150fde070fcca0c4e832437611b44838fcd325 # v2.0.4
-        with:
-          label: Tests
-          status: '${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_succ }} passed, ${{ fromJSON( steps.test-results.outputs.json ).formatted.stats.tests_fail }} failed'
-          color: ${{ env.BADGE_COLOR }}
-          path: badge.svg
-
-      - name: Upload badge to Gist
-        if: github.ref == 'refs/heads/master' && inputs.gist-url != ''
-        uses: andymckay/append-gist-action@ab30bf28df67017c7ad696500b218558c7c04db3 # 0.3
-        with:
-          token: ${{ secrets.gist-token }}
-          gistURL: ${{ inputs.gist-url }}
-          file: ${{ inputs.gist-file }}
-
-
