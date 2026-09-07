@@ -39,6 +39,8 @@ pipeline {
 			</li>
 			</ul>
 		''')
+		choice(name: 'projectsToDeploy', choices: ['all', 'platform', 'jdt', 'pde'],
+			description: 'Which project(s) to deploy to Maven. "all" runs platform, jdt, and pde.')
 	}
 	agent {
 		label 'basic'
@@ -128,6 +130,12 @@ pipeline {
 				}
 				stages {
 					stage('Deploy project to Maven') {
+					when {
+							anyOf {
+								expression { params.projectsToDeploy == 'all' }
+								expression { params.projectsToDeploy == env.PROJECT }
+							}
+						 }
 						environment {
 							SETTINGS = "/home/jenkins/.m2/settings-deploy-ossrh-${PROJECT == 'platform' ? 'releng': PROJECT}.xml"
 							SONATYPE_BEARER_TOKEN = credentials("central-sonatype-bearer-token-${PROJECT}")
