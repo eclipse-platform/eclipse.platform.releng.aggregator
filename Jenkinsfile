@@ -29,7 +29,7 @@ pipeline {
 		jdk 'temurin-jdk25-latest'
 	}
 	environment {
-		MAVEN_OPTS = '-Xmx4000m'
+		MAVEN_OPTS = '-Xmx4000m -Djdk.xml.maxGeneralEntitySizeLimit=0'
 	}
 	stages {
 		stage('Deploy parent-pom and SDK-target') {
