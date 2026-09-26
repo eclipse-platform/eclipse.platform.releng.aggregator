@@ -273,6 +273,17 @@ private void removeDropsOnRemote(String remoteDirectory, List<String> drops) {
 
 // --- tool installation ---
 
+def getTemurinJDK(int version, String os, String arch, String releaseType = 'ga') {
+	if (os == 'linux' && arch == 'x86_64' && releaseType == 'ga') {
+		return tool(type: 'jdk', name: "temurin-jdk${version}-latest")
+	}
+	def jdkPath = "${WORKSPACE}/tools/jdk-${version}"
+	if (fileExists("${jdkPath}")) {
+		return "${jdkPath}/" + sh(script: "ls ${jdkPath}", returnStdout: true).strip()
+	}
+	return downloadTemurinJDK(version, os, arch, releaseType)
+}
+
 def downloadTemurinJDK(int version, String os, String arch, String releaseType='ga') {
 	// Translate os/arch names that are different in the Adoptium API
 	if (arch == 'x86_64') {
@@ -283,7 +294,7 @@ def downloadTemurinJDK(int version, String os, String arch, String releaseType='
 	} else if (os == 'win32') {
 		os = 'windows'
 	}
-	return installDownloadableTool('jdk', "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse") + (os == 'mac' ? '/Contents/Home' : '')
+	return installDownloadableTool("jdk-${version}", "https://api.adoptium.net/v3/binary/latest/${version}/${releaseType}/${os}/${arch}/jdk/hotspot/normal/eclipse") + (os == 'mac' ? '/Contents/Home' : '')
 }
 
 def installDownloadableTool(String toolType, String url) {
