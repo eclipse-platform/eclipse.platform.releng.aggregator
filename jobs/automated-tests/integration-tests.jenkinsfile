@@ -47,6 +47,7 @@ pipeline {
 				// Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
 				ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
 				ANT_OPTS = "-Djava.io.tmpdir=${pathOf(env.WORKSPACE + '/tmp')}"
+				JDK_JAVA_OPTIONS = '-Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=50000000' // Required in case of numerous test failures
 			}
 			steps { timeout(time: 8, unit: 'HOURS') { // timeout of test execution (starts after the agent was accessed)
 				// workspace is not always cleaned (a previous clean-up may have failed). Clean before git cloning or custom tools are installed into workspace.
