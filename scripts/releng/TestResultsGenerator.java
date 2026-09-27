@@ -76,7 +76,7 @@ public class TestResultsGenerator {
 				errorCount = -2;
 			} else {
 				try {
-					Document document = XmlProcessorFactoryRelEng.parseDocumentWithErrorOnDOCTYPE(fileName);
+					Document document = XmlProcessorFactoryRelEng.parseDocumentIgnoringDOCTYPE(fileName);
 					final NodeList elements = document.getElementsByTagName(elementName);
 
 					final int elementCount = elements.getLength();
@@ -189,7 +189,7 @@ public class TestResultsGenerator {
 
 		Set<String> testLogsSet = new TreeSet<>();
 
-		Document document = XmlProcessorFactoryRelEng.parseDocumentWithErrorOnDOCTYPE(testManifestFile);
+		Document document = XmlProcessorFactoryRelEng.parseDocumentIgnoringDOCTYPE(testManifestFile);
 
 		// store a list of the test logs expected after testing
 		NodeList testLogList = document.getElementsByTagName("logFile");

@@ -40,34 +40,20 @@ public class XmlProcessorFactoryRelEng {
 
 	// using these factories is synchronized with creating & configuring them
 	// potentially concurrently in another thread:
-	private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY_ERROR_ON_DOCTYPE;
 	private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE;
 
 	static {
 		try {
-			DocumentBuilderFactory factory1 = DocumentBuilderFactory.newInstance();
-			// completely disable DOCTYPE declaration:
-			factory1.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true); //$NON-NLS-1$
-			DOCUMENT_BUILDER_FACTORY_ERROR_ON_DOCTYPE = factory1;
-
 			DocumentBuilderFactory factory2 = DocumentBuilderFactory.newInstance();
 			// completely disable external entities declarations:
 			factory2.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
 			factory2.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+			factory2.setAttribute("jdk.xml.maxGeneralEntitySizeLimit", "0");
+			factory2.setAttribute("jdk.xml.totalEntitySizeLimit", "50000000");
 			DOCUMENT_BUILDER_FACTORY_IGNORING_DOCTYPE = factory2;
 		} catch (ParserConfigurationException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}
-	}
-
-	/**
-	 * Parses the given XML files, throwing an SAXParseException when detecting
-	 * external entities.
-	 */
-	public static synchronized Document parseDocumentWithErrorOnDOCTYPE(Path file)
-			throws ParserConfigurationException, IOException, SAXException {
-		DocumentBuilder builder = DOCUMENT_BUILDER_FACTORY_ERROR_ON_DOCTYPE.newDocumentBuilder();
-		return builder.parse(file.toFile());
 	}
 
 	/**
