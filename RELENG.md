@@ -22,7 +22,7 @@ The folders containing the individual job definitions are replicated in the Jenk
 Labels and descriptions of the folders implied by that structure can be specified in the [Create jobs](jobs/seed.jenkinsfile) seed job:
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/blob/df6078e32be3d8e268fe9cc60c8a49332fb6c616/jobs/seed.jenkinsfile#L19-L26
 
-Multiple build and test jobs have the release version in the job name because it is required for result parsing, e.g. the [automated tests](https://ci.eclipse.org/releng/job/automated-tests).
+Multiple build and test jobs have the release version in the job name because it is required for result parsing, e.g. the [automated tests](https://ci.eclipse.org/releng/job/builds).
 In order to minimize constant adjustments of the job definitions the active streams are configured through the [buildConfigurations.json](jobs/buildConfigurations.json) file.
 This file is used to create the versioned build and test jobs and is also read by these jobs during their execution for detailed configuration.
 
@@ -68,7 +68,7 @@ The **Y-build** is a full Eclipse-SDK build with the support of the new Java ver
 The **P-build** is a patch build that contains modified plugins designed to be installed on top of the current I-build to use the new java version support as early as possible.
 They are now managed by the JDT-project itself in [org.eclipse.jdt.releng](https://github.com/eclipse-jdt/eclipse.jdt/tree/master/org.eclipse.jdt.releng).
 
-The Y-build themselves and their unit tests are, just like the regular I-builds, defined in the [build.jenkinsfile](jobs/builds/build.jenkinsfile) respectively the [integration-tests.jenkinsfile](jobs/automated-tests/integration-tests.jenkinsfile) in git
+The Y-build themselves and their unit tests are, just like the regular I-builds, defined in the [build.jenkinsfile](jobs/builds/build.jenkinsfile) respectively the [integration-tests.jenkinsfile](jobs/builds/integration-tests.jenkinsfile) in git
 and used for the [Y Builds](https://ci.eclipse.org/releng/job/y-builds) folder in Jenkins.
 
 ## Setting Up New Builds
