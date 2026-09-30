@@ -75,9 +75,9 @@ The integrations (nightly) build jobs are hosted on Jenkins instance https://ci.
 The job with the highest release number is the one that builds nightly SDK build, like `I-build-4.41` job for 4.41 SDK.
 
 - The build artifacts and test results are accessible at https://download.eclipse.org/eclipse/downloads/
-- If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/job/automated-tests
+- If the tests fail to start, test jobs for each platform can be found at https://ci.eclipse.org/releng/job/builds
 - If the build is successful but relevant functionality is severely broken and the build shouldn't be used,
-  the build can be marked as *unstable* using the [Mark build](https://ci.eclipse.org/releng/job/builds/job/mark-build) job.
+  the build can be marked as *unstable* using the [Mark build](https://ci.eclipse.org/releng/job/releng/job/mark-build) job.
 - Daily Maven snapshots are provided by the [Deploy to Maven repository](https://ci.eclipse.org/releng/job/releng/job/deploy-maven) job
 and are available at https://repo.eclipse.org/content/repositories/eclipse-snapshots/
 

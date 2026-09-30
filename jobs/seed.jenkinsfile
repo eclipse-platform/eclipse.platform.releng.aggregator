@@ -17,8 +17,7 @@ pipeline {
 				dir(JOBS_ROOT_DIRECTORY) {
 					script {
 						def folderDefinitions = [
-							'automated-tests': [ displayName: 'Automated Tests', description: 'Folder for Unit Tests'],
-							'builds': [displayName: 'Builds', description: 'Eclipse periodic build jobs.'],
+							'builds': [displayName: 'Builds', description: 'Eclipse periodic integration builds.'],
 							'y-builds': [displayName: 'Y Builds', description: 'Builds and tests for the beta java builds.'],
 							'cleanup': [displayName: 'Cleanup', description: 'Cleanup Scripts.'],
 							'releng': [displayName: 'Releng', description: 'Jobs related to routine releng tasks. Some are periodic, some are "manual" jobs ran only when needed.'],
@@ -36,7 +35,8 @@ pipeline {
 						}
 						// Remove the generic 'build' job and define stream specific I/Y-build jobs instead
 						def buildJob = pipelineJobDefinitions.remove('builds/build')
-						def integrationTestsJob = pipelineJobDefinitions.remove('automated-tests/integration-tests')
+						def integrationTestsJob = pipelineJobDefinitions.remove('builds/integration-tests')
+						def smokeTestsJob = pipelineJobDefinitions.remove('builds/smoke-tests')
 						
 						def buildConfigurations = readJSON(file: 'buildConfigurations.json')
 						buildConfigurations.each{ buildType, buildConfig ->
@@ -46,15 +46,16 @@ pipeline {
 									description: "Eclipse SDK ${buildConfig.typeName} builds", disabled: streamConfig.disabled, cronTrigger: streamConfig.schedule]
 								// Create tests
 								buildConfig.tests.each{ testConfig ->
-									def jobName = "${buildConfig.testsFolder}/ep${MAJOR}${MINOR}${buildType}-unit-${testConfig.os}-${testConfig.arch}-java${testConfig.javaVersion}"
+									def jobName = "${buildConfig.folder}/ep${MAJOR}${MINOR}${buildType}-unit-${testConfig.os}-${testConfig.arch}-java${testConfig.javaVersion}"
 									pipelineJobDefinitions[jobName] = [*:integrationTestsJob,
 										displayName: null,
 										description: "Run Eclipse SDK ${buildConfig.typeName} tests for ${testConfig.os.capitalize()} on ${testConfig.arch} with Java ${testConfig.javaVersion}"]
 								}
 							}
+							pipelineJobDefinitions["${buildConfig.folder}/smoke-tests"] = [ *:smokeTestsJob, displayName: "${buildType}-build smoke tests" ]
 						}
 						
-						jobDsl(additionalParameters: [FOLDER_DEFINITIONS: folderDefinitions,  PIPELINE_JOB_DEFINITIONS: pipelineJobDefinitions], sandbox: true, scriptText : '''\
+						jobDsl(additionalParameters: [FOLDER_DEFINITIONS: folderDefinitions, PIPELINE_JOB_DEFINITIONS: pipelineJobDefinitions], sandbox: true, scriptText : '''\
 							FOLDER_DEFINITIONS.each{ folderName, folderDef ->
 								folder(folderName) {
 									if (folderDef.displayName != null) {
