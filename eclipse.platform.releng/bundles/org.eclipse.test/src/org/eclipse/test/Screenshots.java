@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2025 IBM Corporation and others.
+ * Copyright (c) 2016, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,11 +15,16 @@ package org.eclipse.test;
 
 import java.io.File;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Widget;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.opentest4j.IncompleteExecutionException;
 
 /**
  * Helper class to take screenshots from running tests.
@@ -28,6 +33,55 @@ import org.junit.runner.Description;
  */
 public final class Screenshots {
 
+	/**
+	 * JUnit 5 extension that takes a screenshot when a test fails and then
+	 * disposes the supplied widget.
+	 *
+	 * @since 3.7
+	 */
+	public static final class ScreenshotOnFailureExtension implements AfterEachCallback {
+		private static final Pattern INVOCATION_INDEX = Pattern.compile(":#(\\d+)\\]");
+
+		private final Supplier<Widget> widgetSupplier;
+
+		public ScreenshotOnFailureExtension(Supplier<Widget> widgetSupplier) {
+			this.widgetSupplier = widgetSupplier;
+		}
+
+		@Override
+		public void afterEach(ExtensionContext context) {
+			try {
+				context.getExecutionException().filter(e -> !(e instanceof IncompleteExecutionException))
+						.ifPresent(e -> {
+							String screenshot = Screenshots.takeScreenshot(context.getRequiredTestClass(),
+									screenshotName(context));
+							e.addSuppressed(new Throwable("Screenshot written to " + screenshot));
+						});
+			} finally {
+				if (widgetSupplier != null) {
+					Widget widget = widgetSupplier.get();
+					if (widget != null) {
+						widget.dispose();
+					}
+				}
+			}
+		}
+
+		private static String screenshotName(ExtensionContext context) {
+			StringBuilder name = new StringBuilder(context.getRequiredTestMethod().getName());
+			// Invocations of parameterized or repeated tests and classes need distinct files
+			Matcher index = INVOCATION_INDEX.matcher(context.getUniqueId());
+			while (index.find()) {
+				name.append('[').append(index.group(1)).append(']');
+			}
+			return name.toString();
+		}
+	}
+
+	/**
+	 * @deprecated JUnit 4 rule, use {@link ScreenshotOnFailureExtension} instead
+	 */
+	@Deprecated(forRemoval = true, since = "2026-12")
 	public static class ScreenshotOnFailure extends TestWatcher {
 		private final Supplier<Widget> shell;
 
@@ -61,10 +115,9 @@ public final class Screenshots {
 
 	/**
 	 * @since 3.6.200
-	 * @deprecated Screenshots must be taken before dispose. Use
-	 *             {@link #onFailure(Supplier)} instead
+	 * @deprecated JUnit 4 rule, use {@link #onFailureExtension(Supplier)} instead
 	 **/
-	@Deprecated
+	@Deprecated(forRemoval = true, since = "2026-12")
 	public static TestWatcher onFailure() {
 		return onFailure(null);
 	}
@@ -73,11 +126,25 @@ public final class Screenshots {
 	 * Takes a screenshot on failure before dispose. The supplied shell must not be
 	 * disposed in {@code @org.junit.After} but is disposed by the returned Rule
 	 * even if no failure occurred.
-	 * 
+	 *
 	 * @since 3.6.200
+	 * @deprecated JUnit 4 rule, use {@link #onFailureExtension(Supplier)} instead
 	 **/
+	@Deprecated(forRemoval = true, since = "2026-12")
 	public static ScreenshotOnFailure onFailure(Supplier<Widget> shell) {
 		return new ScreenshotOnFailure(shell);
+	}
+
+	/**
+	 * Returns a JUnit 5 extension for {@code @RegisterExtension} that takes a
+	 * screenshot on failure before the supplied widget is disposed. The widget must
+	 * not be disposed in {@code @AfterEach}; the extension disposes it even if no
+	 * failure occurred. A {@code null} supplier or widget only takes the screenshot.
+	 *
+	 * @since 3.7
+	 */
+	public static ScreenshotOnFailureExtension onFailureExtension(Supplier<Widget> widgetSupplier) {
+		return new ScreenshotOnFailureExtension(widgetSupplier);
 	}
     /**
      * Takes a screenshot and writes the path to the generated image file to System.out.
