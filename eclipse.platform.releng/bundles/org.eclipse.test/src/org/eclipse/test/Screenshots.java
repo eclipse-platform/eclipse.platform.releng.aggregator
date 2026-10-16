@@ -14,6 +14,7 @@
 package org.eclipse.test;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +22,9 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.widgets.Widget;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.opentest4j.IncompleteExecutionException;
@@ -35,12 +38,16 @@ public final class Screenshots {
 
 	/**
 	 * JUnit 5 extension that takes a screenshot when a test fails and then
-	 * disposes the supplied widget.
+	 * disposes the supplied widget. Failures of the test method are captured
+	 * before {@code @AfterEach} runs, failures of {@code @BeforeEach} and
+	 * {@code @AfterEach} after it.
 	 *
 	 * @since 3.7
 	 */
-	public static final class ScreenshotOnFailureExtension implements AfterEachCallback {
+	public static final class ScreenshotOnFailureExtension implements AfterTestExecutionCallback, AfterEachCallback {
 		private static final Pattern INVOCATION_INDEX = Pattern.compile(":#(\\d+)\\]");
+		private static final Namespace NAMESPACE = Namespace.create(ScreenshotOnFailureExtension.class);
+		private static final String TAKEN = "screenshotTaken";
 
 		private final Supplier<Widget> widgetSupplier;
 
@@ -49,14 +56,18 @@ public final class Screenshots {
 		}
 
 		@Override
+		public void afterTestExecution(ExtensionContext context) {
+			if (takeScreenshotOnFailure(context)) {
+				context.getStore(NAMESPACE).put(TAKEN, Boolean.TRUE);
+			}
+		}
+
+		@Override
 		public void afterEach(ExtensionContext context) {
 			try {
-				context.getExecutionException().filter(e -> !(e instanceof IncompleteExecutionException))
-						.ifPresent(e -> {
-							String screenshot = Screenshots.takeScreenshot(context.getRequiredTestClass(),
-									screenshotName(context));
-							e.addSuppressed(new Throwable("Screenshot written to " + screenshot));
-						});
+				if (context.getStore(NAMESPACE).remove(TAKEN) == null) {
+					takeScreenshotOnFailure(context);
+				}
 			} finally {
 				if (widgetSupplier != null) {
 					Widget widget = widgetSupplier.get();
@@ -65,6 +76,16 @@ public final class Screenshots {
 					}
 				}
 			}
+		}
+
+		private static boolean takeScreenshotOnFailure(ExtensionContext context) {
+			Optional<Throwable> failure = context.getExecutionException()
+					.filter(e -> !(e instanceof IncompleteExecutionException));
+			failure.ifPresent(e -> {
+				String screenshot = Screenshots.takeScreenshot(context.getRequiredTestClass(), screenshotName(context));
+				e.addSuppressed(new Throwable("Screenshot written to " + screenshot));
+			});
+			return failure.isPresent();
 		}
 
 		private static String screenshotName(ExtensionContext context) {
@@ -137,9 +158,10 @@ public final class Screenshots {
 
 	/**
 	 * Returns a JUnit 5 extension for {@code @RegisterExtension} that takes a
-	 * screenshot on failure before the supplied widget is disposed. The widget must
-	 * not be disposed in {@code @AfterEach}; the extension disposes it even if no
-	 * failure occurred. A {@code null} supplier or widget only takes the screenshot.
+	 * screenshot on failure before the supplied widget is disposed. A failing test
+	 * method is captured before {@code @AfterEach} runs, so {@code @AfterEach} may
+	 * dispose the UI itself. The extension disposes the widget even if no failure
+	 * occurred; a {@code null} supplier or widget only takes the screenshot.
 	 *
 	 * @since 3.7
 	 */
