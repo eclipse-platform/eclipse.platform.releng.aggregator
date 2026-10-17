@@ -917,6 +917,106 @@
         label="Master"/>
     <description>The Platform Website</description>
   </project>
+  <project name="github"
+      label="Platform .github">
+    <setupTask
+        xsi:type="git:GitCloneTask"
+        id="github.clone.platform.github"
+        locationQualifier="eclipse.platform"
+        remoteURI="eclipse-platform/.github"
+        checkoutBranch="main">
+      <annotation
+          source="http://www.eclipse.org/oomph/setup/InducedChoices">
+        <detail
+            key="inherit">
+          <value>github.remoteURIs</value>
+        </detail>
+        <detail
+            key="label">
+          <value>Platform .github GitHub Repository</value>
+        </detail>
+        <detail
+            key="target">
+          <value>remoteURI</value>
+        </detail>
+      </annotation>
+      <configSections
+          name="branch">
+        <properties
+            key="autoSetupRebase"
+            value="always"/>
+      </configSections>
+      <description>Platform .github</description>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCreationTask"
+        excludedTriggers="BOOTSTRAP"
+        targetURL="${github.clone.platform.github.location|uri}/.gitignore">
+      <content>
+        .project
+        .gitignore
+        /.settings/
+      </content>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCreationTask"
+        excludedTriggers="BOOTSTRAP"
+        targetURL="${github.clone.platform.github.location|uri}/.project">
+      <content>
+        &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>
+        &lt;projectDescription>
+        	&lt;name>eclipse.platform.github&lt;/name>
+        	&lt;comment>Platform GitHub&lt;/comment>
+        	&lt;projects>
+        	&lt;/projects>
+        	&lt;buildSpec>
+        	&lt;/buildSpec>
+        	&lt;natures>
+        	&lt;/natures>
+        &lt;/projectDescription>
+
+      </content>
+    </setupTask>
+    <setupTask
+        xsi:type="setup:ResourceCreationTask"
+        excludedTriggers="BOOTSTRAP"
+        targetURL="${github.clone.platform.github.location|uri}/.settings/org.eclipse.core.resources.prefs">
+      <content>
+        eclipse.preferences.version=1
+        encoding/&lt;project>=UTF-8
+
+      </content>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.targlets:TargletTask">
+      <targlet
+          name="Platform GitHub">
+        <requirement
+            name="*"/>
+        <sourceLocator
+            rootFolder="${github.clone.platform.github.location}"/>
+      </targlet>
+    </setupTask>
+    <setupTask
+        xsi:type="setup.workingsets:WorkingSetTask"
+        id="platform.github.workingsets">
+      <workingSet
+          name="Platform GitHub">
+        <predicate
+            xsi:type="predicates:AndPredicate">
+          <operand
+              xsi:type="predicates:OrPredicate">
+            <operand
+                xsi:type="predicates:RepositoryPredicate"
+                project="eclipse.platform.github"/>
+          </operand>
+        </predicate>
+      </workingSet>
+    </setupTask>
+    <stream
+        name="main"
+        label="Main"/>
+  </project>
   <logicalProjectContainer
       xsi:type="setup:ProjectCatalog"
       href="index:/org.eclipse.setup#//@projectCatalogs[name='org.eclipse']"/>
