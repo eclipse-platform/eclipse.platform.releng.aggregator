@@ -1,6 +1,9 @@
 // Constants read by job creation
 private static final _JOB_DESCRIPTION = 'Runs all smoke tests for the Eclipse SDK.'
 
+// Result of each matrix cell (key: '<machine> / Java <version>'), collected for the notification mail
+@groovy.transform.Field def smokeResults = [:]
+
 pipeline {
 	options {
 		timeout(time: 300, unit: 'MINUTES')
@@ -18,6 +21,12 @@ pipeline {
 	stages {
 		stage('Trigger tests'){
 			matrix {
+				when {
+					anyOf {
+						expression { env.JAVA_VERSION == '25' || env.JAVA_VERSION == '27' } // Java 25 and 27 for both I and Y builds
+						expression { env.JAVA_VERSION == '28' && params.buildId.startsWith('Y') } // Java 28 for Y-builds only
+					}
+				}
 				axes {
 					axis {
 						name 'MACHINE'
@@ -30,7 +39,7 @@ pipeline {
 					}
 					axis {
 						name 'JAVA_VERSION'
-						values '25', '26'
+						values '25', '27', '28'
 					}
 				}
 				stages {
@@ -65,21 +74,29 @@ pipeline {
 	}
 	post {
 		unsuccessful {
-			emailext subject: "Smoke test for ${buildId} - ${currentBuild.currentResult}", 
-				body: """\
-					Smoke tests failed for ${buildId}. Please review the logs:
-					${BUILD_URL}
-					""".stripIndent(), mimeType: 'text/plain',
-				to: "${buildId.startsWith('Y') ? 'jdt-dev@eclipse.org' : 'platform-releng-dev@eclipse.org' }",
-				from:"genie.releng@eclipse.org"
+			script {
+				def mailBody = "Smoke tests failed for ${buildId}. Please review the logs:\n${BUILD_URL}\n\n" +
+					"Results per machine / Java version:\n" + formatSmokeResults(smokeResults)
+				emailext subject: "Smoke test for ${buildId} - ${currentBuild.currentResult}",
+					body: mailBody, mimeType: 'text/plain',
+					to: "${buildId.startsWith('Y') ? 'jdt-dev@eclipse.org' : 'platform-releng-dev@eclipse.org' }",
+					from:"genie.releng@eclipse.org"
+			}
 		}
 	}
 }
 
+@NonCPS
+def formatSmokeResults(Map results) {
+	return results.keySet().sort().collect{ key -> '  ' + key.padRight(35) + ' : ' + results[key] }.join('\n')
+}
+
 def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, String javaVersion) {
 	executorAgent.call({
+		def result = 'FAILED' // stays like this if anything throws before the test results are evaluated
 		cleanWs()
-		def javaHome = installJDK(javaVersion, os, arch)
+		def releaseType = javaVersion == '28' ? 'ea' : 'ga' // Java 28 is only available as early-access
+		def javaHome = installJDK(javaVersion, os, arch, releaseType)
 		def antHome = tool(type:'ant', name:'apache-ant-latest')
 		try {
 		dir ("${WORKSPACE}/${agentId}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
@@ -126,8 +143,11 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 				}
 			}
 		}
-		junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+		def summary = junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+		result = (summary.failCount > 0 ? 'FAILED' : 'PASSED') +
+			" (${summary.passCount} passed, ${summary.failCount} failed, ${summary.skipCount} skipped)"
 		} finally {
+			smokeResults["${agentId} / Java ${javaVersion}"] = result
 			archiveArtifacts allowEmptyArchive: true, artifacts: '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, */*.properties, */*.txt'
 			cleanWs()
 		}
