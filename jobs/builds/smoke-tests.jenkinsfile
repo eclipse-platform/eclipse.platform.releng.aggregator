@@ -3,6 +3,8 @@ private static final _JOB_DESCRIPTION = 'Runs all smoke tests for the Eclipse SD
 
 @groovy.transform.Field
 def BUILD = null
+@groovy.transform.Field // Result of each matrix cell (key: '<platform> / Java <version>')
+def TEST_RESULTS = Collections.synchronizedMap([:])
 
 pipeline {
 	options {
@@ -39,7 +41,7 @@ pipeline {
 				}
 			}
 		}
-		stage('Run tests') {
+		stage('Smoke tests') {
 			steps {
 				script {
 					def smokeTests = [:]
@@ -54,8 +56,7 @@ pipeline {
 							} else {
 								error "Unsupported agent type ${test.agent.type}"
 							}
-							def name = test.label.replace(' ','_').toLowerCase(Locale.ENGLISH)
-							smokeTests["${test.label} - Java ${javaVersion.toUpperCase()}"] = { runSmokeTest(executor, name, test.os, test.ws, test.arch, javaVersion) }
+							smokeTests["${test.label} - Java ${javaVersion.toUpperCase()}"] = { runSmokeTest(executor, test.label, test.os, test.ws, test.arch, javaVersion) }
 						}
 					}
 					parallel(smokeTests)
@@ -69,19 +70,29 @@ pipeline {
 				body: """\
 					Smoke tests failed for ${buildId}. Please review the logs:
 					${BUILD_URL}
-					""".stripIndent(), mimeType: 'text/plain',
+					
+					Results per platform / Java version:
+					""".stripIndent() + formatTestResults(TEST_RESULTS), mimeType: 'text/plain',
 				to: BUILD.mailingList, from:"genie.releng@eclipse.org"
 		}
 	}
 }
 
+@NonCPS
+def formatTestResults(Map<String, String> results) {
+	def maxNameLength = results.keySet().collect{k -> k.length()}.max()
+	return results.collect{ test, result -> '  ' + test.padRight(maxNameLength) + ' : ' + result }.sort().join('\n')
+}
+
 def runSmokeTest(Closure executorAgent, String name, String os, String ws, String arch, String javaVersion) {
 	executorAgent.call({
+		def result = 'FAILED' // stays like this if anything throws before the test results are evaluated
 		cleanWs()
+		try {
 		def javaHome = installJDK(javaVersion, os, arch)
 		def antHome = tool(type:'ant', name:'apache-ant-latest')
-		try {
-		dir ("${WORKSPACE}/${name}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
+		def folderName = name.replace(' ','_').toLowerCase(Locale.ENGLISH)
+		dir ("${WORKSPACE}/${folderName}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
 			withEnv([
 				"JAVA_HOME=${javaHome}", "ANT_HOME=${ antHome }",
 				"WORKSPACE=${pwd()}", "PATH=${javaHome}/bin:${antHome}/bin:${PATH}",
@@ -124,8 +135,10 @@ def runSmokeTest(Closure executorAgent, String name, String os, String ws, Strin
 				}
 			}
 		}
-		junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+		def summary = junit keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml'
+		result = "${summary.failCount > 0 ? 'FAILED' : 'PASSED'} (${summary.passCount} passed, ${summary.failCount} failed, ${summary.skipCount} skipped)"
 		} finally {
+			TEST_RESULTS["${name} / Java ${javaVersion.toUpperCase()}"] = result
 			archiveArtifacts allowEmptyArchive: true, artifacts: '**/eclipse-testing/results/**, **/eclipse-testing/directorLogs/**, */*.properties, */*.txt'
 			cleanWs()
 		}
