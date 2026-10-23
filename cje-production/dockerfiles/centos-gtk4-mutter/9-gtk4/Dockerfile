@@ -10,6 +10,9 @@ RUN chmod u+x /usr/local/bin/uid_entrypoint && \
 
 ENTRYPOINT [ "uid_entrypoint" ]
 
+# WebKitGTK 2.54.0 aborts the JVM when an SWT Browser is created:
+# https://github.com/eclipse-platform/eclipse.platform.swt/issues/3588
+# Require the fixed version so a stale mirror fails the build instead.
 RUN dnf -y update && dnf -y install \
       gtk3 \
       gtk4 \
@@ -30,7 +33,7 @@ RUN dnf -y update && dnf -y install \
       curl-minimal \
       git \
       dbus \
-      webkit2gtk3 \
+      'webkit2gtk3 >= 2.54.1' \
       glibc-locale-source \
       glibc-langpack-en \
     && dnf clean all
