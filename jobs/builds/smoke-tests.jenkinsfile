@@ -1,11 +1,15 @@
 // Constants read by job creation
 private static final _JOB_DESCRIPTION = 'Runs all smoke tests for the Eclipse SDK.'
 
+@groovy.transform.Field
+def BUILD = null
+
 pipeline {
 	options {
 		timeout(time: 300, unit: 'MINUTES')
 		timestamps()
 		buildDiscarder(logRotator(numToKeepStr:'10'))
+		skipDefaultCheckout()
 	}
 	parameters {
 		string(name: 'buildId', trim: true, description: 'Build Id to test (such as I20240611-1800, N20120716-0800).')
@@ -16,49 +20,45 @@ pipeline {
 	}
 	agent none
 	stages {
-		stage('Trigger tests'){
-			matrix {
-				axes {
-					axis {
-						name 'MACHINE'
-						values \
-						'opensuse_leap', \
-						'linux_riscv', \
-						'centos9', \
-						'centos_arm', \
-						'centos_ppc'
-					}
-					axis {
-						name 'JAVA_VERSION'
-						values '25', '26'
+		stage('Fetch test configuration') {
+			agent {
+				label 'basic'
+			}
+			steps {
+				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
+					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+					[path: 'jobs/buildConfigurations.json'],
+				])])
+				script {
+					def jobFolderName = "${env.JOB_NAME}".split('/')[-2]
+					echo "Job folder: $jobFolderName"
+					BUILD = readJSON(file: 'jobs/buildConfigurations.json').values().find{ c -> c.folder == jobFolderName}
+					if (BUILD == null) {
+						error "Unsupported folder for smoke tests: ${jobFolderName}"
 					}
 				}
-				stages {
-					stage('Create test setup') {
-						steps{
-							script {
-								def agentId = env.MACHINE
-								def os, arch, executorAgent;
-								if (agentId == 'opensuse_leap') {
-									os = 'linux'; arch = 'x86_64'
-									executorAgent = createKubernetesAgent('ghcr.io/eclipse-platform/platformreleng-opensuse-gtk3-metacity:16')
-								} else if (agentId == 'linux_riscv') {
-									os = 'linux'; arch = 'riscv64'
-									executorAgent = createLabeledAgent('riscv64')
-								} else if (agentId == 'centos9') {
-									os = 'linux'; arch = 'x86_64'
-									executorAgent = createKubernetesAgent('ghcr.io/eclipse-platform/platformreleng-centos-gtk4-mutter:9')
-								} else if (agentId == 'centos_arm') {
-									os = 'linux'; arch = 'aarch64'
-									executorAgent = createLabeledAgent('arm64')
-								} else if (agentId == 'centos_ppc') {
-									os = 'linux'; arch = 'ppc64le'
-									executorAgent = createLabeledAgent('ppctest')
-								}
-								runSmokeTest(executorAgent, agentId, os, arch, env.JAVA_VERSION)
+			}
+		}
+		stage('Run tests') {
+			steps {
+				script {
+					def smokeTests = [:]
+					BUILD.smokeTests.each{ test ->
+						def versions = test.javaVersion instanceof List ? test.javaVersion : [ test.javaVersion ]
+						return versions.collect{v -> v.toString()}.each{ javaVersion ->
+							def executor;
+							if (test.agent.type == 'static') {
+								executor = createLabeledAgent(test.agent.label)
+							} else if (test.agent.type == 'kubernetes') {
+								executor = createKubernetesAgent(test.agent.image)
+							} else {
+								error "Unsupported agent type ${test.agent.type}"
 							}
+							def name = test.label.replace(' ','_').toLowerCase(Locale.ENGLISH)
+							smokeTests["${test.label} - Java ${javaVersion.toUpperCase()}"] = { runSmokeTest(executor, name, test.os, test.ws, test.arch, javaVersion) }
 						}
 					}
+					parallel(smokeTests)
 				}
 			}
 		}
@@ -70,19 +70,18 @@ pipeline {
 					Smoke tests failed for ${buildId}. Please review the logs:
 					${BUILD_URL}
 					""".stripIndent(), mimeType: 'text/plain',
-				to: "${buildId.startsWith('Y') ? 'jdt-dev@eclipse.org' : 'platform-releng-dev@eclipse.org' }",
-				from:"genie.releng@eclipse.org"
+				to: BUILD.mailingList, from:"genie.releng@eclipse.org"
 		}
 	}
 }
 
-def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, String javaVersion) {
+def runSmokeTest(Closure executorAgent, String name, String os, String ws, String arch, String javaVersion) {
 	executorAgent.call({
 		cleanWs()
 		def javaHome = installJDK(javaVersion, os, arch)
 		def antHome = tool(type:'ant', name:'apache-ant-latest')
 		try {
-		dir ("${WORKSPACE}/${agentId}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
+		dir ("${WORKSPACE}/${name}-java${javaVersion}") { // run in a unique directory to allow distinction of archived build artifacts
 			withEnv([
 				"JAVA_HOME=${javaHome}", "ANT_HOME=${ antHome }",
 				"WORKSPACE=${pwd()}", "PATH=${javaHome}/bin:${antHome}/bin:${PATH}",
@@ -90,7 +89,6 @@ def runSmokeTest(Closure executorAgent, String agentId, String os, String arch, 
 			]) {
 				xvnc(useXauthority: true) {
 					if (os =='linux') {
-						def ws = 'gtk'
 						sh '''#!/bin/bash -x
 							cat /etc/*release
 							echo "whoami:  $(whoami)"
@@ -151,7 +149,12 @@ def createLabeledAgent(String agentLabel){
 	return { body -> node(agentLabel) { stage('Run tests') { body() } } }
 }
 
-def installJDK(String version, String os, String arch, String releaseType='ga') {
+def installJDK(String version, String os, String arch) {
+	String releaseType = 'ga'
+	if (version.endsWith('-ea')) {
+		releaseType = 'ea'
+		version = version.substring(0, version.length() - 3)
+	}
 	// Translate os/arch names that are different in the Adoptium API
 	if (os == 'win32') {
 		os = 'windows'
