@@ -97,7 +97,6 @@ def runSmokeTest(Closure executorAgent, String name, String os, String ws, Strin
 				"JAVA_HOME=${javaHome}", "ANT_HOME=${ antHome }",
 				"WORKSPACE=${pwd()}", "PATH=${javaHome}/bin:${antHome}/bin:${PATH}",
 				"ANT_OPTS=-Djava.io.tmpdir=${pwd()}/tmp",
-				'SWT_SESSIONMANAGER_DBUS_DISABLE=true',
 			]) {
 				xvnc(useXauthority: true) {
 					if (os =='linux') {
@@ -152,7 +151,7 @@ def createKubernetesAgent(String imageName){
 			containerTemplate(name: 'custom', image: imageName,
 				resourceRequestCpu:'1000m', resourceRequestMemory:'512Mi',
 				resourceLimitCpu:'1000m', resourceLimitMemory:'2048Mi',
-				alwaysPullImage: true, command: 'cat', ttyEnabled: true)
+				alwaysPullImage: true, command: 'uid_entrypoint', args: 'cat', ttyEnabled: true)
 		]) {
 			node(POD_LABEL) { stage('Run tests') { container('custom') { body() } } }
 		}
