@@ -26,6 +26,7 @@ RUN zypper --non-interactive update && zypper --non-interactive install \
       vim \
       tar \
       gzip \
+      hostname \
       dbus-1-x11 \
       dbus-1-daemon \
       at-spi2-core
