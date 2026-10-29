@@ -29,6 +29,7 @@ RUN dnf -y update && dnf -y install \
       liberation-fonts \
       unzip \
       lsof \
+      hostname \
       wget \
       curl-minimal \
       git \
