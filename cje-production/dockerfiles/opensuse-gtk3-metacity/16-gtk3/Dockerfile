@@ -25,7 +25,13 @@ RUN zypper --non-interactive update && zypper --non-interactive install \
       git-core \
       vim \
       tar \
-      gzip
+      gzip \
+      dbus-1-x11 \
+      dbus-1-daemon \
+      at-spi2-core
+
+# Allow GLib to autolaunch a D-Bus session bus on ${DISPLAY}
+RUN dbus-uuidgen > /etc/machine-id
 
 ENV HOME=/home/vnc
 ENV DISPLAY=:0
