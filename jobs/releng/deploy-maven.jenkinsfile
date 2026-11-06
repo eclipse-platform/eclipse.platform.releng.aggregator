@@ -216,7 +216,7 @@ pipeline {
 												"https://central.sonatype.com/api/v1/publisher/upload?name=${PROJECT^^}_${REPO_TAG}&publishingType=USER_MANAGED"
 										''')
 										writeFile(file: "${WORKSPACE}/deploymentId-${PROJECT}.txt", text: "${deploymentId}")
-										waitUntil(initialRecurrencePeriod: 5_000) {
+										waitUntil(initialRecurrencePeriod: 30_000, maxRecurrencePeriod: 90_000) {
 											// See https://central.sonatype.org/publish/publish-portal-api/#verify-status-of-the-deployment
 											def deploymentStatusResponse = sh(returnStdout: true, script: """
 												curl --request POST \
