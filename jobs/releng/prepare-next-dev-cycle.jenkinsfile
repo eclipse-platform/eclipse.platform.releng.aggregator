@@ -407,13 +407,22 @@ pipeline {
 			}
 			steps {
 				script {
+					def releaseEvents = utilities.releaseEvents()
+					def earlyCreatedAfterNextReleaseEvents = [ 'M1', 'GA' ]
+					def afterNextReleaseVersion = "${NEXT_RELEASE_VERSION_MAJOR}.${env.NEXT_RELEASE_VERSION_MINOR.toInteger() + 1}"
 					for (organisation in githubAPI.listEclipseOrganizations()) {
 						def repositories = githubAPI.listReposOfOrganization(organisation)
 						echo "${organisation} repositories: ${repositories.name}"
 						for (repository in repositories) {
-							utilities.releaseEvents().each{ name, description ->
+							releaseEvents.each{ name, description ->
 								def title = "${NEXT_RELEASE_VERSION}" + (name != 'GA' ? " ${name}" : '')
 								githubAPI.createMilestone("${organisation}/${repository.name}", title, "${NEXT_RELEASE_VERSION} ${description}", env["${name}_DATE"])
+							}
+							// Create milestones for relevant events already for the release after the next release, to support their use at the end of the next release cycle.
+							for (name in earlyCreatedAfterNextReleaseEvents) {
+								def title = "${afterNextReleaseVersion}" + (name != 'GA' ? " ${name}" : '')
+								def description = releaseEvents[name]
+								githubAPI.createMilestone("${organisation}/${repository.name}", title, "${afterNextReleaseVersion} ${description}", null)
 							}
 						}
 					}

@@ -46,8 +46,11 @@ def listReposOfOrganization(String orga) {
  * @param dueDay the milestone's due-date, format: YYYY-MM-DD
  */
 def createMilestone(String orgaRepo, String title, String description, String dueDay) {
-	echo "In ${orgaRepo}, create milestone: ${title} due on ${dueDay}"
-	def params = [title: title, description: description, due_on: "${dueDay}T23:59:59Z"]
+	echo "In ${orgaRepo}, create milestone: ${title}" + (dueDay ? " due on ${dueDay}" : '')
+	def params = [title: title, description: description]
+	if (dueDay) {
+		params.due_on = "${dueDay}T23:59:59Z"
+	}
 	def response = queryGithubAPI('-X POST', "repos/${orgaRepo}/milestones", params)
 	if (isFailed(response, 201)) {
 		if (response.errors && response.errors[0]?.code == 'already_exists') {
