@@ -181,7 +181,9 @@ def queryGithubAPI(String method, String endpoint, Map<String, Object> queryPara
 }
 
 private boolean isFailed(Map response, int successCode) {
-	return response?.errors || (response?.status && response.status?.toInteger() != successCode)
+	return response?.errors || (response?.status
+		&& (response.status instanceof String || response.status instanceof Number)
+		&& response.status.toInteger() != successCode)
 }
 
 def getCurrentRepositoriesGithubName() {
