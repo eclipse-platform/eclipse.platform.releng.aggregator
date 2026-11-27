@@ -1,4 +1,5 @@
-def TEST_AGENT = null
+@groovy.transform.Field
+def TEST = null
 
 pipeline {
 	options {
@@ -18,8 +19,14 @@ pipeline {
 		''')
 	}
 	agent none
+	environment {
+		GIT_REPOSITORY = "${scm.userRemoteConfigs[0].url}"
+		GIT_BRANCH = "${scm.branches[0].name}" //TODO: Or really use params.buildId?
+		// Download Server locations (seldomly changes)
+		EP_ECLIPSE_DROPS = '/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4'
+	}
 	stages {
-		stage('Fetch test configuration') {
+		stage('Select agent') {
 			when {
 				beforeAgent true
 				equals actual: params.testAgent, expected: ''
@@ -31,103 +38,122 @@ pipeline {
 			steps {
 				script {
 					def buildConfigurations = sh(script: "curl --fail https://raw.githubusercontent.com/eclipse-platform/eclipse.platform.releng.aggregator/refs/heads/master/jobs/buildConfigurations.json", returnStdout: true)
-					def testConfiguration = readTestConfiguration(readJSON(text: buildConfigurations))
-					TEST_AGENT = testConfiguration.agent
-					echo "Read agent for OS=${testConfiguration.os} ARCH=${testConfiguration.arch}: ${TEST_AGENT}"
+					TEST = readTestConfiguration(readJSON(text: buildConfigurations))
+					echo "Read agent for OS=${TEST.os} ARCH=${TEST.arch}: ${TEST.agent}"
 				}
 			}
 		}
-		stage('Run Tests') {
+		stage('Test') {
 			agent {
-				label "${ params.testAgent ?: TEST_AGENT }"
+				label "${ params.testAgent ?: TEST.agent }"
+			}
+			tools {
+				ant 'apache-ant-latest'
 			}
 			environment {
-				// Download Server locations (seldomly change)
-				EP_ECLIPSE_DROPS = '/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4'
-				// Declaring a jdk and ant the usual way in the 'tools' section, because of unknown reasons, breaks the usage of system commands like xvnc, pkill and sh
-				ANT_HOME = tool(type:'ant', name:'apache-ant-latest')
-				ANT_OPTS = "-Djava.io.tmpdir=${pathOf(env.WORKSPACE + '/tmp')}"
+				REPO_ROOT = "${WORKSPACE}/eclipse.platform.releng.aggregator" // Can only be set with active agent
 			}
-			steps { timeout(time: 8, unit: 'HOURS') { // timeout of test execution (starts after the agent was accessed)
-				// workspace is not always cleaned (a previous clean-up may have failed). Clean before git cloning or custom tools are installed into workspace.
-				cleanWs()
-				checkout scmGit(userRemoteConfigs: [[url: "${scm.userRemoteConfigs[0].url}"]], branches: [[name: "${scm.branches[0].name}"]],
-					extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
-					[path: 'jobs/buildConfigurations.json'],
-					[path: 'jobs/shared/utilities.groovy'],
-					[path: 'scripts/releng'],
-					[path: 'scripts/testing'],
-				])])
-				script {
-					def buildConfigurations = readJSON(file: 'jobs/buildConfigurations.json')
-					def test = readTestConfiguration(buildConfigurations)
-					env.JAVA_HOME = getJDKInstallationPath(test)
-					env.PATH = [pathOf("${JAVA_HOME}/bin"), pathOf("${ANT_HOME}/bin"), env.PATH].join(isUnix() ? ':' : ';')
-					
-					def preambel = ''
-					if (isUnix()) {
-						preambel = '''#!/bin/bash -xe
-							export LANG=en_US.UTF-8
-							echo " whoami: $(whoami)"
-							echo " uname -a: $(uname -a)"
-							
-							# 0002 is often the default for shell users, but it is not when ran from
-							# a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
-							# we create on shared area.
-							oldumask=$(umask)
-							umask 0002
-							echo "umask explicitly set to 0002, old value was $oldumask"
-						'''
-					}
-					boolean needsXVNC = test.os == 'linux'
-					// tmp must already exist, for Java to make use of it, in subsequent steps
-					runScript(needsXVNC, preambel + """
-						mkdir tmp
-						
-						echo JAVA_HOME: §[JAVA_HOME]
-						echo ANT_HOME: §[ANT_HOME]
-						echo PATH: §[PATH]
-						java -XshowSettings -version
-						
-						curl --fail --output getEBuilder.xml https://download.eclipse.org/eclipse/relengScripts/testScripts/bootstrap/getEBuilder.xml
-						ant -f getEBuilder.xml -DbuildId=${params.buildId} -Dosgi.os=${test.os} -Dosgi.ws=${test.ws} -Dosgi.arch=${test.arch} -DtestSuite=${params.testSuite}
-					""")
-					def testResults = junit(keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml')
-					writeFile(file: "workarea/${buildId}/eclipse-testing/results/${JOB_BASE_NAME}.json",
-						text: """{"passCount":${testResults.passCount},"failCount":${testResults.failCount},"skipCount":${testResults.skipCount},"duration":${testResults.duration}}""")
-				}
-			}}
-			post {
-				always {
-					script {
-						if (currentBuild.result != 'ABORTED') {
-							// Transfer test results to storage-server (skip for partial results on aborted run)
-							sshagent(['projects-storage.eclipse.org-bot-ssh']) {
-								sh '''#!/bin/bash -xe
-									remoteResultsDirectory="${EP_ECLIPSE_DROPS}/${buildId}/testresults"
-									localResultsDirectory="workarea/${buildId}/eclipse-testing/results"
-									ssh genie.releng@projects-storage.eclipse.org mkdir -p ${remoteResultsDirectory}
-									if [ -d "${localResultsDirectory}/xml" ] && [ -z "$(find ${localResultsDirectory}/xml -maxdepth 0 -empty)" ]; then
-										
-										# Generate new summary file
-										java \
-											-DxmlDirectory="${WORKSPACE}/${localResultsDirectory}/xml" \
-											-DtestsConfigExpected=${JOB_BASE_NAME} \
-											-DtestManifestFile="${WORKSPACE}/scripts/testing/publishingFiles/testManifest.xml" \
-											${WORKSPACE}/scripts/releng/TestResultsGenerator.java
-										
-										# First delete result files from a previous run of the same configuration (in case that test configuration was run again), then transfer the new results.
-										ssh genie.releng@projects-storage.eclipse.org rm -rfv ${remoteResultsDirectory}/${JOB_BASE_NAME}* ${remoteResultsDirectory}/*/*${JOB_BASE_NAME}*
-										scp -r ${localResultsDirectory}/* genie.releng@projects-storage.eclipse.org:${remoteResultsDirectory}
-									fi
-								'''
+			stages {
+				stage('Prepare environment') {
+					steps {
+						// workspace is not always cleaned (a previous clean-up may have failed). 
+						// Clean before git cloning or custom tools are installed into workspace.
+						cleanWs()
+						dir("${REPO_ROOT}") {
+							checkout scmGit(userRemoteConfigs: [[url: "${GIT_REPOSITORY}"]], branches: [[name: "${GIT_BRANCH}"]],
+								extensions: [cloneOption(depth: 1, shallow: true, noTags: true), sparseCheckout([
+								[path: 'cje-production/buildproperties.txt'],
+								[path: 'jobs'],
+								[path: 'production'],
+								[path: 'scripts'],
+								
+							])])
+						}
+						script {
+							if (TEST == null) {
+								def buildConfigurations = readJSON(file: "${REPO_ROOT}/jobs/buildConfigurations.json")
+								TEST = readTestConfiguration(buildConfigurations)
 							}
 						}
-						if (currentBuild.result == 'SUCCESS' || currentBuild.result == 'UNSTABLE') {
-							build job: 'releng/update-index', wait: false
+					}
+				}
+				stage('Run') {
+					options {
+						timeout(time: 8, unit: 'HOURS') // timeout of test execution (starts when this stage is accessed)
+					}
+					environment {
+						ANT_OPTS = "-Djava.io.tmpdir=${pathOf(env.WORKSPACE + '/tmp')}"
+						JAVA_HOME = "${jdkToolFor(TEST)}"
+					}
+					steps {
+						script {
+							def preambel = ''
+							if (isUnix()) {
+								preambel = '''#!/bin/bash -xe
+									export LANG=en_US.UTF-8
+									echo " whoami: $(whoami)"
+									echo " uname -a: $(uname -a)"
+									
+									# 0002 is often the default for shell users, but it is not when ran from
+									# a cron job, so we set it explicitly, to be sure of value, so releng group has write access to anything
+									# we create on shared area.
+									oldumask=$(umask)
+									umask 0002
+									echo "umask explicitly set to 0002, old value was $oldumask"
+								'''
+							}
+							boolean needsXVNC = TEST.os == 'linux'
+							// tmp must already exist, for Java to make use of it, in subsequent steps
+							runScript(needsXVNC, preambel + """
+								mkdir tmp
+								
+								echo PATH: ${PATH}
+								java -XshowSettings -version
+								ant -diagnostics
+								
+								ant -f ${REPO_ROOT}/production/testScripts/runTests2.xml -DWORKSPACE=${WORKSPACE} -DbuildId=${params.buildId} \
+									-Dosgi.os=${TEST.os} -Dosgi.ws=${TEST.ws} -Dosgi.arch=${TEST.arch} \
+									-DtestSuite=${params.testSuite}
+							""")
 						}
 					}
 				}
+				stage('Collect results') {
+					tools {
+						jdk 'temurin-jdk25-latest'
+					}
+					environment {
+						remoteResultsDirectory = "${EP_ECLIPSE_DROPS}/${buildId}/testresults"
+						localResultsDirectory = "workarea/${buildId}/eclipse-testing/results"
+					}
+					steps {
+						script {
+							def testResults = junit(keepLongStdio: true, testResults: '**/eclipse-testing/results/xml/*.xml')
+							writeJSON(file: "workarea/${buildId}/eclipse-testing/results/${JOB_BASE_NAME}.json",
+								json: [passCount: testResults.passCount, failCount: testResults.failCount, skipCount: testResults.skipCount, duration: testResults.duration])
+						}
+						runScript(false, """
+							java \
+								-DxmlDirectory="${WORKSPACE}/${localResultsDirectory}/xml" \
+								-DtestsConfigExpected=${JOB_BASE_NAME} \
+								-DtestManifestFile="${REPO_ROOT}/scripts/testing/publishingFiles/testManifest.xml" \
+								${REPO_ROOT}/scripts/releng/TestResultsGenerator.java
+						""")
+						sshagent(['projects-storage.eclipse.org-bot-ssh']) {
+							// Transfer test results to storage-server
+							runScript(false, """
+								ssh genie.releng@projects-storage.eclipse.org mkdir -p ${remoteResultsDirectory}
+								
+								# First delete result files from a previous run of the same configuration (in case that test configuration was run again), then transfer the new results.
+								ssh genie.releng@projects-storage.eclipse.org rm -rfv ${remoteResultsDirectory}/${JOB_BASE_NAME}* ${remoteResultsDirectory}/*/*${JOB_BASE_NAME}*
+								scp -r ${localResultsDirectory}/* genie.releng@projects-storage.eclipse.org:${remoteResultsDirectory}
+							""")
+						}
+						build job: 'releng/update-index', wait: false
+					}
+				}
+			}
+			post {
 				cleanup {
 					cleanWs()
 				}
@@ -161,7 +187,6 @@ def readTestConfiguration(Map<String, Object> buildConfigurations) {
 
 def runScript(boolean withXVNC, String scriptText) {
 	if (isUnix()) {
-		scriptText = scriptText.replaceAll(/§\[(\w+?)\]/,'\\${$1}')
 		if (withXVNC) {
 			xvnc(useXauthority: true) {
 				sh(scriptText)
@@ -170,17 +195,24 @@ def runScript(boolean withXVNC, String scriptText) {
 			sh(scriptText)
 		}
 	} else {
-		bat (scriptText.replaceAll(/§\[(\w+?)\]/,'%$1%'))
+		bat (scriptText)
 	}
 }
 
+def jdkToolFor(Map<String, Object> test) {
+	def javaHome = getJDKInstallationPath(test)
+	env.PATH = String.join(isUnix() ? ':' : ';', pathOf("${javaHome}/bin"), env.PATH)
+	return javaHome
+}
+
 def getJDKInstallationPath(Map<String, Object> test) {
-	def utilities = load 'jobs/shared/utilities.groovy'
-	switch(test.jdk.type) {
+	def utilities = load "${REPO_ROOT}/jobs/shared/utilities.groovy"
+	switch(test.jdk?.type) {
 		case 'tool': return tool(type:'jdk', name: test.jdk.name)
 		case 'local': return test.jdk.path
 		case 'install': return utilities.installDownloadableTool('jdk', test.jdk.url) + (test.os == 'macosx' ? '/Contents/Home' : '')
-		case 'temurin': return utilities.downloadTemurinJDK(test.javaVersion, test.os, test.arch, test.jdk.ea ? 'ea' : 'ga')
+		case null: // use temurin by default
+		case 'temurin': return utilities.getTemurinJDK(test.javaVersion, test.os, test.arch, test.jdk?.ea ? 'ea' : 'ga')
 	}
 }
 
